@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.8 |
+| Version | 0.9 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
 | Stand | 06.10.2026 |
 | Sprache | Deutsch |
@@ -22,6 +22,7 @@
 | 0.6 | 05.10.2026 | Zuordnungen beim Import stets manuell, ohne Vorbelegung und ohne Speicherung (FA-EI-06, E-11); Auswahl einzelner Partien beim Export auf eine Gruppe beschränkt (FA-EI-02), gruppenübergreifende Auswahl geparkt (PP-19) |
 | 0.7 | 06.10.2026 | Ergebnisse der Architekturphase: Vollsicherung einschließlich Einstellungen (FA-EI-02, -05, -09, -10); Austausch über Teilen-Menü bzw. Download, kein QR-Code (FA-EI-12); Konfliktregeln beim Import präzisiert (FA-EI-03, -11); Sperren während einer laufenden Partie (FA-AB-09); erneutes Abspielen einer unterbrochenen Animation (FA-AB-07); Sicherungspunkte vor Updates, Tagesregel und Umfang (FA-DS-04, -07); Sicherungsdialog vor jedem Update und Update nur nach ausdrücklicher Bestätigung (FA-UP-02, -03); Installation und Speicherschutz (neu 5.14, FA-IS-01 bis -03); Ton respektiert die Stummschaltung (FA-IN-07); Brettumriss einheitlich „spitz“ (FA-PL-07); Zufall und Abnahmeplattformen präzisiert (NFA-ZF-01, -02, NFA-PL-01); lokales Testen über HTTPS (EP-06); OP-01, OP-02, OP-09 geklärt; neue Entscheidungen E-14 bis E-20; neuer offener Punkt OP-12 |
 | 0.8 | 06.10.2026 | Ergebnisse der Setup-Planung: OP-12 geklärt (E-21, Adresse `https://boardbrain.github.io/`); Arbeitsweise mit Story-Bündeln, Haltepunkten und Abnahme durch den Product Owner (neu EP-10 bis EP-12, E-22); `main` vor Release 1.0 nur mit Platzhalter (EP-02 präzisiert, E-25); Arbeitsbranches und Pull Requests präzisiert (EP-03, EP-04); Lizenz MIT (E-23); Barrierefreiheit ausdrücklich kein Ziel von Version 1 (E-24); Modelleinsatz für Setup und kritische Teile ergänzt (9.3); neuer offener Punkt OP-13 (Vorabversionen) |
+| 0.9 | 06.10.2026 | Lizenz von MIT auf PolyForm Strict License 1.0.0 geändert (E-23) (PR #1) |
 
 ## Inhaltsverzeichnis
 
@@ -481,7 +482,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-20 | Während einer laufenden Partie sind Import, Wiederherstellung und strukturelle Änderungen der beteiligten Gruppe gesperrt | Die laufende Partie darf nicht auf geänderte oder fehlende Daten verweisen |
 | E-21 | Die App wird dauerhaft unter `https://boardbrain.github.io/` veröffentlicht: GitHub-Organisation `boardbrain`, Repository `boardbrain.github.io` (Architektur ADR-022). Die Adresse wird nie geändert. *(neu in 0.8)* | Eigene Herkunft, damit kein anderes Projekt die Daten der App sieht; kostenlos; kurz und gut weiterzugeben; ein späterer Wechsel würde alle Nutzer von ihren Daten trennen |
 | E-22 | Schnelle Umsetzung hat Vorrang vor feingranularer Steuerung: Claude Code setzt Story-Bündel eigenständig bis zum Pull Request um; der Product Owner nimmt im Pull Request ab und mergt (EP-10, EP-11) *(neu in 0.8)* | Ein nutzbarer Stand entsteht schnell; die Kontrolle über alles, was nach `develop` und `main` gelangt, bleibt beim Product Owner; Haltepunkte sichern Entscheidungen, die ihm vorbehalten sind |
-| E-23 | Der Quellcode steht unter der MIT-Lizenz mit dem Urheberhinweis „Copyright (c) 2026 Jonasss29“; Klänge und Schriften behalten ihre eigenen Lizenzen *(neu in 0.8)* | Kurz, verbreitet, mit allen Abhängigkeiten verträglich; enthält einen Haftungsausschluss; Pseudonym statt Klarname |
+| E-23 | Der Quellcode steht unter der PolyForm Strict License 1.0.0 mit dem Hinweis „Required Notice: Copyright (c) 2026 Jonasss29“; er ist öffentlich einsehbar (E-06), aber nicht Open Source: Nutzung nur für nichtkommerzielle Zwecke, Weitergabe und Änderungen durch Dritte sind nicht erlaubt. Klänge und Schriften behalten ihre eigenen Lizenzen *(neu in 0.8, geändert in 0.9: vorher MIT)* | Der Product Owner behält die Kontrolle über Weitergabe und kommerzielle Nutzung; standardisierter, verständlicher Lizenztext; verträglich mit den Lizenzen der Abhängigkeiten (MIT, ISC, BSD, Apache 2.0 erlauben die Verwendung in nicht offenem Code); enthält einen Haftungsausschluss; Pseudonym statt Klarname |
 | E-24 | Barrierefreiheit ist kein Ziel von Version 1 *(neu in 0.8)* | Die App wird nur im Freundeskreis genutzt. Unberührt bleiben die Erkennbarkeit von Gebäuden und Straßen (FA-PL-05, FA-PL-06, US-PL-04) und die technische Regel, echte Bedienelemente mit Beschriftung zu verwenden (Entwicklungsrichtlinien) |
 | E-25 | Erste Veröffentlichung ist ein Platzhalter (Release 0.1.0) ohne Service Worker und ohne Datenspeicherung; über Vorabversionen der echten App vor 1.0 wird nach Inkrement I2 entschieden (OP-13) *(neu in 0.8)* | Die Veröffentlichungskette wird früh auf der echten Adresse nachgewiesen, ohne dass etwas auf den Geräten zurückbleibt |
 

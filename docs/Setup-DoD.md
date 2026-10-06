@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Prüfbare Checkliste für den Abschluss der Setup-Phase |
-| Version | 0.1 |
+| Version | 0.2 |
 | Stand | 06.10.2026 |
 | Grundlage | BoardBrain_Architektur.md v0.2, Entwicklungsrichtlinien.md v0.1, Setup-Anleitung.md v0.1 |
 | Sprache | Deutsch |
@@ -14,6 +14,7 @@
 | Version | Datum | Änderung |
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
+| 0.2 | 06.10.2026 | Lizenz PolyForm Strict License 1.0.0 statt MIT (C3); C2 ohne feste Versionsnummern, weil die Dokumente während des Setups fortgeschrieben werden (PR #1) |
 
 ## Grundsatz
 
@@ -55,8 +56,8 @@ Spalte „Wer“: **PO** = Product Owner, **CC** = Claude Code.
 | # | Kriterium | Nachweis | Wer | ✓ |
 |---|---|---|---|---|
 | C1 | Ordnerstruktur nach Architektur Kapitel 15, soweit für das Setup nötig; jedes Modul in `src/core` mit `index.ts` | Dateibaum | CC | ☐ |
-| C2 | `docs/` enthält Anforderungen v0.8, Spezifikation v0.5, Architektur v0.2, Entwicklungsrichtlinien, Setup-Anleitung, Setup-DoD | Dateien auf GitHub | CC | ☐ |
-| C3 | `CLAUDE.md`, `README.md` (Kurzbeschreibung, Adresse, Verweis auf `docs/`), `LICENSE` (MIT, „Copyright (c) 2026 Jonasss29“), `CHANGELOG.md` | Dateien auf GitHub | CC | ☐ |
+| C2 | `docs/` enthält die aktuellen Fassungen von Anforderungen, Spezifikation, Architektur, Entwicklungsrichtlinien, Setup-Anleitung, Setup-DoD | Dateien auf GitHub | CC | ☐ |
+| C3 | `CLAUDE.md`, `README.md` (Kurzbeschreibung, Adresse, Verweis auf `docs/`), `LICENSE` (PolyForm Strict License 1.0.0 mit „Required Notice: Copyright (c) 2026 Jonasss29“), `CHANGELOG.md` | Dateien auf GitHub | CC | ☐ |
 | C4 | `.gitattributes` mit `* text=auto eol=lf`; alle Textdateien im Repository haben LF | `git ls-files --eol` zeigt keine `crlf` im Index | CC | ☐ |
 | C5 | `.gitignore` deckt `node_modules`, `dist`, `coverage`, Testergebnisse, `.claude/settings.local.json`, Zertifikatsdateien (`*.pem`, `*.key`) ab | Inhalt | CC | ☐ |
 | C6 | `.nvmrc`, `.npmrc` mit `save-exact=true`; alle Versionen in `package.json` exakt; `package-lock.json` committet | Inhalt | CC | ☐ |
