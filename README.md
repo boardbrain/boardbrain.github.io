@@ -20,4 +20,4 @@ Die gesamte Projektdokumentation liegt in [`docs/`](docs/):
 
 ## Lizenz
 
-[MIT](LICENSE)
+Der Quellcode ist öffentlich einsehbar, aber **nicht Open Source**. Er steht unter der [PolyForm Strict License 1.0.0](LICENSE): Nutzung nur für nichtkommerzielle Zwecke; Weitergabe und Änderungen sind nicht erlaubt.

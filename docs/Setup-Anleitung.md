@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Schritt-für-Schritt-Anleitung für die Einrichtung |
-| Version | 0.1 |
+| Version | 0.2 |
 | Stand | 06.10.2026 |
 | Grundlage | BoardBrain_Architektur.md v0.2 (Kapitel 16), Entwicklungsrichtlinien.md v0.1 |
 | Abschlusskriterium | Alle Punkte in `Setup-DoD.md` erfüllt |
@@ -15,6 +15,7 @@
 | Version | Datum | Änderung |
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
+| 0.2 | 06.10.2026 | Lizenz in I2 von MIT auf PolyForm Strict License 1.0.0 geändert (Anforderungsdokumentation E-23) (PR #1) |
 
 ## So liest du diese Anleitung
 
@@ -337,7 +338,7 @@ Claude Code arbeitet in Etappen und hält nach jeder an. Die folgende Übersicht
 
 ### I2 Erster Stand auf `main` und `develop`
 
-- **[CLAUDE CODE]** legt den ersten Commit auf `main` an: Dokumente, `CLAUDE.md`, `README.md`, `LICENSE` (MIT, Jonasss29), `CHANGELOG.md`, `.gitattributes`, `.gitignore`. Pusht `main`, legt `develop` an und pusht es. (Schutzregeln gibt es noch nicht; das ist der einzige direkte Push.)
+- **[CLAUDE CODE]** legt den ersten Commit auf `main` an: Dokumente, `CLAUDE.md`, `README.md`, `LICENSE` (PolyForm Strict 1.0.0, Jonasss29), `CHANGELOG.md`, `.gitattributes`, `.gitignore`. Pusht `main`, legt `develop` an und pusht es. (Schutzregeln gibt es noch nicht; das ist der einzige direkte Push.)
 - **[DU]** auf GitHub im Repository:
   1. **Settings → General → Default branch**: auf das Wechselsymbol klicken, **develop** wählen, **Update**, Warnung bestätigen.
   2. Weiter unten unter **Pull Requests**:

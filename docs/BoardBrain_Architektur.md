@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.2 |
+| Version | 0.3 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 06.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -16,6 +16,7 @@
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung nach Klärung von OP-01, OP-02, OP-09 und der Übergabepunkte aus Kapitel 8 der Spezifikation v0.3 |
 | 0.2 | 06.10.2026 | Ergebnisse der Setup-Planung: ADR-022 angenommen (`https://boardbrain.github.io/`); neue ADR-023 (Branch- und Release-Modell), ADR-024 (Prettier), ADR-025 (Fehlerbehandlung); Stack um Formatierer, Prüfwerkzeuge und Node.js-Version ergänzt (3.1); Modul `core/shared` (4.3); Fehlerbehandlung (neu 4.6); Content-Security-Policy als Meta-Tag (12.4); Diagnoseansicht (13.1); CSS-Animationen verboten (13.6); Teststrategie präzisiert (14.1, 14.5, 14.6); Ordnerstruktur vervollständigt (15); Kapitel 16 neu gefasst (Werkzeuge, Befehle, Branches und Auslieferung, `CLAUDE.md`, Claude Code, lokales HTTPS); Risiken und offene Punkte aktualisiert (18); nächste Schritte (19) |
+| 0.3 | 06.10.2026 | Lizenz in der Ordnerstruktur auf PolyForm Strict License 1.0.0 geändert (15; Anforderungsdokumentation E-23) (PR #1) |
 
 ## Inhaltsverzeichnis
 
@@ -1160,7 +1161,7 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  └─ e2e/                            Playwright-Szenarien
 ├─ CLAUDE.md                          Kurzfassung der Entwicklungsrichtlinien für Claude Code
 ├─ README.md                          Kurzbeschreibung, Adresse, Verweis auf docs/
-├─ LICENSE                            MIT, Copyright (c) 2026 Jonasss29
+├─ LICENSE                            PolyForm Strict 1.0.0, Copyright (c) 2026 Jonasss29
 ├─ CHANGELOG.md                       Änderungen je Release (deutsch)
 ├─ .gitattributes                     LF für alle Textdateien
 ├─ .gitignore
