@@ -1,0 +1,40 @@
+# Abhängigkeiten
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# Tests
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Zertifikate und Schlüssel: liegen nie im Repository (Architektur 16.6)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Persönliche Einstellungen von Claude Code (Architektur 16.5)
+.claude/settings.local.json
+
+# Lokale Umgebungsdateien
+.env
+.env.*
+
+# Betriebssystem und Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
