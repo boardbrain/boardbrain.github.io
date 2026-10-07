@@ -250,6 +250,12 @@ export default defineConfig([
           prefix: ['is', 'has', 'can', 'should'],
         },
         { selector: 'variable', modifiers: ['destructured'], format: null },
+        // React contexts are rendered as JSX elements and therefore need a capital letter.
+        {
+          selector: 'variable',
+          filter: { regex: 'Context$', match: true },
+          format: ['PascalCase'],
+        },
         { selector: 'function', format: ['camelCase', 'PascalCase'] },
         { selector: 'typeLike', format: ['PascalCase'] },
         { selector: 'typeParameter', format: ['PascalCase'] },
