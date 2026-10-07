@@ -15,6 +15,7 @@
   /* States */
   --color-status-ok: #3fcf73;
   --color-status-error: #ff6b6b;
+  --color-status-warning: #f2c94c;
   --color-status-info: #8ab4f8;
 
   /* Accent (later 6 to 8 variants via data-accent, US-GB-01) */

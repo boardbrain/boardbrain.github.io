@@ -19,6 +19,8 @@
     "check": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && eslint --max-warnings=0 . && stylelint \"**/*.css\" && prettier --check . && depcruise src && vitest run --project unit --project dom --coverage"
   },
   "dependencies": {
+    "dexie": "4.4.6",
+    "dexie-react-hooks": "4.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-router": "8.4.0"
@@ -49,6 +51,7 @@
     "eslint-plugin-jsdoc": "65.2.0",
     "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-testing-library": "7.16.2",
+    "fake-indexeddb": "6.2.5",
     "fast-check": "4.10.2",
     "globals": "17.13.0",
     "jsdom": "30.1.2",
