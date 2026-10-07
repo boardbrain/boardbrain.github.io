@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Schritt-für-Schritt-Anleitung für die Einrichtung |
-| Version | 0.3 |
-| Stand | 06.10.2026 |
+| Version | 0.4 |
+| Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Architektur.md v0.2 (Kapitel 16), Entwicklungsrichtlinien.md v0.1 |
 | Abschlusskriterium | Alle Punkte in `Setup-DoD.md` erfüllt |
 | Sprache | Deutsch |
@@ -17,6 +17,7 @@
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
 | 0.2 | 06.10.2026 | Lizenz in I2 von MIT auf PolyForm Strict License 1.0.0 geändert (Anforderungsdokumentation E-23) (PR #1) |
 | 0.3 | 07.10.2026 | Node.js 26 (B2); kein eigenes iPhone: Zertifikat nur auf dem iPad, iPhone nur für die veröffentlichte App über das Gerät eines Freundes (E3, F2, F3, I4, I10, Hilfe) (PR #2) |
+| 0.4 | 07.10.2026 | Abschluss des Setups: 2FA-Pflicht in der Organisation optional, solange der Product Owner einziges Mitglied ist (Teil A); Hilfe bei nicht erreichbarem Entwicklungsserver nach Branch-Wechsel |
 
 ## So liest du diese Anleitung
 
@@ -39,7 +40,7 @@ Diese Schritte hast du in der Planung schon ausgeführt. Hake sie hier nur ab.
 
 - [ ] **[DU]** Zwei-Faktor-Authentifizierung im persönlichen GitHub-Konto aktiv, Wiederherstellungscodes gesichert
 - [ ] **[DU]** Private E-Mail-Adresse aktiv („Keep my email addresses private“, „Block command line pushes that expose my email“); noreply-Adresse notiert
-- [ ] **[DU]** Organisation `boardbrain` angelegt (Free), 2FA-Pflicht aktiv, Base permissions „Read“
+- [ ] **[DU]** Organisation `boardbrain` angelegt (Free), Base permissions „Read“; 2FA-Pflicht für Mitglieder optional, solange der Product Owner das einzige Mitglied ist (sein persönliches Konto hat 2FA)
 - [ ] **[DU]** Repository `boardbrain/boardbrain.github.io` angelegt: öffentlich, leer; Wiki und Projects aus, Issues an; „Automatically delete head branches“ an
 - [ ] **[DU]** Sicherheitsfunktionen: Private vulnerability reporting, Dependabot alerts, Secret scanning mit Push protection an (Dependency graph und CodeQL folgen in Teil I)
 - [ ] **[DU]** Actions: nur Actions von GitHub erlaubt; Fork-Workflows nur nach Freigabe; Workflow permissions „Read“; Actions dürfen keine Pull Requests erstellen
@@ -440,4 +441,5 @@ Damit ist das Setup abgeschlossen. Nächster Schritt: Design (OP-06, OP-11) oder
 | Push wird mit „workflow scope“ abgelehnt | `gh auth refresh --scopes workflow` |
 | Handy oder Tablet zeigt Zertifikatswarnung | Unter iPadOS die Zertifikatsvertrauenseinstellung (F2, Schritt 4) prüfen; IP-Adresse in `ipconfig` mit der im Zertifikat vergleichen (E2) |
 | Handy erreicht den PC nicht | Gleiches WLAN? Netzwerk in Windows „Privat“ (D2)? Firewall-Abfrage für Node.js erlaubt? |
+| Entwicklungsserver plötzlich nicht mehr erreichbar, Ausgabe zeigt `http://localhost` statt `https://…` | Der Server hat beim Wechsel des Branches neu gestartet, während `vite.config.ts` kurz fehlte. Claude Code bitten, den Entwicklungsserver neu zu starten |
 | Prüfung auf GitHub rot, lokal grün | Claude Code den Link zum fehlgeschlagenen Lauf geben; häufig Zeilenenden oder fehlende Dateien im Commit |
