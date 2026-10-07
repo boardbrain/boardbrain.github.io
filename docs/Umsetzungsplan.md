@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.3 |
+| Version | 0.5 |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.5 (2.3), Entwicklungsrichtlinien.md v0.3 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.11 (9.3, 13), BoardBrain_Architektur.md v0.6 (19) |
 | Sprache | Deutsch |
@@ -16,6 +16,7 @@
 | 0.1 | 07.10.2026 | Erstfassung nach Abschluss des Setups: Reihenfolge, Zuschnitt von Inkrement I1, Modelle, Ablauf |
 | 0.2 | 07.10.2026 | K-1 erledigt: Empfehlung, Dependabot-PR #3 (`@babel/core` 8) zu mergen |
 | 0.3 | 07.10.2026 | I1-A umgesetzt (PR #11) |
+| 0.5 | 07.10.2026 | Neues Bündel I1-E „Personen und Gruppen im Überblick“ (US-VW-05) nach I1-C (PR #13) |
 
 ## 1. Zweck
 
@@ -28,7 +29,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | # | Schritt | Wann | Status |
 |---|---|---|---|
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
-| 1 | Inkrement I1 Fundament: Bündel I1-A bis I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A umgesetzt (#11) |
+| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A umgesetzt (#11) |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | offen |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
@@ -95,6 +96,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 | I1-A Zufall und Losbaustein | US-LS-01 | Opus, high | `feat/us-ls-01-random-draw` | umgesetzt (#11) |
 | I1-B Personen, Spiele, Datenbank | US-PG-01, US-SP-02 | Opus, high | `feat/us-pg-01-persons-and-games` | offen |
 | I1-C Gruppen und Farben | US-PG-02, US-PG-03 | Sonnet, medium | `feat/us-pg-02-groups-and-colors` | offen |
+| I1-E Personen und Gruppen im Überblick | US-VW-05 | Sonnet, medium | `feat/us-vw-05-persons-and-groups-overview` | offen |
 | I1-D Brett und Installation | US-PL-01 | Opus, high | `feat/us-pl-01-board-and-install` | offen |
 
 ### I1-A Zufall und Losbaustein
@@ -117,6 +119,14 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Inhalt:** Gruppen mit 2 bis 12 Mitgliedern und Bindung (global oder ein Spiel), Namensvorschlag, Prüfung gleichnamiger Personen (US-PG-02, Spezifikation 3.4); Farbmodell mit Gruppen- und Catan-Farbe, automatische Vergabe und Farbtausch (US-PG-03, Spezifikation 3.3). Farbwerte bis D-1 als Platzhalter in `tokens.css`.
 - **Pakete:** `zustand` nur, falls für Zustand der Oberfläche nötig (Architektur 3.1); sonst keine.
 - **Abnahme durch den Product Owner:** Gruppen mit 2, 4 und 5 Mitgliedern anlegen, Catan-Bindung bei 5 Mitgliedern gesperrt, Farbtausch prüfen; Hoch- und Querformat auf S26 und iPad.
+
+### I1-E Personen und Gruppen im Überblick
+
+- **Reihenfolge:** nach I1-C und vor I1-D. Die ID ist neu vergeben, weil IDs nie umnummeriert werden (Richtlinien 11.1).
+- **Inhalt:** Personenliste mit den Gruppen jeder Person; Detailansicht einer Person (`#/verwaltung/personen/‹id›`); Gruppenliste und Detailansicht einer Gruppe mit Bindung, Mitgliedern und Farben (`#/verwaltung/gruppen/‹id›`); gegenseitige Verweise (US-VW-05). Die Detailansichten sind die Grundlage, an die später US-ER-04 (Ergebnisse einer Gruppe, I3) und US-VW-01 bis -03 (Bearbeiten, Archivieren, I5) anknüpfen.
+- **Warum hier:** Erst mit I1-C gibt es Gruppen; ohne Übersicht lassen sich angelegte Gruppen und Farben nicht nachsehen, was spätestens am ersten Spieleabend mit I2 fehlt.
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** Personen und Gruppen anlegen, Gruppen in der Personenliste sehen, zwischen Person und Gruppe hin- und herspringen, Zurück-Taste auf dem S26.
 
 ### I1-D Brett und Installation
 

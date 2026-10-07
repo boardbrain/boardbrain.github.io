@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.11 |
+| Version | 0.12 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
 | Stand | 07.10.2026 |
 | Sprache | Deutsch |
@@ -25,6 +25,7 @@
 | 0.9 | 06.10.2026 | Lizenz von MIT auf PolyForm Strict License 1.0.0 geändert (E-23) (PR #1) |
 | 0.10 | 07.10.2026 | OP-13 ergänzt: Abnahme auf dem iPhone nur über Geräte von Freunden (PR #2) |
 | 0.11 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung beginnt vor dem Design; OP-11 parallel zu I1, OP-06 vor I5; Verweis auf `docs/Umsetzungsplan.md` (13) |
+| 0.12 | 07.10.2026 | Übersicht über Personen und Gruppen mit Detailansichten (neu FA-VW-06) (PR #13) |
 
 ## Inhaltsverzeichnis
 
@@ -291,6 +292,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | FA-VW-03 | Gruppen können archiviert und wiederbelebt werden; Partien und Statistik bleiben dabei erhalten. Aktive und archivierte Gruppen können nach deutlicher Warnung gelöscht werden; dabei werden alle ihre Partien entfernt. |
 | FA-VW-04 | Eigene Spiele können umbenannt und archiviert werden. Löschen ist nur ohne zugehörige Ergebnisse möglich. Catan kann weder umbenannt noch archiviert noch gelöscht werden. |
 | FA-VW-05 | Archivierte Personen, Gruppen und Spiele erscheinen in keiner Auswahlliste für neue Daten, bleiben aber in bestehenden Daten und Statistiken sichtbar. |
+| FA-VW-06 | Die Personenliste zeigt zu jeder Person ihre Gruppen. Personen und Gruppen lassen sich antippen und öffnen eine Detailansicht: bei Personen mit ihren Gruppen, bei Gruppen mit Bindung, Mitgliedern und deren Farben. Gruppen und Mitglieder sind in den Detailansichten wiederum antippbar. *(neu in 0.12)* |
 
 ### 5.14 Installation und Speicherschutz *(neu in 0.7)*
 
