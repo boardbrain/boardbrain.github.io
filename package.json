@@ -1,6 +1,6 @@
 {
   "name": "boardbrain",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Fair random decisions and statistics for game nights",
   "license": "PolyForm-Strict-1.0.0",
