@@ -1,0 +1,21 @@
+.screen {
+  max-width: 40rem;
+  padding: var(--space-6) var(--space-4);
+  margin: 0 auto;
+}
+
+.details {
+  margin-top: var(--space-6);
+  color: var(--color-text-muted);
+}
+
+.trace {
+  padding: var(--space-3);
+  overflow-x: auto;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-small);
+  white-space: pre-wrap;
+  user-select: text;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-2);
+}

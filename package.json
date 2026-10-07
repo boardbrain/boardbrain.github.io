@@ -1,0 +1,63 @@
+{
+  "name": "boardbrain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Faire Zufallsentscheidungen und Statistik am Spieleabend",
+  "license": "PolyForm-Strict-1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && vite build",
+    "preview": "vite preview",
+    "test": "vitest run --project unit --project dom",
+    "test:stat": "vitest run --project statistical",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "check": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && eslint --max-warnings=0 . && stylelint \"**/*.css\" && prettier --check . && depcruise src && vitest run --project unit --project dom --coverage"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router": "8.4.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "@rolldown/plugin-babel": "0.2.4",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
+    "@types/babel__core": "7.20.5",
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "@vitest/coverage-v8": "5.0.3",
+    "@vitest/eslint-plugin": "1.6.27",
+    "babel-plugin-react-compiler": "1.0.0",
+    "dependency-cruiser": "18.5.0",
+    "eslint": "10.12.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-check-file": "3.3.2",
+    "eslint-plugin-jsdoc": "65.2.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-testing-library": "7.16.2",
+    "fast-check": "4.10.2",
+    "globals": "17.13.0",
+    "jsdom": "30.1.2",
+    "prettier": "3.9.9",
+    "stylelint": "17.16.0",
+    "stylelint-config-standard": "40.0.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1",
+    "vite": "8.3.3",
+    "vitest": "5.0.3"
+  }
+}

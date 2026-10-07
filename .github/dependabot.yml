@@ -1,0 +1,25 @@
+# Abhängigkeits-Updates (Entwicklungsrichtlinien 10.3): monatlich, kleine Updates gebündelt,
+# Ziel develop, Titelpräfix deps. Sicherheitsupdates kommen unabhängig davon sofort.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: deps
+    groups:
+      minor:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: deps
+    groups:
+      actions:
+        update-types: [minor, patch]

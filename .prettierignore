@@ -1,0 +1,12 @@
+# ADR-024: Prettier formatiert Code, CSS, JSON und YAML. Markdown bleibt ausgenommen,
+# weil Prettier Tabellen auf gleiche Spaltenbreite auffüllen würde.
+docs/
+*.md
+
+# Erzeugte Dateien
+dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+package-lock.json
