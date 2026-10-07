@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.3 |
+| Version | 0.4 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 06.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -17,6 +17,7 @@
 | 0.1 | 06.10.2026 | Erstfassung nach Klärung von OP-01, OP-02, OP-09 und der Übergabepunkte aus Kapitel 8 der Spezifikation v0.3 |
 | 0.2 | 06.10.2026 | Ergebnisse der Setup-Planung: ADR-022 angenommen (`https://boardbrain.github.io/`); neue ADR-023 (Branch- und Release-Modell), ADR-024 (Prettier), ADR-025 (Fehlerbehandlung); Stack um Formatierer, Prüfwerkzeuge und Node.js-Version ergänzt (3.1); Modul `core/shared` (4.3); Fehlerbehandlung (neu 4.6); Content-Security-Policy als Meta-Tag (12.4); Diagnoseansicht (13.1); CSS-Animationen verboten (13.6); Teststrategie präzisiert (14.1, 14.5, 14.6); Ordnerstruktur vervollständigt (15); Kapitel 16 neu gefasst (Werkzeuge, Befehle, Branches und Auslieferung, `CLAUDE.md`, Claude Code, lokales HTTPS); Risiken und offene Punkte aktualisiert (18); nächste Schritte (19) |
 | 0.3 | 06.10.2026 | Lizenz in der Ordnerstruktur auf PolyForm Strict License 1.0.0 geändert (15; Anforderungsdokumentation E-23) (PR #1) |
+| 0.4 | 07.10.2026 | Ergebnisse des Setups: Node.js 26 statt 24 (3.1, 16.1); TypeScript 6, React Compiler über `@rolldown/plugin-babel` (3.1); ESLint 10 ohne `eslint-plugin-react`, Ersatzregeln über `no-restricted-syntax` (neu ADR-026; 3.1, 13.3, 14.7, ADR-018); Markdown von Prettier ausgenommen (3.1); Ende-zu-Ende-Tests lokal über HTTPS mit ignorierten Zertifikatsfehlern (14.5); `tsconfig.node.json` (15); Berechtigungen für PowerShell und keine Hinweise auf Claude in Commits und Pull Requests (16.5); Zertifizierungsstelle nicht auf dem iPhone (16.6) (PR #2) |
 
 ## Inhaltsverzeichnis
 
@@ -125,10 +126,10 @@ Es gibt genau zwei Wege, auf denen Daten das Gerät berühren: App-Dateien komme
 | Bereich | Wahl | Zweck | ADR |
 |---|---|---|---|
 | Auslieferungsform | Progressive Web App ohne nativen Wrapper | Eine Codebasis, installierbar, offline, kostenlos | ADR-001 |
-| Sprache | TypeScript im strikten Modus | Typen machen Code überprüfbar und lesbar | ADR-002 |
+| Sprache | TypeScript im strikten Modus, Version 6 (Version 7 erst, wenn typescript-eslint sie unterstützt) | Typen machen Code überprüfbar und lesbar | ADR-002 |
 | UI-Framework | React 19 mit React Compiler | Darstellung und Interaktion | ADR-003 |
 | Animationen | Motion (`motion/react`) | Glücksrad, Aufblinken, Übergänge, Mikroanimationen | ADR-004 |
-| Build-Werkzeug | Vite mit `@vitejs/plugin-react` | Entwicklungsserver, Bündeln, Plugins | ADR-005 |
+| Build-Werkzeug | Vite mit `@vitejs/plugin-react`; React Compiler über `@rolldown/plugin-babel` mit `babel-plugin-react-compiler` | Entwicklungsserver, Bündeln, Plugins | ADR-005 |
 | PWA | `vite-plugin-pwa` mit eigenem Service Worker (`injectManifest`) | Manifest, Precache-Liste, kontrollierte Updates | ADR-015 |
 | Speicher | IndexedDB mit Dexie, `dexie-react-hooks` | Lokale Datenbank mit Transaktionen und Migrationen | ADR-007 |
 | Schemaprüfung | Valibot | Prüfung importierter Dateien und Sicherungspunkte | ADR-012 |
@@ -141,14 +142,14 @@ Es gibt genau zwei Wege, auf denen Daten das Gerät berühren: App-Dateien komme
 | Kennungen | `crypto.randomUUID()` (UUID v4) | Weltweit eindeutige Kennungen | ADR-011 |
 | Unit- und Komponententests | Vitest mit Abdeckungsmessung (`@vitest/coverage-v8`), React Testing Library, fast-check, `fake-indexeddb` | Fachlogik, Komponenten, Invarianten, Datenbank | ADR-020 |
 | Ende-zu-Ende-Tests | Playwright (Chromium, WebKit) | Abläufe im Browser, offline, Neustart, Update | ADR-020 |
-| Statische Prüfungen | ESLint (typescript-eslint mit Typinformationen, react-hooks einschließlich der Regeln des React Compilers, react, jsdoc, check-file, testing-library, vitest), Stylelint, dependency-cruiser | Projektregeln automatisch durchsetzen (Entwicklungsrichtlinien, Kapitel 13) | – |
-| Formatierung | Prettier mit `eslint-config-prettier` | Einheitliche Form von Code, CSS, JSON und YAML; `docs/` ausgenommen | ADR-024 |
+| Statische Prüfungen | ESLint (typescript-eslint mit Typinformationen, react-hooks einschließlich der Regeln des React Compilers, jsdoc, check-file, testing-library, vitest; Projektregeln über `no-restricted-syntax`, ADR-026), Stylelint, dependency-cruiser | Projektregeln automatisch durchsetzen (Entwicklungsrichtlinien, Kapitel 13) | – |
+| Formatierung | Prettier mit `eslint-config-prettier` | Einheitliche Form von Code, CSS, JSON und YAML; Markdown (`docs/` und Dateien im Wurzelordner) ausgenommen | ADR-024 |
 | Commit-Konvention | commitlint (Conventional Commits) | Prüfung des Titels jedes Pull Requests | ADR-023 |
-| Laufzeit der Werkzeuge | Node.js 24 (aktive LTS zum Zeitpunkt des Setups), npm; Version in `.nvmrc` | Nur Entwicklung, nicht Teil der App | – |
+| Laufzeit der Werkzeuge | Node.js 26, npm; Version in `.nvmrc`. Entscheidung des Product Owners im Setup, obwohl Node.js 26 erst Ende Oktober 2026 als LTS eingestuft wird | Nur Entwicklung, nicht Teil der App | – |
 | Lokales HTTPS | mkcert | Test auf Mobilgeräten im WLAN | – |
 | Hosting | GitHub Pages unter `https://boardbrain.github.io/`, Deployment per GitHub Actions bei Release-Tags | Statische Auslieferung | ADR-022, ADR-023 |
 
-Konkrete Versionen werden in der Setup-Phase auf den dann aktuellen stabilen Stand festgelegt und in `package.json` exakt fixiert (`save-exact` in `.npmrc`); `package-lock.json` liegt im Repository, und auf GitHub wird mit `npm ci` genau dieser Stand installiert. Aktualisierungen von Abhängigkeiten erfolgen über Dependabot oder bewusst in eigenen `deps/`-Branches (Entwicklungsrichtlinien, Kapitel 10). Der Wechsel auf Node.js 26 erfolgt nach dessen LTS-Einstufung als eigener Branch.
+Konkrete Versionen werden in der Setup-Phase auf den dann aktuellen stabilen Stand festgelegt und in `package.json` exakt fixiert (`save-exact` in `.npmrc`); `package-lock.json` liegt im Repository, und auf GitHub wird mit `npm ci` genau dieser Stand installiert. Aktualisierungen von Abhängigkeiten erfolgen über Dependabot oder bewusst in eigenen `deps/`-Branches (Entwicklungsrichtlinien, Kapitel 10). Abweichend von der Planung (Node.js 24) läuft das Projekt seit dem Setup auf Node.js 26; ein späterer Wechsel der Hauptversion erfolgt als eigener `deps/`-Branch.
 
 ### 3.2 Begründung in Kürze
 
@@ -940,7 +941,7 @@ Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktion
 
 - Alle Texte stehen in `src/i18n/de.ts` als verschachteltes, typisiertes Objekt. `t('statistik.siege')` ist typgeprüft; ein fehlender Schlüssel ist ein Compilerfehler.
 - Platzhalter (`{name}`) und Mehrzahl über `Intl.PluralRules`; Datum und Zahlen über `Intl.DateTimeFormat` und `Intl.NumberFormat` mit `de-DE`.
-- Die ESLint-Regel `react/jsx-no-literals` verbietet feste Texte in JSX, ergänzt um Prüfungen für Attribute wie `aria-label`, `title` und `placeholder` (NFA-I18N-02).
+- ESLint (`no-restricted-syntax`, ADR-026) verbietet feste Texte in JSX, sowohl als Kinder (Text, Zeichenketten, Template-Literale) als auch in den Attributen `title`, `placeholder`, `alt`, `aria-label` und weiteren ARIA-Textattributen (NFA-I18N-02).
 - Eine weitere Sprache (PP-10) ist eine zusätzliche Datei mit demselben Typ.
 
 ### 13.4 Design-Tokens (ADR-018)
@@ -1057,7 +1058,7 @@ Playwright-Szenarien (Auswahl):
 - Darstellung: Smartphone und Tablet in Hoch- und Querformat ohne abgeschnittene Inhalte (NFA-PL-04).
 - Content-Security-Policy: Der Produktions-Build enthält das Meta-Tag aus 12.4.
 
-Die Ende-zu-Ende-Tests laufen gegen `npm run preview`. Lokal mit dem mkcert-Zertifikat über HTTPS, auf GitHub über `http://localhost`, das Browser ebenfalls als sicheren Kontext behandeln.
+Die Ende-zu-Ende-Tests laufen gegen `npm run preview`; lokal baut `npm run test:e2e` vorher den aktuellen Stand. Lokal laufen sie mit dem mkcert-Zertifikat über HTTPS; weil Playwrights WebKit unter Windows dem Zertifikatsspeicher von Windows nicht vertraut, ignorieren die Tests Zertifikatsfehler (die Seite bleibt ein sicherer Kontext). Auf GitHub laufen sie über `http://localhost`, das Browser ebenfalls als sicheren Kontext behandeln. Eine Fixture lässt jeden Test zusätzlich bei Fehlern in der Browser-Konsole fehlschlagen, darunter Verstöße gegen die Content-Security-Policy.
 
 WebKit unter Windows nähert Safari an, ersetzt aber nicht den Test auf echten Apple-Geräten.
 
@@ -1082,7 +1083,7 @@ Eine Checkliste in `docs/Abnahme-Checkliste.md` (angelegt in Inkrement I1) umfas
 | NFA-GB-01, -02, -06 | Abnahme durch den Product Owner |
 | NFA-GB-04 | Manueller Test |
 | NFA-GB-05 | Stylelint und ESLint gegen Farbwerte außerhalb der Tokens |
-| NFA-I18N-01, -02 | `react/jsx-no-literals` und typisierte Textschlüssel |
+| NFA-I18N-01, -02 | ESLint gegen feste Texte (ADR-026) und typisierte Textschlüssel |
 | NFA-EW-01 bis -06 | Architektur-Review anhand von Kapitel 4, 5 und 7; dependency-cruiser |
 | NFA-EW-07 | Unit-, Eigenschafts- und statistische Tests (14.2 bis 14.4) |
 | NFA-EW-08 | Austauschbarer `BuildingPlanner`; Bericht zur Sackgassenquote |
@@ -1166,12 +1167,13 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 ├─ .gitattributes                     LF für alle Textdateien
 ├─ .gitignore
 ├─ .nvmrc                             Node.js-Hauptversion für lokal und GitHub
-├─ .npmrc                             save-exact=true
+├─ .npmrc                             save-exact=true, engine-strict=true
 ├─ .prettierrc.json, .prettierignore
 ├─ commitlint.config.js
 ├─ index.html                         mit Content-Security-Policy (12.4)
 ├─ package.json, package-lock.json
-├─ tsconfig.json
+├─ tsconfig.json                      Typprüfung von src und tests/support, tests/statistical
+├─ tsconfig.node.json                 Typprüfung der Konfigurationsdateien und tests/e2e
 ├─ vite.config.ts
 ├─ vitest.config.ts
 ├─ playwright.config.ts
@@ -1194,7 +1196,7 @@ Die verbindlichen Arbeitsregeln stehen in `docs/Entwicklungsrichtlinien.md`, die
 
 | Werkzeug | Installation | Zweck |
 |---|---|---|
-| Node.js 24 LTS und npm | `winget install OpenJS.NodeJS.LTS` (direkt, ohne Versionsmanager) | Laufzeit und Paketverwaltung der Werkzeuge |
+| Node.js 26 und npm | `winget install OpenJS.NodeJS` bis zur LTS-Einstufung von Node.js 26, danach `OpenJS.NodeJS.LTS` (direkt, ohne Versionsmanager) | Laufzeit und Paketverwaltung der Werkzeuge |
 | Git für Windows | `winget install Git.Git` | Versionsverwaltung (EP-01); bringt Git Bash mit, das Claude Code nutzt |
 | GitHub CLI (`gh`) | `winget install GitHub.cli`, Anmeldung über den Browser mit Berechtigung `workflow` | Pull Requests und Releases aus Claude Code; Anmeldung für Git |
 | Claude Code | nativer Installer, Bedienung über die Erweiterung in VS Code | Umsetzung, Pflege von Code und Dokumentation |
@@ -1255,7 +1257,7 @@ Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrich
 
 ### 16.5 Claude Code
 
-**Berechtigungen** stehen in `.claude/settings.json` im Repository; persönliche Ergänzungen in `.claude/settings.local.json`, die nicht ins Repository gelangt. Berechtigungen werden von Claude Code durchgesetzt, Anweisungen in `CLAUDE.md` nicht; harte Grenzen gehören deshalb in die Berechtigungen.
+**Berechtigungen** stehen in `.claude/settings.json` im Repository; persönliche Ergänzungen in `.claude/settings.local.json`, die nicht ins Repository gelangt. Berechtigungen werden von Claude Code durchgesetzt, Anweisungen in `CLAUDE.md` nicht; harte Grenzen gehören deshalb in die Berechtigungen. Befehlsregeln stehen jeweils für das Bash- und das PowerShell-Werkzeug von Claude Code. Sie greifen auf die übliche Schreibweise eines Befehls und sind keine vollständige Sicherheitsgrenze; `develop` und `main` schützen zusätzlich die Rulesets auf GitHub.
 
 | Bereich | Regel |
 |---|---|
@@ -1263,15 +1265,16 @@ Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrich
 | `npm run …`, `npx` für Projektwerkzeuge, lokale `git`-Befehle, `git push` in Arbeitsbranches, `gh pr …` | erlaubt |
 | `npm install` bzw. `npm uninstall` | Nachfrage (neue Abhängigkeiten sind ein Haltepunkt) |
 | `git tag`, `gh release …`, `gh api`, `gh repo edit` | Nachfrage |
-| Lesen von `rootCA-key.pem` und des Zertifikatsordners | verboten |
+| Lesen von `rootCA-key.pem` und des Zertifikatsordners | verboten (Lesen und Bearbeiten, zusätzlich `cat` und `Get-Content` auf diese Pfade) |
 | `git push --force`, `git reset --hard`, `rm -rf`, `gh repo delete` | verboten |
 | Modus ohne Berechtigungsprüfung | gesperrt (`disableBypassPermissionsMode`) |
+| Hinweise auf Claude in Commits und Pull Requests | abgeschaltet (`attribution` mit leeren Texten; Entwicklungsrichtlinien 3.3) |
 
 **Modelle:** siehe Anforderungsdokumentation 9.3.
 
 ### 16.6 Lokales HTTPS
 
-mkcert erzeugt eine lokale Zertifizierungsstelle, die in Windows sowie von Hand auf Android, iPhone und iPad als vertrauenswürdig installiert wird, und ein Serverzertifikat für `localhost`, `127.0.0.1`, `::1` und die feste IP-Adresse des PCs im Heimnetz (Adressreservierung in der FRITZ!Box). Das Serverzertifikat liegt unter `%USERPROFILE%\.boardbrain-certs\` (`cert.pem`, `key.pem`) und wird vom Product Owner erzeugt, nicht von Claude Code. `vite.config.ts` liest es von dort und schaltet HTTPS nur ein, wenn die Dateien vorhanden sind; ohne Zertifikat (z. B. auf GitHub) laufen `dev` und `preview` über `http://localhost`. Der Schlüssel der Zertifizierungsstelle verlässt den PC nie.
+mkcert erzeugt eine lokale Zertifizierungsstelle, die in Windows sowie von Hand auf Android und dem iPad als vertrauenswürdig installiert wird (ein eigenes iPhone gibt es nicht, auf fremden Geräten wird sie nie installiert; Anforderungsdokumentation OP-13), und ein Serverzertifikat für `localhost`, `127.0.0.1`, `::1` und die feste IP-Adresse des PCs im Heimnetz (Adressreservierung in der FRITZ!Box). Das Serverzertifikat liegt unter `%USERPROFILE%\.boardbrain-certs\` (`cert.pem`, `key.pem`) und wird vom Product Owner erzeugt, nicht von Claude Code. `vite.config.ts` liest es von dort und schaltet HTTPS nur ein, wenn die Dateien vorhanden sind; ohne Zertifikat (z. B. auf GitHub) laufen `dev` und `preview` über `http://localhost`. Der Schlüssel der Zertifizierungsstelle verlässt den PC nie.
 
 ---
 
@@ -1308,6 +1311,7 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | ADR-023 | Branch- und Release-Modell | Angenommen |
 | ADR-024 | Prettier als Formatierer | Angenommen |
 | ADR-025 | Fehlerbehandlung mit Ergebnistyp | Angenommen |
+| ADR-026 | ESLint 10 ohne eslint-plugin-react | Angenommen |
 
 ---
 
@@ -1553,6 +1557,8 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 
 **Konsequenzen:** Keine zusätzlichen Abhängigkeiten; fehlende Texte und unzulässige Farben fallen beim Bauen auf.
 
+**Hinweis (0.4):** Die Regel gegen feste Texte setzt seit dem Setup ADR-026 um; `react/jsx-no-literals` entfällt. Die Entscheidung selbst bleibt unverändert.
+
 ---
 
 ### ADR-019: Hash-Routing mit React Router; Zustand für Sitzungszustand
@@ -1674,6 +1680,27 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | Bibliothek (z. B. neverthrow) | Mehr Komfort, aber eine Abhängigkeit für eine triviale Aufgabe (Architektur 3.2) |
 
 **Konsequenzen:** TypeScript erzwingt die Behandlung beider Fälle; Fehlercodes werden über die Sprachdatei übersetzt.
+
+---
+
+### ADR-026: ESLint 10 ohne eslint-plugin-react
+
+**Status:** Angenommen (Setup, 07.10.2026; Entscheidung des Product Owners; ergänzt ADR-018)
+
+**Kontext:** `eslint-plugin-react` 7.37.5 (letztes Release April 2025) unterstützt ESLint nur bis Version 9; aktuell ist ESLint 10. Gebraucht werden aus dem Plugin nur wenige Regeln: keine festen Texte in JSX (`jsx-no-literals`), kein `dangerouslySetInnerHTML` (`no-danger`), kein Index als `key`, nur Funktionskomponenten.
+
+**Entscheidung:** ESLint 10. Die benötigten Regeln werden mit der eingebauten Regel `no-restricted-syntax` nachgebildet und melden auf Deutsch, welche Projektregel verletzt ist. Jede Ersatzregel ist durch einen Negativtest belegt. Bedingung des Product Owners war, dass alle übrigen ESLint-Plugins ESLint 10 unterstützen: typescript-eslint, eslint-plugin-react-hooks, eslint-plugin-jsdoc und eslint-plugin-testing-library nennen ESLint 10 ausdrücklich, @vitest/eslint-plugin wird mit ESLint 10 getestet; eslint-plugin-check-file (`>=9`) und eslint-config-prettier (`>=7`) erlauben es über offene Versionsbereiche und wurden praktisch geprüft.
+
+**Betrachtete Optionen:**
+
+| Option | Bewertung |
+|---|---|
+| ESLint 10 mit Ersatzregeln (gewählt) | Aktuelle, gepflegte Version; eine Abhängigkeit weniger; Regeln prüfen nur die Syntax |
+| ESLint 9.39 mit eslint-plugin-react | Entspricht dem bisherigen Wortlaut, aber ESLint 9 läuft aus; ein Umstieg wäre bald nötig |
+| `@eslint-react/eslint-plugin` | Zusätzliche Abhängigkeit, ohne Regel gegen feste Texte |
+| eslint-plugin-react unter ESLint 10 erzwingen | Nicht unterstützt, fehleranfällig |
+
+**Konsequenzen:** Der Index als `key` wird nur an den üblichen Namen `i`, `idx` und `index` erkannt, Klassenkomponenten nur bei direkter Ableitung von `Component` oder `PureComponent`; der Rest bleibt Review. Unterstützt eslint-plugin-react später ESLint 10, kann es die Ersatzregeln wieder ablösen (neue ADR).
 
 ---
 

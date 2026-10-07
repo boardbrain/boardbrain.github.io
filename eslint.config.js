@@ -403,6 +403,15 @@ export default defineConfig([
       'vitest/no-focused-tests': 'error',
       'vitest/no-disabled-tests': 'error',
       'vitest/expect-expect': ['error', { assertFunctionNames: ['expect', 'fc.assert'] }],
+      // vitest/no-focused-tests erkennt nur Vitest; diese Regel fängt auch test.only in Playwright.
+      'no-restricted-syntax': [
+        'error',
+        ...BASE_SYNTAX,
+        {
+          selector: 'CallExpression > MemberExpression.callee[property.name="only"]',
+          message: 'Kein .only in Tests (Entwicklungsrichtlinien 8.2).',
+        },
+      ],
       // In Tests sind Typbehauptungen erlaubt (Entwicklungsrichtlinien 4.1).
       '@typescript-eslint/consistent-type-assertions': 'off',
     },

@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.1 |
+| Version | 0.2 |
 | Status | Verbindlich ab der Setup-Phase |
 | Stand | 06.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
@@ -16,6 +16,7 @@
 | Version | Datum | Änderung |
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
+| 0.2 | 07.10.2026 | Ergebnisse des Setups: keine Hinweise auf Claude in Commits und Pull Requests (3.3); Markdown von Prettier ausgenommen (4.2); ESLint-Regeln ohne `eslint-plugin-react` (5, 13; Architektur ADR-026); Node.js 26 vor LTS-Einstufung (10.3) (PR #2) |
 
 ## Inhaltsverzeichnis
 
@@ -162,6 +163,8 @@ release: 1.0.0
 
 Bezüge stehen in der Beschreibung des Pull Requests, nicht im Titel: `Stories: US-PG-01 bis US-PG-04`, `Fixes #12`.
 
+Commit-Nachrichten und Beschreibungen von Pull Requests enthalten **keine Hinweise auf Claude**: keine Zeile `Co-Authored-By: Claude …`, kein „Generated with Claude Code“. Claude Code ist dafür über `attribution` in `.claude/settings.json` eingestellt (Architektur 16.5).
+
 Automatisch geprüft: ja, der Job `pr-title` prüft den Titel jedes Pull Requests mit commitlint.
 
 ### 3.4 Pull Requests
@@ -254,7 +257,7 @@ Issues dienen nur für Fehler und technische Aufgaben, nie für Anforderungen; d
 
 ### 4.2 Formatierung (ADR-024)
 
-Prettier formatiert Code, CSS, JSON und YAML: einfache Anführungszeichen, Zeilenlänge 100, LF-Zeilenenden, sonst Standardwerte. `docs/` ist ausgenommen. VS Code formatiert beim Speichern; `npm run format` formatiert alles.
+Prettier formatiert Code, CSS, JSON und YAML: einfache Anführungszeichen, Zeilenlänge 100, LF-Zeilenenden, sonst Standardwerte. Markdown ist ausgenommen (`docs/`, `README.md`, `CHANGELOG.md`, `CLAUDE.md`), weil Prettier Tabellen auf gleiche Spaltenbreite auffüllen würde. VS Code formatiert beim Speichern; `npm run format` formatiert alles.
 
 Automatisch geprüft: ja, `prettier --check` in `npm run check`.
 
@@ -320,7 +323,7 @@ Kurzfassung der Architektur; Details in BoardBrain_Architektur.md.
 | Anwendungsdienste definieren Transaktionsgrenzen und prüfen Sperren während einer laufenden Partie | 4.4, FA-AB-09 | nein (Review, Tests) |
 | Kein `Math.random`, nirgends, auch nicht in Tests; Zufall nur über `RandomSource`; `crypto.getRandomValues` nur in `infra/random` | 6, NFA-ZF-01 | ja, ESLint |
 | `crypto.randomUUID()` ist die einzige Quelle für Kennungen und wird nur in `infra` aufgerufen | 7.2, NFA-DH-05 | ja, ESLint |
-| Keine festen Texte in der Oberfläche; alle Texte aus `src/i18n/de.ts` über `t()` | 13.3, NFA-I18N | ja, ESLint `react/jsx-no-literals` und Typprüfung |
+| Keine festen Texte in der Oberfläche; alle Texte aus `src/i18n/de.ts` über `t()` | 13.3, NFA-I18N | ja, ESLint (`no-restricted-syntax`, Architektur ADR-026) und Typprüfung |
 | Keine Farbwerte außerhalb von `src/ui/styles/tokens.css` | 13.4, NFA-GB-05 | ja, Stylelint und ESLint |
 | Animationen nur über Motion; keine CSS-Animationen | 13.6 | ja, Stylelint |
 | Erst speichern, dann zeigen: Das Ergebnis eines Schritts ist gespeichert, bevor die Animation beginnt | 10, ADR-014 | nein (Review, Ende-zu-Ende-Test) |
@@ -471,7 +474,7 @@ Laufzeitabhängigkeiten werden zusätzlich in Architektur 3.1 eingetragen; eine 
 | Sicherheitsupdates (Dependabot security updates) | Pull Request kommt automatisch; mergen, sobald die Prüfungen bestanden sind und ein kurzer Rundgang unauffällig war |
 | Kleine Updates (Dependabot version updates, monatlich gebündelt) | Ein Pull Request im Monat; Vorgehen wie oben |
 | Große Versionssprünge (MAJOR) | Eigener Pull Request je Paket; Claude Code liest die Migrationshinweise des Pakets, passt den Code an und beschreibt die Änderungen |
-| Node.js | Wechsel der Hauptversion als `deps/node-‹version›`, frühestens nach deren LTS-Einstufung |
+| Node.js | Wechsel der Hauptversion als `deps/node-‹version›`, frühestens nach deren LTS-Einstufung. Einmalige Ausnahme: Das Setup startet auf Entscheidung des Product Owners mit Node.js 26, bevor es als LTS eingestuft ist |
 
 Dependabot-Pull-Requests zielen auf `develop` und tragen das Präfix `deps:`. Aktualisiert werden auch die GitHub-Actions-Bausteine in den Workflows.
 
@@ -545,12 +548,12 @@ Markdown, deutsch, Tabellen für Festlegungen, Codebeispiele nur als Skizzen. Pr
 | Nur benannte Exporte, Kurzpfad `@/` | ESLint `no-restricted-syntax`, `no-restricted-imports` | `eslint.config.js` | `check` |
 | Doku-Kommentare an Exporten in `core`, `games`, `app` | `eslint-plugin-jsdoc` | `eslint.config.js` | `check` |
 | Kein `Math.random`; `crypto` und `fetch` nur an erlaubten Orten; keine Browser-APIs in `core` und `games` | ESLint `no-restricted-properties`, `no-restricted-globals` | `eslint.config.js` | `check` |
-| Keine festen Texte in JSX | `eslint-plugin-react` `jsx-no-literals` | `eslint.config.js` | `check` |
+| Keine festen Texte in JSX (auch in `title`, `placeholder`, `alt`, `aria-label`); Index nicht als `key`; nur Funktionskomponenten | ESLint `no-restricted-syntax` (Ersatz für `eslint-plugin-react`, Architektur ADR-026) | `eslint.config.js` | `check` |
 | Keine Farbwerte in TypeScript | ESLint `no-restricted-syntax` | `eslint.config.js` | `check` |
 | Hooks- und Compiler-Regeln | `eslint-plugin-react-hooks` | `eslint.config.js` | `check` |
 | Fehlerbehandlung (`no-empty`, `no-floating-promises`, `only-throw-error`) | ESLint, typescript-eslint | `eslint.config.js` | `check` |
-| Sicherheit (`no-eval`, `no-implied-eval`, `no-new-func`, `react/no-danger`) | ESLint | `eslint.config.js` | `check` |
-| Testkonventionen (`no-focused-tests`, Abfragen über `screen`) | `@vitest/eslint-plugin`, `eslint-plugin-testing-library` | `eslint.config.js` | `check` |
+| Sicherheit (`no-eval`, `no-implied-eval`, `no-new-func`; `dangerouslySetInnerHTML`, `innerHTML` und `insertAdjacentHTML` über `no-restricted-syntax`) | ESLint | `eslint.config.js` | `check` |
+| Testkonventionen (`no-focused-tests`, `.only` auch in Playwright-Tests, Abfragen über `screen`) | `@vitest/eslint-plugin`, `eslint-plugin-testing-library`, `no-restricted-syntax` | `eslint.config.js` | `check` |
 | Keine Farbwerte außerhalb von `tokens.css`; keine CSS-Animationen | Stylelint | `stylelint.config.js` | `check` |
 | Formatierung | Prettier | `.prettierrc.json`, `.prettierignore` | `check` |
 | Schichten, Modulschnittstellen, erlaubte Bibliotheken je Schicht, keine Zyklen | dependency-cruiser | `.dependency-cruiser.cjs` | `check` |

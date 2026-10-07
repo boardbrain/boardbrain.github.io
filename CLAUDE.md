@@ -74,6 +74,7 @@ Frage mit begründetem Vorschlag und Alternativen. Alles andere entscheidest du 
 - Squash nach `develop`, Merge commit nach `main`. Nach `main` nur aus `develop` oder `hotfix/…`.
 - Release nach Richtlinien 3.8. `git tag` und `gh release` nur nach ausdrücklicher Zustimmung.
 - Kein Force-Push, kein Umschreiben veröffentlichter Geschichte.
+- Keine Hinweise auf Claude in Commits und PRs: kein `Co-Authored-By`, kein „Generated with Claude Code“ (Richtlinien 3.3).
 
 **Abhängigkeiten**
 - Keine neue Abhängigkeit ohne Zustimmung. Exakte Versionen. `package-lock.json` immer mit committen.
