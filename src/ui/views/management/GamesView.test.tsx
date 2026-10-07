@@ -1,6 +1,6 @@
 import { aCustomGame } from '@tests/support/masterDataFakes';
 import { renderWithApp } from '@tests/support/renderWithApp';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { GamesView } from './GamesView';
@@ -28,7 +28,9 @@ describe('US-SP-02 Create a custom game (game management)', () => {
     await user.click(screen.getByRole('button', { name: 'Speichern' }));
 
     expect(await within(customGamesArea()).findByRole('listitem')).toHaveTextContent('Uno');
-    expect(screen.getByLabelText('Name')).toHaveValue('');
+    await waitFor(() => {
+      expect(screen.getByLabelText('Name')).toHaveValue('');
+    });
   });
 
   it('saving is impossible with a blank name', async () => {

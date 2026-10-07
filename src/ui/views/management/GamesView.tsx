@@ -1,5 +1,6 @@
 import { useId, useState, useTransition } from 'react';
-import { cleanName } from '@/core/model';
+import type { NameDuplicateError } from '@/app/services/masterDataService';
+import { cleanName, type NameEmptyError } from '@/core/model';
 import { SUPPORTED_GAMES } from '@/games/registry';
 import { useCustomGames } from '@/infra/db/readHooks';
 import { t } from '@/i18n/t';
@@ -9,7 +10,11 @@ import { NameList } from '@/ui/components/NameList';
 import { Notice } from '@/ui/components/Notice';
 import { Page } from '@/ui/components/Page';
 
-type Message = { readonly kind: 'duplicate'; readonly name: string } | { readonly kind: 'empty' };
+// `submitted` is the input the message belongs to; the message is hidden once the input changes.
+type Message = {
+  readonly error: NameEmptyError | NameDuplicateError;
+  readonly submitted: string;
+};
 
 /**
  * Game management `#/verwaltung/spiele` (US-SP-02): supported and custom games in separate
@@ -27,25 +32,22 @@ export function GamesView(): React.JSX.Element {
 
   function save(): void {
     // Unexpected errors in the transition reach the error boundary of the view (ADR-025).
+    const submitted = name;
     startTransition(async () => {
-      const result = await masterData.createCustomGame(name);
+      const result = await masterData.createCustomGame(submitted);
       startTransition(() => {
         if (result.ok) {
-          setName('');
+          // Keep a name that was typed while saving was still running.
+          setName((current) => (current === submitted ? '' : current));
           setMessage(null);
           return;
         }
-        switch (result.error) {
-          case 'name-duplicate':
-            setMessage({ kind: 'duplicate', name: cleanName(name) });
-            break;
-          case 'name-empty':
-            setMessage({ kind: 'empty' });
-            break;
-        }
+        setMessage({ error: result.error, submitted });
       });
     });
   }
+
+  const visibleMessage = message?.submitted === name ? message : null;
 
   function handleNameChange(value: string): void {
     setName(value);
@@ -61,12 +63,12 @@ export function GamesView(): React.JSX.Element {
         onValueChange={handleNameChange}
         onSubmit={save}
       >
-        {message?.kind === 'duplicate' && (
+        {visibleMessage?.error === 'name-duplicate' && (
           <Notice tone="error">
-            <p>{t('spiele.gleicherName', { name: message.name })}</p>
+            <p>{t('spiele.gleicherName', { name: cleanName(visibleMessage.submitted) })}</p>
           </Notice>
         )}
-        {message?.kind === 'empty' && (
+        {visibleMessage?.error === 'name-empty' && (
           <Notice tone="error">
             <p>{t('verwaltung.nameLeer')}</p>
           </Notice>

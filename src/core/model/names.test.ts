@@ -50,6 +50,14 @@ describe('Specification 3.4 names', () => {
     ]);
   });
 
+  it('sorts names that differ only in case in a fixed order, whatever the input order', () => {
+    const upperFirst = sortByName([{ name: 'Anna' }, { name: 'anna' }]);
+    const lowerFirst = sortByName([{ name: 'anna' }, { name: 'Anna' }]);
+
+    expect(upperFirst.map((item) => item.name)).toEqual(['anna', 'Anna']);
+    expect(lowerFirst.map((item) => item.name)).toEqual(['anna', 'Anna']);
+  });
+
   it('does not change the given list when sorting', () => {
     const items = [{ name: 'b' }, { name: 'a' }];
 

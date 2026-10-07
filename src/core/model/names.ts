@@ -1,4 +1,6 @@
 const COLLATOR = new Intl.Collator('de-DE', { sensitivity: 'base', numeric: true });
+// Tie-breaker for names that differ only in case or accents, so the order is always the same.
+const EXACT_COLLATOR = new Intl.Collator('de-DE', { sensitivity: 'variant', numeric: true });
 
 /**
  * Stored form of a name: Unicode-normalised and without spaces at the start and end
@@ -36,8 +38,11 @@ export function containsName(names: readonly string[], name: string): boolean {
 
 /**
  * Returns the items sorted alphabetically by name in German order, ignoring case;
- * numbers in names are sorted by value ("Spiel 2" before "Spiel 10").
+ * numbers in names are sorted by value ("Spiel 2" before "Spiel 10"). Names that differ only
+ * in case keep a fixed order ("anna" before "Anna").
  */
 export function sortByName<T extends { readonly name: string }>(items: readonly T[]): T[] {
-  return items.toSorted((a, b) => COLLATOR.compare(a.name, b.name));
+  return items.toSorted(
+    (a, b) => COLLATOR.compare(a.name, b.name) || EXACT_COLLATOR.compare(a.name, b.name),
+  );
 }

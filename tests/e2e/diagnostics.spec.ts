@@ -1,11 +1,12 @@
 import { expect, test } from './fixtures';
 
 test.describe('Architecture 13.1 diagnostics view', () => {
-  test('the start address redirects to #/diagnose', async ({ page }) => {
-    await page.goto('/');
+  test('is reachable via #/diagnose but not part of the navigation', async ({ page }) => {
+    await page.goto('/#/diagnose');
 
-    await expect(page).toHaveURL(/#\/diagnose$/);
     await expect(page.getByRole('heading', { name: 'Diagnose' })).toBeVisible();
+    const navigation = page.getByRole('navigation', { name: 'Hauptnavigation' });
+    await expect(navigation.getByRole('link', { name: 'Diagnose' })).toHaveCount(0);
   });
 
   test('shows the version and all check values as available', async ({ page }) => {
