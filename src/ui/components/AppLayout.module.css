@@ -1,0 +1,43 @@
+.layout {
+  min-height: 100dvh;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.appName {
+  font-weight: 700;
+}
+
+.navList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.link,
+.activeLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target-min);
+  padding: 0 var(--space-3);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-2);
+}
+
+.activeLink {
+  color: var(--color-text);
+  background: var(--color-surface);
+}

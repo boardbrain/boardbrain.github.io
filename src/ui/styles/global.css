@@ -21,6 +21,15 @@ body {
     env(safe-area-inset-left);
 }
 
+h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-base);
+}
+
+a {
+  color: var(--color-accent);
+}
+
 button {
   min-height: var(--touch-target-min);
   padding: var(--space-2) var(--space-4);
@@ -28,5 +37,22 @@ button {
   color: var(--color-surface);
   background: var(--color-accent);
   border: 0;
+  border-radius: var(--radius-2);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* At least 16px, otherwise Safari on iOS zooms in when the field gets focus. */
+input {
+  min-height: var(--touch-target-min);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: max(var(--font-size-base), 16px);
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-2);
 }

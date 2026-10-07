@@ -1,5 +1,5 @@
 import type { Clock, IdGenerator, MasterDataRepositories, MasterDataStore } from '@/app/ports';
-import type { CustomGame, Person } from '@/core/model';
+import { toGameId, toPersonId, type CustomGame, type Person } from '@/core/model';
 
 /**
  * Fixed time for tests.
@@ -65,7 +65,7 @@ export class InMemoryMasterDataStore implements MasterDataStore {
  */
 export function aPerson(fields: Partial<Person> = {}): Person {
   return {
-    id: '00000000-0000-4000-8000-0000000000a1' as Person['id'],
+    id: toPersonId('00000000-0000-4000-8000-0000000000a1'),
     name: 'Anna',
     archived: false,
     createdAt: TEST_NOW,
@@ -79,7 +79,7 @@ export function aPerson(fields: Partial<Person> = {}): Person {
  */
 export function aCustomGame(fields: Partial<CustomGame> = {}): CustomGame {
   return {
-    id: '00000000-0000-4000-8000-0000000000b1' as CustomGame['id'],
+    id: toGameId('00000000-0000-4000-8000-0000000000b1'),
     name: 'Uno',
     archived: false,
     createdAt: TEST_NOW,
