@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.3 |
+| Version | 0.4 |
 | Status | Verbindlich ab der Setup-Phase |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
@@ -18,6 +18,7 @@
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
 | 0.2 | 07.10.2026 | Ergebnisse des Setups: keine Hinweise auf Claude in Commits und Pull Requests (3.3); Markdown von Prettier ausgenommen (4.2); ESLint-Regeln ohne `eslint-plugin-react` (5, 13; Architektur ADR-026); Node.js 26 vor LTS-Einstufung (10.3); Code durchgehend englisch, auch Kommentare und Testnamen (4.3, 4.6, 8.2; Architektur ADR-027) (PR #2) |
 | 0.3 | 07.10.2026 | Aufträge an Claude Code verweisen auf `docs/Umsetzungsplan.md` (14) |
+| 0.4 | 07.10.2026 | Namensregel für React-Kontexte (4.3) (PR #12) |
 
 ## Inhaltsverzeichnis
 
@@ -271,6 +272,7 @@ Code ist immer englisch: Bezeichner, Kommentare, Testnamen, Fehler- und Protokol
 | Typen, Komponenten | PascalCase, ohne Präfix `I` | `GroupForm`, `RandomSource` | ja |
 | Variablen, Funktionen, Parameter | camelCase | `pickWinner` | ja |
 | Echte Konstanten auf Modulebene | UPPER_SNAKE_CASE | `MAX_GROUP_SIZE` | ja |
+| React-Kontexte (werden in JSX wie Komponenten verwendet) | PascalCase mit Endung `Context` | `AppDependenciesContext` | ja |
 | Wahrheitswerte | Präfix `is`, `has`, `can`, `should` | `isArchived` | ja |
 | Ereignis-Props und Behandler | `onX` bzw. `handleX` | `onSave`, `handleSave` | nein (Review) |
 | Fehlercodes | kebab-case-Zeichenketten | `'group-full'` | nein (Review) |

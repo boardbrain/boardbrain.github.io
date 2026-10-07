@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.7 |
+| Version | 0.8 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -21,6 +21,7 @@
 | 0.5 | 07.10.2026 | Job `e2e` im offiziellen Playwright-Container statt Browserinstallation auf dem Runner; Vorjob `playwright-version` liest den Tag aus `package-lock.json` (16.3) (PR #6) |
 | 0.6 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung nach `docs/Umsetzungsplan.md`, Design OP-11 parallel zu I1 und OP-06 vor I5; `core/placement` als erstes Bündel von I2 (19) |
 | 0.7 | 07.10.2026 | Bündel I1-A: Codeskizzen in 6.1 und 6.2 an die Umsetzung angeglichen (`type` statt `interface` nach der ESLint-Regel `consistent-type-definitions`, Dateinamen in camelCase, `pick` ohne `!`); Testquellen über `@tests/…` und Regel `production-not-to-tests` (6.1, 14.2) (PR #11) |
+| 0.8 | 07.10.2026 | Bündel I1-B: Textschlüssel der Spielmodule ohne Abhängigkeit von `i18n` (5.1); Schemaversionen als Liste (Migrationsgerüst), Datenbankklasse ohne `!`, alle Stores ab Version 1 (7.3); Startansicht statt Diagnose unter `#/`, Kopfzeile mit Hauptnavigation (13.1); Abhängigkeiten der Ansichten über `AppDependenciesProvider` (13.2); globales `fake-indexeddb` für Lesehooks in Komponententests (14.1) (PR #12) |
 
 ## Inhaltsverzeichnis
 
@@ -289,17 +290,19 @@ Jedes unterstützte Spiel ist ein Modul, das eine gemeinsame Schnittstelle erfü
 
 ```ts
 // games/types.ts (Skizze)
-export interface GameModule {
+export type GameModule = {
   id: GameId;                       // feste Kennung, z. B. CATAN_GAME_ID
-  nameKey: MessageKey;              // Text aus der Sprachdatei
+  nameKey: string;                  // Textschlüssel, z. B. 'spiele.namen.catan'
   playerCount: { min: number; max: number };
-  editions: EditionDef[];           // leer, wenn das Spiel keine Versionen kennt
-  modes: ModeDef[];
-  playerColors: PlayerColorPalette | null;   // Catan: Rot, Blau, Weiß, Orange (FA-SP-05)
+  editions: EditionDef[];           // leer, wenn das Spiel keine Versionen kennt (ab US-SP-04)
+  modes: ModeDef[];                 // ab US-SP-04
+  playerColors: readonly CatanColorKey[] | null;   // Catan: Rot, Blau, Weiß, Orange (FA-SP-05)
   supportsVictoryPoints: boolean;
-  generation: GenerationDefinition | null;   // null: nur Ergebniserfassung
-}
+  generation: GenerationDefinition | null;   // null: nur Ergebniserfassung (ab I2)
+};
 ```
+
+`games` darf nur `core` verwenden und kennt daher den Typ der Textschlüssel aus `src/i18n` nicht. `nameKey` ist deshalb in der Schnittstelle ein einfacher String; `SUPPORTED_GAMES` wird mit `as const satisfies` angelegt und behält so den genauen Schlüssel. Die Oberfläche ruft `t(game.nameKey)` auf, und der Compiler prüft den Schlüssel dort. Die Namen der unterstützten Spiele erhält der `MasterDataService` in `src/main.tsx`, damit eigene Spiele nicht „Catan“ heißen können (US-SP-02 AK-2).
 
 Eigene Spiele sind keine Module, sondern Datensätze (`CustomGame`). Sie haben keine Versionen, Modi, Spielfarben, Siegpunkte oder Generierung. Die Oberfläche fragt Fähigkeiten immer über eine gemeinsame Funktion ab (`gameCapabilities(gameId)`), damit sie nicht zwischen „Modul“ und „eigenem Spiel“ unterscheiden muss.
 
@@ -563,18 +566,10 @@ Eine IndexedDB-Datenbank `boardbrain` mit folgenden Stores (ADR-007):
 
 ```ts
 // infra/db/database.ts (Skizze)
-export class BoardBrainDb extends Dexie {
-  persons!: Table<Person, PersonId>;
-  groups!: Table<Group, GroupId>;
-  games!: Table<CustomGame, GameId>;
-  matches!: Table<Match, MatchId>;
-  snapshots!: Table<Snapshot, string>;
-  session!: Table<StoredSession, 'current'>;
-  meta!: Table<MetaEntry, MetaKey>;
-
-  constructor() {
-    super('boardbrain', { chromeTransactionDurability: 'strict' });
-    this.version(1).stores({
+export const SCHEMA_VERSIONS: readonly SchemaVersion[] = [
+  {
+    version: 1,
+    stores: {
       persons: 'id, name',
       groups: 'id',
       games: 'id',
@@ -582,12 +577,34 @@ export class BoardBrainDb extends Dexie {
       snapshots: 'id, createdAt, reason',
       session: 'id',
       meta: 'key',
-    });
+    },
+  },
+  // Version 2: { version: 2, stores: { … nur geänderte Stores … }, upgrade: async (tx) => { … } }
+];
+
+export class BoardBrainDb extends Dexie {
+  readonly persons: Table<Person, PersonId>;
+  readonly games: Table<CustomGame, GameId>;
+  readonly meta: Table<MetaEntry, MetaEntry['key']>;
+  // groups, matches, snapshots, session: Typen folgen mit ihren Bündeln
+
+  constructor(name = 'boardbrain', options: Pick<DexieOptions, 'indexedDB' | 'IDBKeyRange'> = {}) {
+    super(name, { ...options, chromeTransactionDurability: 'strict' });
+    for (const schema of SCHEMA_VERSIONS) {
+      const version = this.version(schema.version).stores(schema.stores);
+      if (schema.upgrade !== undefined) version.upgrade(schema.upgrade);
+    }
+    this.persons = this.table('persons');
+    // …
   }
 }
 ```
 
 `chromeTransactionDurability: 'strict'` sorgt dafür, dass Chromium-Browser wie Brave eine Transaktion erst als abgeschlossen melden, wenn sie dauerhaft geschrieben ist. Das ist für die laufende Partie wichtig.
+
+**Migrationsgerüst:** Die Schemaversionen stehen als Liste in `SCHEMA_VERSIONS`. Eine Schemaänderung hängt eine neue Version mit den geänderten Stores und, falls Daten umgewandelt werden müssen, einer `upgrade`-Funktion an; bestehende Einträge werden nie geändert, damit jede ältere Datenbank Schritt für Schritt aktualisiert werden kann. Version 1 enthält bereits alle Stores der Version 1 der App, damit spätere Bündel für ihre Stores keine Migration brauchen. Die Tabellen werden ohne Definite-Assignment-Behauptung (`!`) mit `this.table(…)` belegt; Tests übergeben eine eigene IndexedDB aus `fake-indexeddb`. `src/main.tsx` öffnet die Datenbank, bevor die App bedienbar wird (11.3, Schritt 7); scheitert das Öffnen, erscheint der Fehlerbildschirm.
+
+**Schnittstellen:** `app/ports.ts` definiert `MasterDataStore` mit `transaction(work)` und den Repositories, dazu `IdGenerator` und `Clock`. `infra/db` implementiert den Speicher (`createDexieMasterDataStore`), `infra/random/uuidGenerator.ts` die Kennungen und `infra/platform/systemClock.ts` die Uhr.
 
 Wahrheitswerte wie `archived` sind in IndexedDB nicht indizierbar. Gefiltert wird im Speicher; bei der erwarteten Datenmenge ist das unkritisch.
 
@@ -928,6 +945,8 @@ Beim Start ruft die App `navigator.storage.persisted()` und, falls nötig, `navi
 
 Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktionieren direkte Aufrufe und die Zurück-Taste unter Android ohne Serverkonfiguration auf GitHub Pages (ADR-019).
 
+Ein Rahmen (`AppLayout`) zeigt eine Kopfzeile mit dem App-Namen und der Hauptnavigation; sie nennt nur Bereiche, die es schon gibt (seit I1-B „Start“ und „Verwaltung“). Adressen sind deutsch, z. B. `#/verwaltung/personen`; unbekannte Adressen führen zur Startansicht `#/`. Jede Ansicht ist von einer eigenen Error Boundary umschlossen.
+
 | Bereich | Ansichten |
 |---|---|
 | Start | Startansicht, Banner (Erinnerung, Update, Speicherwarnung), Rückkehr zur laufenden Partie |
@@ -938,7 +957,7 @@ Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktion
 | Daten | Export, Import mit Entscheidungsdialogen, Sicherung mit Sicherungspunkten und Importliste |
 | Einstellungen | Ton, Akzentfarbe, Version |
 | Installation | Anleitung (iOS ausschließlich diese Ansicht im Browser) |
-| Diagnose | Technische Prüfwerte für die Abnahme auf Geräten: Version, sicherer Kontext, Verfügbarkeit von `crypto.randomUUID`, Service Worker und persistentem Speicher, Installationsstatus. Nur über die direkte Adresse `#/diagnose` erreichbar; entsteht im Setup und ist im Platzhalter-Release die Startansicht |
+| Diagnose | Technische Prüfwerte für die Abnahme auf Geräten: Version, sicherer Kontext, Verfügbarkeit von `crypto.randomUUID`, Service Worker und persistentem Speicher, Installationsstatus. Nur über die direkte Adresse `#/diagnose` erreichbar, nicht in der Navigation; entstand im Setup und war im Platzhalter-Release die Startansicht, seit I1-B ist `#/` die Startansicht |
 
 ### 13.2 Zustand in der Oberfläche
 
@@ -947,7 +966,8 @@ Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktion
 | Gespeicherte Daten | `useLiveQuery` aus `dexie-react-hooks`; Ansichten aktualisieren sich bei jeder Änderung automatisch (US-ER-05 AK-3) |
 | Laufende Partie | Zustand-Store mit Abbild der gespeicherten Sitzung; Änderungen nur über `SessionService` |
 | Vorbereitung | Zustand-Store, nur im Arbeitsspeicher |
-| Formulare | Lokaler Komponentenzustand |
+| Formulare | Lokaler Komponentenzustand; Speichern über `useTransition`, damit unerwartete Fehler die Error Boundary der Ansicht erreichen |
+| Datenbank und Dienste | `AppDependenciesProvider` (`ui/AppDependencies.tsx`) reicht die in `src/main.tsx` zusammengesetzte Datenbank und die Anwendungsdienste an die Ansichten weiter; Lesehooks wie `usePersons(db)` aus `infra/db/readHooks.ts` erhalten die Datenbank als Parameter |
 
 ### 13.3 Texte (ADR-018)
 
@@ -996,7 +1016,7 @@ Zwei eigene SVG-Komponenten: Liniendiagramm der kumulierten Siege und Verteilung
 | Eigenschaftstests | Vitest mit fast-check | Invarianten über viele zufällige Fälle mit festem Startwert | `npm test` |
 | Exakter Nachweis | Vitest | Verzerrungsfreiheit von `uniformIntFromWords` | `npm test` |
 | Statistische Tests | Vitest, eigene Suite | Gleichverteilung mit dem echten Generator; Sackgassenquote | `npm run test:stat`, vor jedem Merge nach `main` |
-| Datenbanktests | Vitest mit `fake-indexeddb` | Repositories, Transaktionen, Migrationen, Sicherungspunkte | `npm test` |
+| Datenbanktests | Vitest mit `fake-indexeddb` (je Test eine eigene `IDBFactory`); in Komponententests zusätzlich global eingebunden, weil Dexies Live-Abfragen ein globales IndexedDB voraussetzen | Repositories, Transaktionen, Migrationen, Sicherungspunkte | `npm test` |
 | Komponententests | Vitest mit React Testing Library | Formulare, Dialoge, Entscheidungsdialoge beim Import | `npm test` |
 | Ende-zu-Ende-Tests | Playwright (Chromium, WebKit; Smartphone- und Tablet-Formate) | Vollständige Abläufe im Browser | `npm run test:e2e`, vor jedem Merge |
 | Manuelle Abnahme | Checkliste | Echte Geräte: Android (Brave), iPhone und iPad (Safari), Windows (Brave) | Vor jedem Release |
