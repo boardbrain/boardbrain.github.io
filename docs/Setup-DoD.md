@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Prüfbare Checkliste für den Abschluss der Setup-Phase |
-| Version | 0.1 |
+| Version | 0.3 |
 | Stand | 06.10.2026 |
 | Grundlage | BoardBrain_Architektur.md v0.2, Entwicklungsrichtlinien.md v0.1, Setup-Anleitung.md v0.1 |
 | Sprache | Deutsch |
@@ -14,6 +14,8 @@
 | Version | Datum | Änderung |
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
+| 0.2 | 06.10.2026 | Lizenz PolyForm Strict License 1.0.0 statt MIT (C3); C2 ohne feste Versionsnummern, weil die Dokumente während des Setups fortgeschrieben werden (PR #1) |
+| 0.3 | 07.10.2026 | Node.js 26 nach Entscheidung des Product Owners (B1); Begleitpakete und spätere Testpakete (C7); „alle Prüfwerte grün“ präzisiert (C12, E4 bis E7); kein eigenes iPhone: E6 entfällt, iPhone in G3 optional; `.only` auch per ESLint (D15) (PR #2) |
 
 ## Grundsatz
 
@@ -42,7 +44,7 @@ Spalte „Wer“: **PO** = Product Owner, **CC** = Claude Code.
 
 | # | Kriterium | Nachweis | Wer | ✓ |
 |---|---|---|---|---|
-| B1 | Node.js in der LTS-Version, die in `.nvmrc` steht; npm vorhanden | `node -v`, `npm -v`, Inhalt von `.nvmrc` | CC | ☐ |
+| B1 | Node.js in der Hauptversion, die in `.nvmrc` steht (26; Entscheidung des Product Owners, LTS-Einstufung Ende Oktober 2026); npm vorhanden | `node -v`, `npm -v`, Inhalt von `.nvmrc` | CC | ☐ |
 | B2 | Git, GitHub CLI, mkcert installiert | `git --version`, `gh --version`, `mkcert -version` | CC | ☐ |
 | B3 | Git-Konfiguration nach Architektur 16.1 | `git config --global --list` | CC | ☐ |
 | B4 | GitHub CLI angemeldet mit Berechtigung `workflow` und Zugriff auf die Organisation | `gh auth status`; `gh repo view boardbrain/boardbrain.github.io` | CC | ☐ |
@@ -55,17 +57,17 @@ Spalte „Wer“: **PO** = Product Owner, **CC** = Claude Code.
 | # | Kriterium | Nachweis | Wer | ✓ |
 |---|---|---|---|---|
 | C1 | Ordnerstruktur nach Architektur Kapitel 15, soweit für das Setup nötig; jedes Modul in `src/core` mit `index.ts` | Dateibaum | CC | ☐ |
-| C2 | `docs/` enthält Anforderungen v0.8, Spezifikation v0.5, Architektur v0.2, Entwicklungsrichtlinien, Setup-Anleitung, Setup-DoD | Dateien auf GitHub | CC | ☐ |
-| C3 | `CLAUDE.md`, `README.md` (Kurzbeschreibung, Adresse, Verweis auf `docs/`), `LICENSE` (MIT, „Copyright (c) 2026 Jonasss29“), `CHANGELOG.md` | Dateien auf GitHub | CC | ☐ |
+| C2 | `docs/` enthält die aktuellen Fassungen von Anforderungen, Spezifikation, Architektur, Entwicklungsrichtlinien, Setup-Anleitung, Setup-DoD | Dateien auf GitHub | CC | ☐ |
+| C3 | `CLAUDE.md`, `README.md` (Kurzbeschreibung, Adresse, Verweis auf `docs/`), `LICENSE` (PolyForm Strict License 1.0.0 mit „Required Notice: Copyright (c) 2026 Jonasss29“), `CHANGELOG.md` | Dateien auf GitHub | CC | ☐ |
 | C4 | `.gitattributes` mit `* text=auto eol=lf`; alle Textdateien im Repository haben LF | `git ls-files --eol` zeigt keine `crlf` im Index | CC | ☐ |
 | C5 | `.gitignore` deckt `node_modules`, `dist`, `coverage`, Testergebnisse, `.claude/settings.local.json`, Zertifikatsdateien (`*.pem`, `*.key`) ab | Inhalt | CC | ☐ |
 | C6 | `.nvmrc`, `.npmrc` mit `save-exact=true`; alle Versionen in `package.json` exakt; `package-lock.json` committet | Inhalt | CC | ☐ |
-| C7 | Alle Abhängigkeiten aus Architektur 3.1 und den Prüfwerkzeugen in Kapitel 13 der Richtlinien sind installiert, keine weiteren; Laufzeitabhängigkeiten nur, soweit für das Gerüst nötig, die übrigen folgen mit ihrem Inkrement | `npm ls --depth=0`, Liste im PR | CC | ☐ |
+| C7 | Alle Abhängigkeiten aus Architektur 3.1 und den Prüfwerkzeugen in Kapitel 13 der Richtlinien sind installiert, keine weiteren; Laufzeitabhängigkeiten nur, soweit für das Gerüst nötig, die übrigen folgen mit ihrem Inkrement; ebenso `fake-indexeddb`, das erst mit Dexie gebraucht wird. Zulässige Begleiter: `@rolldown/plugin-babel`, `@babel/core` und `@types/babel__core` für den React Compiler | `npm ls --depth=0`, Liste im PR | CC | ☐ |
 | C8 | `tsconfig.json`: strikt, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch`, `verbatimModuleSyntax`, `erasableSyntaxOnly`; Kurzpfad `@/` | Inhalt | CC | ☐ |
 | C9 | React Compiler im Build aktiv | Konfiguration in `vite.config.ts`; Hinweis im Build oder in den React-Entwicklertools | CC | ☐ |
 | C10 | Sprachdatei `src/i18n/de.ts` mit typisiertem `t()`; Tokens in `src/ui/styles/tokens.css` (Platzhalterwerte bis OP-11) | Dateien | CC | ☐ |
 | C11 | `core/shared` mit `Result`, `ok`, `err`, `assert` und Tests | Dateien, Tests | CC | ☐ |
-| C12 | Diagnoseansicht `#/diagnose` zeigt Version, sicheren Kontext, `crypto.randomUUID`, Verfügbarkeit von Service Worker und persistentem Speicher (nur lesend), Installationsstatus; alle Texte aus der Sprachdatei | Ansicht im Browser | CC | ☐ |
+| C12 | Diagnoseansicht `#/diagnose` zeigt Version, sicheren Kontext, `crypto.randomUUID`, Verfügbarkeit von Service Worker und persistentem Speicher (nur lesend), Installationsstatus; alle Texte aus der Sprachdatei. Prüfwerte erscheinen grün oder rot; Speicherschutz und Installationsstatus sind im Browser-Tab erwartungsgemäß „nein“ und erscheinen neutral als Information | Ansicht im Browser | CC | ☐ |
 | C13 | Error Boundary um die Ansichten; globale Fehlerbehandlung | Code; Komponententest | CC | ☐ |
 | C14 | `index.html` mit Content-Security-Policy als Meta-Tag (nur im Build) | Inhalt von `dist/index.html` | CC | ☐ |
 | C15 | Kein Service Worker, kein PWA-Plugin, keine Datenspeicherung im Setup-Stand | Code; `dist/` enthält keinen Service Worker | CC | ☐ |
@@ -93,7 +95,7 @@ Jeder Befehl läuft auf dem sauberen Stand fehlerfrei. Jeder Negativtest wird ei
 | D12 | Falscher Dateiname (z. B. `group-form.tsx` für eine Komponente) → ESLint rot | Negativtest | CC | ☐ |
 | D13 | Nicht abgewartetes Promise, leerer `catch` → ESLint rot | Negativtest | CC | ☐ |
 | D14 | Unformatierte Datei → Prettier-Prüfung rot | Negativtest | CC | ☐ |
-| D15 | `.only` in einem Ende-zu-Ende-Test → Playwright rot (mit gesetzter Variable `CI`) | Negativtest | CC | ☐ |
+| D15 | `.only` in einem Ende-zu-Ende-Test → Playwright rot (mit gesetzter Variable `CI`); zusätzlich ESLint rot | Negativtest | CC | ☐ |
 | D16 | Anfrage an eine fremde Adresse in einem Ende-zu-Ende-Test → Netzwerkwächter rot | Negativtest | CC | ☐ |
 | D17 | Ende-zu-Ende-Test prüft das Meta-Tag der Content-Security-Policy im Build | Test vorhanden und grün | CC | ☐ |
 | D18 | Ungültiger PR-Titel (z. B. `Update stuff`) → commitlint rot | Negativtest lokal mit `npx commitlint` | CC | ☐ |
@@ -105,9 +107,9 @@ Jeder Befehl läuft auf dem sauberen Stand fehlerfrei. Jeder Negativtest wird ei
 | E1 | mkcert-Zertifizierungsstelle in Windows installiert; Serverzertifikat für `localhost`, `127.0.0.1`, `::1` und die feste IP in `%USERPROFILE%\.boardbrain-certs\` | Dateien vorhanden | PO | ☐ |
 | E2 | `rootCA-key.pem` liegt ausschließlich im mkcert-Ordner; keine Zertifikatsdatei im Repository | `git ls-files` enthält keine `.pem`; Kontrolle des Ordners | PO, CC | ☐ |
 | E3 | `npm run dev` liefert über HTTPS aus, im WLAN erreichbar; ohne Zertifikat Rückfall auf `http://localhost` | Konfiguration; Ausgabe des Servers | CC | ☐ |
-| E4 | Windows, Brave: Diagnoseansicht über `https://localhost:5173` ohne Warnung, alle Werte grün | Bildschirm | PO | ☐ |
-| E5 | Android, Brave: Diagnoseansicht über `https://‹IP›:5173` ohne Warnung, alle Werte grün | Bildschirm | PO | ☐ |
-| E6 | iPhone, Safari: wie E5 | Bildschirm | PO | ☐ |
+| E4 | Windows, Brave: Diagnoseansicht über `https://localhost:5173` ohne Warnung, alle Prüfwerte grün (siehe C12) | Bildschirm | PO | ☐ |
+| E5 | Android, Brave: Diagnoseansicht über `https://‹IP›:5173` ohne Warnung, alle Prüfwerte grün (siehe C12) | Bildschirm | PO | ☐ |
+| E6 | iPhone, Safari: entfällt (kein eigenes iPhone) | – | – | – |
 | E7 | iPad, Safari: wie E5 | Bildschirm | PO | ☐ |
 | E8 | `npm run preview` liefert den Produktions-Build ebenso aus; im Build ist die Content-Security-Policy aktiv, und die Konsole zeigt keine Verstöße | Brave-Entwicklertools | PO | ☐ |
 
@@ -129,7 +131,7 @@ Jeder Befehl läuft auf dem sauberen Stand fehlerfrei. Jeder Negativtest wird ei
 |---|---|---|---|---|
 | G1 | Release-Ablauf nach Richtlinien 3.8 durchlaufen: `chore/release-0.1.0` → `develop`, `develop` → `main` (Merge commit), `gh release create v0.1.0` | PRs, Release auf GitHub | PO, CC | ☐ |
 | G2 | Workflow „Deploy“ läuft nur durch den Tag und ist erfolgreich | Actions | PO | ☐ |
-| G3 | `https://boardbrain.github.io/` zeigt auf PC, Android, iPhone und iPad die Diagnoseansicht mit Version 0.1.0 | Bildschirm | PO | ☐ |
+| G3 | `https://boardbrain.github.io/` zeigt auf PC, Android und iPad die Diagnoseansicht mit Version 0.1.0; iPhone optional über das Gerät eines Freundes | Bildschirm | PO | ☐ |
 | G4 | Auf der veröffentlichten Seite ist kein Service Worker registriert und nichts gespeichert | Brave-Entwicklertools → Application | PO | ☐ |
 | G5 | Content-Security-Policy auf der veröffentlichten Seite aktiv, keine Verstöße in der Konsole | Brave-Entwicklertools | PO | ☐ |
 | G6 | `CHANGELOG.md` enthält Version 0.1.0; das GitHub-Release trägt die Änderungsbeschreibung (EP-05) | Release-Seite | PO | ☐ |

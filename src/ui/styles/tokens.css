@@ -1,0 +1,44 @@
+/*
+ * Design tokens (Architecture 13.4, ADR-018). The only file with colour values (NFA-GB-05).
+ * Placeholder values in dark mode (NFA-GB-02); the design phase sets the final palettes (OP-11).
+ */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces and text */
+  --color-surface: #15171c;
+  --color-surface-raised: #1f2229;
+  --color-border: #30343d;
+  --color-text: #e8eaed;
+  --color-text-muted: #a0a6b0;
+
+  /* States */
+  --color-status-ok: #3fcf73;
+  --color-status-error: #ff6b6b;
+  --color-status-info: #8ab4f8;
+
+  /* Accent (later 6 to 8 variants via data-accent, US-GB-01) */
+  --color-accent: #f2a541;
+
+  /* Typography */
+  --font-family-base: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+  --font-family-mono: ui-monospace, 'Cascadia Mono', consolas, monospace;
+  --font-size-small: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-title: 1.5rem;
+  --line-height-base: 1.5;
+
+  /* Spacing and radii */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --radius-2: 0.5rem;
+  --touch-target-min: 44px;
+
+  /* Durations and easings for Motion (Architecture 13.6) */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+}
