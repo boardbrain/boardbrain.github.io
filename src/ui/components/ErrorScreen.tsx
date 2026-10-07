@@ -17,9 +17,9 @@ function handleReload(): void {
 }
 
 /**
- * Verständliche Meldung bei einem unerwarteten Fehler (Entwicklungsrichtlinien 7.2).
- * Die technischen Details werden nur angezeigt, damit man sie in ein Issue kopieren kann;
- * sie werden nie übertragen (NFA-DH-01).
+ * Understandable message for an unexpected error (Development Guidelines 7.2). Technical
+ * details are only shown so they can be copied into an issue; they are never transmitted
+ * (NFA-DH-01).
  */
 export function ErrorScreen({ error }: ErrorScreenProps): React.JSX.Element {
   return (

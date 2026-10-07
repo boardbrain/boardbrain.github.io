@@ -10,18 +10,18 @@ import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
 import '@/ui/styles/tokens.css';
 import '@/ui/styles/global.css';
 
-// Einstieg und einzige Stelle, an der Implementierungen zusammengesetzt werden (Architektur 4.2).
+// Entry point and the only place where implementations are composed (Architecture 4.2).
 
 const container = document.getElementById('root');
 if (container === null) {
-  throw new Error('Element #root fehlt in index.html');
+  throw new Error('Element #root is missing in index.html');
 }
 const root = createRoot(container);
 
-// Die Diagnose liest nur; sie wird einmal beim Start ermittelt.
+// The diagnostics only read; they are determined once at startup.
 const diagnostics = readDiagnostics();
 
-// ADR-019: Hash-Routing. Im Setup ist die Diagnoseansicht die Startansicht (Architektur 13.1).
+// ADR-019: hash routing. During setup the diagnostics view is the start view (Architecture 13.1).
 const router = createHashRouter([
   { path: '/', element: <Navigate to="/diagnose" replace /> },
   {
@@ -38,7 +38,7 @@ const router = createHashRouter([
 ]);
 
 installGlobalErrorHandlers(window, (error) => {
-  console.error('Unerwarteter Fehler außerhalb einer Ansicht', error);
+  console.error('Unexpected error outside a view', error);
   root.render(<ErrorScreen error={error} />);
 });
 

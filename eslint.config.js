@@ -1,8 +1,7 @@
-// ESLint-Regeln für BoardBrain (Entwicklungsrichtlinien Kapitel 13).
-// Regeln, die nur für bestimmte Ordner gelten, sind ordnergenau gesetzt. Weil eine spätere
-// Einstellung derselben Regel die frühere ersetzt, werden die Listen für
-// no-restricted-globals, no-restricted-properties und no-restricted-syntax je Bereich
-// vollständig zusammengesetzt.
+// ESLint rules for BoardBrain (Development Guidelines chapter 13).
+// Rules that apply only to certain folders are scoped per folder. Because a later setting of
+// the same rule replaces the earlier one, the lists for no-restricted-globals,
+// no-restricted-properties and no-restricted-syntax are assembled completely per area.
 import js from '@eslint/js';
 import vitest from '@vitest/eslint-plugin';
 import prettier from 'eslint-config-prettier';
@@ -20,18 +19,18 @@ const TEST_FILES = ['**/*.test.{ts,tsx}', 'tests/**/*.{ts,tsx}'];
 const CONFIG_FILES = ['*.config.{js,ts}', '.dependency-cruiser.cjs'];
 
 // ---------------------------------------------------------------------------------------
-// Bausteine für eingeschränkte Globale, Eigenschaften und Syntax
+// Building blocks for restricted globals, properties and syntax
 // ---------------------------------------------------------------------------------------
 
 const NETWORK_GLOBALS = ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource'].map((name) => ({
   name,
-  message: 'Netzwerkzugriffe nur im Service Worker und in infra/update (NFA-DH-01).',
+  message: 'Network access only in the service worker and infra/update (NFA-DH-01).',
 }));
 
 const CRYPTO_GLOBAL = {
   name: 'crypto',
   message:
-    'crypto nur in infra: Zufall über RandomSource, Kennungen über infra (NFA-ZF-01, NFA-DH-05).',
+    'crypto only in infra: randomness via RandomSource, identifiers via infra (NFA-ZF-01, NFA-DH-05).',
 };
 
 const BROWSER_GLOBALS = [
@@ -47,43 +46,43 @@ const BROWSER_GLOBALS = [
   'self',
 ].map((name) => ({
   name,
-  message: 'Keine Browser-APIs in core und games (Architektur 4.2).',
+  message: 'No browser APIs in core and games (Architecture 4.2).',
 }));
 
 const MATH_RANDOM = {
   object: 'Math',
   property: 'random',
-  message: 'Math.random ist verboten. Zufall nur über RandomSource (NFA-ZF-01).',
+  message: 'Math.random is forbidden. Randomness only via RandomSource (NFA-ZF-01).',
 };
 const GET_RANDOM_VALUES = {
   object: 'crypto',
   property: 'getRandomValues',
-  message: 'crypto.getRandomValues nur in infra/random (NFA-ZF-01).',
+  message: 'crypto.getRandomValues only in infra/random (NFA-ZF-01).',
 };
 const RANDOM_UUID = {
   object: 'crypto',
   property: 'randomUUID',
-  message: 'crypto.randomUUID nur in infra (NFA-DH-05).',
+  message: 'crypto.randomUUID only in infra (NFA-DH-05).',
 };
 const SEND_BEACON = {
   object: 'navigator',
   property: 'sendBeacon',
-  message: 'Netzwerkzugriffe nur im Service Worker und in infra/update (NFA-DH-01).',
+  message: 'Network access only in the service worker and infra/update (NFA-DH-01).',
 };
 
 const COLOR_PATTERN = String.raw`^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$`;
 const COLOR_FUNCTION_PATTERN = String.raw`(?:^|[\s,(])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(`;
 const COLOR_MESSAGE =
-  'Farbwerte nur in src/ui/styles/tokens.css; im Code var(--…) nutzen (NFA-GB-05).';
+  'Colour values only in src/ui/styles/tokens.css; use var(--…) in code (NFA-GB-05).';
 
 const BASE_SYNTAX = [
   {
     selector: 'ExportDefaultDeclaration',
-    message: 'Nur benannte Exporte (Entwicklungsrichtlinien 4.5).',
+    message: 'Named exports only (Development Guidelines 4.5).',
   },
   {
     selector: 'TSEnumDeclaration',
-    message: 'Keine enum; Vereinigung von Zeichenketten verwenden (Entwicklungsrichtlinien 4.1).',
+    message: 'No enum; use a union of string literals (Development Guidelines 4.1).',
   },
   { selector: `Literal[value=/${COLOR_PATTERN}/]`, message: COLOR_MESSAGE },
   { selector: `Literal[value=/${COLOR_FUNCTION_PATTERN}/i]`, message: COLOR_MESSAGE },
@@ -93,18 +92,17 @@ const BASE_SYNTAX = [
   },
   {
     selector: 'AssignmentExpression[left.property.name=/^(?:innerHTML|outerHTML)$/]',
-    message: 'Keine Zuweisung an innerHTML/outerHTML (Entwicklungsrichtlinien 9).',
+    message: 'No assignment to innerHTML/outerHTML (Development Guidelines 9).',
   },
   {
     selector: 'CallExpression[callee.property.name="insertAdjacentHTML"]',
-    message: 'Kein insertAdjacentHTML (Entwicklungsrichtlinien 9).',
+    message: 'No insertAdjacentHTML (Development Guidelines 9).',
   },
 ];
 
-// Ersatz für eslint-plugin-react (Architektur 13.3, Entwicklungsrichtlinien 6 und 9).
+// Replacement for eslint-plugin-react (Architecture 13.3, ADR-026, Development Guidelines 6 and 9).
 const TEXT_ATTRIBUTES = String.raw`^(?:title|placeholder|alt|aria-label|aria-description|aria-placeholder|aria-roledescription|aria-valuetext)$`;
-const JSX_TEXT_MESSAGE =
-  'Keine festen Texte in JSX; Texte über t() aus src/i18n/de.ts (NFA-I18N-02).';
+const JSX_TEXT_MESSAGE = 'No hard-coded text in JSX; use t() with src/i18n/de.ts (NFA-I18N-02).';
 const JSX_SYNTAX = [
   { selector: String.raw`JSXText[value=/\S/]`, message: JSX_TEXT_MESSAGE },
   {
@@ -119,21 +117,21 @@ const JSX_SYNTAX = [
   },
   {
     selector: 'JSXAttribute[name.name="dangerouslySetInnerHTML"]',
-    message: 'Kein dangerouslySetInnerHTML (Entwicklungsrichtlinien 9).',
+    message: 'No dangerouslySetInnerHTML (Development Guidelines 9).',
   },
   {
     selector: String.raw`JSXAttribute[name.name="key"] Identifier[name=/^(?:i|idx|index)$/]`,
-    message: 'Listen-Keys sind stabile Kennungen, nie der Index (Entwicklungsrichtlinien 6).',
+    message: 'List keys are stable identifiers, never the index (Development Guidelines 6).',
   },
   {
     selector: String.raw`ClassDeclaration[superClass.name=/^(?:Component|PureComponent)$/], ClassDeclaration[superClass.property.name=/^(?:Component|PureComponent)$/]`,
     message:
-      'Nur Funktionskomponenten; einzige Ausnahme ist ErrorBoundary (Entwicklungsrichtlinien 6).',
+      'Function components only; the single exception is ErrorBoundary (Development Guidelines 6).',
   },
 ];
 
 /**
- * Regeln für einen Bereich des Repositorys.
+ * Rules for one area of the repository.
  * @param {{ browser?: boolean, crypto?: boolean, getRandomValues?: boolean, randomUUID?: boolean, network?: boolean }} allowed
  */
 function areaRules(allowed) {
@@ -195,7 +193,7 @@ export default defineConfig([
     'docs/',
   ]),
 
-  // Grundregeln für alle Dateien
+  // Base rules for all files
   js.configs.recommended,
   {
     linterOptions: { reportUnusedDisableDirectives: 'error' },
@@ -209,7 +207,7 @@ export default defineConfig([
     },
   },
 
-  // TypeScript mit Typinformationen (Entwicklungsrichtlinien 4.1)
+  // TypeScript with type information (Development Guidelines 4.1)
   {
     files: TS_FILES,
     extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
@@ -262,14 +260,14 @@ export default defineConfig([
     },
   },
 
-  // JavaScript-Konfigurationsdateien: ohne Typinformationen, Node-Umgebung
+  // JavaScript configuration files: without type information, Node environment
   {
     files: JS_FILES,
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: { globals: globals.node },
   },
 
-  // Konfigurationsdateien verlangen einen Standardexport
+  // Configuration files require a default export
   {
     files: CONFIG_FILES,
     rules: {
@@ -280,7 +278,7 @@ export default defineConfig([
     },
   },
 
-  // Bereiche mit eingeschränkten Globalen und Eigenschaften (Entwicklungsrichtlinien 5)
+  // Areas with restricted globals and properties (Development Guidelines 5)
   ...AREAS.map((area) => ({
     name: `boardbrain/area-${area.name}`,
     files: area.files,
@@ -294,7 +292,7 @@ export default defineConfig([
     rules: areaRules({}),
   },
 
-  // Oberfläche: React, Hooks und Compiler, Ersatzregeln für eslint-plugin-react
+  // UI: React, hooks and compiler, replacement rules for eslint-plugin-react
   {
     files: ['src/**/*.tsx'],
     ignores: TEST_FILES,
@@ -311,7 +309,7 @@ export default defineConfig([
     },
   },
 
-  // Importe: Kurzpfad @/ über Modulgrenzen (Entwicklungsrichtlinien 4.5)
+  // Imports: alias @/ across module boundaries (Development Guidelines 4.5)
   {
     files: ['src/**/*.{ts,tsx}'],
     rules: {
@@ -321,9 +319,9 @@ export default defineConfig([
           patterns: [
             {
               group: ['../../*'],
-              message: 'Über Modulgrenzen mit dem Kurzpfad @/ importieren.',
+              message: 'Import across module boundaries with the @/ alias.',
             },
-            { group: ['src/*', '/src/*'], message: 'Kurzpfad @/ statt src/ verwenden.' },
+            { group: ['src/*', '/src/*'], message: 'Use the @/ alias instead of src/.' },
           ],
         },
       ],
@@ -339,7 +337,7 @@ export default defineConfig([
             {
               group: ['../*'],
               message:
-                'Andere Module nur über ihre index.ts mit dem Kurzpfad @/ importieren (Entwicklungsrichtlinien 4.5).',
+                'Import other modules only through their index.ts with the @/ alias (Development Guidelines 4.5).',
             },
           ],
         },
@@ -347,7 +345,7 @@ export default defineConfig([
     },
   },
 
-  // Doku-Kommentare an Exporten in core, games, app (Entwicklungsrichtlinien 4.6)
+  // Doc comments on exports in core, games, app (Development Guidelines 4.6)
   {
     files: ['src/core/**/*.ts', 'src/games/**/*.ts', 'src/app/**/*.ts'],
     ignores: TEST_FILES,
@@ -374,7 +372,7 @@ export default defineConfig([
     },
   },
 
-  // Datei- und Ordnernamen (Entwicklungsrichtlinien 4.4)
+  // File and folder names (Development Guidelines 4.4)
   {
     files: ['src/**/*.{ts,tsx}', 'tests/**/*.ts'],
     plugins: { 'check-file': checkFile },
@@ -395,7 +393,7 @@ export default defineConfig([
     },
   },
 
-  // Tests (Entwicklungsrichtlinien 8)
+  // Tests (Development Guidelines 8)
   {
     files: TEST_FILES,
     extends: [vitest.configs.recommended],
@@ -403,16 +401,16 @@ export default defineConfig([
       'vitest/no-focused-tests': 'error',
       'vitest/no-disabled-tests': 'error',
       'vitest/expect-expect': ['error', { assertFunctionNames: ['expect', 'fc.assert'] }],
-      // vitest/no-focused-tests erkennt nur Vitest; diese Regel fängt auch test.only in Playwright.
+      // vitest/no-focused-tests only detects Vitest; this rule also catches test.only in Playwright.
       'no-restricted-syntax': [
         'error',
         ...BASE_SYNTAX,
         {
           selector: 'CallExpression > MemberExpression.callee[property.name="only"]',
-          message: 'Kein .only in Tests (Entwicklungsrichtlinien 8.2).',
+          message: 'No .only in tests (Development Guidelines 8.2).',
         },
       ],
-      // In Tests sind Typbehauptungen erlaubt (Entwicklungsrichtlinien 4.1).
+      // Type assertions are allowed in tests (Development Guidelines 4.1).
       '@typescript-eslint/consistent-type-assertions': 'off',
     },
   },
@@ -421,11 +419,11 @@ export default defineConfig([
     extends: [testingLibrary.configs['flat/react']],
     languageOptions: { globals: globals.browser },
     rules: {
-      // act ist nötig, wenn eine Ansicht mit use() auf ein Promise wartet.
+      // act is needed when a view waits for a promise with use().
       'testing-library/no-unnecessary-act': ['error', { isStrict: false }],
     },
   },
 
-  // Prettier schaltet kollidierende Formatregeln ab (ADR-024); muss am Ende stehen.
+  // Prettier turns off conflicting formatting rules (ADR-024); must come last.
   prettier,
 ]);

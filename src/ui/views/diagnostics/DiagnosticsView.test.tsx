@@ -14,7 +14,7 @@ const ALL_AVAILABLE: Diagnostics = {
 };
 
 async function renderView(diagnostics: Diagnostics): Promise<void> {
-  // Die Ansicht wartet mit use() auf die Prüfwerte; act wartet, bis sie dargestellt sind.
+  // The view waits for the values with use(); act waits until they are rendered.
   await act(async () => {
     render(
       <Suspense fallback={null}>
@@ -26,14 +26,14 @@ async function renderView(diagnostics: Diagnostics): Promise<void> {
   await screen.findByRole('heading', { name: 'Diagnose' });
 }
 
-describe('Architektur 13.1 Diagnoseansicht', () => {
-  it('zeigt Überschrift und Version', async () => {
+describe('Architecture 13.1 diagnostics view', () => {
+  it('shows heading and version', async () => {
     await renderView(ALL_AVAILABLE);
 
     expect(screen.getByText('Version 0.1.0')).toBeInTheDocument();
   });
 
-  it('zeigt alle Prüfwerte als vorhanden', async () => {
+  it('shows all check values as available', async () => {
     await renderView(ALL_AVAILABLE);
 
     const checks = screen.getByRole('region', { name: 'Prüfwerte' });
@@ -41,14 +41,14 @@ describe('Architektur 13.1 Diagnoseansicht', () => {
     expect(within(checks).queryByText('fehlt')).not.toBeInTheDocument();
   });
 
-  it('meldet einen fehlenden Prüfwert', async () => {
+  it('reports a missing check value', async () => {
     await renderView({ ...ALL_AVAILABLE, secureContext: false });
 
     const checks = screen.getByRole('region', { name: 'Prüfwerte' });
     expect(within(checks).getByText('fehlt')).toBeInTheDocument();
   });
 
-  it('zeigt Speicherschutz und Installationsstatus als Information', async () => {
+  it('shows storage protection and installation status as information', async () => {
     await renderView({ ...ALL_AVAILABLE, persisted: undefined, installed: true });
 
     const infos = screen.getByRole('region', { name: 'Informationen' });

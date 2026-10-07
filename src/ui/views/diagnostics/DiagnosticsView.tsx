@@ -19,9 +19,9 @@ function yesNoUnknown(isYes: boolean | undefined): TextKey {
 }
 
 /**
- * Diagnoseansicht `#/diagnose` (Architektur 13.1): technische Prüfwerte für die Abnahme
- * auf Geräten. Prüfwerte sind grün oder rot; Installationsstatus und Speicherschutz sind
- * im Browser-Tab erwartungsgemäß „nein“ und werden deshalb neutral als Information gezeigt.
+ * Diagnostics view `#/diagnose` (Architecture 13.1): technical check values for acceptance on
+ * devices. Checks are green or red; installation status and storage protection are expectedly
+ * "no" in a browser tab and are therefore shown neutrally as information.
  */
 export function DiagnosticsView({ diagnostics, version }: DiagnosticsViewProps): React.JSX.Element {
   const values = use(diagnostics);

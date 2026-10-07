@@ -16,7 +16,7 @@
 | Version | Datum | Änderung |
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
-| 0.2 | 07.10.2026 | Ergebnisse des Setups: keine Hinweise auf Claude in Commits und Pull Requests (3.3); Markdown von Prettier ausgenommen (4.2); ESLint-Regeln ohne `eslint-plugin-react` (5, 13; Architektur ADR-026); Node.js 26 vor LTS-Einstufung (10.3) (PR #2) |
+| 0.2 | 07.10.2026 | Ergebnisse des Setups: keine Hinweise auf Claude in Commits und Pull Requests (3.3); Markdown von Prettier ausgenommen (4.2); ESLint-Regeln ohne `eslint-plugin-react` (5, 13; Architektur ADR-026); Node.js 26 vor LTS-Einstufung (10.3); Code durchgehend englisch, auch Kommentare und Testnamen (4.3, 4.6, 8.2; Architektur ADR-027) (PR #2) |
 
 ## Inhaltsverzeichnis
 
@@ -263,7 +263,7 @@ Automatisch geprüft: ja, `prettier --check` in `npm run check`.
 
 ### 4.3 Namen
 
-Bezeichner sind englisch, Kommentare und Dokumentation deutsch (ADR-008). Fachbegriffe folgen verbindlich der Zuordnung in Architektur 4.5.
+Code ist immer englisch: Bezeichner, Kommentare, Testnamen, Fehler- und Protokollmeldungen. Deutsch sind nur die Texte der Oberfläche in `src/i18n/de.ts`, die Dokumentation, Commit-Nachrichten und Pull Requests (Architektur ADR-008, ADR-027). Fachbegriffe folgen verbindlich der Zuordnung in Architektur 4.5.
 
 | Element | Konvention | Beispiel | Automatisch |
 |---|---|---|---|
@@ -300,9 +300,9 @@ Abkürzungen nur, wenn allgemein üblich (`id`, `url`). Namen beschreiben den In
 
 | Regel | Automatisch |
 |---|---|
-| Kommentare und Doku-Kommentare deutsch | nein (Review) |
+| Kommentare und Doku-Kommentare englisch, in allen Code- und Konfigurationsdateien (Architektur ADR-027) | nein (Review) |
 | Jede exportierte Funktion, Klasse und jeder exportierte Typ in `core`, `games` und `app` hat einen Doku-Kommentar (`/** … */`): was sie tut, und bei nicht offensichtlichen Entscheidungen warum | ja, ESLint `jsdoc` |
-| Wo Code eine Anforderung umsetzt, nennt der Kommentar deren ID: `// FA-PL-03: Abstandsregel` | nein (Review) |
+| Wo Code eine Anforderung umsetzt, nennt der Kommentar deren ID: `// FA-PL-03: distance rule` | nein (Review) |
 | Kommentare erklären das Warum, nicht das Was | nein (Review) |
 | Kein auskommentierter Code; `TODO` nur mit Bezug: `// TODO(#12): …` | nein (Review) |
 
@@ -408,7 +408,7 @@ Die Teststrategie steht in Architektur Kapitel 14. Übersicht:
 |---|---|
 | Jede Funktion in `core`, `games` und `app` hat Unit-Tests; alle Abnahmekriterien zu LS, PL und SR sind automatisiert (NFA-EW-07) | teilweise, Abdeckung ja; Vollständigkeit per Review |
 | Mindestabdeckung 90 % (Zeilen und Verzweigungen) für `src/core` und `src/games` | ja, Vitest |
-| Testnamen deutsch, als Verhalten formuliert, mit Bezug: `describe('US-AB-03 Schritt wiederholen')`, `it('AK-2: verwirft alle Folgeschritte')` | nein (Review) |
+| Testnamen englisch, als Verhalten formuliert, mit Bezug: `describe('US-AB-03 Repeat step')`, `it('AK-2: discards all following steps')` (Architektur ADR-027) | nein (Review) |
 | Aufbau jedes Tests: Ausgangslage herstellen, Handlung ausführen, Ergebnis prüfen | nein (Review) |
 | Kein echter Zufall in Unit-, Komponenten- und Ende-zu-Ende-Tests: nur `SeededRandomSource` oder `ScriptedRandomSource`; fast-check mit festem Startwert. Echter Zufall nur in der statistischen Suite | teilweise, ESLint (`Math.random` überall verboten, `crypto` außerhalb von `infra` und `tests/statistical`) |
 | Testdaten über Hilfsfunktionen aus `tests/support` (z. B. `aGroup({ … })`), nicht über lange Literale in jedem Test | nein (Review) |

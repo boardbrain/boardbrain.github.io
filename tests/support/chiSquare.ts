@@ -1,26 +1,26 @@
 /**
- * Kritische Werte der Chi-Quadrat-Verteilung für α = 0,001 je Freiheitsgrad
- * (Architektur 14.4). Berechnet über die regularisierte unvollständige Gammafunktion und
- * mit Standardtabellen abgeglichen (z. B. 1 → 10,828; 5 → 20,515). Weitere Freiheitsgrade
- * kommen mit den statistischen Tests in Inkrement I1 hinzu.
+ * Critical values of the chi-square distribution for α = 0.001 per degree of freedom
+ * (Architecture 14.4). Computed via the regularised incomplete gamma function and checked
+ * against standard tables (e.g. 1 → 10.828; 5 → 20.515). Further degrees of freedom are added
+ * with the statistical tests in increment I1.
  */
 export const CHI_SQUARE_CRITICAL_ALPHA_0_001: Readonly<Record<number, number>> = {
   255: 330.5197,
 };
 
 /**
- * Liefert den kritischen Wert für α = 0,001; wirft, wenn er in der Tabelle fehlt.
+ * Returns the critical value for α = 0.001; throws if it is missing from the table.
  */
 export function criticalValue(degreesOfFreedom: number): number {
   const value = CHI_SQUARE_CRITICAL_ALPHA_0_001[degreesOfFreedom];
   if (value === undefined) {
-    throw new Error(`Kein kritischer Wert für ${String(degreesOfFreedom)} Freiheitsgrade`);
+    throw new Error(`No critical value for ${String(degreesOfFreedom)} degrees of freedom`);
   }
   return value;
 }
 
 /**
- * Chi-Quadrat-Statistik der beobachteten Häufigkeiten gegen die Gleichverteilung.
+ * Chi-square statistic of the observed counts against the uniform distribution.
  */
 export function chiSquareAgainstUniform(counts: readonly number[]): number {
   const total = counts.reduce((sum, count) => sum + count, 0);

@@ -1,7 +1,6 @@
 /**
- * Meldet alle Fehler, die keine Error Boundary auffängt: `error` und
- * `unhandledrejection` (Entwicklungsrichtlinien 7.2). Gibt eine Funktion zum Entfernen
- * der Behandler zurück.
+ * Reports all errors that no error boundary catches: `error` and `unhandledrejection`
+ * (Development Guidelines 7.2). Returns a function that removes the handlers.
  */
 export function installGlobalErrorHandlers(
   target: Window,

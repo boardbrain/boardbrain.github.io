@@ -17,7 +17,7 @@
 | 0.1 | 06.10.2026 | Erstfassung nach Klärung von OP-01, OP-02, OP-09 und der Übergabepunkte aus Kapitel 8 der Spezifikation v0.3 |
 | 0.2 | 06.10.2026 | Ergebnisse der Setup-Planung: ADR-022 angenommen (`https://boardbrain.github.io/`); neue ADR-023 (Branch- und Release-Modell), ADR-024 (Prettier), ADR-025 (Fehlerbehandlung); Stack um Formatierer, Prüfwerkzeuge und Node.js-Version ergänzt (3.1); Modul `core/shared` (4.3); Fehlerbehandlung (neu 4.6); Content-Security-Policy als Meta-Tag (12.4); Diagnoseansicht (13.1); CSS-Animationen verboten (13.6); Teststrategie präzisiert (14.1, 14.5, 14.6); Ordnerstruktur vervollständigt (15); Kapitel 16 neu gefasst (Werkzeuge, Befehle, Branches und Auslieferung, `CLAUDE.md`, Claude Code, lokales HTTPS); Risiken und offene Punkte aktualisiert (18); nächste Schritte (19) |
 | 0.3 | 06.10.2026 | Lizenz in der Ordnerstruktur auf PolyForm Strict License 1.0.0 geändert (15; Anforderungsdokumentation E-23) (PR #1) |
-| 0.4 | 07.10.2026 | Ergebnisse des Setups: Node.js 26 statt 24 (3.1, 16.1); TypeScript 6, React Compiler über `@rolldown/plugin-babel` (3.1); ESLint 10 ohne `eslint-plugin-react`, Ersatzregeln über `no-restricted-syntax` (neu ADR-026; 3.1, 13.3, 14.7, ADR-018); Markdown von Prettier ausgenommen (3.1); Ende-zu-Ende-Tests lokal über HTTPS mit ignorierten Zertifikatsfehlern (14.5); `tsconfig.node.json` (15); Berechtigungen für PowerShell und keine Hinweise auf Claude in Commits und Pull Requests (16.5); Zertifizierungsstelle nicht auf dem iPhone (16.6) (PR #2) |
+| 0.4 | 07.10.2026 | Ergebnisse des Setups: Node.js 26 statt 24 (3.1, 16.1); TypeScript 6, React Compiler über `@rolldown/plugin-babel` (3.1); ESLint 10 ohne `eslint-plugin-react`, Ersatzregeln über `no-restricted-syntax` (neu ADR-026; 3.1, 13.3, 14.7, ADR-018); Markdown von Prettier ausgenommen (3.1); Ende-zu-Ende-Tests lokal über HTTPS mit ignorierten Zertifikatsfehlern (14.5); `tsconfig.node.json` (15); Berechtigungen für PowerShell und keine Hinweise auf Claude in Commits und Pull Requests (16.5); Zertifizierungsstelle nicht auf dem iPhone (16.6); Code durchgehend englisch, auch Kommentare und Testnamen (neu ADR-027; 4.5, 16.4, ADR-008) (PR #2) |
 
 ## Inhaltsverzeichnis
 
@@ -234,7 +234,7 @@ Anwendungsdienste setzen Fachlogik und Speicher zu vollständigen Abläufen zusa
 
 ### 4.5 Bezeichner im Code
 
-Bezeichner sind englisch, Kommentare und Dokumentation deutsch (ADR-008). Verbindliche Zuordnung:
+Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberfläche und Dokumentation sind deutsch (ADR-008, ADR-027). Verbindliche Zuordnung:
 
 | Fachbegriff | Bezeichner |
 |---|---|
@@ -1253,7 +1253,7 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 
 ### 16.4 `CLAUDE.md`
 
-Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrichtlinien für Claude Code und verweist für Details auf diese. Sie enthält unter anderem: Arbeitsablauf mit Story-Bündeln und Haltepunkten (EP-10); Schichten und Abhängigkeitsregeln; englische Bezeichner und deutsche Kommentare; kein `Math.random`, Zufall nur über `RandomSource`; keine Farbwerte außerhalb der Tokens; keine festen Texte; Animationen nur über Motion; jeder Schreibzugriff über Repositories; Sperren in Diensten prüfen; Fehlerbehandlung nach 4.6; Tests zu jeder Fachlogik; Git-Konventionen; vor jedem Pull Request `npm run check` und `npm run test:e2e`, vor einem Pull Request nach `main` zusätzlich `npm run test:stat`. Sie verweist auf die Dokumente in `docs/`.
+Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrichtlinien für Claude Code und verweist für Details auf diese. Sie enthält unter anderem: Arbeitsablauf mit Story-Bündeln und Haltepunkten (EP-10); Schichten und Abhängigkeitsregeln; durchgehend englischer Code; kein `Math.random`, Zufall nur über `RandomSource`; keine Farbwerte außerhalb der Tokens; keine festen Texte; Animationen nur über Motion; jeder Schreibzugriff über Repositories; Sperren in Diensten prüfen; Fehlerbehandlung nach 4.6; Tests zu jeder Fachlogik; Git-Konventionen; vor jedem Pull Request `npm run check` und `npm run test:e2e`, vor einem Pull Request nach `main` zusätzlich `npm run test:stat`. Sie verweist auf die Dokumente in `docs/`.
 
 ### 16.5 Claude Code
 
@@ -1293,7 +1293,7 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | ADR-005 | Vite als Build-Werkzeug | Angenommen |
 | ADR-006 | Framework-freie Fachlogik in Schichten | Angenommen |
 | ADR-007 | IndexedDB mit Dexie, eine Datenbank | Angenommen |
-| ADR-008 | Englische Bezeichner, deutsche Kommentare | Angenommen |
+| ADR-008 | Englische Bezeichner, deutsche Kommentare | Angenommen; für Kommentare ersetzt durch ADR-027 |
 | ADR-009 | Zufallsquelle und Verwerfungsverfahren | Angenommen |
 | ADR-010 | Sackgassen: verdeckte Vorausberechnung | Angenommen |
 | ADR-011 | UUID Version 4 als Kennungen | Angenommen |
@@ -1312,6 +1312,7 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | ADR-024 | Prettier als Formatierer | Angenommen |
 | ADR-025 | Fehlerbehandlung mit Ergebnistyp | Angenommen |
 | ADR-026 | ESLint 10 ohne eslint-plugin-react | Angenommen |
+| ADR-027 | Code durchgehend englisch | Angenommen |
 
 ---
 
@@ -1422,6 +1423,8 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 ---
 
 ### ADR-008: Englische Bezeichner, deutsche Kommentare
+
+**Status:** Angenommen; für Kommentare ersetzt durch ADR-027 (07.10.2026)
 
 **Kontext:** Bibliotheken und Werkzeuge sind englisch; die Fachsprache und der Product Owner sind deutsch. Gemischte Bezeichner (`setSieger`, `partienCount`) sind schwer lesbar.
 
@@ -1701,6 +1704,20 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | eslint-plugin-react unter ESLint 10 erzwingen | Nicht unterstützt, fehleranfällig |
 
 **Konsequenzen:** Der Index als `key` wird nur an den üblichen Namen `i`, `idx` und `index` erkannt, Klassenkomponenten nur bei direkter Ableitung von `Component` oder `PureComponent`; der Rest bleibt Review. Unterstützt eslint-plugin-react später ESLint 10, kann es die Ersatzregeln wieder ablösen (neue ADR).
+
+---
+
+### ADR-027: Code durchgehend englisch
+
+**Status:** Angenommen (Setup, 07.10.2026; Entscheidung des Product Owners; ersetzt ADR-008 für Kommentare)
+
+**Kontext:** ADR-008 legte englische Bezeichner und deutsche Kommentare fest, Entwicklungsrichtlinien 8.2 deutsche Testnamen. Der Product Owner hat im Setup entschieden, dass Code immer englisch ist.
+
+**Entscheidung:** Code- und Konfigurationsdateien sind vollständig englisch: Bezeichner, alle Kommentare (`//`, `/* … */`, `/** … */`, `#`) einschließlich Doku-Kommentaren, Testnamen, Fehler- und Protokollmeldungen, Meldungen der Prüfwerkzeuge und Namen von Workflow-Schritten. Anforderungs-IDs werden weiterhin genannt, z. B. `// FA-PL-03: distance rule` oder `describe('US-AB-03 Repeat step')`. Deutsch bleiben nur die Texte der Oberfläche in `src/i18n/de.ts` (die App ist deutsch, NFA-I18N) sowie Dokumentation (`docs/` und Markdown-Dateien), Commit-Nachrichten und Pull Requests.
+
+**Betrachtete Optionen:** Deutsche Kommentare und Testnamen (ADR-008, Entwicklungsrichtlinien 8.2, bisher); nur Kommentare englisch (uneinheitlich).
+
+**Konsequenzen:** Code liest sich durchgehend englisch, passend zu Bezeichnern und Bibliotheken. Fachbegriffe folgen der Zuordnung in 4.5. Tests finden Elemente der Oberfläche weiterhin über deren deutsche Beschriftung. Die Sprache wird nicht automatisch geprüft (Review).
 
 ---
 

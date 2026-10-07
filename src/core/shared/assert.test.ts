@@ -1,20 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { assert, InvariantError } from './assert';
 
-describe('Architektur 4.6 assert', () => {
-  it('lässt eine erfüllte Invariante passieren', () => {
+describe('Architecture 4.6 assert', () => {
+  it('lets a satisfied invariant pass', () => {
     expect(() => {
-      assert(true, 'immer erfüllt');
+      assert(true, 'always satisfied');
     }).not.toThrow();
   });
 
-  it('wirft InvariantError mit Beschreibung, wenn die Invariante verletzt ist', () => {
+  it('throws InvariantError with a description when the invariant is violated', () => {
     expect(() => {
-      assert(false, 'Gruppe hat höchstens 12 Mitglieder');
-    }).toThrow(new InvariantError('Invariante verletzt: Gruppe hat höchstens 12 Mitglieder'));
+      assert(false, 'a group has at most 12 members');
+    }).toThrow(new InvariantError('Invariant violated: a group has at most 12 members'));
   });
 
-  it('InvariantError ist ein Error mit eigenem Namen', () => {
+  it('InvariantError is an Error with its own name', () => {
     const error = new InvariantError('x');
 
     expect(error).toBeInstanceOf(Error);

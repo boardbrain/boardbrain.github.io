@@ -1,11 +1,11 @@
 /**
- * Baum aus Textschlüsseln: Blätter sind Texte, innere Knoten Bereiche.
+ * Tree of text keys: leaves are texts, inner nodes are areas.
  */
 export type TextTree = { readonly [key: string]: string | TextTree };
 
 /**
- * Alle sichtbaren Texte der App auf Deutsch (NFA-I18N-01, ADR-018).
- * Schlüssel sind Bereiche und Punkte, z. B. `diagnose.titel`; Platzhalter in `{name}`.
+ * All visible texts of the app in German (NFA-I18N-01, ADR-018).
+ * Keys are areas joined by dots, e.g. `diagnose.titel`; placeholders as `{name}`.
  */
 export const de = {
   app: {

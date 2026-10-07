@@ -1,6 +1,6 @@
 /**
- * Ausschnitt der Browser-Umgebung, den die Diagnose liest. Als Parameter übergeben,
- * damit sich die Abfrage ohne Browser testen lässt.
+ * Part of the browser environment that the diagnostics read. Passed as a parameter so the
+ * query can be tested without a browser.
  */
 export type DiagnosticsScope = {
   readonly isSecureContext: boolean;
@@ -14,8 +14,8 @@ export type DiagnosticsScope = {
 };
 
 /**
- * Technische Prüfwerte für die Abnahme auf Geräten (Architektur 13.1).
- * `persisted` ist `undefined`, wenn der Browser die Abfrage nicht anbietet.
+ * Technical check values for acceptance on devices (Architecture 13.1).
+ * `persisted` is `undefined` if the browser does not offer the query.
  */
 export type Diagnostics = {
   readonly secureContext: boolean;
@@ -34,15 +34,15 @@ async function readPersisted(scope: DiagnosticsScope): Promise<boolean | undefin
   try {
     return await storage.persisted();
   } catch (error: unknown) {
-    // Diagnose soll nie abbrechen; der Wert gilt dann als unbekannt.
-    console.warn('navigator.storage.persisted() ist fehlgeschlagen', error);
+    // Diagnostics must never abort; the value is then treated as unknown.
+    console.warn('navigator.storage.persisted() failed', error);
     return undefined;
   }
 }
 
 /**
- * Liest die Prüfwerte, ohne etwas anzufordern oder zu speichern. Insbesondere wird
- * `navigator.storage.persist()` nicht aufgerufen (Setup: keine Datenspeicherung).
+ * Reads the check values without requesting or storing anything. In particular,
+ * `navigator.storage.persist()` is not called (setup: no data storage).
  */
 export async function readDiagnostics(scope: DiagnosticsScope = window): Promise<Diagnostics> {
   return {
@@ -51,7 +51,7 @@ export async function readDiagnostics(scope: DiagnosticsScope = window): Promise
     serviceWorkerApi: scope.navigator.serviceWorker !== undefined,
     storageApi: scope.navigator.storage?.persisted !== undefined,
     persisted: await readPersisted(scope),
-    // Architektur 12.1: Standalone-Anzeige, unter iOS zusätzlich navigator.standalone.
+    // Architecture 12.1: standalone display mode, on iOS also navigator.standalone.
     installed:
       scope.matchMedia('(display-mode: standalone)').matches || scope.navigator.standalone === true,
   };

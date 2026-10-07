@@ -1,7 +1,7 @@
 /**
- * Öffentliche Schnittstelle des Moduls `core/random`: Zufallsquelle RandomSource, verzerrungsfreie Ganzzahl und Auswahl aus Listen (NFA-ZF-01 bis -03).
+ * Public interface of the module `core/random`: random source `RandomSource`, unbiased integers and picking from lists (NFA-ZF-01 to -03).
  *
- * Andere Module importieren nur über diese Datei (Architektur 4.3). Inhalt folgt mit dem
- * jeweiligen Inkrement; bis dahin exportiert das Modul nichts.
+ * Other modules import only through this file (Architecture 4.3). Content follows with the
+ * respective increment; until then the module exports nothing.
  */
 export {};

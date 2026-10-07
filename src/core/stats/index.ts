@@ -1,7 +1,7 @@
 /**
- * Öffentliche Schnittstelle des Moduls `core/stats`: Kennzahlen, Siegesserien, Rangliste, Diagrammdaten, Filter (FA-ST-*).
+ * Public interface of the module `core/stats`: key figures, winning streaks, ranking, chart data, filters (FA-ST-*).
  *
- * Andere Module importieren nur über diese Datei (Architektur 4.3). Inhalt folgt mit dem
- * jeweiligen Inkrement; bis dahin exportiert das Modul nichts.
+ * Other modules import only through this file (Architecture 4.3). Content follows with the
+ * respective increment; until then the module exports nothing.
  */
 export {};

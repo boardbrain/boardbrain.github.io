@@ -58,14 +58,14 @@ Frage mit begründetem Vorschlag und Alternativen. Alles andere entscheidest du 
 - Echte Bedienelemente (`button`, `a`, `label`) mit Beschriftung aus der Sprachdatei. Kein manuelles `useMemo`/`useCallback`/`memo`. `useEffect` nur für externe Systeme.
 
 **Code**
-- Bezeichner englisch nach Architektur 4.5; Kommentare deutsch. Doku-Kommentar an jedem Export in `core`, `games`, `app`; Anforderungs-ID nennen, wo Code eine Regel umsetzt (`// FA-PL-03: …`).
+- **Code immer englisch** (ADR-027): Bezeichner nach Architektur 4.5, Kommentare, Testnamen, Fehlermeldungen. Deutsch nur UI-Texte in `de.ts`, Doku, Commits, PRs. Doku-Kommentar an jedem Export in `core`, `games`, `app`; Anforderungs-ID nennen, wo Code eine Regel umsetzt (`// FA-PL-03: …`).
 - Kein `any`, kein `!`, kein `as` (außer `as const`), keine `enum`. Nur benannte Exporte. Module in `core` nur über ihre `index.ts` importieren; über Modulgrenzen mit `@/`.
 - Dateien: Komponenten PascalCase mit `*.module.css` daneben, sonst camelCase; Ordner klein.
 - Erwartbare Fehler als `Result<T, E>` zurückgeben, unerwartete werfen (ADR-025). Kein leerer `catch`, jedes Promise behandelt. Daten von außen mit Valibot prüfen.
 
 **Tests**
 - Jede Funktion in `core`, `games`, `app` hat Tests; Abdeckung `core`/`games` ≥ 90 %.
-- Testnamen deutsch mit Bezug: `describe('US-AB-03 …')`, `it('AK-2: …')`.
+- Testnamen englisch mit Bezug: `describe('US-AB-03 …')`, `it('AK-2: …')`.
 - Neue UI-Abläufe: Ende-zu-Ende-Test für den Hauptweg; Elemente über Rolle und Name finden.
 - Unzuverlässige Tests reparieren, nicht wiederholen.
 

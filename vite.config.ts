@@ -6,8 +6,8 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { defineConfig, type Plugin, type ServerOptions } from 'vite';
 import packageJson from './package.json' with { type: 'json' };
 
-// Architektur 12.4: nur eigene Herkunft. Direktiven, die nur als HTTP-Header wirken
-// (z. B. frame-ancestors), entfallen, weil GitHub Pages keine eigenen Header erlaubt.
+// Architecture 12.4: own origin only. Directives that only work as HTTP headers
+// (e.g. frame-ancestors) are omitted because GitHub Pages does not allow custom headers.
 export const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "script-src 'self'",
@@ -20,8 +20,8 @@ export const CONTENT_SECURITY_POLICY = [
   "base-uri 'self'",
 ].join('; ');
 
-// Fügt die Content-Security-Policy nur im Produktions-Build ein; der Entwicklungsserver
-// schleust eigene Skripte und Stile ein und läuft deshalb ohne Richtlinie.
+// Adds the Content Security Policy to the production build only; the dev server injects its
+// own scripts and styles and therefore runs without a policy.
 function contentSecurityPolicy(): Plugin {
   return {
     name: 'boardbrain-content-security-policy',
@@ -36,9 +36,9 @@ function contentSecurityPolicy(): Plugin {
   };
 }
 
-// Architektur 16.6: Das Serverzertifikat von mkcert liegt außerhalb des Repositorys.
-// Ist es vorhanden, laufen dev und preview über HTTPS und sind im WLAN erreichbar;
-// sonst (z. B. auf GitHub) über http://localhost.
+// Architecture 16.6: the mkcert server certificate lives outside the repository. If it exists,
+// dev and preview run over HTTPS and are reachable on the local network; otherwise (e.g. on
+// GitHub) over http://localhost.
 function localServerOptions(): Pick<ServerOptions, 'https' | 'host'> {
   const certDir = path.join(homedir(), '.boardbrain-certs');
   const certFile = path.join(certDir, 'cert.pem');

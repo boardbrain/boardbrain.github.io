@@ -1,19 +1,18 @@
 /**
- * Fehler für eine verletzte Invariante, also einen Programmierfehler (ADR-025).
- * Er wird geworfen und erst an den Grenzen aufgefangen: in Anwendungsdiensten,
- * Error Boundaries und der globalen Fehlerbehandlung.
+ * Error for a violated invariant, i.e. a programming error (ADR-025). It is thrown and only
+ * caught at the boundaries: application services, error boundaries and the global handler.
  */
 export class InvariantError extends Error {
   override readonly name = 'InvariantError';
 }
 
 /**
- * Prüft eine Invariante und wirft `InvariantError`, wenn sie verletzt ist (Architektur 4.6).
- * Nur für Bedingungen, die bei korrektem Code immer gelten; erwartbare Fehler werden
- * stattdessen als `Result` zurückgegeben.
+ * Checks an invariant and throws `InvariantError` if it is violated (Architecture 4.6).
+ * Only for conditions that always hold in correct code; expected errors are returned as
+ * `Result` instead.
  */
 export function assert(isSatisfied: boolean, description: string): asserts isSatisfied {
   if (!isSatisfied) {
-    throw new InvariantError(`Invariante verletzt: ${description}`);
+    throw new InvariantError(`Invariant violated: ${description}`);
   }
 }

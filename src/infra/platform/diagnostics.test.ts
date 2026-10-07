@@ -11,8 +11,8 @@ function aScope(overrides: Partial<DiagnosticsScope> = {}): DiagnosticsScope {
   };
 }
 
-describe('Architektur 13.1 Diagnoseansicht: Prüfwerte', () => {
-  it('meldet alle Schnittstellen eines sicheren Browsers als vorhanden', async () => {
+describe('Architecture 13.1 diagnostics view: check values', () => {
+  it('reports all interfaces of a secure browser as available', async () => {
     const diagnostics = await readDiagnostics(aScope());
 
     expect(diagnostics).toEqual({
@@ -25,7 +25,7 @@ describe('Architektur 13.1 Diagnoseansicht: Prüfwerte', () => {
     });
   });
 
-  it('meldet fehlende Schnittstellen in einem unsicheren Kontext', async () => {
+  it('reports missing interfaces in an insecure context', async () => {
     const diagnostics = await readDiagnostics(
       aScope({ isSecureContext: false, crypto: {}, navigator: {} }),
     );
@@ -39,20 +39,20 @@ describe('Architektur 13.1 Diagnoseansicht: Prüfwerte', () => {
     });
   });
 
-  it('erkennt die installierte App über die Standalone-Anzeige', async () => {
+  it('detects the installed app via the standalone display mode', async () => {
     const diagnostics = await readDiagnostics(aScope({ matchMedia: () => ({ matches: true }) }));
 
     expect(diagnostics.installed).toBe(true);
   });
 
-  it('erkennt die installierte App unter iOS über navigator.standalone', async () => {
+  it('detects the installed app on iOS via navigator.standalone', async () => {
     const diagnostics = await readDiagnostics(aScope({ navigator: { standalone: true } }));
 
     expect(diagnostics.installed).toBe(true);
   });
 
-  it('meldet den Speicherschutz als unbekannt, wenn die Abfrage scheitert', async () => {
-    const failing = { persisted: () => Promise.reject(new Error('nicht erlaubt')) };
+  it('reports storage protection as unknown when the query fails', async () => {
+    const failing = { persisted: () => Promise.reject(new Error('not allowed')) };
     const diagnostics = await readDiagnostics(aScope({ navigator: { storage: failing } }));
 
     expect(diagnostics.persisted).toBeUndefined();

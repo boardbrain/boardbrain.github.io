@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { installGlobalErrorHandlers } from './globalErrorHandlers';
 
-describe('Entwicklungsrichtlinien 7.2 globale Fehlerbehandlung', () => {
-  it('meldet ein error-Ereignis mit dem Fehlerobjekt', () => {
+describe('Development Guidelines 7.2 global error handling', () => {
+  it('reports an error event with the error object', () => {
     const onError = vi.fn();
     const uninstall = installGlobalErrorHandlers(window, onError);
     const error = new Error('global');
@@ -13,34 +13,34 @@ describe('Entwicklungsrichtlinien 7.2 globale Fehlerbehandlung', () => {
     expect(onError).toHaveBeenCalledWith(error);
   });
 
-  it('meldet ein error-Ereignis ohne Fehlerobjekt mit der Nachricht', () => {
+  it('reports an error event without an error object with its message', () => {
     const onError = vi.fn();
     const uninstall = installGlobalErrorHandlers(window, onError);
 
-    window.dispatchEvent(new ErrorEvent('error', { message: 'Skriptfehler' }));
+    window.dispatchEvent(new ErrorEvent('error', { message: 'script error' }));
     uninstall();
 
-    expect(onError).toHaveBeenCalledWith('Skriptfehler');
+    expect(onError).toHaveBeenCalledWith('script error');
   });
 
-  it('meldet ein nicht behandeltes Promise mit dem Grund', () => {
+  it('reports an unhandled rejection with its reason', () => {
     const onError = vi.fn();
     const uninstall = installGlobalErrorHandlers(window, onError);
     const event = new Event('unhandledrejection');
-    Object.defineProperty(event, 'reason', { value: 'abgelehnt' });
+    Object.defineProperty(event, 'reason', { value: 'rejected' });
 
     window.dispatchEvent(event);
     uninstall();
 
-    expect(onError).toHaveBeenCalledWith('abgelehnt');
+    expect(onError).toHaveBeenCalledWith('rejected');
   });
 
-  it('entfernt die Behandler wieder', () => {
+  it('removes the handlers again', () => {
     const onError = vi.fn();
     const uninstall = installGlobalErrorHandlers(window, onError);
     uninstall();
 
-    window.dispatchEvent(new ErrorEvent('error', { message: 'später' }));
+    window.dispatchEvent(new ErrorEvent('error', { message: 'later' }));
 
     expect(onError).not.toHaveBeenCalled();
   });

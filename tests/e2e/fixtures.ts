@@ -1,9 +1,9 @@
 import { test as base, expect } from '@playwright/test';
 
 /**
- * Testfunktion mit Netzwerkwächter (Entwicklungsrichtlinien 8.3, NFA-DH-01): Jede Anfrage
- * an eine fremde Adresse wird blockiert und lässt den Test fehlschlagen. Außerdem darf die
- * Konsole keine Fehler enthalten, auch keine Verstöße gegen die Content-Security-Policy.
+ * Test function with network guard (Development Guidelines 8.3, NFA-DH-01): every request to a
+ * foreign origin is blocked and fails the test. In addition, the console must not contain
+ * errors, including Content Security Policy violations.
  */
 export const test = base.extend<{ networkGuard: undefined; consoleGuard: undefined }>({
   networkGuard: [
@@ -22,7 +22,7 @@ export const test = base.extend<{ networkGuard: undefined; consoleGuard: undefin
 
       await run(undefined);
 
-      expect(foreignRequests, 'Anfragen an fremde Adressen (NFA-DH-01)').toEqual([]);
+      expect(foreignRequests, 'requests to foreign origins (NFA-DH-01)').toEqual([]);
     },
     { auto: true },
   ],
@@ -40,7 +40,7 @@ export const test = base.extend<{ networkGuard: undefined; consoleGuard: undefin
 
       await run(undefined);
 
-      expect(errors, 'Fehler in der Browser-Konsole').toEqual([]);
+      expect(errors, 'errors in the browser console').toEqual([]);
     },
     { auto: true },
   ],

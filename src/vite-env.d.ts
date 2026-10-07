@@ -1,4 +1,4 @@
 /// <reference types="vite/client" />
 
-/** App-Version aus `package.json`, beim Bauen von Vite eingesetzt (`define`). */
+/** App version from `package.json`, inserted by Vite at build time (`define`). */
 declare const __APP_VERSION__: string;

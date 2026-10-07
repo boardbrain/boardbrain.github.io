@@ -1,4 +1,4 @@
-# Abhängigkeiten
+# Dependencies
 node_modules/
 
 # Build
@@ -17,21 +17,21 @@ playwright/.cache/
 *.log
 npm-debug.log*
 
-# Zertifikate und Schlüssel: liegen nie im Repository (Architektur 16.6)
+# Certificates and keys: never in the repository (Architecture 16.6)
 *.pem
 *.key
 *.crt
 *.p12
 *.pfx
 
-# Persönliche Einstellungen von Claude Code (Architektur 16.5)
+# Personal Claude Code settings (Architecture 16.5)
 .claude/settings.local.json
 
-# Lokale Umgebungsdateien
+# Local environment files
 .env
 .env.*
 
-# Betriebssystem und Editor
+# Operating system and editor
 .DS_Store
 Thumbs.db
 desktop.ini

@@ -1,30 +1,29 @@
 /**
- * Erfolgreiches Ergebnis eines Ablaufs mit erwartbarem Fehlschlag (ADR-025).
+ * Successful outcome of an operation that can fail in an expected way (ADR-025).
  */
 export type Ok<T> = { readonly ok: true; readonly value: T };
 
 /**
- * Erwartbarer Fehlschlag mit typisiertem Fehlercode in kebab-case, z. B. `'group-full'`
- * (ADR-025). Die Oberfläche übersetzt den Code über die Sprachdatei in eine Meldung.
+ * Expected failure with a typed error code in kebab-case, e.g. `'group-full'` (ADR-025).
+ * The UI translates the code into a message via the language file.
  */
 export type Err<E extends string> = { readonly ok: false; readonly error: E };
 
 /**
- * Ergebnis eines Ablaufs, der erwartbar fehlschlagen kann (ADR-025). Erwartbare Fehler
- * werden nicht geworfen, sondern zurückgegeben, damit TypeScript den Aufrufer zwingt,
- * beide Fälle zu behandeln.
+ * Outcome of an operation that can fail in an expected way (ADR-025). Expected errors are
+ * returned instead of thrown, so TypeScript forces the caller to handle both cases.
  */
 export type Result<T, E extends string> = Ok<T> | Err<E>;
 
 /**
- * Erzeugt ein erfolgreiches Ergebnis.
+ * Creates a successful outcome.
  */
 export function ok<T>(value: T): Ok<T> {
   return { ok: true, value };
 }
 
 /**
- * Erzeugt einen erwartbaren Fehlschlag mit dem angegebenen Fehlercode.
+ * Creates an expected failure with the given error code.
  */
 export function err<E extends string>(error: E): Err<E> {
   return { ok: false, error };

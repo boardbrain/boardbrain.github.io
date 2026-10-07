@@ -1,14 +1,14 @@
 import { expect, test } from './fixtures';
 
-test.describe('Architektur 13.1 Diagnoseansicht', () => {
-  test('die Startadresse leitet auf #/diagnose um', async ({ page }) => {
+test.describe('Architecture 13.1 diagnostics view', () => {
+  test('the start address redirects to #/diagnose', async ({ page }) => {
     await page.goto('/');
 
     await expect(page).toHaveURL(/#\/diagnose$/);
     await expect(page.getByRole('heading', { name: 'Diagnose' })).toBeVisible();
   });
 
-  test('zeigt Version und alle Prüfwerte als vorhanden', async ({ page }) => {
+  test('shows the version and all check values as available', async ({ page }) => {
     await page.goto('/#/diagnose');
 
     await expect(page.getByText(/^Version \d+\.\d+\.\d+$/)).toBeVisible();
@@ -17,7 +17,7 @@ test.describe('Architektur 13.1 Diagnoseansicht', () => {
     await expect(checks.getByText('fehlt')).toHaveCount(0);
   });
 
-  test('NFA-PL-04: Inhalt passt ohne waagrechtes Scrollen auf den Bildschirm', async ({ page }) => {
+  test('NFA-PL-04: content fits the screen without horizontal scrolling', async ({ page }) => {
     await page.goto('/#/diagnose');
     await expect(page.getByRole('heading', { name: 'Diagnose' })).toBeVisible();
 

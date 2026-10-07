@@ -3,17 +3,17 @@ import { homedir } from 'node:os';
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
-// Architektur 14.5: Ende-zu-Ende-Tests laufen gegen `npm run preview`. Lokal über HTTPS mit
-// dem mkcert-Zertifikat; Playwrights WebKit vertraut dem Windows-Zertifikatsspeicher nicht,
-// deshalb werden Zertifikatsfehler ignoriert (die Seite bleibt ein sicherer Kontext).
-// Auf GitHub gibt es kein Zertifikat; dort gilt http://localhost als sicherer Kontext.
+// Architecture 14.5: end-to-end tests run against `npm run preview`. Locally over HTTPS with the
+// mkcert certificate; Playwright's WebKit does not trust the Windows certificate store, so
+// certificate errors are ignored (the page stays a secure context). GitHub has no certificate;
+// there http://localhost counts as a secure context.
 const certDir = path.join(homedir(), '.boardbrain-certs');
 const hasCertificate =
   existsSync(path.join(certDir, 'cert.pem')) && existsSync(path.join(certDir, 'key.pem'));
 const baseURL = `${hasCertificate ? 'https' : 'http'}://localhost:4173`;
 const isCi = Boolean(process.env.CI);
 
-// NFA-PL-04: Smartphone und Tablet, jeweils Hoch- und Querformat, in Chromium und WebKit.
+// NFA-PL-04: phone and tablet, each in portrait and landscape, in Chromium and WebKit.
 const DEVICES = {
   'chromium-phone': 'Galaxy S24',
   'chromium-phone-landscape': 'Galaxy S24 landscape',
@@ -28,7 +28,7 @@ const DEVICES = {
 export default defineConfig({
   testDir: 'tests/e2e',
   testMatch: '**/*.spec.ts',
-  // Entwicklungsrichtlinien 8.2: ein vergessenes .only lässt den Lauf auf GitHub scheitern.
+  // Development Guidelines 8.2: a forgotten .only fails the run on GitHub.
   forbidOnly: isCi,
   retries: 0,
   fullyParallel: true,
@@ -43,7 +43,7 @@ export default defineConfig({
     use: { ...devices[device] },
   })),
   webServer: {
-    // Auf GitHub baut der Job e2e vorher selbst; lokal wird immer der aktuelle Stand gebaut.
+    // On GitHub the e2e job builds beforehand; locally the current state is always built.
     command: isCi ? 'npm run preview' : 'npm run build && npm run preview',
     url: baseURL,
     ignoreHTTPSErrors: true,

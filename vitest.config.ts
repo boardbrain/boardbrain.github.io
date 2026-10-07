@@ -1,7 +1,7 @@
 import { defineConfig, mergeConfig } from 'vitest/config';
 import viteConfig from './vite.config.ts';
 
-// ADR-005: Vitest nutzt dieselbe Konfiguration wie der Build.
+// ADR-005: Vitest uses the same configuration as the build.
 export default mergeConfig(
   viteConfig,
   defineConfig({
@@ -31,7 +31,7 @@ export default mergeConfig(
             name: 'statistical',
             environment: 'node',
             include: ['tests/statistical/**/*.stat.test.ts'],
-            // Architektur 14.4: ein fehlgeschlagener Test wird genau einmal wiederholt.
+            // Architecture 14.4: a failed test is retried exactly once.
             retry: 1,
           },
         },
@@ -41,7 +41,7 @@ export default mergeConfig(
         include: ['src/**/*.{ts,tsx}'],
         exclude: ['src/**/*.test.{ts,tsx}', 'src/main.tsx', 'src/**/*.d.ts'],
         reporter: ['text-summary', 'text', 'html'],
-        // Entwicklungsrichtlinien 8.2: mindestens 90 % für core und games.
+        // Development Guidelines 8.2: at least 90 % for core and games.
         thresholds: {
           'src/core/**': { lines: 90, branches: 90, functions: 90, statements: 90 },
           'src/games/**': { lines: 90, branches: 90, functions: 90, statements: 90 },

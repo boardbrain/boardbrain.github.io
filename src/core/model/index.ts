@@ -1,7 +1,7 @@
 /**
- * Öffentliche Schnittstelle des Moduls `core/model`: Entitäten, Kennungstypen und Invarianten (FA-PG-*, FA-VW-*).
+ * Public interface of the module `core/model`: entities, identifier types and invariants (FA-PG-*, FA-VW-*).
  *
- * Andere Module importieren nur über diese Datei (Architektur 4.3). Inhalt folgt mit dem
- * jeweiligen Inkrement; bis dahin exportiert das Modul nichts.
+ * Other modules import only through this file (Architecture 4.3). Content follows with the
+ * respective increment; until then the module exports nothing.
  */
 export {};

@@ -3,12 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorBoundary } from './ErrorBoundary';
 
 function BrokenView(): React.JSX.Element {
-  throw new Error('Testfehler');
+  throw new Error('test error');
 }
 
-describe('Entwicklungsrichtlinien 7.2 Error Boundary', () => {
+describe('Development Guidelines 7.2 error boundary', () => {
   beforeEach(() => {
-    // React und die Error Boundary protokollieren den absichtlichen Fehler.
+    // React and the error boundary log the intentional error.
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
   });
 
@@ -16,17 +16,17 @@ describe('Entwicklungsrichtlinien 7.2 Error Boundary', () => {
     vi.restoreAllMocks();
   });
 
-  it('zeigt die Ansicht, solange kein Fehler auftritt', () => {
+  it('shows the view as long as no error occurs', () => {
     render(
       <ErrorBoundary>
-        <p>Inhalt</p>
+        <p>content</p>
       </ErrorBoundary>,
     );
 
-    expect(screen.getByText('Inhalt')).toBeInTheDocument();
+    expect(screen.getByText('content')).toBeInTheDocument();
   });
 
-  it('zeigt bei einem Fehler eine verständliche Meldung mit „Neu laden“', () => {
+  it('shows an understandable message with a reload button on error', () => {
     render(
       <ErrorBoundary>
         <BrokenView />
@@ -37,13 +37,13 @@ describe('Entwicklungsrichtlinien 7.2 Error Boundary', () => {
     expect(screen.getByRole('button', { name: 'Neu laden' })).toBeInTheDocument();
   });
 
-  it('bietet die technischen Details zum Kopieren an', () => {
+  it('offers the technical details for copying', () => {
     render(
       <ErrorBoundary>
         <BrokenView />
       </ErrorBoundary>,
     );
 
-    expect(screen.getByText(/Error: Testfehler/)).toBeInTheDocument();
+    expect(screen.getByText(/Error: test error/)).toBeInTheDocument();
   });
 });

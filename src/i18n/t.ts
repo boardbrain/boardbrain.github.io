@@ -5,12 +5,12 @@ type LeafPaths<T> = {
 }[keyof T & string];
 
 /**
- * Gültiger Textschlüssel; ein Tippfehler ist ein Compilerfehler (Architektur 13.3).
+ * Valid text key; a typo is a compile error (Architecture 13.3).
  */
 export type TextKey = LeafPaths<typeof de>;
 
 /**
- * Werte für Platzhalter wie `{version}`.
+ * Values for placeholders such as `{version}`.
  */
 export type TextParams = Readonly<Record<string, string | number>>;
 
@@ -20,23 +20,23 @@ function lookup(tree: TextTree, key: string): string {
   let node: string | TextTree = tree;
   for (const part of key.split('.')) {
     if (typeof node === 'string') {
-      throw new Error(`Textschlüssel zu lang: ${key}`);
+      throw new Error(`Text key too long: ${key}`);
     }
     const next: string | TextTree | undefined = node[part];
     if (next === undefined) {
-      throw new Error(`Textschlüssel fehlt: ${key}`);
+      throw new Error(`Text key missing: ${key}`);
     }
     node = next;
   }
   if (typeof node !== 'string') {
-    throw new Error(`Textschlüssel ist ein Bereich, kein Text: ${key}`);
+    throw new Error(`Text key is an area, not a text: ${key}`);
   }
   return node;
 }
 
 /**
- * Liefert den deutschen Text zum Schlüssel und setzt Platzhalter ein (NFA-I18N-01).
- * Ein Platzhalter ohne Wert bleibt sichtbar stehen, damit der Fehler auffällt.
+ * Returns the German text for the key and fills in placeholders (NFA-I18N-01).
+ * A placeholder without a value stays visible so the mistake is noticed.
  */
 export function t(key: TextKey, params: TextParams = {}): string {
   return lookup(de, key).replace(PLACEHOLDER, (placeholder, name: string) => {

@@ -1,5 +1,5 @@
-# Veröffentlichung auf GitHub Pages, nur durch Release-Tags v* (Architektur 16.3, ADR-023).
-# Die Umgebung github-pages erlaubt zusätzlich nur Tags v*.
+# Publishing to GitHub Pages, only through release tags v* (Architecture 16.3, ADR-023).
+# The github-pages environment additionally allows only tags v*.
 name: Deploy
 
 on:
@@ -32,7 +32,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    # Nur dieser Job erhält Schreibrechte für Pages.
+    # Only this job gets write permissions for Pages.
     permissions:
       pages: write
       id-token: write
