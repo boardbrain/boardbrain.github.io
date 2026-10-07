@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.1 |
+| Version | 0.2 |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.5 (2.3), Entwicklungsrichtlinien.md v0.3 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.11 (9.3, 13), BoardBrain_Architektur.md v0.6 (19) |
 | Sprache | Deutsch |
@@ -14,6 +14,7 @@
 | Version | Datum | Änderung |
 |---|---|---|
 | 0.1 | 07.10.2026 | Erstfassung nach Abschluss des Setups: Reihenfolge, Zuschnitt von Inkrement I1, Modelle, Ablauf |
+| 0.2 | 07.10.2026 | K-1 erledigt: Empfehlung, Dependabot-PR #3 (`@babel/core` 8) zu mergen |
 
 ## 1. Zweck
 
@@ -25,7 +26,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 
 | # | Schritt | Wann | Status |
 |---|---|---|---|
-| 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | offen |
+| 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
 | 1 | Inkrement I1 Fundament: Bündel I1-A bis I1-D (Kapitel 5) | danach, in dieser Reihenfolge | offen |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | offen |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
@@ -132,7 +133,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 
 | ID | Aufgabe | Modell, Aufwand | Status |
 |---|---|---|---|
-| K-1 | Dependabot-PR #3 (`@babel/core` 7 → 8): prüfen, ob `babel-plugin-react-compiler` mit Babel 8 arbeitet (Bündel enthält `memo_cache_sentinel`, alle Prüfungen grün); dann Empfehlung „mergen“ oder „schließen und `@babel/core` in `dependabot.yml` auf Hauptversion 7 halten“ | Sonnet, medium | offen |
+| K-1 | Dependabot-PR #3 (`@babel/core` 7 → 8): prüfen, ob `babel-plugin-react-compiler` mit Babel 8 arbeitet (Bündel enthält `memo_cache_sentinel`, alle Prüfungen grün); dann Empfehlung „mergen“ oder „schließen und `@babel/core` in `dependabot.yml` auf Hauptversion 7 halten“ | Sonnet, medium | erledigt: Empfehlung „mergen“. Mit Babel 8.0.6 erzeugt der Build 8 Treffer für `memo_cache_sentinel`, genau wie mit Babel 7; `check` und `e2e` bestehen. Hinweis: `babel-plugin-react-compiler` 1.0.0 deklariert `@babel/types` ^7 als Abhängigkeit, arbeitet aber nachweislich mit Babel 8 |
 | K-2 | Hohe `npm audit`-Meldungen in Entwicklungswerkzeugen (über `braces`, siehe PR #2) prüfen, sobald Dependabot oder neue Versionen eine Korrektur bieten | Sonnet, medium | offen |
 
 Dependabot öffnet monatlich weitere Pull Requests nach `develop`. Für jeden gilt der Auftrag „Prüfe Dependabot-PR #‹Nummer›“ (Sonnet, medium); Hauptversionssprünge prüft Claude Code wie K-1.
