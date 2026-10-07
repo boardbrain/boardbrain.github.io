@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.6 |
+| Version | 0.7 |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.7 (2.3), Entwicklungsrichtlinien.md v0.4 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.13 (9.3, 13), BoardBrain_Architektur.md v0.9 (19) |
 | Sprache | Deutsch |
@@ -19,6 +19,7 @@
 | 0.4 | 07.10.2026 | I1-B umgesetzt (PR #12); Valibot nach Entscheidung des Product Owners erst mit dem ersten Bündel, das Daten von außen prüft (I4) |
 | 0.5 | 07.10.2026 | Neues Bündel I1-E „Personen und Gruppen im Überblick“ (US-VW-05) nach I1-C (PR #13) |
 | 0.6 | 07.10.2026 | D-1 erledigt (#14): Farbwerte, Designs mit Standard „Holz“; Hinweise für I1-C und US-GB-01 (I6) |
+| 0.7 | 07.10.2026 | I1-C umgesetzt: Gruppen und Farben (Abnahme durch den Product Owner offen) |
 
 ## 1. Zweck
 
@@ -31,7 +32,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | # | Schritt | Wann | Status |
 |---|---|---|---|
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
-| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt |
+| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C in Abnahme |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
@@ -97,7 +98,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 |---|---|---|---|---|
 | I1-A Zufall und Losbaustein | US-LS-01 | Opus, high | `feat/us-ls-01-random-draw` | umgesetzt (#11) |
 | I1-B Personen, Spiele, Datenbank | US-PG-01, US-SP-02 | Opus, high | `feat/us-pg-01-persons-and-games` | umgesetzt (#12) |
-| I1-C Gruppen und Farben | US-PG-02, US-PG-03 | Sonnet, medium | `feat/us-pg-02-groups-and-colors` | offen |
+| I1-C Gruppen und Farben | US-PG-02, US-PG-03 | Sonnet, medium | `feat/us-pg-02-groups-and-colors` | umgesetzt, in Abnahme |
 | I1-E Personen und Gruppen im Überblick | US-VW-05 | Sonnet, medium | `feat/us-vw-05-persons-and-groups-overview` | offen |
 | I1-D Brett und Installation | US-PL-01 | Opus, high | `feat/us-pl-01-board-and-install` | offen |
 
@@ -119,7 +120,8 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 ### I1-C Gruppen und Farben
 
 - **Inhalt:** Gruppen mit 2 bis 12 Mitgliedern und Bindung (global oder ein Spiel), Namensvorschlag, Prüfung gleichnamiger Personen (US-PG-02, Spezifikation 3.4); Farbmodell mit Gruppen- und Catan-Farbe, automatische Vergabe und Farbtausch (US-PG-03, Spezifikation 3.3). Farbwerte und Farbschlüssel stehen seit D-1 fest (Architektur 13.4). Die Reihenfolge der automatischen Vergabe so wählen, dass die ersten Farben einer Gruppe möglichst verschieden sind (nicht Blau neben Indigo, Petrol neben Cyan).
-- **Pakete:** `zustand` nur, falls für Zustand der Oberfläche nötig (Architektur 3.1); sonst keine.
+- **Umsetzung:** Reihenfolge der automatischen Gruppenfarben: Rot, Blau, Gelb, Grün, Violett, Orange, Cyan, Pink, Limette, Indigo, Petrol, Weiß (`GROUP_COLOR_KEYS` in `core/model/colors.ts`; Catan: Rot, Blau, Weiß, Orange). Das nachträgliche Ändern von Farben einer gespeicherten Gruppe gehört zu US-VW-02 (I5); I1-C vergibt und tauscht Farben beim Anlegen.
+- **Pakete:** keine; `zustand` war nicht nötig, der Formularzustand bleibt lokal (Architektur 13.2).
 - **Abnahme durch den Product Owner:** Gruppen mit 2, 4 und 5 Mitgliedern anlegen, Catan-Bindung bei 5 Mitgliedern gesperrt, Farbtausch prüfen; Hoch- und Querformat auf S26 und iPad.
 
 ### I1-E Personen und Gruppen im Überblick

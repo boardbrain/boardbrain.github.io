@@ -1,5 +1,13 @@
 import { Dexie, type DexieOptions, type Table, type Transaction } from 'dexie';
-import type { CustomGame, GameId, IsoTimestamp, Person, PersonId } from '@/core/model';
+import type {
+  CustomGame,
+  GameId,
+  Group,
+  GroupId,
+  IsoTimestamp,
+  Person,
+  PersonId,
+} from '@/core/model';
 
 /**
  * State data in `meta` (Architecture 7.4). Further fields follow with their increments.
@@ -53,11 +61,12 @@ export const DATABASE_NAME = 'boardbrain';
 
 /**
  * The IndexedDB database of BoardBrain (Architecture 7.3, ADR-007). Only `infra/db` uses it;
- * writes go through the repositories. Tables of groups, matches, snapshots and the session
+ * writes go through the repositories. Tables of matches, snapshots and the session
  * get their types with their increments.
  */
 export class BoardBrainDb extends Dexie {
   readonly persons: Table<Person, PersonId>;
+  readonly groups: Table<Group, GroupId>;
   readonly games: Table<CustomGame, GameId>;
   readonly meta: Table<MetaEntry, MetaEntry['key']>;
 
@@ -79,6 +88,7 @@ export class BoardBrainDb extends Dexie {
       }
     }
     this.persons = this.table('persons');
+    this.groups = this.table('groups');
     this.games = this.table('games');
     this.meta = this.table('meta');
   }

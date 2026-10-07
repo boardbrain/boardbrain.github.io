@@ -1,5 +1,12 @@
 import type { Clock, IdGenerator, MasterDataRepositories, MasterDataStore } from '@/app/ports';
-import { toGameId, toPersonId, type CustomGame, type Person } from '@/core/model';
+import {
+  toGameId,
+  toGroupId,
+  toPersonId,
+  type CustomGame,
+  type Group,
+  type Person,
+} from '@/core/model';
 
 /**
  * Fixed time for tests.
@@ -34,15 +41,24 @@ export function sequentialIds(): IdGenerator {
 export class InMemoryMasterDataStore implements MasterDataStore {
   persons: readonly Person[] = [];
   customGames: readonly CustomGame[] = [];
+  groups: readonly Group[] = [];
 
   async transaction<T>(work: (repositories: MasterDataRepositories) => Promise<T>): Promise<T> {
     const persons = [...this.persons];
     const customGames = [...this.customGames];
+    const groups = [...this.groups];
     const result = await work({
       persons: {
         listAll: () => Promise.resolve([...persons]),
         add: (person) => {
           persons.push(person);
+          return Promise.resolve();
+        },
+      },
+      groups: {
+        listAll: () => Promise.resolve([...groups]),
+        add: (group) => {
+          groups.push(group);
           return Promise.resolve();
         },
       },
@@ -56,6 +72,7 @@ export class InMemoryMasterDataStore implements MasterDataStore {
     });
     this.persons = persons;
     this.customGames = customGames;
+    this.groups = groups;
     return result;
   }
 }
@@ -82,6 +99,33 @@ export function aCustomGame(fields: Partial<CustomGame> = {}): CustomGame {
     id: toGameId('00000000-0000-4000-8000-0000000000b1'),
     name: 'Uno',
     archived: false,
+    createdAt: TEST_NOW,
+    updatedAt: TEST_NOW,
+    ...fields,
+  };
+}
+
+/**
+ * Test group of two members with sensible defaults.
+ */
+export function aGroup(fields: Partial<Group> = {}): Group {
+  return {
+    id: toGroupId('00000000-0000-4000-8000-0000000000c1'),
+    name: 'Anna & Ben',
+    archived: false,
+    binding: { kind: 'global' },
+    members: [
+      {
+        personId: toPersonId('00000000-0000-4000-8000-0000000000a1'),
+        groupColor: 'red',
+        catanColor: 'red',
+      },
+      {
+        personId: toPersonId('00000000-0000-4000-8000-0000000000a2'),
+        groupColor: 'blue',
+        catanColor: 'blue',
+      },
+    ],
     createdAt: TEST_NOW,
     updatedAt: TEST_NOW,
     ...fields,

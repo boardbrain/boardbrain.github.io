@@ -3,8 +3,8 @@ import { Page } from '@/ui/components/Page';
 import { t } from '@/i18n/t';
 
 /**
- * Overview of the management area `#/verwaltung` (Architecture 13.1). Groups and the archive
- * follow with their increments.
+ * Overview of the management area `#/verwaltung` (Architecture 13.1). The archive follows with its
+ * increment.
  */
 export function ManagementView(): React.JSX.Element {
   return (
@@ -13,6 +13,7 @@ export function ManagementView(): React.JSX.Element {
         label={t('verwaltung.bereiche')}
         links={[
           { to: '/verwaltung/personen', text: t('verwaltung.personen') },
+          { to: '/verwaltung/gruppen', text: t('verwaltung.gruppen') },
           { to: '/verwaltung/spiele', text: t('verwaltung.spiele') },
         ]}
       />

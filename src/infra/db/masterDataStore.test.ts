@@ -1,4 +1,4 @@
-import { aCustomGame, aPerson } from '@tests/support/masterDataFakes';
+import { aCustomGame, aGroup, aPerson } from '@tests/support/masterDataFakes';
 import { createTestDb } from '@tests/support/testDatabase';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { MasterDataStore } from '@/app/ports';
@@ -37,6 +37,16 @@ describe('Architecture 7.3 master data repositories', () => {
 
     expect(await store.transaction(({ customGames }) => customGames.listAll())).toEqual([uno]);
     expect(await db.games.toArray()).toEqual([uno]);
+  });
+
+  it('adds groups with members and colours and lists all of them', async () => {
+    const group = aGroup({ name: 'Anna & Ben' });
+
+    await store.transaction(({ groups }) => groups.add(group));
+
+    expect(await store.transaction(({ groups }) => groups.listAll())).toEqual([group]);
+    expect(await db.groups.toArray()).toEqual([group]);
+    expect((await db.meta.get('state'))?.value.lastUserDataChangeAt).toBe(group.updatedAt);
   });
 
   it('rejects a second record with the same id', async () => {

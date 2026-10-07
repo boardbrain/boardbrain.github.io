@@ -1,7 +1,7 @@
 import { InvariantError } from '@/core/shared';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { isUuidV4, toGameId, toPersonId } from './ids';
+import { isUuidV4, toGameId, toGroupId, toPersonId } from './ids';
 
 const FC_SEED = 20261007;
 
@@ -33,6 +33,16 @@ describe('NFA-DH-05 identifiers', () => {
 
     expect(toPersonId(uuid)).toBe(uuid);
     expect(toGameId(uuid)).toBe(uuid);
+  });
+
+  it('turns a UUID into a group id unchanged', () => {
+    const uuid = 'c47a0000-0000-4000-8000-000000000001';
+
+    expect(toGroupId(uuid)).toBe(uuid);
+  });
+
+  it('throws an invariant error for a value that is not a group UUID', () => {
+    expect(() => toGroupId('42')).toThrow(InvariantError);
   });
 
   it('throws an invariant error for a value that is not a UUID', () => {

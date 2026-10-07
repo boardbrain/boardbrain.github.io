@@ -36,6 +36,11 @@ function isGameId(value: string): value is GameId {
 }
 
 /**
+ * Identifier of a group: UUID version 4 (NFA-DH-05, ADR-011).
+ */
+export type GroupId = BrandedId<'GroupId'>;
+
+/**
  * Turns a freshly generated UUID into a person id.
  * @throws {InvariantError} if the value is not a UUID version 4.
  */
@@ -53,6 +58,21 @@ export function toPersonId(value: string): PersonId {
 export function toGameId(value: string): GameId {
   if (!isGameId(value)) {
     throw new InvariantError(`Not a UUID v4 game id: ${value}`);
+  }
+  return value;
+}
+
+function isGroupId(value: string): value is GroupId {
+  return isUuidV4(value);
+}
+
+/**
+ * Turns a freshly generated UUID into a group id.
+ * @throws {InvariantError} if the value is not a UUID version 4.
+ */
+export function toGroupId(value: string): GroupId {
+  if (!isGroupId(value)) {
+    throw new InvariantError(`Not a UUID v4 group id: ${value}`);
   }
   return value;
 }
