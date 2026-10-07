@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.6 |
+| Version | 0.7 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -20,6 +20,7 @@
 | 0.4 | 07.10.2026 | Ergebnisse des Setups: Node.js 26 statt 24 (3.1, 16.1); TypeScript 6, React Compiler über `@rolldown/plugin-babel` (3.1); ESLint 10 ohne `eslint-plugin-react`, Ersatzregeln über `no-restricted-syntax` (neu ADR-026; 3.1, 13.3, 14.7, ADR-018); Markdown von Prettier ausgenommen (3.1); Ende-zu-Ende-Tests lokal über HTTPS mit ignorierten Zertifikatsfehlern (14.5); `tsconfig.node.json` (15); Berechtigungen für PowerShell und keine Hinweise auf Claude in Commits und Pull Requests (16.5); Zertifizierungsstelle nicht auf dem iPhone (16.6); Code durchgehend englisch, auch Kommentare und Testnamen (neu ADR-027; 4.5, 16.4, ADR-008) (PR #2) |
 | 0.5 | 07.10.2026 | Job `e2e` im offiziellen Playwright-Container statt Browserinstallation auf dem Runner; Vorjob `playwright-version` liest den Tag aus `package-lock.json` (16.3) (PR #6) |
 | 0.6 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung nach `docs/Umsetzungsplan.md`, Design OP-11 parallel zu I1 und OP-06 vor I5; `core/placement` als erstes Bündel von I2 (19) |
+| 0.7 | 07.10.2026 | Bündel I1-A: Codeskizzen in 6.1 und 6.2 an die Umsetzung angeglichen (`type` statt `interface` nach der ESLint-Regel `consistent-type-definitions`, Dateinamen in camelCase, `pick` ohne `!`); Testquellen über `@tests/…` und Regel `production-not-to-tests` (6.1, 14.2) (PR #11) |
 
 ## Inhaltsverzeichnis
 
@@ -430,22 +431,25 @@ Die Ablaufsteuerung in `core/generation` ist spielunabhängig: Sie ruft `nextSte
 Alle Zufallswerte stammen aus einer einzigen Schnittstelle (NFA-ZF-03). Im Produktivcode gibt es genau eine Implementierung, die den kryptografisch sicheren Generator des Browsers nutzt (NFA-ZF-01).
 
 ```ts
-// core/random/source.ts
-export interface RandomSource {
+// core/random/randomSource.ts
+export type RandomSource = {
   /** Gleichverteilte Ganzzahl 0 … 2^32 − 1 */
   nextUint32(): number;
-}
+};
 
-// infra/random/crypto-source.ts
+// infra/random/cryptoRandomSource.ts (gekürzt)
 export class CryptoRandomSource implements RandomSource {
-  private buffer = new Uint32Array(256);
-  private index = this.buffer.length;
+  private readonly buffer = new Uint32Array(256);
+  private index = 256;
   nextUint32(): number {
-    if (this.index >= this.buffer.length) {
+    if (this.index >= 256) {
       crypto.getRandomValues(this.buffer);   // CSPRNG des Betriebssystems
       this.index = 0;
     }
-    return this.buffer[this.index++];
+    const value = this.buffer[this.index];
+    assert(value !== undefined, '…');        // noUncheckedIndexedAccess, kein `!`
+    this.index += 1;
+    return value;
   }
 }
 ```
@@ -453,7 +457,7 @@ export class CryptoRandomSource implements RandomSource {
 Regeln:
 
 - `Math.random` ist im gesamten Produktivcode per ESLint verboten, auch für dekorative Zwecke wie das Aufblinken.
-- Deterministische Quellen (mit Startwert) liegen ausschließlich unter `tests/support`.
+- Deterministische Quellen (mit Startwert) liegen ausschließlich unter `tests/support`. Tests in `src` importieren sie über den Kurznamen `@tests/…` (nur in der Vitest-Konfiguration); die Regel `production-not-to-tests` in dependency-cruiser verbietet Importe aus `tests/` im Produktivcode.
 - Die Oberfläche bestimmt kein Ergebnis. Animationen erhalten das bereits feststehende Ergebnis und stellen es dar (US-IN-01 AK-2).
 
 ### 6.2 Verzerrungsfreie Umrechnung
@@ -472,11 +476,17 @@ export function uniformIntFromWords(n: number, nextWord: () => number, bits: num
   return x % n;
 }
 
-export const uniformInt = (n: number, rng: RandomSource) =>
-  uniformIntFromWords(n, () => rng.nextUint32(), 32);
+export function uniformInt(n: number, rng: RandomSource): number {
+  return uniformIntFromWords(n, () => rng.nextUint32(), 32);
+}
 
-export const pick = <T>(items: readonly T[], rng: RandomSource): T =>
-  items[uniformInt(items.length, rng)]!;          // leere Liste: uniformInt wirft RangeError
+export function pick<T>(items: readonly T[], rng: RandomSource): T {
+  const index = uniformInt(items.length, rng);    // leere Liste: uniformInt wirft RangeError
+  for (const [position, item] of items.entries()) {
+    if (position === index) return item;          // ohne `!`, `undefined` bleibt ein gültiges Element
+  }
+  throw new InvariantError('picked index lies within the list');
+}
 ```
 
 Weil die Produktivfunktion nur eine Einstellung der allgemeinen Fassung ist, lässt sich deren Korrektheit exakt nachweisen (Kapitel 14.3).
@@ -1000,7 +1010,9 @@ Zwei eigene SVG-Komponenten: Liniendiagramm der kumulierten Siege und Verteilung
 Für reproduzierbare Tests gibt es unter `tests/support` zwei Testquellen:
 
 - `SeededRandomSource`: ein einfacher Generator mit Startwert (z. B. xoshiro128\*\*), für Abläufe und Eigenschaftstests.
-- `ScriptedRandomSource`: liefert eine vorgegebene Folge von Werten, um gezielt Fälle herzustellen, etwa eine bestimmte Sackgasse oder eine bestimmte Reihenfolge.
+- `ScriptedRandomSource`: liefert eine vorgegebene Folge von Werten, um gezielt Fälle herzustellen, etwa eine bestimmte Sackgasse oder eine bestimmte Reihenfolge. Ist die Folge aufgebraucht, wirft sie einen Fehler; so fällt auf, wenn der Code öfter zieht als erwartet.
+
+Beide Testquellen haben eigene Tests in `tests/support` (Referenzwerte von xoshiro128\*\*, Prüfung der vorgegebenen Werte); das Vitest-Projekt `unit` führt sie mit aus.
 
 Mit ihnen werden unter anderem alle Abnahmekriterien zu LS, PL und SR automatisiert geprüft (NFA-EW-07), darunter die Schlangenreihenfolge, Siedlung und Stadt bei Städte & Ritter, die Abstandsregel, die angrenzende Straße und die Wiederholungsregeln aus Spezifikation 3.1.
 
