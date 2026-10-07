@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.8 |
+| Version | 0.9 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -22,6 +22,7 @@
 | 0.6 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung nach `docs/Umsetzungsplan.md`, Design OP-11 parallel zu I1 und OP-06 vor I5; `core/placement` als erstes Bündel von I2 (19) |
 | 0.7 | 07.10.2026 | Bündel I1-A: Codeskizzen in 6.1 und 6.2 an die Umsetzung angeglichen (`type` statt `interface` nach der ESLint-Regel `consistent-type-definitions`, Dateinamen in camelCase, `pick` ohne `!`); Testquellen über `@tests/…` und Regel `production-not-to-tests` (6.1, 14.2) (PR #11) |
 | 0.8 | 07.10.2026 | Bündel I1-B: Textschlüssel der Spielmodule ohne Abhängigkeit von `i18n` (5.1); Schemaversionen als Liste (Migrationsgerüst), Datenbankklasse ohne `!`, alle Stores ab Version 1 (7.3); Startansicht statt Diagnose unter `#/`, Kopfzeile mit Hauptnavigation (13.1); Abhängigkeiten der Ansichten über `AppDependenciesProvider` (13.2); globales `fake-indexeddb` für Lesehooks in Komponententests (14.1) (PR #12) |
+| 0.9 | 07.10.2026 | Design D-1: OP-11 geklärt; Paletten, Farbschlüssel und wählbare Designs über `data-theme` mit Standard „Holz“ (13.4, 18.2, 19); Einstellung „Design“ in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
 
 ## Inhaltsverzeichnis
 
@@ -234,7 +235,7 @@ Anwendungsdienste setzen Fachlogik und Speicher zu vollständigen Abläufen zusa
 | `BackupService` | Sicherungspunkte anlegen, aufbewahren, wiederherstellen; tägliche Prüfung |
 | `UpdateService` | Update-Status abfragen, Sicherungsdialog, Umschaltung auslösen |
 | `PlatformService` | Installationsstatus, persistenter Speicher, Plattformerkennung |
-| `SettingsService` | Ton, Akzentfarbe, Hinweisstand |
+| `SettingsService` | Ton, Design, Akzentfarbe, Hinweisstand |
 
 ### 4.5 Bezeichner im Code
 
@@ -562,7 +563,7 @@ Eine IndexedDB-Datenbank `boardbrain` mit folgenden Stores (ADR-007):
 | `matches` | `id` | `groupId`, `gameId`, `[groupId+date]` | Partien mit Ergebnis |
 | `snapshots` | `id` | `createdAt`, `reason` | Sicherungspunkte (Kapitel 9) |
 | `session` | `id` | – | Genau ein Eintrag `current` oder leer (Kapitel 10) |
-| `meta` | `key` | – | `settings` (Ton, Akzentfarbe) und `state` (Zeitstempel, Hinweise, Erinnerung) |
+| `meta` | `key` | – | `settings` (Ton, Design, Akzentfarbe) und `state` (Zeitstempel, Hinweise, Erinnerung) |
 
 ```ts
 // infra/db/database.ts (Skizze)
@@ -955,7 +956,7 @@ Ein Rahmen (`AppLayout`) zeigt eine Kopfzeile mit dem App-Namen und der Hauptnav
 | Statistik | Kennzahlen, Rangliste, Diagramme, Filter |
 | Verwaltung | Personen, Gruppen, Spiele, Archiv |
 | Daten | Export, Import mit Entscheidungsdialogen, Sicherung mit Sicherungspunkten und Importliste |
-| Einstellungen | Ton, Akzentfarbe, Version |
+| Einstellungen | Ton, Design, Akzentfarbe, Version |
 | Installation | Anleitung (iOS ausschließlich diese Ansicht im Browser) |
 | Diagnose | Technische Prüfwerte für die Abnahme auf Geräten: Version, sicherer Kontext, Verfügbarkeit von `crypto.randomUUID`, Service Worker und persistentem Speicher, Installationsstatus. Nur über die direkte Adresse `#/diagnose` erreichbar, nicht in der Navigation; entstand im Setup und war im Platzhalter-Release die Startansicht, seit I1-B ist `#/` die Startansicht |
 
@@ -979,7 +980,10 @@ Ein Rahmen (`AppLayout`) zeigt eine Kopfzeile mit dem App-Namen und der Hauptnav
 ### 13.4 Design-Tokens (ADR-018)
 
 - Alle Farben, Abstände, Radien, Schatten und Dauern stehen als CSS-Variablen in `src/ui/styles/tokens.css`.
-- Paletten: Oberflächen im Dunkelmodus (NFA-GB-02), 6 bis 8 Akzentfarben über `data-accent` am Wurzelelement (US-GB-01), 4 Catan-Farben, 12 Gruppenfarben. Die Werte legt die Designphase fest (OP-11).
+- Paletten: 4 Catan-Farben (`--color-catan-‹key›`) und 12 Gruppenfarben (`--color-group-‹key›`), in allen Designs gleich; Rot, Orange, Blau und Weiß der Gruppenfarben verweisen auf die Catan-Töne (FA-PG-07). 6 Akzentfarben mit je einem Flächenwert für weiße Schrift und einem Textwert für dunkle Flächen. Werte aus Design D-1 (OP-11, E-26).
+- Farbschlüssel: Catan `red`, `blue`, `white`, `orange`; Gruppen `red`, `orange`, `yellow`, `lime`, `green`, `teal`, `cyan`, `blue`, `indigo`, `violet`, `pink`, `white`; Akzent `indigo`, `blue`, `teal`, `green`, `amber`, `berry`. Die Reihenfolge der automatischen Vergabe legt `core/model` fest, nicht die Tokens.
+- Designs (NFA-GB-03): Jedes Design ist ein Satz Werte für Oberflächen, Text, Rahmen, Hintergrundbild (`--background-image`) und Standard-Akzent unter `:root[data-theme='‹key›']`. Standard ist `wood` („Holz“, auch unter `:root` ohne Merkmal); dazu `ocean`, `forest`, `glass`. Eine gewählte Akzentfarbe setzt `data-accent` am Wurzelelement und überschreibt den Standard-Akzent, weil ihre Regeln danach stehen. Ein weiteres Design ist ein weiterer Block, ohne Änderung an Komponenten.
+- Alle Designs sind dunkel (NFA-GB-02). Mindestkontrast auf jeder Fläche jedes Designs: 4,5 : 1 für Text, 3 : 1 für Catan- und Gruppenfarben. „Glas“ nutzt durchscheinende Flächen mit Unschärfe; das kostet Rechenleistung und wird in US-GB-01 auf älteren Geräten geprüft.
 - Gespeicherte Farbschlüssel werden über eine Zuordnung in Variablen übersetzt, z. B. `catanColor: 'white'` → `var(--color-catan-white)`.
 - Stylelint verbietet Farbwerte außerhalb von `tokens.css`; ESLint verbietet Farbwerte in TypeScript (NFA-GB-05).
 - Ein späterer Hellmodus (PP-09) ist ein zweiter Satz von Werten für dieselben Variablen.
@@ -1778,7 +1782,7 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | OP-12 | Dauerhafte Adresse der App | Setup – geklärt: ADR-022 |
 | OP-13 | Vorabversionen der echten App vor 1.0 | Umsetzung, nach I2 |
 | OP-06 | Visuelle Gestaltung von Glücksrad, Aufblinken und Klängen | Design |
-| OP-11 | Konkrete Farbwerte der Paletten | Design |
+| OP-11 | Konkrete Farbwerte der Paletten | Design – geklärt: 13.4, Anforderungsdokumentation E-26 |
 
 ---
 
@@ -1786,5 +1790,5 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 
 1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0. *Abgeschlossen am 07.10.2026.*
 2. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10) nach `docs/Umsetzungsplan.md`: zuerst `core/random` mit dem Losbaustein, weil dort die strengsten Prüfkriterien gelten; `core/board` in I1, `core/placement` als erstes Bündel von I2; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
-3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 vor I5.
+3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 vor I5. *OP-11 erledigt am 07.10.2026 (13.4).*
 4. **Nach I2:** Entscheidung über Vorabversionen (OP-13).

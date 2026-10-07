@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.12 |
+| Version | 0.13 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
 | Stand | 07.10.2026 |
 | Sprache | Deutsch |
@@ -26,6 +26,7 @@
 | 0.10 | 07.10.2026 | OP-13 ergänzt: Abnahme auf dem iPhone nur über Geräte von Freunden (PR #2) |
 | 0.11 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung beginnt vor dem Design; OP-11 parallel zu I1, OP-06 vor I5; Verweis auf `docs/Umsetzungsplan.md` (13) |
 | 0.12 | 07.10.2026 | Übersicht über Personen und Gruppen mit Detailansichten (neu FA-VW-06) (PR #13) |
+| 0.13 | 07.10.2026 | Design D-1: OP-11 geklärt (E-26); wählbare Designs mit Standard „Holz“ und Standard-Akzent je Design statt einer einzelnen Akzentfarbe mit Standard Lila (NFA-GB-03) |
 
 ## Inhaltsverzeichnis
 
@@ -370,7 +371,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 |---|---|
 | NFA-GB-01 | Modernes, frisches Erscheinungsbild mit eigenständiger Handschrift, bewusst kein generischer „KI-Look“. |
 | NFA-GB-02 | Version 1 erhält ausschließlich einen Dunkelmodus in angenehmen, mitteldunklen Tönen, kein reines Schwarz. |
-| NFA-GB-03 | Es gibt eine Akzentfarbe, die der Nutzer aus 6 bis 8 vordefinierten Tönen wählen kann. Standard ist ein dunkles Lila. *(präzisiert in 0.4)* |
+| NFA-GB-03 | Das Erscheinungsbild ist über Designs wählbar. Ein Design legt Oberflächen, Text, Hintergrund und eine Standard-Akzentfarbe fest; Catan- und Gruppenfarben sind in allen Designs gleich. Version 1 enthält die Designs „Holz“ (Standard), „Tiefsee“, „Wald“ und „Glas“; weitere Designs lassen sich ohne Umbau ergänzen. Zusätzlich kann der Nutzer die Akzentfarbe aus 6 bis 8 vordefinierten Tönen wählen; ohne Auswahl gilt die Standard-Akzentfarbe des Designs. *(präzisiert in 0.4, geändert in 0.13: vorher eine Akzentfarbe mit Standard Lila)* |
 | NFA-GB-04 | Mikroanimationen wie Hover-Effekte. Auf Touch-Geräten werden gleichwertige Effekte bei Berührung eingesetzt. |
 | NFA-GB-05 | Farben werden zentral als Design-Tokens definiert, damit ein späterer Hellmodus ohne Umbau möglich ist. |
 | NFA-GB-06 | Die Darstellung des Bretts ist eine eigenständige, generische Grafik ohne Verwendung von Original-Grafiken des Spiels. |
@@ -489,6 +490,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-23 | Der Quellcode steht unter der PolyForm Strict License 1.0.0 mit dem Hinweis „Required Notice: Copyright (c) 2026 Jonasss29“; er ist öffentlich einsehbar (E-06), aber nicht Open Source: Nutzung nur für nichtkommerzielle Zwecke, Weitergabe und Änderungen durch Dritte sind nicht erlaubt. Klänge und Schriften behalten ihre eigenen Lizenzen *(neu in 0.8, geändert in 0.9: vorher MIT)* | Der Product Owner behält die Kontrolle über Weitergabe und kommerzielle Nutzung; standardisierter, verständlicher Lizenztext; verträglich mit den Lizenzen der Abhängigkeiten (MIT, ISC, BSD, Apache 2.0 erlauben die Verwendung in nicht offenem Code); enthält einen Haftungsausschluss; Pseudonym statt Klarname |
 | E-24 | Barrierefreiheit ist kein Ziel von Version 1 *(neu in 0.8)* | Die App wird nur im Freundeskreis genutzt. Unberührt bleiben die Erkennbarkeit von Gebäuden und Straßen (FA-PL-05, FA-PL-06, US-PL-04) und die technische Regel, echte Bedienelemente mit Beschriftung zu verwenden (Entwicklungsrichtlinien) |
 | E-25 | Erste Veröffentlichung ist ein Platzhalter (Release 0.1.0) ohne Service Worker und ohne Datenspeicherung; über Vorabversionen der echten App vor 1.0 wird nach Inkrement I2 entschieden (OP-13) *(neu in 0.8)* | Die Veröffentlichungskette wird früh auf der echten Adresse nachgewiesen, ohne dass etwas auf den Geräten zurückbleibt |
+| E-26 | Farbwerte nach Design D-1: Standarddesign „Holz“ (warmes, mitteldunkles Braun, Akzent Bernstein); weitere Designs „Tiefsee“ (Petrol), „Wald“ (Grüngrau) und „Glas“ (Farbverlauf mit Milchglasflächen); kräftige Catan-Farben und eine gedeckte Gruppenfarben-Palette; 6 Akzentfarben (Indigo, Blau, Petrol, Grün, Bernstein, Beere). Die Werte stehen ausschließlich in `src/ui/styles/tokens.css` *(neu in 0.13)* | Auswahl des Product Owners anhand einer Vorschau auf den Abnahmegeräten; alle Werte erreichen in allen Designs mindestens 4,5 : 1 für Text und 3 : 1 für Catan- und Gruppenfarben, sodass die Spielfarben unabhängig vom Design lesbar bleiben |
 
 ---
 
@@ -506,7 +508,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | OP-08 | Verhalten der Standardfarben bei Personen in mehreren Gruppen und bei Farbkonflikten innerhalb einer Partie | Spezifikation | geklärt: FA-PG-05 bis -08, Spezifikation 3.3 |
 | OP-09 | Persistenz des Speichers unter iOS (Installation auf dem Home-Bildschirm erforderlich) | Architektur | geklärt: E-17, FA-IS-01 bis -03, Architektur ADR-016 |
 | OP-10 | Priorisierung aller Anforderungen nach MoSCoW und Festlegung des Umfangs von Version 1 | Spezifikation | geklärt: E-10, Spezifikation Kapitel 2 |
-| OP-11 | Konkrete Farbwerte der Catan-Farben, der Gruppenfarben-Palette und der Akzentfarben unter Berücksichtigung der Lesbarkeit im Dunkelmodus | Design | offen |
+| OP-11 | Konkrete Farbwerte der Catan-Farben, der Gruppenfarben-Palette und der Akzentfarben unter Berücksichtigung der Lesbarkeit im Dunkelmodus | Design | geklärt: E-26, NFA-GB-03, Architektur 13.4 |
 | OP-12 | Dauerhafte Adresse (Herkunft) der App: eigene GitHub-Organisation mit eigener Herkunft (Empfehlung) oder Projektseite unter dem persönlichen Konto. Ein späterer Wechsel trennt die Nutzer von ihren Daten. | Setup | geklärt: E-21, Architektur ADR-022 |
 | OP-13 | Veröffentlichung von Vorabversionen der echten App (0.x) vor Release 1.0, etwa für Test-Spieleabende außerhalb des Heimnetzes. Erfordert eine Festlegung zum Umgang mit Daten aus Vorabversionen und einen funktionierenden Update-Mechanismus. Zusätzlich gilt: Der Product Owner besitzt kein eigenes iPhone; die Abnahme auf dem iPhone (NFA-PL-01) ist nur über Geräte von Freunden möglich. Vorabversionen unter der echten Adresse würden das erleichtern, weil dafür kein lokales Zertifikat auf fremden Geräten nötig ist. *(neu in 0.8, präzisiert in 0.10)* | Umsetzung (nach I2) | offen |
 
@@ -544,5 +546,5 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 
 1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08) – *abgeschlossen am 07.10.2026 mit Release 0.1.0*
 2. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10); Reihenfolge, Zuschnitt und Ablauf in `docs/Umsetzungsplan.md`
-3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) vor Inkrement I5. Beides blockiert die vorherigen Inkremente nicht, weil Farbwerte nur in den Design-Tokens stehen und die Inszenierung erst in I5 umgesetzt wird
+3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) vor Inkrement I5. Beides blockiert die vorherigen Inkremente nicht, weil Farbwerte nur in den Design-Tokens stehen und die Inszenierung erst in I5 umgesetzt wird – *OP-11 erledigt am 07.10.2026 (E-26)*
 4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13)
