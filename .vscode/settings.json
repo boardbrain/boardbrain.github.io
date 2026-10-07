@@ -1,0 +1,14 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[markdown]": {
+    "editor.formatOnSave": false
+  },
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "css.validate": false,
+  "stylelint.validate": ["css"],
+  "eslint.validate": ["javascript", "typescript", "typescriptreact"],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}

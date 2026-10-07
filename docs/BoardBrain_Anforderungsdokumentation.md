@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.9 |
+| Version | 0.10 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
 | Stand | 06.10.2026 |
 | Sprache | Deutsch |
@@ -23,6 +23,7 @@
 | 0.7 | 06.10.2026 | Ergebnisse der Architekturphase: Vollsicherung einschließlich Einstellungen (FA-EI-02, -05, -09, -10); Austausch über Teilen-Menü bzw. Download, kein QR-Code (FA-EI-12); Konfliktregeln beim Import präzisiert (FA-EI-03, -11); Sperren während einer laufenden Partie (FA-AB-09); erneutes Abspielen einer unterbrochenen Animation (FA-AB-07); Sicherungspunkte vor Updates, Tagesregel und Umfang (FA-DS-04, -07); Sicherungsdialog vor jedem Update und Update nur nach ausdrücklicher Bestätigung (FA-UP-02, -03); Installation und Speicherschutz (neu 5.14, FA-IS-01 bis -03); Ton respektiert die Stummschaltung (FA-IN-07); Brettumriss einheitlich „spitz“ (FA-PL-07); Zufall und Abnahmeplattformen präzisiert (NFA-ZF-01, -02, NFA-PL-01); lokales Testen über HTTPS (EP-06); OP-01, OP-02, OP-09 geklärt; neue Entscheidungen E-14 bis E-20; neuer offener Punkt OP-12 |
 | 0.8 | 06.10.2026 | Ergebnisse der Setup-Planung: OP-12 geklärt (E-21, Adresse `https://boardbrain.github.io/`); Arbeitsweise mit Story-Bündeln, Haltepunkten und Abnahme durch den Product Owner (neu EP-10 bis EP-12, E-22); `main` vor Release 1.0 nur mit Platzhalter (EP-02 präzisiert, E-25); Arbeitsbranches und Pull Requests präzisiert (EP-03, EP-04); Lizenz MIT (E-23); Barrierefreiheit ausdrücklich kein Ziel von Version 1 (E-24); Modelleinsatz für Setup und kritische Teile ergänzt (9.3); neuer offener Punkt OP-13 (Vorabversionen) |
 | 0.9 | 06.10.2026 | Lizenz von MIT auf PolyForm Strict License 1.0.0 geändert (E-23) (PR #1) |
+| 0.10 | 07.10.2026 | OP-13 ergänzt: Abnahme auf dem iPhone nur über Geräte von Freunden (PR #2) |
 
 ## Inhaltsverzeichnis
 
@@ -504,7 +505,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | OP-10 | Priorisierung aller Anforderungen nach MoSCoW und Festlegung des Umfangs von Version 1 | Spezifikation | geklärt: E-10, Spezifikation Kapitel 2 |
 | OP-11 | Konkrete Farbwerte der Catan-Farben, der Gruppenfarben-Palette und der Akzentfarben unter Berücksichtigung der Lesbarkeit im Dunkelmodus | Design | offen |
 | OP-12 | Dauerhafte Adresse (Herkunft) der App: eigene GitHub-Organisation mit eigener Herkunft (Empfehlung) oder Projektseite unter dem persönlichen Konto. Ein späterer Wechsel trennt die Nutzer von ihren Daten. | Setup | geklärt: E-21, Architektur ADR-022 |
-| OP-13 | Veröffentlichung von Vorabversionen der echten App (0.x) vor Release 1.0, etwa für Test-Spieleabende außerhalb des Heimnetzes. Erfordert eine Festlegung zum Umgang mit Daten aus Vorabversionen und einen funktionierenden Update-Mechanismus. *(neu in 0.8)* | Umsetzung (nach I2) | offen |
+| OP-13 | Veröffentlichung von Vorabversionen der echten App (0.x) vor Release 1.0, etwa für Test-Spieleabende außerhalb des Heimnetzes. Erfordert eine Festlegung zum Umgang mit Daten aus Vorabversionen und einen funktionierenden Update-Mechanismus. Zusätzlich gilt: Der Product Owner besitzt kein eigenes iPhone; die Abnahme auf dem iPhone (NFA-PL-01) ist nur über Geräte von Freunden möglich. Vorabversionen unter der echten Adresse würden das erleichtern, weil dafür kein lokales Zertifikat auf fremden Geräten nötig ist. *(neu in 0.8, präzisiert in 0.10)* | Umsetzung (nach I2) | offen |
 
 ---
 

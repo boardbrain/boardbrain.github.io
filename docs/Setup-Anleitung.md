@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Schritt-für-Schritt-Anleitung für die Einrichtung |
-| Version | 0.2 |
+| Version | 0.3 |
 | Stand | 06.10.2026 |
 | Grundlage | BoardBrain_Architektur.md v0.2 (Kapitel 16), Entwicklungsrichtlinien.md v0.1 |
 | Abschlusskriterium | Alle Punkte in `Setup-DoD.md` erfüllt |
@@ -16,6 +16,7 @@
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
 | 0.2 | 06.10.2026 | Lizenz in I2 von MIT auf PolyForm Strict License 1.0.0 geändert (Anforderungsdokumentation E-23) (PR #1) |
+| 0.3 | 07.10.2026 | Node.js 26 (B2); kein eigenes iPhone: Zertifikat nur auf dem iPad, iPhone nur für die veröffentlichte App über das Gerät eines Freundes (E3, F2, F3, I4, I10, Hilfe) (PR #2) |
 
 ## So liest du diese Anleitung
 
@@ -76,14 +77,14 @@ node -v
 | Ergebnis | Vorgehen |
 |---|---|
 | Fehlermeldung „nicht erkannt“ | Node.js ist nicht installiert: weiter mit dem Installationsbefehl unten |
-| `v24.…` | Passt, Installationsbefehl überspringen |
+| `v26.…` | Passt, Installationsbefehl überspringen |
 | Eine andere Version | Unter *Einstellungen → Apps → Installierte Apps* „Node.js“ deinstallieren, dann den Installationsbefehl ausführen |
 
 ```powershell
 winget install --id OpenJS.NodeJS.LTS -e
 ```
 
-Hinweis: Der Befehl installiert die jeweils aktuelle LTS-Version. Im Oktober 2026 wechselt die LTS-Einstufung von Node.js 24 auf 26. Installiert winget bei dir bereits 26, ist das in Ordnung; Claude Code trägt dann die tatsächlich installierte Hauptversion ins Projekt ein.
+Hinweis: Das Projekt nutzt Node.js 26 (Entscheidung des Product Owners im Setup, `.nvmrc`). Bis Node.js 26 als LTS eingestuft ist (voraussichtlich Ende Oktober 2026), installiert der Befehl oben noch Node.js 24; nimm in dieser Zeit stattdessen `winget install --id OpenJS.NodeJS -e`. Aktualisieren: `winget upgrade --id OpenJS.NodeJS -e`.
 
 ### B3 Git, GitHub CLI, mkcert und Chrome installieren
 
@@ -223,7 +224,7 @@ Der Ordner der Zertifizierungsstelle öffnet sich. Er enthält zwei Dateien:
 | `rootCA.pem` | Kommt auf die Mobilgeräte |
 | `rootCA-key.pem` | **Bleibt hier. Niemals kopieren.** |
 
-Kopiere **nur** `rootCA.pem` auf den Desktop und benenne die Kopie um in `boardbrain-dev-ca.crt`. Die Endung `.crt` erkennen Android und iOS zuverlässiger.
+Kopiere **nur** `rootCA.pem` auf den Desktop und benenne die Kopie um in `boardbrain-dev-ca.crt`. Die Endung `.crt` erkennen Android und iPadOS zuverlässiger.
 
 ---
 
@@ -236,9 +237,9 @@ Kopiere **nur** `rootCA.pem` auf den Desktop und benenne die Kopie um in `boardb
 3. Die Warnung bestätigst du mit **Trotzdem installieren** und wählst die Datei aus.
 4. Kontrolle: Unter *Vertrauenswürdige Anmeldedaten → Nutzer* steht ein Eintrag „mkcert …“.
 
-### F2 iPhone und iPad (Safari)
+### F2 iPad (Safari)
 
-Führe die Schritte auf beiden Geräten aus.
+Ein eigenes iPhone gibt es nicht. Installiere das Zertifikat **nie auf fremden Geräten**, etwa dem iPhone eines Freundes: Wer den Schlüssel deiner Zertifizierungsstelle hätte, könnte dessen Verbindungen mitlesen. Auf einem geliehenen iPhone wird nur die veröffentlichte App unter `https://boardbrain.github.io/` geprüft (I10), dafür ist kein Zertifikat nötig.
 
 1. Schicke `boardbrain-dev-ca.crt` per Mail an dich selbst und öffne den Anhang in der App **Mail** von Apple. Alternativ: in iCloud Drive hochladen und in der App **Dateien** antippen.
 2. Es erscheint „Profil geladen“. Tippe auf **Schließen**.
@@ -249,7 +250,7 @@ Ohne Schritt 4 vertraut Safari dem Zertifikat nicht.
 
 ### F3 Später wieder entfernen
 
-Wenn das Projekt ruht: Android unter *Vertrauenswürdige Anmeldedaten → Nutzer* den Eintrag entfernen; iOS unter *VPN und Geräteverwaltung* das Profil löschen; Windows mit `mkcert -uninstall`.
+Wenn das Projekt ruht: Android unter *Vertrauenswürdige Anmeldedaten → Nutzer* den Eintrag entfernen; iPadOS unter *VPN und Geräteverwaltung* das Profil löschen; Windows mit `mkcert -uninstall`.
 
 ---
 
@@ -356,7 +357,7 @@ Claude Code arbeitet in Etappen und hält nach jeder an. Die folgende Übersicht
 - **[CLAUDE CODE]** startet den Entwicklungsserver und nennt dir die Adressen.
 - **[DU]**:
   1. Am PC in Brave: `https://localhost:5173/#/diagnose`
-  2. Auf Android in Brave sowie auf iPhone und iPad in Safari: `https://‹DEINE-IP›:5173/#/diagnose`
+  2. Auf Android in Brave sowie auf dem iPad in Safari: `https://‹DEINE-IP›:5173/#/diagnose`
   3. Fragt Windows beim ersten Start, ob Node.js im Netzwerk erreichbar sein darf: nur **Private Netzwerke** erlauben.
   4. Auf allen Geräten: keine Zertifikatswarnung, alle Prüfwerte grün.
 
@@ -415,7 +416,7 @@ Jetzt, wo die Prüfungen einmal gelaufen sind, kennt GitHub ihre Namen.
 
 ### I10 Veröffentlichung prüfen
 
-- **[DU]** auf PC, Android, iPhone und iPad: `https://boardbrain.github.io/` öffnen. Die Diagnoseansicht erscheint ohne Warnung.
+- **[DU]** auf PC, Android und iPad: `https://boardbrain.github.io/` öffnen. Die Diagnoseansicht erscheint ohne Warnung. Optional zusätzlich auf dem iPhone eines Freundes in Safari.
 - **[DU]** am PC in Brave: Entwicklertools (F12) → **Application → Service Workers**: Es ist **kein** Service Worker registriert. Unter **Elements** steht im `<head>` das Meta-Tag `Content-Security-Policy`.
 
 ### I11 Abschluss
@@ -437,6 +438,6 @@ Damit ist das Setup abgeschlossen. Nächster Schritt: Design (OP-06, OP-11) oder
 | Ein Befehl wird nach der Installation „nicht erkannt“ | Terminal schließen und neu öffnen; bei VS Code das ganze Programm neu starten |
 | `gh` kann nicht auf `boardbrain/boardbrain.github.io` zugreifen | Unter GitHub → Settings → Applications → Authorized OAuth Apps → GitHub CLI den Zugriff für die Organisation **boardbrain** gewähren; oder `gh auth login` wiederholen und auf **Grant** achten |
 | Push wird mit „workflow scope“ abgelehnt | `gh auth refresh --scopes workflow` |
-| Handy zeigt Zertifikatswarnung | Unter iOS die Zertifikatsvertrauenseinstellung (F2, Schritt 4) prüfen; IP-Adresse in `ipconfig` mit der im Zertifikat vergleichen (E2) |
+| Handy oder Tablet zeigt Zertifikatswarnung | Unter iPadOS die Zertifikatsvertrauenseinstellung (F2, Schritt 4) prüfen; IP-Adresse in `ipconfig` mit der im Zertifikat vergleichen (E2) |
 | Handy erreicht den PC nicht | Gleiches WLAN? Netzwerk in Windows „Privat“ (D2)? Firewall-Abfrage für Node.js erlaubt? |
 | Prüfung auf GitHub rot, lokal grün | Claude Code den Link zum fehlgeschlagenen Lauf geben; häufig Zeilenenden oder fehlende Dateien im Commit |

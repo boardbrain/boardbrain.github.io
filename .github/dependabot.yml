@@ -1,0 +1,25 @@
+# Dependency updates (Development Guidelines 10.3): monthly, minor updates grouped, target
+# develop, title prefix deps. Security updates arrive immediately regardless.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: deps
+    groups:
+      minor:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: deps
+    groups:
+      actions:
+        update-types: [minor, patch]
