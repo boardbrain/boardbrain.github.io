@@ -103,6 +103,14 @@ module.exports = {
       to: { path: '^src/', pathNot: '^src/sw/' },
     },
     {
+      name: 'production-not-to-tests',
+      severity: 'error',
+      comment:
+        'Deterministic random sources and other test helpers only in test code (NFA-ZF-01, Architecture 6.1).',
+      from: { path: '^src/', pathNot: TEST_FILE },
+      to: { path: '^tests/' },
+    },
+    {
       name: 'dexie-only-in-infra-db',
       severity: 'error',
       comment: 'Dexie only in infra/db (Architecture 4.4, 7.3).',
