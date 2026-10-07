@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.5 |
+| Version | 0.6 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 06.10.2026 |
+| Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -19,6 +19,7 @@
 | 0.3 | 05.10.2026 | Zuordnungen beim Import stets manuell, ohne Vorbelegung und ohne Speicherung; Auswahl einzelner Partien beim Export auf eine Gruppe beschränkt (gruppenübergreifend geparkt als PP-19) |
 | 0.4 | 06.10.2026 | Ergebnisse der Architekturphase: „Alle Daten“ wird zur Vollsicherung mit Einstellungen (US-EI-01, US-EI-02, US-EI-03, US-EI-07, 3.9, 3.11); Sicherungspunkt erst unmittelbar vor der Übernahme eines Imports (US-EI-03 AK-1); Konfliktregeln präzisiert (US-EI-04, US-EI-05, 3.9); Sperren während einer laufenden Partie (3.5, US-VW-02, US-VW-03, US-EI-03, US-DS-02); unterbrochene Animation wird erneut abgespielt (US-AB-05); Sicherungspunkte vor Updates, Tagesregel und Umfang (3.10, US-DS-01, US-DS-02); Update nur nach Bestätigung und Sicherungsdialog (neu 3.12, US-UP-01, neu US-UP-02); Installation und Speicherschutz (neu 3.13, neu US-IS-01 bis US-IS-03, US-DS-04); Ton respektiert die Stummschaltung (US-IN-03); Prüfkriterien und Abnahmeplattformen präzisiert (Kapitel 5); Kapitel 8 auf das Ergebnis der Architekturphase umgestellt |
 | 0.5 | 06.10.2026 | Ergebnisse der Setup-Planung: Bezug auf Anforderungsdokumentation v0.8; Umsetzung in Story-Bündeln und Platzhalter-Release 0.1.0 vor 1.0 (2.3); Hinweis zur Barrierefreiheit (Kapitel 5, E-24); Kapitel 8 um die Ergebnisse der Setup-Planung ergänzt (OP-12 geklärt, OP-13 neu) |
+| 0.6 | 07.10.2026 | Neue Story US-VW-05 „Personen und Gruppen im Überblick“ (Must, I1) zu FA-VW-06 (2.3, 2.5, 4.3, 6) (PR #13) |
 
 ## Inhaltsverzeichnis
 
@@ -74,7 +75,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 
 | Inkrement | Inhalt | Ergebnis |
 |---|---|---|
-| I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Brettdarstellung, Losbaustein | Stammdaten anlegbar, Brett sichtbar |
+| I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Brettdarstellung, Losbaustein | Stammdaten anlegbar, Brett sichtbar |
 | I2 Generierung | Ablauf, Losschritte, Platzierung | Vollständige Generierung ohne Inszenierung, am Spieleabend testbar |
 | I3 Ergebnisse und Statistik | Ergebniserfassung, Ergebnisliste, Kennzahlen, Rangliste | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung und Export, Import mit Konflikten und Zuordnung, Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS, Speicherschutz | Daten sicher und teilbar |
@@ -103,6 +104,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-VW-02 | Gruppe bearbeiten | S | I5 |
 | US-VW-03 | Gruppe archivieren, wiederbeleben und löschen | S | I5 |
 | US-VW-04 | Eigenes Spiel bearbeiten, archivieren und löschen | S | I5 |
+| US-VW-05 | Personen und Gruppen im Überblick | M | I1 |
 | US-AB-01 | Partie vorbereiten | M | I2 |
 | US-AB-02 | Schritte einzeln bestätigen | M | I2 |
 | US-AB-03 | Schritt wiederholen | M | I2 |
@@ -149,7 +151,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-IS-03 | Persistenten Speicher sicherstellen | M | I4 |
 | US-GB-01 | Akzentfarbe wählen | C | I6 |
 
-Summe: 57 User Stories (35 Must, 18 Should, 4 Could).
+Summe: 58 User Stories (36 Must, 18 Should, 4 Could).
 
 ---
 
@@ -476,6 +478,16 @@ Bezug: FA-VW-04, FA-VW-05
 - **AK-3:** Gegeben ein eigenes Spiel mit Ergebnissen, wenn ich es löschen will, dann verhindert die App das und bietet stattdessen das Archivieren an.
 - **AK-4:** Gegeben ein archiviertes Spiel, dann erscheint es nicht in der Auswahl für neue Ergebnisse oder Gruppen; bestehende Daten und Statistiken bleiben erhalten, und ich kann es reaktivieren.
 - **AK-5:** Gegeben Catan, dann gibt es weder Umbenennen noch Archivieren noch Löschen.
+
+#### US-VW-05 Personen und Gruppen im Überblick · M
+Als Nutzer möchte ich sehen, wer in welcher Gruppe ist, und von dort zu Personen und Gruppen springen, damit ich Zusammensetzung und Farben jederzeit nachsehen kann.
+Bezug: FA-VW-06
+
+- **AK-1:** Gegeben die Personenliste, dann zeigt sie zu jeder Person die Namen ihrer Gruppen oder einen Hinweis, dass sie keiner Gruppe angehört.
+- **AK-2:** Gegeben die Personenliste, wenn ich eine Person antippe, dann öffnet sich ihre Detailansicht mit Name und Gruppen.
+- **AK-3:** Gegeben die Verwaltung, dann gibt es eine Gruppenliste. Wenn ich dort oder in der Detailansicht einer Person eine Gruppe antippe, dann öffnet sich die Detailansicht der Gruppe mit Name, Bindung (global oder Spiel), Mitgliedern und deren Farben (→ 3.3).
+- **AK-4:** Gegeben die Detailansicht einer Gruppe, wenn ich ein Mitglied antippe, dann öffnet sich die Detailansicht dieser Person.
+- **AK-5:** Gegeben eine Detailansicht, wenn ich „Zurück“ wähle (auch die Zurück-Taste unter Android), dann komme ich zur vorherigen Ansicht.
 
 ### 4.4 Ablauf einer Partie (AB)
 
@@ -943,6 +955,7 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-VW-03 | US-VW-03 |
 | FA-VW-04 | US-VW-04 |
 | FA-VW-05 | US-VW-01, US-VW-03, US-VW-04 |
+| FA-VW-06 | US-VW-05 |
 | FA-AB-01 | US-SP-01, US-AB-01 |
 | FA-AB-02 | US-SP-04, US-AB-01 |
 | FA-AB-03 | US-AB-02 |
