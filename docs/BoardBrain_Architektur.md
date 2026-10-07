@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.5 |
+| Version | 0.6 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -18,7 +18,8 @@
 | 0.2 | 06.10.2026 | Ergebnisse der Setup-Planung: ADR-022 angenommen (`https://boardbrain.github.io/`); neue ADR-023 (Branch- und Release-Modell), ADR-024 (Prettier), ADR-025 (Fehlerbehandlung); Stack um Formatierer, Prüfwerkzeuge und Node.js-Version ergänzt (3.1); Modul `core/shared` (4.3); Fehlerbehandlung (neu 4.6); Content-Security-Policy als Meta-Tag (12.4); Diagnoseansicht (13.1); CSS-Animationen verboten (13.6); Teststrategie präzisiert (14.1, 14.5, 14.6); Ordnerstruktur vervollständigt (15); Kapitel 16 neu gefasst (Werkzeuge, Befehle, Branches und Auslieferung, `CLAUDE.md`, Claude Code, lokales HTTPS); Risiken und offene Punkte aktualisiert (18); nächste Schritte (19) |
 | 0.3 | 06.10.2026 | Lizenz in der Ordnerstruktur auf PolyForm Strict License 1.0.0 geändert (15; Anforderungsdokumentation E-23) (PR #1) |
 | 0.4 | 07.10.2026 | Ergebnisse des Setups: Node.js 26 statt 24 (3.1, 16.1); TypeScript 6, React Compiler über `@rolldown/plugin-babel` (3.1); ESLint 10 ohne `eslint-plugin-react`, Ersatzregeln über `no-restricted-syntax` (neu ADR-026; 3.1, 13.3, 14.7, ADR-018); Markdown von Prettier ausgenommen (3.1); Ende-zu-Ende-Tests lokal über HTTPS mit ignorierten Zertifikatsfehlern (14.5); `tsconfig.node.json` (15); Berechtigungen für PowerShell und keine Hinweise auf Claude in Commits und Pull Requests (16.5); Zertifizierungsstelle nicht auf dem iPhone (16.6); Code durchgehend englisch, auch Kommentare und Testnamen (neu ADR-027; 4.5, 16.4, ADR-008) (PR #2) |
-| 0.5 | 07.10.2026 | Job `e2e` im offiziellen Playwright-Container statt Browserinstallation auf dem Runner; Vorjob `playwright-version` liest den Tag aus `package-lock.json` (16.3) |
+| 0.5 | 07.10.2026 | Job `e2e` im offiziellen Playwright-Container statt Browserinstallation auf dem Runner; Vorjob `playwright-version` liest den Tag aus `package-lock.json` (16.3) (PR #6) |
+| 0.6 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung nach `docs/Umsetzungsplan.md`, Design OP-11 parallel zu I1 und OP-06 vor I5; `core/placement` als erstes Bündel von I2 (19) |
 
 ## Inhaltsverzeichnis
 
@@ -1751,7 +1752,7 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 
 ## 19. Nächste Schritte
 
-1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0.
-2. **Design:** OP-06 und OP-11.
-3. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10): zuerst `core/random`, `core/board` und `core/placement` mit ihren Tests, weil dort die strengsten Prüfkriterien gelten; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
+1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0. *Abgeschlossen am 07.10.2026.*
+2. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10) nach `docs/Umsetzungsplan.md`: zuerst `core/random` mit dem Losbaustein, weil dort die strengsten Prüfkriterien gelten; `core/board` in I1, `core/placement` als erstes Bündel von I2; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
+3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 vor I5.
 4. **Nach I2:** Entscheidung über Vorabversionen (OP-13).

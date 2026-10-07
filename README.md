@@ -14,6 +14,7 @@ Die gesamte Projektdokumentation liegt in [`docs/`](docs/):
 | [Spezifikation](docs/BoardBrain_Spezifikation.md) | User Stories und Abnahmekriterien |
 | [Architektur](docs/BoardBrain_Architektur.md) | Technische Umsetzung und Architekturentscheidungen |
 | [Entwicklungsrichtlinien](docs/Entwicklungsrichtlinien.md) | Verbindliche Arbeitsregeln |
+| [Umsetzungsplan](docs/Umsetzungsplan.md) | Reihenfolge, Story-Bündel und Ablauf der Umsetzung |
 | [Setup-Anleitung](docs/Setup-Anleitung.md), [Setup-DoD](docs/Setup-DoD.md) | Einrichtung der Entwicklungsumgebung und deren Nachweis |
 
 Änderungen je Version stehen in [`CHANGELOG.md`](CHANGELOG.md).
