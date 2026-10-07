@@ -31,31 +31,49 @@ jobs:
       - name: Vulnerabilities in production dependencies
         run: npm audit --omit=dev --audit-level=high
 
-  e2e:
+  # Reads the installed Playwright version from the lock file, so the container image below
+  # always matches it exactly and cannot drift after a dependency update.
+  playwright-version:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.read.outputs.version }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: package-lock.json
+          sparse-checkout-cone-mode: false
+      - name: Read Playwright version from package-lock.json
+        id: read
+        run: |
+          version=$(jq -r '.packages["node_modules/@playwright/test"].version' package-lock.json)
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Unexpected Playwright version in package-lock.json: $version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  # Runs in the official Playwright image: browsers and their system packages are preinstalled,
+  # so no download and no apt-get (which has hung on the runners before).
+  e2e:
+    needs: playwright-version
+    # Run even if playwright-version failed: a skipped required check would count as passed,
+    # whereas a missing version yields an invalid image and makes this job fail.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.playwright-version.outputs.version }}-noble
+      # Run as the runner user, as recommended by Playwright for GitHub Actions
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v7
+      # The image ships its own Node.js; the project needs the version from .nvmrc
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - name: Determine Playwright version
-        id: playwright
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - name: Playwright browsers from cache
-        id: playwright-cache
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium webkit
-      - name: Install system packages for the browsers
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium webkit
       - run: npm run build
       - run: npm run test:e2e
       - name: Keep report on failure
