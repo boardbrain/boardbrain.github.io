@@ -10,7 +10,9 @@ html {
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   color: var(--color-text);
-  background: var(--color-surface);
+  background-color: var(--color-surface);
+  background-image: var(--background-image);
+  background-repeat: no-repeat;
   text-size-adjust: 100%;
 }
 
@@ -27,14 +29,14 @@ h2 {
 }
 
 a {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 
 button {
   min-height: var(--touch-target-min);
   padding: var(--space-2) var(--space-4);
   font: inherit;
-  color: var(--color-surface);
+  color: var(--color-on-accent);
   background: var(--color-accent);
   border: 0;
   border-radius: var(--radius-2);
