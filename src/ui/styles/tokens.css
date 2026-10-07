@@ -1,25 +1,51 @@
 /*
  * Design tokens (Architecture 13.4, ADR-018). The only file with colour values (NFA-GB-05).
- * Placeholder values in dark mode (NFA-GB-02); the design phase sets the final palettes (OP-11).
+ * Colour values from design D-1 (OP-11, E-26). Contrast on every surface of every design:
+ * text at least 4.5:1, Catan and group colours at least 3:1.
  */
 :root {
   color-scheme: dark;
 
-  /* Surfaces and text */
-  --color-surface: #15171c;
-  --color-surface-raised: #1f2229;
-  --color-border: #30343d;
-  --color-text: #e8eaed;
-  --color-text-muted: #a0a6b0;
+  /* Catan colours (Specification 3.3): the same in every design */
+  --color-catan-red: #ef5359;
+  --color-catan-blue: #4189f5;
+  --color-catan-white: #f1f1f4;
+  --color-catan-orange: #f5852b;
+
+  /* Group colours (Specification 3.3, A-01): 12 colours; red, orange, blue, white = Catan tones (FA-PG-07) */
+  --color-group-red: var(--color-catan-red);
+  --color-group-orange: var(--color-catan-orange);
+  --color-group-yellow: #e6cb72;
+  --color-group-lime: #b4d272;
+  --color-group-green: #74cf9c;
+  --color-group-teal: #5fbfb2;
+  --color-group-cyan: #73c8e3;
+  --color-group-blue: var(--color-catan-blue);
+  --color-group-indigo: #959aea;
+  --color-group-violet: #bb98e8;
+  --color-group-pink: #e693c1;
+  --color-group-white: var(--color-catan-white);
+
+  /* Accent palette (NFA-GB-03): fill carries --color-on-accent text, text variant sits on surfaces */
+  --color-accent-indigo: #4f46e5;
+  --color-accent-indigo-text: #a5a8ff;
+  --color-accent-blue: #2563eb;
+  --color-accent-blue-text: #86b4ff;
+  --color-accent-teal: #0f766e;
+  --color-accent-teal-text: #5fd4c4;
+  --color-accent-green: #15803d;
+  --color-accent-green-text: #6fd99a;
+  --color-accent-amber: #b45309;
+  --color-accent-amber-text: #f5be5b;
+  --color-accent-berry: #a8336a;
+  --color-accent-berry-text: #e79ac0;
+  --color-on-accent: #fff;
 
   /* States */
-  --color-status-ok: #3fcf73;
-  --color-status-error: #ff6b6b;
-  --color-status-warning: #f2c94c;
-  --color-status-info: #8ab4f8;
-
-  /* Accent (later 6 to 8 variants via data-accent, US-GB-01) */
-  --color-accent: #f2a541;
+  --color-status-ok: #4ade80;
+  --color-status-error: #fc8585;
+  --color-status-warning: #fbbf24;
+  --color-status-info: #60a5fa;
 
   /* Typography */
   --font-family-base: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
@@ -42,4 +68,92 @@
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/*
+ * Designs (NFA-GB-02, NFA-GB-03): surfaces, text, background and default accent.
+ * "Holz" is the default; switching via data-theme follows with US-GB-01.
+ */
+:root,
+:root[data-theme='wood'] {
+  --color-surface: #231d18;
+  --color-surface-raised: #2d2620;
+  --color-surface-overlay: #383028;
+  --color-border: #4b4036;
+  --color-text: #f4ece1;
+  --color-text-muted: #b8ab9b;
+  --background-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+  --color-accent: var(--color-accent-amber);
+  --color-accent-text: var(--color-accent-amber-text);
+}
+
+:root[data-theme='ocean'] {
+  --color-surface: #10232c;
+  --color-surface-raised: #17303b;
+  --color-surface-overlay: #1f3c49;
+  --color-border: #2d5262;
+  --color-text: #e6f4f7;
+  --color-text-muted: #98b8c2;
+  --background-image: linear-gradient(180deg, #17404e 0%, #10232c 45%);
+  --color-accent: var(--color-accent-teal);
+  --color-accent-text: var(--color-accent-teal-text);
+}
+
+:root[data-theme='forest'] {
+  --color-surface: #1b221e;
+  --color-surface-raised: #232c27;
+  --color-surface-overlay: #2c3731;
+  --color-border: #3b4941;
+  --color-text: #e9f0ea;
+  --color-text-muted: #a5b4aa;
+  --background-image: none;
+  --color-accent: var(--color-accent-green);
+  --color-accent-text: var(--color-accent-green-text);
+}
+
+/* Glass: frosted surfaces over a colour gradient; the blur costs performance on older devices. */
+:root[data-theme='glass'] {
+  --color-surface: #161a2e;
+  --color-surface-raised: #232845;
+  --color-surface-overlay: #2b3152;
+  --color-border: #ffffff26;
+  --color-text: #f1f2fa;
+  --color-text-muted: #aeb3cf;
+  --background-image:
+    radial-gradient(circle at 15% 5%, #4338ca80 0%, transparent 40%),
+    radial-gradient(circle at 90% 35%, #0e749080 0%, transparent 40%),
+    radial-gradient(circle at 40% 100%, #9d174d66 0%, transparent 45%);
+  --color-accent: var(--color-accent-indigo);
+  --color-accent-text: var(--color-accent-indigo-text);
+}
+
+/* Chosen accent overrides the default accent of the design (US-GB-01). */
+:root[data-accent='indigo'] {
+  --color-accent: var(--color-accent-indigo);
+  --color-accent-text: var(--color-accent-indigo-text);
+}
+
+:root[data-accent='blue'] {
+  --color-accent: var(--color-accent-blue);
+  --color-accent-text: var(--color-accent-blue-text);
+}
+
+:root[data-accent='teal'] {
+  --color-accent: var(--color-accent-teal);
+  --color-accent-text: var(--color-accent-teal-text);
+}
+
+:root[data-accent='green'] {
+  --color-accent: var(--color-accent-green);
+  --color-accent-text: var(--color-accent-green-text);
+}
+
+:root[data-accent='amber'] {
+  --color-accent: var(--color-accent-amber);
+  --color-accent-text: var(--color-accent-amber-text);
+}
+
+:root[data-accent='berry'] {
+  --color-accent: var(--color-accent-berry);
+  --color-accent-text: var(--color-accent-berry-text);
 }

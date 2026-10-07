@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.6 |
+| Version | 0.7 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
@@ -20,6 +20,7 @@
 | 0.4 | 06.10.2026 | Ergebnisse der Architekturphase: „Alle Daten“ wird zur Vollsicherung mit Einstellungen (US-EI-01, US-EI-02, US-EI-03, US-EI-07, 3.9, 3.11); Sicherungspunkt erst unmittelbar vor der Übernahme eines Imports (US-EI-03 AK-1); Konfliktregeln präzisiert (US-EI-04, US-EI-05, 3.9); Sperren während einer laufenden Partie (3.5, US-VW-02, US-VW-03, US-EI-03, US-DS-02); unterbrochene Animation wird erneut abgespielt (US-AB-05); Sicherungspunkte vor Updates, Tagesregel und Umfang (3.10, US-DS-01, US-DS-02); Update nur nach Bestätigung und Sicherungsdialog (neu 3.12, US-UP-01, neu US-UP-02); Installation und Speicherschutz (neu 3.13, neu US-IS-01 bis US-IS-03, US-DS-04); Ton respektiert die Stummschaltung (US-IN-03); Prüfkriterien und Abnahmeplattformen präzisiert (Kapitel 5); Kapitel 8 auf das Ergebnis der Architekturphase umgestellt |
 | 0.5 | 06.10.2026 | Ergebnisse der Setup-Planung: Bezug auf Anforderungsdokumentation v0.8; Umsetzung in Story-Bündeln und Platzhalter-Release 0.1.0 vor 1.0 (2.3); Hinweis zur Barrierefreiheit (Kapitel 5, E-24); Kapitel 8 um die Ergebnisse der Setup-Planung ergänzt (OP-12 geklärt, OP-13 neu) |
 | 0.6 | 07.10.2026 | Neue Story US-VW-05 „Personen und Gruppen im Überblick“ (Must, I1) zu FA-VW-06 (2.3, 2.5, 4.3, 6) (PR #13) |
+| 0.7 | 07.10.2026 | Design D-1 (Anforderungsdokumentation 0.13, NFA-GB-03, E-26): US-GB-01 wird „Design und Akzentfarbe wählen“ mit Standarddesign „Holz“ statt Standard Lila (2.5, 4.15); Vollsicherung enthält das gewählte Design (3.9) |
 
 ## Inhaltsverzeichnis
 
@@ -149,7 +150,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-IS-01 | Nutzung unter iOS nur als installierte App | M | I4 |
 | US-IS-02 | Installationshinweis unter Android und Windows | S | I5 |
 | US-IS-03 | Persistenten Speicher sicherstellen | M | I4 |
-| US-GB-01 | Akzentfarbe wählen | C | I6 |
+| US-GB-01 | Design und Akzentfarbe wählen | C | I6 |
 
 Summe: 58 User Stories (36 Must, 18 Should, 4 Could).
 
@@ -296,7 +297,7 @@ Niederlagen und Unentschieden beenden eine Siegesserie.
 
 **Exportumfang:** Vollsicherung; eine oder mehrere Gruppen (mit allen ihren Partien); ein oder mehrere Spiele (mit allen Partien dieser Spiele über alle Gruppen); frei ausgewählte einzelne Partien einer Gruppe (z. B. fünf bestimmte Partien), über eine nach Spiel filterbare Liste der Partien dieser Gruppe. Benötigte Personen, Gruppen und Spiele werden automatisch mit exportiert.
 
-**Vollsicherung:** Enthält alle Personen, Gruppen, eigenen Spiele, Partien und Ergebnisse sowie die Einstellungen (Ton, Akzentfarbe) und den Stand von Hinweisen und Erinnerungen. Nicht enthalten sind Sicherungspunkte und eine laufende Partie. Teilexporte enthalten keine Einstellungen.
+**Vollsicherung:** Enthält alle Personen, Gruppen, eigenen Spiele, Partien und Ergebnisse sowie die Einstellungen (Ton, Design, Akzentfarbe) und den Stand von Hinweisen und Erinnerungen. Nicht enthalten sind Sicherungspunkte und eine laufende Partie. Teilexporte enthalten keine Einstellungen.
 
 **Austausch:** Das Format ist JSON. Exportdateien werden über das Teilen-Menü des Systems weitergegeben oder, wo dieses fehlt, heruntergeladen; der Dateiname nennt Datum und Umfang. Importiert wird über die Dateiauswahl. Einen Austausch per QR-Code gibt es nicht.
 
@@ -897,12 +898,14 @@ Bezug: FA-IS-03 → 3.13
 
 ### 4.15 Erscheinungsbild (GB)
 
-#### US-GB-01 Akzentfarbe wählen · C
-Als Nutzer möchte ich die Akzentfarbe ändern, damit die App meinem Geschmack entspricht.
+#### US-GB-01 Design und Akzentfarbe wählen · C
+Als Nutzer möchte ich Design und Akzentfarbe ändern, damit die App meinem Geschmack entspricht.
 Bezug: NFA-GB-03
 
-- **AK-1:** Gegeben die Einstellungen, dann kann ich aus 6 bis 8 vordefinierten Akzentfarben wählen; Standard ist ein dunkles Lila.
-- **AK-2:** Gegeben ich wähle eine Farbe, dann wirkt sie sofort und bleibt gespeichert.
+- **AK-1:** Gegeben die Einstellungen, dann kann ich eines der Designs „Holz“, „Tiefsee“, „Wald“ und „Glas“ wählen; Standard ist „Holz“.
+- **AK-2:** Gegeben die Einstellungen, dann kann ich aus 6 bis 8 vordefinierten Akzentfarben wählen; ohne Auswahl gilt die Standard-Akzentfarbe des Designs (bei „Holz“ Bernstein).
+- **AK-3:** Gegeben ich wähle ein Design oder eine Akzentfarbe, dann wirkt die Wahl sofort und bleibt gespeichert.
+- **AK-4:** Gegeben ein beliebiges Design, dann sind Catan- und Gruppenfarben unverändert und gut erkennbar.
 
 ---
 
