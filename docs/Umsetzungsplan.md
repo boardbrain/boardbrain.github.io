@@ -18,7 +18,7 @@
 | 0.3 | 07.10.2026 | I1-A umgesetzt (PR #11) |
 | 0.4 | 07.10.2026 | I1-B umgesetzt (PR #12); Valibot nach Entscheidung des Product Owners erst mit dem ersten Bündel, das Daten von außen prüft (I4) |
 | 0.5 | 07.10.2026 | Neues Bündel I1-E „Personen und Gruppen im Überblick“ (US-VW-05) nach I1-C (PR #13) |
-| 0.6 | 07.10.2026 | D-1 erledigt (#PR): Farbwerte, Designs mit Standard „Holz“; Hinweise für I1-C und US-GB-01 (I6) |
+| 0.6 | 07.10.2026 | D-1 erledigt (#14): Farbwerte, Designs mit Standard „Holz“; Hinweise für I1-C und US-GB-01 (I6) |
 
 ## 1. Zweck
 
@@ -32,7 +32,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 |---|---|---|---|
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
 | 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt |
-| 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#PR) |
+| 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
@@ -141,7 +141,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Auftrag:** „Erledige Design D-1 aus docs/Umsetzungsplan.md.“ (Opus, medium)
 - **Inhalt:** Claude Code schlägt Catan-Farben, Gruppenfarben-Palette und Akzentfarben mit Kontrastwerten für den Dunkelmodus vor und zeigt sie als Vorschau; der Product Owner wählt. Ergebnis in `tokens.css`; OP-11 wird in Anforderungsdokumentation und Architektur als geklärt vermerkt (Haltepunkt: Änderung der Anforderungsdokumentation, durch den Auftrag freigegeben).
 - **Branch:** `chore/op-11-color-values`.
-- **Ergebnis (#PR):** Standarddesign „Holz“ mit Akzent Bernstein, kräftige Catan-Farben, gedeckte Gruppenfarben, 6 Akzentfarben; zusätzlich die Designs „Tiefsee“, „Wald“ und „Glas“ als Werte in `tokens.css` (Anforderungsdokumentation E-26, NFA-GB-03). Die Umschaltung über `data-theme` und `data-accent` kommt mit US-GB-01 „Design und Akzentfarbe wählen“ in I6; dabei „Glas“ auf älteren Geräten auf flüssige Darstellung prüfen.
+- **Ergebnis (#14):** Standarddesign „Holz“ mit Akzent Bernstein, kräftige Catan-Farben, gedeckte Gruppenfarben, 6 Akzentfarben; zusätzlich die Designs „Tiefsee“, „Wald“ und „Glas“ als Werte in `tokens.css` (Anforderungsdokumentation E-26, NFA-GB-03). Die Umschaltung über `data-theme` und `data-accent` kommt mit US-GB-01 „Design und Akzentfarbe wählen“ in I6; dabei „Glas“ auf älteren Geräten auf flüssige Darstellung prüfen.
 
 ## 6. Kleine Aufgaben
 
