@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.10 |
+| Version | 0.11 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 06.10.2026 |
+| Stand | 07.10.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -24,6 +24,7 @@
 | 0.8 | 06.10.2026 | Ergebnisse der Setup-Planung: OP-12 geklärt (E-21, Adresse `https://boardbrain.github.io/`); Arbeitsweise mit Story-Bündeln, Haltepunkten und Abnahme durch den Product Owner (neu EP-10 bis EP-12, E-22); `main` vor Release 1.0 nur mit Platzhalter (EP-02 präzisiert, E-25); Arbeitsbranches und Pull Requests präzisiert (EP-03, EP-04); Lizenz MIT (E-23); Barrierefreiheit ausdrücklich kein Ziel von Version 1 (E-24); Modelleinsatz für Setup und kritische Teile ergänzt (9.3); neuer offener Punkt OP-13 (Vorabversionen) |
 | 0.9 | 06.10.2026 | Lizenz von MIT auf PolyForm Strict License 1.0.0 geändert (E-23) (PR #1) |
 | 0.10 | 07.10.2026 | OP-13 ergänzt: Abnahme auf dem iPhone nur über Geräte von Freunden (PR #2) |
+| 0.11 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung beginnt vor dem Design; OP-11 parallel zu I1, OP-06 vor I5; Verweis auf `docs/Umsetzungsplan.md` (13) |
 
 ## Inhaltsverzeichnis
 
@@ -539,7 +540,7 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 
 ## 13. Nächste Schritte
 
-1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08)
-2. Design der Inszenierung und Farbwerte (OP-06, OP-11)
-3. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10)
+1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08) – *abgeschlossen am 07.10.2026 mit Release 0.1.0*
+2. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10); Reihenfolge, Zuschnitt und Ablauf in `docs/Umsetzungsplan.md`
+3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) vor Inkrement I5. Beides blockiert die vorherigen Inkremente nicht, weil Farbwerte nur in den Design-Tokens stehen und die Inszenierung erst in I5 umgesetzt wird
 4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13)

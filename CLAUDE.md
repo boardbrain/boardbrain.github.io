@@ -6,7 +6,7 @@ Verbindliche Kurzfassung von `docs/Entwicklungsrichtlinien.md`. Dort stehen die 
 
 Progressive Web App für faire Zufallsentscheidungen und Statistik am Spieleabend (Catan). Veröffentlicht unter `https://boardbrain.github.io/` (Repository `boardbrain/boardbrain.github.io`). Stack: TypeScript strikt, React 19 mit React Compiler, Motion, Vite, Dexie (IndexedDB), Valibot, React Router (Hash), Zustand, Vitest, Playwright.
 
-Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBrain_Spezifikation.md` (User Stories, Abnahmekriterien), `BoardBrain_Architektur.md` (Wie, ADRs), `Entwicklungsrichtlinien.md` (Arbeitsregeln). Lies die betroffenen Kapitel, bevor du ein Bündel umsetzt. Rangfolge bei Widerspruch: Anforderungen > Spezifikation > Architektur > Richtlinien.
+Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBrain_Spezifikation.md` (User Stories, Abnahmekriterien), `BoardBrain_Architektur.md` (Wie, ADRs), `Entwicklungsrichtlinien.md` (Arbeitsregeln), `Umsetzungsplan.md` (Reihenfolge, Bündel, Modelle, Ablauf jeder Sitzung). Lies den Umsetzungsplan und die betroffenen Kapitel, bevor du ein Bündel umsetzt. Rangfolge bei Widerspruch: Anforderungen > Spezifikation > Architektur > Richtlinien.
 
 ## Befehle
 
@@ -20,11 +20,12 @@ Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBr
 
 ## Arbeitsablauf (EP-10, EP-11)
 
+0. Auftrag nennt ein Bündel oder eine Aufgabe aus `docs/Umsetzungsplan.md`. Zuerst kurzen Umsetzungsplan mit Tests, Paketen und Haltepunkt-Fragen zeigen; erst nach „los“ beginnen (Umsetzungsplan 4.1). Status im Umsetzungsplan im selben PR fortschreiben.
 1. Arbeitsbranch von aktuellem `develop`: `‹typ›/‹beschreibung›`, englisch, klein (`feat/us-pg-01-persons-and-groups`).
 2. Umsetzen mit Tests und Doku-Anpassungen; in sinnvollen Schritten committen.
 3. Vor dem Push: `npm run check` und `npm run test:e2e` bestanden. Vor einem PR nach `main` zusätzlich `npm run test:stat`.
 4. Pushen, PR nach `develop` mit `gh pr create`, Beschreibung nach `.github/pull_request_template.md`, inklusive Testanleitung.
-5. Entwicklungsserver starten und dem Product Owner sagen, was er testen soll. Rückmeldungen im selben Branch beheben.
+5. Entwicklungsserver frisch starten (nach jedem Branch-Wechsel neu, sonst läuft er ohne HTTPS) und dem Product Owner Adressen und Testschritte je Gerät nennen. Rückmeldungen im selben Branch beheben.
 6. **Nie selbst mergen.** Der Product Owner mergt.
 
 ## Haltepunkte: anhalten und fragen, wenn

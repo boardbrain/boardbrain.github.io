@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.2 |
+| Version | 0.3 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 06.10.2026 |
+| Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -17,6 +17,7 @@
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
 | 0.2 | 07.10.2026 | Ergebnisse des Setups: keine Hinweise auf Claude in Commits und Pull Requests (3.3); Markdown von Prettier ausgenommen (4.2); ESLint-Regeln ohne `eslint-plugin-react` (5, 13; Architektur ADR-026); Node.js 26 vor LTS-Einstufung (10.3); Code durchgehend englisch, auch Kommentare und Testnamen (4.3, 4.6, 8.2; Architektur ADR-027) (PR #2) |
+| 0.3 | 07.10.2026 | Aufträge an Claude Code verweisen auf `docs/Umsetzungsplan.md` (14) |
 
 ## Inhaltsverzeichnis
 
@@ -577,5 +578,5 @@ Markdown, deutsch, Tabellen für Festlegungen, Codebeispiele nur als Skizzen. Pr
 - **Modelle und Aufwand:** nach Anforderungsdokumentation 9.3. Standard ist Sonnet 5.5 mit Aufwand „medium“; Opus 5.5 mit „high“ für das Setup und die kritischen Teile (Zufall, Platzierung und Sackgassen, Service Worker und Updates, Importkonflikte, Migrationen). Liegt Sonnet zweimal hintereinander daneben, auf Opus wechseln.
 - **Kontext:** Für jedes Bündel eine neue Sitzung beginnen (`/clear`). Das spart Kontingent und verhindert, dass alte Annahmen nachwirken. `CLAUDE.md` wird in jeder Sitzung automatisch gelesen.
 - **Berechtigungen:** nach Architektur 16.5. Harte Grenzen stehen in `.claude/settings.json`, nicht nur in `CLAUDE.md`.
-- **Auftrag formulieren:** Bündel nennen, Stories aufzählen, besondere Wünsche angeben. Beispiel: „Setze Bündel I1-A um: US-PG-01 bis US-PG-04. Halte dich an CLAUDE.md.“
+- **Auftrag formulieren:** Bündel und Aufgaben stehen mit Modell, Aufwand und Branch-Namen in `docs/Umsetzungsplan.md`, ebenso der genaue Ablauf einer Sitzung. Auftrag: „Setze Bündel I1-A aus docs/Umsetzungsplan.md um.“, bei Bedarf mit besonderen Wünschen.
 - **Nach dem Merge:** Claude Code wechselt zurück auf `develop` und holt den neuen Stand (`git switch develop && git pull`).
