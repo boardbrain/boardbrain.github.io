@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.4 |
+| Version | 0.5 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 06.10.2026 |
+| Stand | 07.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -18,6 +18,7 @@
 | 0.2 | 06.10.2026 | Ergebnisse der Setup-Planung: ADR-022 angenommen (`https://boardbrain.github.io/`); neue ADR-023 (Branch- und Release-Modell), ADR-024 (Prettier), ADR-025 (Fehlerbehandlung); Stack um Formatierer, Prüfwerkzeuge und Node.js-Version ergänzt (3.1); Modul `core/shared` (4.3); Fehlerbehandlung (neu 4.6); Content-Security-Policy als Meta-Tag (12.4); Diagnoseansicht (13.1); CSS-Animationen verboten (13.6); Teststrategie präzisiert (14.1, 14.5, 14.6); Ordnerstruktur vervollständigt (15); Kapitel 16 neu gefasst (Werkzeuge, Befehle, Branches und Auslieferung, `CLAUDE.md`, Claude Code, lokales HTTPS); Risiken und offene Punkte aktualisiert (18); nächste Schritte (19) |
 | 0.3 | 06.10.2026 | Lizenz in der Ordnerstruktur auf PolyForm Strict License 1.0.0 geändert (15; Anforderungsdokumentation E-23) (PR #1) |
 | 0.4 | 07.10.2026 | Ergebnisse des Setups: Node.js 26 statt 24 (3.1, 16.1); TypeScript 6, React Compiler über `@rolldown/plugin-babel` (3.1); ESLint 10 ohne `eslint-plugin-react`, Ersatzregeln über `no-restricted-syntax` (neu ADR-026; 3.1, 13.3, 14.7, ADR-018); Markdown von Prettier ausgenommen (3.1); Ende-zu-Ende-Tests lokal über HTTPS mit ignorierten Zertifikatsfehlern (14.5); `tsconfig.node.json` (15); Berechtigungen für PowerShell und keine Hinweise auf Claude in Commits und Pull Requests (16.5); Zertifizierungsstelle nicht auf dem iPhone (16.6); Code durchgehend englisch, auch Kommentare und Testnamen (neu ADR-027; 4.5, 16.4, ADR-008) (PR #2) |
+| 0.5 | 07.10.2026 | Job `e2e` im offiziellen Playwright-Container statt Browserinstallation auf dem Runner; Vorjob `playwright-version` liest den Tag aus `package-lock.json` (16.3) |
 
 ## Inhaltsverzeichnis
 
@@ -1234,12 +1235,12 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 | Job | Inhalt | Erforderlich für |
 |---|---|---|
 | `check` | `npm ci`, `npm run check`, `npm audit --omit=dev --audit-level=high` | `develop`, `main` |
-| `e2e` | Playwright-Browser installieren, `npm run build`, `npm run test:e2e` | `develop`, `main` |
+| `e2e` | läuft im offiziellen Playwright-Container (`mcr.microsoft.com/playwright`, Browser vorinstalliert); `npm ci`, `npm run build`, `npm run test:e2e`. Der Tag des Containers wird im Vorjob `playwright-version` aus `package-lock.json` gelesen und passt so immer exakt zur installierten Playwright-Version | `develop`, `main` |
 | `pr-title` | commitlint prüft den Titel des Pull Requests | `develop`, `main` |
 | `stat` | `npm run test:stat` (nur bei Ziel `main`) | `main` |
 | `guard-main` | schlägt fehl, wenn ein Pull Request nach `main` nicht aus `develop` oder `hotfix/…` kommt (nur bei Ziel `main`) | `main` |
 
-Übersprungene Jobs gelten bei GitHub als bestanden; `stat` und `guard-main` blockieren Pull Requests nach `develop` daher nicht.
+Übersprungene Jobs gelten bei GitHub als bestanden; `stat` und `guard-main` blockieren Pull Requests nach `develop` daher nicht. Aus demselben Grund läuft `e2e` auch dann, wenn der Vorjob `playwright-version` scheitert, und schlägt in diesem Fall fehl, statt übersprungen zu werden.
 
 **Workflow `deploy.yml`** (bei Push eines Tags `v*`): `npm ci`, `npm run check`, `npm run build`, Hochladen und Veröffentlichen über die GitHub-eigenen Pages-Actions. Nur dieser Workflow erhält die Rechte `pages: write` und `id-token: write`. Die Umgebung `github-pages` erlaubt zusätzlich nur Tags `v*`, sodass GitHub die Regel „nur Releases werden veröffentlicht“ unabhängig vom Workflow durchsetzt (EP-03).
 
