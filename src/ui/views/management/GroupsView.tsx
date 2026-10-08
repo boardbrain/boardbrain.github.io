@@ -84,6 +84,7 @@ export function GroupsView(): React.JSX.Element {
     <Page
       title={t('gruppen.titel')}
       isWide
+      backFallback="/verwaltung"
       actions={
         <button
           type="button"

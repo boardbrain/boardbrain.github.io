@@ -34,6 +34,12 @@ describe('Architecture 13.1 app frame and navigation', () => {
     expect(links.map((link) => link.textContent)).toEqual(['Start', 'Verwaltung']);
   });
 
+  it('NFA-PL-04: contains the hint to turn the phone, shown by the layout only in low landscape', () => {
+    renderAt('/');
+
+    expect(screen.getByText('Bitte das Handy hochkant drehen')).toBeInTheDocument();
+  });
+
   it('marks the current area, also on sub-pages', () => {
     renderAt('/verwaltung/personen');
 

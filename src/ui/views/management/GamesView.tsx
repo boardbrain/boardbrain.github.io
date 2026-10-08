@@ -55,7 +55,7 @@ export function GamesView(): React.JSX.Element {
   }
 
   return (
-    <Page title={t('spiele.titel')}>
+    <Page title={t('spiele.titel')} backFallback="/verwaltung">
       <NameForm
         title={t('spiele.neu')}
         value={name}

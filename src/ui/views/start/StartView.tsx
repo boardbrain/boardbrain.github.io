@@ -1,21 +1,44 @@
-import { LinkList } from '@/ui/components/LinkList';
-import { Page } from '@/ui/components/Page';
+import { useId } from 'react';
 import { t } from '@/i18n/t';
+import { PlayingCard } from '@/ui/components/PlayingCard';
+import { useAreaCards } from '@/ui/views/areaCards';
+import styles from './StartView.module.css';
+
+const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
 
 /**
- * Start view `#/` (Architecture 13.1). "New match" and the banners follow with their
- * increments.
+ * Start view `#/` (Architecture 13.1, design D-3): persons, tables and games as a fan of
+ * playing cards right above the card hand; the view never scrolls. "New match" (I2) and the
+ * banners (I4, I2) get their place above the cards later.
  */
 export function StartView(): React.JSX.Element {
+  const cards = useAreaCards();
+  const headingId = useId();
   return (
-    <Page title={t('start.titel')} intro={t('start.einleitung')}>
-      <LinkList
-        label={t('verwaltung.bereiche')}
-        links={[
-          { to: '/verwaltung/personen', text: t('start.personen') },
-          { to: '/verwaltung/spiele', text: t('start.spiele') },
-        ]}
-      />
-    </Page>
+    <main className={styles.start}>
+      <h1 className={styles.hiddenTitle}>{t('start.titel')}</h1>
+      <div className={styles.spacer} />
+      <nav className={styles.cards} aria-labelledby={headingId}>
+        <h2 id={headingId} className={styles.heading}>
+          {t('karten.titel')}
+        </h2>
+        <div className={styles.fan}>
+          {cards?.map((card, index) => (
+            <PlayingCard
+              key={card.key}
+              to={card.to}
+              title={card.title}
+              count={card.count}
+              icon={card.icon}
+              note={
+                card.key === 'personen' && card.count === 0 ? t('karten.hierAnfangen') : undefined
+              }
+              className={FAN_POSITIONS[index]}
+            />
+          ))}
+        </div>
+      </nav>
+      <div className={styles.spacerLow} />
+    </main>
   );
 }

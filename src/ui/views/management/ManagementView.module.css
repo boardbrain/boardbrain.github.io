@@ -1,0 +1,35 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  align-content: start;
+  width: 100%;
+  max-width: 900px;
+  padding: 20px 16px 28px;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-title);
+  line-height: 1.25;
+}
+
+/* Design D-3: two columns on phones, three on tablets in portrait, four in landscape and on PCs. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (width >= 600px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 1000px), (width >= 600px) and (orientation: landscape) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

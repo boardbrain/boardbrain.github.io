@@ -52,7 +52,7 @@ export function PersonsView(): React.JSX.Element {
   }
 
   return (
-    <Page title={t('personen.titel')}>
+    <Page title={t('personen.titel')} backFallback="/verwaltung">
       <NameForm
         title={t('personen.neu')}
         value={name}

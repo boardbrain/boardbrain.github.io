@@ -11,7 +11,7 @@ test.describe('US-PG-01 Create a person', () => {
     page,
   }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'Personen verwalten' }).click();
+    await page.getByRole('link', { name: /^Personen: / }).click();
     await expect(page.getByText('Noch keine Personen angelegt.')).toBeVisible();
 
     await createPerson(page, 'Anna');
