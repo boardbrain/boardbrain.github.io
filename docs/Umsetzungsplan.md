@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.9 |
+| Version | 0.10 |
 | Stand | 08.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.10 (19) |
 | Sprache | Deutsch |
@@ -22,6 +22,7 @@
 | 0.7 | 07.10.2026 | I1-C umgesetzt: Gruppen und Farben (Abnahme durch den Product Owner offen) |
 | 0.8 | 08.10.2026 | Ergebnis der Abnahme von I1-C: Gruppenseite als „Spielraum“, Catan ausschließen, überarbeitete Gruppenfarben (I1-C); neues Bündel I1-F „Bearbeiten“ nach I1-E (Spezifikation 0.8); Designvorschläge vor jeder neuen Oberfläche (4.1, Richtlinien 2.5) |
 | 0.9 | 08.10.2026 | I1-C umgesetzt (#15): Spielraum wie Designvorschlag F6, Spielauswahl mit aufklappbarer Liste eigener Spiele (Variante C), Suchfelder fokussieren nur mit Maus |
+| 0.10 | 08.10.2026 | Neue Aufgabe D-3 „Startansicht und Navigation“ nach I1-C und vor I1-E: Startansicht, Kopfzeile und Verwaltung im Stil des Spielraums |
 
 ## 1. Zweck
 
@@ -36,6 +37,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
 | 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C umgesetzt (#15) |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
+| 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | offen |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
@@ -59,7 +61,7 @@ Grundlage ist Anforderungsdokumentation 9.3. Modell und Aufwand stellt der Produ
 | Übrige Bündel (Oberflächen, Verwaltung, Statistik) | Sonnet 5.5 | medium |
 | Kleine Aufgaben: Abhängigkeits-Updates, Fehlerbehebungen ohne kritischen Teil | Sonnet 5.5 | medium |
 | Reine Dokumentationspflege | Sonnet 5.5 | low |
-| Design (D-1, D-2), Zuschnitt eines neuen Inkrements | Opus 5.5 | medium |
+| Design (D-1, D-2, D-3), Zuschnitt eines neuen Inkrements | Opus 5.5 | medium |
 | Code-Review, schwierige Fehler | Opus 5.5 | high |
 
 **Wechselregel:** Liegt Sonnet zweimal hintereinander daneben (Tests scheitern wiederholt, Anforderung falsch verstanden), wechselt der Product Owner mit `/model` auf Opus und schreibt „mach weiter“. Der Arbeitsbranch bleibt erhalten.
@@ -137,7 +139,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 
 ### I1-E Personen und Gruppen im Überblick
 
-- **Reihenfolge:** nach I1-C und vor I1-D. Die ID ist neu vergeben, weil IDs nie umnummeriert werden (Richtlinien 11.1).
+- **Reihenfolge:** nach I1-C und D-3, vor I1-D. Die ID ist neu vergeben, weil IDs nie umnummeriert werden (Richtlinien 11.1).
 - **Inhalt:** Personenliste mit den Gruppen jeder Person; Detailansicht einer Person (`#/verwaltung/personen/‹id›`); Gruppenliste und Detailansicht einer Gruppe mit Bindung, Mitgliedern und Farben (`#/verwaltung/gruppen/‹id›`); gegenseitige Verweise (US-VW-05). Die Detailansichten sind die Grundlage, an die US-VW-02, -06 und -07 (Bearbeiten, I1-F), US-ER-04 (Ergebnisse einer Gruppe, I3) sowie US-VW-01, -03 und -04 (Archivieren, Löschen, I5) anknüpfen. *(geändert in 0.8)*
 - **Hinweis (0.8):** Die Gruppenliste ist seit I1-C der „Spielraum“; I1-E ergänzt die Detailansicht eines Tisches und die Personenseite. Für beide zuerst Designvorschläge im Stil des Spielraums (Richtlinien 2.5).
 - **Warum hier:** Erst mit I1-C gibt es Gruppen; ohne Übersicht lassen sich angelegte Gruppen und Farben nicht nachsehen, was spätestens am ersten Spieleabend mit I2 fehlt.
@@ -165,6 +167,16 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Inhalt:** Claude Code schlägt Catan-Farben, Gruppenfarben-Palette und Akzentfarben mit Kontrastwerten für den Dunkelmodus vor und zeigt sie als Vorschau; der Product Owner wählt. Ergebnis in `tokens.css`; OP-11 wird in Anforderungsdokumentation und Architektur als geklärt vermerkt (Haltepunkt: Änderung der Anforderungsdokumentation, durch den Auftrag freigegeben).
 - **Branch:** `chore/op-11-color-values`.
 - **Ergebnis (#14):** Standarddesign „Holz“ mit Akzent Bernstein, kräftige Catan-Farben, gedeckte Gruppenfarben, 6 Akzentfarben; zusätzlich die Designs „Tiefsee“, „Wald“ und „Glas“ als Werte in `tokens.css` (Anforderungsdokumentation E-26, NFA-GB-03). Die Umschaltung über `data-theme` und `data-accent` kommt mit US-GB-01 „Design und Akzentfarbe wählen“ in I6; dabei „Glas“ auf älteren Geräten auf flüssige Darstellung prüfen.
+
+### D-3 Startansicht und Navigation *(neu in 0.10)*
+
+- **Auftrag:** „Erledige Design D-3 aus docs/Umsetzungsplan.md.“ (Opus, medium)
+- **Reihenfolge:** nach I1-C und vor I1-E, damit die Detailansichten aus I1-E gleich in den neuen Rahmen kommen.
+- **Inhalt:** Startansicht, Kopfzeile mit Hauptnavigation (`AppLayout`, Architektur 13.1) und Verwaltungsübersicht im Stil des Spielraums neu gestalten, für Handy, Tablet und PC in Hoch- und Querformat. Zuerst Designvorschläge als klickbare HTML-Datei (Richtlinien 2.5); sie zeigen auch, wo später „Neue Partie“ (I2), „Ergebnis eintragen“ (I3) und die Banner (I4, I5) ihren Platz finden. Gebaut wird nur, was es schon gibt; die Navigation nennt weiter nur vorhandene Bereiche (Architektur 13.1).
+- **Nicht enthalten:** Funktionen späterer Inkremente, Umschalten von Design und Akzentfarbe (US-GB-01, I6), Animationen (Motion kommt mit dem ersten Bündel, das sie braucht).
+- **Branch:** `feat/d-3-start-and-navigation`.
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** Designvorschlag wählen; danach Startansicht, Kopfzeile und Verwaltung auf S26, iPad und PC in Hoch- und Querformat; alle Bereiche erreichbar, Zurück-Taste auf dem S26.
 
 ## 6. Kleine Aufgaben
 
