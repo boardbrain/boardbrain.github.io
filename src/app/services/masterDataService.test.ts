@@ -353,3 +353,28 @@ describe('US-PG-02 Create a group', () => {
     ).rejects.toThrow(InvariantError);
   });
 });
+
+describe('E-27 Create a global group that excludes Catan', () => {
+  it('US-PG-02 AK-7: saves the exclusion and only group colours', async () => {
+    const store = new InMemoryMasterDataStore();
+    store.persons = [
+      aPerson({ id: toPersonId('00000000-0000-4000-8000-0000000000a1'), name: 'Anna' }),
+      aPerson({ id: toPersonId('00000000-0000-4000-8000-0000000000a2'), name: 'Ben' }),
+    ];
+    const { service } = setUp(store);
+
+    const result = await service.createGroup({
+      name: 'Ohne Catan',
+      binding: { kind: 'global', excludesCatan: true },
+      personIds: [
+        toPersonId('00000000-0000-4000-8000-0000000000a1'),
+        toPersonId('00000000-0000-4000-8000-0000000000a2'),
+      ],
+      colors: defaultColors(2, 'group-only'),
+    });
+
+    expect(result.ok && result.value.binding).toEqual({ kind: 'global', excludesCatan: true });
+    expect(store.groups[0]?.members.map((member) => member.groupColor)).toEqual(['red', 'blue']);
+    expect(store.groups[0]?.members.every((member) => !('catanColor' in member))).toBe(true);
+  });
+});

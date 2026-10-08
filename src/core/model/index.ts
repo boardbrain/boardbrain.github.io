@@ -42,6 +42,7 @@ export {
   type ColorSchemeInput,
   type MemberColors,
 } from './groupColors';
+export { findGroups, type GroupMatch } from './groupSearch';
 export {
   isUuidV4,
   toGameId,

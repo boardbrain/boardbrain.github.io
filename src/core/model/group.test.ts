@@ -229,3 +229,47 @@ describe('US-PG-03 colours of a created group', () => {
     ).toThrow(InvariantError);
   });
 });
+
+describe('E-27 global group that excludes Catan', () => {
+  it('US-PG-02 AK-7: creates a group of 3 with group colours only', () => {
+    const persons = people('Anna', 'Ben', 'Clara');
+
+    const result = createGroup(
+      fields(persons, {
+        binding: { kind: 'global', excludesCatan: true },
+        colors: defaultColors(3, 'group-only'),
+      }),
+    );
+
+    expect(result.ok && result.value.binding).toEqual({ kind: 'global', excludesCatan: true });
+    expect(result.ok && result.value.members.every((member) => !('catanColor' in member))).toBe(
+      true,
+    );
+  });
+
+  it('US-PG-03 AK-4: rejects Catan colours in a group that excludes Catan (invariant)', () => {
+    const persons = people('Anna', 'Ben');
+
+    expect(() =>
+      createGroup(
+        fields(persons, {
+          binding: { kind: 'global', excludesCatan: true },
+          colors: defaultColors(2, 'both'),
+        }),
+      ),
+    ).toThrow(InvariantError);
+  });
+
+  it('US-PG-03 AK-2: still needs Catan colours if Catan is explicitly not excluded', () => {
+    const persons = people('Anna', 'Ben');
+
+    expect(() =>
+      createGroup(
+        fields(persons, {
+          binding: { kind: 'global', excludesCatan: false },
+          colors: defaultColors(2, 'group-only'),
+        }),
+      ),
+    ).toThrow(InvariantError);
+  });
+});

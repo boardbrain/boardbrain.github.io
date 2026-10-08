@@ -14,7 +14,12 @@ export const GROUP_SIZE = { min: 2, max: 12 } as const;
  * Binding of a group: to all games or to exactly one game (FA-PG-04).
  */
 export type GroupBinding =
-  { readonly kind: 'global' } | { readonly kind: 'game'; readonly gameId: GameId };
+  | {
+      readonly kind: 'global';
+      /** The group does not play Catan and has no Catan colours (E-27); missing means false. */
+      readonly excludesCatan?: boolean;
+    }
+  | { readonly kind: 'game'; readonly gameId: GameId };
 
 /**
  * Member of a group with the colours of the person in this group (Architecture 7.1).
@@ -141,6 +146,7 @@ export function createGroup(fields: NewGroupFields): Result<Group, GroupError> {
     memberCount: count,
     boundGame: fields.boundGame,
     maxPlayersWithColors: GROUP_MAX_PLAYERS_WITH_COLORS,
+    excludesCatan: fields.binding.kind === 'global' && fields.binding.excludesCatan === true,
   });
   const members = fields.persons.map((person, index): GroupMember => {
     const colors = fields.colors[index];

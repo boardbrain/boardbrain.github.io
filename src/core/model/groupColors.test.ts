@@ -25,6 +25,54 @@ describe('Specification 3.3 colour scheme', () => {
   });
 });
 
+describe('E-27 global group that excludes Catan', () => {
+  it.each([2, 3, 4])('US-PG-03 AK-4: has only group colours with %i members', (memberCount) => {
+    expect(
+      colorSchemeOf({ memberCount, boundGame: null, maxPlayersWithColors: 4, excludesCatan: true }),
+    ).toBe('group-only');
+  });
+
+  it('keeps the Catan colours of a global group that does not exclude Catan', () => {
+    expect(
+      colorSchemeOf({
+        memberCount: 3,
+        boundGame: null,
+        maxPlayersWithColors: 4,
+        excludesCatan: false,
+      }),
+    ).toBe('both');
+  });
+
+  it('drops the Catan colours when Catan is excluded and brings them back (US-VW-02 AK-6)', () => {
+    const both = defaultColors(3, 'both');
+
+    const excluded = normalizeColors(both, 'group-only');
+    expect(excluded.every((member) => member.catanColor === undefined)).toBe(true);
+    expect(excluded.map((member) => member.groupColor)).toEqual(
+      both.map((member) => member.groupColor),
+    );
+
+    expect(normalizeColors(excluded, 'both').map((member) => member.catanColor)).toEqual([
+      'red',
+      'blue',
+      'white',
+    ]);
+  });
+});
+
+describe('E-28 palette', () => {
+  it('has 12 different group colours and starts with four colour families', () => {
+    expect(new Set(GROUP_COLOR_KEYS).size).toBe(12);
+    expect(GROUP_COLOR_KEYS.slice(0, 4)).toEqual(['red', 'blue', 'yellow', 'green']);
+  });
+
+  it('contains the four Catan colours', () => {
+    for (const key of CATAN_COLOR_KEYS) {
+      expect(GROUP_COLOR_KEYS).toContain(key);
+    }
+  });
+});
+
 describe('US-PG-03 automatic colours', () => {
   it('AK-1: assigns the colours of a new group in the order of the palette', () => {
     expect(defaultColors(3, 'group-only')).toEqual([
@@ -46,9 +94,10 @@ describe('US-PG-03 automatic colours', () => {
       );
 
     expect(distance('blue', 'indigo')).toBeGreaterThanOrEqual(3);
-    expect(distance('teal', 'cyan')).toBeGreaterThanOrEqual(3);
+    expect(distance('green', 'teal')).toBeGreaterThanOrEqual(3);
     expect(distance('red', 'orange')).toBeGreaterThanOrEqual(3);
-    expect(distance('yellow', 'lime')).toBeGreaterThanOrEqual(3);
+    expect(distance('yellow', 'orange')).toBeGreaterThanOrEqual(3);
+    expect(distance('magenta', 'pink')).toBeGreaterThanOrEqual(2);
   });
 
   it('AK-2: a global group of 2 to 4 members has a group colour and a Catan colour each', () => {

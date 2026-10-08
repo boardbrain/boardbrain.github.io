@@ -10,7 +10,8 @@ import {
  * Which colours a member of a group has (Specification 3.3):
  * `both` = group colour and Catan colour (global group with 2 to 4 members),
  * `catan-only` = the Catan colour is the group colour as well (group bound to Catan),
- * `group-only` = group colour only (own game, or global group with more than 4 members).
+ * `group-only` = group colour only (own game, global group with more than 4 members, or global
+ * group that excludes Catan, E-27).
  */
 export type ColorScheme = 'both' | 'catan-only' | 'group-only';
 
@@ -37,6 +38,8 @@ export type ColorSchemeInput = {
   readonly boundGame: { readonly hasPlayerColors: boolean } | null;
   /** Most members a game with player colours allows (Catan: 4, FA-PG-10). */
   readonly maxPlayersWithColors: number;
+  /** A global group that excludes Catan has no Catan colours (FA-PG-04, E-27). */
+  readonly excludesCatan?: boolean;
 };
 
 /**
@@ -45,6 +48,9 @@ export type ColorSchemeInput = {
 export function colorSchemeOf(input: ColorSchemeInput): ColorScheme {
   if (input.boundGame !== null) {
     return input.boundGame.hasPlayerColors ? 'catan-only' : 'group-only';
+  }
+  if (input.excludesCatan === true) {
+    return 'group-only';
   }
   return input.memberCount <= input.maxPlayersWithColors ? 'both' : 'group-only';
 }

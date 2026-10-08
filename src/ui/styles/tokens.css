@@ -12,18 +12,18 @@
   --color-catan-white: #f1f1f4;
   --color-catan-orange: #f5852b;
 
-  /* Group colours (Specification 3.3, A-01): 12 colours; red, orange, blue, white = Catan tones (FA-PG-07) */
+  /* Group colours (Specification 3.3, E-28): 12 colours; red, orange, blue, white = Catan tones (FA-PG-07) */
   --color-group-red: var(--color-catan-red);
   --color-group-orange: var(--color-catan-orange);
   --color-group-yellow: #e6cb72;
-  --color-group-lime: #b4d272;
-  --color-group-green: #74cf9c;
+  --color-group-green: #8fb35a;
   --color-group-teal: #5fbfb2;
-  --color-group-cyan: #73c8e3;
   --color-group-blue: var(--color-catan-blue);
-  --color-group-indigo: #959aea;
-  --color-group-violet: #bb98e8;
-  --color-group-pink: #e693c1;
+  --color-group-indigo: #aeb0f2;
+  --color-group-pink: #eba3bf;
+  --color-group-magenta: #d46bc4;
+  --color-group-brown: #94643f;
+  --color-group-gray: #9aa1ab;
   --color-group-white: var(--color-catan-white);
 
   /* Accent palette (NFA-GB-03): fill carries --color-on-accent text, text variant sits on surfaces */
@@ -40,6 +40,7 @@
   --color-accent-berry: #a8336a;
   --color-accent-berry-text: #e79ac0;
   --color-on-accent: #fff;
+  --color-backdrop: #000000b3;
 
   /* States */
   --color-status-ok: #4ade80;
@@ -50,6 +51,7 @@
   /* Typography */
   --font-family-base: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
   --font-family-mono: ui-monospace, 'Cascadia Mono', consolas, monospace;
+  --font-size-tiny: 0.75rem;
   --font-size-small: 0.875rem;
   --font-size-base: 1rem;
   --font-size-title: 1.5rem;
@@ -62,6 +64,7 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --radius-2: 0.5rem;
+  --radius-4: 1rem;
   --touch-target-min: 44px;
 
   /* Durations and easings for Motion (Architecture 13.6) */

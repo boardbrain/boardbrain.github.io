@@ -1,0 +1,98 @@
+.closed {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+}
+
+/* No visible scrollbar: a soft fade at the end shows that there is more. */
+.scroll {
+  display: flex;
+  flex: 1;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-right: 2.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to right, var(--color-surface) 80%, transparent);
+}
+
+/* Wide screens: a field of exactly two rows, scrolled vertically. */
+@media (width >= 48rem) {
+  .closed {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .scroll {
+    flex-flow: row wrap;
+    flex: none;
+    align-content: flex-start;
+    max-height: calc(2 * var(--touch-target-min) + var(--space-2) + 1.5rem);
+    padding: 0 0 1.5rem;
+    overflow: hidden auto;
+    mask-image: linear-gradient(to bottom, var(--color-surface) 70%, transparent);
+  }
+}
+
+.chip,
+.chipOn {
+  flex-shrink: 0;
+  padding: 0 var(--space-4);
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px dashed var(--color-border);
+  border-radius: 999px;
+}
+
+.chip::before {
+  margin-right: var(--space-1);
+  content: '+' / '';
+}
+
+.chipOn {
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-accent-text);
+}
+
+.chipOn::before {
+  margin-right: var(--space-1);
+  content: '✓' / '';
+}
+
+.toggle {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--color-accent-text);
+  background: transparent;
+  border: 1px solid var(--color-accent-text);
+  border-radius: 999px;
+}
+
+@media (width >= 48rem) {
+  .toggle {
+    align-self: flex-start;
+    border-color: transparent;
+  }
+}
+
+.open {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.search {
+  width: 100%;
+  min-width: 0;
+}
+
+.all {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+}

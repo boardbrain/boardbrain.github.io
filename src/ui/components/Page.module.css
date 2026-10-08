@@ -1,9 +1,21 @@
-.page {
+.page,
+.wide {
   display: grid;
   gap: var(--space-6);
   max-width: 40rem;
   padding: var(--space-6) var(--space-4);
   margin: 0 auto;
+}
+
+.wide {
+  max-width: 64rem;
+}
+
+.header {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
 }
 
 .title {
