@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { GameId } from '@/core/model';
 import { t } from '@/i18n/t';
+import { useHasFinePointer } from '@/ui/components/mediaQueries';
 import styles from './BindingPicker.module.css';
 
 /** One game a group can be bound to. */
@@ -45,6 +46,8 @@ export function BindingPicker({
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isAtEnd, setIsAtEnd] = useState(false);
+  // Only with a mouse: on touch screens focusing would pop up the keyboard unasked.
+  const hasFinePointer = useHasFinePointer();
   const chosenCustom = custom.find((option) => option.gameId === choice);
   const needle = query.trim().toLocaleLowerCase('de-DE');
   const shown = custom.filter((option) => option.label.toLocaleLowerCase('de-DE').includes(needle));
@@ -117,7 +120,7 @@ export function BindingPicker({
           className={styles.search}
           type="search"
           autoComplete="off"
-          autoFocus
+          autoFocus={hasFinePointer}
           aria-label={t('gruppen.spielSuchen')}
           placeholder={t('gruppen.spielSuchen')}
           value={query}

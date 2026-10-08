@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { toGameId, type GameId } from '@/core/model';
 import { BindingPicker, type BindingOption } from './BindingPicker';
 
@@ -108,5 +108,42 @@ describe('US-PG-02 AK-4 Choosing what the group plays', () => {
     expect(
       screen.getByText('Catan geht nur mit höchstens 4 Personen. Dieser Tisch hat 5.'),
     ).toBeInTheDocument();
+  });
+});
+
+describe('Search field of the own games and the keyboard', () => {
+  const originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
+  const sixGames = ownGames('Uno', 'Skat', 'Wizard', 'Kniffel', 'Doppelkopf', 'Ligretto');
+
+  afterEach(() => {
+    if (originalMatchMedia !== undefined) {
+      Object.defineProperty(window, 'matchMedia', originalMatchMedia);
+    }
+  });
+
+  it('is not focused on touch screens, so no keyboard pops up unasked', async () => {
+    const user = userEvent.setup();
+    render(<Picker custom={sixGames} />);
+
+    await user.click(screen.getByRole('button', { name: 'Anderes Spiel ▾' }));
+
+    expect(screen.getByRole('searchbox', { name: 'Spiel suchen' })).not.toHaveFocus();
+  });
+
+  it('is focused right away with a mouse', async () => {
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: (query: string) => ({
+        matches: query === '(pointer: fine)',
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      }),
+    });
+    const user = userEvent.setup();
+    render(<Picker custom={sixGames} />);
+
+    await user.click(screen.getByRole('button', { name: 'Anderes Spiel ▾' }));
+
+    expect(screen.getByRole('searchbox', { name: 'Spiel suchen' })).toHaveFocus();
   });
 });

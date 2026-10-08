@@ -510,7 +510,7 @@ describe('US-PG-02 The bench', () => {
     const user = await manyPersons();
 
     await user.click(await screen.findByRole('button', { name: 'Alle 28 ▾' }));
-    await user.keyboard('val');
+    await user.type(screen.getByRole('searchbox', { name: 'Person suchen' }), 'val');
 
     expect(screen.getByRole('button', { name: 'Valentina' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Person 00' })).not.toBeInTheDocument();
@@ -520,11 +520,19 @@ describe('US-PG-02 The bench', () => {
     expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
   });
 
+  it('does not focus the search field on touch screens, so no keyboard pops up', async () => {
+    const user = await manyPersons();
+
+    await user.click(await screen.findByRole('button', { name: 'Alle 28 ▾' }));
+
+    expect(screen.getByRole('searchbox', { name: 'Person suchen' })).not.toHaveFocus();
+  });
+
   it('says so if no person matches the search', async () => {
     const user = await manyPersons();
     await user.click(await screen.findByRole('button', { name: 'Alle 28 ▾' }));
 
-    await user.keyboard('xyz');
+    await user.type(screen.getByRole('searchbox', { name: 'Person suchen' }), 'xyz');
 
     expect(screen.getByText('Keine Person gefunden.')).toBeInTheDocument();
   });
@@ -534,7 +542,7 @@ describe('US-PG-02 The bench', () => {
     await user.click(await screen.findByRole('button', { name: 'Valentina' }));
     await user.click(screen.getByRole('button', { name: 'Alle 28 ▾' }));
 
-    await user.keyboard('val');
+    await user.type(screen.getByRole('searchbox', { name: 'Person suchen' }), 'val');
 
     expect(screen.getByRole('button', { name: 'Valentina' })).toHaveAttribute(
       'aria-pressed',

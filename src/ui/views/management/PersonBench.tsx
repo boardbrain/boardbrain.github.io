@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Person, PersonId } from '@/core/model';
 import { t } from '@/i18n/t';
-import { useIsWideScreen } from '@/ui/components/useIsWideScreen';
+import { useHasFinePointer, useIsWideScreen } from '@/ui/components/mediaQueries';
 import styles from './PersonBench.module.css';
 
 type PersonBenchProps = {
@@ -42,6 +42,8 @@ export function PersonBench({
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const isWide = useIsWideScreen();
+  // Only with a mouse: on touch screens focusing would pop up the keyboard unasked.
+  const hasFinePointer = useHasFinePointer();
   const [isAtEnd, setIsAtEnd] = useState(false);
   const shown = isOpen ? persons.filter((person) => matches(person, query)) : persons;
 
@@ -72,7 +74,7 @@ export function PersonBench({
           className={styles.search}
           type="search"
           autoComplete="off"
-          autoFocus
+          autoFocus={hasFinePointer}
           aria-label={t('gruppen.personSuchen')}
           placeholder={t('gruppen.personSuchen')}
           value={query}
