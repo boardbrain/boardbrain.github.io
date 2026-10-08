@@ -17,6 +17,7 @@ import { ErrorScreen } from '@/ui/components/ErrorScreen';
 import { installGlobalErrorHandlers } from '@/ui/globalErrorHandlers';
 import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
 import { GamesView } from '@/ui/views/management/GamesView';
+import { GroupsView } from '@/ui/views/management/GroupsView';
 import { ManagementView } from '@/ui/views/management/ManagementView';
 import { PersonsView } from '@/ui/views/management/PersonsView';
 import { StartView } from '@/ui/views/start/StartView';
@@ -68,6 +69,7 @@ const router = createHashRouter([
       { path: '/', element: view(<StartView />) },
       { path: '/verwaltung', element: view(<ManagementView />) },
       { path: '/verwaltung/personen', element: view(<PersonsView />) },
+      { path: '/verwaltung/gruppen', element: view(<GroupsView />) },
       { path: '/verwaltung/spiele', element: view(<GamesView />) },
       {
         path: '/diagnose',

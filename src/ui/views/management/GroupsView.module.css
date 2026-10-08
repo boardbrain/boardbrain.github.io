@@ -1,0 +1,183 @@
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: var(--touch-target-min);
+  padding: 0;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.searchRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.room {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.card,
+.newCard {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  justify-items: center;
+  min-width: 0;
+  padding: var(--space-4) var(--space-2);
+  text-align: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4);
+}
+
+.newCard {
+  width: 100%;
+  height: 100%;
+  color: var(--color-accent-text);
+  border-style: dashed;
+  border-color: var(--color-accent-text);
+}
+
+.plus {
+  position: relative;
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  border: 2px dashed var(--color-accent-text);
+  border-radius: 50%;
+}
+
+.plus::before,
+.plus::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2rem;
+  height: 3px;
+  content: '';
+  background: var(--color-accent-text);
+  transform: translate(-50%, -50%);
+}
+
+.plus::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.match {
+  font-size: var(--font-size-small);
+  color: var(--color-accent-text);
+}
+
+.backIcon,
+.closeIcon {
+  display: grid;
+}
+
+/* Phones: the editor fills the screen; wide screens: a large window over the room. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  overflow-y: auto;
+  background: var(--color-surface);
+}
+
+/* Phones: the editor is a page of its own on the normal background. */
+.dialog {
+  width: 100%;
+  max-width: 62rem;
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+
+@media (width >= 48rem) {
+  .backdrop {
+    align-items: flex-start;
+    padding: var(--space-6);
+    background: var(--color-backdrop);
+  }
+
+  .dialog {
+    background: var(--color-surface-overlay);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-4);
+  }
+
+  /* Wide screens: the title first, a close cross at the right edge. */
+  .dialogHeader {
+    justify-content: space-between;
+  }
+
+  .backButton {
+    order: 2;
+  }
+
+  .backIcon {
+    display: none;
+  }
+}
+
+@media (width < 48rem) {
+  .closeIcon {
+    display: none;
+  }
+}
+
+.dialogHeader {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.dialogTitle {
+  margin: 0;
+  font-size: var(--font-size-title);
+}
+
+.backButton {
+  display: grid;
+  place-items: center;
+  width: var(--touch-target-min);
+  padding: 0;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2);
+}
+
+@media (width >= 48rem) {
+  .dialogTitle {
+    font-size: 1.25rem;
+  }
+}

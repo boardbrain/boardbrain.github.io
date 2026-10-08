@@ -6,6 +6,17 @@ import 'fake-indexeddb/auto';
 import { cleanup } from '@testing-library/react';
 import { afterEach } from 'vitest';
 
+// jsdom has no matchMedia; component tests run as on a phone (no media query matches).
+Object.defineProperty(window, 'matchMedia', {
+  configurable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  }),
+});
+
 afterEach(() => {
   cleanup();
 });

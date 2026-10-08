@@ -24,6 +24,13 @@ function repositories(db: BoardBrainDb): MasterDataRepositories {
         await recordUserDataChange(db, person.updatedAt);
       },
     },
+    groups: {
+      listAll: () => db.groups.toArray(),
+      add: async (group) => {
+        await db.groups.add(group);
+        await recordUserDataChange(db, group.updatedAt);
+      },
+    },
     customGames: {
       listAll: () => db.games.toArray(),
       add: async (game) => {
@@ -35,12 +42,13 @@ function repositories(db: BoardBrainDb): MasterDataRepositories {
 }
 
 /**
- * Master data storage on IndexedDB (Architecture 7.3). A transaction spans persons, custom
+ * Master data storage on IndexedDB (Architecture 7.3). A transaction spans persons, groups, custom
  * games and `meta`; Dexie rolls it back completely if `work` throws.
  */
 export function createDexieMasterDataStore(db: BoardBrainDb): MasterDataStore {
   const repos = repositories(db);
   return {
-    transaction: (work) => db.transaction('rw', [db.persons, db.games, db.meta], () => work(repos)),
+    transaction: (work) =>
+      db.transaction('rw', [db.persons, db.groups, db.games, db.meta], () => work(repos)),
   };
 }

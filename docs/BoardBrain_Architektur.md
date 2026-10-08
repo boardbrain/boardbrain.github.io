@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.9 |
+| Version | 0.10 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 07.10.2026 |
+| Stand | 08.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -23,6 +23,7 @@
 | 0.7 | 07.10.2026 | Bündel I1-A: Codeskizzen in 6.1 und 6.2 an die Umsetzung angeglichen (`type` statt `interface` nach der ESLint-Regel `consistent-type-definitions`, Dateinamen in camelCase, `pick` ohne `!`); Testquellen über `@tests/…` und Regel `production-not-to-tests` (6.1, 14.2) (PR #11) |
 | 0.8 | 07.10.2026 | Bündel I1-B: Textschlüssel der Spielmodule ohne Abhängigkeit von `i18n` (5.1); Schemaversionen als Liste (Migrationsgerüst), Datenbankklasse ohne `!`, alle Stores ab Version 1 (7.3); Startansicht statt Diagnose unter `#/`, Kopfzeile mit Hauptnavigation (13.1); Abhängigkeiten der Ansichten über `AppDependenciesProvider` (13.2); globales `fake-indexeddb` für Lesehooks in Komponententests (14.1) (PR #12) |
 | 0.9 | 07.10.2026 | Design D-1: OP-11 geklärt; Paletten, Farbschlüssel und wählbare Designs über `data-theme` mit Standard „Holz“ (13.4, 18.2, 19); Einstellung „Design“ in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
+| 0.10 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Bindung mit `excludesCatan` (4.5, 7.1, FA-PG-04, E-27); Gruppenfarben-Schlüssel und Reihenfolge der Vergabe nach E-28, Kontrastregel für Spielfarben 3 : 1 zum Hintergrund und 2,3 : 1 auf Karten (13.4) |
 
 ## Inhaltsverzeichnis
 
@@ -245,6 +246,7 @@ Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberflä
 |---|---|
 | Person, Gruppe, Mitglied | `Person`, `Group`, `GroupMember` |
 | Globale / spielgebundene Gruppe | `binding: { kind: 'global' }` / `{ kind: 'game', gameId }` |
+| Catan ausschließen (globale Gruppe) | `binding: { kind: 'global', excludesCatan: true }` |
 | Spiel, eigenes Spiel, unterstütztes Spiel | `Game`, `CustomGame`, `GameModule` |
 | Spielversion (Basisspiel, Städte & Ritter) | `edition` (`'base'`, `'cities-and-knights'`) |
 | Modus | `mode` (`'standard'`) |
@@ -510,7 +512,9 @@ export interface Person {
 
 export interface Group {
   id: GroupId; name: string; archived: boolean;
-  binding: { kind: 'global' } | { kind: 'game'; gameId: GameId };
+  binding:
+    | { kind: 'global'; excludesCatan?: boolean } // FA-PG-04, E-27; fehlt = false
+    | { kind: 'game'; gameId: GameId };
   members: GroupMember[];                    // 2 bis 12, nach Anlage unveränderlich
   createdAt: IsoTimestamp; updatedAt: IsoTimestamp;
 }
@@ -981,9 +985,9 @@ Ein Rahmen (`AppLayout`) zeigt eine Kopfzeile mit dem App-Namen und der Hauptnav
 
 - Alle Farben, Abstände, Radien, Schatten und Dauern stehen als CSS-Variablen in `src/ui/styles/tokens.css`.
 - Paletten: 4 Catan-Farben (`--color-catan-‹key›`) und 12 Gruppenfarben (`--color-group-‹key›`), in allen Designs gleich; Rot, Orange, Blau und Weiß der Gruppenfarben verweisen auf die Catan-Töne (FA-PG-07). 6 Akzentfarben mit je einem Flächenwert für weiße Schrift und einem Textwert für dunkle Flächen. Werte aus Design D-1 (OP-11, E-26).
-- Farbschlüssel: Catan `red`, `blue`, `white`, `orange`; Gruppen `red`, `orange`, `yellow`, `lime`, `green`, `teal`, `cyan`, `blue`, `indigo`, `violet`, `pink`, `white`; Akzent `indigo`, `blue`, `teal`, `green`, `amber`, `berry`. Die Reihenfolge der automatischen Vergabe legt `core/model` fest, nicht die Tokens.
+- Farbschlüssel: Catan `red`, `blue`, `white`, `orange`; Gruppen `red`, `blue`, `yellow`, `green` (Moosgrün), `indigo`, `orange`, `teal` (Petrol), `magenta`, `brown` (Kaffee), `pink` (Rosé), `gray` (Steingrau), `white` – in dieser Reihenfolge vergibt `core/model` die Farben automatisch (E-28); Akzent `indigo`, `blue`, `teal`, `green`, `amber`, `berry`. Die Reihenfolge der automatischen Vergabe legt `core/model` fest, nicht die Tokens. *(Gruppen geändert in 0.10: `lime`, `cyan`, `violet` entfallen, `magenta`, `brown`, `gray` neu)*
 - Designs (NFA-GB-03): Jedes Design ist ein Satz Werte für Oberflächen, Text, Rahmen, Hintergrundbild (`--background-image`) und Standard-Akzent unter `:root[data-theme='‹key›']`. Standard ist `wood` („Holz“, auch unter `:root` ohne Merkmal); dazu `ocean`, `forest`, `glass`. Eine gewählte Akzentfarbe setzt `data-accent` am Wurzelelement und überschreibt den Standard-Akzent, weil ihre Regeln danach stehen. Ein weiteres Design ist ein weiterer Block, ohne Änderung an Komponenten.
-- Alle Designs sind dunkel (NFA-GB-02). Mindestkontrast auf jeder Fläche jedes Designs: 4,5 : 1 für Text, 3 : 1 für Catan- und Gruppenfarben. „Glas“ nutzt durchscheinende Flächen mit Unschärfe; das kostet Rechenleistung und wird in US-GB-01 auf älteren Geräten geprüft.
+- Alle Designs sind dunkel (NFA-GB-02). Mindestkontrast für Text: 4,5 : 1 auf jeder Fläche jedes Designs. Catan- und Gruppenfarben: 3 : 1 zum Hintergrund (`--color-surface`) jedes Designs und 2,3 : 1 auf dessen Karten und Überlagerungen (`--color-surface-raised`, `--color-surface-overlay`); untereinander unterscheiden sich die Gruppenfarben um mindestens ΔE 25 (CIE76), Vorrang hat diese Unterscheidbarkeit (E-28). *(geändert in 0.10)* „Glas“ nutzt durchscheinende Flächen mit Unschärfe; das kostet Rechenleistung und wird in US-GB-01 auf älteren Geräten geprüft.
 - Gespeicherte Farbschlüssel werden über eine Zuordnung in Variablen übersetzt, z. B. `catanColor: 'white'` → `var(--color-catan-white)`.
 - Stylelint verbietet Farbwerte außerhalb von `tokens.css`; ESLint verbietet Farbwerte in TypeScript (NFA-GB-05).
 - Ein späterer Hellmodus (PP-09) ist ein zweiter Satz von Werten für dieselben Variablen.

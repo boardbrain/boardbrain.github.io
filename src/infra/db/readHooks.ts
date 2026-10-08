@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { sortByName, type CustomGame, type Person } from '@/core/model';
+import { sortByName, type CustomGame, type Group, type Person } from '@/core/model';
 import type { BoardBrainDb } from './database';
 
 /**
@@ -15,4 +15,11 @@ export function usePersons(db: BoardBrainDb): readonly Person[] | undefined {
  */
 export function useCustomGames(db: BoardBrainDb): readonly CustomGame[] | undefined {
   return useLiveQuery(async () => sortByName(await db.games.toArray()), [db]);
+}
+
+/**
+ * All groups sorted by name; `undefined` while loading (Architecture 13.2).
+ */
+export function useGroups(db: BoardBrainDb): readonly Group[] | undefined {
+  return useLiveQuery(async () => sortByName(await db.groups.toArray()), [db]);
 }

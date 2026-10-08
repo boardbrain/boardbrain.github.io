@@ -1,15 +1,26 @@
 import {
   containsName,
   createCustomGame,
+  createGroup,
   createPerson,
+  GROUP_SIZE,
   toGameId,
+  toGroupId,
   toPersonId,
+  type BoundGame,
   type CustomGame,
+  type GameId,
+  type Group,
+  type GroupBinding,
+  type GroupError,
+  type MemberColors,
   type NameEmptyError,
   type Person,
+  type PersonId,
 } from '@/core/model';
-import { err, type Result } from '@/core/shared';
+import { assert, err, type Result } from '@/core/shared';
 import type { Clock, IdGenerator, MasterDataStore } from '@/app/ports';
+import { findSupportedGame, gameCapabilities } from '@/games/registry';
 
 /**
  * Error code when a record with the same name already exists (US-PG-01 AK-3, US-SP-02 AK-2).
@@ -26,8 +37,18 @@ export type CreatePersonInput = {
 };
 
 /**
+ * Input for creating a group. `colors` has one entry per person, in the same order.
+ */
+export type CreateGroupInput = {
+  readonly name: string;
+  readonly binding: GroupBinding;
+  readonly personIds: readonly PersonId[];
+  readonly colors: readonly MemberColors[];
+};
+
+/**
  * Creating, editing, archiving and deleting persons, groups and custom games
- * (Architecture 4.4). This increment contains creating persons and custom games.
+ * (Architecture 4.4). This increment contains creating persons, groups and custom games.
  */
 export type MasterDataService = {
   /**
@@ -37,6 +58,12 @@ export type MasterDataService = {
   createPerson(
     input: CreatePersonInput,
   ): Promise<Result<Person, NameEmptyError | NameDuplicateError>>;
+  /**
+   * Creates a group (US-PG-02, US-PG-03). The members are checked against the stored persons,
+   * and the binding against the games; a person or game that does not exist is a programming
+   * error and throws.
+   */
+  createGroup(input: CreateGroupInput): Promise<Result<Group, GroupError>>;
   /**
    * Creates a custom game (US-SP-02). Same-named games, including supported ones such as
    * Catan, are rejected with `name-duplicate`.
@@ -80,6 +107,35 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
       });
     },
 
+    async createGroup({ name, binding, personIds, colors }) {
+      return store.transaction(async ({ persons, customGames, groups }) => {
+        const allPersons = await persons.listAll();
+        const members = personIds.map((id) => {
+          const person = allPersons.find((candidate) => candidate.id === id);
+          assert(person !== undefined, `person ${id} exists`);
+          return person;
+        });
+        const boundGame =
+          binding.kind === 'global'
+            ? null
+            : boundGameOf(binding.gameId, await customGames.listAll());
+        const created = createGroup({
+          id: toGroupId(ids.newId()),
+          name,
+          binding,
+          boundGame,
+          persons: members,
+          colors,
+          now: clock.now(),
+        });
+        if (!created.ok) {
+          return created;
+        }
+        await groups.add(created.value);
+        return created;
+      });
+    },
+
     async createCustomGame(name) {
       const created = createCustomGame({ id: toGameId(ids.newId()), name, now: clock.now() });
       if (!created.ok) {
@@ -97,4 +153,21 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
       });
     },
   };
+}
+
+// FA-SP-05, FA-PG-10: a supported game dictates its player count and colours; a custom game
+// has no colours and can be played by any group.
+function boundGameOf(gameId: GameId, customGames: readonly CustomGame[]): BoundGame {
+  const supported = findSupportedGame(gameId);
+  if (supported !== undefined) {
+    return {
+      maxPlayers: supported.playerCount.max,
+      hasPlayerColors: gameCapabilities(gameId).playerColors !== null,
+    };
+  }
+  assert(
+    customGames.some((game) => game.id === gameId),
+    'the bound game exists',
+  );
+  return { maxPlayers: GROUP_SIZE.max, hasPlayerColors: false };
 }

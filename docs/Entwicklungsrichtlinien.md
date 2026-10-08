@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.4 |
+| Version | 0.5 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 07.10.2026 |
+| Stand | 08.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -19,6 +19,7 @@
 | 0.2 | 07.10.2026 | Ergebnisse des Setups: keine Hinweise auf Claude in Commits und Pull Requests (3.3); Markdown von Prettier ausgenommen (4.2); ESLint-Regeln ohne `eslint-plugin-react` (5, 13; Architektur ADR-026); Node.js 26 vor LTS-Einstufung (10.3); Code durchgehend englisch, auch Kommentare und Testnamen (4.3, 4.6, 8.2; Architektur ADR-027) (PR #2) |
 | 0.3 | 07.10.2026 | Aufträge an Claude Code verweisen auf `docs/Umsetzungsplan.md` (14) |
 | 0.4 | 07.10.2026 | Namensregel für React-Kontexte (4.3) (PR #12) |
+| 0.5 | 08.10.2026 | Designvorschläge vor dem Bau neuer oder geänderter Oberflächen (2.2, 2.5); Lehre aus I1-C, wo der Product Owner nach der Umsetzung einen anderen Aufbau wollte |
 
 ## Inhaltsverzeichnis
 
@@ -65,12 +66,13 @@ Leitlinie: **Schnelle Umsetzung hat Vorrang vor feingranularer Steuerung** (E-22
 Ein **Story-Bündel** ist eine Gruppe zusammengehöriger User Stories, die gemeinsam umgesetzt und abgenommen wird, etwa „Personen und Gruppen“ (US-PG-01 bis US-PG-04). Je Inkrement gibt es etwa zwei bis vier Bündel; Fachlogik mit strengen Prüfkriterien wird kleiner geschnitten als Oberflächen. Der Zuschnitt wird zu Beginn eines Inkrements festgelegt.
 
 1. **Auftrag:** Der Product Owner nennt das Bündel.
-2. **Umsetzung:** Claude Code legt den Arbeitsbranch von `develop` an, programmiert, schreibt Tests, aktualisiert betroffene Dokumente und committet in sinnvollen Zwischenschritten.
-3. **Lokale Prüfung:** Claude Code führt `npm run check` und `npm run test:e2e` aus und behebt alle Fehler.
-4. **Pull Request:** Claude Code pusht und eröffnet den Pull Request nach `develop` mit einer Beschreibung nach Vorlage (3.4), einschließlich Testanleitung für den Product Owner.
-5. **Abnahme:** Claude Code startet den Entwicklungsserver mit diesem Stand; der Product Owner testet am PC und bei Bedarf auf Mobilgeräten. Gleichzeitig laufen die Prüfungen auf GitHub.
-6. **Nachbesserung:** Rückmeldungen behebt Claude Code im selben Branch; der Pull Request aktualisiert sich.
-7. **Merge:** Der Product Owner mergt (Squash).
+2. **Designvorschläge:** Enthält das Bündel eine neue oder sichtbar geänderte Oberfläche, zeigt Claude Code zuerst Designvorschläge (2.5) und baut erst nach der Wahl des Product Owners. *(neu in 0.5)*
+3. **Umsetzung:** Claude Code legt den Arbeitsbranch von `develop` an, programmiert, schreibt Tests, aktualisiert betroffene Dokumente und committet in sinnvollen Zwischenschritten.
+4. **Lokale Prüfung:** Claude Code führt `npm run check` und `npm run test:e2e` aus und behebt alle Fehler.
+5. **Pull Request:** Claude Code pusht und eröffnet den Pull Request nach `develop` mit einer Beschreibung nach Vorlage (3.4), einschließlich Testanleitung für den Product Owner.
+6. **Abnahme:** Claude Code startet den Entwicklungsserver mit diesem Stand; der Product Owner testet am PC und bei Bedarf auf Mobilgeräten. Gleichzeitig laufen die Prüfungen auf GitHub.
+7. **Nachbesserung:** Rückmeldungen behebt Claude Code im selben Branch; der Pull Request aktualisiert sich.
+8. **Merge:** Der Product Owner mergt (Squash).
 
 ### 2.3 Haltepunkte
 
@@ -93,6 +95,15 @@ Fehlerbehebungen, Dokumentationsänderungen und Abhängigkeits-Updates folgen de
 | Fachlogik ohne Oberfläche | Liste der Testfälle in Klartext und deren Ergebnis prüfen |
 | Dokumentation | Änderungen lesen |
 | Abhängigkeits-Updates | Kurzer Rundgang durch die App |
+
+### 2.5 Designvorschläge *(neu in 0.5)*
+
+Vor dem Bau einer neuen oder sichtbar geänderten Oberfläche (Ansicht, Ablauf, Farben) zeigt Claude Code mehrere Vorschläge. Das spart Rückschritte: Ein Aufbau lässt sich in einer Vorschau in Minuten ändern, in fertigem Code mit Tests erst nach Stunden.
+
+- **Form:** eine lokale, klickbare HTML-Datei im Wurzelordner des Repositorys (z. B. `groups-preview.html`, `color-preview.html`), eingetragen in `.git/info/exclude` und damit nicht im Repository. Der Entwicklungsserver liefert sie mit aus, sodass der Product Owner sie auf allen Abnahmegeräten öffnen kann (`https://192.168.178.20:5173/‹datei›`).
+- **Inhalt:** mindestens zwei, besser drei bis fünf deutlich verschiedene Ansätze, umschaltbar; Handy hochkant und Tablet quer; die echten Farbwerte aus `tokens.css` und realistische Datenmengen (auch eine volle Liste); bei Farben die Kontraste und Farbabstände als Zahl.
+- **Ablauf:** Der Product Owner wählt, kombiniert oder wünscht weitere Varianten; jede Runde bleibt als eigene Datei zum Vergleich erhalten (`…-v1.html`). Die gewählte Variante hält Claude Code im Pull Request fest.
+- **Ausnahme:** reine Fehlerbehebungen und Änderungen, die einem bereits gewählten Entwurf folgen.
 
 ---
 
@@ -581,4 +592,5 @@ Markdown, deutsch, Tabellen für Festlegungen, Codebeispiele nur als Skizzen. Pr
 - **Kontext:** Für jedes Bündel eine neue Sitzung beginnen (`/clear`). Das spart Kontingent und verhindert, dass alte Annahmen nachwirken. `CLAUDE.md` wird in jeder Sitzung automatisch gelesen.
 - **Berechtigungen:** nach Architektur 16.5. Harte Grenzen stehen in `.claude/settings.json`, nicht nur in `CLAUDE.md`.
 - **Auftrag formulieren:** Bündel und Aufgaben stehen mit Modell, Aufwand und Branch-Namen in `docs/Umsetzungsplan.md`, ebenso der genaue Ablauf einer Sitzung. Auftrag: „Setze Bündel I1-A aus docs/Umsetzungsplan.md um.“, bei Bedarf mit besonderen Wünschen.
+- **Designvorschläge:** bei Oberflächen vor dem Bau (2.5). *(neu in 0.5)*
 - **Nach dem Merge:** Claude Code wechselt zurück auf `develop` und holt den neuen Stand (`git switch develop && git pull`).

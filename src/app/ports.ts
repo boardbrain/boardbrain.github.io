@@ -1,4 +1,4 @@
-import type { CustomGame, IsoTimestamp, Person } from '@/core/model';
+import type { CustomGame, Group, IsoTimestamp, Person } from '@/core/model';
 
 /**
  * Write and read access to persons inside a transaction (Architecture 7.3, 7.4).
@@ -21,15 +21,26 @@ export type CustomGameRepository = {
 };
 
 /**
+ * Write and read access to groups inside a transaction (Architecture 7.3, 7.4).
+ */
+export type GroupRepository = {
+  /** All groups, including archived ones. */
+  listAll(): Promise<readonly Group[]>;
+  /** Adds a new group and records the change of user data. */
+  add(group: Group): Promise<void>;
+};
+
+/**
  * Repositories available inside a master data transaction.
  */
 export type MasterDataRepositories = {
   readonly persons: PersonRepository;
   readonly customGames: CustomGameRepository;
+  readonly groups: GroupRepository;
 };
 
 /**
- * Storage for persons and custom games. The application service sets the transaction
+ * Storage for persons, groups and custom games. The application service sets the transaction
  * boundary (Architecture 4.4): everything `work` does is written completely or not at all.
  */
 export type MasterDataStore = {
