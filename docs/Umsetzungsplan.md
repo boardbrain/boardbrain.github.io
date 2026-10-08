@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.7 |
-| Stand | 07.10.2026 |
-| Grundlage | BoardBrain_Spezifikation.md v0.7 (2.3), Entwicklungsrichtlinien.md v0.4 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.13 (9.3, 13), BoardBrain_Architektur.md v0.9 (19) |
+| Version | 0.8 |
+| Stand | 08.10.2026 |
+| Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.10 (19) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -20,6 +20,7 @@
 | 0.5 | 07.10.2026 | Neues Bündel I1-E „Personen und Gruppen im Überblick“ (US-VW-05) nach I1-C (PR #13) |
 | 0.6 | 07.10.2026 | D-1 erledigt (#14): Farbwerte, Designs mit Standard „Holz“; Hinweise für I1-C und US-GB-01 (I6) |
 | 0.7 | 07.10.2026 | I1-C umgesetzt: Gruppen und Farben (Abnahme durch den Product Owner offen) |
+| 0.8 | 08.10.2026 | Ergebnis der Abnahme von I1-C: Gruppenseite als „Spielraum“, Catan ausschließen, überarbeitete Gruppenfarben (I1-C); neues Bündel I1-F „Bearbeiten“ nach I1-E (Spezifikation 0.8); Designvorschläge vor jeder neuen Oberfläche (4.1, Richtlinien 2.5) |
 
 ## 1. Zweck
 
@@ -32,7 +33,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | # | Schritt | Wann | Status |
 |---|---|---|---|
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
-| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C in Abnahme |
+| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C in Nachbesserung nach der Abnahme |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
@@ -69,6 +70,7 @@ Grundlage ist Anforderungsdokumentation 9.3. Modell und Aufwand stellt der Produ
 1. **Product Owner:** neue Sitzung in VS Code beginnen (bzw. `/clear`), Modell und Aufwand nach Kapitel 5 (Bündel) bzw. 6 (kleine Aufgaben) einstellen, Auftrag senden:
    > Setze Bündel ‹ID› aus docs/Umsetzungsplan.md um.
 2. **Claude Code:** liest diesen Plan, die genannten Stories und Kapitel. Antwortet mit einem **kurzen Umsetzungsplan**: Schritte, Tests je Abnahmekriterium, neue Pakete mit Version, Fragen zu Haltepunkten. Beginnt erst nach „los“.
+   **Bei neuen oder geänderten Oberflächen** zeigt Claude Code danach zuerst Designvorschläge als lokale, klickbare HTML-Datei (Richtlinien 2.5) und baut erst nach der Wahl des Product Owners. *(neu in 0.8)*
 3. **Claude Code:** Branch von aktuellem `develop` mit dem Namen aus Kapitel 5; umsetzen, testen, in Schritten committen; `npm run check`, `npm run test:e2e`, bei Zufall zusätzlich `npm run test:stat`; Status in Kapitel 2 und 5 auf „umgesetzt (#PR)“ setzen; Pull Request nach `develop` nach Vorlage.
 4. **Claude Code:** startet den Entwicklungsserver frisch und nennt die Adressen (PC `https://localhost:5173/`, Mobilgeräte `https://192.168.178.20:5173/`) und die Testschritte je Gerät.
 5. **Product Owner:** testet, meldet Fehler im Chat. Claude Code behebt sie im selben Branch.
@@ -98,8 +100,9 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 |---|---|---|---|---|
 | I1-A Zufall und Losbaustein | US-LS-01 | Opus, high | `feat/us-ls-01-random-draw` | umgesetzt (#11) |
 | I1-B Personen, Spiele, Datenbank | US-PG-01, US-SP-02 | Opus, high | `feat/us-pg-01-persons-and-games` | umgesetzt (#12) |
-| I1-C Gruppen und Farben | US-PG-02, US-PG-03 | Sonnet, medium | `feat/us-pg-02-groups-and-colors` | umgesetzt, in Abnahme |
+| I1-C Gruppen und Farben | US-PG-02, US-PG-03 | Sonnet, medium | `feat/us-pg-02-groups-and-colors` | in Nachbesserung nach der Abnahme |
 | I1-E Personen und Gruppen im Überblick | US-VW-05 | Sonnet, medium | `feat/us-vw-05-persons-and-groups-overview` | offen |
+| I1-F Bearbeiten | US-VW-06, US-VW-02, US-VW-07 | Sonnet, medium | `feat/us-vw-06-edit-master-data` | offen |
 | I1-D Brett und Installation | US-PL-01 | Opus, high | `feat/us-pl-01-board-and-install` | offen |
 
 ### I1-A Zufall und Losbaustein
@@ -119,18 +122,34 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 
 ### I1-C Gruppen und Farben
 
-- **Inhalt:** Gruppen mit 2 bis 12 Mitgliedern und Bindung (global oder ein Spiel), Namensvorschlag, Prüfung gleichnamiger Personen (US-PG-02, Spezifikation 3.4); Farbmodell mit Gruppen- und Catan-Farbe, automatische Vergabe und Farbtausch (US-PG-03, Spezifikation 3.3). Farbwerte und Farbschlüssel stehen seit D-1 fest (Architektur 13.4). Die Reihenfolge der automatischen Vergabe so wählen, dass die ersten Farben einer Gruppe möglichst verschieden sind (nicht Blau neben Indigo, Petrol neben Cyan).
-- **Umsetzung:** Reihenfolge der automatischen Gruppenfarben: Rot, Blau, Gelb, Grün, Violett, Orange, Cyan, Pink, Limette, Indigo, Petrol, Weiß (`GROUP_COLOR_KEYS` in `core/model/colors.ts`; Catan: Rot, Blau, Weiß, Orange). Das nachträgliche Ändern von Farben einer gespeicherten Gruppe gehört zu US-VW-02 (I5); I1-C vergibt und tauscht Farben beim Anlegen.
-- **Pakete:** keine; `zustand` war nicht nötig, der Formularzustand bleibt lokal (Architektur 13.2).
-- **Abnahme durch den Product Owner:** Gruppen mit 2, 4 und 5 Mitgliedern anlegen, Catan-Bindung bei 5 Mitgliedern gesperrt, Farbtausch prüfen; Hoch- und Querformat auf S26 und iPad.
+- **Inhalt:** Gruppen mit 2 bis 12 Mitgliedern und Bindung (global, global ohne Catan oder ein Spiel), Namensvorschlag, Prüfung gleichnamiger Personen (US-PG-02, Spezifikation 3.4); Farbmodell mit Gruppen- und Catan-Farbe, automatische Vergabe und Farbtausch (US-PG-03, Spezifikation 3.3).
+- **Erste Abnahme (07./08.10.2026):** Die erste Fassung (Formular, Palette aus D-1) hat der Product Owner nicht abgenommen. In drei Runden Designvorschlägen (`groups-preview.html`) und mehreren Farbrunden (`color-preview.html`) sind entschieden worden:
+  - **Catan ausschließen** bei globalen Gruppen (FA-PG-04, E-27, US-PG-02 AK-7).
+  - **Gruppenfarben nach E-28** in dieser Reihenfolge der automatischen Vergabe: Rot, Blau, Gelb, Moosgrün, Indigo (hell), Orange, Petrol, Magenta, Kaffee, Rosé, Steingrau, Weiß (`GROUP_COLOR_KEYS` in `core/model/colors.ts`; Catan: Rot, Blau, Weiß, Orange); Kontrastregel nach Architektur 13.4.
+  - **Gruppenseite als „Spielraum“** (Variante F6): Alle Gruppen erscheinen als Tische im Raster (Mini-Tisch mit Farbpunkten, Name, Bindung und Anzahl), erste Karte „+ Neuer Tisch“. Eine Lupe neben der Überschrift öffnet eine Suche nach Gruppenname und Mitgliedern („Anna sitzt hier“). „+ Neuer Tisch“ öffnet den Editor, auf dem Handy bildschirmfüllend mit Zurück-Pfeil, auf Tablet und PC als großes Fenster über dem Raum.
+  - **Editor:** Bank „Wer spielt mit?“, runder Tisch mit farbigen Plätzen (Catan-Farbe als eckiges Zeichen), daneben die Palette der gewählten Person (Gruppenfarbe rund, Catan-Farbe eckig, Anfangsbuchstabe zeigt, wer eine Farbe hat, Antippen tauscht), darunter Gruppenname und „Was wird gespielt?“ mit dem Schalter „Catan ausschließen“.
+  - **Bank:** auf dem Handy eine wischbare Zeile mit festem Knopf „Alle ‹n› ▾“, auf Tablet und PC ein Feld mit zwei Zeilen zum Scrollen nach unten mit „Alle ‹n› anzeigen ▾“; aufgeklappt mit Suchfeld „Person suchen“. Nirgends sichtbare Scrollleisten, stattdessen ein weich auslaufender Rand.
+- **Hinweis:** Das nachträgliche Ändern von Farben und Bindung einer gespeicherten Gruppe gehört zu US-VW-02 (I1-F); I1-C vergibt und tauscht Farben beim Anlegen.
+- **Pakete:** keine; `zustand` war nicht nötig, der Formularzustand bleibt lokal (Architektur 13.2). Aufklappen und Einblenden zunächst ohne Animation; Motion (Architektur 13.6) kommt mit dem ersten Bündel, das Animationen braucht.
+- **Abnahme durch den Product Owner:** Gruppen mit 2, 4, 5 und 12 Mitgliedern anlegen; Catan bei 5 Mitgliedern gesperrt; Catan ausschließen bei 3 Mitgliedern; Farbtausch; Suche nach Gruppe und Person; Bank auf- und zuklappen und durchsuchen; Hoch- und Querformat auf S26 und iPad.
 
 ### I1-E Personen und Gruppen im Überblick
 
 - **Reihenfolge:** nach I1-C und vor I1-D. Die ID ist neu vergeben, weil IDs nie umnummeriert werden (Richtlinien 11.1).
-- **Inhalt:** Personenliste mit den Gruppen jeder Person; Detailansicht einer Person (`#/verwaltung/personen/‹id›`); Gruppenliste und Detailansicht einer Gruppe mit Bindung, Mitgliedern und Farben (`#/verwaltung/gruppen/‹id›`); gegenseitige Verweise (US-VW-05). Die Detailansichten sind die Grundlage, an die später US-ER-04 (Ergebnisse einer Gruppe, I3) und US-VW-01 bis -03 (Bearbeiten, Archivieren, I5) anknüpfen.
+- **Inhalt:** Personenliste mit den Gruppen jeder Person; Detailansicht einer Person (`#/verwaltung/personen/‹id›`); Gruppenliste und Detailansicht einer Gruppe mit Bindung, Mitgliedern und Farben (`#/verwaltung/gruppen/‹id›`); gegenseitige Verweise (US-VW-05). Die Detailansichten sind die Grundlage, an die US-VW-02, -06 und -07 (Bearbeiten, I1-F), US-ER-04 (Ergebnisse einer Gruppe, I3) sowie US-VW-01, -03 und -04 (Archivieren, Löschen, I5) anknüpfen. *(geändert in 0.8)*
+- **Hinweis (0.8):** Die Gruppenliste ist seit I1-C der „Spielraum“; I1-E ergänzt die Detailansicht eines Tisches und die Personenseite. Für beide zuerst Designvorschläge im Stil des Spielraums (Richtlinien 2.5).
 - **Warum hier:** Erst mit I1-C gibt es Gruppen; ohne Übersicht lassen sich angelegte Gruppen und Farben nicht nachsehen, was spätestens am ersten Spieleabend mit I2 fehlt.
 - **Pakete:** keine.
 - **Abnahme durch den Product Owner:** Personen und Gruppen anlegen, Gruppen in der Personenliste sehen, zwischen Person und Gruppe hin- und herspringen, Zurück-Taste auf dem S26.
+
+### I1-F Bearbeiten *(neu in 0.8)*
+
+- **Reihenfolge:** nach I1-E (die Detailansichten sind der Ort zum Bearbeiten) und vor I1-D.
+- **Inhalt:** Person umbenennen mit Prüfung gleichnamiger Mitglieder in ihren Gruppen (US-VW-06); Gruppe bearbeiten: Name, Farben, Bindung einschließlich „Catan ausschließen“, Mitglieder unveränderlich (US-VW-02); eigenes Spiel umbenennen mit eindeutigem Namen, Catan nicht umbenennbar (US-VW-07).
+- **Warum vorgezogen:** Wunsch des Product Owners (Spezifikation 0.8). Tippfehler oder eine falsche Bindung sollen vor dem ersten Spieleabend mit I2 korrigierbar sein. Archivieren und Löschen bleiben in I5, weil sie Partien (I3) und Sicherungspunkte (I4) brauchen.
+- **Hinweis:** US-VW-02 AK-3 (bestehende Partien) wird mit I3 nachgewiesen, AK-5 (laufende Partie) mit I2; US-VW-06 AK-1 für Ergebnisse und Statistiken mit I3.
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** Person, Gruppe und eigenes Spiel umbenennen; Farbe und Bindung einer Gruppe ändern, Catan ausschließen und wieder zulassen; Konflikte (gleichnamige Person in einer Gruppe, doppelter Spielname, 5 Mitglieder an Catan) werden verhindert.
 
 ### I1-D Brett und Installation
 

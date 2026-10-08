@@ -20,7 +20,7 @@ Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBr
 
 ## Arbeitsablauf (EP-10, EP-11)
 
-0. Auftrag nennt ein Bündel oder eine Aufgabe aus `docs/Umsetzungsplan.md`. Zuerst kurzen Umsetzungsplan mit Tests, Paketen und Haltepunkt-Fragen zeigen; erst nach „los“ beginnen (Umsetzungsplan 4.1). Status im Umsetzungsplan im selben PR fortschreiben.
+0. Auftrag nennt ein Bündel oder eine Aufgabe aus `docs/Umsetzungsplan.md`. Zuerst kurzen Umsetzungsplan mit Tests, Paketen und Haltepunkt-Fragen zeigen; erst nach „los“ beginnen (Umsetzungsplan 4.1). Bei neuen oder geänderten Oberflächen zuerst Designvorschläge als lokale, klickbare HTML-Datei im Wurzelordner zeigen (in `.git/info/exclude`, über den Dev-Server auf allen Geräten erreichbar) und erst nach der Wahl des Product Owners bauen (Richtlinien 2.5). Status im Umsetzungsplan im selben PR fortschreiben.
 1. Arbeitsbranch von aktuellem `develop`: `‹typ›/‹beschreibung›`, englisch, klein (`feat/us-pg-01-persons-and-groups`).
 2. Umsetzen mit Tests und Doku-Anpassungen; in sinnvollen Schritten committen.
 3. Vor dem Push: `npm run check` und `npm run test:e2e` bestanden. Vor einem PR nach `main` zusätzlich `npm run test:stat`.

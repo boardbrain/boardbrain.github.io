@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.13 |
+| Version | 0.14 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 07.10.2026 |
+| Stand | 08.10.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -27,6 +27,7 @@
 | 0.11 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung beginnt vor dem Design; OP-11 parallel zu I1, OP-06 vor I5; Verweis auf `docs/Umsetzungsplan.md` (13) |
 | 0.12 | 07.10.2026 | Übersicht über Personen und Gruppen mit Detailansichten (neu FA-VW-06) (PR #13) |
 | 0.13 | 07.10.2026 | Design D-1: OP-11 geklärt (E-26); wählbare Designs mit Standard „Holz“ und Standard-Akzent je Design statt einer einzelnen Akzentfarbe mit Standard Lila (NFA-GB-03) |
+| 0.14 | 08.10.2026 | Abnahme von I1-C: globale Gruppen können Catan ausschließen (FA-PG-04, E-27); überarbeitete Gruppenfarben-Palette und Kontrastregel für Spielfarben (E-28, E-26 angepasst) |
 
 ## Inhaltsverzeichnis
 
@@ -151,7 +152,7 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | FA-PG-01 | Nutzer können beliebig viele Personen anlegen. |
 | FA-PG-02 | Nutzer können beliebig viele Gruppen anlegen. |
 | FA-PG-03 | Eine Gruppe besteht aus einer festen Menge von Personen. Eine Person kann mehreren Gruppen angehören. |
-| FA-PG-04 | Eine Gruppe ist entweder global oder an genau ein Spiel gebunden. |
+| FA-PG-04 | Eine Gruppe ist entweder global oder an genau ein Spiel gebunden. Eine globale Gruppe kann Catan ausschließen; sie spielt dann alle übrigen Spiele und hat keine Catan-Farben. *(ergänzt in 0.14)* |
 | FA-PG-05 | Bei Spielen mit Spielfarben (FA-SP-05) hat jede Person innerhalb einer Gruppe, die dieses Spiel spielen kann, je Spiel eine Standard-Spielfarbe. *(präzisiert in 0.4)* |
 | FA-PG-06 | Die Spielfarbe einer Person kann für eine einzelne Partie abweichend gewählt werden, ohne die Standardfarbe zu verändern. |
 | FA-PG-07 | Jede Person hat innerhalb einer Gruppe eine Gruppenfarbe aus einer modernen, spielunabhängigen Palette, die auch die vier Catan-Farben enthält. Gruppenfarbe und Catan-Farbe dürfen gleich sein. In an Catan gebundenen Gruppen ist die Catan-Farbe zugleich die Gruppenfarbe. *(neu in 0.4)* |
@@ -490,7 +491,9 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-23 | Der Quellcode steht unter der PolyForm Strict License 1.0.0 mit dem Hinweis „Required Notice: Copyright (c) 2026 Jonasss29“; er ist öffentlich einsehbar (E-06), aber nicht Open Source: Nutzung nur für nichtkommerzielle Zwecke, Weitergabe und Änderungen durch Dritte sind nicht erlaubt. Klänge und Schriften behalten ihre eigenen Lizenzen *(neu in 0.8, geändert in 0.9: vorher MIT)* | Der Product Owner behält die Kontrolle über Weitergabe und kommerzielle Nutzung; standardisierter, verständlicher Lizenztext; verträglich mit den Lizenzen der Abhängigkeiten (MIT, ISC, BSD, Apache 2.0 erlauben die Verwendung in nicht offenem Code); enthält einen Haftungsausschluss; Pseudonym statt Klarname |
 | E-24 | Barrierefreiheit ist kein Ziel von Version 1 *(neu in 0.8)* | Die App wird nur im Freundeskreis genutzt. Unberührt bleiben die Erkennbarkeit von Gebäuden und Straßen (FA-PL-05, FA-PL-06, US-PL-04) und die technische Regel, echte Bedienelemente mit Beschriftung zu verwenden (Entwicklungsrichtlinien) |
 | E-25 | Erste Veröffentlichung ist ein Platzhalter (Release 0.1.0) ohne Service Worker und ohne Datenspeicherung; über Vorabversionen der echten App vor 1.0 wird nach Inkrement I2 entschieden (OP-13) *(neu in 0.8)* | Die Veröffentlichungskette wird früh auf der echten Adresse nachgewiesen, ohne dass etwas auf den Geräten zurückbleibt |
-| E-26 | Farbwerte nach Design D-1: Standarddesign „Holz“ (warmes, mitteldunkles Braun, Akzent Bernstein); weitere Designs „Tiefsee“ (Petrol), „Wald“ (Grüngrau) und „Glas“ (Farbverlauf mit Milchglasflächen); kräftige Catan-Farben und eine gedeckte Gruppenfarben-Palette; 6 Akzentfarben (Indigo, Blau, Petrol, Grün, Bernstein, Beere). Die Werte stehen ausschließlich in `src/ui/styles/tokens.css` *(neu in 0.13)* | Auswahl des Product Owners anhand einer Vorschau auf den Abnahmegeräten; alle Werte erreichen in allen Designs mindestens 4,5 : 1 für Text und 3 : 1 für Catan- und Gruppenfarben, sodass die Spielfarben unabhängig vom Design lesbar bleiben |
+| E-26 | Farbwerte nach Design D-1: Standarddesign „Holz“ (warmes, mitteldunkles Braun, Akzent Bernstein); weitere Designs „Tiefsee“ (Petrol), „Wald“ (Grüngrau) und „Glas“ (Farbverlauf mit Milchglasflächen); kräftige Catan-Farben und eine gedeckte Gruppenfarben-Palette; 6 Akzentfarben (Indigo, Blau, Petrol, Grün, Bernstein, Beere). Die Werte stehen ausschließlich in `src/ui/styles/tokens.css` *(neu in 0.13; Gruppenfarben und Kontrastregel geändert in 0.14 durch E-28)* | Auswahl des Product Owners anhand einer Vorschau auf den Abnahmegeräten; alle Werte erreichen in allen Designs mindestens 4,5 : 1 für Text, sodass die App unabhängig vom Design lesbar bleibt |
+| E-27 | Eine globale Gruppe kann Catan ausschließen; sie hat dann auch bei 2 bis 4 Mitgliedern nur Gruppenfarben *(neu in 0.14)* | Wer mit einer kleinen Gruppe nie Catan spielt, muss keine Catan-Farben vergeben; die Gruppe bleibt dennoch für alle übrigen Spiele offen. Wunsch des Product Owners bei der Abnahme von I1-C |
+| E-28 | Überarbeitete Gruppenfarben-Palette mit 12 gut unterscheidbaren, gedeckten Farben: Rot, Blau, Orange und Weiß (Catan-Töne), Gelb, Moosgrün, Indigo (hell), Petrol, Magenta, Kaffee, Rosé, Steingrau. Spielfarben erreichen mindestens 3 : 1 zum Hintergrund jedes Designs und mindestens 2,3 : 1 auf dessen Karten *(neu in 0.14)* | Die Unterscheidbarkeit der Personenfarben untereinander hat Vorrang vor dem Kontrast zum Hintergrund: In der Palette aus D-1 waren Grün, Limette und Petrol sowie Violett und Indigo zu ähnlich (Farbabstand ΔE bis 13); die neue Palette erreicht mindestens ΔE 29. Ausgewählt vom Product Owner in der Farbvorschau auf den Abnahmegeräten, in allen vier Designs geprüft |
 
 ---
 

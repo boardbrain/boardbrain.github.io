@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.7 |
+| Version | 0.8 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 07.10.2026 |
+| Stand | 08.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -21,6 +21,7 @@
 | 0.5 | 06.10.2026 | Ergebnisse der Setup-Planung: Bezug auf Anforderungsdokumentation v0.8; Umsetzung in Story-Bündeln und Platzhalter-Release 0.1.0 vor 1.0 (2.3); Hinweis zur Barrierefreiheit (Kapitel 5, E-24); Kapitel 8 um die Ergebnisse der Setup-Planung ergänzt (OP-12 geklärt, OP-13 neu) |
 | 0.6 | 07.10.2026 | Neue Story US-VW-05 „Personen und Gruppen im Überblick“ (Must, I1) zu FA-VW-06 (2.3, 2.5, 4.3, 6) (PR #13) |
 | 0.7 | 07.10.2026 | Design D-1 (Anforderungsdokumentation 0.13, NFA-GB-03, E-26): US-GB-01 wird „Design und Akzentfarbe wählen“ mit Standarddesign „Holz“ statt Standard Lila (2.5, 4.15); Vollsicherung enthält das gewählte Design (3.9) |
+| 0.8 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Gruppen können Catan ausschließen (FA-PG-04, E-27; 3.3, 3.4, US-PG-02 AK-7, US-PG-03 AK-2 und AK-4, US-AB-01 AK-1, US-VW-02 AK-6); Farbwerte nach E-28 (3.3). Bearbeiten nach Wunsch des Product Owners vorgezogen: neu US-VW-06 „Person umbenennen“ und US-VW-07 „Eigenes Spiel umbenennen“ (Must, I1) aus US-VW-01 und US-VW-04; US-VW-02 „Gruppe bearbeiten“ wird Must in I1; US-VW-01 und US-VW-04 behalten Archivieren und Löschen (2.3, 2.5, 4.3, 6) |
 
 ## Inhaltsverzeichnis
 
@@ -76,7 +77,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 
 | Inkrement | Inhalt | Ergebnis |
 |---|---|---|
-| I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Brettdarstellung, Losbaustein | Stammdaten anlegbar, Brett sichtbar |
+| I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Umbenennen und Gruppen bearbeiten, Brettdarstellung, Losbaustein *(ergänzt in 0.8)* | Stammdaten anlegbar und korrigierbar, Brett sichtbar |
 | I2 Generierung | Ablauf, Losschritte, Platzierung | Vollständige Generierung ohne Inszenierung, am Spieleabend testbar |
 | I3 Ergebnisse und Statistik | Ergebniserfassung, Ergebnisliste, Kennzahlen, Rangliste | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung und Export, Import mit Konflikten und Zuordnung, Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS, Speicherschutz | Daten sicher und teilbar |
@@ -101,11 +102,13 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-PG-02 | Gruppe anlegen | M | I1 |
 | US-PG-03 | Farben einer Gruppe festlegen | M | I1 |
 | US-PG-04 | Catan-Farbe für eine Partie abweichend wählen | S | I5 |
-| US-VW-01 | Person bearbeiten, archivieren und löschen | S | I5 |
-| US-VW-02 | Gruppe bearbeiten | S | I5 |
+| US-VW-01 | Person archivieren und löschen | S | I5 |
+| US-VW-02 | Gruppe bearbeiten | M | I1 |
 | US-VW-03 | Gruppe archivieren, wiederbeleben und löschen | S | I5 |
-| US-VW-04 | Eigenes Spiel bearbeiten, archivieren und löschen | S | I5 |
+| US-VW-04 | Eigenes Spiel archivieren und löschen | S | I5 |
 | US-VW-05 | Personen und Gruppen im Überblick | M | I1 |
+| US-VW-06 | Person umbenennen | M | I1 |
+| US-VW-07 | Eigenes Spiel umbenennen | M | I1 |
 | US-AB-01 | Partie vorbereiten | M | I2 |
 | US-AB-02 | Schritte einzeln bestätigen | M | I2 |
 | US-AB-03 | Schritt wiederholen | M | I2 |
@@ -217,20 +220,21 @@ Es gelten die Regeln aus Kapitel 6 der Anforderungsdokumentation. Ergänzend:
 Regeln:
 
 1. Farben gelten ausschließlich innerhalb einer Gruppe. Eine Person kann in verschiedenen Gruppen verschiedene Farben haben.
-2. In globalen Gruppen mit 2 bis 4 Personen hat jede Person eine Gruppenfarbe und eine Catan-Farbe. Beide dürfen derselbe Farbton sein.
+2. In globalen Gruppen mit 2 bis 4 Personen, die Catan nicht ausschließen, hat jede Person eine Gruppenfarbe und eine Catan-Farbe. Beide dürfen derselbe Farbton sein. *(präzisiert in 0.8)*
 3. In an Catan gebundenen Gruppen ist die Catan-Farbe zugleich die Gruppenfarbe.
-4. In globalen Gruppen mit mehr als 4 Personen und in Gruppen, die an ein eigenes Spiel gebunden sind, gibt es nur die Gruppenfarbe.
+4. In globalen Gruppen mit mehr als 4 Personen, in globalen Gruppen, die Catan ausschließen, und in Gruppen, die an ein eigenes Spiel gebunden sind, gibt es nur die Gruppenfarbe. *(ergänzt in 0.8)*
 5. Beim Anlegen einer Gruppe werden die Farben automatisch der Reihe nach mit freien Farben der Palette belegt und sind änderbar. Farben aus anderen Gruppen werden nicht übernommen oder vorgeschlagen.
 6. Wählt man für eine Person eine Farbe, die in der Gruppe bzw. Partie bereits belegt ist, tauschen die beiden Personen ihre Farben.
 7. Die Catan-Farbe kann für eine einzelne Partie abweichend gewählt werden; die Standardfarbe bleibt unverändert.
 8. Verwendung: Catan-Farben auf dem Brett, im Glücksrad der Catan-Generierung und im Catan-Ergebnis; Gruppenfarben in Ergebnislisten, Rangliste und Diagrammen.
-9. Konkrete Farbwerte werden in der Designphase festgelegt (OP-11).
+9. Die konkreten Farbwerte stehen in Architektur 13.4 (Anforderungsdokumentation E-26, E-28). *(geändert in 0.8)*
 
 ### 3.4 Gruppen und Spiele: Verträglichkeit
 
 | Gruppentyp | Erlaubte Spiele | Mitglieder |
 |---|---|---|
 | Global | alle Spiele; Catan nur bei 2 bis 4 Mitgliedern | 2 bis 12 |
+| Global ohne Catan *(neu in 0.8)* | alle Spiele außer Catan | 2 bis 12 |
 | An Catan gebunden | nur Catan | 2 bis 4 |
 | An ein eigenes Spiel gebunden | nur dieses Spiel | 2 bis 12 |
 
@@ -420,15 +424,16 @@ Bezug: FA-PG-02, FA-PG-03, FA-PG-04, FA-PG-09, FA-PG-10 → 3.4
 - **AK-4:** Gegeben mehr als 4 Mitglieder, dann ist die Bindung an Catan nicht wählbar und die App nennt den Grund.
 - **AK-5:** Gegeben eine Person gehört bereits einer Gruppe an, wenn ich sie einer weiteren Gruppe hinzufüge, dann ist das zulässig.
 - **AK-6:** Gegeben zwei ausgewählte Personen haben denselben Namen (ohne Beachtung von Groß- und Kleinschreibung), wenn ich speichern will, dann verhindert die App das und nennt die betroffenen Personen.
+- **AK-7:** Gegeben ich lege eine globale Gruppe mit 2 bis 4 Mitgliedern an, dann kann ich Catan ausschließen; die Gruppe kann dann kein Catan spielen. Bei mehr als 4 Mitgliedern ist Catan ohnehin ausgeschlossen. *(neu in 0.8)*
 
 #### US-PG-03 Farben einer Gruppe festlegen · M
 Als Nutzer möchte ich jeder Person in einer Gruppe Farben zuweisen, damit sie auf dem Brett und in Statistiken erkennbar ist.
 Bezug: FA-PG-05, FA-PG-07, FA-PG-08, FA-SP-05 → 3.3
 
 - **AK-1:** Gegeben ich lege eine Gruppe an, dann sind die Farben automatisch der Reihe nach mit freien Farben belegt, ohne Übernahme aus anderen Gruppen.
-- **AK-2:** Gegeben eine globale Gruppe mit 2 bis 4 Mitgliedern, dann hat jede Person eine Gruppenfarbe und eine Catan-Farbe, und beide dürfen derselbe Farbton sein.
+- **AK-2:** Gegeben eine globale Gruppe mit 2 bis 4 Mitgliedern, die Catan nicht ausschließt, dann hat jede Person eine Gruppenfarbe und eine Catan-Farbe, und beide dürfen derselbe Farbton sein. *(präzisiert in 0.8)*
 - **AK-3:** Gegeben eine an Catan gebundene Gruppe, dann hat jede Person nur eine Catan-Farbe, die zugleich als Gruppenfarbe dient.
-- **AK-4:** Gegeben eine an ein eigenes Spiel gebundene Gruppe oder eine globale Gruppe mit mehr als 4 Mitgliedern, dann hat jede Person nur eine Gruppenfarbe.
+- **AK-4:** Gegeben eine an ein eigenes Spiel gebundene Gruppe, eine globale Gruppe mit mehr als 4 Mitgliedern oder eine globale Gruppe, die Catan ausschließt, dann hat jede Person nur eine Gruppenfarbe. *(ergänzt in 0.8)*
 - **AK-5:** Gegeben Person A hat Rot, wenn ich Person B Rot zuweise, dann erhält A die bisherige Farbe von B.
 
 #### US-PG-04 Catan-Farbe für eine Partie abweichend wählen · S
@@ -440,17 +445,17 @@ Bezug: FA-PG-06
 
 ### 4.3 Verwaltung (VW)
 
-#### US-VW-01 Person bearbeiten, archivieren und löschen · S
-Als Nutzer möchte ich Personen umbenennen, archivieren und löschen, damit meine Personenliste aktuell bleibt.
-Bezug: FA-VW-01, FA-VW-05, FA-PG-09
+#### US-VW-01 Person archivieren und löschen · S
+Als Nutzer möchte ich Personen archivieren und löschen, damit meine Personenliste aktuell bleibt. *(geändert in 0.8: Umbenennen ist jetzt US-VW-06)*
+Bezug: FA-VW-01, FA-VW-05
 
-- **AK-1:** Gegeben eine Person, wenn ich sie umbenenne, dann erscheint der neue Name überall, auch in bestehenden Ergebnissen und Statistiken.
+- **AK-1:** *(verschoben nach US-VW-06 AK-1 in 0.8)*
 - **AK-2:** Gegeben eine Person ist Mitglied mindestens einer Gruppe (auch einer archivierten), wenn ich sie löschen will, dann verhindert die App das und nennt die betroffenen Gruppen.
 - **AK-3:** Gegeben eine Person ohne Gruppenzugehörigkeit, wenn ich sie lösche und die Warnung bestätige, dann wird zuvor ein Sicherungspunkt angelegt und die Person entfernt.
 - **AK-4:** Gegeben eine Person, wenn ich sie archiviere, dann erscheint sie nicht mehr in der Auswahl für neue Gruppen; bestehende Gruppen, Ergebnisse und Statistiken bleiben unverändert. Ich kann sie jederzeit reaktivieren.
-- **AK-5:** Gegeben der neue Name gleicht dem Namen eines anderen Mitglieds einer ihrer Gruppen, wenn ich umbenenne, dann verhindert die App das und nennt die betroffene Gruppe.
+- **AK-5:** *(verschoben nach US-VW-06 AK-2 in 0.8)*
 
-#### US-VW-02 Gruppe bearbeiten · S
+#### US-VW-02 Gruppe bearbeiten · M
 Als Nutzer möchte ich Name, Farben und Spielbindung einer Gruppe ändern können, damit sie zur Realität passt.
 Bezug: FA-VW-02 → 3.3, 3.4
 
@@ -459,6 +464,9 @@ Bezug: FA-VW-02 → 3.3, 3.4
 - **AK-3:** Gegeben ich ändere die Spielbindung, wenn alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen, dann wird die Änderung übernommen; andernfalls verhindert die App sie und nennt den Grund.
 - **AK-4:** Gegeben die neue Bindung erfordert zusätzliche Farben, dann werden diese gemäß 3.3 automatisch belegt und sind änderbar.
 - **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann ist die Änderung der Spielbindung gesperrt (→ 3.5).
+- **AK-6:** Gegeben eine globale Gruppe, wenn ich Catan ausschließe oder wieder zulasse, dann entfallen die Catan-Farben bzw. werden gemäß 3.3 automatisch belegt; für das Zulassen gilt AK-3. *(neu in 0.8)*
+
+*Hinweis (0.8):* Die Story ist nach Wunsch des Product Owners von Should (I5) nach Must (I1) vorgezogen. Bis I2 gibt es keine Partien; AK-3 wird deshalb in I1 für die Mitgliederzahl nachgewiesen und mit der Ergebniserfassung (I3) für bestehende Partien, AK-5 mit dem Ablauf einer Partie (I2).
 
 #### US-VW-03 Gruppe archivieren, wiederbeleben und löschen · S
 Als Nutzer möchte ich nicht mehr aktive Gruppen archivieren und bei Bedarf wiederbeleben oder endgültig löschen, damit die Übersicht aufgeräumt bleibt, ohne Statistik zu verlieren.
@@ -470,15 +478,15 @@ Bezug: FA-VW-03, FA-VW-05
 - **AK-4:** Gegeben ich bestätige das Löschen, dann wird zuvor ein Sicherungspunkt angelegt, und die Gruppe wird mit allen ihren Partien entfernt; die Personen bleiben erhalten.
 - **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann sind Archivieren und Löschen gesperrt (→ 3.5).
 
-#### US-VW-04 Eigenes Spiel bearbeiten, archivieren und löschen · S
-Als Nutzer möchte ich eigene Spiele umbenennen, archivieren und löschen können, damit die Spieleliste übersichtlich bleibt.
+#### US-VW-04 Eigenes Spiel archivieren und löschen · S
+Als Nutzer möchte ich eigene Spiele archivieren und löschen können, damit die Spieleliste übersichtlich bleibt. *(geändert in 0.8: Umbenennen ist jetzt US-VW-07)*
 Bezug: FA-VW-04, FA-VW-05
 
-- **AK-1:** Gegeben ein eigenes Spiel, dann kann ich es umbenennen (eindeutiger Name wie in US-SP-02).
+- **AK-1:** *(verschoben nach US-VW-07 AK-1 in 0.8)*
 - **AK-2:** Gegeben ein eigenes Spiel ohne Ergebnisse, wenn ich es lösche und bestätige, dann wird zuvor ein Sicherungspunkt angelegt und das Spiel entfernt.
 - **AK-3:** Gegeben ein eigenes Spiel mit Ergebnissen, wenn ich es löschen will, dann verhindert die App das und bietet stattdessen das Archivieren an.
 - **AK-4:** Gegeben ein archiviertes Spiel, dann erscheint es nicht in der Auswahl für neue Ergebnisse oder Gruppen; bestehende Daten und Statistiken bleiben erhalten, und ich kann es reaktivieren.
-- **AK-5:** Gegeben Catan, dann gibt es weder Umbenennen noch Archivieren noch Löschen.
+- **AK-5:** Gegeben Catan, dann gibt es weder Archivieren noch Löschen (für Umbenennen siehe US-VW-07 AK-2). *(geändert in 0.8)*
 
 #### US-VW-05 Personen und Gruppen im Überblick · M
 Als Nutzer möchte ich sehen, wer in welcher Gruppe ist, und von dort zu Personen und Gruppen springen, damit ich Zusammensetzung und Farben jederzeit nachsehen kann.
@@ -490,13 +498,27 @@ Bezug: FA-VW-06
 - **AK-4:** Gegeben die Detailansicht einer Gruppe, wenn ich ein Mitglied antippe, dann öffnet sich die Detailansicht dieser Person.
 - **AK-5:** Gegeben eine Detailansicht, wenn ich „Zurück“ wähle (auch die Zurück-Taste unter Android), dann komme ich zur vorherigen Ansicht.
 
+#### US-VW-06 Person umbenennen · M
+Als Nutzer möchte ich Personen umbenennen, damit ich Tippfehler korrigieren kann. *(neu in 0.8, aus US-VW-01)*
+Bezug: FA-VW-01, FA-PG-09
+
+- **AK-1:** Gegeben eine Person, wenn ich sie umbenenne, dann erscheint der neue Name überall, auch in bestehenden Ergebnissen und Statistiken. *(bisher US-VW-01 AK-1; Ergebnisse und Statistiken werden mit I3 nachgewiesen)*
+- **AK-2:** Gegeben der neue Name gleicht dem Namen eines anderen Mitglieds einer ihrer Gruppen, wenn ich umbenenne, dann verhindert die App das und nennt die betroffene Gruppe. *(bisher US-VW-01 AK-5)*
+
+#### US-VW-07 Eigenes Spiel umbenennen · M
+Als Nutzer möchte ich eigene Spiele umbenennen, damit ich Tippfehler korrigieren kann. *(neu in 0.8, aus US-VW-04)*
+Bezug: FA-VW-04
+
+- **AK-1:** Gegeben ein eigenes Spiel, dann kann ich es umbenennen (eindeutiger Name wie in US-SP-02). *(bisher US-VW-04 AK-1)*
+- **AK-2:** Gegeben Catan, dann gibt es kein Umbenennen. *(bisher Teil von US-VW-04 AK-5)*
+
 ### 4.4 Ablauf einer Partie (AB)
 
 #### US-AB-01 Partie vorbereiten · M
 Als bedienende Person möchte ich Gruppe und Optionen festlegen, bevor die Generierung beginnt, damit sie zu unserem Abend passt.
 Bezug: FA-AB-01, FA-AB-02, FA-PG-10 → 3.1, 3.4
 
-- **AK-1:** Gegeben ich habe Catan gewählt, dann zeigt die App nur aktive Gruppen, die Catan spielen können (globale Gruppen mit 2 bis 4 Mitgliedern und an Catan gebundene Gruppen).
+- **AK-1:** Gegeben ich habe Catan gewählt, dann zeigt die App nur aktive Gruppen, die Catan spielen können (globale Gruppen mit 2 bis 4 Mitgliedern, die Catan nicht ausschließen, und an Catan gebundene Gruppen). *(präzisiert in 0.8)*
 - **AK-2:** Gegeben ich habe eine Gruppe gewählt, dann zeigt die App alle Mitglieder als Beteiligte an; eine Abwahl einzelner Mitglieder ist nicht möglich.
 - **AK-3:** Gegeben die Optionen, dann kann ich LS-01, LS-03 und LS-04 einzeln an- und abschalten (Standard: an); LS-02 wird als immer aktiv angezeigt.
 - **AK-4:** Gegeben die Optionen, dann kann ich die Startrohstoffe aktivieren (Standard: aus) und dabei die Anzahl von 1 bis 5 (Standard: 2) sowie „mit Zurücklegen“ (Standard) oder „ohne Zurücklegen“ einstellen.
@@ -947,16 +969,16 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-SP-04 | US-SP-04 |
 | FA-SP-05 | US-SP-02, US-PG-03 |
 | FA-PG-01 | US-PG-01 |
-| FA-PG-02 bis FA-PG-04 | US-PG-02 |
+| FA-PG-02 bis FA-PG-04 | US-PG-02; FA-PG-04 auch US-PG-03, US-VW-02 |
 | FA-PG-05 | US-PG-03 |
 | FA-PG-06 | US-PG-04 |
 | FA-PG-07, FA-PG-08 | US-PG-03 |
 | FA-PG-09 | US-PG-02, US-VW-01 |
 | FA-PG-10 | US-PG-02, US-AB-01 |
-| FA-VW-01 | US-VW-01 |
+| FA-VW-01 | US-VW-01, US-VW-06 |
 | FA-VW-02 | US-VW-02 |
 | FA-VW-03 | US-VW-03 |
-| FA-VW-04 | US-VW-04 |
+| FA-VW-04 | US-VW-04, US-VW-07 |
 | FA-VW-05 | US-VW-01, US-VW-03, US-VW-04 |
 | FA-VW-06 | US-VW-05 |
 | FA-AB-01 | US-SP-01, US-AB-01 |
