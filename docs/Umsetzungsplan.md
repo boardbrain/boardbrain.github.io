@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.10 |
+| Version | 0.11 |
 | Stand | 08.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.10 (19) |
 | Sprache | Deutsch |
@@ -23,6 +23,7 @@
 | 0.8 | 08.10.2026 | Ergebnis der Abnahme von I1-C: Gruppenseite als „Spielraum“, Catan ausschließen, überarbeitete Gruppenfarben (I1-C); neues Bündel I1-F „Bearbeiten“ nach I1-E (Spezifikation 0.8); Designvorschläge vor jeder neuen Oberfläche (4.1, Richtlinien 2.5) |
 | 0.9 | 08.10.2026 | I1-C umgesetzt (#15): Spielraum wie Designvorschlag F6, Spielauswahl mit aufklappbarer Liste eigener Spiele (Variante C), Suchfelder fokussieren nur mit Maus |
 | 0.10 | 08.10.2026 | Neue Aufgabe D-3 „Startansicht und Navigation“ nach I1-C und vor I1-E: Startansicht, Kopfzeile und Verwaltung im Stil des Spielraums |
+| 0.11 | 08.10.2026 | D-3 umgesetzt: Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst |
 
 ## 1. Zweck
 
@@ -37,7 +38,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
 | 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C umgesetzt (#15) |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
-| 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | offen |
+| 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
@@ -158,8 +159,9 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 ### I1-D Brett und Installation
 
 - **Inhalt:** Brettmodell in `core/board` mit 19 Feldern, Kreuzungen, Kanten und Nachbarschaften (Architektur 5.2) als Grundlage für die Platzierung in I2; Darstellung des Bretts (US-PL-01); Manifest und minimaler Service Worker mit `vite-plugin-pwa` (`injectManifest`), damit die Installation unter Brave für Android früh geprüft wird (Architektur 11, 12.1, 18.1, 19); `docs/Abnahme-Checkliste.md` anlegen (Architektur 14.6).
+- **Hinweis (0.11):** Die App-Symbole für Manifest und Startbildschirm entstehen aus dem Logo von D-3 (`src/ui/components/Logo.tsx`, `public/favicon.svg`).
 - **Pakete:** `vite-plugin-pwa`.
-- **Abnahme durch den Product Owner:** Brett in Hoch- und Querformat auf allen Geräten; App unter Brave (S26) und Safari (iPad) zum Startbildschirm hinzufügen und starten; Start im Flugmodus.
+- **Abnahme durch den Product Owner:** Brett auf dem S26 im Hochformat, auf iPad und PC in beiden Ausrichtungen (E-29); App unter Brave (S26) und Safari (iPad) zum Startbildschirm hinzufügen und starten; Start im Flugmodus.
 
 ### D-1 Farbwerte (OP-11)
 
@@ -176,7 +178,8 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Nicht enthalten:** Funktionen späterer Inkremente, Umschalten von Design und Akzentfarbe (US-GB-01, I6), Animationen (Motion kommt mit dem ersten Bündel, das sie braucht).
 - **Branch:** `feat/d-3-start-and-navigation`.
 - **Pakete:** keine.
-- **Abnahme durch den Product Owner:** Designvorschlag wählen; danach Startansicht, Kopfzeile und Verwaltung auf S26, iPad und PC in Hoch- und Querformat; alle Bereiche erreichbar, Zurück-Taste auf dem S26.
+- **Abnahme durch den Product Owner:** Designvorschlag wählen; danach Startansicht, Kopfzeile und Verwaltung auf S26 (hochkant, quer nur Hinweis), iPad und PC; alle Bereiche erreichbar, Zurück-Taste auf dem S26.
+- **Ergebnis:** In zwei Runden Designvorschlägen (`start-preview-v1.html`, `start-preview-v2.html`, Logos in `logo-preview-v1.html`) gewählt: Konzept E „Kartenhand“ – Hauptnavigation als Spielkarten am unteren Rand, Start mit Personen, Tische, Spiele als Kartenfächer direkt über der Hand und ohne Scrollen, Verwaltung als Kartenraster; „Neue Partie“ (I2) später als Nachziehstapel mit klassischem Kartenrücken über den Karten; Logo „Eine Kontur“ (Gehirn, linke Hälfte Schachbrett); Zurück führt zur vorherigen Seite; Smartphones nur im Hochformat (E-29); Texte ohne „Eure …“. Verbindliche Referenz war `d3-final-preview.html`; Start und Verwaltung stimmen auf Handy, Tablet hoch und quer und PC pixelgenau mit ihr überein.
 
 ## 6. Kleine Aufgaben
 
