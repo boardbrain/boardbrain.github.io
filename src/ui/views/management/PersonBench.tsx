@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Person, PersonId } from '@/core/model';
 import { t } from '@/i18n/t';
+import { useIsWideScreen } from '@/ui/components/useIsWideScreen';
 import styles from './PersonBench.module.css';
 
 type PersonBenchProps = {
@@ -10,6 +11,17 @@ type PersonBenchProps = {
   readonly isFull: boolean;
   readonly onToggle: (person: Person) => void;
 };
+
+// A little tolerance, browsers round scroll positions.
+const END_TOLERANCE_PX = 2;
+
+// True once nothing more is hidden to the right or below: the fade at the edge then disappears.
+function isScrolledToEnd(element: HTMLElement): boolean {
+  return (
+    element.scrollLeft + element.clientWidth >= element.scrollWidth - END_TOLERANCE_PX &&
+    element.scrollTop + element.clientHeight >= element.scrollHeight - END_TOLERANCE_PX
+  );
+}
 
 function matches(person: Person, query: string): boolean {
   const needle = query.trim().toLocaleLowerCase('de-DE');
@@ -29,6 +41,8 @@ export function PersonBench({
 }: PersonBenchProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const isWide = useIsWideScreen();
+  const [isAtEnd, setIsAtEnd] = useState(false);
   const shown = isOpen ? persons.filter((person) => matches(person, query)) : persons;
 
   function chips(): React.JSX.Element[] {
@@ -72,7 +86,7 @@ export function PersonBench({
         {shown.length === 0 && <p className={styles.hint}>{t('gruppen.keinePerson')}</p>}
         <button
           type="button"
-          className={styles.toggle}
+          className={styles.link}
           aria-expanded="true"
           onClick={() => {
             setIsOpen(false);
@@ -87,7 +101,19 @@ export function PersonBench({
 
   return (
     <div className={styles.closed}>
-      <div className={styles.scroll} role="group" aria-label={t('gruppen.bank')}>
+      <div
+        className={isAtEnd ? styles.scrollEnd : styles.scroll}
+        role="group"
+        aria-label={t('gruppen.bank')}
+        ref={(element) => {
+          if (element !== null) {
+            setIsAtEnd(isScrolledToEnd(element));
+          }
+        }}
+        onScroll={(event) => {
+          setIsAtEnd(isScrolledToEnd(event.currentTarget));
+        }}
+      >
         {chips()}
       </div>
       <button
@@ -98,7 +124,7 @@ export function PersonBench({
           setIsOpen(true);
         }}
       >
-        {t('gruppen.alle', { count: persons.length })}
+        {t(isWide ? 'gruppen.alleAnzeigen' : 'gruppen.alle', { count: persons.length })}
       </button>
     </div>
   );

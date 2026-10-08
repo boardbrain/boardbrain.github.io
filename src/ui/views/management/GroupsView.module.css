@@ -112,11 +112,12 @@
   background: var(--color-surface);
 }
 
+/* Phones: the editor is a page of its own on the normal background. */
 .dialog {
   width: 100%;
   max-width: 62rem;
   padding: var(--space-4);
-  background: var(--color-surface-overlay);
+  background: var(--color-surface);
 }
 
 @media (width >= 48rem) {
@@ -127,6 +128,7 @@
   }
 
   .dialog {
+    background: var(--color-surface-overlay);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-4);
   }
@@ -172,4 +174,10 @@
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-2);
+}
+
+@media (width >= 48rem) {
+  .dialogTitle {
+    font-size: 1.25rem;
+  }
 }

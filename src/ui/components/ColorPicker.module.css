@@ -1,11 +1,27 @@
-.row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--touch-target-min), 1fr));
-  gap: var(--space-3) var(--space-2);
+/* Phones: one swipeable row without a visible scrollbar. */
+.row,
+.rowSquare {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-1) 2px var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+@media (width >= 48rem) {
+  .row,
+  .rowSquare {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--touch-target-min), 1fr));
+    gap: var(--space-3) var(--space-2);
+    padding: 0;
+    overflow: visible;
+  }
 }
 
 .item {
   display: grid;
+  flex-shrink: 0;
   gap: var(--space-1);
   justify-items: center;
 }
@@ -27,6 +43,12 @@
 .selected {
   outline: 3px solid var(--color-text);
   outline-offset: 2px;
+}
+
+/* Catan colours are square, like the marker at the seat. */
+.rowSquare .swatch,
+.rowSquare .selected {
+  border-radius: 0.625rem;
 }
 
 .name {

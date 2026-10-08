@@ -5,15 +5,18 @@
   min-width: 0;
 }
 
-/* No visible scrollbar: a soft fade at the end shows that there is more. */
-.scroll {
+/* No visible scrollbar: a soft fade at the edge shows that there is more. */
+.scroll,
+.scrollEnd {
   display: flex;
   flex: 1;
   gap: var(--space-2);
   min-width: 0;
-  padding-right: 2.5rem;
   overflow-x: auto;
   scrollbar-width: none;
+}
+
+.scroll {
   mask-image: linear-gradient(to right, var(--color-surface) 80%, transparent);
 }
 
@@ -21,17 +24,21 @@
 @media (width >= 48rem) {
   .closed {
     flex-direction: column;
+    gap: var(--space-2);
     align-items: stretch;
   }
 
-  .scroll {
+  .scroll,
+  .scrollEnd {
     flex-flow: row wrap;
     flex: none;
     align-content: flex-start;
-    max-height: calc(2 * var(--touch-target-min) + var(--space-2) + 1.25rem);
-    padding: 0 0 1.25rem;
+    max-height: calc(2 * var(--touch-target-min) + var(--space-2));
     overflow: hidden auto;
-    mask-image: linear-gradient(to bottom, var(--color-surface) calc(100% - 1.25rem), transparent);
+  }
+
+  .scroll {
+    mask-image: linear-gradient(to bottom, var(--color-surface) 65%, transparent);
   }
 }
 
@@ -62,23 +69,36 @@
 
 .toggle {
   flex-shrink: 0;
+  padding: 0 var(--space-3);
   font-weight: 600;
   color: var(--color-accent-text);
-  background: transparent;
+  background: var(--color-surface-overlay);
   border: 1px solid var(--color-accent-text);
   border-radius: 999px;
+}
+
+/* Wide screens and the expanded bench: a plain text link. */
+.link {
+  justify-self: start;
+  padding: 0 var(--space-1);
+  font-weight: 600;
+  color: var(--color-accent-text);
+  background: none;
+  border: 0;
 }
 
 @media (width >= 48rem) {
   .toggle {
     align-self: flex-start;
+    padding: 0 var(--space-1);
+    background: none;
     border-color: transparent;
   }
 }
 
 .open {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .search {

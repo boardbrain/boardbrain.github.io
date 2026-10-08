@@ -29,7 +29,11 @@ export function ColorPicker<K extends GroupColorKey | CatanColorKey>({
   onSelect,
 }: ColorPickerProps<K>): React.JSX.Element {
   return (
-    <div role="group" aria-label={label} className={styles.row}>
+    <div
+      role="group"
+      aria-label={label}
+      className={palette === 'catan' ? styles.rowSquare : styles.row}
+    >
       {options.map((color) => {
         const holder = color === selected ? undefined : holderOf?.(color);
         const name = t(`farben.${color}`);

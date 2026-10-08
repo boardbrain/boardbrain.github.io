@@ -247,26 +247,27 @@ export function GroupEditor({
 
       <div className={styles.columns}>
         <div className={styles.tableColumn}>
-          {members.length === 0 ? (
-            <p className={styles.muted}>{t('gruppen.leererPlatz')}</p>
-          ) : (
-            <GroupTable
-              seats={seats}
-              size="large"
-              selectedId={activePerson?.id}
-              onSelect={setActiveId}
-              title={name === '' ? undefined : name}
-              subtitle={
-                choice === null
-                  ? isSwitchOn
-                    ? t('gruppen.bindungOhneCatan')
-                    : t('gruppen.bindungGlobal')
-                  : bindingOptions.find((option) => option.gameId === choice)?.label
-              }
-            />
-          )}
+          <GroupTable
+            seats={seats}
+            size="large"
+            selectedId={activePerson?.id}
+            onSelect={setActiveId}
+            title={name === '' ? t('gruppen.tischLeer') : name}
+            subtitle={
+              choice === null
+                ? isSwitchOn
+                  ? t('gruppen.bindungOhneCatan')
+                  : t('gruppen.bindungGlobal')
+                : bindingOptions.find((option) => option.gameId === choice)?.label
+            }
+          />
         </div>
 
+        {(activePerson === undefined || activeColors === undefined) && (
+          <div className={styles.card}>
+            <p className={styles.cardHint}>{t('gruppen.farbenLeer')}</p>
+          </div>
+        )}
         {activePerson !== undefined && activeColors !== undefined && (
           <section className={styles.card}>
             <div className={styles.head}>
@@ -403,9 +404,11 @@ export function GroupEditor({
           <p>{t('gruppen.fehlerSpeichern')}</p>
         </Notice>
       )}
-      <button type="submit" className={styles.save} disabled={!canSave}>
-        {t('gruppen.speichern')}
-      </button>
+      <div className={styles.saveBar}>
+        <button type="submit" className={styles.save} disabled={!canSave}>
+          {t('gruppen.speichern')}
+        </button>
+      </div>
     </form>
   );
 }

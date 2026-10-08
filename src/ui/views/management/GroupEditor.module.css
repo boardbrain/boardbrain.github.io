@@ -1,6 +1,6 @@
 .form {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 
 .section {
@@ -23,12 +23,12 @@
 .columns {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-6);
+  gap: var(--space-4);
   align-items: flex-start;
 }
 
 .columns > * {
-  flex: 1 1 18rem;
+  flex: 1 1 17.5rem;
   min-width: 0;
 }
 
@@ -39,11 +39,17 @@
 
 .card {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-2);
+  border-radius: var(--radius-4);
+}
+
+.cardHint {
+  margin: var(--space-3) 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
 }
 
 .label {
@@ -56,10 +62,10 @@
   color: var(--color-text-muted);
 }
 
+/* Equal columns; with many own games they wrap into further rows instead of squeezing. */
 .segment {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
   gap: var(--space-1);
   padding: var(--space-1);
   background: var(--color-surface-raised);
@@ -135,6 +141,22 @@
 
 .switchOn::after {
   left: 1.5625rem;
+}
+
+/* Phones: the save button stays at the bottom edge while the editor scrolls. */
+.saveBar {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-3) 0 var(--space-1);
+  background: linear-gradient(to bottom, transparent, var(--color-surface) 35%);
+}
+
+@media (width >= 48rem) {
+  .saveBar {
+    position: static;
+    padding: 0;
+    background: none;
+  }
 }
 
 .save {

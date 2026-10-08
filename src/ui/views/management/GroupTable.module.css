@@ -17,10 +17,13 @@
 
 .large {
   max-width: 18rem;
+  margin: var(--space-2) auto;
 }
 
 @media (width >= 48rem) {
   .large {
+    --seat: 16%;
+
     max-width: 23.75rem;
   }
 }
@@ -59,14 +62,39 @@
   box-shadow: none;
 }
 
-.title {
-  font-size: var(--font-size-small);
+.title,
+.titleSmall {
+  font-size: var(--font-size-base);
   overflow-wrap: anywhere;
 }
 
+.titleSmall {
+  font-size: var(--font-size-small);
+}
+
 .subtitle {
-  font-size: var(--font-size-tiny);
+  font-size: var(--font-size-small);
   color: var(--color-text-muted);
+}
+
+/* The empty seat below the table while fewer than two persons sit there. */
+.emptySeat {
+  position: absolute;
+  top: 91%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--seat);
+  aspect-ratio: 1;
+  min-width: var(--touch-target-min);
+  color: var(--color-text-muted);
+  border: 2px dashed var(--color-border);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.emptySeat::before {
+  content: '+' / '';
 }
 
 .seat,

@@ -1,4 +1,4 @@
-import type { CatanColorKey, GroupColorKey, PersonId } from '@/core/model';
+import { GROUP_SIZE, type CatanColorKey, type GroupColorKey, type PersonId } from '@/core/model';
 import styles from './GroupTable.module.css';
 
 /**
@@ -27,6 +27,8 @@ type GroupTableProps = {
 
 // More than this many seats get smaller so they still fit around the table.
 const DENSE_FROM = 7;
+// From this many seats the suggested name gets long, so the title in the middle gets smaller.
+const LONG_TITLE_FROM = 3;
 const FULL_CIRCLE_DEGREES = 360;
 
 function seatPosition(index: number, count: number): { left: string; top: string } {
@@ -59,12 +61,19 @@ export function GroupTable({
   ]
     .filter((name) => typeof name === 'string')
     .join(' ');
+  // Until two persons sit at the table, an empty seat invites to bring more (US-PG-02 AK-3).
+  const hasEmptySeat = size === 'large' && seats.length < GROUP_SIZE.min;
   return (
     <div className={className}>
       <div className={styles.table}>
-        {title !== undefined && <strong className={styles.title}>{title}</strong>}
+        {title !== undefined && (
+          <strong className={seats.length > LONG_TITLE_FROM ? styles.titleSmall : styles.title}>
+            {title}
+          </strong>
+        )}
         {subtitle !== undefined && <span className={styles.subtitle}>{subtitle}</span>}
       </div>
+      {hasEmptySeat && <span className={styles.emptySeat} aria-hidden="true" />}
       {seats.map((seat, index) => {
         const position = seatPosition(index, seats.length);
         const style = { ...position, background: `var(--color-group-${seat.groupColor})` };
