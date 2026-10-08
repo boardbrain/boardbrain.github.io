@@ -182,7 +182,12 @@ export function GroupsView(): React.JSX.Element {
                   setIsEditing(false);
                 }}
               >
-                <BackIcon />
+                <span className={styles.backIcon}>
+                  <BackIcon />
+                </span>
+                <span className={styles.closeIcon}>
+                  <CloseIcon />
+                </span>
               </button>
               <h2 className={styles.dialogTitle}>{t('gruppen.neu')}</h2>
             </div>

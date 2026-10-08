@@ -28,10 +28,10 @@
     flex-flow: row wrap;
     flex: none;
     align-content: flex-start;
-    max-height: calc(2 * var(--touch-target-min) + var(--space-2) + 1.5rem);
-    padding: 0 0 1.5rem;
+    max-height: calc(2 * var(--touch-target-min) + var(--space-2) + 1.25rem);
+    padding: 0 0 1.25rem;
     overflow: hidden auto;
-    mask-image: linear-gradient(to bottom, var(--color-surface) 70%, transparent);
+    mask-image: linear-gradient(to bottom, var(--color-surface) calc(100% - 1.25rem), transparent);
   }
 }
 

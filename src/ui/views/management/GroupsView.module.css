@@ -95,6 +95,11 @@
   color: var(--color-accent-text);
 }
 
+.backIcon,
+.closeIcon {
+  display: grid;
+}
+
 /* Phones: the editor fills the screen; wide screens: a large window over the room. */
 .backdrop {
   position: fixed;
@@ -122,9 +127,27 @@
   }
 
   .dialog {
-    padding: var(--space-6);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-4);
+  }
+
+  /* Wide screens: the title first, a close cross at the right edge. */
+  .dialogHeader {
+    justify-content: space-between;
+  }
+
+  .backButton {
+    order: 2;
+  }
+
+  .backIcon {
+    display: none;
+  }
+}
+
+@media (width < 48rem) {
+  .closeIcon {
+    display: none;
   }
 }
 
