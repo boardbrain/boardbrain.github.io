@@ -62,35 +62,6 @@
   color: var(--color-text-muted);
 }
 
-/* Equal columns; with many own games they wrap into further rows instead of squeezing. */
-.segment {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
-  gap: var(--space-1);
-  padding: var(--space-1);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-2);
-}
-
-.segmentOn,
-.segmentOff {
-  padding: var(--space-1) var(--space-2);
-  border: 0;
-  border-radius: var(--radius-2);
-}
-
-.segmentOff {
-  color: var(--color-text);
-  background: transparent;
-}
-
-.segmentOn {
-  font-weight: 600;
-  color: var(--color-on-accent);
-  background: var(--color-accent);
-}
-
 .switchRow {
   display: flex;
   gap: var(--space-3);

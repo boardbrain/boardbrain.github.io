@@ -266,8 +266,27 @@ describe('US-PG-02 Bring persons to the table', () => {
     await db.games.add(aCustomGame({ name: 'Uno' }));
     await openEditor(user);
     await bring(user, 'Anna', 'Ben', 'Clara', 'David', 'Eva');
+    await user.click(await screen.findByRole('button', { name: 'Anderes Spiel ▾' }));
 
-    expect(await screen.findByRole('button', { name: 'Nur Uno' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Nur Uno' })).toBeEnabled();
+  });
+
+  it('AK-4: a group bound to an own game is saved with that game', async () => {
+    const user = userEvent.setup();
+    const { db } = renderWithApp(<GroupsView />);
+    await addPersons(db, 2);
+    const uno = aCustomGame({ name: 'Uno' });
+    await db.games.add(uno);
+    await openEditor(user);
+    await bring(user, 'Anna', 'Ben');
+
+    await user.click(await screen.findByRole('button', { name: 'Anderes Spiel ▾' }));
+    await user.click(screen.getByRole('button', { name: 'Nur Uno' }));
+    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
+
+    await waitFor(async () => {
+      expect((await db.groups.toArray())[0]?.binding).toEqual({ kind: 'game', gameId: uno.id });
+    });
   });
 
   it('AK-5: a person from another group can join another table', async () => {

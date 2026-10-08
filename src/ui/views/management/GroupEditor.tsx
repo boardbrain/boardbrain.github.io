@@ -23,6 +23,7 @@ import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { ColorPicker } from '@/ui/components/ColorPicker';
 import { Notice } from '@/ui/components/Notice';
+import { BindingPicker, type BindingOption } from './BindingPicker';
 import { GroupTable, type TableSeat } from './GroupTable';
 import styles from './GroupEditor.module.css';
 import { PersonBench } from './PersonBench';
@@ -36,12 +37,6 @@ type GroupEditorProps = {
 
 // `null` = all games; otherwise the game the group is bound to.
 type BindingChoice = GameId | null;
-
-type BindingOption = {
-  readonly gameId: GameId;
-  readonly label: string;
-  readonly maxMembers: number;
-};
 
 function schemeOf(
   memberCount: number,
@@ -112,16 +107,15 @@ export function GroupEditor({
   const activePerson = members[activeIndex];
   const activeColors = colors[activeIndex];
 
-  const bindingOptions: readonly BindingOption[] = [
-    ...SUPPORTED_GAMES.map((game) => ({
-      gameId: game.id,
-      label: t(game.nameKey),
-      maxMembers: game.playerCount.max,
-    })),
-    ...customGames
-      .filter((game) => !game.archived)
-      .map((game) => ({ gameId: game.id, label: game.name, maxMembers: GROUP_SIZE.max })),
-  ];
+  const supportedOptions: readonly BindingOption[] = SUPPORTED_GAMES.map((game) => ({
+    gameId: game.id,
+    label: t(game.nameKey),
+    maxMembers: game.playerCount.max,
+  }));
+  const customOptions: readonly BindingOption[] = customGames
+    .filter((game) => !game.archived)
+    .map((game) => ({ gameId: game.id, label: game.name, maxMembers: GROUP_SIZE.max }));
+  const bindingOptions = [...supportedOptions, ...customOptions];
 
   // US-PG-02 AK-4: a binding the new member count no longer allows falls back to "all games".
   function change(
@@ -334,43 +328,15 @@ export function GroupEditor({
 
         <fieldset className={styles.section}>
           <legend className={styles.label}>{t('gruppen.spiele')}</legend>
-          <div className={styles.segment}>
-            <button
-              type="button"
-              className={choice === null ? styles.segmentOn : styles.segmentOff}
-              aria-pressed={choice === null}
-              onClick={() => {
-                change(memberIds, colors, null, isCatanExcluded);
-              }}
-            >
-              {t('gruppen.bindungGlobal')}
-            </button>
-            {bindingOptions.map((option) => (
-              <button
-                key={option.gameId}
-                type="button"
-                className={choice === option.gameId ? styles.segmentOn : styles.segmentOff}
-                aria-pressed={choice === option.gameId}
-                disabled={members.length > option.maxMembers}
-                onClick={() => {
-                  change(memberIds, colors, option.gameId, isCatanExcluded);
-                }}
-              >
-                {t('gruppen.bindungNur', { spiel: option.label })}
-              </button>
-            ))}
-          </div>
-          {bindingOptions
-            .filter((option) => members.length > option.maxMembers)
-            .map((option) => (
-              <span key={option.gameId} className={styles.muted}>
-                {t('gruppen.bindungGesperrt', {
-                  spiel: option.label,
-                  max: option.maxMembers,
-                  count: members.length,
-                })}
-              </span>
-            ))}
+          <BindingPicker
+            supported={supportedOptions}
+            custom={customOptions}
+            choice={choice}
+            memberCount={members.length}
+            onChoose={(next) => {
+              change(memberIds, colors, next, isCatanExcluded);
+            }}
+          />
           {choice === null && (
             <button
               type="button"

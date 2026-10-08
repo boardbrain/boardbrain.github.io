@@ -85,6 +85,31 @@ test.describe('US-PG-02 and US-PG-03 The room and the editor', () => {
     ).toBeVisible();
   });
 
+  test('AK-4: a table can be bound to an own game from the folded-out list', async ({ page }) => {
+    await page.goto('/#/verwaltung/spiele');
+    await page.getByLabel('Name').fill('Uno');
+    await page.getByRole('button', { name: 'Speichern' }).click();
+    await expect(
+      page.getByRole('region', { name: 'Eigene Spiele' }).getByRole('listitem'),
+    ).toHaveText(['Uno']);
+    await createPersons(page, 'Anna', 'Ben');
+    await openRoom(page);
+    await openEditor(page);
+    await bring(page, 'Anna', 'Ben');
+
+    await page.getByRole('button', { name: 'Anderes Spiel ▾' }).click();
+    await page.getByRole('button', { name: 'Nur Uno' }).click();
+    await expect(page.getByRole('button', { name: 'Nur Uno ▾' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+
+    await expect(
+      page.getByRole('list', { name: 'Alle Tische' }).getByText('Uno · 2'),
+    ).toBeVisible();
+  });
+
   test('US-PG-03 AK-5: choosing a taken colour swaps the two persons', async ({ page }) => {
     await createPersons(page, 'Anna', 'Ben');
     await openRoom(page);
