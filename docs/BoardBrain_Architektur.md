@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.11 |
+| Version | 0.12 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 08.10.2026 |
+| Stand | 09.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -25,6 +25,7 @@
 | 0.9 | 07.10.2026 | Design D-1: OP-11 geklärt; Paletten, Farbschlüssel und wählbare Designs über `data-theme` mit Standard „Holz“ (13.4, 18.2, 19); Einstellung „Design“ in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
 | 0.10 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Bindung mit `excludesCatan` (4.5, 7.1, FA-PG-04, E-27); Gruppenfarben-Schlüssel und Reihenfolge der Vergabe nach E-28, Kontrastregel für Spielfarben 3 : 1 zum Hintergrund und 2,3 : 1 auf Karten (13.4) |
 | 0.11 | 08.10.2026 | Design D-3: Rahmen mit Logo, Hauptnavigation als Kartenhand am unteren Rand, Startansicht ohne Scrollen, Zurück zur vorherigen Seite, Hinweis zum Drehen auf Smartphones im Querformat, Design-Referenz in `docs/design/` (13.1, NFA-PL-04, E-29); Tests ohne Smartphone im Querformat (14.5) |
+| 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, E-30) in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
 
 ## Inhaltsverzeichnis
 
@@ -237,7 +238,7 @@ Anwendungsdienste setzen Fachlogik und Speicher zu vollständigen Abläufen zusa
 | `BackupService` | Sicherungspunkte anlegen, aufbewahren, wiederherstellen; tägliche Prüfung |
 | `UpdateService` | Update-Status abfragen, Sicherungsdialog, Umschaltung auslösen |
 | `PlatformService` | Installationsstatus, persistenter Speicher, Plattformerkennung |
-| `SettingsService` | Ton, Design, Akzentfarbe, Hinweisstand |
+| `SettingsService` | Ton, Design, Akzentfarbe, „Ich hasse Catan!“ (US-SP-05), Hinweisstand |
 
 ### 4.5 Bezeichner im Code
 
@@ -568,7 +569,7 @@ Eine IndexedDB-Datenbank `boardbrain` mit folgenden Stores (ADR-007):
 | `matches` | `id` | `groupId`, `gameId`, `[groupId+date]` | Partien mit Ergebnis |
 | `snapshots` | `id` | `createdAt`, `reason` | Sicherungspunkte (Kapitel 9) |
 | `session` | `id` | – | Genau ein Eintrag `current` oder leer (Kapitel 10) |
-| `meta` | `key` | – | `settings` (Ton, Design, Akzentfarbe) und `state` (Zeitstempel, Hinweise, Erinnerung) |
+| `meta` | `key` | – | `settings` (Ton, Design, Akzentfarbe, „Ich hasse Catan!“) und `state` (Zeitstempel, Hinweise, Erinnerung) |
 
 ```ts
 // infra/db/database.ts (Skizze)
@@ -968,7 +969,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 | Statistik | Kennzahlen, Rangliste, Diagramme, Filter |
 | Verwaltung | Personen, Gruppen, Spiele, Archiv |
 | Daten | Export, Import mit Entscheidungsdialogen, Sicherung mit Sicherungspunkten und Importliste |
-| Einstellungen | Ton, Design, Akzentfarbe, Version |
+| Einstellungen | Ton, „Ich hasse Catan!“ mit Bestätigung, Design, Akzentfarbe, Version |
 | Installation | Anleitung (iOS ausschließlich diese Ansicht im Browser) |
 | Diagnose | Technische Prüfwerte für die Abnahme auf Geräten: Version, sicherer Kontext, Verfügbarkeit von `crypto.randomUUID`, Service Worker und persistentem Speicher, Installationsstatus. Nur über die direkte Adresse `#/diagnose` erreichbar, nicht in der Navigation; entstand im Setup und war im Platzhalter-Release die Startansicht, seit I1-B ist `#/` die Startansicht |
 
