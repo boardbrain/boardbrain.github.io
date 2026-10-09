@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.15 |
+| Version | 0.16 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 08.10.2026 |
+| Stand | 09.10.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -29,6 +29,7 @@
 | 0.13 | 07.10.2026 | Design D-1: OP-11 geklärt (E-26); wählbare Designs mit Standard „Holz“ und Standard-Akzent je Design statt einer einzelnen Akzentfarbe mit Standard Lila (NFA-GB-03) |
 | 0.14 | 08.10.2026 | Abnahme von I1-C: globale Gruppen können Catan ausschließen (FA-PG-04, E-27); überarbeitete Gruppenfarben-Palette und Kontrastregel für Spielfarben (E-28, E-26 angepasst) |
 | 0.15 | 08.10.2026 | Design D-3: Smartphones nur im Hochformat, Tablets und PC in beiden Ausrichtungen (NFA-PL-04 präzisiert, E-29) |
+| 0.16 | 09.10.2026 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus (FA-SP-06, E-30) |
 
 ## Inhaltsverzeichnis
 
@@ -145,6 +146,7 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | FA-SP-03 | Eigene Spiele werden in einem separaten Bereich „Eigene Spiele“ angezeigt und sind dadurch von unterstützten Spielen unterscheidbar. |
 | FA-SP-04 | Für unterstützte Spiele können eine Spielversion und ein Modus gewählt werden. |
 | FA-SP-05 | Spielfarben und Siegpunkte sind spielspezifische Merkmale. Jedes Spiel legt fest, ob es diese unterstützt. In Version 1 unterstützt ausschließlich Catan Spielfarben (Rot, Blau, Weiß, Orange) und Siegpunkte; eigene Spiele haben keine Spielfarben und keine Siegpunkte. Gruppenfarben (FA-PG-07) sind davon unabhängig. *(geändert in 0.4)* |
+| FA-SP-06 | Die Einstellung „Ich hasse Catan!“ (Untertitel „Die Catan-Funktionen werden ausgeblendet.“) blendet Catan app-weit aus: keine Generierung und keine neue Catan-Partie, Catan in keiner Spielauswahl, bei allen Gruppen ist Catan ausgeschlossen und die Bindung „Nur Catan“ nicht wählbar. Bisherige Catan-Ergebnisse bleiben sichtbar. Das Einschalten erfordert eine Bestätigung nach einer Warnung; die Einstellung ist jederzeit umkehrbar und verändert die gespeicherten Einstellungen der Gruppen nicht. Standard ist aus. *(neu in 0.16)* |
 
 ### 5.2 Personen und Gruppen
 
@@ -496,6 +498,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-27 | Eine globale Gruppe kann Catan ausschließen; sie hat dann auch bei 2 bis 4 Mitgliedern nur Gruppenfarben *(neu in 0.14)* | Wer mit einer kleinen Gruppe nie Catan spielt, muss keine Catan-Farben vergeben; die Gruppe bleibt dennoch für alle übrigen Spiele offen. Wunsch des Product Owners bei der Abnahme von I1-C |
 | E-28 | Überarbeitete Gruppenfarben-Palette mit 12 gut unterscheidbaren, gedeckten Farben: Rot, Blau, Orange und Weiß (Catan-Töne), Gelb, Moosgrün, Indigo (hell), Petrol, Magenta, Kaffee, Rosé, Steingrau. Spielfarben erreichen mindestens 3 : 1 zum Hintergrund jedes Designs und mindestens 2,3 : 1 auf dessen Karten *(neu in 0.14)* | Die Unterscheidbarkeit der Personenfarben untereinander hat Vorrang vor dem Kontrast zum Hintergrund: In der Palette aus D-1 waren Grün, Limette und Petrol sowie Violett und Indigo zu ähnlich (Farbabstand ΔE bis 13); die neue Palette erreicht mindestens ΔE 29. Ausgewählt vom Product Owner in der Farbvorschau auf den Abnahmegeräten, in allen vier Designs geprüft |
 | E-29 | Smartphones nur im Hochformat; im Querformat erscheint statt der App ein Hinweis zum Drehen. Tablets (auch aufgeklappte Falt-Smartphones) und PC in beiden Ausrichtungen *(neu in 0.15)* | Im Querformat ist ein Smartphone zu niedrig für Navigation und Inhalt; ein Hinweis wirkt auf Android und iOS gleich, eine echte Sperre gibt es nur unter Android und würde dort auch Tablets sperren. Entscheidung des Product Owners in Design D-3 |
+| E-30 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus; Einschalten nur nach Warnung und Bestätigung; umkehrbar ohne Änderung gespeicherter Gruppeneinstellungen; Gruppen, die währenddessen angelegt werden, schließen Catan aus und können es später wieder zulassen *(neu in 0.16)* | Voraussichtlich nutzen viele die App ganz ohne Catan, nur für Ergebnisse und Statistik; für sie sind Generierung, Catan-Farben und Catan-Auswahl nur Ballast. Entscheidung des Product Owners nach Design D-3 |
 
 ---
 

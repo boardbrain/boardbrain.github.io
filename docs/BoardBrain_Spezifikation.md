@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.9 |
+| Version | 0.10 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 08.10.2026 |
+| Stand | 09.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -23,6 +23,7 @@
 | 0.7 | 07.10.2026 | Design D-1 (Anforderungsdokumentation 0.13, NFA-GB-03, E-26): US-GB-01 wird „Design und Akzentfarbe wählen“ mit Standarddesign „Holz“ statt Standard Lila (2.5, 4.15); Vollsicherung enthält das gewählte Design (3.9) |
 | 0.8 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Gruppen können Catan ausschließen (FA-PG-04, E-27; 3.3, 3.4, US-PG-02 AK-7, US-PG-03 AK-2 und AK-4, US-AB-01 AK-1, US-VW-02 AK-6); Farbwerte nach E-28 (3.3). Bearbeiten nach Wunsch des Product Owners vorgezogen: neu US-VW-06 „Person umbenennen“ und US-VW-07 „Eigenes Spiel umbenennen“ (Must, I1) aus US-VW-01 und US-VW-04; US-VW-02 „Gruppe bearbeiten“ wird Must in I1; US-VW-01 und US-VW-04 behalten Archivieren und Löschen (2.3, 2.5, 4.3, 6) |
 | 0.9 | 08.10.2026 | Design D-3 (Anforderungsdokumentation 0.15, E-29): Smartphones nur im Hochformat, im Querformat ein Hinweis zum Drehen; Tablets in beiden Ausrichtungen (US-PL-01 AK-3, NFA-PL-04) |
+| 0.10 | 09.10.2026 | Neue Story US-SP-05 „Catan app-weit ausblenden („Ich hasse Catan!“)“ (Must, I6) zu FA-SP-06 und E-30 (Anforderungsdokumentation 0.16); US-VW-02 AK-7 (2.3, 2.5, 4.1, 4.3, 6) |
 
 ## Inhaltsverzeichnis
 
@@ -83,7 +84,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 | I3 Ergebnisse und Statistik | Ergebniserfassung, Ergebnisliste, Kennzahlen, Rangliste | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung und Export, Import mit Konflikten und Zuordnung, Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS, Speicherschutz | Daten sicher und teilbar |
 | I5 Erlebnis und Ausbau | Alle Should-Stories | Vorgesehenes Spielerlebnis |
-| I6 Feinschliff | Alle Could-Stories | Kandidat für Release 1.0 |
+| I6 Feinschliff | Alle Could-Stories sowie US-SP-05 „Ich hasse Catan!“ (Must; kommt mit der Einstellungsansicht) *(ergänzt in 0.10)* | Kandidat für Release 1.0 |
 
 Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwickelt, die jeweils ein Bündel zusammengehöriger User Stories enthalten (etwa zwei bis vier Bündel je Inkrement; der Zuschnitt wird zu Beginn eines Inkrements festgelegt), und vom Product Owner im Pull Request abgenommen (EP-11). Nach `main` gelangt vor Release 1.0 nur der Platzhalter aus der Setup-Phase (Release 0.1.0, EP-02); danach erst der abgenommene Stand von Release 1.0. Über Vorabversionen wird nach I2 entschieden (OP-13). *(präzisiert in 0.5)*
 
@@ -99,6 +100,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-SP-02 | Eigenes Spiel anlegen | M | I1 |
 | US-SP-03 | Unterstützte und eigene Spiele unterscheiden | S | I5 |
 | US-SP-04 | Spielversion und Modus wählen | M | I2 |
+| US-SP-05 | Catan app-weit ausblenden („Ich hasse Catan!“) | M | I6 |
 | US-PG-01 | Person anlegen | M | I1 |
 | US-PG-02 | Gruppe anlegen | M | I1 |
 | US-PG-03 | Farben einer Gruppe festlegen | M | I1 |
@@ -156,7 +158,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-IS-03 | Persistenten Speicher sicherstellen | M | I4 |
 | US-GB-01 | Design und Akzentfarbe wählen | C | I6 |
 
-Summe: 58 User Stories (36 Must, 18 Should, 4 Could).
+Summe: 59 User Stories (37 Must, 18 Should, 4 Could).
 
 ---
 
@@ -405,6 +407,18 @@ Bezug: FA-SP-04, FA-AB-02
 - **AK-1:** Gegeben die Optionen einer Catan-Partie, dann kann ich zwischen „Basisspiel“ (vorausgewählt) und „Städte & Ritter“ wählen.
 - **AK-2:** Gegeben die Optionen einer Catan-Partie, dann ist der Modus „Standard“ vorausgewählt und in Version 1 die einzige Option.
 
+#### US-SP-05 Catan app-weit ausblenden („Ich hasse Catan!“) · M *(neu in 0.10)*
+Als Nutzer, der kein Catan spielt, möchte ich alle Catan-Funktionen ausblenden, damit die App nur zeigt, was ich brauche: Ergebnisse und Statistik meiner Spiele.
+Bezug: FA-SP-06, E-30
+
+- **AK-1:** Gegeben die Einstellungen, dann gibt es den Schalter „Ich hasse Catan!“ mit dem Untertitel „Die Catan-Funktionen werden ausgeblendet.“; Standard ist aus.
+- **AK-2:** Gegeben ich schalte ihn ein, dann erklärt eine Warnung, was ausgeblendet wird, und die Einstellung wird erst nach Bestätigung aktiv; Abbrechen lässt alles unverändert. Das Ausschalten wirkt ohne Rückfrage.
+- **AK-3:** Gegeben die Einstellung ist an, dann bietet die Startansicht keine neue Partie an, sondern direkt „Ergebnis eintragen“, und Catan erscheint weder in einer Spielauswahl noch in der Spieleverwaltung.
+- **AK-4:** Gegeben die Einstellung ist an, wenn ich eine Gruppe anlege oder bearbeite, dann ist „Catan ausschließen“ eingeschaltet und nicht änderbar und die Bindung „Nur Catan“ ausgegraut und nicht wählbar; neu angelegte Gruppen werden mit „Catan ausschließen“ gespeichert.
+- **AK-5:** Gegeben die Einstellung ist an, dann erscheinen bestehende Gruppen ohne Catan-Farben und Gruppen mit der Bindung „Nur Catan“ ausgegraut; ihre bisherigen Ergebnisse bleiben erreichbar, neue Partien und Ergebnisse sind für sie nicht möglich.
+- **AK-6:** Gegeben bisherige Catan-Ergebnisse, dann bleiben sie in Ergebnislisten und Statistik sichtbar; neue Catan-Ergebnisse kommen nicht hinzu.
+- **AK-7:** Gegeben ich schalte die Einstellung aus, dann ist alles wie zuvor: Die gespeicherten Einstellungen der Gruppen wurden nicht verändert. Gruppen, die währenddessen angelegt wurden, behalten „Catan ausschließen“ und können Catan über US-VW-02 AK-6 wieder zulassen.
+
 ### 4.2 Personen und Gruppen (PG)
 
 #### US-PG-01 Person anlegen · M
@@ -466,6 +480,7 @@ Bezug: FA-VW-02 → 3.3, 3.4
 - **AK-4:** Gegeben die neue Bindung erfordert zusätzliche Farben, dann werden diese gemäß 3.3 automatisch belegt und sind änderbar.
 - **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann ist die Änderung der Spielbindung gesperrt (→ 3.5).
 - **AK-6:** Gegeben eine globale Gruppe, wenn ich Catan ausschließe oder wieder zulasse, dann entfallen die Catan-Farben bzw. werden gemäß 3.3 automatisch belegt; für das Zulassen gilt AK-3. *(neu in 0.8)*
+- **AK-7:** Gegeben die Einstellung „Ich hasse Catan!“ ist an, dann kann ich Catan nicht wieder zulassen und keine Bindung „Nur Catan“ wählen (→ US-SP-05). *(neu in 0.10)*
 
 *Hinweis (0.8):* Die Story ist nach Wunsch des Product Owners von Should (I5) nach Must (I1) vorgezogen. Bis I2 gibt es keine Partien; AK-3 wird deshalb in I1 für die Mitgliederzahl nachgewiesen und mit der Ergebniserfassung (I3) für bestehende Partien, AK-5 mit dem Ablauf einer Partie (I2).
 
@@ -969,6 +984,7 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-SP-03 | US-SP-03 |
 | FA-SP-04 | US-SP-04 |
 | FA-SP-05 | US-SP-02, US-PG-03 |
+| FA-SP-06 | US-SP-05, US-VW-02 |
 | FA-PG-01 | US-PG-01 |
 | FA-PG-02 bis FA-PG-04 | US-PG-02; FA-PG-04 auch US-PG-03, US-VW-02 |
 | FA-PG-05 | US-PG-03 |

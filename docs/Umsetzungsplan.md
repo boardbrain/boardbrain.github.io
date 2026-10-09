@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.11 |
-| Stand | 08.10.2026 |
+| Version | 0.12 |
+| Stand | 09.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.10 (19) |
 | Sprache | Deutsch |
 
@@ -24,6 +24,7 @@
 | 0.9 | 08.10.2026 | I1-C umgesetzt (#15): Spielraum wie Designvorschlag F6, Spielauswahl mit aufklappbarer Liste eigener Spiele (Variante C), Suchfelder fokussieren nur mit Maus |
 | 0.10 | 08.10.2026 | Neue Aufgabe D-3 „Startansicht und Navigation“ nach I1-C und vor I1-E: Startansicht, Kopfzeile und Verwaltung im Stil des Spielraums |
 | 0.11 | 08.10.2026 | D-3 umgesetzt (#17): Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst; Design-Referenz `docs/design/d3-start-navigation-final-preview.html` mit Verweisen je Inkrement, Platz für „Ergebnis eintragen“ auf dem Start (7) |
+| 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, Spezifikation 0.10) in I6 eingeplant (7) |
 
 ## 1. Zweck
 
@@ -210,4 +211,4 @@ Die Stories je Inkrement stehen in Spezifikation 2.5. Der Zuschnitt in Bündel f
 | I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1): Antippen von „Partie“ dunkelt den Start ab und zeigt zwei Spielkarten – links vorne und in der Akzentfarbe „Ergebnis eintragen“ als Hauptaktion, rechts „Neue Partie“ (Variante K2 aus fünf Vorschlagsrunden, `result-entry-preview-v1.html` bis `result-entry-preview.html`; Begründung: viele werden die App ohne Catan nutzen) |
 | I4 | Banner (Sicherung, Update, Speicher) oben auf dem Start, ohne die Karten zu verschieben; Karte „Daten“ in der Kartenhand |
 | I5 | Vierte Karte „Archiv“ in der Verwaltung |
-| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). Mit der geplanten Einstellung „Ich hasse Catan!“ zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Anforderung folgt in einem eigenen Pull Request) |
+| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). Einstellung „Ich hasse Catan!“ (US-SP-05, Must): Einschalten mit Warnung und Bestätigung; danach zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Referenz, Schalter „Einstellung“), und alle übrigen bis dahin gebauten Ansichten blenden Catan aus |
