@@ -14,6 +14,8 @@ export function ManagementView(): React.JSX.Element {
       <h1 className={styles.title}>{t('verwaltung.titel')}</h1>
       <nav aria-label={t('verwaltung.bereiche')}>
         <div className={styles.grid}>
+          {/* The archive (I5) becomes a fourth card here, see
+              docs/design/d3-start-navigation-final-preview.html. */}
           {cards?.map((card) => (
             <PlayingCard
               key={card.key}

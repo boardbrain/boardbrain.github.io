@@ -17,7 +17,12 @@ export function StartView(): React.JSX.Element {
   return (
     <main className={styles.start}>
       <h1 className={styles.hiddenTitle}>{t('start.titel')}</h1>
+      {/* Place for the banners (reminder I4, update I4, running match I2) at the top; they must
+          not push the cards down while there is room. Look and sizes:
+          docs/design/d3-start-navigation-final-preview.html, scope "Mit späteren Funktionen". */}
       <div className={styles.spacer} />
+      {/* Place for "new match" (I2) as a draw pile right above the cards, together with them in
+          one column with a 14px gap (same reference). */}
       <nav className={styles.cards} aria-labelledby={headingId}>
         <h2 id={headingId} className={styles.heading}>
           {t('karten.titel')}
