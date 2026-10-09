@@ -20,7 +20,7 @@
 | 0.3 | 07.10.2026 | Aufträge an Claude Code verweisen auf `docs/Umsetzungsplan.md` (14) |
 | 0.4 | 07.10.2026 | Namensregel für React-Kontexte (4.3) (PR #12) |
 | 0.5 | 08.10.2026 | Designvorschläge vor dem Bau neuer oder geänderter Oberflächen (2.2, 2.5); Lehre aus I1-C, wo der Product Owner nach der Umsetzung einen anderen Aufbau wollte |
-| 0.6 | 08.10.2026 | Design D-3: Vorschauen heißen `…-preview….html` und stehen in `.gitignore`; frühere Runden werden archiviert, nie gelöscht (2.5); E2E-Formate nach E-29: Smartphones im Hochformat, Tablets in beiden Ausrichtungen (8.3) |
+| 0.6 | 08.10.2026 | Design D-3: Vorschauen heißen `…-preview….html` und stehen in `.gitignore`; frühere Runden werden archiviert, nie gelöscht; die finale Referenz eines Bündels kommt als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (2.5); E2E-Formate nach E-29: Smartphones im Hochformat, Tablets in beiden Ausrichtungen (8.3) |
 
 ## Inhaltsverzeichnis
 
@@ -104,6 +104,7 @@ Vor dem Bau einer neuen oder sichtbar geänderten Oberfläche (Ansicht, Ablauf, 
 - **Form:** eine lokale, klickbare HTML-Datei im Wurzelordner des Repositorys (z. B. `groups-preview.html`, `color-preview.html`). Der Name enthält immer `-preview`; das Muster `/*-preview*.html` in `.gitignore` hält alle Vorschauen aus dem Repository. *(geändert in 0.6)* Der Entwicklungsserver liefert sie mit aus, sodass der Product Owner sie auf allen Abnahmegeräten öffnen kann (`https://192.168.178.20:5173/‹datei›`).
 - **Inhalt:** mindestens zwei, besser drei bis fünf deutlich verschiedene Ansätze, umschaltbar; Handy hochkant und Tablet quer; die echten Farbwerte aus `tokens.css` und realistische Datenmengen (auch eine volle Liste); bei Farben die Kontraste und Farbabstände als Zahl.
 - **Ablauf:** Der Product Owner wählt, kombiniert oder wünscht weitere Varianten; jede Runde bleibt als eigene Datei zum Vergleich erhalten (`…-preview-v1.html`) und wird nie gelöscht. Die gewählte Variante hält Claude Code im Pull Request fest.
+- **Finale Referenz:** Nach der Wahl erstellt Claude Code eine finale Vorschau nur mit der gewählten Variante: umschaltbar nach Gerät, Datenstand und Umfang („jetzt gebaut“ / „mit späteren Funktionen“), darunter Bauangaben mit Maßen, Abständen und Verhalten. Nach Abnahme durch den Product Owner kommt sie als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (z. B. `d3-start-navigation-final-preview.html`) und ist die verbindliche Vorlage für dieses und spätere Bündel, die dort andocken. Nach dem Bau vergleicht Claude Code Vorlage und App per Screenshot in denselben Zuständen und behebt Abweichungen, bevor es „fertig“ meldet. *(neu in 0.6)*
 - **Ausnahme:** reine Fehlerbehebungen und Änderungen, die einem bereits gewählten Entwurf folgen.
 
 ---

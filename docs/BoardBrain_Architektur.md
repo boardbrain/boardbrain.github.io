@@ -24,7 +24,7 @@
 | 0.8 | 07.10.2026 | Bündel I1-B: Textschlüssel der Spielmodule ohne Abhängigkeit von `i18n` (5.1); Schemaversionen als Liste (Migrationsgerüst), Datenbankklasse ohne `!`, alle Stores ab Version 1 (7.3); Startansicht statt Diagnose unter `#/`, Kopfzeile mit Hauptnavigation (13.1); Abhängigkeiten der Ansichten über `AppDependenciesProvider` (13.2); globales `fake-indexeddb` für Lesehooks in Komponententests (14.1) (PR #12) |
 | 0.9 | 07.10.2026 | Design D-1: OP-11 geklärt; Paletten, Farbschlüssel und wählbare Designs über `data-theme` mit Standard „Holz“ (13.4, 18.2, 19); Einstellung „Design“ in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
 | 0.10 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Bindung mit `excludesCatan` (4.5, 7.1, FA-PG-04, E-27); Gruppenfarben-Schlüssel und Reihenfolge der Vergabe nach E-28, Kontrastregel für Spielfarben 3 : 1 zum Hintergrund und 2,3 : 1 auf Karten (13.4) |
-| 0.11 | 08.10.2026 | Design D-3: Rahmen mit Logo, Hauptnavigation als Kartenhand am unteren Rand, Startansicht ohne Scrollen, Zurück zur vorherigen Seite, Hinweis zum Drehen auf Smartphones im Querformat (13.1, NFA-PL-04, E-29); Tests ohne Smartphone im Querformat (14.5) |
+| 0.11 | 08.10.2026 | Design D-3: Rahmen mit Logo, Hauptnavigation als Kartenhand am unteren Rand, Startansicht ohne Scrollen, Zurück zur vorherigen Seite, Hinweis zum Drehen auf Smartphones im Querformat, Design-Referenz in `docs/design/` (13.1, NFA-PL-04, E-29); Tests ohne Smartphone im Querformat (14.5) |
 
 ## Inhaltsverzeichnis
 
@@ -951,12 +951,13 @@ Beim Start ruft die App `navigator.storage.persisted()` und, falls nötig, `navi
 
 Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktionieren direkte Aufrufe und die Zurück-Taste unter Android ohne Serverkonfiguration auf GitHub Pages (ADR-019).
 
-Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und App-Namen, dazwischen die Ansicht (nur sie scrollt), unten die Hauptnavigation als Kartenhand – jeder Bereich ist eine Spielkarte, die aktive ist herausgezogen. Die Kartenhand nennt nur Bereiche, die es schon gibt (seit I1-B „Start“ und „Verwaltung“); auf den Unterseiten der Verwaltung ist „Verwaltung“ aktiv. Adressen sind deutsch, z. B. `#/verwaltung/personen`; unbekannte Adressen führen zur Startansicht `#/`. Jede Ansicht ist von einer eigenen Error Boundary umschlossen. *(geändert in 0.11, Design D-3)*
+Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und App-Namen, dazwischen die Ansicht (nur sie scrollt), unten die Hauptnavigation als Kartenhand – jeder Bereich ist eine Spielkarte, die aktive ist herausgezogen. Die Kartenhand nennt nur Bereiche, die es schon gibt (seit I1-B „Start“ und „Verwaltung“); auf den Unterseiten der Verwaltung ist „Verwaltung“ aktiv. Adressen sind deutsch, z. B. `#/verwaltung/personen`; unbekannte Adressen führen zur Startansicht `#/`. Jede Ansicht ist von einer eigenen Error Boundary umschlossen. Aussehen, Maße und die Plätze späterer Funktionen legt die Design-Referenz `docs/design/d3-start-navigation-final-preview.html` fest. *(geändert in 0.11, Design D-3)*
 
 - **Startansicht:** Personen, Tische und Spiele als Fächer aus Spielkarten mit der Anzahl in den Ecken, direkt über der Kartenhand; die Ansicht scrollt nie, die Karten passen ihre Größe dem Platz an. Darüber erscheinen später „Neue Partie“ (I2, als Nachziehstapel) und oben die Banner; sie verschieben den Inhalt nicht, solange der Platz reicht.
 - **Verwaltung:** dieselben Spielkarten als Raster mit den ersten Namen jedes Bereichs.
 - **Zurück:** Unterseiten haben links neben dem Titel einen Zurück-Knopf. Er führt wie die Zurück-Taste unter Android zur vorherigen Seite (`navigate(-1)`); wurde die Seite direkt aufgerufen, zur Verwaltung.
 - **Smartphone im Querformat (NFA-PL-04, E-29):** Ein Fenster im Querformat, das niedriger als 500 px ist, gilt als Smartphone; der Rahmen zeigt dann per Media Query nur den Hinweis, das Gerät zu drehen. Das wirkt auf Android und iOS gleich; eine Sperre im Manifest entfällt, weil iOS sie nicht kennt und sie unter Android auch Tablets sperren würde.
+- **Kartenhand:** Die Bereiche stehen als Liste in `AppLayout`; ein weiterer Bereich ist ein Eintrag. Drehung und Breite berechnet `cardHand.ts` (9° je Karte, ab sechs Karten 70 px breit und 6°).
 - **Logo:** ein Gehirn, dessen linke Hälfte ein Schachbrett ist (`Logo`, Farbe `--color-accent-text`); als Symbol im Browser-Tab `public/favicon.svg` mit festem Farbwert, weil eine Bilddatei die Tokens nicht lesen kann. Die Symbole für Startbildschirm und Manifest entstehen in I1-D aus derselben Grafik.
 
 | Bereich | Ansichten |

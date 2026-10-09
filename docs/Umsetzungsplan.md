@@ -23,7 +23,7 @@
 | 0.8 | 08.10.2026 | Ergebnis der Abnahme von I1-C: Gruppenseite als „Spielraum“, Catan ausschließen, überarbeitete Gruppenfarben (I1-C); neues Bündel I1-F „Bearbeiten“ nach I1-E (Spezifikation 0.8); Designvorschläge vor jeder neuen Oberfläche (4.1, Richtlinien 2.5) |
 | 0.9 | 08.10.2026 | I1-C umgesetzt (#15): Spielraum wie Designvorschlag F6, Spielauswahl mit aufklappbarer Liste eigener Spiele (Variante C), Suchfelder fokussieren nur mit Maus |
 | 0.10 | 08.10.2026 | Neue Aufgabe D-3 „Startansicht und Navigation“ nach I1-C und vor I1-E: Startansicht, Kopfzeile und Verwaltung im Stil des Spielraums |
-| 0.11 | 08.10.2026 | D-3 umgesetzt: Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst |
+| 0.11 | 08.10.2026 | D-3 umgesetzt: Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst; Design-Referenz `docs/design/d3-start-navigation-final-preview.html` mit Verweisen je Inkrement (7) |
 
 ## 1. Zweck
 
@@ -179,7 +179,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Branch:** `feat/d-3-start-and-navigation`.
 - **Pakete:** keine.
 - **Abnahme durch den Product Owner:** Designvorschlag wählen; danach Startansicht, Kopfzeile und Verwaltung auf S26 (hochkant, quer nur Hinweis), iPad und PC; alle Bereiche erreichbar, Zurück-Taste auf dem S26.
-- **Ergebnis:** In zwei Runden Designvorschlägen (`start-preview-v1.html`, `start-preview-v2.html`, Logos in `logo-preview-v1.html`) gewählt: Konzept E „Kartenhand“ – Hauptnavigation als Spielkarten am unteren Rand, Start mit Personen, Tische, Spiele als Kartenfächer direkt über der Hand und ohne Scrollen, Verwaltung als Kartenraster; „Neue Partie“ (I2) später als Nachziehstapel mit klassischem Kartenrücken über den Karten; Logo „Eine Kontur“ (Gehirn, linke Hälfte Schachbrett); Zurück führt zur vorherigen Seite; Smartphones nur im Hochformat (E-29); Texte ohne „Eure …“. Verbindliche Referenz war `d3-final-preview.html`; Start und Verwaltung stimmen auf Handy, Tablet hoch und quer und PC pixelgenau mit ihr überein.
+- **Ergebnis:** In zwei Runden Designvorschlägen (`start-preview-v1.html`, `start-preview-v2.html`, Logos in `logo-preview-v1.html`) gewählt: Konzept E „Kartenhand“ – Hauptnavigation als Spielkarten am unteren Rand, Start mit Personen, Tische, Spiele als Kartenfächer direkt über der Hand und ohne Scrollen, Verwaltung als Kartenraster; „Neue Partie“ (I2) später als Nachziehstapel mit klassischem Kartenrücken über den Karten; Logo „Eine Kontur“ (Gehirn, linke Hälfte Schachbrett); Zurück führt zur vorherigen Seite; Smartphones nur im Hochformat (E-29); Texte ohne „Eure …“. Verbindliche Referenz ist `docs/design/d3-start-navigation-final-preview.html` (im Repository); Start und Verwaltung stimmen auf Handy, Tablet hoch und quer und PC pixelgenau mit ihr überein. Gebaut ist nur der Umfang „Jetzt in D-3 gebaut“; der Umfang „Mit späteren Funktionen“ zeigt, wo die Funktionen der weiteren Inkremente andocken (Kapitel 7).
 
 ## 6. Kleine Aufgaben
 
@@ -201,3 +201,13 @@ Die Stories je Inkrement stehen in Spezifikation 2.5. Der Zuschnitt in Bündel f
 | I4 Daten und Updates | Import mit Konflikten, Sicherungspunkte, Service Worker und Updates, Speicherschutz; Paket `valibot` (aus I1-B zurückgestellt) |
 | I5 Erlebnis und Ausbau | Glücksrad mit Motion (nach D-2), Startrohstoffe (Zufall) |
 | I6 Feinschliff | keine |
+
+**Design-Referenz für Start und Navigation (D-3):** `docs/design/d3-start-navigation-final-preview.html`, Umfang „Mit späteren Funktionen“. Platz und Aussehen der folgenden Elemente sind dort festgelegt; das jeweilige Bündel baut sie genau so ein (Richtlinien 2.5):
+
+| Inkrement | Element aus der Referenz |
+|---|---|
+| I2 | „Neue Partie“ als Nachziehstapel mit klassischem Kartenrücken direkt über den Karten; Hinweis „‹Gruppe› spielt gerade – Weiter“ oben auf dem Start |
+| I3 | Karte „Statistik“ in der Kartenhand. Offen: Wo „Ergebnis eintragen“ auf dem Start erscheint (US-ER-01 AK-1), ist in D-3 nicht entworfen – Designvorschlag zu Beginn von I3 |
+| I4 | Banner (Sicherung, Update, Speicher) oben auf dem Start, ohne die Karten zu verschieben; Karte „Daten“ in der Kartenhand |
+| I5 | Vierte Karte „Archiv“ in der Verwaltung |
+| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`) |
