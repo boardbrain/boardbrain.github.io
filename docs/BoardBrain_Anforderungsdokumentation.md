@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.14 |
+| Version | 0.15 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
 | Stand | 08.10.2026 |
 | Sprache | Deutsch |
@@ -28,6 +28,7 @@
 | 0.12 | 07.10.2026 | Übersicht über Personen und Gruppen mit Detailansichten (neu FA-VW-06) (PR #13) |
 | 0.13 | 07.10.2026 | Design D-1: OP-11 geklärt (E-26); wählbare Designs mit Standard „Holz“ und Standard-Akzent je Design statt einer einzelnen Akzentfarbe mit Standard Lila (NFA-GB-03) |
 | 0.14 | 08.10.2026 | Abnahme von I1-C: globale Gruppen können Catan ausschließen (FA-PG-04, E-27); überarbeitete Gruppenfarben-Palette und Kontrastregel für Spielfarben (E-28, E-26 angepasst) |
+| 0.15 | 08.10.2026 | Design D-3: Smartphones nur im Hochformat, Tablets und PC in beiden Ausrichtungen (NFA-PL-04 präzisiert, E-29) |
 
 ## Inhaltsverzeichnis
 
@@ -354,7 +355,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | NFA-PL-01 | Die App läuft auf Android, iOS (Smartphone und iPad) und Windows. Abgenommen wird mit Brave unter Android und Windows sowie mit Safari unter iOS und iPadOS; Chrome dient als Vergleichsbrowser. *(präzisiert in 0.7)* |
 | NFA-PL-02 | Die App ist so plattformunabhängig wie möglich umgesetzt. |
 | NFA-PL-03 | Die App funktioniert nach der Installation vollständig offline. Internet wird nur für Updates benötigt. |
-| NFA-PL-04 | Die Darstellung passt sich an Smartphone- und Tablet-Bildschirme an. |
+| NFA-PL-04 | Die Darstellung passt sich an Smartphone- und Tablet-Bildschirme an. Smartphones werden im Hochformat genutzt; im Querformat zeigt die App auf Smartphones nur einen Hinweis, das Gerät zu drehen. Tablets und PC sind in beiden Ausrichtungen nutzbar. *(präzisiert in 0.15, E-29)* |
 
 ### 7.3 Datenhaltung und Datenschutz
 
@@ -494,6 +495,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-26 | Farbwerte nach Design D-1: Standarddesign „Holz“ (warmes, mitteldunkles Braun, Akzent Bernstein); weitere Designs „Tiefsee“ (Petrol), „Wald“ (Grüngrau) und „Glas“ (Farbverlauf mit Milchglasflächen); kräftige Catan-Farben und eine gedeckte Gruppenfarben-Palette; 6 Akzentfarben (Indigo, Blau, Petrol, Grün, Bernstein, Beere). Die Werte stehen ausschließlich in `src/ui/styles/tokens.css` *(neu in 0.13; Gruppenfarben und Kontrastregel geändert in 0.14 durch E-28)* | Auswahl des Product Owners anhand einer Vorschau auf den Abnahmegeräten; alle Werte erreichen in allen Designs mindestens 4,5 : 1 für Text, sodass die App unabhängig vom Design lesbar bleibt |
 | E-27 | Eine globale Gruppe kann Catan ausschließen; sie hat dann auch bei 2 bis 4 Mitgliedern nur Gruppenfarben *(neu in 0.14)* | Wer mit einer kleinen Gruppe nie Catan spielt, muss keine Catan-Farben vergeben; die Gruppe bleibt dennoch für alle übrigen Spiele offen. Wunsch des Product Owners bei der Abnahme von I1-C |
 | E-28 | Überarbeitete Gruppenfarben-Palette mit 12 gut unterscheidbaren, gedeckten Farben: Rot, Blau, Orange und Weiß (Catan-Töne), Gelb, Moosgrün, Indigo (hell), Petrol, Magenta, Kaffee, Rosé, Steingrau. Spielfarben erreichen mindestens 3 : 1 zum Hintergrund jedes Designs und mindestens 2,3 : 1 auf dessen Karten *(neu in 0.14)* | Die Unterscheidbarkeit der Personenfarben untereinander hat Vorrang vor dem Kontrast zum Hintergrund: In der Palette aus D-1 waren Grün, Limette und Petrol sowie Violett und Indigo zu ähnlich (Farbabstand ΔE bis 13); die neue Palette erreicht mindestens ΔE 29. Ausgewählt vom Product Owner in der Farbvorschau auf den Abnahmegeräten, in allen vier Designs geprüft |
+| E-29 | Smartphones nur im Hochformat; im Querformat erscheint statt der App ein Hinweis zum Drehen. Tablets (auch aufgeklappte Falt-Smartphones) und PC in beiden Ausrichtungen *(neu in 0.15)* | Im Querformat ist ein Smartphone zu niedrig für Navigation und Inhalt; ein Hinweis wirkt auf Android und iOS gleich, eine echte Sperre gibt es nur unter Android und würde dort auch Tablets sperren. Entscheidung des Product Owners in Design D-3 |
 
 ---
 

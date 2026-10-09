@@ -12,8 +12,8 @@ async function createPersons(page: Page, ...names: string[]): Promise<void> {
 
 async function openRoom(page: Page): Promise<void> {
   await page.goto('/#/verwaltung');
-  await page.getByRole('link', { name: 'Gruppen' }).click();
-  await expect(page.getByRole('heading', { name: 'Eure Tische', level: 1 })).toBeVisible();
+  await page.getByRole('link', { name: /^Tische: / }).click();
+  await expect(page.getByRole('heading', { name: 'Tische', level: 1 })).toBeVisible();
 }
 
 async function openEditor(page: Page): Promise<void> {

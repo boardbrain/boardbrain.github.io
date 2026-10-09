@@ -1,22 +1,33 @@
-import { LinkList } from '@/ui/components/LinkList';
-import { Page } from '@/ui/components/Page';
 import { t } from '@/i18n/t';
+import { PlayingCard } from '@/ui/components/PlayingCard';
+import { useAreaCards } from '@/ui/views/areaCards';
+import styles from './ManagementView.module.css';
 
 /**
- * Overview of the management area `#/verwaltung` (Architecture 13.1). The archive follows with its
- * increment.
+ * Overview of the management area `#/verwaltung` (Architecture 13.1, design D-3): persons,
+ * tables and games as a grid of playing cards. The archive follows with its increment.
  */
 export function ManagementView(): React.JSX.Element {
+  const cards = useAreaCards();
   return (
-    <Page title={t('verwaltung.titel')}>
-      <LinkList
-        label={t('verwaltung.bereiche')}
-        links={[
-          { to: '/verwaltung/personen', text: t('verwaltung.personen') },
-          { to: '/verwaltung/gruppen', text: t('verwaltung.gruppen') },
-          { to: '/verwaltung/spiele', text: t('verwaltung.spiele') },
-        ]}
-      />
-    </Page>
+    <main className={styles.page}>
+      <h1 className={styles.title}>{t('verwaltung.titel')}</h1>
+      <nav aria-label={t('verwaltung.bereiche')}>
+        <div className={styles.grid}>
+          {/* The archive (I5) becomes a fourth card here, see
+              docs/design/d3-start-navigation-final-preview.html. */}
+          {cards?.map((card) => (
+            <PlayingCard
+              key={card.key}
+              to={card.to}
+              title={card.title}
+              count={card.count}
+              icon={card.icon}
+              note={card.names.join(', ')}
+            />
+          ))}
+        </div>
+      </nav>
+    </main>
   );
 }

@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.8 |
+| Version | 0.9 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 08.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
@@ -22,6 +22,7 @@
 | 0.6 | 07.10.2026 | Neue Story US-VW-05 „Personen und Gruppen im Überblick“ (Must, I1) zu FA-VW-06 (2.3, 2.5, 4.3, 6) (PR #13) |
 | 0.7 | 07.10.2026 | Design D-1 (Anforderungsdokumentation 0.13, NFA-GB-03, E-26): US-GB-01 wird „Design und Akzentfarbe wählen“ mit Standarddesign „Holz“ statt Standard Lila (2.5, 4.15); Vollsicherung enthält das gewählte Design (3.9) |
 | 0.8 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Gruppen können Catan ausschließen (FA-PG-04, E-27; 3.3, 3.4, US-PG-02 AK-7, US-PG-03 AK-2 und AK-4, US-AB-01 AK-1, US-VW-02 AK-6); Farbwerte nach E-28 (3.3). Bearbeiten nach Wunsch des Product Owners vorgezogen: neu US-VW-06 „Person umbenennen“ und US-VW-07 „Eigenes Spiel umbenennen“ (Must, I1) aus US-VW-01 und US-VW-04; US-VW-02 „Gruppe bearbeiten“ wird Must in I1; US-VW-01 und US-VW-04 behalten Archivieren und Löschen (2.3, 2.5, 4.3, 6) |
+| 0.9 | 08.10.2026 | Design D-3 (Anforderungsdokumentation 0.15, E-29): Smartphones nur im Hochformat, im Querformat ein Hinweis zum Drehen; Tablets in beiden Ausrichtungen (US-PL-01 AK-3, NFA-PL-04) |
 
 ## Inhaltsverzeichnis
 
@@ -602,7 +603,7 @@ Bezug: FA-PL-07, FA-PL-08, NFA-GB-06, NFA-PL-04
 
 - **AK-1:** Gegeben die Platzierung, dann zeigt die App 19 Felder mit nach oben zeigender Spitze in Reihen zu 3, 4, 5, 4 und 3 Feldern; der Umriss ist oben und unten gerade und links und rechts spitz.
 - **AK-2:** Gegeben die Darstellung, dann tragen die Felder keine Landschaften oder Zahlen und es werden keine Original-Grafiken des Spiels verwendet.
-- **AK-3:** Gegeben Hoch- oder Querformat auf Smartphone oder Tablet, dann ist das Brett vollständig sichtbar und behält seine Ausrichtung.
+- **AK-3:** Gegeben Hochformat auf einem Smartphone oder Hoch- oder Querformat auf einem Tablet, dann ist das Brett vollständig sichtbar und behält seine Ausrichtung. *(geändert in 0.9, E-29)*
 
 #### US-PL-02 Gebäude zufällig platzieren · M
 Als Spielende möchten wir, dass die App unsere Startgebäude regelkonform und fair platziert, damit niemand die besten Plätze wählen kann.
@@ -941,7 +942,7 @@ Bezug: NFA-GB-03
 | NFA-PL-01 | Abnahme auf Android (Brave), iPhone und iPad (Safari, installiert) und Windows (Brave, installiert); Chrome als Vergleichsbrowser | Manueller Test | M |
 | NFA-PL-02 | Eine gemeinsame Codebasis für alle Plattformen | Code-Review | M |
 | NFA-PL-03 | Alle Funktionen außer Updates arbeiten im Flugmodus | Manueller Test | M |
-| NFA-PL-04 | Alle Ansichten sind auf Smartphone und Tablet in Hoch- und Querformat ohne abgeschnittene Inhalte nutzbar | Manueller Test | M |
+| NFA-PL-04 | Alle Ansichten sind auf Smartphones im Hochformat und auf Tablets in Hoch- und Querformat ohne abgeschnittene Inhalte nutzbar; ein Smartphone im Querformat zeigt nur den Hinweis, das Gerät zu drehen *(geändert in 0.9, E-29)* | Manueller Test, automatisierter Test | M |
 | NFA-DH-01 bis -03 | Keine Netzwerkzugriffe außer für Updates; keine Konten, keine Anmeldung, kein Tracking; eine Content-Security-Policy erlaubt nur die eigene Herkunft; Ende-zu-Ende-Tests schlagen bei Anfragen an fremde Adressen fehl | Code-Review, Netzwerkmitschnitt, automatisierter Test | M |
 | NFA-DH-04 | Jeder Export enthält eine Formatversion; Import älterer Versionen ist durch Tests abgedeckt | Automatisierter Test | M |
 | NFA-DH-05 | Jeder Datensatz hat eine zufällige, weltweit eindeutige Kennung | Code-Review | M |

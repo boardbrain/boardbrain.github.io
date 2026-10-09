@@ -11,7 +11,7 @@ test.describe('US-SP-02 Create a custom game', () => {
     page,
   }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'Spiele verwalten' }).click();
+    await page.getByRole('link', { name: /^Spiele: / }).click();
     const supported = page.getByRole('region', { name: 'Unterstützte Spiele' });
     const custom = page.getByRole('region', { name: 'Eigene Spiele' });
     await expect(supported.getByRole('listitem')).toHaveText(['Catan']);

@@ -1,43 +1,139 @@
+/* The frame fills the screen; only the view in between scrolls (design D-3). */
 .layout {
-  min-height: 100dvh;
+  height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .header {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
+  flex: none;
+  gap: 12px;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-surface-raised);
-  border-bottom: 1px solid var(--color-border);
+  justify-content: center;
+  padding: 10px 14px;
 }
 
 .appName {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
   font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
-.navList {
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.content::-webkit-scrollbar {
+  display: none;
+}
+
+/* Main navigation as a hand of cards; the cards stick out below and are cut off by the frame. */
+.hand {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  flex: none;
+  justify-content: center;
+  height: 104px;
+  background: linear-gradient(180deg, transparent, var(--color-surface-raised));
+}
+
+.handList,
+.compactHand {
+  display: flex;
+  justify-content: center;
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-.link,
-.activeLink {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--touch-target-min);
-  padding: 0 var(--space-3);
-  color: var(--color-text-muted);
-  text-decoration: none;
-  border-radius: var(--radius-2);
+.handItem {
+  display: flex;
+  margin: 0 -8px;
 }
 
-.activeLink {
+/* The rotation per card comes from cardHand.ts; the translation sinks the card into the hand. */
+.card,
+.activeCard {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  place-items: center;
+  align-content: center;
+  width: 86px;
+  height: 104px;
+  font-size: 0.7rem;
   color: var(--color-text);
-  background: var(--color-surface);
+  text-decoration: none;
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 -4px 12px var(--color-shadow);
+  transform: translateY(16px);
+  transform-origin: 50% 140%;
+}
+
+/* The active card is pulled out of the hand. */
+.activeCard {
+  z-index: 2;
+  font-weight: 700;
+  color: var(--color-accent-text);
+  border-color: var(--color-accent-text);
+  transform: translateY(4px);
+}
+
+/* From six areas the cards get narrower so that all fit on a phone. */
+.compactHand .handItem {
+  margin: 0 -6px;
+}
+
+.compactHand .card,
+.compactHand .activeCard {
+  width: 70px;
+}
+
+.rotateHint {
+  display: none;
+}
+
+/* NFA-PL-04: phones are used upright. A low screen in landscape is a phone (tablets and PCs are
+   higher), on Android and iOS alike. */
+@media (orientation: landscape) and (height < 500px) {
+  .app {
+    display: none;
+  }
+
+  .rotateHint {
+    display: grid;
+    gap: 12px;
+    place-content: center;
+    justify-items: center;
+    height: 100%;
+    padding: 16px;
+    text-align: center;
+  }
+}
+
+.rotateIcon {
+  display: grid;
+  color: var(--color-accent-text);
+}
+
+.rotateTitle {
+  font-size: 1.15rem;
+}
+
+.rotateText {
+  max-width: 320px;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
 }

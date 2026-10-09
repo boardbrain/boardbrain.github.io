@@ -1,0 +1,3752 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>BoardBrain – D-3 final: Start und Navigation</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          var(--bg-image) fixed,
+          var(--bg);
+        color: var(--text);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          roboto,
+          sans-serif;
+        line-height: 1.5;
+      }
+      button,
+      input {
+        font: inherit;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+        background: none;
+        border: 0;
+        padding: 0;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+      h2 {
+        font-size: 1rem;
+      }
+
+      /* ---------- picker ---------- */
+      .picker {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: grid;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+      @media (width < 800px) {
+        .picker {
+          position: static;
+        }
+      }
+      .picker .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .picker .label {
+        min-width: 80px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .chip {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .chip[aria-pressed='true'] {
+        font-weight: 600;
+        color: var(--accent-text);
+        background: var(--overlay);
+        border-color: var(--accent-text);
+      }
+      .intro {
+        max-width: 1220px;
+        margin: 0 auto;
+        padding: 12px 16px 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .intro b {
+        color: var(--text);
+      }
+      .stage {
+        padding: 16px;
+      }
+
+      /* ---------- device frames ---------- */
+      .frame {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto;
+        overflow: hidden;
+        background:
+          var(--bg-image),
+          var(--bg);
+        border: 1px dashed var(--border);
+        border-radius: 24px;
+      }
+      .frame.phoneP {
+        width: min(100%, 390px);
+        height: 780px;
+      }
+      .frame.phoneL {
+        width: min(100%, 780px);
+        height: 370px;
+      }
+      .frame.tabletP {
+        width: min(100%, 780px);
+        height: 1020px;
+      }
+      .frame.wide {
+        width: min(100%, 1180px);
+        height: 760px;
+      }
+      .frame.device {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        width: auto;
+        height: auto;
+        border: 0;
+        border-radius: 0;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+          env(safe-area-inset-left);
+      }
+      .exit {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        z-index: 60;
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 56px;
+        color: var(--muted);
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-left: 0;
+        border-radius: 0 12px 12px 0;
+        opacity: 0.8;
+      }
+
+      /* ---------- shared app pieces ---------- */
+      .app {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .app.row {
+        flex-direction: row;
+      }
+      .scroll {
+        flex: 1;
+        min-height: 0;
+        min-width: 0;
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+      .scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .pad {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+        align-content: start;
+        padding: 20px 16px 28px;
+      }
+      .wideContent {
+        width: 100%;
+        max-width: 1040px;
+        margin: 0 auto;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 0.85rem;
+      }
+      .tiny {
+        font-size: 0.75rem;
+      }
+      .logo {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      .logo svg {
+        color: var(--accent-text);
+      }
+      .iconBtn {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        color: var(--text);
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+      }
+      .primary {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 10px 20px;
+        font-weight: 600;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 14px;
+      }
+      .secondary {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 8px 18px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+      .linkBtn {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        color: var(--accent-text);
+        font-size: 0.9rem;
+      }
+      .sectionHead {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .card {
+        padding: 14px;
+        background: var(--raised);
+        backdrop-filter: blur(var(--blur));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .avatar {
+        display: inline-grid;
+        place-items: center;
+        flex: none;
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #1b1b1b;
+        border-radius: 50%;
+      }
+      .avatarRow {
+        display: flex;
+      }
+      .avatarRow .avatar {
+        margin-right: -8px;
+        border: 2px solid var(--raised);
+      }
+      .fadeRow {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        mask-image: linear-gradient(90deg, #000 85%, transparent);
+      }
+      .fadeRow::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* future placeholder */
+      .ph {
+        position: relative;
+        opacity: 0.55;
+        outline: 2px dashed var(--muted);
+        outline-offset: 3px;
+        border-radius: 14px;
+      }
+      .ph-tag {
+        position: absolute;
+        top: -10px;
+        right: 8px;
+        z-index: 2;
+        padding: 0 7px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        line-height: 18px;
+        color: var(--bg);
+        background: var(--muted);
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .banner {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+      .banner b {
+        color: var(--accent-text);
+      }
+
+      /* mini table (as in the Spielraum) */
+      .mt {
+        position: relative;
+        flex: none;
+      }
+      .mt-top {
+        position: absolute;
+        inset: 22%;
+        background: var(--overlay);
+        border: 2px solid var(--border);
+        border-radius: 50%;
+      }
+      .mt-seat {
+        position: absolute;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .mt-seat.sq {
+        border-radius: 22%;
+      }
+
+      /* generic sub pages */
+      .roomGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+        gap: 12px;
+      }
+      .tableCard {
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        padding: 16px 8px;
+        text-align: center;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .tableCard.new {
+        color: var(--accent-text);
+        border: 1px dashed var(--accent-text);
+      }
+      .plusTable {
+        display: grid;
+        place-items: center;
+        width: 96px;
+        height: 96px;
+        border: 2px dashed var(--accent-text);
+        border-radius: 50%;
+      }
+      .listRow {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        min-height: 52px;
+        padding: 6px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .listRow:last-child {
+        border-bottom: 0;
+      }
+      .fieldRow {
+        display: flex;
+        gap: 8px;
+      }
+      .field {
+        flex: 1;
+        min-width: 0;
+        min-height: 48px;
+        padding: 0 14px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .pageHead {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      /* ---------- A Tischmitte ---------- */
+      .a-head {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+      }
+      .a-seg {
+        display: flex;
+        padding: 4px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .a-seg button {
+        min-height: 40px;
+        padding: 0 12px;
+        color: var(--muted);
+        border-radius: 999px;
+      }
+      .a-seg button[aria-current='page'] {
+        color: var(--text);
+        font-weight: 600;
+        background: var(--overlay);
+        box-shadow: 0 1px 0 var(--border);
+      }
+      .a-table {
+        position: relative;
+        flex: none;
+        margin: 0 auto;
+      }
+      .a-top {
+        position: absolute;
+        inset: 17%;
+        display: grid;
+        gap: 8px;
+        place-content: center;
+        justify-items: center;
+        padding: 12px;
+        text-align: center;
+        background: radial-gradient(circle at 40% 35%, var(--overlay), var(--raised));
+        border: 6px solid var(--border);
+        border-radius: 50%;
+        box-shadow: inset 0 0.75rem 2.5rem -0.75rem var(--shadow);
+      }
+      .a-seat {
+        position: absolute;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 0;
+        color: var(--text);
+        background: var(--raised);
+        border: 2px solid var(--border);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .a-seat .lbl {
+        font-size: 0.7rem;
+        line-height: 1.2;
+      }
+      .a-seat .cnt {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 24px;
+        padding: 0 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 22px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 999px;
+      }
+      .a-seat.ghost {
+        opacity: 0.5;
+        border-style: dashed;
+      }
+      .a-seat.hint {
+        border-color: var(--accent-text);
+        box-shadow: 0 0 0 4px var(--overlay);
+      }
+      .a-split {
+        display: grid;
+        gap: 20px;
+        align-items: center;
+      }
+      .a-cards {
+        display: grid;
+        gap: 12px;
+      }
+      .a-card {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        text-align: left;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+      }
+      .a-card .top {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .a-card .count {
+        margin-left: auto;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-text);
+      }
+
+      /* ---------- B App-Leiste ---------- */
+      .b-top {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        min-height: 56px;
+        padding: 6px 16px;
+      }
+      .b-tabs {
+        display: flex;
+        justify-content: space-around;
+        padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+        background: var(--raised);
+        border-top: 1px solid var(--border);
+      }
+      .b-tab {
+        position: relative;
+        display: grid;
+        flex: 1;
+        justify-items: center;
+        gap: 2px;
+        min-height: 56px;
+        padding: 6px 4px;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .b-tab .pill {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 30px;
+        border-radius: 999px;
+      }
+      .b-tab[aria-current='page'] {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .b-tab[aria-current='page'] .pill {
+        color: var(--accent-text);
+        background: var(--overlay);
+      }
+      .b-tab.ghost {
+        opacity: 0.45;
+      }
+      .b-rail {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+        width: 96px;
+        padding: 14px 6px;
+        background: var(--raised);
+        border-right: 1px solid var(--border);
+      }
+      .b-rail.slim {
+        width: 72px;
+      }
+      .b-rail .b-tab {
+        flex: none;
+        width: 100%;
+      }
+      .b-hero {
+        display: grid;
+        gap: 6px;
+        padding: 18px;
+        text-align: left;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 20px;
+      }
+      .b-hero .big {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+      }
+      .b-tiles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .b-tile {
+        display: grid;
+        gap: 4px;
+        padding: 14px;
+        text-align: left;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .b-tile .n {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .b-mini {
+        display: grid;
+        flex: none;
+        justify-items: center;
+        gap: 4px;
+        width: 112px;
+        padding: 12px 6px;
+        text-align: center;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .b-list {
+        overflow: hidden;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .b-list button {
+        width: 100%;
+        text-align: left;
+      }
+      .b-ico {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 38px;
+        height: 38px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 10px;
+      }
+
+      /* ---------- C Spielraum ---------- */
+      .c-head {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 10px 14px;
+      }
+      .c-head .logo {
+        margin-right: auto;
+      }
+      .c-pillBtn {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 14px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .c-bench {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 12px;
+        background: linear-gradient(180deg, var(--overlay), var(--raised));
+        border: 1px solid var(--border);
+        border-bottom-width: 6px;
+        border-radius: 16px;
+      }
+      .c-shelf {
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+        min-height: 92px;
+        padding: 10px 12px 0;
+        border-bottom: 6px solid var(--border);
+      }
+      .c-box {
+        display: grid;
+        place-items: center;
+        flex: none;
+        padding: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 6px 6px 2px 2px;
+      }
+      .c-sheetBack {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        background: #000000b3;
+      }
+      .c-sheet {
+        display: grid;
+        gap: 14px;
+        width: 100%;
+        max-height: 92%;
+        padding: 18px 16px 24px;
+        overflow-y: auto;
+        background: var(--overlay);
+        border-radius: 22px 22px 0 0;
+      }
+      .c-sheetBack.center {
+        align-items: center;
+      }
+      .c-sheetBack.center .c-sheet {
+        width: min(440px, 90%);
+        border-radius: 22px;
+      }
+      .c-actions {
+        display: grid;
+        gap: 12px;
+      }
+
+      /* ---------- D Schachtel ---------- */
+      .d-tabs {
+        display: flex;
+        gap: 4px;
+        align-items: flex-end;
+        padding: 0 14px;
+      }
+      .d-tab {
+        min-height: 44px;
+        padding: 8px 18px;
+        color: var(--muted);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-bottom: 0;
+        border-radius: 12px 12px 0 0;
+      }
+      .d-tab[aria-current='page'] {
+        position: relative;
+        top: 1px;
+        color: var(--text);
+        font-weight: 600;
+        background: var(--raised);
+      }
+      .d-tab.ghost {
+        opacity: 0.45;
+        border-style: dashed;
+      }
+      .d-box {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        margin: 0 10px 10px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 0 16px 16px;
+      }
+      .d-grid {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+      }
+      .d-cell {
+        position: relative;
+        display: grid;
+        gap: 8px;
+        align-content: space-between;
+        min-height: 120px;
+        padding: 14px;
+        text-align: left;
+        background: var(--bg);
+        border-radius: 14px;
+        box-shadow:
+          inset 0 4px 14px var(--shadow),
+          inset 0 -1px 0 var(--border);
+      }
+      .d-cell .n {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--accent-text);
+      }
+      .d-shelf {
+        display: grid;
+        gap: 0;
+        padding: 16px 16px 24px;
+      }
+      .d-spine {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        min-height: 64px;
+        padding: 10px 16px;
+        font-weight: 700;
+        text-align: left;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-left: 10px solid var(--spine);
+        border-radius: 6px;
+      }
+      .d-spine .n {
+        margin-left: auto;
+        font-size: 1.25rem;
+        letter-spacing: 0;
+        color: var(--accent-text);
+      }
+      .d-board {
+        height: 10px;
+        margin: 2px -8px 18px;
+        background: var(--border);
+        border-radius: 3px;
+        box-shadow: 0 6px 10px -4px var(--shadow);
+      }
+
+      /* ---------- E Kartenhand ---------- */
+      .e-hand {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        height: 104px;
+        padding-bottom: env(safe-area-inset-bottom);
+        background: linear-gradient(180deg, transparent, var(--raised));
+      }
+      .e-navCard {
+        position: relative;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 2px;
+        width: 86px;
+        height: 104px;
+        margin: 0 -8px;
+        font-size: 0.7rem;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 -4px 12px var(--shadow);
+        transform-origin: 50% 140%;
+      }
+      .e-navCard[aria-current='page'] {
+        z-index: 2;
+        color: var(--accent-text);
+        font-weight: 700;
+        border-color: var(--accent-text);
+      }
+      .e-navCard.ghost {
+        opacity: 0.5;
+        border-style: dashed;
+      }
+      .e-card {
+        position: relative;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 6px;
+        aspect-ratio: 5 / 7;
+        padding: 18px 10px;
+        text-align: center;
+        background: linear-gradient(160deg, var(--overlay), var(--raised));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 6px 18px var(--shadow);
+      }
+      .e-card .corner {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--accent-text);
+      }
+      .e-card .corner.br {
+        top: auto;
+        right: 10px;
+        bottom: 8px;
+        left: auto;
+        transform: rotate(180deg);
+      }
+      .e-card .ttl {
+        font-weight: 700;
+      }
+      .e-fan {
+        display: flex;
+        justify-content: center;
+      }
+      .e-fan .e-card {
+        width: 31%;
+        max-width: 170px;
+        margin: 0 -2%;
+      }
+      .e-hero {
+        width: min(100%, 260px);
+        margin: 0 auto;
+        aspect-ratio: 5 / 7;
+      }
+
+      /* ---------- F Hausplan ---------- */
+      .f-plan {
+        display: grid;
+        gap: 6px;
+        padding: 6px;
+        background: var(--border);
+        border-radius: 10px;
+      }
+      .f-room {
+        position: relative;
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        min-height: 130px;
+        padding: 14px;
+        text-align: left;
+        background: var(--raised);
+        border-radius: 4px;
+      }
+      .f-room .kind {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .f-room .ttl {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+      .f-room .ttl span {
+        color: var(--accent-text);
+      }
+      .f-room.ghost {
+        background: var(--bg);
+        opacity: 0.6;
+      }
+      .f-door {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--border);
+        border-color: var(--border) transparent transparent var(--border);
+        border-radius: 100% 0 0 0;
+        opacity: 0.8;
+      }
+      .f-note {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        background: var(--overlay);
+        border-left: 4px solid var(--accent-text);
+        border-radius: 4px;
+        transform: rotate(-0.6deg);
+      }
+
+      /* ---------- G Spielanleitung ---------- */
+      .g-head {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .g-word {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+      }
+      .g-side {
+        display: grid;
+        gap: 2px;
+        align-content: start;
+        width: 260px;
+        padding: 20px 14px;
+        overflow-y: auto;
+        background: var(--raised);
+        border-right: 1px solid var(--border);
+      }
+      .g-side .sec {
+        margin: 14px 10px 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .g-side button {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 10px;
+        text-align: left;
+        border-radius: 10px;
+      }
+      .g-side button[aria-current='page'] {
+        font-weight: 600;
+        color: var(--accent-text);
+        background: var(--overlay);
+      }
+      .g-side .ghost {
+        opacity: 0.45;
+      }
+      .g-drawerBack {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        display: flex;
+        background: #000000b3;
+      }
+      .g-drawerBack .g-side {
+        width: min(300px, 82%);
+        box-shadow: 8px 0 24px var(--shadow);
+      }
+      .g-cover {
+        display: grid;
+        gap: 14px;
+        justify-items: start;
+        padding: 28px 4px 8px;
+      }
+      .g-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+      }
+      .g-rule {
+        width: 64px;
+        height: 4px;
+        background: var(--accent-text);
+        border-radius: 2px;
+      }
+      .g-toc {
+        display: grid;
+      }
+      .g-toc button {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        min-height: 52px;
+        padding: 10px 2px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      .g-toc .no {
+        width: 1.6em;
+        font-weight: 700;
+        color: var(--accent-text);
+      }
+      .g-toc .dots {
+        flex: 1;
+        border-bottom: 2px dotted var(--border);
+        transform: translateY(-4px);
+      }
+      .g-toc .n {
+        font-weight: 700;
+      }
+
+      /* ---------- round 2 ---------- */
+      .h-land {
+        aspect-ratio: auto;
+        min-height: 96px;
+        justify-items: start;
+        padding: 18px 20px;
+        text-align: left;
+      }
+      .h-bar {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        height: 80px;
+        padding: 0 8px;
+        overflow: hidden;
+        background: linear-gradient(180deg, transparent, var(--raised));
+        border-top: 1px solid var(--border);
+      }
+      .h-card {
+        display: grid;
+        flex: 1;
+        gap: 2px;
+        align-content: start;
+        justify-items: center;
+        max-width: 92px;
+        height: 104px;
+        padding-top: 10px;
+        font-size: 0.72rem;
+        color: var(--muted);
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 -2px 8px var(--shadow);
+        transform: rotate(var(--rot)) translateY(16px);
+      }
+      .h-card.on {
+        font-weight: 700;
+        color: var(--accent-text);
+        border-color: var(--accent-text);
+        transform: rotate(var(--rot)) translateY(4px);
+      }
+      .h-card.ghost {
+        opacity: 0.45;
+        border-style: dashed;
+      }
+      .h-sideWrap {
+        display: flex;
+        flex-direction: column;
+        width: 136px;
+        overflow: hidden;
+        background: var(--raised);
+        border-right: 1px solid var(--border);
+      }
+      .h-side {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 0;
+      }
+      .h-side .h-card {
+        flex: none;
+        grid-template-columns: auto 1fr;
+        align-content: center;
+        align-items: center;
+        justify-items: start;
+        gap: 8px;
+        width: 160px;
+        max-width: none;
+        height: 56px;
+        padding: 0 10px 0 40px;
+        transform: translateX(-34px);
+      }
+      .h-side .h-card.on {
+        transform: translateX(-22px);
+      }
+      .j-deck {
+        display: flex;
+        gap: 14px;
+        margin: 0 -16px;
+        padding: 14px 16px 18px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+      }
+      .j-deck::-webkit-scrollbar {
+        display: none;
+      }
+      .j-deck > * {
+        flex: none;
+        scroll-snap-align: center;
+      }
+      .j-dots {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+      .j-dots span {
+        width: 8px;
+        height: 8px;
+        background: var(--border);
+        border-radius: 50%;
+      }
+      .j-dots span.on {
+        background: var(--accent-text);
+      }
+      .k-slot {
+        overflow: visible;
+      }
+      .k-center {
+        display: grid;
+        place-items: center;
+        width: 60px;
+        height: 60px;
+        margin-top: -26px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 50%;
+        outline: 2px dashed var(--muted);
+        outline-offset: 3px;
+        box-shadow: 0 4px 14px var(--shadow);
+      }
+      .b-rail .k-center {
+        margin: 0 0 4px;
+      }
+      .k-fanBack {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 120px;
+        background: #000000a6;
+      }
+      .k-fanBack.rail {
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 40px 0 0 120px;
+      }
+      .k-fan {
+        display: flex;
+      }
+      .m-back {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        background: #000000b3;
+      }
+      .m-fan {
+        position: absolute;
+        bottom: 84px;
+        left: 50%;
+        width: 0;
+        height: 0;
+      }
+      .m-card {
+        position: absolute;
+        bottom: 0;
+        bottom: -43px;
+        left: -33px;
+        display: grid;
+        gap: 2px;
+        align-content: center;
+        justify-items: center;
+        width: 66px;
+        height: 86px;
+        font-size: 0.68rem;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px var(--shadow);
+      }
+      .m-card.on {
+        font-weight: 700;
+        color: var(--accent-text);
+        border-color: var(--accent-text);
+      }
+      .m-card.ghost {
+        color: var(--muted);
+        border-style: dashed;
+      }
+      .m-deck {
+        position: absolute;
+        bottom: calc(18px + env(safe-area-inset-bottom));
+        left: 50%;
+        z-index: 21;
+        display: grid;
+        place-items: center;
+        width: 60px;
+        height: 76px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 12px;
+        box-shadow:
+          5px -4px 0 var(--overlay),
+          10px -8px 0 var(--border),
+          0 6px 16px var(--shadow);
+        transform: translateX(-50%) rotate(-4deg);
+      }
+
+      /* ---------- E: variants for "Neue Partie" ---------- */
+      .e-pile {
+        display: flex;
+        gap: 22px;
+        align-items: center;
+        width: 100%;
+        padding: 14px 18px 14px 22px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .e-pileStack {
+        position: relative;
+        flex: none;
+        width: 54px;
+        height: 74px;
+      }
+      .e-back {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: repeating-linear-gradient(45deg, var(--accent) 0 5px, var(--raised) 5px 10px);
+        border: 3px solid var(--overlay);
+        border-radius: 8px;
+        box-shadow: 0 2px 6px var(--shadow);
+      }
+      .e-back:nth-child(1) {
+        transform: rotate(-9deg) translate(-5px, 2px);
+      }
+      .e-back:nth-child(2) {
+        transform: rotate(6deg) translate(4px, 1px);
+      }
+      .e-backBadge {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border: 2px solid var(--overlay);
+        border-radius: 50%;
+      }
+      .e-hexRow {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        width: 100%;
+        padding: 4px 0;
+      }
+      .e-hex {
+        display: grid;
+        flex: none;
+        place-items: center;
+        align-content: center;
+        width: 92px;
+        height: 106px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.15;
+        color: var(--on-accent);
+        background: var(--accent);
+        clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+      }
+      .e-strip {
+        position: relative;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        min-height: 60px;
+        padding: 0 18px 0 36px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px var(--shadow);
+        transform: rotate(-1.2deg);
+      }
+      .e-strip .corner {
+        position: absolute;
+        top: 6px;
+        left: 12px;
+        font-weight: 800;
+      }
+      .e-fan.four .e-card {
+        width: 25%;
+        max-width: 150px;
+      }
+      .e-backCard {
+        background: repeating-linear-gradient(45deg, var(--accent) 0 6px, var(--raised) 6px 12px);
+      }
+      .e-q {
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--accent-text);
+        background: var(--bg);
+        border-radius: 50%;
+      }
+      .e-backLabel {
+        padding: 2px 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: var(--bg);
+        border-radius: 999px;
+      }
+      .e-hand.six .e-navCard {
+        width: 70px;
+        margin: 0 -6px;
+      }
+      .e-trumpNav {
+        z-index: 3;
+        font-weight: 700;
+        color: var(--on-accent);
+        background: var(--accent);
+        border: 2px dashed var(--muted);
+      }
+
+      /* ---------- draw pile designs ---------- */
+      .e-pile.compact {
+        padding: 10px 14px 10px 18px;
+      }
+      .ps-all {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+        gap: 12px;
+      }
+      .ps-corner {
+        position: absolute;
+        top: 3px;
+        left: 5px;
+        font-size: 0.6rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--accent-text);
+      }
+      .ps-corner.br {
+        top: auto;
+        right: 5px;
+        bottom: 3px;
+        left: auto;
+        transform: rotate(180deg);
+      }
+
+      /* classic: diamond lattice with an inner frame */
+      .ps-classic .e-back {
+        background:
+          repeating-linear-gradient(45deg, transparent 0 5px, var(--border) 5px 6px),
+          repeating-linear-gradient(-45deg, transparent 0 5px, var(--border) 5px 6px),
+          var(--raised);
+        border: 2px solid var(--overlay);
+        box-shadow:
+          inset 0 0 0 3px var(--raised),
+          inset 0 0 0 4px var(--accent-text),
+          0 2px 6px var(--shadow);
+      }
+
+      /* hex: dotted honeycomb feel with a hex mark */
+      .ps-hex .e-back {
+        color: var(--on-accent);
+        background:
+          radial-gradient(circle, #ffffff2e 0 1.5px, transparent 2px) 0 0 / 8px 8px,
+          var(--accent);
+        border: 2px solid var(--overlay);
+        box-shadow:
+          inset 0 0 0 3px var(--accent),
+          inset 0 0 0 4px #ffffff59,
+          0 2px 6px var(--shadow);
+      }
+      .ps-hexMark {
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+      .ps-hexPlay {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      /* neat: one tidy deck, the edges of the cards below show */
+      .ps-neat .e-back:nth-child(1),
+      .ps-neat .e-back:nth-child(2) {
+        display: none;
+      }
+      .ps-neat .e-back {
+        inset: 0 0 12px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border: 2px solid var(--overlay);
+        box-shadow:
+          0 3px 0 -1px var(--raised),
+          0 4px 0 -1px var(--border),
+          0 7px 0 -2px var(--raised),
+          0 8px 0 -2px var(--border),
+          0 11px 0 -3px var(--raised),
+          0 12px 0 -3px var(--border),
+          0 14px 10px -4px var(--shadow);
+      }
+
+      /* joker: face-up card with a question mark on top of two backs */
+      .ps-joker .e-back {
+        background: repeating-linear-gradient(45deg, var(--overlay) 0 5px, var(--raised) 5px 10px);
+      }
+      .ps-joker .e-back:nth-child(3) {
+        background: var(--overlay);
+        border: 2px solid var(--accent-text);
+        transform: rotate(3deg) translate(2px, -2px);
+      }
+      .ps-q {
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--accent-text);
+      }
+
+      /* fan: three cards spread like a hand, the front one shows the play sign */
+      .ps-fan {
+        width: 80px;
+      }
+      .ps-fan .e-back {
+        inset: 0 auto 0 16px;
+        width: 48px;
+        transform-origin: 50% 100%;
+        background:
+          repeating-linear-gradient(45deg, transparent 0 5px, var(--border) 5px 6px),
+          repeating-linear-gradient(-45deg, transparent 0 5px, var(--border) 5px 6px),
+          var(--raised);
+      }
+      .ps-fan .e-back:nth-child(1) {
+        transform: rotate(-22deg);
+      }
+      .ps-fan .e-back:nth-child(2) {
+        transform: rotate(22deg);
+      }
+      .ps-fan .e-back:nth-child(3) {
+        color: var(--accent-text);
+        background: var(--overlay);
+        border-color: var(--accent-text);
+        transform: none;
+      }
+
+      /* coin: plain dark backs, a round play token lies on top like a game piece */
+      .ps-coin .e-back {
+        background: var(--overlay);
+        border: 2px solid var(--border);
+      }
+      .ps-coin .e-back:nth-child(1) {
+        transform: rotate(-6deg) translate(-3px, 1px);
+      }
+      .ps-coin .e-back:nth-child(2) {
+        transform: rotate(4deg) translate(3px, 0);
+      }
+      .ps-coin {
+        overflow: visible;
+      }
+      .ps-coin .e-back:nth-child(3) {
+        overflow: visible;
+        box-shadow:
+          inset 0 0 0 3px var(--overlay),
+          inset 0 0 0 4px var(--border),
+          0 2px 6px var(--shadow);
+      }
+      .ps-token {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        padding-left: 2px;
+        color: var(--on-accent);
+        background: radial-gradient(circle at 35% 30%, var(--accent-text), var(--accent) 60%);
+        border: 3px solid var(--bg);
+        border-radius: 50%;
+        box-shadow: 0 3px 8px var(--shadow);
+        transform: translate(14px, 18px);
+      }
+
+      /* "Wie fertig": later features without grey, dashes or labels */
+      .real .ghost {
+        opacity: 1 !important;
+        color: var(--text) !important;
+      }
+      .real .e-navCard.ghost,
+      .real .h-card.ghost,
+      .real .m-card.ghost,
+      .real .a-seat.ghost,
+      .real .d-tab.ghost {
+        border-style: solid !important;
+      }
+      .real .ghost .pill {
+        outline: none !important;
+      }
+      .real .ghost .tiny,
+      .real .a-seat.ghost .cnt {
+        display: none;
+      }
+      .real .f-room.ghost {
+        background: var(--raised);
+      }
+      .real .k-center {
+        outline: none;
+      }
+      .real .a-seat.ghost,
+      .real .b-tab.ghost {
+        color: var(--muted) !important;
+      }
+
+      /* ---------- logo concepts ---------- */
+      .logoWord {
+        gap: 0;
+        font-weight: 400;
+      }
+      .logoWord b {
+        font-weight: 800;
+        color: var(--accent-text);
+      }
+      .lg-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: 14px;
+        max-width: 1220px;
+        margin: 0 auto;
+      }
+      .lg-card {
+        display: grid;
+        gap: 10px;
+        padding: 16px;
+        text-align: left;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+      }
+      .lg-card.on {
+        border-color: var(--accent-text);
+      }
+      .lg-row {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+      }
+      .lg-icon {
+        display: grid;
+        place-items: center;
+        width: 84px;
+        height: 84px;
+        background:
+          var(--bg-image),
+          var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 4px 12px var(--shadow);
+      }
+      .lg-bar {
+        padding: 10px 12px;
+        background: var(--bg);
+        border-radius: 10px;
+      }
+
+      /* ---------- final start: bottom aligned, never scrolls ---------- */
+      .e-startFull {
+        container-type: size;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        max-width: 620px;
+        height: 100%;
+        margin: 0 auto;
+        padding: 14px 16px 30px;
+      }
+      .e-notes {
+        display: grid;
+        gap: 10px;
+      }
+      .land .e-notes {
+        grid-template-columns: 1fr 1fr;
+      }
+      .land .banner {
+        min-height: 0;
+        padding: 6px 12px;
+        overflow: hidden;
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+      .land .e-startFull,
+      .e-startFull.land {
+        gap: 8px;
+        padding: 8px 16px 22px;
+      }
+      .land .e-pile {
+        padding: 8px 14px;
+      }
+      .land .e-pileStack {
+        width: 44px;
+        height: 60px;
+      }
+      .land .e-cardsBlock h2 {
+        display: none;
+      }
+      .e-spacer {
+        flex: 1;
+        min-height: 0;
+      }
+      /* Gap below the cards depends on the screen height only, so notes at the top do not push the
+         content down; it shrinks only when the space is not sufficient. */
+      .e-spacer.low {
+        flex: 0 1 9cqh;
+      }
+      .e-bottomCol {
+        display: grid;
+        gap: 14px;
+      }
+      .e-bottomRow {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+      }
+      .e-cardsBlock {
+        display: grid;
+        gap: 4px;
+      }
+      /* Card width follows the free space: at most a third of the width and about a quarter of the height. */
+      .e-fanBottom .e-card {
+        width: min(31cqw, 170px, 23cqh);
+        padding: 8% 6%;
+      }
+      .land .e-fanBottom .e-card {
+        width: min(13cqw, 38cqh);
+      }
+
+      /* ---------- I3: choice after tapping "Neue Partie" (variant D3d) ---------- */
+      .r-dim {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        background: #000000b3;
+      }
+      .r-fanOut {
+        display: flex;
+        justify-content: center;
+      }
+      .e-card.r-playCard {
+        width: 150px;
+        gap: 14px;
+        aspect-ratio: 5 / 7;
+      }
+      .r-playCard strong {
+        font-size: 0.95rem;
+        line-height: 1.25;
+      }
+      .r-playCard .corner {
+        font-size: 1rem;
+      }
+      .r-left {
+        z-index: 1;
+        margin-right: -12px;
+        transform: rotate(-8deg) translateY(6px);
+      }
+      .r-right {
+        transform: rotate(8deg) translateY(6px);
+      }
+      .r-halfIcon {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 50%;
+      }
+
+      /* ---------- K2: result entry first; setting "Ich hasse Catan!" ---------- */
+      .e-card.r-filled {
+        color: var(--on-accent);
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .r-filled .corner {
+        color: var(--on-accent);
+      }
+      .r-filled .r-halfIcon {
+        color: var(--accent);
+        background: var(--on-accent);
+      }
+      .r-discard .e-back {
+        background: var(--overlay);
+        border: 2px solid var(--border);
+      }
+      .r-discard .e-back:nth-child(1) {
+        transform: rotate(8deg) translate(4px, 2px);
+      }
+      .r-discard .e-back:nth-child(2) {
+        transform: rotate(-5deg) translate(-3px, 1px);
+      }
+      .r-discard .e-back:nth-child(3) {
+        border-color: var(--accent-text);
+      }
+      .r-lines {
+        position: absolute;
+        inset: 10px 8px;
+        background: repeating-linear-gradient(180deg, transparent 0 7px, var(--border) 7px 8px);
+      }
+      .r-pen {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border: 2px solid var(--overlay);
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="picker">
+      <div class="row" id="concept-row"></div>
+      <div class="row" id="frame-row"></div>
+      <div class="row" id="option-row"></div>
+      <div class="row" id="trump-row"></div>
+      <div class="row" id="pile-row"></div>
+      <div class="row" id="logo-row"></div>
+    </div>
+    <p class="intro" id="intro"></p>
+    <div class="stage" id="stage"></div>
+
+    <script>
+      // Mockups only, not app code. Colour values mirror src/ui/styles/tokens.css.
+      const GROUP = {
+        red: '#ef5359',
+        blue: '#4189f5',
+        yellow: '#e6cb72',
+        green: '#8fb35a',
+        indigo: '#aeb0f2',
+        orange: '#f5852b',
+        teal: '#5fbfb2',
+        magenta: '#d46bc4',
+        brown: '#94643f',
+        pink: '#eba3bf',
+        gray: '#9aa1ab',
+        white: '#f1f1f4',
+      };
+      const GROUP_ORDER = Object.keys(GROUP);
+      const CATAN_ORDER = ['red', 'blue', 'white', 'orange'];
+
+      const THEMES = {
+        wood: {
+          label: 'Holz',
+          bg: '#231d18',
+          raised: '#2d2620',
+          overlay: '#383028',
+          border: '#4b4036',
+          text: '#f4ece1',
+          muted: '#b8ab9b',
+          accent: '#b45309',
+          accentText: '#f5be5b',
+          image: 'radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%)',
+          blur: '0px',
+        },
+        ocean: {
+          label: 'Tiefsee',
+          bg: '#10232c',
+          raised: '#17303b',
+          overlay: '#1f3c49',
+          border: '#2d5262',
+          text: '#e6f4f7',
+          muted: '#98b8c2',
+          accent: '#0f766e',
+          accentText: '#5fd4c4',
+          image: 'linear-gradient(180deg, #17404e 0%, #10232c 45%)',
+          blur: '0px',
+        },
+        forest: {
+          label: 'Wald',
+          bg: '#1b221e',
+          raised: '#232c27',
+          overlay: '#2c3731',
+          border: '#3b4941',
+          text: '#e9f0ea',
+          muted: '#a5b4aa',
+          accent: '#15803d',
+          accentText: '#6fd99a',
+          image: 'none',
+          blur: '0px',
+        },
+        glass: {
+          label: 'Glas',
+          bg: '#161a2e',
+          raised: '#2328458c',
+          overlay: '#2b3152cc',
+          border: '#ffffff26',
+          text: '#f1f2fa',
+          muted: '#aeb3cf',
+          accent: '#4f46e5',
+          accentText: '#a5a8ff',
+          image:
+            'radial-gradient(circle at 15% 5%, #4338ca80 0%, transparent 40%), radial-gradient(circle at 90% 35%, #0e749080 0%, transparent 40%), radial-gradient(circle at 40% 100%, #9d174d66 0%, transparent 45%)',
+          blur: '14px',
+        },
+      };
+
+      const FRAMES = {
+        phoneP: 'Handy hoch',
+        phoneL: 'Handy quer (Dreh-Hinweis)',
+        tabletP: 'Tablet hoch',
+        wide: 'Tablet quer / PC',
+        device: '⛶ Vollbild auf diesem Gerät',
+      };
+
+      // ---------- data ----------
+      const PERSONS = [
+        'Anna', 'Ben', 'Clara', 'David', 'Eva', 'Finn', 'Greta', 'Hanna', 'Ilias', 'Jonas',
+        'Katharina', 'Leo', 'Mia', 'Noah', 'Oskar', 'Paula', 'Quirin', 'Rosalie', 'Samuel',
+        'Tilda', 'Ulrich', 'Valentina', 'Wilhelm', 'Xenia', 'Yusuf', 'Zoe', 'Mama', 'Papa',
+      ];
+      const GROUPS = [
+        ['Freitagsrunde', 'Catan', 4],
+        ['Familie', 'Alle Spiele', 6],
+        ['Uno-Abend', 'Uno', 3],
+        ['Studienfreunde', 'Alle Spiele', 5],
+        ['Nachbarn', 'Catan', 3],
+        ['Büro-Mittagspause', 'Alle Spiele ohne Catan', 4],
+        ['Großfamilie Weihnachten', 'Alle Spiele', 12],
+        ['Doppelkopf-Runde', 'Alle Spiele ohne Catan', 4],
+        ['Catan-Profis', 'Catan', 4],
+        ['Urlaub Ostsee 2026', 'Alle Spiele', 8],
+        ['Geschwister', 'Alle Spiele', 3],
+        ['Pärchenabend', 'Catan', 4],
+        ['Sportverein', 'Uno', 10],
+        ['Kinder', 'Uno', 2],
+        ['Spieletreff Mittwoch', 'Alle Spiele', 7],
+      ].map(([name, game, count], i) => ({
+        name,
+        meta: game + ' · ' + count,
+        members: Array.from({ length: count }, (_, k) => PERSONS[(i * 5 + k * 3) % PERSONS.length]),
+        dots: Array.from({ length: count }, (_, k) =>
+          game === 'Catan' ? CATAN_ORDER[k] : GROUP_ORDER[(k + i) % 12],
+        ),
+        catan: game === 'Catan',
+      }));
+      const GAMES = [
+        ['Catan', 'eingebaut'],
+        ['Uno', '2 bis 10'],
+        ['Doppelkopf', '4'],
+        ['Wizard', '3 bis 6'],
+        ['Skyjo', '2 bis 8'],
+        ['Kniffel', '1 bis 10'],
+      ];
+
+      const state = {
+        concept: 'E',
+        frame: 'phoneP',
+        lastFrame: 'phoneP',
+        theme: 'wood',
+        data: 'full',
+        future: false,
+        noCatan: false,
+        screen: 'start',
+        sheet: null,
+        menu: false,
+        fan: false,
+        from: 'start',
+        eTrump: 'pile',
+        pileStyle: 'classic',
+        logo: 'cb1',
+        bb: { side: 'L', brain: 'lines', board: 'checker', shape: 'brain' },
+        showLogos: false,
+      };
+
+      function D() {
+        return state.data === 'full'
+          ? { persons: PERSONS, groups: GROUPS, games: [...GAMES] }
+          : { persons: [], groups: [], games: GAMES.slice(0, 1) };
+      }
+
+      function kind() {
+        if (state.frame !== 'device') return state.frame;
+        const w = window.innerWidth;
+        const hgt = window.innerHeight;
+        if (w < 600) return 'phoneP';
+        if (hgt < 520) return 'phoneL';
+        if (w < 1000 && hgt > w) return 'tabletP';
+        return 'wide';
+      }
+
+      // ---------- helpers ----------
+      function h(tag, attrs, ...kids) {
+        const el = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          if (v == null || v === false) continue;
+          if (k === 'class') el.className = v;
+          else if (k === 'style') {
+            for (const [p, val] of Object.entries(v)) {
+              if (p.startsWith('--')) el.style.setProperty(p, val);
+              else el.style[p] = val;
+            }
+          } else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+          else el.setAttribute(k, v === true ? '' : v);
+        }
+        for (const c of kids.flat(Infinity)) {
+          if (c == null || c === false) continue;
+          el.append(c instanceof Node ? c : String(c));
+        }
+        return el;
+      }
+
+      const ICONS = {
+        home: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+        people:
+          'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M22 21v-1a6 6 0 0 0-4-5.6',
+        table:
+          'M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zM12 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM12 22.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM3 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
+        dice: 'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01',
+        play: 'M7 4l13 8-13 8z',
+        pen: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
+        chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+        box: 'M3 7h18v4H3zM5 11v9h14v-9M10 15h4',
+        folder: 'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+        cog: 'M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+        menu: 'M4 6h16M4 12h16M4 18h16',
+        rotate: 'M6 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 18h1M18.5 7.5a7 7 0 0 1 0 9M16.8 15.2l1.7 1.3 1.3-1.8',
+        back: 'M15 5l-7 7 7 7',
+        next: 'M9 5l7 7-7 7',
+        search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.5-4.5',
+        hex: 'M12 2l8.7 5v10L12 22l-8.7-5V7z',
+        close: 'M6 6l12 12M18 6L6 18',
+        plus: 'M12 5v14M5 12h14',
+        sync: 'M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5',
+        bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4',
+      };
+      function icon(name, size = 22) {
+        const NS = 'http://www.w3.org/2000/svg';
+        const s = document.createElementNS(NS, 'svg');
+        for (const [k, v] of Object.entries({
+          viewBox: '0 0 24 24',
+          width: size,
+          height: size,
+          fill: name === 'play' ? 'currentColor' : 'none',
+          stroke: 'currentColor',
+          'stroke-width': 2,
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          'aria-hidden': 'true',
+        }))
+          s.setAttribute(k, v);
+        const p = document.createElementNS(NS, 'path');
+        p.setAttribute('d', ICONS[name]);
+        s.append(p);
+        return s;
+      }
+
+      const CB_NAMES = {
+        cb1: ['Eine Kontur', 'Ein Umriss für das ganze Gehirn, gerade Mittellinie; die Felder enden genau an der Mitte.'],
+        cb2: ['Felder werden Windungen', 'Die Reihen des Bretts laufen über die Mitte weiter und werden zu den Windungen.'],
+        cb3: ['Negativ', 'Gefülltes Gehirn, Brett und Windungen ausgespart – am kräftigsten als App-Symbol.'],
+        cb4: ['Rund', 'Kompakteres, fast rundes Gehirn mit wenigen Windungen.'],
+        cb5: ['Profil', 'Gehirn von der Seite, der vordere Teil ist das Brett.'],
+        cb6: ['Brett mit Rand', 'Das Brett hat einen eigenen Rand und sitzt wie eingelegt in der linken Hälfte.'],
+      };
+      // ---------- logo concepts (PO: no hexagon; round 2: more brains and tables) ----------
+      const LOGOS = {
+        cb1: [CB_NAMES.cb1[0], CB_NAMES.cb1[1], 'Favorit'],
+        cb2: [CB_NAMES.cb2[0], CB_NAMES.cb2[1], 'Favorit'],
+        cb3: [CB_NAMES.cb3[0], CB_NAMES.cb3[1], 'Favorit'],
+        cb4: [CB_NAMES.cb4[0], CB_NAMES.cb4[1], 'Favorit'],
+        cb5: [CB_NAMES.cb5[0], CB_NAMES.cb5[1], 'Favorit'],
+        cb6: [CB_NAMES.cb6[0], CB_NAMES.cb6[1], 'Favorit'],
+        brainDie: ['Gehirn + Würfel', 'Ein rundes Gehirn, vorne rechts liegt ein Würfel.', 'Gehirn'],
+        brainChecker: ['Kariertes Gehirn', 'Das ganze Gehirn als Spielbrett.', 'Gehirn'],
+        brainColors: ['Buntes Gehirn', 'Vier Gehirnviertel in den Gruppenfarben, wie Spieler am Tisch.', 'Gehirn'],
+        brainPips: ['Würfelgehirn', 'Ein gefülltes Gehirn, jede Hälfte zeigt eine Würfel-Drei.', 'Gehirn'],
+        brainCard: ['Karte mit Gehirn', 'Eine Spielkarte, auf der ein Gehirn abgebildet ist – passt zu E.', 'Gehirn'],
+        thoughtDie: ['Denkblase mit Würfel', 'Eine Gedankenwolke, in der ein Würfel steckt.', 'Gehirn'],
+        table: ['Runder Tisch', 'Vier Plätze in den Gruppenfarben (bisher).', 'Tisch'],
+        table6: ['Volle Runde', 'Kleinerer Tisch mit sechs Plätzen.', 'Tisch'],
+        tableChairs: ['Tisch mit Stühlen', 'Stühle als runde Bögen statt Punkte.', 'Tisch'],
+        tableBrain: ['Tisch mit Gehirn', 'Vier Plätze, in der Tischmitte ein Gehirn.', 'Tisch'],
+        tableDie: ['Tisch mit Würfel', 'Vier Plätze, in der Mitte liegt ein Würfel.', 'Tisch'],
+        tableCards: ['Tisch mit Karten', 'Vier Plätze, in der Mitte zwei Karten.', 'Tisch'],
+        tableSide: ['Spielrunde von vorn', 'Drei Leute sitzen hinter einem Tisch, darauf eine Karte.', 'Tisch'],
+        tableRing: ['Farbring', 'Abstrakt: vier Farbbögen bilden eine Runde.', 'Tisch'],
+        card: ['Spielkarte mit B', 'Eine leicht schräge Karte mit B.', 'Weitere'],
+        die: ['Würfel', 'Der mittlere Punkt leuchtet.', 'Weitere'],
+        wheel: ['Glücksrad', 'Farbiges Rad mit Zeiger.', 'Weitere'],
+        meeple: ['Spielfigur', 'Die klassische Brettspielfigur.', 'Weitere'],
+        fan: ['Kartenfächer', 'Drei Karten, die vordere leuchtet.', 'Weitere'],
+        monogram: ['Monogramm BB', 'Schlicht, gut als App-Symbol.', 'Weitere'],
+        word: ['Nur Schriftzug', '„Board“ normal, „Brain“ fett.', 'Weitere'],
+        hex: ['Sechseck (bisher)', 'Zum Vergleich.', 'Weitere'],
+      };
+      // ---------- brain + board builder (PO: more of these, also mirrored, other brain and board designs) ----------
+      const BB_SIDES = { L: 'Brett links', R: 'Brett rechts' };
+      const BB_BOARDS = { checker: 'Schachbrett', colors: 'Bunte Felder', grid: 'Go-Brett', hex: 'Catan-Felder', track: 'Spielweg', pieces: 'Mit Spielfigur' };
+      const BB_SHAPES = { brain: 'In Gehirnform', square: 'Als Quadrat' };
+      const BB_BRAINS = { lines: 'Linien', filled: 'Gefüllt', soft: 'Weich', net: 'Netz', bold: 'Kräftig' };
+      const BB_PRESETS = [
+        'bb:L:lines:checker',
+        'bb:R:lines:checker',
+        'bb:L:filled:checker',
+        'bb:R:filled:colors',
+        'bb:L:soft:hex',
+        'bb:R:soft:hex',
+        'bb:L:net:grid',
+        'bb:R:bold:track',
+        'bb:L:filled:pieces',
+        'bb:R:net:colors',
+        'bb:L:soft:checker:square',
+        'bb:R:filled:hex:square',
+      ];
+      let clipSeq = 0;
+      function parseBB(kind) {
+        const [, side, brain, board, shape] = kind.split(':');
+        return { side, brain, board, shape: shape || 'brain' };
+      }
+      function bbName(p) {
+        return `${BB_BOARDS[p.board]}${p.shape === 'square' ? ' (Quadrat)' : ''} + Gehirn „${BB_BRAINS[p.brain]}“, ${BB_SIDES[p.side]}`;
+      }
+      function logoName(k) {
+        if (k === 'bb') return bbName(state.bb);
+        if (k.startsWith('bb:')) return bbName(parseBB(k));
+        return LOGOS[k][0];
+      }
+      function bbSvg(p) {
+        const A = 'var(--accent-text)';
+        const BG = 'var(--bg)';
+        const G = GROUP;
+        const line = (d, w = 2.6, c = A) => `<path d="${d}" style="fill:none;stroke:${c};stroke-width:${w};stroke-linecap:round;stroke-linejoin:round"/>`;
+        const BL = 'M23 8C19 5 13 6 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42 22 40 23 40.5 23 40Z';
+        const BR = 'M25 8C29 5 35 6 36 10 41 10 43 15 41 18 45 20 45 27 41 29 43 33 40 38 36 37 35 41 30 42 26 40 25 40.5 25 40Z';
+        const FR = 'M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M29 22c2 3 0 6-3 6';
+        const SBR = 'M25 8C30 4.5 37 6.5 38.5 11.5 43.5 13.5 45 20.5 42 24 45 28 43.5 35.5 38 36.5 36 41.5 30 43 25 40Z';
+        const SFR = 'M31 13c3 .5 5 3 4.5 6M30 27c3.5.5 5 3 4 6.5';
+        const mirror = (svg) => `<g transform="translate(48 0) scale(-1 1)">${svg}</g>`;
+        const brains = {
+          lines: line(BR) + line(FR, 2.1),
+          filled: `<path d="${BR}" style="fill:${A}"/>` + line(FR, 2.2, BG),
+          soft: line(SBR, 2.8) + line(SFR, 2.4),
+          net:
+            line(BR) +
+            line('M30 14L37 18L32 24L39 29L31 33M30 14L32 24L31 33', 1.5) +
+            [[30, 14], [37, 18], [32, 24], [39, 29], [31, 33]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" style="fill:${A}"/>`).join(''),
+          bold: line(BR, 3.6) + line('M29 14c4 1 6 4 5 8s-5 6-4 10', 3),
+        };
+        const cells = (fn) => {
+          let o = '';
+          const s = 5.25;
+          for (let x = 2, i = 0; x < 25; x += s, i++) for (let y = 4, j = 0; y < 44; y += s, j++) o += fn(x, y, i, j, s);
+          return o;
+        };
+        const hexes = () => {
+          const cols = [G.green, G.yellow, G.red, G.gray, G.brown, G.teal];
+          const r = 3.7;
+          const w = r * Math.sqrt(3);
+          let o = '';
+          let k = 0;
+          for (let row = 0, y = 5; y < 46; row++, y += r * 1.5)
+            for (let x = (row % 2 ? w / 2 : 0) + 1; x < 27; x += w) {
+              const pts = [0, 1, 2, 3, 4, 5]
+                .map((a) => {
+                  const t = (Math.PI / 3) * a - Math.PI / 2;
+                  return `${(x + r * Math.cos(t)).toFixed(2)},${(y + r * Math.sin(t)).toFixed(2)}`;
+                })
+                .join(' ');
+              o += `<polygon points="${pts}" style="fill:${cols[(k++ * 7) % 6]};stroke:${BG};stroke-width:1"/>`;
+            }
+          return o;
+        };
+        const four = [G.red, G.blue, G.yellow, G.green];
+        const boards = {
+          checker: cells((x, y, i, j, s) => ((i + j) % 2 === 0 ? `<rect x="${x}" y="${y}" width="${s}" height="${s}" style="fill:${A}"/>` : '')),
+          colors: cells((x, y, i, j, s) => ((i + j) % 2 === 0 ? `<rect x="${x}" y="${y}" width="${s}" height="${s}" style="fill:${four[(i + Math.floor(j / 2)) % 4]}"/>` : '')),
+          grid:
+            [6, 11, 16, 21].map((x) => line(`M${x} 2V46`, 1.3)).join('') +
+            [10, 15.5, 21, 26.5, 32, 37.5].map((y) => line(`M0 ${y}H24`, 1.3)).join('') +
+            `<circle cx="11" cy="21" r="2.9" style="fill:${A}"/><circle cx="16" cy="26.5" r="2.9" style="fill:var(--text)"/><circle cx="16" cy="15.5" r="2.9" style="fill:var(--text)"/><circle cx="11" cy="32" r="2.9" style="fill:${A}"/>`,
+          hex: hexes(),
+          track:
+            line('M19 9 14 9 9.5 12 8 17 12 20.5 17 22 19.5 26.5 16 31 10.5 32 8 36.5', 1.4, 'var(--border)') +
+            [[19, 9], [14, 9], [9.5, 12], [8, 17], [12, 20.5], [17, 22], [19.5, 26.5], [16, 31], [10.5, 32], [8, 36.5]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="2.6" style="fill:${four[i % 4]}"/>`).join(''),
+          pieces:
+            cells((x, y, i, j, s) => ((i + j) % 2 === 0 ? `<rect x="${x}" y="${y}" width="${s}" height="${s}" style="fill:var(--border)"/>` : '')) +
+            `<circle cx="14" cy="17" r="3.4" style="fill:${A};stroke:${BG};stroke-width:1.2"/><path d="M9.5 31c0-4.5 2-7.5 4.5-9 2.5 1.5 4.5 4.5 4.5 9z" style="fill:${A};stroke:${BG};stroke-width:1.2"/><rect x="8" y="30.5" width="12" height="3.2" rx="1.4" style="fill:${A};stroke:${BG};stroke-width:1.2"/>`,
+        };
+        const id = 'bbc' + ++clipSeq;
+        const square = p.shape === 'square';
+        const shape = square ? '<rect x="3" y="13" width="20" height="22" rx="3"/>' : `<path d="${BL}"/>`;
+        const outline = square ? `<rect x="3" y="13" width="20" height="22" rx="3" style="fill:none;stroke:${A};stroke-width:2.4"/>` : line(BL, 2.4);
+        const board = `<clipPath id="${id}">${shape}</clipPath><g clip-path="url(#${id})">${boards[p.board]}</g>${outline}`;
+        const brain = brains[p.brain];
+        const body = p.side === 'L' ? board + brain : mirror(board) + mirror(brain);
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">${body}</svg>`;
+      }
+      function bbBuilder() {
+        const row = (label, map, key) =>
+          h(
+            'div',
+            { style: { display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' } },
+            h('span', { style: { minWidth: '80px', color: 'var(--muted)', fontSize: '0.85rem' } }, label),
+            Object.entries(map).map(([k, l]) =>
+              h('button', { class: 'chip', 'aria-pressed': String(state.bb[key] === k), onclick: () => { state.bb = { ...state.bb, [key]: k }; render(); } }, l),
+            ),
+          );
+        const prev = state.logo;
+        state.logo = 'bb';
+        const bar = logo();
+        state.logo = prev;
+        return h(
+          'div',
+          { class: 'lg-card', style: { gap: '12px', cursor: 'default' } },
+          h('strong', {}, 'Baukasten: selbst zusammenstellen'),
+          row('Seite', BB_SIDES, 'side'),
+          row('Brett', BB_BOARDS, 'board'),
+          row('Brettform', BB_SHAPES, 'shape'),
+          row('Gehirn', BB_BRAINS, 'brain'),
+          h('div', { class: 'lg-row', style: { flexWrap: 'wrap' } }, h('span', { class: 'lg-icon' }, logoMark('bb', 58)), h('span', {}, logoMark('bb', 128)), h('div', { class: 'lg-bar' }, bar)),
+          h('button', { class: 'primary', style: { justifySelf: 'start' }, onclick: () => { state.logo = 'bb'; state.showLogos = false; render(); } }, 'Dieses Logo übernehmen'),
+        );
+      }
+      function bbPresetCard(kind) {
+        const p = parseBB(kind);
+        return h(
+          'button',
+          { class: 'lg-card', onclick: () => { state.bb = p; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+          h('div', { class: 'lg-row' }, h('span', { class: 'lg-icon' }, logoMark(kind, 58)), h('span', { class: 'lg-big' }, logoMark(kind, 80))),
+          h('span', { class: 'small' }, bbName(p)),
+          h('span', { class: 'tiny muted' }, 'Antippen lädt es in den Baukasten'),
+        );
+      }
+      // ---------- checkerboard + brain: complete drawings (PO: one graphic each, not modular) ----------
+      const CB = {
+        cb1: ['Eine Kontur', 'Ein Umriss für das ganze Gehirn, gerade Mittellinie; die Felder enden genau an der Mitte.'],
+        cb2: ['Felder werden Windungen', 'Die Reihen des Bretts laufen über die Mitte weiter und werden zu den Windungen.'],
+        cb3: ['Negativ', 'Gefülltes Gehirn, Brett und Windungen ausgespart – am kräftigsten als App-Symbol.'],
+        cb4: ['Rund', 'Kompakteres, fast rundes Gehirn mit wenigen Windungen.'],
+        cb5: ['Profil', 'Gehirn von der Seite, der vordere Teil ist das Brett.'],
+        cb6: ['Brett mit Rand', 'Das Brett hat einen eigenen Rand und sitzt wie eingelegt in der linken Hälfte.'],
+      };
+      function cbSvg(kind) {
+        const A = 'var(--accent-text)';
+        const BG = 'var(--bg)';
+        const line = (d, w = 2.6, c = A) => `<path d="${d}" style="fill:none;stroke:${c};stroke-width:${w};stroke-linecap:round;stroke-linejoin:round"/>`;
+        const OUT = 'M24 8.5C21 5 14 5.5 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42.5 22 40.5 23 41 23.5 41 24 40.5 24.5 41 25 41 26 40.5 30 42.5 35 41 36 37 40 38 43 33 41 29 45 27 45 20 41 18 43 15 41 10 36 10 34 5.5 27 5 24 8.5Z';
+        const ROUND = 'M24 6C17 3.5 9.5 7.5 9 13 4 15.5 4 22.5 6.5 25 4 29 6 35.5 11 36.5 13 42 20 43.5 24 41 28 43.5 35 42 37 36.5 42 35.5 44 29 41.5 25 44 22.5 44 15.5 39 13 38.5 7.5 31 3.5 24 6Z';
+        const PROFILE = 'M7.5 26C5.5 17.5 11 9 20 7.2 27.5 5.8 35.5 7.8 40.5 13.5 44.5 18 44.5 25 41.5 29 39.5 31.5 36.5 32 34 32.5 33 35.5 30 37.5 27 37 25.5 39.5 22 40.5 20.5 38 15 38.5 10.5 35.5 9.3 31 8.3 29.6 7.5 26Z';
+        // Squares start exactly at x = 24 and run to the left; rows are centred on y = 24.
+        const checker = (s, fill, edge = 24) => {
+          let o = '';
+          for (let i = 0; edge - s * i > 0; i++)
+            for (let j = -5; j < 5; j++) if ((((i + j) % 2) + 2) % 2 === 0) o += `<rect x="${edge - s * (i + 1)}" y="${24 + s * j}" width="${s}" height="${s}" style="fill:${fill}"/>`;
+          return o;
+        };
+        const id = 'cb' + ++clipSeq;
+        const leftOf = (shape, content, half = '<rect x="0" y="0" width="24" height="48"/>') =>
+          `<clipPath id="${id}a"><path d="${shape}"/></clipPath><clipPath id="${id}b">${half}</clipPath><g clip-path="url(#${id}a)"><g clip-path="url(#${id}b)">${content}</g></g>`;
+        const svg = (body) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">${body}</svg>`;
+        if (kind === 'cb1')
+          return svg(leftOf(OUT, checker(5.4, A)) + line('M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6', 2.2) + line(OUT) + line('M24 8.5V40.5'));
+        if (kind === 'cb2')
+          return svg(
+            leftOf(OUT, checker(5.4, A)) +
+              line('M24 18.6c3 0 4 2.6 7.5 2.6S37 18 41 18.5M24 29.4c3 0 4-2.6 7.5-2.6S37 29.5 41 29M24 13.2c2 0 3.2 1.8 5.8 1.8M24 34.8c2 0 3.2-1.6 5.8-1.6', 2.2) +
+              line(OUT) +
+              line('M24 8.5V40.5'),
+          );
+        if (kind === 'cb3')
+          return svg(
+            `<path d="${OUT}" style="fill:${A}"/>` +
+              leftOf(OUT, checker(5.4, BG)) +
+              line('M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6', 2.4, BG) +
+              line('M24 8.5V40.5', 2.2, BG),
+          );
+        if (kind === 'cb4')
+          return svg(leftOf(ROUND, checker(5.6, A)) + line('M38.5 13c-3 1-5 3-5 6M41.5 25c-3.5 0-6 1.5-7 4M31 36c0-2.5-1.5-4.5-3.5-5.5', 2.2) + line(ROUND, 2.7) + line('M24 6V41', 2.6));
+        if (kind === 'cb5') {
+          const sulcus = 'M24 6.6c-1.6 4 1.6 6 0 10s1.6 6 0 10 1.6 6 0 12';
+          const half = '<path d="M0 0H24V6.6c-1.6 4 1.6 6 0 10s1.6 6 0 10 1.6 6 0 12V48H0Z"/>';
+          return svg(
+            leftOf(PROFILE, checker(5.4, A), half) +
+              line('M29 11c1 3 4 4 7.5 3.5M32.5 20c3 0 5.5 2 6 4.5M27.5 28c3-1 6 0 7 2.5', 2.2) +
+              line('M34 32.5c1.5 2.5 4 3 6.5 1.5M27 37c.6 2.2.6 4.2-.6 6.5', 2.4) +
+              line(PROFILE) +
+              line(sulcus, 2.4),
+          );
+        }
+        // cb6: an inlaid board with its own frame inside the left half
+        const frameClip = `<clipPath id="${id}f"><rect x="8.6" y="13.2" width="15.4" height="21.6" rx="2"/></clipPath>`;
+        return svg(
+          frameClip +
+            `<g clip-path="url(#${id}f)">${checker(5.4, A)}</g>` +
+            `<rect x="8.6" y="13.2" width="15.4" height="21.6" rx="2" style="fill:none;stroke:${A};stroke-width:1.8"/>` +
+            line('M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6', 2.2) +
+            line(OUT) +
+            line('M24 8.5V40.5'),
+        );
+      }
+      function logoSvg(kind) {
+        if (CB[kind]) return cbSvg(kind);
+        if (kind === 'bb') return bbSvg(state.bb);
+        if (kind.startsWith('bb:')) return bbSvg(parseBB(kind));
+        const A = 'var(--accent-text)';
+        const G = GROUP;
+        const line = (d, w = 2.6, color = A) => `<path d="${d}" style="fill:none;stroke:${color};stroke-width:${w};stroke-linecap:round;stroke-linejoin:round"/>`;
+        const BL = 'M23 8C19 5 13 6 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42 22 40 23 40.5 23 40Z';
+        const BR = 'M25 8C29 5 35 6 36 10 41 10 43 15 41 18 45 20 45 27 41 29 43 33 40 38 36 37 35 41 30 42 26 40 25 40.5 25 40Z';
+        const FL = 'M12 10c2 3 6 3 7 6M7 18c4 0 6 3 5 6M7 29c4-1 7 1 8 4M19 22c-2 3 0 6 3 6';
+        const FR = 'M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M29 22c2 3 0 6-3 6';
+        const brain = (w = 2.6) => line(BL, w) + line(BR, w) + line(FL, w * 0.8) + line(FR, w * 0.8);
+        const checker = (x0, y0, x1, y1, step) => {
+          let out = '';
+          for (let x = x0, i = 0; x < x1; x += step, i++)
+            for (let y = y0, j = 0; y < y1; y += step, j++) if ((i + j) % 2 === 0) out += `<rect x="${x}" y="${y}" width="${step}" height="${step}" style="fill:${A}"/>`;
+          return out;
+        };
+        const pips = (pts, r, color) => pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="${r}" style="fill:${color}"/>`).join('');
+        const dieFace = (x, y, s, fill, pip, stroke) => {
+          const a = s * 0.27;
+          const c = s / 2;
+          return `<rect x="${x}" y="${y}" width="${s}" height="${s}" rx="${s * 0.24}" style="fill:${fill};${stroke ? `stroke:${stroke};stroke-width:2.4` : ''}"/>` +
+            pips([[x + a, y + a], [x + s - a, y + a], [x + a, y + s - a], [x + s - a, y + s - a]], s * 0.085, pip) +
+            pips([[x + c, y + c]], s * 0.1, stroke ? A : pip);
+        };
+        const seats = (n, radius, r, colors) =>
+          colors.slice(0, n).map((c, i) => {
+            const a = (i / n) * 2 * Math.PI - Math.PI / 2;
+            return `<circle cx="${24 + radius * Math.cos(a)}" cy="${24 + radius * Math.sin(a)}" r="${r}" style="fill:${c}"/>`;
+          }).join('');
+        const four = [G.red, G.blue, G.yellow, G.green];
+        const top = (r) => `<circle cx="24" cy="24" r="${r}" style="fill:var(--overlay);stroke:var(--border);stroke-width:2.6"/>`;
+        const at = (s) => `transform="translate(24 24.5) scale(${s}) translate(-24 -24.5)"`;
+        const m48 = {
+          brainDie: `<g transform="translate(-2 -3) scale(0.88)">${brain(2.9)}</g><g transform="rotate(12 35 35)">${dieFace(25.5, 25.5, 19, 'var(--overlay)', 'var(--text)', A)}</g>`,
+          brainHalfBoard: `${line(BL)}${line(FL, 2.1)}<clipPath id="cpBR"><path d="${BR}"/></clipPath><g clip-path="url(#cpBR)">${checker(25, 4, 46, 44, 5.25)}</g>${line(BR)}`,
+          brainChecker: `<clipPath id="cpB"><path d="${BL}"/><path d="${BR}"/></clipPath><g clip-path="url(#cpB)">${checker(3, 4, 46, 44, 5.4)}</g>${line(BL, 2.4)}${line(BR, 2.4)}`,
+          brainColors: `<clipPath id="cpB2"><path d="${BL}"/><path d="${BR}"/></clipPath><g clip-path="url(#cpB2)"><rect x="0" y="0" width="24" height="24" style="fill:${G.red}"/><rect x="24" y="0" width="24" height="24" style="fill:${G.blue}"/><rect x="0" y="24" width="24" height="24" style="fill:${G.yellow}"/><rect x="24" y="24" width="24" height="24" style="fill:${G.green}"/></g>${line(FL, 2.2, 'var(--bg)')}${line(FR, 2.2, 'var(--bg)')}`,
+          brainPips: `<path d="${BL}" style="fill:${A}"/><path d="${BR}" style="fill:${A}"/>${pips([[12, 16], [15.5, 23.5], [19, 31], [36, 16], [32.5, 23.5], [29, 31]], 2.6, 'var(--bg)')}`,
+          brainCard: `<g transform="rotate(-8 24 24)"><rect x="9" y="3" width="30" height="42" rx="5" style="fill:var(--overlay);stroke:${A};stroke-width:2.6"/><g ${at(0.56)}>${brain(4.4)}</g></g>`,
+          thoughtDie: `<path d="M13 31a7 7 0 0 1-2-13.7A9 9 0 0 1 27 9.5a8 8 0 0 1 13 6 7.5 7.5 0 0 1-2 15.5Z" style="fill:var(--overlay);stroke:${A};stroke-width:2.6;stroke-linejoin:round"/><circle cx="11" cy="38" r="3" style="fill:var(--overlay);stroke:${A};stroke-width:2.2"/><circle cx="5.5" cy="44" r="1.8" style="fill:${A}"/><g transform="rotate(-10 25.5 20.5)">${dieFace(18.5, 13.5, 14, A, 'var(--bg)')}</g>`,
+          table6: top(11) + seats(6, 18.5, 4.6, [G.red, G.blue, G.yellow, G.green, G.indigo, G.orange]),
+          tableChairs: top(11) + four.map((c, i) => `<rect x="18" y="2.5" width="12" height="6.5" rx="3.25" transform="rotate(${i * 90} 24 24)" style="fill:${c}"/>`).join(''),
+          tableBrain: top(12.5) + seats(4, 18, 4.8, four) + `<g ${at(0.47)}>${brain(5.4)}</g>`,
+          tableDie: top(12.5) + seats(4, 18, 4.8, four) + `<g transform="rotate(15 24 24)">${dieFace(17.5, 17.5, 13, A, 'var(--bg)')}</g>`,
+          tableCards: top(12.5) + seats(4, 18, 4.8, four) + `<rect x="18" y="17" width="9" height="13" rx="2" transform="rotate(-18 22.5 23.5)" style="fill:var(--raised);stroke:${A};stroke-width:1.8"/><rect x="22" y="18" width="9" height="13" rx="2" transform="rotate(14 26.5 24.5)" style="fill:${A}"/>`,
+          tableSide: `<ellipse cx="11" cy="27" rx="7.5" ry="6" style="fill:${G.red}"/><circle cx="11" cy="16.5" r="4.6" style="fill:${G.red}"/><ellipse cx="37" cy="27" rx="7.5" ry="6" style="fill:${G.yellow}"/><circle cx="37" cy="16.5" r="4.6" style="fill:${G.yellow}"/><ellipse cx="24" cy="23.5" rx="7.5" ry="6" style="fill:${G.blue}"/><circle cx="24" cy="12.5" r="4.6" style="fill:${G.blue}"/><ellipse cx="24" cy="34" rx="21.5" ry="8.5" style="fill:var(--overlay);stroke:var(--border);stroke-width:2.6"/><rect x="20" y="30" width="8" height="6" rx="1.2" transform="rotate(-12 24 33)" style="fill:${A}"/>`,
+          tableRing: four.map((c, i) => `<circle cx="24" cy="24" r="15" transform="rotate(${i * 90 - 90 + 7} 24 24)" style="fill:none;stroke:${c};stroke-width:7.5;stroke-dasharray:18.5 100;stroke-linecap:round"/>`).join('') + `<circle cx="24" cy="24" r="5" style="fill:${A}"/>`,
+        };
+        if (m48[kind]) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">${m48[kind]}</svg>`;
+        const marks = {
+          hex: `<path d="M12 2l8.7 5v10L12 22l-8.7-5V7z" style="fill:none;stroke:${A};stroke-width:2;stroke-linejoin:round"/>`,
+          die: `<g transform="rotate(-10 12 12)"><rect x="3" y="3" width="18" height="18" rx="4.5" style="fill:var(--overlay);stroke:${A};stroke-width:1.8"/>
+            <circle cx="8" cy="8" r="1.6" style="fill:var(--text)"/><circle cx="16" cy="8" r="1.6" style="fill:var(--text)"/>
+            <circle cx="12" cy="12" r="1.9" style="fill:${A}"/>
+            <circle cx="8" cy="16" r="1.6" style="fill:var(--text)"/><circle cx="16" cy="16" r="1.6" style="fill:var(--text)"/></g>`,
+          card: `<g transform="rotate(-9 12 12)"><rect x="5" y="2.5" width="14" height="19" rx="2.5" style="fill:var(--overlay);stroke:${A};stroke-width:1.8"/>
+            <text x="12" y="16.2" text-anchor="middle" style="font:800 11px system-ui,sans-serif;fill:${A}">B</text>
+            <circle cx="8" cy="5.8" r="0.9" style="fill:${A}"/><circle cx="16" cy="18.2" r="0.9" style="fill:${A}"/></g>`,
+          table: `<circle cx="12" cy="12" r="5.4" style="fill:var(--overlay);stroke:var(--border);stroke-width:1.6"/>
+            <circle cx="12" cy="3.3" r="2.8" style="fill:${G.red}"/><circle cx="20.7" cy="12" r="2.8" style="fill:${G.blue}"/>
+            <circle cx="12" cy="20.7" r="2.8" style="fill:${G.yellow}"/><circle cx="3.3" cy="12" r="2.8" style="fill:${G.green}"/>`,
+          wheel: `<path d="M12 13.5V4.5a9 9 0 0 1 9 9z" style="fill:${G.red}"/><path d="M12 13.5h9a9 9 0 0 1-9 9z" style="fill:${G.blue}"/>
+            <path d="M12 13.5v9a9 9 0 0 1-9-9z" style="fill:${G.yellow}"/><path d="M12 13.5H3a9 9 0 0 1 9-9z" style="fill:${G.green}"/>
+            <circle cx="12" cy="13.5" r="2" style="fill:var(--bg)"/><path d="M9.6 1h4.8L12 6.2z" style="fill:var(--text);stroke:var(--bg);stroke-width:0.8"/>`,
+          meeple: `<path d="M12 2.2a3.1 3.1 0 0 1 3.1 3.1c0 .9-.4 1.7-1 2.3 2.8.6 6.6 1.8 6.6 4.2 0 1.3-1.3 1.7-3 1.5l2.4 6.5c.2.6-.2 1-.8 1H15.2L12 16.6l-3.2 4.2H4.7c-.6 0-1-.4-.8-1l2.4-6.5c-1.7.2-3-.2-3-1.5 0-2.4 3.8-3.6 6.6-4.2-.6-.6-1-1.4-1-2.3A3.1 3.1 0 0 1 12 2.2z" style="fill:${A}"/>`,
+          fan: `<g style="stroke-width:1.4"><rect x="8" y="3" width="8" height="12" rx="1.6" transform="rotate(-24 12 21)" style="fill:var(--overlay);stroke:${A}"/>
+            <rect x="8" y="3" width="8" height="12" rx="1.6" transform="rotate(24 12 21)" style="fill:var(--overlay);stroke:${A}"/>
+            <rect x="8" y="2" width="8" height="12" rx="1.6" style="fill:${A};stroke:var(--bg)"/>
+            <circle cx="12" cy="8" r="1.6" style="fill:var(--bg)"/></g>`,
+          monogram: `<rect x="1.5" y="1.5" width="21" height="21" rx="5.5" style="fill:var(--accent)"/>
+            <text x="12" y="16" text-anchor="middle" style="font:800 9.6px system-ui,sans-serif;letter-spacing:-0.4px;fill:var(--on-accent)">BB</text>`,
+        };
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${marks[kind]}</svg>`;
+      }
+      function logoMark(kind, size) {
+        const svg = document.importNode(new DOMParser().parseFromString(logoSvg(kind === 'word' ? 'monogram' : kind), 'image/svg+xml').documentElement, true);
+        svg.setAttribute('width', size);
+        svg.setAttribute('height', size);
+        svg.setAttribute('aria-hidden', 'true');
+        return svg;
+      }
+      function logo(size = 22) {
+        if (state.logo === 'word') return h('span', { class: 'logo logoWord' }, 'Board', h('b', {}, 'Brain'));
+        return h('span', { class: 'logo' }, logoMark(state.logo, size + 6), 'BoardBrain');
+      }
+      function logoGallery() {
+        const groups = ['Favorit', 'Gehirn', 'Tisch', 'Weitere'];
+        return h(
+          'div',
+          { style: { display: 'grid', gap: '20px', maxWidth: '1220px', margin: '0 auto' } },
+          groups.map((grp) => [
+            h('h2', { style: { fontSize: '1.15rem' } }, grp === 'Favorit' ? 'Schachbrett links + Gehirn rechts – ganze Entwürfe' : grp === 'Weitere' ? 'Weitere aus Runde 1' : 'Mit ' + grp),
+            h(
+              'div',
+              { class: 'lg-grid' },
+              Object.entries(LOGOS)
+                .filter(([, v]) => v[2] === grp)
+                .map(([k, [name, desc]]) =>
+                  h(
+                    'button',
+                    {
+                      class: 'lg-card' + (state.logo === k ? ' on' : ''),
+                      onclick: () => {
+                        state.logo = k;
+                        state.showLogos = false;
+                        render();
+                      },
+                    },
+                    h('div', { class: 'lg-row' }, h('span', { class: 'lg-icon' }, logoMark(k, 58)), h('span', { class: 'lg-big' }, logoMark(k, 80))),
+                    h('div', { class: 'lg-bar' }, (() => { const prev = state.logo; state.logo = k; const el = logo(); state.logo = prev; return el; })()),
+                    h('strong', {}, name),
+                    h('span', { class: 'small muted' }, desc),
+                  ),
+                ),
+            ),
+          ]),
+        );
+      }
+
+      // Placeholder for later increments: dashed and greyed; hidden when "Spätere Funktionen" is off.
+      function ph(el, tag, extraClass) {
+        if (!state.future) return null;
+        // "Wie fertig": later features look as if they already existed.
+        if (state.future === 'real' || state.future === 'realNB') return el;
+        return h('div', { class: 'ph' + (extraClass ? ' ' + extraClass : '') }, el, h('span', { class: 'ph-tag' }, extraClass === 'short' ? tag : 'später · ' + tag));
+      }
+
+      function backupBanner() {
+        if (state.future === 'realNB') return null;
+        return ph(
+          h('div', { class: 'banner' }, icon('bell', 20), h('span', {}, h('b', {}, 'Sicherung empfohlen'), ' – letzte vor 14 Tagen')),
+          'I4 Banner',
+        );
+      }
+      function resumeCard() {
+        if (state.future === 'realNB') return null;
+        return ph(
+          h(
+            'div',
+            { class: 'banner' },
+            icon('play', 18),
+            h('span', { style: { flex: '1' } }, h('b', {}, 'Freitagsrunde'), ' spielt gerade – Runde 3'),
+            h('span', { class: 'linkBtn' }, 'Weiter ›'),
+          ),
+          'I2 laufende Partie',
+        );
+      }
+
+      function miniTable(g, size = 64) {
+        const wrap = h('div', { class: 'mt', style: { width: size + 'px', height: size + 'px' } }, h('div', { class: 'mt-top' }));
+        const n = g.dots.length;
+        const seat = size * (n >= 7 ? 0.2 : 0.24);
+        g.dots.forEach((c, i) => {
+          const a = (i / n) * 2 * Math.PI - Math.PI / 2;
+          wrap.append(
+            h('span', {
+              class: 'mt-seat',
+              style: {
+                width: seat + 'px',
+                height: seat + 'px',
+                left: 50 + 40 * Math.cos(a) + '%',
+                top: 50 + 40 * Math.sin(a) + '%',
+                background: GROUP[c],
+              },
+            }),
+          );
+        });
+        return wrap;
+      }
+
+      function avatar(name, i, size = 32) {
+        return h(
+          'span',
+          {
+            class: 'avatar',
+            style: { background: GROUP[GROUP_ORDER[i % 12]], width: size + 'px', height: size + 'px' },
+          },
+          name[0],
+        );
+      }
+
+      function go(screen) {
+        const subs = ['gruppen', 'personen', 'spiele'];
+        if (subs.includes(screen) && !subs.includes(state.screen)) state.from = state.screen;
+        state.screen = screen;
+        state.sheet = null;
+        state.menu = false;
+        state.fan = false;
+        render();
+      }
+
+      function isSub() {
+        return ['gruppen', 'personen', 'spiele'].includes(state.screen);
+      }
+      function areaOf(screen) {
+        return screen === 'start' ? 'start' : 'verwaltung';
+      }
+
+      // ---------- generic sub pages (as today, only the frame changes) ----------
+      const SUB_TITLES = { gruppen: 'Tische', personen: 'Personen', spiele: 'Spiele' };
+
+      function subBody(screen, opts = {}) {
+        const d = D();
+        const head = h(
+          'div',
+          { class: 'pageHead' },
+          opts.back !== false &&
+            h('button', { class: 'iconBtn', 'aria-label': 'Zurück', onclick: () => go(state.from || opts.backTo || 'verwaltung') }, icon('back')),
+          h('h1', { style: { flex: '1' } }, SUB_TITLES[screen]),
+          screen === 'gruppen' && h('button', { class: 'iconBtn', 'aria-label': 'Suchen' }, icon('search')),
+        );
+        let body;
+        if (screen === 'gruppen') {
+          body = h(
+            'div',
+            { class: 'roomGrid' },
+            h('button', { class: 'tableCard new' }, h('span', { class: 'plusTable' }, icon('plus', 32)), 'Neuer Tisch'),
+            d.groups.map((g) =>
+              h('div', { class: 'tableCard' }, miniTable(g, 96), h('span', {}, g.name), h('span', { class: 'small muted' }, g.meta)),
+            ),
+          );
+          if (d.groups.length === 0)
+            body = [body, h('p', { class: 'muted' }, 'Lege zuerst mindestens zwei Personen an, um einen Tisch zu bilden.')];
+        } else if (screen === 'personen') {
+          body = [
+            h('div', { class: 'fieldRow' }, h('input', { class: 'field', placeholder: 'Neue Person' }), h('button', { class: 'primary' }, 'Anlegen')),
+            d.persons.length === 0
+              ? h('p', { class: 'muted' }, 'Noch keine Personen angelegt.')
+              : h('div', { class: 'card', style: { padding: '0' } }, d.persons.map((p, i) => h('div', { class: 'listRow' }, avatar(p, i), p))),
+          ];
+        } else {
+          body = [
+            h('div', { class: 'fieldRow' }, h('input', { class: 'field', placeholder: 'Neues Spiel' }), h('button', { class: 'primary' }, 'Anlegen')),
+            h(
+              'div',
+              { class: 'card', style: { padding: '0' } },
+              d.games.map(([g, m]) => h('div', { class: 'listRow' }, icon(g === 'Catan' ? 'hex' : 'dice'), h('span', { style: { flex: '1' } }, g), h('span', { class: 'small muted' }, m))),
+            ),
+          ];
+        }
+        return h('div', { class: 'pad wideContent' }, head, body);
+      }
+
+      // ---------- A Tischmitte ----------
+      function aStart() {
+        const k = kind();
+        const d = D();
+        const empty = d.persons.length === 0;
+        const size = { phoneP: 320, phoneL: 290, tabletP: 470, wide: 450 }[k];
+        const seats = [
+          { s: 'personen', i: 'people', l: 'Personen', n: d.persons.length, hint: empty },
+          { s: 'gruppen', i: 'table', l: 'Tische', n: d.groups.length },
+          { s: 'spiele', i: 'dice', l: 'Spiele', n: d.games.length },
+        ];
+        if (state.future)
+          seats.push({ ghost: 'I3', i: 'pen', l: 'Ergebnis' }, { ghost: 'I3', i: 'chart', l: 'Statistik' });
+        const seatSize = size * 0.22;
+        const center = empty
+          ? [h('strong', {}, 'Willkommen!'), h('span', { class: 'small muted' }, 'Setz zuerst Leute an den Tisch: tippe auf „Personen“.')]
+          : state.future
+            ? [
+                ph(h('span', { class: 'primary' }, icon('play', 18), 'Neue Partie'), 'I2'),
+                h('span', { class: 'small muted', style: { marginTop: '6px' } }, 'Catan oder ein anderes Spiel'),
+              ]
+            : [h('strong', { style: { fontSize: '1.15rem' } }, 'Spieleabend'), h('span', { class: 'small muted' }, 'Faire Zufallsentscheidungen und Statistik')];
+        const table = h(
+          'div',
+          { class: 'a-table', style: { width: size + 'px', height: size + 'px' } },
+          h('div', { class: 'a-top' }, center),
+          seats.map((st, i) => {
+            const a = (i / seats.length) * 2 * Math.PI - Math.PI / 2 + (seats.length === 3 ? Math.PI / 3 : 0);
+            return h(
+              'button',
+              {
+                class: 'a-seat' + (st.ghost ? ' ghost' : '') + (st.hint ? ' hint' : ''),
+                style: {
+                  width: seatSize + 'px',
+                  height: seatSize + 'px',
+                  left: 50 + 41 * Math.cos(a) + '%',
+                  top: 50 + 41 * Math.sin(a) + '%',
+                },
+                onclick: st.s ? () => go(st.s) : null,
+              },
+              icon(st.i, 20),
+              h('span', { class: 'lbl' }, st.l),
+              st.ghost ? h('span', { class: 'cnt', style: { background: 'var(--muted)', color: 'var(--bg)' } }, st.ghost) : h('span', { class: 'cnt' }, st.n),
+            );
+          }),
+        );
+        const side = h(
+          'div',
+          { class: 'stack', style: { display: 'grid', gap: '14px', alignContent: 'start' } },
+          resumeCard(),
+          d.groups.length > 0 && [
+            h('div', { class: 'sectionHead' }, h('h2', {}, 'Zuletzt gespielt'), h('button', { class: 'linkBtn', onclick: () => go('gruppen') }, 'Alle Tische ›')),
+            h(
+              'div',
+              { class: 'card', style: { padding: '0' } },
+              d.groups.slice(0, k === 'phoneL' ? 2 : 4).map((g) => h('div', { class: 'listRow' }, miniTable(g, 40), h('span', { style: { flex: '1' } }, g.name), h('span', { class: 'small muted' }, g.meta))),
+            ),
+          ],
+        );
+        if (k === 'wide' || k === 'phoneL')
+          return h('div', { class: 'pad wideContent' }, backupBanner(), h('div', { class: 'a-split', style: { gridTemplateColumns: 'auto 1fr' } }, table, side));
+        return h('div', { class: 'pad' }, backupBanner(), table, side);
+      }
+
+      function aMgmt() {
+        const k = kind();
+        const d = D();
+        const cols = { phoneP: 1, phoneL: 3, tabletP: 2, wide: 4 }[k];
+        const card = (s, ic, title, n, preview) =>
+          h(
+            'button',
+            { class: 'a-card', onclick: () => go(s) },
+            h('div', { class: 'top' }, h('span', { class: 'b-ico' }, icon(ic, 20)), h('strong', {}, title), h('span', { class: 'count' }, n)),
+            preview,
+          );
+        return h(
+          'div',
+          { class: 'pad wideContent' },
+          h('h1', {}, 'Verwaltung'),
+          h(
+            'div',
+            { class: 'a-cards', style: { gridTemplateColumns: `repeat(${cols}, 1fr)` } },
+            card('personen', 'people', 'Personen', d.persons.length,
+              d.persons.length ? h('div', { class: 'avatarRow' }, d.persons.slice(0, 9).map((p, i) => avatar(p, i))) : h('span', { class: 'small muted' }, 'Noch niemand angelegt')),
+            card('gruppen', 'table', 'Tische', d.groups.length,
+              d.groups.length ? h('div', { style: { display: 'flex', gap: '6px' } }, d.groups.slice(0, 3).map((g) => miniTable(g, 48))) : h('span', { class: 'small muted' }, 'Noch keine Tische')),
+            card('spiele', 'dice', 'Spiele', d.games.length, h('span', { class: 'small muted' }, d.games.map((g) => g[0]).join(' · '))),
+            ph(h('div', { class: 'a-card' }, h('div', { class: 'top' }, h('span', { class: 'b-ico' }, icon('box', 20)), h('strong', {}, 'Archiv'), h('span', { class: 'count' }, '2')), h('span', { class: 'small muted' }, 'Archivierte Personen und Tische')), 'I5'),
+          ),
+        );
+      }
+
+      const conceptA = () => {
+        const seg = h(
+          'nav',
+          { class: 'a-seg', 'aria-label': 'Hauptnavigation' },
+          ['start', 'verwaltung'].map((s) =>
+            h('button', { 'aria-current': areaOf(state.screen) === s ? 'page' : null, onclick: () => go(s) }, s === 'start' ? 'Start' : 'Verwaltung'),
+          ),
+        );
+        const body = state.screen === 'start' ? aStart() : state.screen === 'verwaltung' ? aMgmt() : subBody(state.screen);
+        return h('div', { class: 'app' }, h('header', { class: 'a-head' }, logo(), h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } }, seg, settingsGhost())), h('main', { class: 'scroll' }, body));
+      };
+
+      // ---------- B App-Leiste ----------
+      function bTabs(rail) {
+        const tabs = [
+          ['start', 'home', 'Start'],
+          ['verwaltung', 'folder', 'Verwaltung'],
+        ];
+        const ghosts = state.future
+          ? [
+              ['chart', 'Statistik', 'I3'],
+              ['box', 'Daten', 'I4'],
+              ['cog', 'Einstell.', 'I6'],
+            ]
+          : [];
+        const slim = rail && kind() === 'phoneL';
+        return [
+          tabs.map(([s, ic, l]) =>
+            h('button', { class: 'b-tab', 'aria-current': areaOf(state.screen) === s ? 'page' : null, onclick: () => go(s) }, h('span', { class: 'pill' }, icon(ic)), !slim && l),
+          ),
+          ghosts.map(([ic, l, tag]) => h('span', { class: 'b-tab ghost', title: 'später · ' + tag }, h('span', { class: 'pill', style: { outline: '1.5px dashed var(--muted)' } }, icon(ic)), !slim && l)),
+        ];
+      }
+      function bStart() {
+        const k = kind();
+        const d = D();
+        const empty = d.persons.length === 0;
+        const wide = k === 'wide' || k === 'phoneL';
+        const hero = state.future
+          ? [
+              ph(h('div', { class: 'b-hero' }, h('span', { class: 'big' }, icon('play', 22), 'Neue Partie'), h('span', {}, 'Catan oder ein anderes Spiel – Tisch wählen und los')), 'I2'),
+              ph(h('div', { class: 'secondary', style: { width: '100%' } }, icon('pen', 20), 'Ergebnis eintragen'), 'I3'),
+            ]
+          : null;
+        const steps = empty &&
+          h(
+            'div',
+            { class: 'card', style: { display: 'grid', gap: '10px' } },
+            h('h2', {}, 'So geht es los'),
+            h('button', { class: 'secondary', style: { justifyContent: 'flex-start' }, onclick: () => go('personen') }, h('b', {}, '1'), 'Personen anlegen'),
+            h('div', { class: 'secondary muted', style: { justifyContent: 'flex-start', opacity: '0.6' } }, h('b', {}, '2'), 'Einen Tisch decken'),
+            state.future && h('div', { class: 'secondary muted', style: { justifyContent: 'flex-start', opacity: '0.6' } }, h('b', {}, '3'), 'Partie starten (später · I2)'),
+          );
+        const tables = d.groups.length > 0 && [
+          h('div', { class: 'sectionHead' }, h('h2', {}, 'Tische'), h('button', { class: 'linkBtn', onclick: () => go('gruppen') }, 'Alle ' + d.groups.length + ' ›')),
+          h('div', { class: 'fadeRow' }, d.groups.map((g) => h('button', { class: 'b-mini', onclick: () => go('gruppen') }, miniTable(g, 64), h('span', { class: 'small' }, g.name)))),
+        ];
+        const tiles = h(
+          'div',
+          { class: 'b-tiles' },
+          h('button', { class: 'b-tile', onclick: () => go('personen') }, icon('people'), h('span', { class: 'n' }, d.persons.length), h('span', { class: 'small muted' }, 'Personen')),
+          h('button', { class: 'b-tile', onclick: () => go('spiele') }, icon('dice'), h('span', { class: 'n' }, d.games.length), h('span', { class: 'small muted' }, 'Spiele')),
+        );
+        const greet = h('div', {}, h('p', { class: 'small muted' }, 'Donnerstag, 8. Oktober'), h('h1', {}, 'Schön, dass ihr spielt'));
+        if (wide)
+          return h(
+            'div',
+            { class: 'pad wideContent' },
+            greet,
+            backupBanner(),
+            h(
+              'div',
+              { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'start' } },
+              h('div', { style: { display: 'grid', gap: '14px' } }, resumeCard(), hero, steps),
+              h('div', { style: { display: 'grid', gap: '14px', minWidth: '0' } }, tables, tiles),
+            ),
+          );
+        return h('div', { class: 'pad' }, greet, backupBanner(), resumeCard(), hero, steps, tables, tiles);
+      }
+      function bMgmt() {
+        const d = D();
+        const row = (s, ic, title, sub, n) =>
+          h('button', { class: 'listRow', onclick: () => go(s) }, h('span', { class: 'b-ico' }, icon(ic, 20)), h('span', { style: { flex: '1', display: 'grid' } }, h('strong', {}, title), h('span', { class: 'small muted' }, sub)), h('span', { class: 'muted' }, n), icon('next', 18));
+        return h(
+          'div',
+          { class: 'pad wideContent', style: { maxWidth: '720px' } },
+          h('h1', {}, 'Verwaltung'),
+          h(
+            'div',
+            { class: 'b-list' },
+            row('personen', 'people', 'Personen', 'Wer mitspielt', d.persons.length),
+            row('gruppen', 'table', 'Tische', 'Gruppen mit Farben', d.groups.length),
+            row('spiele', 'dice', 'Spiele', 'Catan und eigene Spiele', d.games.length),
+          ),
+          ph(h('div', { class: 'b-list' }, h('div', { class: 'listRow' }, h('span', { class: 'b-ico' }, icon('box', 20)), h('span', { style: { flex: '1', display: 'grid' } }, h('strong', {}, 'Archiv'), h('span', { class: 'small muted' }, 'Archivierte Personen und Tische')))), 'I5'),
+        );
+      }
+      const conceptB = () => bShell(bStart, bMgmt);
+
+      // ---------- C Alles im Spielraum ----------
+      function cRoom() {
+        const k = kind();
+        const d = D();
+        const wide = k === 'wide' || k === 'phoneL';
+        const tableSize = k === 'phoneP' ? 84 : 96;
+        const room = h(
+          'div',
+          { class: 'roomGrid', style: { gridTemplateColumns: `repeat(auto-fill, minmax(${k === 'phoneP' ? 8.5 : 9.5}rem, 1fr))` } },
+          h('button', { class: 'tableCard new', onclick: () => go('gruppen') }, h('span', { class: 'plusTable', style: { width: tableSize + 'px', height: tableSize + 'px' } }, icon('plus', 30)), 'Neuer Tisch'),
+          d.groups.map((g, i) =>
+            h(
+              'button',
+              { class: 'tableCard', onclick: () => { state.sheet = i; render(); } },
+              miniTable(g, tableSize),
+              h('span', {}, g.name),
+              h('span', { class: 'small muted' }, g.meta),
+            ),
+          ),
+        );
+        const bench = h(
+          'div',
+          { style: { display: 'grid', gap: '8px' } },
+          h('div', { class: 'sectionHead' }, h('h2', {}, 'Die Bank'), h('button', { class: 'linkBtn', onclick: () => go('personen') }, d.persons.length ? 'Alle ' + d.persons.length + ' ›' : '+ Person')),
+          h(
+            'button',
+            { class: 'c-bench', onclick: () => go('personen') },
+            d.persons.length
+              ? h('div', { class: 'fadeRow', style: { flex: '1', flexWrap: wide ? 'wrap' : 'nowrap', maskImage: wide ? 'none' : null } }, d.persons.slice(0, wide ? 18 : 28).map((p, i) => avatar(p, i, 36)))
+              : h('span', { class: 'muted small' }, 'Noch sitzt niemand auf der Bank. Tippe hier, um Personen anzulegen.'),
+          ),
+        );
+        const shelf = h(
+          'div',
+          { style: { display: 'grid', gap: '8px' } },
+          h('div', { class: 'sectionHead' }, h('h2', {}, 'Das Regal'), h('button', { class: 'linkBtn', onclick: () => go('spiele') }, 'Alle ' + d.games.length + ' ›')),
+          h(
+            'button',
+            { class: 'c-shelf', onclick: () => go('spiele') },
+            d.games.map(([g], i) =>
+              h('span', { class: 'c-box', style: { width: [64, 46, 52, 40, 44, 50][i] + 'px', height: [80, 58, 70, 64, 52, 74][i] + 'px', borderTop: '4px solid ' + GROUP[['orange', 'red', 'teal', 'indigo', 'green', 'yellow'][i]] } }, g === 'Catan' ? icon('hex', 22) : g.slice(0, 4)),
+            ),
+            ph(h('span', { class: 'c-box', style: { width: '52px', height: '60px' } }, icon('box', 18)), 'I5 Archiv'),
+          ),
+        );
+        const title = h(
+          'div',
+          { class: 'sectionHead', style: { alignItems: 'center' } },
+          h('h1', {}, 'Euer Spielraum'),
+          d.groups.length > 0 && h('button', { class: 'iconBtn', 'aria-label': 'Suchen' }, icon('search')),
+        );
+        const hint = d.persons.length < 2 && h('p', { class: 'muted small' }, 'Setz zuerst mindestens zwei Personen auf die Bank, dann kannst du einen Tisch decken.');
+        if (wide)
+          return h(
+            'div',
+            { class: 'pad wideContent' },
+            backupBanner(),
+            h(
+              'div',
+              { style: { display: 'grid', gridTemplateColumns: k === 'phoneL' ? '1.4fr 1fr' : '2fr 1fr', gap: '24px', alignItems: 'start' } },
+              h('div', { style: { display: 'grid', gap: '16px' } }, title, resumeCard(), hint, room),
+              h('div', { style: { display: 'grid', gap: '20px' } }, bench, shelf),
+            ),
+          );
+        return h('div', { class: 'pad' }, backupBanner(), title, resumeCard(), bench, hint, room, shelf);
+      }
+      function cSheet() {
+        const g = D().groups[state.sheet];
+        const k = kind();
+        const close = () => {
+          state.sheet = null;
+          render();
+        };
+        return h(
+          'div',
+          { class: 'c-sheetBack' + (k === 'phoneP' ? '' : ' center'), onclick: (e) => e.target === e.currentTarget && close() },
+          h(
+            'div',
+            { class: 'c-sheet', role: 'dialog', 'aria-label': g.name },
+            h('div', { class: 'pageHead' }, miniTable(g, 72), h('div', { style: { flex: '1', display: 'grid' } }, h('strong', {}, g.name), h('span', { class: 'small muted' }, g.meta), h('span', { class: 'tiny muted' }, g.members.join(', '))), h('button', { class: 'iconBtn', 'aria-label': 'Schließen', onclick: close }, icon('close'))),
+            h(
+              'div',
+              { class: 'c-actions' },
+              ph(h('div', { class: 'primary', style: { width: '100%' } }, icon('play', 18), 'Neue Partie an diesem Tisch'), 'I2'),
+              ph(h('div', { class: 'secondary', style: { width: '100%' } }, icon('pen', 18), 'Ergebnis eintragen'), 'I3'),
+              ph(h('div', { class: 'secondary', style: { width: '100%' } }, icon('chart', 18), 'Ergebnisse und Statistik'), 'I3'),
+              ph(h('div', { class: 'secondary', style: { width: '100%' } }, 'Tisch ansehen und bearbeiten'), 'I1-E, I1-F'),
+              !state.future && h('p', { class: 'muted small' }, 'Hier erscheinen später die Aktionen für diesen Tisch.'),
+            ),
+          ),
+        );
+      }
+      const conceptC = () => {
+        const sub = state.screen === 'personen' || state.screen === 'spiele';
+        const head = h(
+          'header',
+          { class: 'c-head' },
+          logo(),
+          ph(h('span', { class: 'c-pillBtn' }, icon('chart', 18), kind() === 'phoneP' ? null : 'Statistik'), 'I3', 'short'),
+          ph(h('span', { class: 'iconBtn' }, icon('cog', 20)), 'I6', 'short'),
+        );
+        const body = sub ? subBody(state.screen, { backTo: 'start' }) : cRoom();
+        return h('div', { class: 'app' }, head, h('main', { class: 'scroll' }, body), state.sheet != null && !sub && cSheet());
+      };
+
+      // ---------- D Schachtel ----------
+      function dStart() {
+        const k = kind();
+        const d = D();
+        const cols = { phoneP: 2, phoneL: 4, tabletP: 3, wide: 4 }[k];
+        const cell = (s, ic, title, n, extra, span) =>
+          h(
+            'button',
+            { class: 'd-cell', onclick: s ? () => go(s) : null, style: span || {} },
+            h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, h('strong', {}, title), icon(ic, 20)),
+            extra,
+            n != null && h('span', { class: 'n' }, n),
+          );
+        const big = { gridColumn: 'span 2', gridRow: k === 'phoneP' ? null : 'span 2' };
+        const tablesCell = cell(
+          'gruppen',
+          'table',
+          'Tische',
+          d.groups.length,
+          d.groups.length ? h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } }, d.groups.slice(0, state.future ? 3 : 6).map((g) => miniTable(g, state.future ? 44 : 64))) : h('span', { class: 'small muted' }, 'Noch keine Tische'),
+          state.future ? null : big,
+        );
+        return h(
+          'div',
+          { class: 'd-grid', style: { gridTemplateColumns: `repeat(${cols}, 1fr)` } },
+          state.future && h('div', { style: { gridColumn: '1 / -1' } }, backupBanner()),
+          state.future && h('div', { style: { gridColumn: '1 / -1' } }, resumeCard()),
+          state.future &&
+            ph(
+              h('div', { class: 'd-cell', style: { height: '100%', minHeight: k === 'phoneP' ? '150px' : '250px', background: 'var(--accent)', color: 'var(--on-accent)' } }, h('strong', { style: { fontSize: '1.25rem' } }, 'Neue Partie'), h('span', { style: { justifySelf: 'center' } }, icon('play', 56)), h('span', {}, 'Catan oder ein anderes Spiel')),
+              'I2',
+              '',
+            ),
+          tablesCell,
+          cell('personen', 'people', 'Personen', d.persons.length, d.persons.length ? h('div', { class: 'avatarRow' }, d.persons.slice(0, 5).map((p, i) => avatar(p, i, 26))) : h('span', { class: 'small muted' }, 'Hier anfangen')),
+          cell('spiele', 'dice', 'Spiele', d.games.length, h('span', { class: 'small muted' }, d.games.slice(0, 3).map((g) => g[0]).join(', '))),
+          state.future && ph(h('div', { class: 'd-cell', style: { height: '100%' } }, h('strong', {}, 'Ergebnis eintragen'), icon('pen', 28)), 'I3'),
+        );
+      }
+      // The first placeholder cell spans 2x2; wrap afterwards via style on the ph container.
+      function fixBig(grid) {
+        const first = grid.querySelector(':scope > .ph');
+        if (first && first.textContent.includes('Neue Partie')) {
+          first.style.gridColumn = 'span 2';
+          if (kind() !== 'phoneP') first.style.gridRow = 'span 2';
+        }
+        return grid;
+      }
+      function dMgmt() {
+        const d = D();
+        const spine = (s, title, n, color, width, ghostTag) => {
+          const el = h('button', { class: 'd-spine', style: { '--spine': GROUP[color], width: width + '%' }, onclick: s ? () => go(s) : null }, title, h('span', { class: 'n' }, n));
+          return ghostTag ? ph(el, ghostTag) : el;
+        };
+        return h(
+          'div',
+          { class: 'd-shelf wideContent', style: { maxWidth: '760px' } },
+          h('h1', { style: { marginBottom: '16px' } }, 'Verwaltung'),
+          spine('personen', 'Personen', d.persons.length, 'teal', 92),
+          spine('gruppen', 'Tische', d.groups.length, 'orange', 84),
+          h('div', { class: 'd-board' }),
+          spine('spiele', 'Spiele', d.games.length, 'indigo', 96),
+          state.future && h('div', { style: { height: '8px' } }),
+          spine(null, 'Archiv', 2, 'gray', 78, 'I5'),
+          h('div', { class: 'd-board' }),
+        );
+      }
+      const conceptD = () => {
+        const tabs = h(
+          'nav',
+          { class: 'd-tabs', 'aria-label': 'Hauptnavigation' },
+          ['start', 'verwaltung'].map((s) => h('button', { class: 'd-tab', 'aria-current': areaOf(state.screen) === s ? 'page' : null, onclick: () => go(s) }, s === 'start' ? 'Start' : 'Verwaltung')),
+          state.future && h('span', { class: 'd-tab ghost', title: 'später · I3' }, 'Statistik'),
+        );
+        const body = state.screen === 'start' ? fixBig(dStart()) : state.screen === 'verwaltung' ? dMgmt() : subBody(state.screen);
+        return h(
+          'div',
+          { class: 'app' },
+          h('header', { class: 'a-head', style: { paddingBottom: '6px' } }, logo(), ph(h('span', { class: 'iconBtn' }, icon('cog', 20)), 'I6', 'short')),
+          tabs,
+          h('div', { class: 'd-box' }, h('main', { class: 'scroll' }, body)),
+        );
+      };
+
+      // ---------- E Kartenhand ----------
+      function eCard(s, ic, title, n, sub, extraStyle) {
+        return h(
+          'button',
+          { class: 'e-card', onclick: s ? () => go(s) : null, style: extraStyle || {} },
+          h('span', { class: 'corner' }, n),
+          h('span', { style: { color: 'var(--accent-text)' } }, icon(ic, 34)),
+          h('span', { class: 'ttl' }, title),
+          sub && h('span', { class: 'tiny muted' }, sub),
+          h('span', { class: 'corner br' }, n),
+        );
+      }
+      // Variants for "Neue Partie" in E and M (PO: the big card is too bulky on phones).
+      const TRUMPS = {
+        pile: 'Nachziehstapel',
+        hidden: 'Verdeckte Karte im Fächer',
+        hand: 'Trumpf in der Hand',
+        hex: 'Catan-Feld',
+        strip: 'Schmale Karte',
+        big: 'Große Karte (bisher)',
+      };
+      // Designs for the draw pile (PO: pile yes, but the stack design needs more options).
+      const PILES = {
+        classic: 'Klassischer Kartenrücken',
+        hex: 'Wabe (Catan)',
+        neat: 'Ordentlicher Stapel',
+        joker: 'Joker obenauf',
+        fan: 'Aufgefächert',
+        coin: 'Mit Spielmarke',
+        stripes: 'Streifen (bisher)',
+        all: 'Alle nebeneinander',
+      };
+      function pileTop(style) {
+        if (style === 'hex') return h('span', { class: 'ps-hexMark' }, icon('hex', 34), h('span', { class: 'ps-hexPlay' }, icon('play', 12)));
+        if (style === 'neat') return icon('play', 24);
+        if (style === 'joker') return [h('span', { class: 'ps-corner' }, '★'), h('span', { class: 'ps-q' }, '?'), h('span', { class: 'ps-corner br' }, '★')];
+        if (style === 'fan') return [h('span', { class: 'ps-corner' }, '★'), icon('play', 22)];
+        if (style === 'coin') return h('span', { class: 'ps-token' }, icon('play', 16));
+        return h('span', { class: 'e-backBadge' }, icon('play', 18));
+      }
+      function pileStack(style) {
+        return h('span', { class: 'e-pileStack ps-' + style }, h('span', { class: 'e-back' }), h('span', { class: 'e-back' }), h('span', { class: 'e-back' }, pileTop(style)));
+      }
+      function pileButton(style, compact) {
+        return h(
+          'button',
+          { class: 'e-pile' + (compact ? ' compact' : '') },
+          pileStack(style),
+          h('span', { style: { display: 'grid', textAlign: 'left' } }, h('strong', { style: { fontSize: '1.1rem' } }, 'Neue Partie')),
+          h('span', { class: 'muted', style: { marginLeft: 'auto' } }, icon('next', 20)),
+        );
+      }
+      function pileVariant() {
+        if (state.pileStyle !== 'all') return ph(pileButton(state.pileStyle), 'I2');
+        return ph(
+          h(
+            'div',
+            { class: 'ps-all' },
+            Object.entries(PILES)
+              .filter(([k]) => k !== 'all')
+              .map(([k, l]) => h('div', { style: { display: 'grid', gap: '4px' } }, h('span', { class: 'tiny muted' }, l), pileButton(k, true))),
+          ),
+          'I2',
+        );
+      }
+      function eTrump(wide) {
+        if (!state.future) return null;
+        const v = state.eTrump;
+        if (v === 'big')
+          return ph(
+            h('div', { class: 'e-card e-hero', style: { background: 'var(--accent)', color: 'var(--on-accent)', width: wide ? '220px' : null } }, h('span', { class: 'corner', style: { color: 'var(--on-accent)' } }, '★'), icon('play', 48), h('span', { class: 'ttl', style: { fontSize: '1.25rem' } }, 'Neue Partie'), h('span', { class: 'small' }, 'Karte ziehen = losspielen'), h('span', { class: 'corner br', style: { color: 'var(--on-accent)' } }, '★')),
+            'I2',
+          );
+        if (v === 'pile') return pileVariant();
+        if (v === 'hex')
+          return ph(
+            h(
+              'button',
+              { class: 'e-hexRow' },
+              h('span', { class: 'e-hex' }, icon('play', 22), h('span', {}, 'Neue'), h('span', {}, 'Partie')),
+              h('span', { style: { display: 'grid', textAlign: 'left' } }, h('strong', {}, 'Neues Feld legen'), h('span', { class: 'small muted' }, 'Spiel und Tisch wählen, dann geht es los')),
+            ),
+            'I2',
+          );
+        if (v === 'strip')
+          return ph(h('button', { class: 'e-strip' }, h('span', { class: 'corner' }, '★'), icon('play', 20), h('strong', {}, 'Neue Partie'), h('span', { class: 'small', style: { marginLeft: 'auto' } }, 'Tisch wählen ›')), 'I2');
+        return null;
+      }
+      function eBackCard() {
+        return ph(h('button', { class: 'e-card e-backCard', style: { width: '100%' } }, h('span', { class: 'e-q' }, '?'), h('span', { class: 'e-backLabel' }, 'Neue Partie')), 'I2');
+      }
+      function resultChoice() {
+        const close = (e) => {
+          if (e.target === e.currentTarget) {
+            state.resSheet = false;
+            render();
+          }
+        };
+        return h(
+          'div',
+          { class: 'r-dim', onclick: close },
+          h(
+            'div',
+            { class: 'r-fanOut' },
+            h('button', { class: 'e-card r-playCard r-left r-filled' }, h('span', { class: 'corner' }, '✎'), h('span', { class: 'r-halfIcon' }, icon('pen', 28)), h('strong', {}, 'Ergebnis eintragen'), h('span', { class: 'corner br' }, '✎')),
+            h('button', { class: 'e-card r-playCard r-right' }, h('span', { class: 'corner' }, '▶'), h('span', { class: 'r-halfIcon' }, icon('play', 30)), h('strong', {}, 'Neue Partie'), h('span', { class: 'corner br' }, '▶')),
+          ),
+        );
+      }
+      function eStart() {
+        const d = D();
+        const k = kind();
+        let hero = eTrump(false);
+        if (hero) {
+          // I3: the pile is called "Partie"; tapping it offers "Ergebnis eintragen" or "Neue Partie"
+          hero.querySelector('strong').textContent = 'Partie';
+          hero.addEventListener('click', () => {
+            state.resSheet = true;
+            render();
+          });
+        }
+        // Setting "Ich hasse Catan!" (I6): no generation, the start offers only the result entry
+        if (hero && state.noCatan)
+          hero = h(
+            'button',
+            { class: 'e-pile' },
+            h('span', { class: 'e-pileStack r-discard' }, h('span', { class: 'e-back' }), h('span', { class: 'e-back' }), h('span', { class: 'e-back' }, h('span', { class: 'r-lines' }), h('span', { class: 'r-pen' }, icon('pen', 18)))),
+            h('strong', { style: { fontSize: '1.1rem' } }, 'Ergebnis eintragen'),
+            h('span', { class: 'muted', style: { marginLeft: 'auto' } }, icon('next', 20)),
+          );
+        if (state.noCatan && state.future) d.games = d.games.filter(([name]) => name !== 'Catan');
+        const fan = h('div', { class: 'e-fan e-fanBottom' }, [
+          eCard('personen', 'people', 'Personen', d.persons.length, d.persons.length ? null : 'hier anfangen', { transform: 'rotate(-7deg) translateY(8%)' }),
+          eCard('gruppen', 'table', 'Tische', d.groups.length, null, { zIndex: '1', transform: 'none' }),
+          eCard('spiele', 'dice', 'Spiele', d.games.length, null, { zIndex: 'auto', transform: 'rotate(7deg) translateY(8%)' }),
+        ]);
+        const cards = h('div', { class: 'e-cardsBlock' }, h('h2', {}, 'Karten'), fan);
+        // Phone in landscape: start a match left, cards right; otherwise stacked.
+        const bottom =
+          k === 'phoneL'
+            ? h('div', { class: 'e-bottomRow' }, hero && h('div', { style: { flex: '1', minWidth: '0' } }, hero), h('div', { style: { flex: '1.3', minWidth: '0' } }, cards))
+            : h('div', { class: 'e-bottomCol' }, hero, cards);
+        const notes = [backupBanner(), resumeCard()].filter(Boolean);
+        return h('div', { class: 'e-startFull' + (k === 'phoneL' ? ' land' : '') }, notes.length > 0 && h('div', { class: 'e-notes' }, notes), h('div', { class: 'e-spacer' }), bottom, h('div', { class: 'e-spacer low' }));
+      }
+      function eMgmt() {
+        const d = D();
+        const k = kind();
+        const cols = { phoneP: 2, phoneL: 4, tabletP: 3, wide: 4 }[k];
+        return h(
+          'div',
+          { class: 'pad wideContent', style: { maxWidth: '900px' } },
+          h('h1', {}, 'Verwaltung'),
+          h(
+            'div',
+            { style: { display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: '14px' } },
+            eCard('personen', 'people', 'Personen', d.persons.length, d.persons.slice(0, 3).join(', ')),
+            eCard('gruppen', 'table', 'Tische', d.groups.length, d.groups.slice(0, 2).map((g) => g.name).join(', ')),
+            eCard('spiele', 'dice', 'Spiele', d.games.length, d.games.slice(0, 3).map((g) => g[0]).join(', ')),
+            ph(eCard(null, 'box', 'Archiv', 2, 'Archivierte Personen und Tische', { width: '100%' }), 'I5'),
+          ),
+        );
+      }
+      const conceptE = () => {
+        const body = state.screen === 'start' ? eStart() : state.screen === 'verwaltung' ? eMgmt() : subBody(state.screen);
+        return h('div', { class: 'app' }, h('header', { class: 'a-head', style: { justifyContent: 'center' } }, logo()), h('main', { class: 'scroll', style: state.screen === 'start' ? { overflow: 'hidden' } : {} }, body), eHand(), state.resSheet && state.screen === 'start' && state.future && resultChoice());
+      };
+
+      // ---------- F Hausplan ----------
+      function fPlan() {
+        const k = kind();
+        const d = D();
+        const areas = {
+          phoneP: ['"spiel spiel" "diele schrank" "buero keller"', '1fr 1fr'],
+          phoneL: ['"spiel spiel diele" "spiel spiel schrank" "buero keller keller"', '1fr 1fr 1fr'],
+          tabletP: ['"spiel spiel" "diele schrank" "buero keller"', '1fr 1fr'],
+          wide: ['"spiel spiel diele schrank" "spiel spiel buero keller"', '1fr 1fr 1fr 1fr'],
+        }[k];
+        const room = (area, s, kindLabel, title, n, content, door) =>
+          h(
+            'button',
+            { class: 'f-room', style: { gridArea: area }, onclick: s ? () => go(s) : null },
+            door && h('span', { class: 'f-door', style: door }),
+            h('span', { class: 'kind' }, kindLabel),
+            h('span', { class: 'ttl' }, title, h('span', {}, n)),
+            content,
+          );
+        const ghost = (area, kindLabel, title, tag) =>
+          state.future
+            ? h('div', { class: 'f-room ghost', style: { gridArea: area } }, h('span', { class: 'kind' }, kindLabel), h('span', { class: 'ttl' }, title), h('span', { class: 'tiny muted' }, 'später · ' + tag))
+            : h('div', { class: 'f-room ghost', style: { gridArea: area, opacity: '0.25' } });
+        return h(
+          'div',
+          { class: 'f-plan', style: { gridTemplateAreas: areas[0], gridTemplateColumns: areas[1] } },
+          room(
+            'spiel',
+            'gruppen',
+            'Spielzimmer',
+            'Tische',
+            d.groups.length,
+            [
+              d.groups.length
+                ? h('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } }, d.groups.slice(0, k === 'phoneP' ? 4 : 8).map((g) => miniTable(g, k === 'phoneP' ? 56 : 64)))
+                : h('span', { class: 'small muted' }, 'Noch leer – erst Gäste in die Diele holen.'),
+              ph(h('span', { class: 'primary', style: { marginTop: '8px' } }, icon('play', 18), 'Neue Partie'), 'I2'),
+            ],
+          ),
+          room('diele', 'personen', 'Diele', 'Gäste', d.persons.length, d.persons.length ? h('div', { class: 'avatarRow' }, d.persons.slice(0, 5).map((p, i) => avatar(p, i, 28))) : h('span', { class: 'small muted' }, 'Hier fängt alles an')),
+          room('schrank', 'spiele', 'Spieleschrank', 'Spiele', d.games.length, h('span', { class: 'small muted' }, d.games.slice(0, 3).map((g) => g[0]).join(', '))),
+          ghost('buero', 'Arbeitszimmer', 'Statistik', 'I3'),
+          ghost('keller', 'Keller', 'Archiv und Sicherung', 'I4, I5'),
+        );
+      }
+      const conceptF = () => {
+        const sub = isSub();
+        const head = h(
+          'header',
+          { class: 'a-head' },
+          logo(),
+          sub && h('button', { class: 'c-pillBtn', onclick: () => go('start') }, icon('home', 18), 'Grundriss'),
+        );
+        const body = sub
+          ? subBody(state.screen, { backTo: 'start' })
+          : h(
+              'div',
+              { class: 'pad wideContent' },
+              h('div', {}, h('h1', {}, 'Willkommen im Spielhaus'), h('p', { class: 'small muted' }, 'Tippe auf einen Raum.')),
+              ph(h('div', { class: 'f-note' }, icon('bell', 18), 'Zettel an der Tür: Sicherung empfohlen'), 'I4 Banner'),
+              resumeCard(),
+              fPlan(),
+            );
+        return h('div', { class: 'app' }, head, h('main', { class: 'scroll' }, body));
+      };
+
+      // ---------- G Spielanleitung ----------
+      function gSide() {
+        const item = (s, ic, l) => h('button', { 'aria-current': state.screen === s ? 'page' : null, onclick: () => go(s) }, icon(ic, 20), l);
+        const ghost = (ic, l, tag) => state.future && h('span', { class: 'ghost', style: { display: 'flex', gap: '10px', alignItems: 'center', minHeight: '40px', padding: '0 10px' } }, icon(ic, 20), l, h('span', { class: 'tiny muted' }, tag));
+        return h(
+          'nav',
+          { class: 'g-side', 'aria-label': 'Hauptnavigation' },
+          h('span', { class: 'g-word', style: { padding: '4px 10px 10px' } }, 'BoardBrain'),
+          item('start', 'home', 'Start'),
+          ghost('play', 'Neue Partie', 'I2'),
+          h('span', { class: 'sec' }, 'Verwaltung'),
+          item('verwaltung', 'folder', 'Übersicht'),
+          item('personen', 'people', 'Personen'),
+          item('gruppen', 'table', 'Tische'),
+          item('spiele', 'dice', 'Spiele'),
+          state.future && h('span', { class: 'sec' }, 'Später'),
+          ghost('pen', 'Ergebnisse', 'I3'),
+          ghost('chart', 'Statistik', 'I3'),
+          ghost('box', 'Daten', 'I4'),
+          ghost('cog', 'Einstellungen', 'I6'),
+        );
+      }
+      function toc(entries) {
+        return h(
+          'div',
+          { class: 'g-toc' },
+          entries.map(([no, s, l, n, tag]) => {
+            const el = h('button', { onclick: s ? () => go(s) : null }, h('span', { class: 'no' }, no), h('span', {}, l), h('span', { class: 'dots' }), h('span', { class: 'n' }, n));
+            return tag ? ph(el, tag) : el;
+          }),
+        );
+      }
+      function gStart() {
+        const d = D();
+        return h(
+          'div',
+          { class: 'pad wideContent', style: { maxWidth: '680px' } },
+          backupBanner(),
+          h(
+            'div',
+            { class: 'g-cover' },
+            h('span', { class: 'g-word muted' }, 'Spielanleitung für'),
+            h('span', { class: 'g-title' }, 'euren', h('br'), 'Spieleabend'),
+            h('span', { class: 'g-rule' }),
+            h('p', { class: 'muted' }, 'Faire Zufallsentscheidungen und Statistik.'),
+            ph(h('span', { class: 'primary' }, icon('play', 18), 'Neue Partie'), 'I2'),
+          ),
+          resumeCard(),
+          h('h2', { class: 'g-word', style: { marginTop: '8px' } }, 'Inhalt'),
+          toc([
+            ['1', 'personen', d.persons.length ? 'Wer spielt mit?' : 'Wer spielt mit? – hier anfangen', d.persons.length],
+            ['2', 'gruppen', 'Tische', d.groups.length],
+            ['3', 'spiele', 'Spiele', d.games.length],
+            ['4', null, 'Ergebnis eintragen', '–', 'I3'],
+          ]),
+        );
+      }
+      function gMgmt() {
+        const d = D();
+        return h(
+          'div',
+          { class: 'pad wideContent', style: { maxWidth: '680px' } },
+          h('div', { class: 'g-cover', style: { paddingTop: '8px' } }, h('span', { class: 'g-word muted' }, 'Kapitel'), h('span', { class: 'g-title', style: { fontSize: '2rem' } }, 'Verwaltung'), h('span', { class: 'g-rule' })),
+          toc([
+            ['1', 'personen', 'Personen', d.persons.length],
+            ['2', 'gruppen', 'Tische', d.groups.length],
+            ['3', 'spiele', 'Spiele', d.games.length],
+            ['4', null, 'Archiv', '2', 'I5'],
+          ]),
+        );
+      }
+      const conceptG = () => {
+        const k = kind();
+        const body = state.screen === 'start' ? gStart() : state.screen === 'verwaltung' ? gMgmt() : subBody(state.screen, { back: k !== 'wide' });
+        if (k === 'wide') return h('div', { class: 'app row' }, gSide(), h('main', { class: 'scroll' }, body));
+        return h(
+          'div',
+          { class: 'app' },
+          h(
+            'header',
+            { class: 'g-head' },
+            h('button', { class: 'iconBtn', 'aria-label': 'Menü', onclick: () => { state.menu = true; render(); } }, icon('menu')),
+            h('span', { class: 'g-word', style: { flex: '1', textAlign: 'center' } }, 'BoardBrain'),
+            h('span', { style: { width: '44px' } }),
+          ),
+          h('main', { class: 'scroll' }, body),
+          state.menu && h('div', { class: 'g-drawerBack', onclick: (e) => { if (e.target === e.currentTarget) { state.menu = false; render(); } } }, gSide()),
+        );
+      };
+
+      // ---------- round 2: shared ----------
+      function settingsGhost() {
+        return ph(h('span', { class: 'iconBtn', title: 'Einstellungen' }, icon('cog', 20)), 'I6', 'short');
+      }
+      function navItems() {
+        return [
+          ['start', 'home', 'Start'],
+          ['verwaltung', 'folder', 'Verwaltung'],
+          ...(state.future
+            ? [
+                [null, 'chart', 'Statistik', 'I3'],
+                [null, 'box', 'Daten', 'I4'],
+                [null, 'cog', 'Einstell.', 'I6'],
+              ]
+            : []),
+        ];
+      }
+      function eHand() {
+        let all = navItems();
+        if (state.concept === 'E' && state.future && state.eTrump === 'hand') all = [all[0], all[1], ['__trump', 'play', 'Partie', 'I2'], ...all.slice(2)];
+        const n = all.length;
+        return h(
+          'nav',
+          { class: 'e-hand' + (n > 5 ? ' six' : ''), 'aria-label': 'Hauptnavigation' },
+          all.map(([s, ic, l, tag], i) => {
+            const rot = (i - (n - 1) / 2) * (n > 5 ? 6 : 9);
+            if (s === '__trump')
+              return h('span', { class: 'e-navCard e-trumpNav', title: 'später · I2', style: { transform: `rotate(${rot}deg) translateY(-4px)` } }, icon(ic, 24), l);
+            const active = s && areaOf(state.screen) === s;
+            return h(
+              s ? 'button' : 'span',
+              {
+                class: 'e-navCard' + (s ? '' : ' ghost'),
+                'aria-current': active ? 'page' : null,
+                title: tag ? 'später · ' + tag : null,
+                style: { transform: `rotate(${rot}deg) translateY(${active ? 4 : 16}px)` },
+                onclick: s ? () => go(s) : null,
+              },
+              icon(ic, 22),
+              l,
+            );
+          }),
+        );
+      }
+      function sectionHead(title, label, s) {
+        return h('div', { class: 'sectionHead' }, h('h2', {}, title), label && h('button', { class: 'linkBtn', onclick: () => go(s) }, label));
+      }
+      function greeting() {
+        return h('div', {}, h('p', { class: 'small muted' }, 'Donnerstag, 8. Oktober'), h('h1', {}, 'Schön, dass ihr spielt'));
+      }
+      function tableCard(g) {
+        return h(
+          'button',
+          { class: 'e-card', style: { width: '108px', flex: 'none', padding: '16px 6px 14px', gap: '4px' }, onclick: () => go('gruppen') },
+          h('span', { class: 'corner small' }, g.dots.length),
+          miniTable(g, 60),
+          h('span', { class: 'small', style: { fontWeight: '600', lineHeight: '1.2' } }, g.name),
+          h('span', { class: 'corner br small' }, g.dots.length),
+        );
+      }
+      function landCard(s, ic, title, n) {
+        return h(
+          'button',
+          { class: 'e-card h-land', onclick: s ? () => go(s) : null },
+          h('span', { class: 'corner' }, n),
+          h('span', { style: { display: 'flex', gap: '10px', alignItems: 'center' } }, h('span', { style: { color: 'var(--accent-text)' } }, icon(ic, 26)), h('span', { class: 'ttl' }, title)),
+          h('span', { class: 'corner br' }, n),
+        );
+      }
+      function trumpCard(wide) {
+        return ph(
+          h(
+            'div',
+            { class: 'e-card h-land', style: { background: 'var(--accent)', color: 'var(--on-accent)', minHeight: wide ? '180px' : '150px' } },
+            h('span', { class: 'corner', style: { color: 'var(--on-accent)' } }, '★'),
+            h('span', { style: { display: 'flex', gap: '12px', alignItems: 'center', fontSize: '1.3rem', fontWeight: '700' } }, icon('play', 30), 'Neue Partie'),
+            h('span', { class: 'small' }, 'Catan oder ein anderes Spiel – Tisch wählen und los'),
+            h('span', { class: 'corner br', style: { color: 'var(--on-accent)' } }, '★'),
+          ),
+          'I2',
+        );
+      }
+      function stepCard(no, text, s, tag) {
+        const el = h(
+          'button',
+          { class: 'e-card', style: { width: '116px', flex: 'none', opacity: s || tag ? '1' : '0.5' }, onclick: s ? () => go(s) : null },
+          h('span', { class: 'corner' }, no),
+          h('span', { class: 'ttl small' }, text),
+          h('span', { class: 'corner br' }, no),
+        );
+        return tag ? ph(el, tag) : el;
+      }
+
+      // ---------- H Kartenleiste ----------
+      function hStart(withTrump = true) {
+        const k = kind();
+        const d = D();
+        const wide = k === 'wide' || k === 'phoneL';
+        const empty = d.persons.length === 0;
+        const trump = withTrump && state.future && [trumpCard(wide), ph(h('div', { class: 'secondary', style: { width: '100%' } }, icon('pen', 20), 'Ergebnis eintragen'), 'I3')];
+        const steps =
+          empty &&
+          h(
+            'div',
+            { style: { display: 'grid', gap: '8px' } },
+            h('h2', {}, 'So geht es los'),
+            h(
+              'div',
+              { class: 'fadeRow', style: { maskImage: 'none', padding: '12px 2px 8px' } },
+              stepCard('1', 'Personen anlegen', 'personen'),
+              stepCard('2', 'Einen Tisch decken', null),
+              state.future && stepCard('3', 'Partie starten', null, 'I2'),
+            ),
+          );
+        const tables = d.groups.length > 0 && [sectionHead('Tische', 'Alle ' + d.groups.length + ' ›', 'gruppen'), h('div', { class: 'fadeRow', style: { padding: '4px 2px 10px' } }, d.groups.map(tableCard))];
+        const pair = h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' } }, landCard('personen', 'people', 'Personen', d.persons.length), landCard('spiele', 'dice', 'Spiele', d.games.length));
+        if (wide)
+          return h(
+            'div',
+            { class: 'pad wideContent' },
+            greeting(),
+            backupBanner(),
+            h(
+              'div',
+              { style: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '20px', alignItems: 'start' } },
+              h('div', { style: { display: 'grid', gap: '14px' } }, resumeCard(), trump, steps, !trump && !steps && pair),
+              h('div', { style: { display: 'grid', gap: '14px', minWidth: '0' } }, tables, (trump || steps) && pair),
+            ),
+          );
+        return h('div', { class: 'pad' }, greeting(), backupBanner(), resumeCard(), trump, steps, tables, pair);
+      }
+      function hBar(vertical) {
+        const all = navItems();
+        return h(
+          'nav',
+          { class: vertical ? 'h-side' : 'h-bar', 'aria-label': 'Hauptnavigation' },
+          all.map(([s, ic, l, tag], i) => {
+            const active = s && areaOf(state.screen) === s;
+            const rot = vertical ? 0 : (i - (all.length - 1) / 2) * 3;
+            return h(
+              s ? 'button' : 'span',
+              {
+                class: 'h-card' + (s ? '' : ' ghost') + (active ? ' on' : ''),
+                'aria-current': active ? 'page' : null,
+                title: tag ? 'später · ' + tag : null,
+                style: { '--rot': rot + 'deg' },
+                onclick: s ? () => go(s) : null,
+              },
+              icon(ic, 20),
+              h('span', {}, l),
+            );
+          }),
+        );
+      }
+      const conceptH = () => {
+        const k = kind();
+        const side = k === 'wide' || k === 'phoneL';
+        const body = state.screen === 'start' ? hStart() : state.screen === 'verwaltung' ? eMgmt() : subBody(state.screen);
+        if (side)
+          return h(
+            'div',
+            { class: 'app row' },
+            h('div', { class: 'h-sideWrap' }, h('span', { style: { padding: '14px 18px 4px', color: 'var(--accent-text)' } }, logoMark(state.logo, 30)), hBar(true)),
+            h('main', { class: 'scroll' }, body),
+          );
+        return h('div', { class: 'app' }, h('header', { class: 'b-top' }, logo()), h('main', { class: 'scroll' }, body), hBar(false));
+      };
+
+      // ---------- I Tisch und Hand ----------
+      const conceptI = () => {
+        const body = state.screen === 'start' ? aStart() : state.screen === 'verwaltung' ? aMgmt() : subBody(state.screen);
+        return h('div', { class: 'app' }, h('header', { class: 'a-head' }, logo()), h('main', { class: 'scroll' }, body), eHand());
+      };
+
+      // ---------- shell with tab bar / rail (B, J, K) ----------
+      function bShell(startFn, mgmtFn, tabsFn = bTabs, overlay = null) {
+        const k = kind();
+        const rail = k === 'wide' || k === 'phoneL';
+        const body = state.screen === 'start' ? startFn() : state.screen === 'verwaltung' ? mgmtFn() : subBody(state.screen);
+        if (rail)
+          return h(
+            'div',
+            { class: 'app row' },
+            h('nav', { class: 'b-rail' + (k === 'phoneL' ? ' slim' : ''), 'aria-label': 'Hauptnavigation' }, h('span', { style: { margin: '4px 0 14px', color: 'var(--accent-text)' } }, logoMark(state.logo, 30)), tabsFn(true)),
+            h('main', { class: 'scroll' }, body),
+            overlay,
+          );
+        return h('div', { class: 'app' }, h('header', { class: 'b-top' }, logo()), h('main', { class: 'scroll' }, body), h('nav', { class: 'b-tabs', 'aria-label': 'Hauptnavigation' }, tabsFn(false)), overlay);
+      }
+
+      // ---------- J Kartendeck ----------
+      function jStart() {
+        const k = kind();
+        const d = D();
+        const wide = k === 'wide' || k === 'phoneL';
+        const cw = { phoneP: '70%', phoneL: '190px', tabletP: '260px', wide: '230px' }[k];
+        const card = (s, ic, title, n, content, opts = {}) =>
+          h(
+            s ? 'button' : 'div',
+            { class: 'e-card j-card', style: Object.assign({ width: cw }, opts.style || {}), onclick: s ? () => go(s) : null },
+            h('span', { class: 'corner', style: opts.corner || {} }, n),
+            h('span', { style: { color: opts.accent ? 'inherit' : 'var(--accent-text)' } }, icon(ic, 36)),
+            h('span', { class: 'ttl', style: { fontSize: '1.2rem' } }, title),
+            content,
+            h('span', { class: 'corner br', style: opts.corner || {} }, n),
+          );
+        const ghostCard = (ic, title, n, tag, content, opts) => {
+          const w = ph(card(null, ic, title, n, content, Object.assign({}, opts, { style: Object.assign({ width: '100%' }, (opts && opts.style) || {}) })), tag);
+          if (w) Object.assign(w.style, { width: cw, flex: 'none' });
+          return w;
+        };
+        const cards = [
+          state.future && ghostCard('play', 'Neue Partie', '★', 'I2', h('span', { class: 'small' }, 'Tisch wählen und los'), { accent: true, style: { background: 'var(--accent)', color: 'var(--on-accent)' }, corner: { color: 'var(--on-accent)' } }),
+          card('personen', 'people', 'Personen', d.persons.length, d.persons.length ? h('div', { class: 'avatarRow' }, d.persons.slice(0, 6).map((p, i) => avatar(p, i, 28))) : h('span', { class: 'small muted' }, 'Hier anfangen')),
+          card('gruppen', 'table', 'Tische', d.groups.length, d.groups.length ? h('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' } }, d.groups.slice(0, 4).map((g) => miniTable(g, 40))) : h('span', { class: 'small muted' }, 'Noch keine Tische')),
+          card('spiele', 'dice', 'Spiele', d.games.length, h('span', { class: 'small muted' }, d.games.slice(0, 3).map((g) => g[0]).join(', '))),
+          state.future && ghostCard('pen', 'Ergebnis eintragen', '–', 'I3'),
+          state.future && ghostCard('chart', 'Statistik', '–', 'I3'),
+        ].filter(Boolean);
+        const dots = h('div', { class: 'j-dots' }, cards.map((_, i) => h('span', { class: i === 0 ? 'on' : '' })));
+        const deck = h('div', { class: 'j-deck' }, cards);
+        deck.addEventListener('scroll', () => {
+          const i = Math.round((deck.scrollLeft / Math.max(1, deck.scrollWidth - deck.clientWidth)) * (cards.length - 1));
+          [...dots.children].forEach((dot, j) => (dot.className = j === i ? 'on' : ''));
+        });
+        return h('div', { class: wide ? 'pad wideContent' : 'pad' }, greeting(), backupBanner(), resumeCard(), h('div', { style: { display: 'grid', gap: '4px' } }, sectionHead('Was steht an?', null), h('p', { class: 'small muted' }, 'Wischen für mehr ›')), deck, dots);
+      }
+      const conceptJ = () => bShell(jStart, bMgmt);
+
+      // ---------- K Leiste mit Trumpf ----------
+      function kTabs(rail) {
+        const slim = rail && kind() === 'phoneL';
+        const tab = (s, ic, l) => h('button', { class: 'b-tab', 'aria-current': areaOf(state.screen) === s ? 'page' : null, onclick: () => go(s) }, h('span', { class: 'pill' }, icon(ic)), !slim && l);
+        const ghost = (ic, l, tag) => state.future && h('span', { class: 'b-tab ghost', title: 'später · ' + tag }, h('span', { class: 'pill', style: { outline: '1.5px dashed var(--muted)' } }, icon(ic)), !slim && l);
+        const center =
+          state.future &&
+          h(
+            'div',
+            { class: 'b-tab k-slot' },
+            h('button', { class: 'k-center', 'aria-label': 'Partie', 'aria-expanded': String(state.fan), onclick: () => { state.fan = !state.fan; render(); } }, icon(state.fan ? 'close' : 'play', 26)),
+            !slim && h('span', {}, 'Partie'),
+          );
+        const start = tab('start', 'home', 'Start');
+        const mgmt = tab('verwaltung', 'folder', 'Verwaltung');
+        return rail
+          ? [center, start, mgmt, ghost('chart', 'Statistik', 'I3'), ghost('cog', 'Einstell.', 'I6')]
+          : [start, mgmt, center, ghost('chart', 'Statistik', 'I3'), ghost('cog', 'Einstell.', 'I6')];
+      }
+      function kFan() {
+        const k = kind();
+        const rail = k === 'wide' || k === 'phoneL';
+        const close = (e) => {
+          if (e.target === e.currentTarget) {
+            state.fan = false;
+            render();
+          }
+        };
+        const c = (ic, title, sub, tag, accent) =>
+          ph(
+            h(
+              'div',
+              { class: 'e-card', style: { width: '140px', background: accent ? 'var(--accent)' : null, color: accent ? 'var(--on-accent)' : null } },
+              h('span', { class: 'corner', style: { color: accent ? 'var(--on-accent)' : null } }, '★'),
+              icon(ic, 34),
+              h('span', { class: 'ttl' }, title),
+              h('span', { class: 'tiny' }, sub),
+            ),
+            tag,
+          );
+        const a = c('play', 'Neue Partie', 'Tisch wählen und los', 'I2', true);
+        const b = c('pen', 'Ergebnis eintragen', 'ohne Generierung', 'I3', false);
+        a.style.transform = 'rotate(-7deg) translateY(10px)';
+        b.style.transform = 'rotate(7deg) translateY(10px)';
+        b.style.marginLeft = '-10px';
+        return h('div', { class: 'k-fanBack' + (rail ? ' rail' : ''), onclick: close }, h('div', { class: 'k-fan' }, a, b));
+      }
+      const conceptK = () => bShell(() => hStart(false), eMgmt, kTabs, state.fan ? kFan() : null);
+
+      // ---------- M Kartenstapel-Menü ----------
+      function mMenu() {
+        const items = [
+          ['start', 'home', 'Start'],
+          ['verwaltung', 'folder', 'Verwaltung'],
+          ['personen', 'people', 'Personen'],
+          ['gruppen', 'table', 'Tische'],
+          ['spiele', 'dice', 'Spiele'],
+          ...(state.future
+            ? [
+                [null, 'chart', 'Statistik', 'I3'],
+                [null, 'box', 'Daten', 'I4'],
+                [null, 'cog', 'Einstell.', 'I6'],
+              ]
+            : []),
+        ];
+        const n = items.length;
+        const wide = kind() === 'wide' || kind() === 'tabletP';
+        const R = wide ? 210 : n > 5 ? 148 : 124;
+        const close = () => {
+          state.fan = false;
+          render();
+        };
+        return h(
+          'div',
+          { class: 'm-back', onclick: (e) => e.target === e.currentTarget && close() },
+          h(
+            'nav',
+            { class: 'm-fan', 'aria-label': 'Hauptnavigation' },
+            items.map(([s, ic, l, tag], i) => {
+              // Cards on a half circle around the deck, slightly tilted like a fanned hand.
+              const t = Math.PI - (Math.PI * i) / (n - 1);
+              const x = R * Math.cos(t);
+              const y = R * Math.sin(t);
+              const a = (90 - (t * 180) / Math.PI) / 3;
+              const cur = s && state.screen === s;
+              return h(
+                s ? 'button' : 'span',
+                { class: 'm-card' + (s ? '' : ' ghost') + (cur ? ' on' : ''), title: tag ? 'später · ' + tag : null, style: { transform: `translate(${x}px, ${-y}px) rotate(${a}deg)` }, onclick: s ? () => go(s) : null },
+                icon(ic, 22),
+                h('span', {}, l),
+                tag && h('span', { class: 'tiny' }, tag),
+              );
+            }),
+          ),
+          h('button', { class: 'm-deck', 'aria-label': 'Menü schließen', onclick: close }, icon('close', 24)),
+        );
+      }
+      const conceptM = () => {
+        const body = state.screen === 'start' ? eStart() : state.screen === 'verwaltung' ? eMgmt() : subBody(state.screen);
+        return h(
+          'div',
+          { class: 'app' },
+          h('header', { class: 'a-head', style: { justifyContent: 'center' } }, logo()),
+          h('main', { class: 'scroll', style: { paddingBottom: '84px' } }, body),
+          state.fan ? mMenu() : h('button', { class: 'm-deck', 'aria-label': 'Menü', onclick: () => { state.fan = true; render(); } }, icon('menu', 24)),
+        );
+      };
+
+      // ---------- concepts ----------
+      const CONCEPTS = {
+        H: [
+          'H Kartenleiste',
+          '<b>E aufgeräumt, mit dem Aufbau von B.</b> Unten stehen die Bereiche als Karten in einer Leiste (aktive Karte herausgezogen, Beschriftung immer lesbar); am PC und Handy quer stecken sie links als Kartenhalter. Start wie B, aber alles als Karten: „Neue Partie“ als Trumpfkarte, eure Tische als Kartenreihe mit der Zahl der Plätze in der Ecke.',
+          conceptH,
+        ],
+        I: [
+          'I Tisch und Hand',
+          '<b>A und E kombiniert:</b> Start ist der runde Spieltisch aus A mit den Bereichen als Plätzen und „Neue Partie“ in der Mitte; die Navigation ist die Kartenhand aus E. Kopfzeile nur mit dem Namen.',
+          conceptI,
+        ],
+        J: [
+          'J Kartendeck',
+          '<b>B mit einem Kartendeck zum Wischen:</b> Navigation unten (PC links) wie B. Auf dem Start liegen große Karten, durch die man waagerecht wischt: Neue Partie, Personen, Tische, Spiele, später Ergebnis und Statistik. Am PC liegen sie nebeneinander.',
+          conceptJ,
+        ],
+        K: [
+          'K Leiste mit Trumpf',
+          '<b>B mit Mittelknopf:</b> In der Leiste sitzt in der Mitte ein runder Knopf „Partie“ (ab I2). Antippen fächert zwei Karten auf: „Neue Partie“ und „Ergebnis eintragen“. Der Start bleibt ruhig, und die wichtigste Handlung ist überall einen Tipp entfernt. Verwaltung als Karten wie E.',
+          conceptK,
+        ],
+        M: [
+          'M Kartenstapel-Menü',
+          '<b>E ohne feste Leiste:</b> Unten in der Mitte liegt nur ein kleiner Kartenstapel. Antippen fächert alle Bereiche als Karten im Bogen auf – auch Personen, Tische und Spiele direkt, später Statistik, Daten, Einstellungen. Der Bildschirm bleibt fast ganz für den Inhalt frei.',
+          conceptM,
+        ],
+        B: [
+          'B App-Leiste (R1)',
+          '<b>Aus Runde 1:</b> Navigation unten mit Symbolen (Handy, Tablet hoch), seitlich als Leiste auf PC und Handy quer. Start mit Begrüßung, großer Taste „Neue Partie“, euren Tischen als wischbarer Reihe und Kacheln. Verwaltung als ruhige Liste.',
+          conceptB,
+        ],
+        E: [
+          'E Kartenhand (R1)',
+          '<b>Aus Runde 1, jetzt mit Einstellungen:</b> Navigation als Spielkarten auf der Hand unten am Rand; die aktive Karte ist herausgezogen. Die Bereiche sind Spielkarten mit der Anzahl in der Ecke. „Neue Partie“ wird später die große Trumpfkarte.',
+          conceptE,
+        ],
+        A: [
+          'A Tischmitte (R1)',
+          '<b>Aus Runde 1, jetzt mit Einstellungen:</b> Die Startseite ist ein großer Spieltisch, die Bereiche sitzen als Plätze daran; in der Tischmitte liegt später „Neue Partie“. Oben Umschalter Start | Verwaltung und das Zahnrad.',
+          conceptA,
+        ],
+      };
+
+      // ---------- picker and render ----------
+      function chips(label, entries, current, onPick) {
+        return [
+          h('span', { class: 'label' }, label),
+          ...entries.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': String(k === current), onclick: () => { onPick(k); render(); } }, l)),
+        ];
+      }
+
+      function applyTheme() {
+        const t = THEMES[state.theme];
+        const r = document.documentElement.style;
+        r.setProperty('--bg', t.bg);
+        r.setProperty('--raised', t.raised);
+        r.setProperty('--overlay', t.overlay);
+        r.setProperty('--border', t.border);
+        r.setProperty('--text', t.text);
+        r.setProperty('--muted', t.muted);
+        r.setProperty('--accent', t.accent);
+        r.setProperty('--accent-text', t.accentText);
+        r.setProperty('--bg-image', t.image);
+        r.setProperty('--blur', t.blur);
+        r.setProperty('--on-accent', '#fff');
+        r.setProperty('--shadow', '#0000008c');
+      }
+
+      function render() {
+        applyTheme();
+        document.documentElement.classList.toggle('real', state.future === 'real' || state.future === 'realNB');
+        document.getElementById('concept-row').replaceChildren(
+          h('span', { class: 'label' }, 'Final'),
+          h('span', { class: 'small' }, 'Konzept E Kartenhand · Neue Partie als Nachziehstapel (klassischer Kartenrücken) · Logo „Eine Kontur“ · Design Holz'),
+        );
+        document.getElementById('frame-row').replaceChildren(
+          ...chips('Gerät', Object.entries(FRAMES), state.frame, (k) => {
+            if (k !== 'device') state.lastFrame = k;
+            state.frame = k;
+          }),
+        );
+        document.getElementById('option-row').replaceChildren(
+          ...chips('Daten', [['full', 'Gefüllt (28 Personen, 15 Tische)'], ['empty', 'Leer (erster Start)']], state.data, (k) => {
+            state.data = k;
+          }),
+          ...chips('Umfang', [[false, 'Jetzt in D-3 gebaut'], ['real', 'Mit späteren Funktionen (I2–I6)'], ['realNB', 'Mit späteren Funktionen, ohne Hinweise oben']], state.future, (k) => (state.future = k)),
+          ...(state.future
+            ? chips('Einstellung', [[false, 'Catan an'], [true, '„Ich hasse Catan!“ an (I6)']], state.noCatan, (k) => {
+                state.noCatan = k;
+                state.resSheet = false;
+              })
+            : []),
+        );
+        document.getElementById('trump-row').replaceChildren();
+        document.getElementById('pile-row').replaceChildren();
+        document.getElementById('logo-row').replaceChildren();
+        document.getElementById('intro').innerHTML =
+          '<b>Verbindliche Referenz für D-3.</b> So soll die App aussehen. „Jetzt in D-3 gebaut“ zeigt genau den Umfang dieses Bündels; „Mit späteren Funktionen“ zeigt, wo Neue Partie, Banner, Statistik, Daten und Einstellungen später ihren Platz haben. Die Unterseiten Personen, Tische und Spiele behalten ihren Inhalt von heute (hier vereinfacht), nur Rahmen und Zurück sind neu.';
+        if (state.showLogos) {
+          document.getElementById('stage').replaceChildren(logoGallery());
+          return;
+        }
+        const frame = h('div', { class: 'frame ' + state.frame }, kind() === 'phoneL' ? rotateHint() : CONCEPTS[state.concept][2]());
+        if (state.frame === 'device')
+          frame.append(h('button', { class: 'exit', 'aria-label': 'Vollbild verlassen', onclick: () => { state.frame = state.lastFrame; render(); } }, icon('close', 16)));
+        document.getElementById('stage').replaceChildren(frame, finalPanel());
+      }
+
+      function rotateHint() {
+        return h(
+          'div',
+          { class: 'app', style: { display: 'grid', placeItems: 'center', padding: '16px' } },
+          h(
+            'div',
+            { style: { display: 'grid', gap: '12px', justifyItems: 'center', textAlign: 'center', maxWidth: '320px' } },
+            h('span', { style: { color: 'var(--accent-text)' } }, icon('rotate', 56)),
+            h('strong', { style: { fontSize: '1.15rem' } }, 'Bitte das Handy hochkant drehen'),
+            h('span', { class: 'small muted' }, 'BoardBrain ist auf dem Handy für das Hochformat gemacht.'),
+          ),
+        );
+      }
+      function finalPanel() {
+        const spec = (title, rows) =>
+          h('div', { class: 'card', style: { display: 'grid', gap: '6px', alignContent: 'start' } }, h('h2', {}, title), h('ul', { style: { margin: '0', paddingLeft: '18px', display: 'grid', gap: '4px', alignContent: 'start' } }, rows.map((r) => h('li', { class: 'small' }, r))));
+        return h(
+          'div',
+          { style: { display: 'grid', gap: '14px', maxWidth: '1180px', margin: '24px auto 0' } },
+          h(
+            'div',
+            { class: 'card', style: { display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' } },
+            h('div', { style: { display: 'grid', gap: '6px', justifyItems: 'center' } }, h('span', { class: 'lg-icon', style: { width: '120px', height: '120px', borderRadius: '28px' } }, logoMark('cb1', 84)), h('span', { class: 'tiny muted' }, 'App-Symbol (Startbildschirm)')),
+            h('div', { style: { display: 'grid', gap: '6px', justifyItems: 'center' } }, h('span', { class: 'lg-icon', style: { width: '40px', height: '40px', borderRadius: '8px' } }, logoMark('cb1', 28)), h('span', { class: 'tiny muted' }, 'Browser-Tab')),
+            h('div', { style: { display: 'grid', gap: '6px', justifyItems: 'center' } }, h('span', {}, logoMark('cb1', 200)), h('span', { class: 'tiny muted' }, 'Logo „Eine Kontur“ groß')),
+          ),
+          h(
+            'div',
+            { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(20rem, 1fr))', gap: '14px' } },
+            spec('Kopfzeile', [
+              'Logo-Zeichen 28 px + „BoardBrain“ fett, waagerecht zentriert; Abstand 10 px oben/unten, 14 px seitlich.',
+              'Logo: ein Gehirn-Umriss (Strich 2,6 von 48), links Schachbrett bis genau zur geraden Mittellinie, rechts vier Windungen; Farbe Akzent-Text.',
+              'Kein Umschalter, keine Links: die Navigation ist die Kartenhand unten.',
+            ]),
+            spec('Kartenhand (Navigation, alle Geräte unten)', [
+              'Leiste 104 px hoch, Verlauf von durchsichtig zu Fläche „raised“; Karten 86 × 104 px, Ecken 10 px, Rand 1 px, Überlappung je 8 px.',
+              'Fächer: Drehung 9° pro Karte von der Mitte aus, Drehpunkt unter der Karte (50 % / 140 %).',
+              'Inaktiv 16 px nach unten versenkt; aktiv nur 4 px, Rand und Schrift in Akzent-Text, fett, vorne liegend.',
+              'Inhalt: Symbol 22 px über der Beschriftung (0,7 rem). Jetzt: Start, Verwaltung. Später: Statistik (I3), Daten (I4), Einstell. mit Zahnrad (I6); ab 6 Karten 70 px breit, 6° Drehung.',
+              'Aktiv ist „Verwaltung“ auch auf Personen, Tische und Spiele.',
+            ]),
+            spec('Start', [
+              'Alles sitzt unten direkt über der Kartenhand und passt immer ohne Scrollen auf den Bildschirm: oben nur die Hinweise (später), dann freier Raum, dann „Neue Partie“ (später), darunter die Überschrift „Karten“ und der Fächer mit Personen, Tische, Spiele. Unter den Karten bleibt ein Abstand von 9 % der Höhe des Inhaltsbereichs, damit der Inhalt leicht über der Kartenhand schwebt. Hinweise oben verschieben den Inhalt nicht; nur wenn der Platz nicht reicht, wird zuerst dieser Abstand kleiner.',
+              'Karte: Seitenverhältnis 5 : 7, Breite richtet sich nach dem Platz (höchstens ein Drittel der Breite, 170 px und rund ein Viertel der Höhe), −2 % Überlappung; links −7° und 8 px tiefer, Mitte gerade und vorn, rechts +7° und 8 px tiefer.',
+              'Ecke oben links und unten rechts (um 180° gedreht): Anzahl, fett, Akzent-Text. Mitte: Symbol 34 px in Akzent-Text, darunter Name fett.',
+              'Fläche: Verlauf 160° von „overlay“ nach „raised“, Rand 1 px, Ecken 14 px, Schatten.',
+              'Leer: Personen-Karte zeigt zusätzlich „hier anfangen“.',
+              'PC/Tablet quer: Inhalt zentriert, Fächer höchstens 560 px breit.',
+            ]),
+            spec('Verwaltung', [
+              'Titel „Verwaltung“, darunter Raster aus Spielkarten: 2 Spalten (Handy hoch), 3 (Tablet hoch), 4 (quer und PC); Abstand 14 px, Inhalt höchstens 900 px breit.',
+              'Karten wie auf dem Start, ohne Drehung; unter dem Namen eine Vorschauzeile (die ersten Namen) in klein und gedämpft.',
+              'Später (I5): vierte Karte „Archiv“.',
+            ]),
+            spec('Handy quer: Dreh-Hinweis', [
+              'Ist das Fenster im Querformat und niedriger als rund 500 px, zeigt die App statt des Inhalts nur den Hinweis „Bitte das Handy hochkant drehen“ mit Symbol (Akzent-Text, 56 px) und einem kurzen Satz.',
+              'Entscheidet nach Bildschirmhöhe, nicht nach Gerät: gilt gleich für Android und iOS, im Browser und installiert. iPad quer, PC und aufgeklapptes Fold sind höher und zeigen die App normal.',
+              'Keine Sperre im Manifest (würde Android-Tablets und das aufgeklappte Fold mitsperren, iOS ignoriert sie).',
+            ]),
+            spec('Unterseiten und Zurück', [
+              'Personen, Tische, Spiele: Inhalt wie heute; links neben dem Titel ein runder Zurück-Knopf (44 px).',
+              'Zurück führt dorthin, woher man kam (Start → Personen → Zurück = Start); ohne Vorgänger zur Verwaltung. Die Android-Zurück-Taste verhält sich gleich.',
+            ]),
+            spec('Später, nicht in D-3 bauen', [
+              'Banner „Sicherung empfohlen“ (I4) und „laufende Partie – Weiter“ (I2) oben auf dem Start.',
+              'Neue Partie (I2): Nachziehstapel – Zeile mit drei verdeckten Karten (54 × 74 px, Rautengitter, goldener Innenrahmen, ▶-Marke), daneben die Beschriftung „Partie“ ohne Untertitel, rechts ›. In I2 führt Antippen direkt zur neuen Partie.',
+              'Ergebnis eintragen (I3, US-ER-01 AK-1, Variante K2): ab I3 dunkelt Antippen von „Partie“ den Start ab (Schwarz 70 %) und zeigt mittig zwei Spielkarten – zum Ausprobieren „Mit späteren Funktionen“ wählen und auf „Partie“ tippen. Karten 150 px breit, 5 : 7, ✎ bzw. ▶ in den Ecken, in der Mitte ein Kreis 56 px mit Symbol, darunter der Titel. Links vorne „Ergebnis eintragen“ (Hauptaktion, weil viele ohne Catan spielen): Fläche in Akzent, Schrift und Ecken in der Schrift auf Akzent, Kreis umgekehrt; rechts „Neue Partie“ wie alle Karten. −8° und +8°, beide 6 px tiefer, 12 px Überlappung. Tippen daneben schließt.',
+              'Einstellung „Ich hasse Catan!“ (I6): der Start zeigt statt „Partie“ nur die Zeile „Ergebnis eintragen“ (offener Stapel mit Linien und Stift, sonst wie die Zeile „Partie“); Catan zählt nicht mehr bei den Spielen. Zum Ausprobieren unter „Einstellung“ einschalten.',
+            ]),
+          ),
+        );
+      }
+
+      window.addEventListener('resize', () => {
+        if (state.frame === 'device') render();
+      });
+      render();
+    </script>
+  </body>
+</html>

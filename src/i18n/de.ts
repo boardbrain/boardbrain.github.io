@@ -15,6 +15,7 @@ export const de = {
     name: 'Name',
     speichern: 'Speichern',
     abbrechen: 'Abbrechen',
+    zurueck: 'Zurück',
   },
   navigation: {
     titel: 'Hauptnavigation',
@@ -23,15 +24,21 @@ export const de = {
   },
   start: {
     titel: 'Start',
-    einleitung: 'Faire Zufallsentscheidungen und Statistik für euren Spieleabend.',
-    personen: 'Personen verwalten',
-    spiele: 'Spiele verwalten',
+  },
+  karten: {
+    titel: 'Karten',
+    karte: '{name}: {anzahl}',
+    hierAnfangen: 'hier anfangen',
+  },
+  drehen: {
+    titel: 'Bitte das Handy hochkant drehen',
+    text: 'BoardBrain ist auf dem Handy für das Hochformat gemacht.',
   },
   verwaltung: {
     titel: 'Verwaltung',
     bereiche: 'Bereiche der Verwaltung',
     personen: 'Personen',
-    gruppen: 'Gruppen',
+    gruppen: 'Tische',
     spiele: 'Spiele',
     nameLeer: 'Bitte gib einen Namen ein.',
   },
@@ -46,7 +53,7 @@ export const de = {
     trotzdemAnlegen: 'Trotzdem anlegen',
   },
   gruppen: {
-    titel: 'Eure Tische',
+    titel: 'Tische',
     neu: 'Neuer Tisch',
     liste: 'Alle Tische',
     leer: 'Noch keine Tische angelegt.',
