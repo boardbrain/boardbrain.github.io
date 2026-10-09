@@ -23,7 +23,7 @@
 | 0.8 | 08.10.2026 | Ergebnis der Abnahme von I1-C: Gruppenseite als „Spielraum“, Catan ausschließen, überarbeitete Gruppenfarben (I1-C); neues Bündel I1-F „Bearbeiten“ nach I1-E (Spezifikation 0.8); Designvorschläge vor jeder neuen Oberfläche (4.1, Richtlinien 2.5) |
 | 0.9 | 08.10.2026 | I1-C umgesetzt (#15): Spielraum wie Designvorschlag F6, Spielauswahl mit aufklappbarer Liste eigener Spiele (Variante C), Suchfelder fokussieren nur mit Maus |
 | 0.10 | 08.10.2026 | Neue Aufgabe D-3 „Startansicht und Navigation“ nach I1-C und vor I1-E: Startansicht, Kopfzeile und Verwaltung im Stil des Spielraums |
-| 0.11 | 08.10.2026 | D-3 umgesetzt: Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst; Design-Referenz `docs/design/d3-start-navigation-final-preview.html` mit Verweisen je Inkrement (7) |
+| 0.11 | 08.10.2026 | D-3 umgesetzt: Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst; Design-Referenz `docs/design/d3-start-navigation-final-preview.html` mit Verweisen je Inkrement, Platz für „Ergebnis eintragen“ auf dem Start (7) |
 
 ## 1. Zweck
 
@@ -206,8 +206,8 @@ Die Stories je Inkrement stehen in Spezifikation 2.5. Der Zuschnitt in Bündel f
 
 | Inkrement | Element aus der Referenz |
 |---|---|
-| I2 | „Neue Partie“ als Nachziehstapel mit klassischem Kartenrücken direkt über den Karten; Hinweis „‹Gruppe› spielt gerade – Weiter“ oben auf dem Start |
-| I3 | Karte „Statistik“ in der Kartenhand. Offen: Wo „Ergebnis eintragen“ auf dem Start erscheint (US-ER-01 AK-1), ist in D-3 nicht entworfen – Designvorschlag zu Beginn von I3 |
+| I2 | „Neue Partie“ als Nachziehstapel mit klassischem Kartenrücken direkt über den Karten, ohne Untertitel; Antippen führt in I2 direkt zur neuen Partie. Hinweis „‹Gruppe› spielt gerade – Weiter“ oben auf dem Start |
+| I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1): Antippen von „Neue Partie“ dunkelt den Start ab und zeigt zwei Spielkarten „Neue Partie“ und „Ergebnis eintragen“ (Variante D3d aus vier Vorschlagsrunden, `result-entry-preview-v1.html` bis `result-entry-preview.html`) |
 | I4 | Banner (Sicherung, Update, Speicher) oben auf dem Start, ohne die Karten zu verschieben; Karte „Daten“ in der Kartenhand |
 | I5 | Vierte Karte „Archiv“ in der Verwaltung |
 | I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`) |

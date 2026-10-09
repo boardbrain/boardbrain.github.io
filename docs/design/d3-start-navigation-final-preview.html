@@ -1706,6 +1706,49 @@
       .land .e-fanBottom .e-card {
         width: min(13cqw, 38cqh);
       }
+
+      /* ---------- I3: choice after tapping "Neue Partie" (variant D3d) ---------- */
+      .r-dim {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        background: #000000b3;
+      }
+      .r-fanOut {
+        display: flex;
+        justify-content: center;
+      }
+      .e-card.r-playCard {
+        width: 150px;
+        gap: 14px;
+        aspect-ratio: 5 / 7;
+      }
+      .r-playCard strong {
+        font-size: 0.95rem;
+        line-height: 1.25;
+      }
+      .r-playCard .corner {
+        font-size: 1rem;
+      }
+      .r-left {
+        z-index: 1;
+        margin-right: -12px;
+        transform: rotate(-8deg) translateY(6px);
+      }
+      .r-right {
+        transform: rotate(8deg) translateY(6px);
+      }
+      .r-halfIcon {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
@@ -2861,7 +2904,7 @@
           'button',
           { class: 'e-pile' + (compact ? ' compact' : '') },
           pileStack(style),
-          h('span', { style: { display: 'grid', textAlign: 'left' } }, h('strong', { style: { fontSize: '1.1rem' } }, 'Neue Partie'), h('span', { class: 'small muted' }, 'Karte vom Stapel ziehen')),
+          h('span', { style: { display: 'grid', textAlign: 'left' } }, h('strong', { style: { fontSize: '1.1rem' } }, 'Neue Partie')),
           h('span', { class: 'muted', style: { marginLeft: 'auto' } }, icon('next', 20)),
         );
       }
@@ -2904,10 +2947,34 @@
       function eBackCard() {
         return ph(h('button', { class: 'e-card e-backCard', style: { width: '100%' } }, h('span', { class: 'e-q' }, '?'), h('span', { class: 'e-backLabel' }, 'Neue Partie')), 'I2');
       }
+      function resultChoice() {
+        const close = (e) => {
+          if (e.target === e.currentTarget) {
+            state.resSheet = false;
+            render();
+          }
+        };
+        return h(
+          'div',
+          { class: 'r-dim', onclick: close },
+          h(
+            'div',
+            { class: 'r-fanOut' },
+            h('button', { class: 'e-card r-playCard r-left' }, h('span', { class: 'corner' }, '▶'), h('span', { class: 'r-halfIcon' }, icon('play', 30)), h('strong', {}, 'Neue Partie'), h('span', { class: 'corner br' }, '▶')),
+            h('button', { class: 'e-card r-playCard r-right' }, h('span', { class: 'corner' }, '✎'), h('span', { class: 'r-halfIcon' }, icon('pen', 28)), h('strong', {}, 'Ergebnis eintragen'), h('span', { class: 'corner br' }, '✎')),
+          ),
+        );
+      }
       function eStart() {
         const d = D();
         const k = kind();
         const hero = eTrump(false);
+        // I3: tapping the pile offers "Neue Partie" or "Ergebnis eintragen" as two playing cards
+        if (hero)
+          hero.addEventListener('click', () => {
+            state.resSheet = true;
+            render();
+          });
         const fan = h('div', { class: 'e-fan e-fanBottom' }, [
           eCard('personen', 'people', 'Personen', d.persons.length, d.persons.length ? null : 'hier anfangen', { transform: 'rotate(-7deg) translateY(8%)' }),
           eCard('gruppen', 'table', 'Tische', d.groups.length, null, { zIndex: '1', transform: 'none' }),
@@ -2942,7 +3009,7 @@
       }
       const conceptE = () => {
         const body = state.screen === 'start' ? eStart() : state.screen === 'verwaltung' ? eMgmt() : subBody(state.screen);
-        return h('div', { class: 'app' }, h('header', { class: 'a-head', style: { justifyContent: 'center' } }, logo()), h('main', { class: 'scroll', style: state.screen === 'start' ? { overflow: 'hidden' } : {} }, body), eHand());
+        return h('div', { class: 'app' }, h('header', { class: 'a-head', style: { justifyContent: 'center' } }, logo()), h('main', { class: 'scroll', style: state.screen === 'start' ? { overflow: 'hidden' } : {} }, body), eHand(), state.resSheet && state.screen === 'start' && state.future && resultChoice());
       };
 
       // ---------- F Hausplan ----------
@@ -3606,7 +3673,8 @@
             ]),
             spec('Später, nicht in D-3 bauen', [
               'Banner „Sicherung empfohlen“ (I4) und „laufende Partie – Weiter“ (I2) oben auf dem Start.',
-              'Neue Partie (I2): Nachziehstapel – Zeile mit drei verdeckten Karten (54 × 74 px, Rautengitter, goldener Innenrahmen, ▶-Marke), daneben „Neue Partie“ und „Karte vom Stapel ziehen“, rechts ›.',
+              'Neue Partie (I2): Nachziehstapel – Zeile mit drei verdeckten Karten (54 × 74 px, Rautengitter, goldener Innenrahmen, ▶-Marke), daneben „Neue Partie“ ohne Untertitel, rechts ›. In I2 führt Antippen direkt zur neuen Partie.',
+              'Ergebnis eintragen (I3, US-ER-01 AK-1): ab I3 dunkelt Antippen des Stapels den Start ab (Schwarz 70 %) und zeigt mittig zwei Spielkarten – zum Ausprobieren „Mit späteren Funktionen“ wählen und auf „Neue Partie“ tippen. Karten 150 px breit, 5 : 7, gleicher Rand wie alle Karten; ▶ bzw. ✎ in den Ecken; in der Mitte ein runder Kreis 56 px in Akzent mit Symbol, darunter der Titel. Links „Neue Partie“ −8°, rechts „Ergebnis eintragen“ +8°, beide 6 px tiefer, 12 px Überlappung, links liegt oben. Tippen daneben schließt.',
             ]),
           ),
         );
