@@ -206,8 +206,8 @@ Die Stories je Inkrement stehen in Spezifikation 2.5. Der Zuschnitt in Bündel f
 
 | Inkrement | Element aus der Referenz |
 |---|---|
-| I2 | „Neue Partie“ als Nachziehstapel mit klassischem Kartenrücken direkt über den Karten, ohne Untertitel; Antippen führt in I2 direkt zur neuen Partie. Hinweis „‹Gruppe› spielt gerade – Weiter“ oben auf dem Start |
-| I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1): Antippen von „Neue Partie“ dunkelt den Start ab und zeigt zwei Spielkarten „Neue Partie“ und „Ergebnis eintragen“ (Variante D3d aus vier Vorschlagsrunden, `result-entry-preview-v1.html` bis `result-entry-preview.html`) |
+| I2 | Nachziehstapel mit klassischem Kartenrücken und der Beschriftung „Partie“ direkt über den Karten, ohne Untertitel; Antippen führt in I2 direkt zur neuen Partie. Hinweis „‹Gruppe› spielt gerade – Weiter“ oben auf dem Start |
+| I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1): Antippen von „Partie“ dunkelt den Start ab und zeigt zwei Spielkarten – links vorne und in der Akzentfarbe „Ergebnis eintragen“ als Hauptaktion, rechts „Neue Partie“ (Variante K2 aus fünf Vorschlagsrunden, `result-entry-preview-v1.html` bis `result-entry-preview.html`; Begründung: viele werden die App ohne Catan nutzen) |
 | I4 | Banner (Sicherung, Update, Speicher) oben auf dem Start, ohne die Karten zu verschieben; Karte „Daten“ in der Kartenhand |
 | I5 | Vierte Karte „Archiv“ in der Verwaltung |
-| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`) |
+| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). Mit der geplanten Einstellung „Ich hasse Catan!“ zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Anforderung folgt in einem eigenen Pull Request) |

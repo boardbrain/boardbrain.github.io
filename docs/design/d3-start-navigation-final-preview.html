@@ -1749,6 +1749,49 @@
         background: var(--accent);
         border-radius: 50%;
       }
+
+      /* ---------- K2: result entry first; setting "Ich hasse Catan!" ---------- */
+      .e-card.r-filled {
+        color: var(--on-accent);
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .r-filled .corner {
+        color: var(--on-accent);
+      }
+      .r-filled .r-halfIcon {
+        color: var(--accent);
+        background: var(--on-accent);
+      }
+      .r-discard .e-back {
+        background: var(--overlay);
+        border: 2px solid var(--border);
+      }
+      .r-discard .e-back:nth-child(1) {
+        transform: rotate(8deg) translate(4px, 2px);
+      }
+      .r-discard .e-back:nth-child(2) {
+        transform: rotate(-5deg) translate(-3px, 1px);
+      }
+      .r-discard .e-back:nth-child(3) {
+        border-color: var(--accent-text);
+      }
+      .r-lines {
+        position: absolute;
+        inset: 10px 8px;
+        background: repeating-linear-gradient(180deg, transparent 0 7px, var(--border) 7px 8px);
+      }
+      .r-pen {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        color: var(--on-accent);
+        background: var(--accent);
+        border: 2px solid var(--overlay);
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
@@ -1893,6 +1936,7 @@
         theme: 'wood',
         data: 'full',
         future: false,
+        noCatan: false,
         screen: 'start',
         sheet: null,
         menu: false,
@@ -1907,7 +1951,7 @@
 
       function D() {
         return state.data === 'full'
-          ? { persons: PERSONS, groups: GROUPS, games: GAMES }
+          ? { persons: PERSONS, groups: GROUPS, games: [...GAMES] }
           : { persons: [], groups: [], games: GAMES.slice(0, 1) };
       }
 
@@ -2960,21 +3004,33 @@
           h(
             'div',
             { class: 'r-fanOut' },
-            h('button', { class: 'e-card r-playCard r-left' }, h('span', { class: 'corner' }, '▶'), h('span', { class: 'r-halfIcon' }, icon('play', 30)), h('strong', {}, 'Neue Partie'), h('span', { class: 'corner br' }, '▶')),
-            h('button', { class: 'e-card r-playCard r-right' }, h('span', { class: 'corner' }, '✎'), h('span', { class: 'r-halfIcon' }, icon('pen', 28)), h('strong', {}, 'Ergebnis eintragen'), h('span', { class: 'corner br' }, '✎')),
+            h('button', { class: 'e-card r-playCard r-left r-filled' }, h('span', { class: 'corner' }, '✎'), h('span', { class: 'r-halfIcon' }, icon('pen', 28)), h('strong', {}, 'Ergebnis eintragen'), h('span', { class: 'corner br' }, '✎')),
+            h('button', { class: 'e-card r-playCard r-right' }, h('span', { class: 'corner' }, '▶'), h('span', { class: 'r-halfIcon' }, icon('play', 30)), h('strong', {}, 'Neue Partie'), h('span', { class: 'corner br' }, '▶')),
           ),
         );
       }
       function eStart() {
         const d = D();
         const k = kind();
-        const hero = eTrump(false);
-        // I3: tapping the pile offers "Neue Partie" or "Ergebnis eintragen" as two playing cards
-        if (hero)
+        let hero = eTrump(false);
+        if (hero) {
+          // I3: the pile is called "Partie"; tapping it offers "Ergebnis eintragen" or "Neue Partie"
+          hero.querySelector('strong').textContent = 'Partie';
           hero.addEventListener('click', () => {
             state.resSheet = true;
             render();
           });
+        }
+        // Setting "Ich hasse Catan!" (I6): no generation, the start offers only the result entry
+        if (hero && state.noCatan)
+          hero = h(
+            'button',
+            { class: 'e-pile' },
+            h('span', { class: 'e-pileStack r-discard' }, h('span', { class: 'e-back' }), h('span', { class: 'e-back' }), h('span', { class: 'e-back' }, h('span', { class: 'r-lines' }), h('span', { class: 'r-pen' }, icon('pen', 18)))),
+            h('strong', { style: { fontSize: '1.1rem' } }, 'Ergebnis eintragen'),
+            h('span', { class: 'muted', style: { marginLeft: 'auto' } }, icon('next', 20)),
+          );
+        if (state.noCatan && state.future) d.games = d.games.filter(([name]) => name !== 'Catan');
         const fan = h('div', { class: 'e-fan e-fanBottom' }, [
           eCard('personen', 'people', 'Personen', d.persons.length, d.persons.length ? null : 'hier anfangen', { transform: 'rotate(-7deg) translateY(8%)' }),
           eCard('gruppen', 'table', 'Tische', d.groups.length, null, { zIndex: '1', transform: 'none' }),
@@ -3592,6 +3648,12 @@
             state.data = k;
           }),
           ...chips('Umfang', [[false, 'Jetzt in D-3 gebaut'], ['real', 'Mit späteren Funktionen (I2–I6)'], ['realNB', 'Mit späteren Funktionen, ohne Hinweise oben']], state.future, (k) => (state.future = k)),
+          ...(state.future
+            ? chips('Einstellung', [[false, 'Catan an'], [true, '„Ich hasse Catan!“ an (I6)']], state.noCatan, (k) => {
+                state.noCatan = k;
+                state.resSheet = false;
+              })
+            : []),
         );
         document.getElementById('trump-row').replaceChildren();
         document.getElementById('pile-row').replaceChildren();
@@ -3673,8 +3735,9 @@
             ]),
             spec('Später, nicht in D-3 bauen', [
               'Banner „Sicherung empfohlen“ (I4) und „laufende Partie – Weiter“ (I2) oben auf dem Start.',
-              'Neue Partie (I2): Nachziehstapel – Zeile mit drei verdeckten Karten (54 × 74 px, Rautengitter, goldener Innenrahmen, ▶-Marke), daneben „Neue Partie“ ohne Untertitel, rechts ›. In I2 führt Antippen direkt zur neuen Partie.',
-              'Ergebnis eintragen (I3, US-ER-01 AK-1): ab I3 dunkelt Antippen des Stapels den Start ab (Schwarz 70 %) und zeigt mittig zwei Spielkarten – zum Ausprobieren „Mit späteren Funktionen“ wählen und auf „Neue Partie“ tippen. Karten 150 px breit, 5 : 7, gleicher Rand wie alle Karten; ▶ bzw. ✎ in den Ecken; in der Mitte ein runder Kreis 56 px in Akzent mit Symbol, darunter der Titel. Links „Neue Partie“ −8°, rechts „Ergebnis eintragen“ +8°, beide 6 px tiefer, 12 px Überlappung, links liegt oben. Tippen daneben schließt.',
+              'Neue Partie (I2): Nachziehstapel – Zeile mit drei verdeckten Karten (54 × 74 px, Rautengitter, goldener Innenrahmen, ▶-Marke), daneben die Beschriftung „Partie“ ohne Untertitel, rechts ›. In I2 führt Antippen direkt zur neuen Partie.',
+              'Ergebnis eintragen (I3, US-ER-01 AK-1, Variante K2): ab I3 dunkelt Antippen von „Partie“ den Start ab (Schwarz 70 %) und zeigt mittig zwei Spielkarten – zum Ausprobieren „Mit späteren Funktionen“ wählen und auf „Partie“ tippen. Karten 150 px breit, 5 : 7, ✎ bzw. ▶ in den Ecken, in der Mitte ein Kreis 56 px mit Symbol, darunter der Titel. Links vorne „Ergebnis eintragen“ (Hauptaktion, weil viele ohne Catan spielen): Fläche in Akzent, Schrift und Ecken in der Schrift auf Akzent, Kreis umgekehrt; rechts „Neue Partie“ wie alle Karten. −8° und +8°, beide 6 px tiefer, 12 px Überlappung. Tippen daneben schließt.',
+              'Einstellung „Ich hasse Catan!“ (I6): der Start zeigt statt „Partie“ nur die Zeile „Ergebnis eintragen“ (offener Stapel mit Linien und Stift, sonst wie die Zeile „Partie“); Catan zählt nicht mehr bei den Spielen. Zum Ausprobieren unter „Einstellung“ einschalten.',
             ]),
           ),
         );
