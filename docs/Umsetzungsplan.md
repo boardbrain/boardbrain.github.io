@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.12 |
-| Stand | 09.10.2026 |
+| Version | 0.13 |
+| Stand | 25.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.10 (19) |
 | Sprache | Deutsch |
 
@@ -25,6 +25,7 @@
 | 0.10 | 08.10.2026 | Neue Aufgabe D-3 „Startansicht und Navigation“ nach I1-C und vor I1-E: Startansicht, Kopfzeile und Verwaltung im Stil des Spielraums |
 | 0.11 | 08.10.2026 | D-3 umgesetzt (#17): Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst; Design-Referenz `docs/design/d3-start-navigation-final-preview.html` mit Verweisen je Inkrement, Platz für „Ergebnis eintragen“ auf dem Start (7) |
 | 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, Spezifikation 0.10) in I6 eingeplant (7) |
+| 0.13 | 25.10.2026 | I1-E umgesetzt: Personenliste als Spielkarten, Personenseite „Karte und Steckbrief“, Tischseite „Großer Tisch“; Design-Referenz `docs/design/i1e-persons-tables-final-preview.html`; Catan-Farben nur im Editor (5) |
 
 ## 1. Zweck
 
@@ -37,7 +38,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | # | Schritt | Wann | Status |
 |---|---|---|---|
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
-| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C umgesetzt (#15) |
+| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C umgesetzt (#15), I1-E umgesetzt |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
@@ -106,7 +107,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 | I1-A Zufall und Losbaustein | US-LS-01 | Opus, high | `feat/us-ls-01-random-draw` | umgesetzt (#11) |
 | I1-B Personen, Spiele, Datenbank | US-PG-01, US-SP-02 | Opus, high | `feat/us-pg-01-persons-and-games` | umgesetzt (#12) |
 | I1-C Gruppen und Farben | US-PG-02, US-PG-03 | Sonnet, medium | `feat/us-pg-02-groups-and-colors` | umgesetzt (#15) |
-| I1-E Personen und Gruppen im Überblick | US-VW-05 | Sonnet, medium | `feat/us-vw-05-persons-and-groups-overview` | offen |
+| I1-E Personen und Gruppen im Überblick | US-VW-05 | Sonnet, medium | `feat/us-vw-05-persons-and-groups-overview` | umgesetzt |
 | I1-F Bearbeiten | US-VW-06, US-VW-02, US-VW-07 | Sonnet, medium | `feat/us-vw-06-edit-master-data` | offen |
 | I1-D Brett und Installation | US-PL-01 | Opus, high | `feat/us-pl-01-board-and-install` | offen |
 
@@ -147,6 +148,12 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Warum hier:** Erst mit I1-C gibt es Gruppen; ohne Übersicht lassen sich angelegte Gruppen und Farben nicht nachsehen, was spätestens am ersten Spieleabend mit I2 fehlt.
 - **Pakete:** keine.
 - **Abnahme durch den Product Owner:** Personen und Gruppen anlegen, Gruppen in der Personenliste sehen, zwischen Person und Gruppe hin- und herspringen, Zurück-Taste auf dem S26.
+- **Ergebnis (0.13):** In drei Runden Designvorschlägen (`persons-groups-preview-v1.html`, `persons-preview-v2.html`, `persons-preview.html`) gewählt:
+  - **Personenliste L1 „Spielkarten“:** jede Person als Spielkarte mit Anzahl der Tische in den Ecken, Anfangsbuchstabe, ihren Farben an den Tischen als Punkte und den Tischnamen (US-VW-05 AK-1); erste Karte „+ Neue Person“, Lupe für die Suche nach Namen, „+“ öffnet das Formular.
+  - **Personenseite D9 „Karte und Steckbrief“:** kleine Spielkarte, daneben Name, „dabei seit“ (Anlegedatum), Anzahl Tische und Mitspieler; darunter ihre Tische mit ihrer Farbe, ab 7 Tischen eingeklappt.
+  - **Tischseite T7 „Großer Tisch“:** der runde Tisch aus dem Editor mit antippbaren Plätzen, Spielbindung, Anzahl, „angelegt am“ und die Mitglieder mit ihren Farben. Die Reiter „Ergebnisse“ und „Statistik“ kommen mit I3; bis dahin steht dort nur die Überschrift „Am Tisch“.
+  - **Catan-Farben** erscheinen nur noch im Editor, nicht auf Personen- und Tischseiten (Entscheidung des Product Owners).
+  - Verbindliche Referenz ist `docs/design/i1e-persons-tables-final-preview.html`; der Umfang „Mit späteren Funktionen“ zeigt, wo Bearbeiten (I1-F), Ergebnisse und Statistik (I3) sowie Archivieren und Löschen (I5) andocken.
 
 ### I1-F Bearbeiten *(neu in 0.8)*
 
