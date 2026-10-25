@@ -1,0 +1,106 @@
+/* Playing card 5 : 7 like on the start view (design D-3), content from the top (design I1-E, L1). */
+.card {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  place-items: center;
+  align-content: start;
+  min-width: 0;
+  aspect-ratio: 5 / 7;
+  padding: 14px 8px 24px;
+  color: var(--color-text);
+  text-align: center;
+  text-decoration: none;
+  background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px var(--color-shadow);
+}
+
+.corner,
+.cornerBottom {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-accent-text);
+}
+
+/* Bottom right, upside down like the index of a real card. */
+.cornerBottom {
+  inset: auto 10px 8px auto;
+  transform: rotate(180deg);
+}
+
+.initial {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-top: 6px;
+  font-size: var(--font-size-base);
+  font-weight: 800;
+  color: var(--color-accent-text);
+  border: 2px solid var(--color-accent-text);
+  border-radius: 50%;
+}
+
+.alone .initial {
+  color: var(--color-text-muted);
+  border-style: dashed;
+  border-color: var(--color-text-muted);
+}
+
+.name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.more {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 10px;
+  color: var(--color-text-muted);
+}
+
+/* US-VW-05 AK-1: the names of the tables, two lines at most. */
+.tables {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Very narrow phones: one line, so the corner number stays free. */
+@media (width < 370px) {
+  .tables {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+}

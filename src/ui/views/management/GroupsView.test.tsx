@@ -1,4 +1,4 @@
-import { aCustomGame, aPerson } from '@tests/support/masterDataFakes';
+import { aCustomGame, aGroup, aPerson } from '@tests/support/masterDataFakes';
 import { renderWithApp } from '@tests/support/renderWithApp';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -548,5 +548,19 @@ describe('US-PG-02 The bench', () => {
       'aria-pressed',
       'true',
     );
+  });
+});
+
+describe('US-VW-05 Tables in the room open their page', () => {
+  it('AK-3: every table in the room is a link to its table page', async () => {
+    const { db } = renderWithApp(<GroupsView />);
+    await addPersons(db, 2);
+    const id = toGroupId('00000000-0000-4000-8000-0000000000c1');
+    await db.groups.add(aGroup({ id, name: 'Freitagsrunde' }));
+
+    const room = await screen.findByRole('list', { name: 'Alle Tische' });
+    const table = await within(room).findByRole('link', { name: /Freitagsrunde/ });
+
+    expect(table).toHaveAttribute('href', `/verwaltung/gruppen/${id}`);
   });
 });

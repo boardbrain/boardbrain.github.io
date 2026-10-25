@@ -1,0 +1,40 @@
+/* Seats are a quarter of the table, from seven seats a fifth (design I1-E, like the room). */
+.table {
+  --seat: 24%;
+
+  position: relative;
+  display: block;
+  flex: none;
+}
+
+.dense {
+  --seat: 20%;
+}
+
+.top {
+  position: absolute;
+  inset: 22%;
+  background: var(--color-surface-overlay);
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.seat,
+.seatHighlighted,
+.seatDimmed {
+  position: absolute;
+  width: var(--seat);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.seatHighlighted {
+  z-index: 1;
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.seatDimmed {
+  opacity: 0.3;
+}

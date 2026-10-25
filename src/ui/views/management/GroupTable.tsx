@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import { GROUP_SIZE, type CatanColorKey, type GroupColorKey, type PersonId } from '@/core/model';
 import styles from './GroupTable.module.css';
 
@@ -16,10 +17,15 @@ export type TableSeat = {
 
 type GroupTableProps = {
   readonly seats: readonly TableSeat[];
-  /** `small` for the overview cards (decoration), `large` for the editor (seats are buttons). */
-  readonly size: 'small' | 'large';
+  /**
+   * `small` for the overview cards (decoration), `large` for the editor (seats are buttons),
+   * `detail` for the table page (seats are links, US-VW-05 AK-4).
+   */
+  readonly size: 'small' | 'large' | 'detail';
   readonly selectedId?: PersonId | undefined;
   readonly onSelect?: (id: PersonId) => void;
+  /** Address a seat leads to (detail only). */
+  readonly seatHref?: (id: PersonId) => string;
   /** Text in the middle of the table (large only). */
   readonly title?: string | undefined;
   readonly subtitle?: string | undefined;
@@ -50,15 +56,12 @@ export function GroupTable({
   size,
   selectedId,
   onSelect,
+  seatHref,
   title,
   subtitle,
 }: GroupTableProps): React.JSX.Element {
   const isDense = seats.length >= DENSE_FROM;
-  const className = [
-    styles.wrap,
-    size === 'large' ? styles.large : styles.small,
-    isDense && styles.dense,
-  ]
+  const className = [styles.wrap, styles[size], isDense && styles.dense]
     .filter((name) => typeof name === 'string')
     .join(' ');
   // Until two persons sit at the table, an empty seat invites to bring more (US-PG-02 AK-3).
@@ -85,6 +88,20 @@ export function GroupTable({
         );
         if (size === 'small') {
           return <span key={seat.id} className={styles.seat} style={style} aria-hidden="true" />;
+        }
+        if (seatHref !== undefined) {
+          return (
+            <Link
+              key={seat.id}
+              to={seatHref(seat.id)}
+              className={styles.seat}
+              style={style}
+              aria-label={seat.label}
+            >
+              {seat.initial}
+              {mark}
+            </Link>
+          );
         }
         return (
           <button
