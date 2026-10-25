@@ -1,4 +1,4 @@
-import { InvariantError } from '@/core/shared';
+import { err, InvariantError, ok, type Result } from '@/core/shared';
 
 declare const idBrand: unique symbol;
 
@@ -75,4 +75,25 @@ export function toGroupId(value: string): GroupId {
     throw new InvariantError(`Not a UUID v4 group id: ${value}`);
   }
   return value;
+}
+
+/**
+ * Error code for a text that is not an identifier, e.g. a mistyped address.
+ */
+export type IdInvalidError = 'id-invalid';
+
+/**
+ * Reads a person id from outside, e.g. from the address `#/verwaltung/personen/‹id›`
+ * (US-VW-05 AK-2). Unlike `toPersonId` a wrong value is an expected error.
+ */
+export function parsePersonId(value: string): Result<PersonId, IdInvalidError> {
+  return isPersonId(value) ? ok(value) : err('id-invalid');
+}
+
+/**
+ * Reads a group id from outside, e.g. from the address `#/verwaltung/gruppen/‹id›`
+ * (US-VW-05 AK-3). Unlike `toGroupId` a wrong value is an expected error.
+ */
+export function parseGroupId(value: string): Result<GroupId, IdInvalidError> {
+  return isGroupId(value) ? ok(value) : err('id-invalid');
 }
