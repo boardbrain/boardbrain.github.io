@@ -36,6 +36,9 @@
 .card,
 .newCard {
   display: grid;
+  height: 100%;
+  color: var(--color-text);
+  text-decoration: none;
   gap: var(--space-1);
   align-content: start;
   justify-items: center;

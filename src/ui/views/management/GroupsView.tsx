@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { findGroups, type CustomGame, type Group, type Person } from '@/core/model';
-import { findSupportedGame } from '@/games/registry';
+import { Link } from 'react-router';
+import { findGroups, type Group, type Person } from '@/core/model';
 import { t } from '@/i18n/t';
 import { useCustomGames, useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
@@ -8,25 +8,11 @@ import { BackIcon, CloseIcon, SearchIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
 import { Page } from '@/ui/components/Page';
 import { GroupEditor } from './GroupEditor';
+import { bindingLabel } from './groupBinding';
 import { GroupTable, type TableSeat } from './GroupTable';
 import styles from './GroupsView.module.css';
 
 const MIN_PERSONS_FOR_GROUP = 2;
-
-// What the group plays, e.g. "Alle Spiele ohne Catan" or the name of the bound game.
-function bindingLabel(group: Group, customGames: readonly CustomGame[]): string {
-  if (group.binding.kind === 'global') {
-    return group.binding.excludesCatan === true
-      ? t('gruppen.bindungOhneCatan')
-      : t('gruppen.bindungGlobal');
-  }
-  const { gameId } = group.binding;
-  const supported = findSupportedGame(gameId);
-  if (supported !== undefined) {
-    return t(supported.nameKey);
-  }
-  return customGames.find((game) => game.id === gameId)?.name ?? '';
-}
 
 function seatsOf(group: Group, persons: readonly Person[]): TableSeat[] {
   return group.members.map((member) => {
@@ -144,22 +130,26 @@ export function GroupsView(): React.JSX.Element {
           </button>
         </li>
         {matches.map(({ group, memberNames }) => (
-          <li key={group.id} className={styles.card}>
-            <GroupTable seats={seatsOf(group, persons ?? [])} size="small" />
-            <strong className={styles.name}>{group.name}</strong>
-            <span className={styles.meta}>
-              {t('gruppen.bindungText', {
-                bindung: bindingLabel(group, customGames ?? []),
-                anzahl: group.members.length,
-              })}
-            </span>
-            {memberNames.length > 0 && (
-              <span className={styles.match}>
-                {t(memberNames.length === 1 ? 'gruppen.treffer.einer' : 'gruppen.treffer.mehrere', {
-                  namen: memberNames.join(', '),
+          <li key={group.id}>
+            {/* US-VW-05 AK-3: a table opens its page. */}
+            <Link to={`/verwaltung/gruppen/${group.id}`} className={styles.card}>
+              <GroupTable seats={seatsOf(group, persons ?? [])} size="small" />
+              <strong className={styles.name}>{group.name}</strong>
+              <span className={styles.meta}>
+                {t('gruppen.bindungText', {
+                  bindung: bindingLabel(group, customGames ?? []),
+                  anzahl: group.members.length,
                 })}
               </span>
-            )}
+              {memberNames.length > 0 && (
+                <span className={styles.match}>
+                  {t(
+                    memberNames.length === 1 ? 'gruppen.treffer.einer' : 'gruppen.treffer.mehrere',
+                    { namen: memberNames.join(', ') },
+                  )}
+                </span>
+              )}
+            </Link>
           </li>
         ))}
       </ul>

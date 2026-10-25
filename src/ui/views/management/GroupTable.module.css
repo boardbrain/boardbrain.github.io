@@ -32,6 +32,31 @@
   --seat: 14%;
 }
 
+/* Table page (design I1-E, T7): 300 px on phones, 360 px on tablets, 380 px on wide screens. */
+.detail {
+  --seat: 17%;
+
+  width: 300px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+@media (width >= 37.5rem) {
+  .detail {
+    width: 360px;
+  }
+}
+
+@media (width >= 62.5rem) {
+  .detail {
+    width: 380px;
+  }
+}
+
+.detail.dense {
+  --seat: 14%;
+}
+
 .small.dense {
   --seat: 20%;
 }
@@ -139,4 +164,18 @@
   height: 42%;
   border: 3px solid var(--color-surface);
   border-radius: 6px;
+}
+
+.detail .seat {
+  min-width: 40px;
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.detail.dense .seat {
+  font-size: 1rem;
+}
+
+.detail .subtitle {
+  font-size: var(--font-size-tiny);
 }

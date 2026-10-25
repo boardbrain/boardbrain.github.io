@@ -7,6 +7,8 @@ type NameFormProps = {
   readonly title: string;
   readonly value: string;
   readonly isPending: boolean;
+  /** Puts the cursor into the field when the form appears, e.g. after "new person". */
+  readonly isFocused?: boolean;
   readonly onValueChange: (value: string) => void;
   readonly onSubmit: () => void;
   /** Hints below the form, e.g. about a duplicate name. */
@@ -21,6 +23,7 @@ export function NameForm({
   title,
   value,
   isPending,
+  isFocused = false,
   onValueChange,
   onSubmit,
   children,
@@ -45,6 +48,7 @@ export function NameForm({
           className={styles.input}
           type="text"
           autoComplete="off"
+          autoFocus={isFocused}
           value={value}
           onChange={(event) => {
             onValueChange(event.target.value);

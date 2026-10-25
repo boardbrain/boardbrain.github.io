@@ -1,7 +1,7 @@
 import { InvariantError } from '@/core/shared';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { isUuidV4, toGameId, toGroupId, toPersonId } from './ids';
+import { isUuidV4, parseGroupId, parsePersonId, toGameId, toGroupId, toPersonId } from './ids';
 
 const FC_SEED = 20261007;
 
@@ -48,5 +48,26 @@ describe('NFA-DH-05 identifiers', () => {
   it('throws an invariant error for a value that is not a UUID', () => {
     expect(() => toPersonId('42')).toThrow(InvariantError);
     expect(() => toGameId('42')).toThrow(InvariantError);
+  });
+});
+
+describe('US-VW-05 identifiers from an address', () => {
+  const uuid = 'c47a0000-0000-4000-8000-000000000001';
+
+  it('AK-2: reads a person id from a valid UUID', () => {
+    expect(parsePersonId(uuid)).toEqual({ ok: true, value: uuid });
+  });
+
+  it('AK-3: reads a group id from a valid UUID', () => {
+    expect(parseGroupId(uuid)).toEqual({ ok: true, value: uuid });
+  });
+
+  it.each([
+    ['mistyped', 'c47a0000'],
+    ['empty', ''],
+    ['uppercase', uuid.toUpperCase()],
+  ])('returns an expected error for a %s value instead of throwing', (_case, value) => {
+    expect(parsePersonId(value)).toEqual({ ok: false, error: 'id-invalid' });
+    expect(parseGroupId(value)).toEqual({ ok: false, error: 'id-invalid' });
   });
 });

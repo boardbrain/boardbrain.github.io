@@ -1,5 +1,37 @@
 .actions {
   display: flex;
+  gap: var(--space-2);
+}
+
+.iconButton,
+.addButton {
+  display: grid;
+  place-items: center;
+  width: var(--touch-target-min);
+  padding: 0;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.addButton {
+  color: var(--color-accent-text);
+  border-color: var(--color-accent-text);
+}
+
+.searchRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.noticeActions {
+  display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
@@ -8,4 +40,57 @@
   color: var(--color-text);
   background: transparent;
   border: 1px solid var(--color-border);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* Design I1-E L1: 3 columns on phones, 5 on tablets upright, 7 on wide screens. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+@media (width >= 37.5rem) {
+  .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 62.5rem) {
+  .grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+.item {
+  display: grid;
+  min-width: 0;
+}
+
+.newCard {
+  display: grid;
+  gap: 3px;
+  place-items: center;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 5 / 7;
+  padding: 18px 10px;
+  color: var(--color-accent-text);
+  background: transparent;
+  border: 1px dashed var(--color-accent-text);
+  border-radius: 14px;
+}
+
+.newCardLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
 }

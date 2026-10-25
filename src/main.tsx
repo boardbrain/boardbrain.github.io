@@ -18,8 +18,10 @@ import { installGlobalErrorHandlers } from '@/ui/globalErrorHandlers';
 import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
 import { GamesView } from '@/ui/views/management/GamesView';
 import { GroupsView } from '@/ui/views/management/GroupsView';
+import { GroupView } from '@/ui/views/management/GroupView';
 import { ManagementView } from '@/ui/views/management/ManagementView';
 import { PersonsView } from '@/ui/views/management/PersonsView';
+import { PersonView } from '@/ui/views/management/PersonView';
 import { StartView } from '@/ui/views/start/StartView';
 import '@/ui/styles/tokens.css';
 import '@/ui/styles/global.css';
@@ -69,7 +71,9 @@ const router = createHashRouter([
       { path: '/', element: view(<StartView />) },
       { path: '/verwaltung', element: view(<ManagementView />) },
       { path: '/verwaltung/personen', element: view(<PersonsView />) },
+      { path: '/verwaltung/personen/:personId', element: view(<PersonView />) },
       { path: '/verwaltung/gruppen', element: view(<GroupsView />) },
+      { path: '/verwaltung/gruppen/:groupId', element: view(<GroupView />) },
       { path: '/verwaltung/spiele', element: view(<GamesView />) },
       {
         path: '/diagnose',

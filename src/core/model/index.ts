@@ -45,11 +45,15 @@ export {
 export { findGroups, type GroupMatch } from './groupSearch';
 export {
   isUuidV4,
+  parseGroupId,
+  parsePersonId,
   toGameId,
   toGroupId,
   toPersonId,
   type GameId,
   type GroupId,
+  type IdInvalidError,
   type PersonId,
 } from './ids';
+export { countFellowPlayers, findPersons, tablesOfPerson, type PersonTable } from './overview';
 export { cleanName, containsName, isBlankName, isSameName, sortByName } from './names';

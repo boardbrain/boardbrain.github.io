@@ -1,0 +1,30 @@
+/* Design I1-E T7: table above the members; on wide screens the table on the left. */
+.layout {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (width >= 62.5rem) {
+  .layout {
+    grid-template-columns: 380px minmax(0, 1fr);
+  }
+}
+
+.tableColumn {
+  display: grid;
+  gap: 12px;
+}
+
+/* The member's seat: group colour with the initial, like at the table. */
+.seat {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-surface);
+  border-radius: 50%;
+}

@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.12 |
+| Version | 0.13 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 09.10.2026 |
+| Stand | 25.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -26,6 +26,7 @@
 | 0.10 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Bindung mit `excludesCatan` (4.5, 7.1, FA-PG-04, E-27); Gruppenfarben-Schlüssel und Reihenfolge der Vergabe nach E-28, Kontrastregel für Spielfarben 3 : 1 zum Hintergrund und 2,3 : 1 auf Karten (13.4) |
 | 0.11 | 08.10.2026 | Design D-3: Rahmen mit Logo, Hauptnavigation als Kartenhand am unteren Rand, Startansicht ohne Scrollen, Zurück zur vorherigen Seite, Hinweis zum Drehen auf Smartphones im Querformat, Design-Referenz in `docs/design/` (13.1, NFA-PL-04, E-29); Tests ohne Smartphone im Querformat (14.5) |
 | 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, E-30) in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
+| 0.13 | 25.10.2026 | Bündel I1-E: Detailansichten `#/verwaltung/personen/‹id›` und `#/verwaltung/gruppen/‹id›`, Kennungen aus der Adresse als `Result`, Design-Referenz `docs/design/i1e-persons-tables-final-preview.html` (13.1) |
 
 ## Inhaltsverzeichnis
 
@@ -956,6 +957,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 
 - **Startansicht:** Personen, Tische und Spiele als Fächer aus Spielkarten mit der Anzahl in den Ecken, direkt über der Kartenhand; die Ansicht scrollt nie, die Karten passen ihre Größe dem Platz an. Darüber erscheinen später „Neue Partie“ (I2, als Nachziehstapel) und oben die Banner; sie verschieben den Inhalt nicht, solange der Platz reicht.
 - **Verwaltung:** dieselben Spielkarten als Raster mit den ersten Namen jedes Bereichs.
+- **Personen und Tische im Überblick (US-VW-05, FA-VW-06):** Die Personenliste zeigt jede Person als Spielkarte mit ihren Tischen; jede Karte öffnet `#/verwaltung/personen/‹id›`, jeder Tisch im Spielraum und auf der Personenseite `#/verwaltung/gruppen/‹id›`, jeder Platz und jedes Mitglied auf der Tischseite wieder die Person. Die Kennung aus der Adresse liest `parsePersonId` bzw. `parseGroupId` als `Result` (ADR-025); eine unbekannte oder ungültige Kennung zeigt einen Hinweis statt eines Fehlers. Die Lesehooks `usePerson` und `useGroup` liefern `null` für „nicht vorhanden“. Catan-Farben erscheinen nur im Editor. Aussehen und Maße legt `docs/design/i1e-persons-tables-final-preview.html` fest; dort ist auch zu sehen, wo Bearbeiten (I1-F), Ergebnisse und Statistik (I3) sowie Archivieren (I5) andocken. *(neu in 0.13)*
 - **Zurück:** Unterseiten haben links neben dem Titel einen Zurück-Knopf. Er führt wie die Zurück-Taste unter Android zur vorherigen Seite (`navigate(-1)`); wurde die Seite direkt aufgerufen, zur Verwaltung.
 - **Smartphone im Querformat (NFA-PL-04, E-29):** Ein Fenster im Querformat, das niedriger als 500 px ist, gilt als Smartphone; der Rahmen zeigt dann per Media Query nur den Hinweis, das Gerät zu drehen. Das wirkt auf Android und iOS gleich; eine Sperre im Manifest entfällt, weil iOS sie nicht kennt und sie unter Android auch Tablets sperren würde.
 - **Kartenhand:** Die Bereiche stehen als Liste in `AppLayout`; ein weiterer Bereich ist ein Eintrag. Drehung und Breite berechnet `cardHand.ts` (9° je Karte, ab sechs Karten 70 px breit und 6°).

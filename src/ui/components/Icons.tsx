@@ -156,3 +156,25 @@ export function RotateIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Arrow to the right at the end of a row that opens a page. Decorative.
+ */
+export function ChevronIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M9 5l7 7-7 7" />
+    </Outline>
+  );
+}
+
+/**
+ * Plus for "new". Decorative: the button around it carries the label.
+ */
+export function PlusIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M12 5v14M5 12h14" />
+    </Outline>
+  );
+}
