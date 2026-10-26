@@ -158,6 +158,16 @@ describe('US-VW-02 Edit a table (table page)', () => {
     expect(stored?.members.every((member) => member.catanColor === undefined)).toBe(true);
   });
 
+  it('a blank name shows an error while typing and blocks saving', async () => {
+    const { user } = await openEditor();
+    const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });
+
+    await user.clear(within(editor).getByLabelText('Gruppenname'));
+
+    expect(within(editor).getByRole('alert')).toHaveTextContent('Bitte gib einen Namen ein.');
+    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+  });
+
   it('closing with unsaved changes asks first', async () => {
     const { user } = await openEditor();
     const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });

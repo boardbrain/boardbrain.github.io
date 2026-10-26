@@ -401,7 +401,14 @@ export function GroupEditor({
               setTypedName(event.target.value);
             }}
           />
-          <span className={styles.muted}>{t('gruppen.namenHinweis')}</span>
+          {/* Checked while typing like renaming (design I1-F); not before anything was typed. */}
+          {typedName !== null && isBlankName(typedName) ? (
+            <Notice tone="error">
+              <p>{t('verwaltung.nameLeer')}</p>
+            </Notice>
+          ) : (
+            group === undefined && <span className={styles.muted}>{t('gruppen.namenHinweis')}</span>
+          )}
         </div>
 
         <fieldset className={styles.section}>

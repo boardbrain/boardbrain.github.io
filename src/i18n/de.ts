@@ -85,8 +85,8 @@ export const de = {
       'An den Tischen {tische} sitzt schon jemand namens „{name}“. An einem Tisch müssen die Namen verschieden sein.',
     konfliktAllgemein:
       'An einem ihrer Tische sitzt schon jemand namens „{name}“. An einem Tisch müssen die Namen verschieden sein.',
-    gleicherNameUmbenennen: 'Es gibt bereits eine Person namens „{name}“. Trotzdem umbenennen?',
-    trotzdemUmbenennen: 'Trotzdem umbenennen',
+    gleicherNameUmbenennen:
+      'Es gibt bereits eine Person namens „{name}“. Mit „Speichern“ wird trotzdem umbenannt.',
   },
   gruppen: {
     titel: 'Tische',

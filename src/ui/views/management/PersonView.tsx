@@ -4,6 +4,7 @@ import {
   cleanName,
   countFellowPlayers,
   findNameConflicts,
+  isSameName,
   parsePersonId,
   tablesOfPerson,
   type CustomGame,
@@ -124,22 +125,25 @@ function PersonRename({
     initialName: person.name,
     fieldLabel: t('personen.neuerName'),
     liveError: conflictText,
+    // US-PG-01 AK-3: another person with the name elsewhere is only a hint.
+    liveHint: (name) =>
+      persons.some((other) => other.id !== person.id && isSameName(other.name, name))
+        ? {
+            text: t('personen.gleicherNameUmbenennen', { name: cleanName(name) }),
+            note: t('personen.gleicherNameGruppe'),
+          }
+        : null,
     save: (name, isConfirmed) =>
       masterData.renamePerson({ personId: person.id, name, isDuplicateConfirmed: isConfirmed }),
+    // Only if someone changed the data in the meantime; the live checks show it right after.
     messageFor: (error, name) => {
       if (error === 'name-duplicate') {
-        return {
-          tone: 'warning',
-          text: t('personen.gleicherNameUmbenennen', { name }),
-          note: t('personen.gleicherNameGruppe'),
-          confirmLabel: t('personen.trotzdemUmbenennen'),
-        };
+        return t('personen.gleicherNameUmbenennen', { name });
       }
       if (error === 'name-empty') {
-        return { tone: 'error', text: t('verwaltung.nameLeer') };
+        return t('verwaltung.nameLeer');
       }
-      // Someone else changed a name in the meantime; the live check names the table then.
-      return { tone: 'error', text: t('personen.konfliktAllgemein', { name }) };
+      return t('personen.konfliktAllgemein', { name });
     },
     onClose,
   });

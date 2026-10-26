@@ -2612,31 +2612,25 @@
         state.ren = null;
         render();
       }
+      // Everything is checked while typing (PO decision round 4): errors block "Speichern",
+      // the hint about a same-named person elsewhere does not, saving then confirms it.
       function renameIssues() {
         const r = state.ren;
         const v = r.value.trim();
+        const blank = v === '';
         // US-VW-06 AK-2: another member at one of her tables already has the name.
-        const conflicts = r.kind === 'person' ? groupsOf(r.id).filter((g) => g.members.some((m) => m.pid !== r.id && same(person(m.pid).name, v))) : [];
-        return { blank: v === '', unchanged: v === r.original, conflicts };
+        const conflicts = r.kind === 'person' && !blank ? groupsOf(r.id).filter((g) => g.members.some((m) => m.pid !== r.id && same(person(m.pid).name, v))) : [];
+        // US-VW-07 AK-1: unique among all games, Catan included.
+        const gameTaken = r.kind === 'game' && !blank && (same('Catan', v) || DB.games.some((x) => x.id !== r.id && same(x.name, v)));
+        // Like US-PG-01 AK-3: another person with the name elsewhere is only a hint.
+        const duplicate = r.kind === 'person' && !blank && v !== r.original && conflicts.length === 0 && DB.persons.some((p) => p.id !== r.id && same(p.name, v));
+        return { blank, unchanged: v === r.original, conflicts, gameTaken, duplicate };
       }
-      function saveRename(isConfirmed) {
+      function saveRename() {
         const r = state.ren;
         const v = r.value.trim();
-        if (r.kind === 'person') {
-          // Like US-PG-01 AK-3: another person with the name elsewhere is only a hint.
-          if (!isConfirmed && DB.persons.some((p) => p.id !== r.id && same(p.name, v))) {
-            r.submitted = 'duplicate';
-            render();
-            return;
-          }
-          person(r.id).name = v;
-        } else {
-          // US-VW-07 AK-1: unique among all games, Catan included.
-          if (same('Catan', v) || DB.games.some((x) => x.id !== r.id && same(x.name, v))) {
-            r.submitted = 'game-duplicate';
-            render();
-            return;
-          }
+        if (r.kind === 'person') person(r.id).name = v;
+        else {
           const old = game(r.id).name;
           DB.groups.forEach((g) => { if (g.binding.kind === 'game' && g.binding.game === old) g.binding = { kind: 'game', game: v }; });
           game(r.id).name = v;
@@ -2647,25 +2641,25 @@
       function renameParts() {
         const r = state.ren;
         const is = renameIssues();
-        const canSave = !is.blank && !is.unchanged && is.conflicts.length === 0;
+        const canSave = !is.blank && !is.unchanged && is.conflicts.length === 0 && !is.gameTaken;
         const v = r.value.trim();
         const input = h('input', {
           class: 'field', id: 'renField', value: r.value, autocomplete: 'off', 'aria-label': r.kind === 'person' ? 'Neuer Name' : 'Neuer Spielname',
-          oninput: (e) => { r.value = e.target.value; r.submitted = null; state.caret = e.target.selectionStart; render(); },
-          onkeydown: (e) => { if (e.key === 'Enter' && canSave) saveRename(false); if (e.key === 'Escape') cancelRename(); },
+          oninput: (e) => { r.value = e.target.value; state.caret = e.target.selectionStart; render(); },
+          onkeydown: (e) => { if (e.key === 'Enter' && canSave) saveRename(); if (e.key === 'Escape') cancelRename(); },
         });
         const notices = [
+          is.blank && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Bitte gib einen Namen ein.')),
           is.conflicts.length > 0 && h('div', { class: 'notice', role: 'alert' },
             h('p', {}, (is.conflicts.length === 1 ? 'Am Tisch ' : 'An den Tischen ') + quoteList(is.conflicts.map((g) => g.name)) + ' sitzt schon jemand namens „' + v + '“. An einem Tisch müssen die Namen verschieden sein.')),
-          r.submitted === 'duplicate' && h('div', { class: 'notice warn', role: 'alert' },
-            h('p', {}, 'Es gibt bereits eine Person namens „' + v + '“. Trotzdem umbenennen?'),
-            h('p', { class: 'small muted' }, 'Gleichnamige Personen können später nicht Mitglied derselben Gruppe werden.'),
-            h('button', { class: 'ghostBtn', style: { justifySelf: 'start' }, onclick: () => saveRename(true) }, 'Trotzdem umbenennen')),
-          r.submitted === 'game-duplicate' && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Es gibt bereits ein Spiel namens „' + v + '“. Bitte wähle einen anderen Namen.')),
+          is.gameTaken && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Es gibt bereits ein Spiel namens „' + v + '“. Bitte wähle einen anderen Namen.')),
+          is.duplicate && h('div', { class: 'notice warn', role: 'alert' },
+            h('p', {}, 'Es gibt bereits eine Person namens „' + v + '“. Mit „Speichern“ wird trotzdem umbenannt.'),
+            h('p', { class: 'small muted' }, 'Gleichnamige Personen können später nicht Mitglied derselben Gruppe werden.')),
         ];
         const buttons = h('div', { class: 'btnRow tight' },
           h('button', { class: 'ghostBtn', onclick: cancelRename }, 'Abbrechen'),
-          h('button', { class: 'primary', disabled: !canSave, onclick: () => saveRename(false) }, 'Speichern'));
+          h('button', { class: 'primary', disabled: !canSave, onclick: saveRename }, 'Speichern'));
         return { input, notices, buttons };
       }
       // Renaming in place: while renaming, the field and the two buttons take the
@@ -2886,7 +2880,7 @@
                 h('p', { class: 'lockNote' }, icon('people', 18), 'Wer am Tisch sitzt, bleibt fest. Für eine andere Runde legst du einen neuen Tisch an.')),
               h('div', { class: 'edColumns' }, h('div', { style: { display: 'grid', justifyItems: 'center' } }, table), colorCard),
               h('div', { class: 'edColumns' },
-                h('div', { class: 'edSection' }, h('label', { class: 'lbl', for: 'edName' }, 'Gruppenname'), nameInput, d.name.trim() === '' && h('span', { class: 'small', style: { color: 'var(--status-error)' } }, 'Bitte gib einen Namen ein.')),
+                h('div', { class: 'edSection' }, h('label', { class: 'lbl', for: 'edName' }, 'Gruppenname'), nameInput, d.name.trim() === '' && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Bitte gib einen Namen ein.'))),
                 binding),
               h('div', { class: 'saveBar' }, h('button', { class: 'primary', disabled: !canSave, onclick: saveEdit }, 'Änderungen speichern')))));
       }
@@ -3018,9 +3012,9 @@
           spec('Person umbenennen (US-VW-06)', [
             'Kleine Pille „✎ Umbenennen“ unter der Karte (wie „Bearbeiten“ am Tisch). Beim Antippen ersetzen Eingabefeld und „Abbrechen | Speichern“ nebeneinander die Zeilen „dabei seit“ und die Pillen; die Höhe bleibt gleich, darunter verschiebt sich nichts. Nur ein Fehler oder Hinweis erscheint darunter.',
             'Gespeichert wird erst mit „Speichern“ oder der Eingabetaste; „Abbrechen“ oder Esc verwirft ohne Rückfrage, weil das ausdrücklich gewählt ist.',
-            '„Speichern“ ist gesperrt, solange der Name leer oder unverändert ist.',
+            'Alles wird schon beim Tippen geprüft, auch bei Spielen und Tischen: Ein Fehler erscheint sofort unter der Karte, und „Speichern“ bleibt gesperrt – bei leerem oder unverändertem Namen ebenso.',
             'Sitzt an einem ihrer Tische schon jemand mit dem neuen Namen, erscheint sofort beim Tippen ein Fehler mit den Tischen, und Speichern bleibt gesperrt (AK-2).',
-            'Heißt nur jemand außerhalb ihrer Tische so, kommt nach „Speichern“ derselbe Hinweis wie beim Anlegen mit „Trotzdem umbenennen“.',
+            'Heißt nur jemand außerhalb ihrer Tische so, erscheint beim Tippen ein Hinweis; „Speichern“ bleibt möglich und gilt als Bestätigung (US-PG-01 AK-3).',
             'Der neue Name erscheint danach überall: Liste, Tische, Spielraum (AK-1).',
           ]),
           spec('Tisch bearbeiten (US-VW-02)', [
@@ -3033,7 +3027,7 @@
           spec('Eigenes Spiel (US-VW-07)', [
             'Eigene Spiele in der Spieleliste sind jetzt Zeilen mit ›; sie öffnen die neue Spielseite #/verwaltung/spiele/‹id›.',
             'Spielseite im Stil der Personenseite: Karte, Name, „angelegt am“, Tische nur für dieses Spiel. Später: Ergebnisse, Statistik (I3), Archivieren, Löschen (I5).',
-            'Umbenennen wie bei Personen: Pille „✎ Umbenennen“ unter der Karte. Ein Name, den schon ein anderes Spiel oder Catan trägt, wird abgelehnt.',
+            'Umbenennen wie bei Personen: Pille „✎ Umbenennen“ unter der Karte. Ein Name, den schon ein anderes Spiel oder Catan trägt, zeigt beim Tippen einen Fehler und sperrt „Speichern“.',
             'Catan ist fest eingebaut: keine Spielseite, kein Umbenennen (AK-2).',
           ]),
           spec('Rückfrage beim Verlassen', [

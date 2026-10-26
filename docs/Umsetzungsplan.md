@@ -166,7 +166,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Abnahme durch den Product Owner:** Person, Gruppe und eigenes Spiel umbenennen; Farbe und Bindung einer Gruppe ändern, Catan ausschließen und wieder zulassen; Konflikte (gleichnamige Person in einer Gruppe, doppelter Spielname, 5 Mitglieder an Catan) werden verhindert.
 - **Ergebnis der Designrunden (0.14):**
   - **Aktionen:** auf Personen-, Tisch- und Spielseite gleich als kleine Pillen unter den Angaben („✎ Umbenennen“, „✎ Bearbeiten“); Archivieren und Löschen kommen in I5 als Pillen daneben.
-  - **Umbenennen** von Person und eigenem Spiel an Ort und Stelle: Feld und „Abbrechen | Speichern“ ersetzen das Profil neben der Karte, darunter verschiebt sich nichts. Eine gleichnamige Person außerhalb ihrer Tische ist wie beim Anlegen nur ein Hinweis mit „Trotzdem umbenennen“ (Entscheidung des Product Owners).
+  - **Umbenennen** von Person und eigenem Spiel an Ort und Stelle: Feld und „Abbrechen | Speichern“ ersetzen das Profil neben der Karte, darunter verschiebt sich nichts. Geprüft wird schon beim Tippen, bei Person, Spiel und Tisch gleich: Fehler erscheinen sofort und sperren „Speichern“. Eine gleichnamige Person außerhalb ihrer Tische ist nur ein Hinweis; „Speichern“ danach gilt als Bestätigung (Entscheidungen des Product Owners).
   - **Spielseite** `#/verwaltung/spiele/‹id›` für eigene Spiele; Catan ist „fest eingebaut“ und hat keine.
   - **Tisch bearbeiten** wie „Neuer Tisch“, ohne Bank, unter einer eigenen Adresse.
   - **Rückfrage** „Änderungen verwerfen?“ beim Verlassen mit ungespeicherten Änderungen.

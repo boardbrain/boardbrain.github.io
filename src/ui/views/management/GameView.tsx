@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { parseGameId, type CustomGame, type Group } from '@/core/model';
+import { cleanName, containsName, parseGameId, type CustomGame, type Group } from '@/core/model';
+import { SUPPORTED_GAMES } from '@/games/registry';
 import { formatDate } from '@/i18n/format';
 import { t } from '@/i18n/t';
-import { useCustomGame, useGroups } from '@/infra/db/readHooks';
+import { useCustomGame, useCustomGames, useGroups } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { ChevronIcon, DiceIcon, PenIcon } from '@/ui/components/Icons';
 import { MiniTable } from '@/ui/components/MiniTable';
@@ -29,23 +30,32 @@ function tablesOfGame(groups: readonly Group[], game: CustomGame): Group[] {
 
 type GameRenameProps = {
   readonly game: CustomGame;
+  /** Names of all other games, the supported ones included. */
+  readonly otherNames: readonly string[];
   readonly card: React.JSX.Element;
   readonly actions: React.JSX.Element;
   readonly onClose: () => void;
 };
 
 // US-VW-07 AK-1: renamed in place like a person; the name must stay unique among all games.
-function GameRename({ game, card, actions, onClose }: GameRenameProps): React.JSX.Element {
+function GameRename({
+  game,
+  otherNames,
+  card,
+  actions,
+  onClose,
+}: GameRenameProps): React.JSX.Element {
   const { masterData } = useAppDependencies();
   const { form, notices } = useRenameForm({
     initialName: game.name,
     fieldLabel: t('spiele.neuerName'),
+    // AK-1: checked while typing against Catan and the other custom games.
+    liveError: (name) =>
+      containsName(otherNames, name) ? t('spiele.gleicherName', { name: cleanName(name) }) : null,
     save: (name) => masterData.renameCustomGame({ gameId: game.id, name }),
-    messageFor: (error, name) => ({
-      tone: 'error',
-      text:
-        error === 'name-duplicate' ? t('spiele.gleicherName', { name }) : t('verwaltung.nameLeer'),
-    }),
+    // Only if a game was created in the meantime; the live check shows it right after.
+    messageFor: (error, name) =>
+      error === 'name-duplicate' ? t('spiele.gleicherName', { name }) : t('verwaltung.nameLeer'),
     onClose,
   });
   return (
@@ -71,6 +81,7 @@ export function GameView(): React.JSX.Element | null {
   const parsed = parseGameId(gameId);
   const game = useCustomGame(db, parsed.ok ? parsed.value : null);
   const groups = useGroups(db);
+  const customGames = useCustomGames(db);
   const [isRenaming, setIsRenaming] = useState(false);
 
   if (game === undefined || groups === undefined) {
@@ -112,6 +123,12 @@ export function GameView(): React.JSX.Element | null {
       {isRenaming ? (
         <GameRename
           game={game}
+          otherNames={[
+            ...SUPPORTED_GAMES.map((supported) => t(supported.nameKey)),
+            ...(customGames ?? [])
+              .filter((other) => other.id !== game.id)
+              .map((other) => other.name),
+          ]}
           card={card}
           actions={actions}
           onClose={() => {

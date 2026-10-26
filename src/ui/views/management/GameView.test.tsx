@@ -66,11 +66,12 @@ describe('US-VW-07 Rename a custom game (game page)', () => {
     await user.click(await screen.findByRole('button', { name: 'Umbenennen' }));
     await user.clear(screen.getByLabelText('Neuer Spielname'));
     await user.type(screen.getByLabelText('Neuer Spielname'), name);
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
+    // Checked while typing; saving stays blocked.
+    expect(screen.getByRole('alert')).toHaveTextContent(
       `Es gibt bereits ein Spiel namens „${name}“. Bitte wähle einen anderen Namen.`,
     );
+    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
     expect((await db.games.get(UNO))?.name).toBe('Uno');
   });
 

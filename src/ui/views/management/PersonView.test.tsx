@@ -144,19 +144,28 @@ describe('US-VW-06 Rename a person (person page)', () => {
     expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
   });
 
-  it('US-PG-01 AK-3: a same-named person elsewhere is saved after confirmation', async () => {
+  it('US-PG-01 AK-3: hints at a same-named person elsewhere while typing; saving confirms', async () => {
     const { user, db } = await startRenaming();
 
     await user.clear(screen.getByLabelText('Neuer Name'));
-    await user.type(screen.getByLabelText('Neuer Name'), 'Zoe');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Es gibt bereits eine Person namens „Zoe“. Trotzdem umbenennen?',
+    await user.type(screen.getByLabelText('Neuer Name'), 'zoe');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Es gibt bereits eine Person namens „zoe“. Mit „Speichern“ wird trotzdem umbenannt.',
     );
     expect((await db.persons.get(ANNA))?.name).toBe('Anna');
-    await user.click(screen.getByRole('button', { name: 'Trotzdem umbenennen' }));
+    await user.click(screen.getByRole('button', { name: 'Speichern' }));
 
-    expect(await screen.findByRole('heading', { name: 'Zoe', level: 1 })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'zoe', level: 1 })).toBeInTheDocument();
+  });
+
+  it('a blank name shows an error while typing and blocks saving', async () => {
+    const { user } = await startRenaming();
+
+    await user.clear(screen.getByLabelText('Neuer Name'));
+    await user.type(screen.getByLabelText('Neuer Name'), '  ');
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Bitte gib einen Namen ein.');
+    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
   });
 
   it('cancelling keeps the old name without asking', async () => {

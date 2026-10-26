@@ -16,15 +16,10 @@
   padding: 6px 8px;
 }
 
-.cancel,
-.confirm {
+.cancel {
   color: var(--color-text);
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-}
-
-.confirm {
-  justify-self: start;
 }
 
 .notices {

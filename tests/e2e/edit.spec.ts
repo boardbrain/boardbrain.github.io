@@ -66,17 +66,16 @@ test.describe('US-VW-06 Rename a person', () => {
     await expect(page.getByRole('list', { name: 'Mitglieder' })).toContainText('Anna');
   });
 
-  test('a same-named person outside her tables needs a confirmation', async ({ page }) => {
+  test('a same-named person outside her tables is a hint while typing', async ({ page }) => {
     await createPersons(page, 'Ana', 'Clara');
     await openPerson(page, 'Ana');
 
     await page.getByRole('button', { name: 'Umbenennen' }).click();
     await page.getByLabel('Neuer Name').fill('Clara');
-    await page.getByRole('button', { name: 'Speichern' }).click();
     await expect(page.getByRole('alert')).toContainText(
-      'Es gibt bereits eine Person namens „Clara“. Trotzdem umbenennen?',
+      'Es gibt bereits eine Person namens „Clara“. Mit „Speichern“ wird trotzdem umbenannt.',
     );
-    await page.getByRole('button', { name: 'Trotzdem umbenennen' }).click();
+    await page.getByRole('button', { name: 'Speichern' }).click();
 
     await expect(page.getByRole('heading', { name: 'Clara', level: 1 })).toBeVisible();
   });
@@ -180,10 +179,10 @@ test.describe('US-VW-07 Rename a custom game', () => {
     const field = page.getByLabel('Neuer Spielname');
     for (const taken of ['skyjo', 'CATAN']) {
       await field.fill(taken);
-      await page.getByRole('button', { name: 'Speichern' }).click();
       await expect(page.getByRole('alert')).toContainText(
         `Es gibt bereits ein Spiel namens „${taken}“.`,
       );
+      await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
     }
     await field.fill('UNO');
     await page.getByRole('button', { name: 'Speichern' }).click();
