@@ -34,13 +34,14 @@ test.describe('US-SP-02 Create a custom game', () => {
     await createGame(page, 'Uno');
     await expect(custom.getByRole('listitem')).toHaveText([/^Uno/]);
 
-    await createGame(page, 'uno');
-    await expect(page.getByRole('alert')).toContainText('Es gibt bereits ein Spiel namens „uno“.');
-
-    await createGame(page, 'CATAN');
-    await expect(page.getByRole('alert')).toContainText(
-      'Es gibt bereits ein Spiel namens „CATAN“.',
-    );
+    // Checked while typing; saving stays blocked.
+    for (const taken of ['uno', 'CATAN']) {
+      await page.getByLabel('Name').fill(taken);
+      await expect(page.getByRole('alert')).toContainText(
+        `Es gibt bereits ein Spiel namens „${taken}“.`,
+      );
+      await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    }
 
     await page.reload();
     await expect(custom.getByRole('listitem')).toHaveText([/^Uno/]);

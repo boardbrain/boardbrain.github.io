@@ -6,26 +6,13 @@ import { Notice } from '@/ui/components/Notice';
 import { UnsavedChangesGuard } from '@/ui/components/UnsavedChangesGuard';
 import styles from './RenameForm.module.css';
 
-/**
- * Hint that does not block saving, e.g. about a same-named person elsewhere (US-PG-01 AK-3).
- */
-export type RenameHint = {
-  readonly text: string;
-  readonly note?: string;
-};
-
 type RenameFormOptions<E extends string> = {
   readonly initialName: string;
   /** Accessible name of the field, e.g. "Neuer Name". */
   readonly fieldLabel: string;
   /** Checked while typing; a message blocks saving (US-VW-06 AK-2, US-VW-07 AK-1). */
   readonly liveError?: (name: string) => string | null;
-  /**
-   * Checked while typing; a hint is shown, and saving after seeing it counts as the
-   * confirmation (US-PG-01 AK-3).
-   */
-  readonly liveHint?: (name: string) => RenameHint | null;
-  readonly save: (name: string, isConfirmed: boolean) => Promise<Result<unknown, E>>;
+  readonly save: (name: string) => Promise<Result<unknown, E>>;
   /** Text for an error the service still reports, e.g. after a change in the meantime. */
   readonly messageFor: (error: E, name: string) => string;
   /** Called after saving and after cancelling. */
@@ -44,7 +31,6 @@ export function useRenameForm<E extends string>({
   initialName,
   fieldLabel,
   liveError,
-  liveHint,
   save,
   messageFor,
   onClose,
@@ -54,7 +40,6 @@ export function useRenameForm<E extends string>({
   const [isPending, startTransition] = useTransition();
   const isChanged = cleanName(name) !== initialName;
   const blockingError = isBlankName(name) ? t('verwaltung.nameLeer') : (liveError?.(name) ?? null);
-  const hint = isChanged && blockingError === null ? (liveHint?.(name) ?? null) : null;
   const canSave = isChanged && blockingError === null && !isPending;
   const savedError = submitted?.name === name ? messageFor(submitted.error, cleanName(name)) : null;
 
@@ -65,9 +50,8 @@ export function useRenameForm<E extends string>({
     }
     // Unexpected errors in the transition reach the error boundary of the view (ADR-025).
     const value = name;
-    const isConfirmed = hint !== null;
     startTransition(async () => {
-      const result = await save(value, isConfirmed);
+      const result = await save(value);
       startTransition(() => {
         if (result.ok) {
           onClose();
@@ -112,21 +96,13 @@ export function useRenameForm<E extends string>({
 
   const error = blockingError ?? savedError;
   const notices =
-    error !== null || hint !== null ? (
+    error === null ? null : (
       <div className={styles.notices}>
-        {error !== null && (
-          <Notice tone="error">
-            <p>{error}</p>
-          </Notice>
-        )}
-        {error === null && hint !== null && (
-          <Notice tone="warning">
-            <p>{hint.text}</p>
-            {hint.note !== undefined && <p className={styles.note}>{hint.note}</p>}
-          </Notice>
-        )}
+        <Notice tone="error">
+          <p>{error}</p>
+        </Notice>
       </div>
-    ) : null;
+    );
 
   return { form, notices };
 }

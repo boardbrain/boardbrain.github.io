@@ -2612,19 +2612,17 @@
         state.ren = null;
         render();
       }
-      // Everything is checked while typing (PO decision round 4): errors block "Speichern",
-      // the hint about a same-named person elsewhere does not, saving then confirms it.
+      // Everything is checked while typing (PO decisions rounds 4 and 5): an error blocks
+      // "Speichern". Person, table and game names are unique in the whole app (E-31).
       function renameIssues() {
         const r = state.ren;
         const v = r.value.trim();
         const blank = v === '';
-        // US-VW-06 AK-2: another member at one of her tables already has the name.
-        const conflicts = r.kind === 'person' && !blank ? groupsOf(r.id).filter((g) => g.members.some((m) => m.pid !== r.id && same(person(m.pid).name, v))) : [];
+        // US-VW-06 AK-2: no other person may have the name.
+        const personTaken = r.kind === 'person' && !blank && DB.persons.some((p) => p.id !== r.id && same(p.name, v));
         // US-VW-07 AK-1: unique among all games, Catan included.
         const gameTaken = r.kind === 'game' && !blank && (same('Catan', v) || DB.games.some((x) => x.id !== r.id && same(x.name, v)));
-        // Like US-PG-01 AK-3: another person with the name elsewhere is only a hint.
-        const duplicate = r.kind === 'person' && !blank && v !== r.original && conflicts.length === 0 && DB.persons.some((p) => p.id !== r.id && same(p.name, v));
-        return { blank, unchanged: v === r.original, conflicts, gameTaken, duplicate };
+        return { blank, unchanged: v === r.original, personTaken, gameTaken };
       }
       function saveRename() {
         const r = state.ren;
@@ -2641,7 +2639,7 @@
       function renameParts() {
         const r = state.ren;
         const is = renameIssues();
-        const canSave = !is.blank && !is.unchanged && is.conflicts.length === 0 && !is.gameTaken;
+        const canSave = !is.blank && !is.unchanged && !is.personTaken && !is.gameTaken;
         const v = r.value.trim();
         const input = h('input', {
           class: 'field', id: 'renField', value: r.value, autocomplete: 'off', 'aria-label': r.kind === 'person' ? 'Neuer Name' : 'Neuer Spielname',
@@ -2650,12 +2648,8 @@
         });
         const notices = [
           is.blank && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Bitte gib einen Namen ein.')),
-          is.conflicts.length > 0 && h('div', { class: 'notice', role: 'alert' },
-            h('p', {}, (is.conflicts.length === 1 ? 'Am Tisch ' : 'An den Tischen ') + quoteList(is.conflicts.map((g) => g.name)) + ' sitzt schon jemand namens „' + v + '“. An einem Tisch müssen die Namen verschieden sein.')),
+          is.personTaken && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Es gibt bereits eine Person namens „' + v + '“. Bitte wähle einen anderen Namen.')),
           is.gameTaken && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Es gibt bereits ein Spiel namens „' + v + '“. Bitte wähle einen anderen Namen.')),
-          is.duplicate && h('div', { class: 'notice warn', role: 'alert' },
-            h('p', {}, 'Es gibt bereits eine Person namens „' + v + '“. Mit „Speichern“ wird trotzdem umbenannt.'),
-            h('p', { class: 'small muted' }, 'Gleichnamige Personen können später nicht Mitglied derselben Gruppe werden.')),
         ];
         const buttons = h('div', { class: 'btnRow tight' },
           h('button', { class: 'ghostBtn', onclick: cancelRename }, 'Abbrechen'),
@@ -2870,7 +2864,9 @@
           oninput: (e) => { d.name = e.target.value; state.caret = e.target.selectionStart; state.focusEd = true; render(); },
         });
         const dirty = editSignature(d) !== d.orig;
-        const canSave = dirty && d.name.trim() !== '';
+        // US-VW-02 AK-1: the name of another table is taken (E-31).
+        const nameTaken = DB.groups.some((other) => other.id !== d.gid && same(other.name, d.name));
+        const canSave = dirty && d.name.trim() !== '' && !nameTaken;
         return h('div', { class: 'edBackdrop' + (wideK ? ' wideEd' : '') },
           h('div', { class: 'edDialog', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'edT' },
             h('div', { class: 'edHead' }, h('button', { class: 'squareBtn', 'aria-label': 'Schließen', onclick: back }, icon(wideK ? 'close' : 'back')), h('h2', { id: 'edT' }, 'Tisch bearbeiten')),
@@ -2880,7 +2876,7 @@
                 h('p', { class: 'lockNote' }, icon('people', 18), 'Wer am Tisch sitzt, bleibt fest. Für eine andere Runde legst du einen neuen Tisch an.')),
               h('div', { class: 'edColumns' }, h('div', { style: { display: 'grid', justifyItems: 'center' } }, table), colorCard),
               h('div', { class: 'edColumns' },
-                h('div', { class: 'edSection' }, h('label', { class: 'lbl', for: 'edName' }, 'Gruppenname'), nameInput, d.name.trim() === '' && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Bitte gib einen Namen ein.'))),
+                h('div', { class: 'edSection' }, h('label', { class: 'lbl', for: 'edName' }, 'Gruppenname'), nameInput, d.name.trim() === '' && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Bitte gib einen Namen ein.')), nameTaken && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Es gibt bereits einen Tisch namens „' + d.name.trim() + '“. Bitte wähle einen anderen Namen.'))),
                 binding),
               h('div', { class: 'saveBar' }, h('button', { class: 'primary', disabled: !canSave, onclick: saveEdit }, 'Änderungen speichern')))));
       }
@@ -3013,8 +3009,7 @@
             'Kleine Pille „✎ Umbenennen“ unter der Karte (wie „Bearbeiten“ am Tisch). Beim Antippen ersetzen Eingabefeld und „Abbrechen | Speichern“ nebeneinander die Zeilen „dabei seit“ und die Pillen; die Höhe bleibt gleich, darunter verschiebt sich nichts. Nur ein Fehler oder Hinweis erscheint darunter.',
             'Gespeichert wird erst mit „Speichern“ oder der Eingabetaste; „Abbrechen“ oder Esc verwirft ohne Rückfrage, weil das ausdrücklich gewählt ist.',
             'Alles wird schon beim Tippen geprüft, auch bei Spielen und Tischen: Ein Fehler erscheint sofort unter der Karte, und „Speichern“ bleibt gesperrt – bei leerem oder unverändertem Namen ebenso.',
-            'Sitzt an einem ihrer Tische schon jemand mit dem neuen Namen, erscheint sofort beim Tippen ein Fehler mit den Tischen, und Speichern bleibt gesperrt (AK-2).',
-            'Heißt nur jemand außerhalb ihrer Tische so, erscheint beim Tippen ein Hinweis; „Speichern“ bleibt möglich und gilt als Bestätigung (US-PG-01 AK-3).',
+            'Personennamen sind app-weit eindeutig (E-31): Heißt schon eine andere Person so, auch eine archivierte, erscheint sofort beim Tippen ein Fehler, und Speichern bleibt gesperrt (AK-2). Ebenso beim Anlegen (US-PG-01 AK-3).',
             'Der neue Name erscheint danach überall: Liste, Tische, Spielraum (AK-1).',
           ]),
           spec('Tisch bearbeiten (US-VW-02)', [
@@ -3023,6 +3018,7 @@
             'Farben tauschen wie beim Anlegen. Ändert sich die Bindung, bleiben vorhandene Farben; fehlende Catan-Farben werden automatisch vergeben, bei „Catan ausschließen“ fallen sie weg (AK-4, AK-6).',
             '„Nur Catan“ und „Catan ausschließen“ ab 5 Personen gesperrt mit Grund (AK-3).',
             '„Änderungen speichern“ erst aktiv, wenn sich etwas geändert hat.',
+            'Tischnamen sind app-weit eindeutig (E-31): ein vergebener Name zeigt beim Tippen einen Fehler, auch der Namensvorschlag beim Anlegen (US-PG-02 AK-8).',
           ]),
           spec('Eigenes Spiel (US-VW-07)', [
             'Eigene Spiele in der Spieleliste sind jetzt Zeilen mit ›; sie öffnen die neue Spielseite #/verwaltung/spiele/‹id›.',

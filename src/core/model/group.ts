@@ -241,27 +241,3 @@ export function editGroup(group: Group, changes: GroupChanges): Result<Group, Gr
   );
   return ok({ ...group, name, binding: changes.binding, members, updatedAt: changes.now });
 }
-
-/**
- * Groups of the person in which another member has the given name (US-VW-06 AK-2, FA-VW-01):
- * renaming the person to this name would make two names in the group equal. `persons` must
- * contain the members of the groups.
- */
-export function findNameConflicts(
-  groups: readonly Group[],
-  persons: readonly Person[],
-  personId: PersonId,
-  name: string,
-): Group[] {
-  return groups.filter(
-    (group) =>
-      group.members.some((member) => member.personId === personId) &&
-      group.members.some((member) => {
-        if (member.personId === personId) {
-          return false;
-        }
-        const other = persons.find((person) => person.id === member.personId);
-        return other !== undefined && isSameName(other.name, name);
-      }),
-  );
-}

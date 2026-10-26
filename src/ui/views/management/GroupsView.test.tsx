@@ -564,3 +564,25 @@ describe('US-VW-05 Tables in the room open their page', () => {
     expect(table).toHaveAttribute('href', `/verwaltung/gruppen/${id}`);
   });
 });
+
+describe('US-PG-02 AK-8 Unique table names', () => {
+  it('shows a taken suggested name at once and blocks saving', async () => {
+    const user = userEvent.setup();
+    const { db } = renderWithApp(<GroupsView />);
+    await addPersons(db, 2);
+    await db.groups.add(aGroup({ name: 'Anna & Ben', archived: true }));
+    await openEditor(user);
+
+    await bring(user, 'Anna', 'Ben');
+
+    const editor = screen.getByRole('dialog', { name: 'Neuer Tisch' });
+    expect(within(editor).getByRole('alert')).toHaveTextContent(
+      'Es gibt bereits einen Tisch namens „Anna & Ben“. Bitte wähle einen anderen Namen.',
+    );
+    expect(within(editor).getByRole('button', { name: 'Gruppe anlegen' })).toBeDisabled();
+
+    await user.type(within(editor).getByLabelText('Gruppenname'), ' 2');
+    expect(within(editor).queryByRole('alert')).not.toBeInTheDocument();
+    expect(within(editor).getByRole('button', { name: 'Gruppe anlegen' })).toBeEnabled();
+  });
+});

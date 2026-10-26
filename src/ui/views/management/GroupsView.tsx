@@ -151,6 +151,7 @@ export function GroupsView(): React.JSX.Element {
           <GroupEditor
             persons={activePersons}
             customGames={customGames ?? []}
+            takenNames={(groups ?? []).map((group) => group.name)}
             onSaved={() => {
               setIsEditing(false);
             }}

@@ -3,7 +3,6 @@ import { InvariantError } from '@/core/shared';
 import {
   createGroup,
   editGroup,
-  findNameConflicts,
   findSameNamedPersons,
   suggestGroupName,
   type Group,
@@ -467,31 +466,5 @@ describe('US-VW-02 Edit a group', () => {
     expect(() => editGroup(group, changes(group, { colors: defaultColors(3, 'both') }))).toThrow(
       InvariantError,
     );
-  });
-});
-
-describe('US-VW-06 AK-2: name conflicts in the groups of a person', () => {
-  const persons = people('Anna', 'Ben', 'Clara', 'Dora');
-  const [anna, ben, clara, dora] = persons;
-  if (anna === undefined || ben === undefined || clara === undefined || dora === undefined) {
-    throw new Error('four test persons exist');
-  }
-  const annaBen = aStoredGroup([anna, ben]);
-  const claraDora = {
-    ...aStoredGroup([clara, dora]),
-    id: toGroupId('00000000-0000-4000-8000-0000000000c2'),
-  };
-  const groups = [annaBen, claraDora];
-
-  it('finds the group in which another member has the new name, ignoring case', () => {
-    expect(findNameConflicts(groups, persons, anna.id, ' BEN ')).toEqual([annaBen]);
-  });
-
-  it('ignores groups the person is not a member of', () => {
-    expect(findNameConflicts(groups, persons, anna.id, 'Clara')).toEqual([]);
-  });
-
-  it('ignores the person itself', () => {
-    expect(findNameConflicts(groups, persons, anna.id, 'anna')).toEqual([]);
   });
 });

@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router';
 import { parseGroupId, type Group, type Person } from '@/core/model';
 import { formatDate } from '@/i18n/format';
 import { t } from '@/i18n/t';
-import { useCustomGames, useGroup, usePersons } from '@/infra/db/readHooks';
+import { useCustomGames, useGroup, useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { EditorDialog } from '@/ui/components/EditorDialog';
 import { ChevronIcon, PenIcon } from '@/ui/components/Icons';
@@ -58,6 +58,7 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
   const group = useGroup(db, parsed.ok ? parsed.value : null);
   const persons = usePersons(db);
   const customGames = useCustomGames(db);
+  const groups = useGroups(db);
   const closeEditor = useGoBack(groupHref(groupId));
 
   if (group === undefined || persons === undefined) {
@@ -144,6 +145,9 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
           <GroupEditor
             group={group}
             persons={persons}
+            takenNames={(groups ?? [])
+              .filter((other) => other.id !== group.id)
+              .map((other) => other.name)}
             customGames={customGames ?? []}
             onSaved={closeEditor}
           />

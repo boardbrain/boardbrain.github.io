@@ -16,8 +16,6 @@ export const de = {
     speichern: 'Speichern',
     abbrechen: 'Abbrechen',
     zurueck: 'Zurück',
-    zitat: '„{name}“',
-    liste: '{vorne} und {letzter}',
   },
   verwerfen: {
     titel: 'Änderungen verwerfen?',
@@ -56,10 +54,7 @@ export const de = {
     neu: 'Neue Person',
     liste: 'Alle Personen',
     leer: 'Noch keine Personen angelegt.',
-    gleicherName: 'Es gibt bereits eine Person namens „{name}“. Trotzdem anlegen?',
-    gleicherNameGruppe:
-      'Gleichnamige Personen können später nicht Mitglied derselben Gruppe werden.',
-    trotzdemAnlegen: 'Trotzdem anlegen',
+    gleicherName: 'Es gibt bereits eine Person namens „{name}“. Bitte wähle einen anderen Namen.',
     suchen: 'Personen suchen',
     suchfeld: 'Person suchen',
     suchfeldSchliessen: 'Suche leeren und schließen',
@@ -79,14 +74,6 @@ export const de = {
     nichtGefunden: 'Diese Person gibt es nicht.',
     umbenennen: 'Umbenennen',
     neuerName: 'Neuer Name',
-    konfliktEiner:
-      'Am Tisch {tische} sitzt schon jemand namens „{name}“. An einem Tisch müssen die Namen verschieden sein.',
-    konfliktMehrere:
-      'An den Tischen {tische} sitzt schon jemand namens „{name}“. An einem Tisch müssen die Namen verschieden sein.',
-    konfliktAllgemein:
-      'An einem ihrer Tische sitzt schon jemand namens „{name}“. An einem Tisch müssen die Namen verschieden sein.',
-    gleicherNameUmbenennen:
-      'Es gibt bereits eine Person namens „{name}“. Mit „Speichern“ wird trotzdem umbenannt.',
   },
   gruppen: {
     titel: 'Tische',
@@ -151,6 +138,7 @@ export const de = {
     amTisch: 'Am Tisch · {anzahl}',
     mitglieder: 'Mitglieder',
     nichtGefunden: 'Diesen Tisch gibt es nicht.',
+    gleicherName: 'Es gibt bereits einen Tisch namens „{name}“. Bitte wähle einen anderen Namen.',
     bearbeiten: 'Bearbeiten',
     bearbeitenTitel: 'Tisch bearbeiten',
     amTischTitel: 'Am Tisch',

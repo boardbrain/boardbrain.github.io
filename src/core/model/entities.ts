@@ -93,8 +93,8 @@ function renamed<T extends Person | CustomGame>(
 }
 
 /**
- * Gives a person a new, cleaned name (US-VW-06 AK-1, FA-VW-01). Whether the name clashes
- * with a member of one of the person's groups is checked by `findNameConflicts`.
+ * Gives a person a new, cleaned name (US-VW-06 AK-1, FA-VW-01). Uniqueness among all persons
+ * is checked by the caller, which knows the other persons (E-31).
  */
 export function renamePerson(
   person: Person,

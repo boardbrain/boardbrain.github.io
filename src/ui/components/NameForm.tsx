@@ -1,6 +1,7 @@
 import { useId, type ReactNode, type SubmitEvent } from 'react';
 import { isBlankName } from '@/core/model';
 import { t } from '@/i18n/t';
+import { Notice } from './Notice';
 import styles from './NameForm.module.css';
 
 type NameFormProps = {
@@ -11,13 +12,15 @@ type NameFormProps = {
   readonly isFocused?: boolean;
   readonly onValueChange: (value: string) => void;
   readonly onSubmit: () => void;
-  /** Hints below the form, e.g. about a duplicate name. */
+  /** Found while typing, e.g. a name that is taken; it blocks saving (E-31). */
+  readonly error?: string | null;
+  /** Hints below the form, e.g. after a failed save. */
   readonly children?: ReactNode;
 };
 
 /**
  * Form for creating a record by name. Saving is impossible while the name is blank
- * (US-PG-01 AK-2) or a save is still running.
+ * (US-PG-01 AK-2), an error is shown or a save is still running.
  */
 export function NameForm({
   title,
@@ -26,6 +29,7 @@ export function NameForm({
   isFocused = false,
   onValueChange,
   onSubmit,
+  error = null,
   children,
 }: NameFormProps): React.JSX.Element {
   const titleId = useId();
@@ -33,7 +37,9 @@ export function NameForm({
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>): void {
     event.preventDefault();
-    onSubmit();
+    if (error === null) {
+      onSubmit();
+    }
   }
 
   return (
@@ -54,10 +60,15 @@ export function NameForm({
             onValueChange(event.target.value);
           }}
         />
-        <button type="submit" disabled={isBlankName(value) || isPending}>
+        <button type="submit" disabled={isBlankName(value) || error !== null || isPending}>
           {t('allgemein.speichern')}
         </button>
       </div>
+      {error !== null && (
+        <Notice tone="error">
+          <p>{error}</p>
+        </Notice>
+      )}
       {children}
     </form>
   );

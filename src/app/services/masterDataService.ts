@@ -4,7 +4,6 @@ import {
   createGroup,
   createPerson,
   editGroup,
-  findNameConflicts,
   GROUP_SIZE,
   renameCustomGame,
   renamePerson,
@@ -29,7 +28,9 @@ import type { Clock, IdGenerator, MasterDataStore } from '@/app/ports';
 import { findSupportedGame, gameCapabilities } from '@/games/registry';
 
 /**
- * Error code when a record with the same name already exists (US-PG-01 AK-3, US-SP-02 AK-2).
+ * Error code when a record with the same name already exists: persons, groups and games have
+ * names that are unique in the whole app (FA-PG-09, E-31, US-PG-01 AK-3, US-PG-02 AK-8,
+ * US-SP-02 AK-2).
  */
 export type NameDuplicateError = 'name-duplicate';
 
@@ -38,15 +39,7 @@ export type NameDuplicateError = 'name-duplicate';
  */
 export type CreatePersonInput = {
   readonly name: string;
-  /** The user has confirmed the hint about an existing person with the same name. */
-  readonly isDuplicateConfirmed: boolean;
 };
-
-/**
- * Error code when another member of one of the person's groups has the new name
- * (US-VW-06 AK-2). The UI finds the affected groups with `findNameConflicts`.
- */
-export type SameNamedMemberError = 'same-named-member';
 
 /**
  * Input for renaming a person.
@@ -54,8 +47,6 @@ export type SameNamedMemberError = 'same-named-member';
 export type RenamePersonInput = {
   readonly personId: PersonId;
   readonly name: string;
-  /** The user has confirmed the hint about another person with the same name. */
-  readonly isDuplicateConfirmed: boolean;
 };
 
 /**
@@ -93,8 +84,8 @@ export type CreateGroupInput = {
  */
 export type MasterDataService = {
   /**
-   * Creates a person (US-PG-01). A same-named person is only a hint: without confirmation
-   * the result is `name-duplicate`, with confirmation the person is saved.
+   * Creates a person (US-PG-01). A name that another person has, archived ones included, is
+   * rejected with `name-duplicate` (AK-3).
    */
   createPerson(
     input: CreatePersonInput,
@@ -102,27 +93,27 @@ export type MasterDataService = {
   /**
    * Creates a group (US-PG-02, US-PG-03). The members are checked against the stored persons,
    * and the binding against the games; a person or game that does not exist is a programming
-   * error and throws.
+   * error and throws. A name that another group has is rejected with `name-duplicate` (AK-8).
    */
-  createGroup(input: CreateGroupInput): Promise<Result<Group, GroupError>>;
+  createGroup(input: CreateGroupInput): Promise<Result<Group, GroupError | NameDuplicateError>>;
   /**
    * Creates a custom game (US-SP-02). Same-named games, including supported ones such as
    * Catan, are rejected with `name-duplicate`.
    */
   createCustomGame(name: string): Promise<Result<CustomGame, NameEmptyError | NameDuplicateError>>;
   /**
-   * Renames a person (US-VW-06). A name that another member of one of the person's groups has
-   * is rejected (AK-2). Another same-named person is only a hint as in US-PG-01 AK-3: without
-   * confirmation the result is `name-duplicate`. A person that does not exist throws.
+   * Renames a person (US-VW-06). A name that another person has, archived ones included, is
+   * rejected with `name-duplicate` (AK-2). A person that does not exist throws.
    */
   renamePerson(
     input: RenamePersonInput,
-  ): Promise<Result<Person, NameEmptyError | SameNamedMemberError | NameDuplicateError>>;
+  ): Promise<Result<Person, NameEmptyError | NameDuplicateError>>;
   /**
-   * Changes name, colours and binding of a group; the members stay the same (US-VW-02). A
-   * group or game that does not exist throws.
+   * Changes name, colours and binding of a group; the members stay the same (US-VW-02). A name
+   * that another group has is rejected with `name-duplicate` (AK-1). A group or game that does
+   * not exist throws.
    */
-  editGroup(input: EditGroupInput): Promise<Result<Group, GroupEditError>>;
+  editGroup(input: EditGroupInput): Promise<Result<Group, GroupEditError | NameDuplicateError>>;
   /**
    * Renames a custom game (US-VW-07). Names of other games, including supported ones such as
    * Catan, are rejected with `name-duplicate`. Supported games are not custom games and cannot
@@ -152,16 +143,16 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
   const { store, ids, clock, supportedGameNames } = deps;
 
   return {
-    async createPerson({ name, isDuplicateConfirmed }) {
+    async createPerson({ name }) {
       const created = createPerson({ id: toPersonId(ids.newId()), name, now: clock.now() });
       if (!created.ok) {
         return created;
       }
       return store.transaction(async ({ persons }) => {
         const existing = await persons.listAll();
-        // US-PG-01 AK-3: archived persons still exist and therefore count as well.
+        // US-PG-01 AK-3, E-31: archived persons still exist and therefore count as well.
         const names = existing.map((person) => person.name);
-        if (!isDuplicateConfirmed && containsName(names, created.value.name)) {
+        if (containsName(names, created.value.name)) {
           return err('name-duplicate');
         }
         await persons.add(created.value);
@@ -193,6 +184,11 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
         if (!created.ok) {
           return created;
         }
+        // US-PG-02 AK-8, E-31: unique among all groups, archived ones included.
+        const names = (await groups.listAll()).map((group) => group.name);
+        if (containsName(names, created.value.name)) {
+          return err('name-duplicate');
+        }
         await groups.add(created.value);
         return created;
       });
@@ -215,8 +211,8 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
       });
     },
 
-    async renamePerson({ personId, name, isDuplicateConfirmed }) {
-      return store.transaction(async ({ persons, groups }) => {
+    async renamePerson({ personId, name }) {
+      return store.transaction(async ({ persons }) => {
         const allPersons = await persons.listAll();
         const person = allPersons.find((candidate) => candidate.id === personId);
         assert(person !== undefined, `person ${personId} exists`);
@@ -224,20 +220,12 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
         if (!renamed.ok) {
           return renamed;
         }
-        // US-VW-06 AK-2, FA-VW-01: names stay unique within every group of the person.
-        const conflicts = findNameConflicts(
-          await groups.listAll(),
-          allPersons,
-          personId,
-          renamed.value.name,
-        );
-        if (conflicts.length > 0) {
-          return err('same-named-member');
-        }
+        // US-VW-06 AK-2, FA-VW-01: unique among all other persons; her own name does not count,
+        // so only changing the case is allowed.
         const otherNames = allPersons
           .filter((candidate) => candidate.id !== personId)
           .map((candidate) => candidate.name);
-        if (!isDuplicateConfirmed && containsName(otherNames, renamed.value.name)) {
+        if (containsName(otherNames, renamed.value.name)) {
           return err('name-duplicate');
         }
         await persons.update(renamed.value);
@@ -247,7 +235,8 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
 
     async editGroup({ groupId, name, binding, colors }) {
       return store.transaction(async ({ customGames, groups }) => {
-        const group = (await groups.listAll()).find((candidate) => candidate.id === groupId);
+        const allGroups = await groups.listAll();
+        const group = allGroups.find((candidate) => candidate.id === groupId);
         assert(group !== undefined, `group ${groupId} exists`);
         const boundGame =
           binding.kind === 'global'
@@ -256,6 +245,13 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
         const edited = editGroup(group, { name, binding, boundGame, colors, now: clock.now() });
         if (!edited.ok) {
           return edited;
+        }
+        // US-VW-02 AK-1, E-31: unique among all other groups.
+        const otherNames = allGroups
+          .filter((candidate) => candidate.id !== groupId)
+          .map((candidate) => candidate.name);
+        if (containsName(otherNames, edited.value.name)) {
+          return err('name-duplicate');
         }
         await groups.update(edited.value);
         return edited;

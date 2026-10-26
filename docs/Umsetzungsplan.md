@@ -26,7 +26,7 @@
 | 0.11 | 08.10.2026 | D-3 umgesetzt (#17): Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst; Design-Referenz `docs/design/d3-start-navigation-final-preview.html` mit Verweisen je Inkrement, Platz für „Ergebnis eintragen“ auf dem Start (7) |
 | 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, Spezifikation 0.10) in I6 eingeplant (7) |
 | 0.13 | 25.10.2026 | I1-E umgesetzt (#19): Personenliste als Spielkarten, Personenseite „Karte und Steckbrief“, Tischseite „Großer Tisch“; Design-Referenz `docs/design/i1e-persons-tables-final-preview.html`; Catan-Farben nur im Editor (5) |
-| 0.14 | 26.10.2026 | I1-F umgesetzt: Umbenennen an Ort und Stelle, Spielseite, Tisch bearbeiten wie „Neuer Tisch“ ohne Bank, kleine Pillen als Aktionen, Rückfrage bei ungespeicherten Änderungen; Design-Referenz `docs/design/i1f-edit-final-preview.html`; US-VW-02 AK-7 mit I6 (2, 5) |
+| 0.14 | 26.10.2026 | I1-F umgesetzt: Umbenennen an Ort und Stelle, Spielseite, Tisch bearbeiten wie „Neuer Tisch“ ohne Bank, kleine Pillen als Aktionen, Rückfrage bei ungespeicherten Änderungen; Design-Referenz `docs/design/i1f-edit-final-preview.html`; Personen- und Tischnamen app-weit eindeutig (E-31); US-VW-02 AK-7 mit I6 (2, 5) |
 
 ## 1. Zweck
 
@@ -166,7 +166,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Abnahme durch den Product Owner:** Person, Gruppe und eigenes Spiel umbenennen; Farbe und Bindung einer Gruppe ändern, Catan ausschließen und wieder zulassen; Konflikte (gleichnamige Person in einer Gruppe, doppelter Spielname, 5 Mitglieder an Catan) werden verhindert.
 - **Ergebnis der Designrunden (0.14):**
   - **Aktionen:** auf Personen-, Tisch- und Spielseite gleich als kleine Pillen unter den Angaben („✎ Umbenennen“, „✎ Bearbeiten“); Archivieren und Löschen kommen in I5 als Pillen daneben.
-  - **Umbenennen** von Person und eigenem Spiel an Ort und Stelle: Feld und „Abbrechen | Speichern“ ersetzen das Profil neben der Karte, darunter verschiebt sich nichts. Geprüft wird schon beim Tippen, bei Person, Spiel und Tisch gleich: Fehler erscheinen sofort und sperren „Speichern“. Eine gleichnamige Person außerhalb ihrer Tische ist nur ein Hinweis; „Speichern“ danach gilt als Bestätigung (Entscheidungen des Product Owners).
+  - **Umbenennen** von Person und eigenem Spiel an Ort und Stelle: Feld und „Abbrechen | Speichern“ ersetzen das Profil neben der Karte, darunter verschiebt sich nichts. Geprüft wird schon beim Tippen, bei Person, Spiel und Tisch gleich: Fehler erscheinen sofort und sperren „Speichern“. Personen- und Tischnamen sind app-weit eindeutig, auch beim Anlegen (E-31, Anforderungsdokumentation 0.17, Spezifikation 0.11; Entscheidungen des Product Owners).
   - **Spielseite** `#/verwaltung/spiele/‹id›` für eigene Spiele; Catan ist „fest eingebaut“ und hat keine.
   - **Tisch bearbeiten** wie „Neuer Tisch“, ohne Bank, unter einer eigenen Adresse.
   - **Rückfrage** „Änderungen verwerfen?“ beim Verlassen mit ungespeicherten Änderungen.

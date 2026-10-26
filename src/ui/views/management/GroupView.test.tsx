@@ -191,3 +191,30 @@ describe('US-VW-02 Edit a table (table page)', () => {
     expect(screen.getByRole('heading', { name: 'Freitagsrunde', level: 1 })).toBeInTheDocument();
   });
 });
+
+describe('US-VW-02 AK-1 Unique table names when editing', () => {
+  it('the name of another table is an error while typing; its own name is not', async () => {
+    const user = userEvent.setup();
+    const { db } = renderWithApp(<OverviewRoutes />, { path: PATH });
+    await addAnnaAndBen(db);
+    await db.groups.bulkAdd([
+      aGroup({ id: FRIDAY, name: 'Freitagsrunde' }),
+      aGroup({ id: toGroupId('00000000-0000-4000-8000-0000000000c9'), name: 'Familie' }),
+    ]);
+    await user.click(await screen.findByRole('link', { name: 'Bearbeiten' }));
+    const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });
+    const field = within(editor).getByLabelText('Gruppenname');
+
+    await user.clear(field);
+    await user.type(field, 'familie');
+    expect(within(editor).getByRole('alert')).toHaveTextContent(
+      'Es gibt bereits einen Tisch namens „familie“.',
+    );
+    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+
+    await user.clear(field);
+    await user.type(field, 'FREITAGSRUNDE');
+    expect(within(editor).queryByRole('alert')).not.toBeInTheDocument();
+    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toBeEnabled();
+  });
+});

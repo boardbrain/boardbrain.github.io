@@ -54,7 +54,7 @@ test.describe('US-VW-06 Rename a person', () => {
     // AK-2: Ben sits at the same table.
     await field.fill('ben');
     await expect(page.getByRole('alert')).toContainText(
-      'Am Tisch „Ana & Ben“ sitzt schon jemand namens „ben“.',
+      'Es gibt bereits eine Person namens „ben“.',
     );
     await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
 
@@ -66,18 +66,17 @@ test.describe('US-VW-06 Rename a person', () => {
     await expect(page.getByRole('list', { name: 'Mitglieder' })).toContainText('Anna');
   });
 
-  test('a same-named person outside her tables is a hint while typing', async ({ page }) => {
+  test('AK-2: the name of any other person is an error while typing', async ({ page }) => {
     await createPersons(page, 'Ana', 'Clara');
     await openPerson(page, 'Ana');
 
     await page.getByRole('button', { name: 'Umbenennen' }).click();
-    await page.getByLabel('Neuer Name').fill('Clara');
-    await expect(page.getByRole('alert')).toContainText(
-      'Es gibt bereits eine Person namens „Clara“. Mit „Speichern“ wird trotzdem umbenannt.',
-    );
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await page.getByLabel('Neuer Name').fill('clara');
 
-    await expect(page.getByRole('heading', { name: 'Clara', level: 1 })).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText(
+      'Es gibt bereits eine Person namens „clara“. Bitte wähle einen anderen Namen.',
+    );
+    await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
   });
 
   test('leaving with an unsaved name asks first', async ({ page }) => {
@@ -129,6 +128,22 @@ test.describe('US-VW-02 Edit a table', () => {
     await editor.getByRole('button', { name: 'Änderungen speichern' }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.getByText('Alle Spiele', { exact: true }).first()).toBeVisible();
+  });
+
+  test('AK-1: the name of another table is an error while typing', async ({ page }) => {
+    await createPersons(page, 'Anna', 'Ben', 'Clara');
+    await createTable(page, 'Anna', 'Ben');
+    await createTable(page, 'Anna', 'Clara');
+    await openTable(page, 'Anna & Ben');
+
+    await page.getByRole('link', { name: 'Bearbeiten' }).click();
+    const editor = page.getByRole('dialog', { name: 'Tisch bearbeiten' });
+    await editor.getByLabel('Gruppenname').fill('anna & clara');
+
+    await expect(editor.getByRole('alert')).toContainText(
+      'Es gibt bereits einen Tisch namens „anna & clara“.',
+    );
+    await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
   });
 
   test('AK-3: Catan is blocked for five persons', async ({ page }) => {

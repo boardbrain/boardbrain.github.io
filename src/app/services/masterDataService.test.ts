@@ -9,7 +9,7 @@ import {
 } from '@tests/support/masterDataFakes';
 import { describe, expect, it } from 'vitest';
 import type { MasterDataStore } from '@/app/ports';
-import { defaultColors, toGameId, toPersonId, type PersonId } from '@/core/model';
+import { defaultColors, toGameId, toGroupId, toPersonId, type PersonId } from '@/core/model';
 import { InvariantError } from '@/core/shared';
 import {
   createMasterDataService,
@@ -36,7 +36,7 @@ describe('US-PG-01 Create a person', () => {
     const store = new InMemoryMasterDataStore();
     const { service } = setUp(store);
 
-    const result = await service.createPerson({ name: ' Anna ', isDuplicateConfirmed: false });
+    const result = await service.createPerson({ name: ' Anna ' });
 
     const anna = {
       id: FIRST_ID,
@@ -53,40 +53,29 @@ describe('US-PG-01 Create a person', () => {
     const store = new InMemoryMasterDataStore();
     const { service } = setUp(store);
 
-    const result = await service.createPerson({ name, isDuplicateConfirmed: true });
+    const result = await service.createPerson({ name });
 
     expect(result).toEqual({ ok: false, error: 'name-empty' });
     expect(store.persons).toEqual([]);
   });
 
-  it('AK-3: reports a same-named person and does not save without confirmation', async () => {
+  it('AK-3: refuses a same-named person ignoring case and spaces', async () => {
     const store = new InMemoryMasterDataStore();
     store.persons = [aPerson({ name: 'Anna' })];
     const { service } = setUp(store);
 
-    const result = await service.createPerson({ name: ' aNNa', isDuplicateConfirmed: false });
+    const result = await service.createPerson({ name: ' aNNa' });
 
     expect(result).toEqual({ ok: false, error: 'name-duplicate' });
     expect(store.persons).toHaveLength(1);
   });
 
-  it('AK-3: saves a same-named person after confirmation', async () => {
-    const store = new InMemoryMasterDataStore();
-    store.persons = [aPerson({ name: 'Anna' })];
-    const { service } = setUp(store);
-
-    const result = await service.createPerson({ name: 'anna', isDuplicateConfirmed: true });
-
-    expect(result.ok).toBe(true);
-    expect(store.persons.map((person) => person.name)).toEqual(['Anna', 'anna']);
-  });
-
-  it('AK-3: also reports a same-named archived person', async () => {
+  it('AK-3: also refuses the name of an archived person', async () => {
     const store = new InMemoryMasterDataStore();
     store.persons = [aPerson({ name: 'Anna', archived: true })];
     const { service } = setUp(store);
 
-    const result = await service.createPerson({ name: 'Anna', isDuplicateConfirmed: false });
+    const result = await service.createPerson({ name: 'Anna' });
 
     expect(result).toEqual({ ok: false, error: 'name-duplicate' });
   });
@@ -96,7 +85,7 @@ describe('US-PG-01 Create a person', () => {
     store.persons = [aPerson({ name: 'Anna' })];
     const { service } = setUp(store);
 
-    const result = await service.createPerson({ name: 'Ben', isDuplicateConfirmed: false });
+    const result = await service.createPerson({ name: 'Ben' });
 
     expect(result.ok).toBe(true);
     expect(store.persons).toHaveLength(2);
@@ -179,9 +168,7 @@ describe('Architecture 4.4 transaction boundary', () => {
     };
     const { service } = setUp(failing);
 
-    await expect(
-      service.createPerson({ name: 'Anna', isDuplicateConfirmed: false }),
-    ).rejects.toThrow('disk full');
+    await expect(service.createPerson({ name: 'Anna' })).rejects.toThrow('disk full');
     expect(store.persons).toEqual([]);
   });
 });
@@ -385,6 +372,7 @@ const LATER = '2026-10-26T20:00:00.000Z';
 const ANNA_ID = toPersonId('00000000-0000-4000-8000-0000000000a1');
 const BEN_ID = toPersonId('00000000-0000-4000-8000-0000000000a2');
 const CLARA_ID = toPersonId('00000000-0000-4000-8000-0000000000a3');
+const DORA_ID = toPersonId('00000000-0000-4000-8000-0000000000a4');
 
 function editSetUp(store: InMemoryMasterDataStore): MasterDataService {
   return createMasterDataService({
@@ -415,7 +403,6 @@ describe('US-VW-06 Rename a person', () => {
     const result = await service.renamePerson({
       personId: ANNA_ID,
       name: ' Anna ',
-      isDuplicateConfirmed: false,
     });
 
     const anna = aPerson({ id: ANNA_ID, name: 'Anna', updatedAt: LATER });
@@ -430,63 +417,52 @@ describe('US-VW-06 Rename a person', () => {
     const result = await service.renamePerson({
       personId: ANNA_ID,
       name: '  ',
-      isDuplicateConfirmed: true,
     });
 
     expect(result).toEqual({ ok: false, error: 'name-empty' });
     expect(store.persons[0]?.name).toBe('Ana');
   });
 
-  it('AK-2: refuses the name of another member of one of her groups, even when confirmed', async () => {
+  it('AK-2: refuses the name of another member of one of her groups', async () => {
     const store = storeWithTable();
     const service = editSetUp(store);
 
-    const result = await service.renamePerson({
-      personId: ANNA_ID,
-      name: 'ben',
-      isDuplicateConfirmed: true,
-    });
+    const result = await service.renamePerson({ personId: ANNA_ID, name: 'ben' });
 
-    expect(result).toEqual({ ok: false, error: 'same-named-member' });
+    expect(result).toEqual({ ok: false, error: 'name-duplicate' });
     expect(store.persons[0]?.name).toBe('Ana');
   });
 
-  it('US-PG-01 AK-3: reports a same-named person outside her groups without confirmation', async () => {
+  it('AK-2: refuses the name of a person outside her groups as well', async () => {
     const store = storeWithTable();
     const service = editSetUp(store);
 
     const result = await service.renamePerson({
       personId: ANNA_ID,
       name: 'Clara',
-      isDuplicateConfirmed: false,
     });
 
     expect(result).toEqual({ ok: false, error: 'name-duplicate' });
     expect(store.persons[0]?.name).toBe('Ana');
   });
 
-  it('US-PG-01 AK-3: saves a same-named person outside her groups after confirmation', async () => {
+  it('AK-2: refuses the name of an archived person', async () => {
     const store = storeWithTable();
+    store.persons = [...store.persons, aPerson({ id: DORA_ID, name: 'Dora', archived: true })];
     const service = editSetUp(store);
 
-    const result = await service.renamePerson({
-      personId: ANNA_ID,
-      name: 'Clara',
-      isDuplicateConfirmed: true,
-    });
+    const result = await service.renamePerson({ personId: ANNA_ID, name: 'DORA' });
 
-    expect(result.ok).toBe(true);
-    expect(store.persons.map((person) => person.name)).toEqual(['Clara', 'Ben', 'Clara']);
+    expect(result).toEqual({ ok: false, error: 'name-duplicate' });
   });
 
-  it('allows changing only the case of her own name without a hint', async () => {
+  it('allows changing only the case of her own name', async () => {
     const store = storeWithTable();
     const service = editSetUp(store);
 
     const result = await service.renamePerson({
       personId: ANNA_ID,
       name: 'ANA',
-      isDuplicateConfirmed: false,
     });
 
     expect(result.ok && result.value.name).toBe('ANA');
@@ -495,9 +471,9 @@ describe('US-VW-06 Rename a person', () => {
   it('throws for a person that does not exist', async () => {
     const service = editSetUp(new InMemoryMasterDataStore());
 
-    await expect(
-      service.renamePerson({ personId: ANNA_ID, name: 'Anna', isDuplicateConfirmed: false }),
-    ).rejects.toThrow(InvariantError);
+    await expect(service.renamePerson({ personId: ANNA_ID, name: 'Anna' })).rejects.toThrow(
+      InvariantError,
+    );
   });
 });
 
@@ -670,5 +646,63 @@ describe('US-VW-07 Rename a custom game', () => {
         name: 'Siedler',
       }),
     ).rejects.toThrow(InvariantError);
+  });
+});
+
+describe('E-31 Unique group names', () => {
+  const otherGroupId = toGroupId('00000000-0000-4000-8000-0000000000c2');
+
+  function storeWithTwoGroups(): InMemoryMasterDataStore {
+    const store = new InMemoryMasterDataStore();
+    store.persons = [aPerson({ id: ANNA_ID, name: 'Anna' }), aPerson({ id: BEN_ID, name: 'Ben' })];
+    store.groups = [
+      aGroup({ name: 'Freitagsrunde' }),
+      aGroup({ id: otherGroupId, name: 'Familie', archived: true }),
+    ];
+    return store;
+  }
+
+  it('US-PG-02 AK-8: refuses a new group with the name of an archived group', async () => {
+    const store = storeWithTwoGroups();
+    const service = editSetUp(store);
+
+    const result = await service.createGroup({
+      name: ' familie ',
+      binding: { kind: 'global' },
+      personIds: [ANNA_ID, BEN_ID],
+      colors: defaultColors(2, 'both'),
+    });
+
+    expect(result).toEqual({ ok: false, error: 'name-duplicate' });
+    expect(store.groups).toHaveLength(2);
+  });
+
+  it('US-VW-02 AK-1: refuses renaming a group to the name of another group', async () => {
+    const store = storeWithTwoGroups();
+    const service = editSetUp(store);
+
+    const result = await service.editGroup({
+      groupId: aGroup().id,
+      name: 'FAMILIE',
+      binding: { kind: 'global' },
+      colors: defaultColors(2, 'both'),
+    });
+
+    expect(result).toEqual({ ok: false, error: 'name-duplicate' });
+    expect(store.groups[0]?.name).toBe('Freitagsrunde');
+  });
+
+  it('US-VW-02 AK-1: allows changing only the case of its own name', async () => {
+    const store = storeWithTwoGroups();
+    const service = editSetUp(store);
+
+    const result = await service.editGroup({
+      groupId: aGroup().id,
+      name: 'FREITAGSRUNDE',
+      binding: { kind: 'global' },
+      colors: defaultColors(2, 'both'),
+    });
+
+    expect(result.ok && result.value.name).toBe('FREITAGSRUNDE');
   });
 });

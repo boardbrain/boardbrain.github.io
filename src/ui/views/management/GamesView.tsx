@@ -1,7 +1,13 @@
 import { useId, useState, useTransition } from 'react';
 import { Link } from 'react-router';
 import type { NameDuplicateError } from '@/app/services/masterDataService';
-import { cleanName, type CustomGame, type Group, type NameEmptyError } from '@/core/model';
+import {
+  cleanName,
+  containsName,
+  type CustomGame,
+  type Group,
+  type NameEmptyError,
+} from '@/core/model';
 import { SUPPORTED_GAMES } from '@/games/registry';
 import { useCustomGames, useGroups } from '@/infra/db/readHooks';
 import { t } from '@/i18n/t';
@@ -66,6 +72,14 @@ export function GamesView(): React.JSX.Element {
   }
 
   const visibleMessage = message?.submitted === name ? message : null;
+  // US-SP-02 AK-2: checked while typing against Catan and all custom games.
+  const isTaken = containsName(
+    [
+      ...SUPPORTED_GAMES.map((game) => t(game.nameKey)),
+      ...(customGames ?? []).map((game) => game.name),
+    ],
+    name,
+  );
 
   function handleNameChange(value: string): void {
     setName(value);
@@ -80,8 +94,9 @@ export function GamesView(): React.JSX.Element {
         isPending={isPending}
         onValueChange={handleNameChange}
         onSubmit={save}
+        error={isTaken ? t('spiele.gleicherName', { name: cleanName(name) }) : null}
       >
-        {visibleMessage?.error === 'name-duplicate' && (
+        {visibleMessage?.error === 'name-duplicate' && !isTaken && (
           <Notice tone="error">
             <p>{t('spiele.gleicherName', { name: cleanName(visibleMessage.submitted) })}</p>
           </Notice>

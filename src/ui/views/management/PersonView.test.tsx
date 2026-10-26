@@ -132,30 +132,20 @@ describe('US-VW-06 Rename a person (person page)', () => {
     expect((await db.persons.get(ANNA))?.name).toBe('Annika');
   });
 
-  it('AK-2: names the table while typing and blocks saving', async () => {
-    const { user } = await startRenaming();
-
-    await user.clear(screen.getByLabelText('Neuer Name'));
-    await user.type(screen.getByLabelText('Neuer Name'), 'BEN');
-
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Am Tisch „Freitagsrunde“ sitzt schon jemand namens „BEN“.',
-    );
-    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
-  });
-
-  it('US-PG-01 AK-3: hints at a same-named person elsewhere while typing; saving confirms', async () => {
+  it.each([
+    ['a member of her table', 'BEN'],
+    ['a person without a common table', 'zoe'],
+  ])('AK-2: the name of %s is an error while typing', async (_case, name) => {
     const { user, db } = await startRenaming();
 
     await user.clear(screen.getByLabelText('Neuer Name'));
-    await user.type(screen.getByLabelText('Neuer Name'), 'zoe');
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Es gibt bereits eine Person namens „zoe“. Mit „Speichern“ wird trotzdem umbenannt.',
-    );
-    expect((await db.persons.get(ANNA))?.name).toBe('Anna');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
+    await user.type(screen.getByLabelText('Neuer Name'), name);
 
-    expect(await screen.findByRole('heading', { name: 'zoe', level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      `Es gibt bereits eine Person namens „${name}“. Bitte wähle einen anderen Namen.`,
+    );
+    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    expect((await db.persons.get(ANNA))?.name).toBe('Anna');
   });
 
   it('a blank name shows an error while typing and blocks saving', async () => {

@@ -3,16 +3,14 @@ import { Link, useParams } from 'react-router';
 import {
   cleanName,
   countFellowPlayers,
-  findNameConflicts,
-  isSameName,
+  containsName,
   parsePersonId,
   tablesOfPerson,
   type CustomGame,
-  type Group,
   type Person,
   type PersonTable,
 } from '@/core/model';
-import { formatDate, formatQuotedList } from '@/i18n/format';
+import { formatDate } from '@/i18n/format';
 import { t } from '@/i18n/t';
 import { useCustomGames, useGroups, usePerson, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
@@ -94,7 +92,6 @@ function TableRows({ person, tables, customGames }: TableRowsProps): React.JSX.E
 type PersonRenameProps = {
   readonly person: Person;
   readonly persons: readonly Person[];
-  readonly groups: readonly Group[];
   readonly card: React.JSX.Element;
   readonly actions: React.JSX.Element;
   readonly onClose: () => void;
@@ -104,47 +101,22 @@ type PersonRenameProps = {
 function PersonRename({
   person,
   persons,
-  groups,
   card,
   actions,
   onClose,
 }: PersonRenameProps): React.JSX.Element {
   const { masterData } = useAppDependencies();
-  // AK-2: checked while typing, so the tables are named before saving.
-  function conflictText(name: string): string | null {
-    const conflicts = findNameConflicts(groups, persons, person.id, name);
-    if (conflicts.length === 0) {
-      return null;
-    }
-    return t(conflicts.length === 1 ? 'personen.konfliktEiner' : 'personen.konfliktMehrere', {
-      tische: formatQuotedList(conflicts.map((group) => group.name)),
-      name: cleanName(name),
-    });
-  }
+  const otherNames = persons.filter((other) => other.id !== person.id).map((other) => other.name);
   const { form, notices } = useRenameForm({
     initialName: person.name,
     fieldLabel: t('personen.neuerName'),
-    liveError: conflictText,
-    // US-PG-01 AK-3: another person with the name elsewhere is only a hint.
-    liveHint: (name) =>
-      persons.some((other) => other.id !== person.id && isSameName(other.name, name))
-        ? {
-            text: t('personen.gleicherNameUmbenennen', { name: cleanName(name) }),
-            note: t('personen.gleicherNameGruppe'),
-          }
-        : null,
-    save: (name, isConfirmed) =>
-      masterData.renamePerson({ personId: person.id, name, isDuplicateConfirmed: isConfirmed }),
-    // Only if someone changed the data in the meantime; the live checks show it right after.
-    messageFor: (error, name) => {
-      if (error === 'name-duplicate') {
-        return t('personen.gleicherNameUmbenennen', { name });
-      }
-      if (error === 'name-empty') {
-        return t('verwaltung.nameLeer');
-      }
-      return t('personen.konfliktAllgemein', { name });
-    },
+    // AK-2, E-31: no other person may have the name; checked while typing.
+    liveError: (name) =>
+      containsName(otherNames, name) ? t('personen.gleicherName', { name: cleanName(name) }) : null,
+    save: (name) => masterData.renamePerson({ personId: person.id, name }),
+    // Only if a person was created in the meantime; the live check shows it right after.
+    messageFor: (error, name) =>
+      error === 'name-duplicate' ? t('personen.gleicherName', { name }) : t('verwaltung.nameLeer'),
     onClose,
   });
   return (
@@ -213,7 +185,6 @@ export function PersonView(): React.JSX.Element | null {
         <PersonRename
           person={person}
           persons={persons}
-          groups={groups}
           card={card}
           actions={actions}
           onClose={() => {

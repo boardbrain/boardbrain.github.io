@@ -24,7 +24,6 @@ export {
 export {
   createGroup,
   editGroup,
-  findNameConflicts,
   findSameNamedPersons,
   GROUP_MAX_PLAYERS_WITH_COLORS,
   GROUP_SIZE,

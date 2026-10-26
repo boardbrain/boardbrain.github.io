@@ -3,6 +3,7 @@ import {
   CATAN_COLOR_KEYS,
   cleanName,
   colorSchemeOf,
+  containsName,
   findSameNamedPersons,
   GROUP_COLOR_KEYS,
   GROUP_MAX_PLAYERS_WITH_COLORS,
@@ -42,6 +43,8 @@ type GroupEditorProps = {
    * new group is created.
    */
   readonly group?: Group | undefined;
+  /** Names of all other groups: a group name must be unique (US-PG-02 AK-8, E-31). */
+  readonly takenNames: readonly string[];
 };
 
 const LOCK_ICON_SIZE = 18;
@@ -115,6 +118,7 @@ export function GroupEditor({
   customGames,
   onSaved,
   group,
+  takenNames,
 }: GroupEditorProps): React.JSX.Element {
   const { masterData } = useAppDependencies();
   const [memberIds, setMemberIds] = useState<readonly PersonId[]>(
@@ -147,10 +151,15 @@ export function GroupEditor({
       choice !== choiceOf(group) ||
       (choice === null && isCatanExcluded !== excludesCatan(group)) ||
       !sameColors(colors, colorsOf(group)));
+  // Checked while typing, the suggested name as well (US-PG-02 AK-8, US-VW-02 AK-1).
+  const isNameTaken = containsName(takenNames, name);
+  // A blank name is an error only once something was typed, not before members are chosen.
+  const isTypedNameBlank = typedName !== null && isBlankName(typedName);
   const canSave =
     isCountValid &&
     sameNamed.length === 0 &&
     !isBlankName(name) &&
+    !isNameTaken &&
     !isPending &&
     (group === undefined || isDirty);
   const activeIndex = Math.max(
@@ -401,13 +410,19 @@ export function GroupEditor({
               setTypedName(event.target.value);
             }}
           />
-          {/* Checked while typing like renaming (design I1-F); not before anything was typed. */}
-          {typedName !== null && isBlankName(typedName) ? (
+          {/* Checked while typing like renaming (design I1-F). */}
+          {isTypedNameBlank && (
             <Notice tone="error">
               <p>{t('verwaltung.nameLeer')}</p>
             </Notice>
-          ) : (
-            group === undefined && <span className={styles.muted}>{t('gruppen.namenHinweis')}</span>
+          )}
+          {isNameTaken && (
+            <Notice tone="error">
+              <p>{t('gruppen.gleicherName', { name: cleanName(name) })}</p>
+            </Notice>
+          )}
+          {!isNameTaken && !isTypedNameBlank && group === undefined && (
+            <span className={styles.muted}>{t('gruppen.namenHinweis')}</span>
           )}
         </div>
 
