@@ -1,6 +1,7 @@
 import { useId, useState, useTransition, type SubmitEvent } from 'react';
 import {
   CATAN_COLOR_KEYS,
+  cleanName,
   colorSchemeOf,
   findSameNamedPersons,
   GROUP_COLOR_KEYS,
@@ -13,6 +14,7 @@ import {
   type ColorScheme,
   type CustomGame,
   type GameId,
+  type Group,
   type GroupBinding,
   type MemberColors,
   type Person,
@@ -22,7 +24,9 @@ import { findSupportedGame, gameCapabilities, SUPPORTED_GAMES } from '@/games/re
 import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { ColorPicker } from '@/ui/components/ColorPicker';
+import { PeopleIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
+import { UnsavedChangesGuard } from '@/ui/components/UnsavedChangesGuard';
 import { BindingPicker, type BindingOption } from './BindingPicker';
 import { GroupTable, type TableSeat } from './GroupTable';
 import styles from './GroupEditor.module.css';
@@ -33,7 +37,14 @@ type GroupEditorProps = {
   readonly customGames: readonly CustomGame[];
   /** Called after the group is saved. */
   readonly onSaved: () => void;
+  /**
+   * The group to change (US-VW-02): its members stay fixed, so there is no bench. Without it a
+   * new group is created.
+   */
+  readonly group?: Group | undefined;
 };
+
+const LOCK_ICON_SIZE = 18;
 
 // `null` = all games; otherwise the game the group is bound to.
 type BindingChoice = GameId | null;
@@ -61,6 +72,30 @@ function isChoiceAllowed(choice: BindingChoice, memberCount: number): boolean {
   return game === undefined || memberCount <= game.playerCount.max;
 }
 
+function colorsOf(group: Group | undefined): MemberColors[] {
+  return (group?.members ?? []).map(({ groupColor, catanColor }) =>
+    catanColor === undefined ? { groupColor } : { groupColor, catanColor },
+  );
+}
+
+function choiceOf(group: Group | undefined): BindingChoice {
+  return group?.binding.kind === 'game' ? group.binding.gameId : null;
+}
+
+function excludesCatan(group: Group | undefined): boolean {
+  return group?.binding.kind === 'global' && group.binding.excludesCatan === true;
+}
+
+function sameColors(a: readonly MemberColors[], b: readonly MemberColors[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((colors, index) => {
+      const other = b[index];
+      return colors.groupColor === other?.groupColor && colors.catanColor === other.catanColor;
+    })
+  );
+}
+
 function toBinding(choice: BindingChoice, isCatanExcluded: boolean): GroupBinding {
   if (choice !== null) {
     return { kind: 'game', gameId: choice };
@@ -71,22 +106,28 @@ function toBinding(choice: BindingChoice, isCatanExcluded: boolean): GroupBindin
 /**
  * Editor for a new group (US-PG-02, US-PG-03): bring 2 to 12 persons to the table, check the
  * automatically assigned colours, choose what is played and save. The colours of every
- * member follow the rules of Specification 3.3.
+ * member follow the rules of Specification 3.3. With `group` it changes name, colours and
+ * binding of that group and keeps its members (US-VW-02, design I1-F); leaving with unsaved
+ * changes asks first.
  */
 export function GroupEditor({
   persons,
   customGames,
   onSaved,
+  group,
 }: GroupEditorProps): React.JSX.Element {
   const { masterData } = useAppDependencies();
-  const [memberIds, setMemberIds] = useState<readonly PersonId[]>([]);
-  const [colors, setColors] = useState<readonly MemberColors[]>([]);
-  const [choice, setChoice] = useState<BindingChoice>(null);
-  const [isCatanExcluded, setIsCatanExcluded] = useState(false);
-  const [activeId, setActiveId] = useState<PersonId | null>(null);
+  const [memberIds, setMemberIds] = useState<readonly PersonId[]>(
+    group?.members.map((member) => member.personId) ?? [],
+  );
+  const [colors, setColors] = useState<readonly MemberColors[]>(colorsOf(group));
+  const [choice, setChoice] = useState<BindingChoice>(choiceOf(group));
+  const [isCatanExcluded, setIsCatanExcluded] = useState(excludesCatan(group));
+  const [activeId, setActiveId] = useState<PersonId | null>(group?.members[0]?.personId ?? null);
   // `null` while the user has not typed a name: the suggestion is shown then (US-PG-02 AK-2).
-  const [typedName, setTypedName] = useState<string | null>(null);
+  const [typedName, setTypedName] = useState<string | null>(group?.name ?? null);
   const [hasSaveFailed, setHasSaveFailed] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
   const nameId = useId();
 
@@ -99,7 +140,19 @@ export function GroupEditor({
   const sameNamed = findSameNamedPersons(members);
   // US-PG-02 AK-3: fewer than 2 or more than 12 members cannot be saved.
   const isCountValid = members.length >= GROUP_SIZE.min && members.length <= GROUP_SIZE.max;
-  const canSave = isCountValid && sameNamed.length === 0 && !isBlankName(name) && !isPending;
+  // US-VW-02: saving a change only makes sense if something changed.
+  const isDirty =
+    group !== undefined &&
+    (cleanName(name) !== group.name ||
+      choice !== choiceOf(group) ||
+      (choice === null && isCatanExcluded !== excludesCatan(group)) ||
+      !sameColors(colors, colorsOf(group)));
+  const canSave =
+    isCountValid &&
+    sameNamed.length === 0 &&
+    !isBlankName(name) &&
+    !isPending &&
+    (group === undefined || isDirty);
   const activeIndex = Math.max(
     0,
     memberIds.findIndex((id) => id === activeId),
@@ -152,14 +205,14 @@ export function GroupEditor({
   function save(): void {
     // Unexpected errors in the transition reach the error boundary of the view (ADR-025).
     startTransition(async () => {
-      const result = await masterData.createGroup({
-        name,
-        binding: toBinding(choice, isCatanExcluded),
-        personIds: memberIds,
-        colors,
-      });
+      const binding = toBinding(choice, isCatanExcluded);
+      const result =
+        group === undefined
+          ? await masterData.createGroup({ name, binding, personIds: memberIds, colors })
+          : await masterData.editGroup({ groupId: group.id, name, binding, colors });
       startTransition(() => {
         if (result.ok) {
+          setHasSaved(true);
           onSaved();
           return;
         }
@@ -211,33 +264,58 @@ export function GroupEditor({
   const isSwitchOn = isCatanExcluded || members.length > GROUP_MAX_PLAYERS_WITH_COLORS;
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} aria-label={t('gruppen.neu')}>
-      <section className={styles.section}>
-        <div className={styles.head}>
-          <h2>{t('gruppen.wer')}</h2>
-          <span className={styles.muted} role="status">
-            {t('gruppen.mitgliederAnzahl', { count: members.length })}
-          </span>
-        </div>
-        <PersonBench
-          persons={persons}
-          selectedIds={memberIds}
-          isFull={members.length >= GROUP_SIZE.max}
-          onToggle={toggleMember}
-        />
-        {sameNamed.length > 0 && (
-          <Notice tone="error">
-            <p>
-              {t('gruppen.gleicheNamen', {
-                namen: sameNamed
-                  .flat()
-                  .map((person) => person.name)
-                  .join(', '),
-              })}
-            </p>
-          </Notice>
-        )}
-      </section>
+    <form
+      className={styles.form}
+      onSubmit={handleSubmit}
+      aria-label={t(group === undefined ? 'gruppen.neu' : 'gruppen.bearbeitenTitel')}
+    >
+      {group !== undefined && (
+        <section className={styles.section}>
+          <div className={styles.head}>
+            <h2>{t('gruppen.amTischTitel')}</h2>
+            <span className={styles.muted}>
+              {t('gruppen.personenAnzahl', { count: members.length })}
+            </span>
+          </div>
+          {/* US-VW-02 AK-2: no way to add or remove members. */}
+          <p className={styles.lockNote}>
+            <PeopleIcon size={LOCK_ICON_SIZE} />
+            {t('gruppen.mitgliederFest')}
+          </p>
+          <UnsavedChangesGuard
+            isDirty={isDirty && !hasSaved}
+            text={t('verwerfen.tisch', { name: group.name })}
+          />
+        </section>
+      )}
+      {group === undefined && (
+        <section className={styles.section}>
+          <div className={styles.head}>
+            <h2>{t('gruppen.wer')}</h2>
+            <span className={styles.muted} role="status">
+              {t('gruppen.mitgliederAnzahl', { count: members.length })}
+            </span>
+          </div>
+          <PersonBench
+            persons={persons}
+            selectedIds={memberIds}
+            isFull={members.length >= GROUP_SIZE.max}
+            onToggle={toggleMember}
+          />
+          {sameNamed.length > 0 && (
+            <Notice tone="error">
+              <p>
+                {t('gruppen.gleicheNamen', {
+                  namen: sameNamed
+                    .flat()
+                    .map((person) => person.name)
+                    .join(', '),
+                })}
+              </p>
+            </Notice>
+          )}
+        </section>
+      )}
 
       <div className={styles.columns}>
         <div className={styles.tableColumn}>
@@ -367,12 +445,12 @@ export function GroupEditor({
 
       {hasSaveFailed && (
         <Notice tone="error">
-          <p>{t('gruppen.fehlerSpeichern')}</p>
+          <p>{t(group === undefined ? 'gruppen.fehlerSpeichern' : 'gruppen.fehlerBearbeiten')}</p>
         </Notice>
       )}
       <div className={styles.saveBar}>
         <button type="submit" className={styles.save} disabled={!canSave}>
-          {t('gruppen.speichern')}
+          {t(group === undefined ? 'gruppen.speichern' : 'gruppen.aenderungenSpeichern')}
         </button>
       </div>
     </form>

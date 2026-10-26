@@ -97,3 +97,11 @@ export function parsePersonId(value: string): Result<PersonId, IdInvalidError> {
 export function parseGroupId(value: string): Result<GroupId, IdInvalidError> {
   return isGroupId(value) ? ok(value) : err('id-invalid');
 }
+
+/**
+ * Reads a game id from outside, e.g. from the address `#/verwaltung/spiele/‹id›`
+ * (US-VW-07). Unlike `toGameId` a wrong value is an expected error.
+ */
+export function parseGameId(value: string): Result<GameId, IdInvalidError> {
+  return isGameId(value) ? ok(value) : err('id-invalid');
+}

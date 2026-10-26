@@ -51,6 +51,7 @@ export {
 export { findGroups, type GroupMatch } from './groupSearch';
 export {
   isUuidV4,
+  parseGameId,
   parseGroupId,
   parsePersonId,
   toGameId,

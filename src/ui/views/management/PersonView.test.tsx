@@ -1,7 +1,7 @@
 import { aGroup, aPerson } from '@tests/support/masterDataFakes';
 import { OverviewRoutes } from '@tests/support/overviewRoutes';
 import { renderWithApp } from '@tests/support/renderWithApp';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { toGroupId, toPersonId } from '@/core/model';
@@ -96,5 +96,102 @@ describe('US-VW-05 Persons and tables in the overview (person page)', () => {
     renderWithApp(<OverviewRoutes />, { path: `/verwaltung/personen/${ZOE}` });
 
     expect(await screen.findByText('Diese Person gibt es nicht.')).toBeInTheDocument();
+  });
+});
+
+describe('US-VW-06 Rename a person (person page)', () => {
+  async function startRenaming(): Promise<{
+    user: ReturnType<typeof userEvent.setup>;
+    db: BoardBrainDb;
+  }> {
+    const user = userEvent.setup();
+    const { db } = renderWithApp(<OverviewRoutes />, { path: `/verwaltung/personen/${ANNA}` });
+    await addAnnaAndBen(db);
+    await db.persons.add(aPerson({ id: ZOE, name: 'Zoe' }));
+    await db.groups.add(aGroup({ id: FRIDAY, name: 'Freitagsrunde' }));
+    await user.click(await screen.findByRole('button', { name: 'Umbenennen' }));
+    return { user, db };
+  }
+
+  it('AK-1: the field replaces the profile and saves the new name', async () => {
+    const { user, db } = await startRenaming();
+    const field = screen.getByLabelText('Neuer Name');
+    expect(field).toHaveValue('Anna');
+    expect(screen.queryByText('dabei seit 07.10.2026')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+
+    await user.clear(field);
+    await user.type(field, ' Annika ');
+    await user.click(screen.getByRole('button', { name: 'Speichern' }));
+
+    expect(await screen.findByRole('heading', { name: 'Annika', level: 1 })).toBeInTheDocument();
+    // The live query may show the name a moment before the form closes.
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Neuer Name')).not.toBeInTheDocument();
+    });
+    expect((await db.persons.get(ANNA))?.name).toBe('Annika');
+  });
+
+  it('AK-2: names the table while typing and blocks saving', async () => {
+    const { user } = await startRenaming();
+
+    await user.clear(screen.getByLabelText('Neuer Name'));
+    await user.type(screen.getByLabelText('Neuer Name'), 'BEN');
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Am Tisch „Freitagsrunde“ sitzt schon jemand namens „BEN“.',
+    );
+    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+  });
+
+  it('US-PG-01 AK-3: a same-named person elsewhere is saved after confirmation', async () => {
+    const { user, db } = await startRenaming();
+
+    await user.clear(screen.getByLabelText('Neuer Name'));
+    await user.type(screen.getByLabelText('Neuer Name'), 'Zoe');
+    await user.click(screen.getByRole('button', { name: 'Speichern' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Es gibt bereits eine Person namens „Zoe“. Trotzdem umbenennen?',
+    );
+    expect((await db.persons.get(ANNA))?.name).toBe('Anna');
+    await user.click(screen.getByRole('button', { name: 'Trotzdem umbenennen' }));
+
+    expect(await screen.findByRole('heading', { name: 'Zoe', level: 1 })).toBeInTheDocument();
+  });
+
+  it('cancelling keeps the old name without asking', async () => {
+    const { user, db } = await startRenaming();
+
+    await user.type(screen.getByLabelText('Neuer Name'), 'x');
+    await user.click(screen.getByRole('button', { name: 'Abbrechen' }));
+
+    expect(screen.queryByLabelText('Neuer Name')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect((await db.persons.get(ANNA))?.name).toBe('Anna');
+  });
+
+  it('Escape cancels as well', async () => {
+    const { user } = await startRenaming();
+
+    await user.type(screen.getByLabelText('Neuer Name'), 'x{Escape}');
+
+    expect(screen.queryByLabelText('Neuer Name')).not.toBeInTheDocument();
+  });
+
+  it('leaving with an unsaved name asks first', async () => {
+    const { user } = await startRenaming();
+    await user.type(screen.getByLabelText('Neuer Name'), 'x');
+
+    await user.click(screen.getByRole('link', { name: /Freitagsrunde/ }));
+    const question = await screen.findByRole('alertdialog', { name: 'Änderungen verwerfen?' });
+    expect(question).toHaveTextContent('Der neue Name „Annax“ ist noch nicht gespeichert.');
+    await user.click(within(question).getByRole('button', { name: 'Weiter bearbeiten' }));
+    expect(screen.getByLabelText('Neuer Name')).toHaveValue('Annax');
+
+    await user.click(screen.getByRole('link', { name: /Freitagsrunde/ }));
+    await user.click(await screen.findByRole('button', { name: 'Verwerfen' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Freitagsrunde', level: 1 }),
+    ).toBeInTheDocument();
   });
 });

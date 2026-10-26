@@ -1,0 +1,38 @@
+/* Design I1-F: field above "Abbrechen | Speichern", in the place of the profile next to the card. */
+.form {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.buttons > * {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 8px;
+}
+
+.cancel,
+.confirm {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.confirm {
+  justify-self: start;
+}
+
+.notices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.note {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}

@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router';
+import { createMemoryRouter, RouterProvider } from 'react-router';
 import { onTestFinished } from 'vitest';
 import { createMasterDataService, type MasterDataService } from '@/app/services/masterDataService';
 import type { BoardBrainDb } from '@/infra/db/database';
@@ -18,7 +18,8 @@ type RenderOptions = {
 
 /**
  * Renders a view with an empty in-memory database, the real application services and a
- * router (Architecture 14.1, component tests). The database is closed after the test.
+ * data router like the app, so `useBlocker` works (Architecture 14.1, component tests). The
+ * database is closed after the test.
  */
 export function renderWithApp(
   element: ReactNode,
@@ -36,9 +37,10 @@ export function renderWithApp(
       supportedGameNames: ['Catan'],
     }),
   );
+  const router = createMemoryRouter([{ path: '*', element }], { initialEntries: [path] });
   render(
     <AppDependenciesProvider dependencies={{ db, masterData }}>
-      <MemoryRouter initialEntries={[path]}>{element}</MemoryRouter>
+      <RouterProvider router={router} />
     </AppDependenciesProvider>,
   );
   return { db };

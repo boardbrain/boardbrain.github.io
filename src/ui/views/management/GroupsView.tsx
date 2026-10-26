@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { findGroups, type Group, type Person } from '@/core/model';
 import { t } from '@/i18n/t';
 import { useCustomGames, useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
-import { BackIcon, CloseIcon, SearchIcon } from '@/ui/components/Icons';
+import { EditorDialog } from '@/ui/components/EditorDialog';
+import { CloseIcon, SearchIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
 import { Page } from '@/ui/components/Page';
 import { GroupEditor } from './GroupEditor';
@@ -44,22 +45,6 @@ export function GroupsView(): React.JSX.Element {
   const canCreate = activePersons.length >= MIN_PERSONS_FOR_GROUP;
   const matches = findGroups(groups ?? [], persons ?? [], query);
   const trimmedQuery = query.trim();
-
-  // Escape closes the editor; the keyboard is an external system, hence the effect.
-  useEffect(() => {
-    if (!isEditing) {
-      return undefined;
-    }
-    function closeOnEscape(event: KeyboardEvent): void {
-      if (event.key === 'Escape') {
-        setIsEditing(false);
-      }
-    }
-    document.addEventListener('keydown', closeOnEscape);
-    return () => {
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, [isEditing]);
 
   function toggleSearch(): void {
     setIsSearchOpen(!isSearchOpen);
@@ -157,40 +142,20 @@ export function GroupsView(): React.JSX.Element {
         <p className={styles.hint}>{t('gruppen.leer')}</p>
       )}
       {isEditing && (
-        <div className={styles.backdrop}>
-          <div
-            className={styles.dialog}
-            role="dialog"
-            aria-modal="true"
-            aria-label={t('gruppen.neu')}
-          >
-            <div className={styles.dialogHeader}>
-              <button
-                type="button"
-                className={styles.backButton}
-                aria-label={t('gruppen.schliessen')}
-                onClick={() => {
-                  setIsEditing(false);
-                }}
-              >
-                <span className={styles.backIcon}>
-                  <BackIcon />
-                </span>
-                <span className={styles.closeIcon}>
-                  <CloseIcon />
-                </span>
-              </button>
-              <h2 className={styles.dialogTitle}>{t('gruppen.neu')}</h2>
-            </div>
-            <GroupEditor
-              persons={activePersons}
-              customGames={customGames ?? []}
-              onSaved={() => {
-                setIsEditing(false);
-              }}
-            />
-          </div>
-        </div>
+        <EditorDialog
+          title={t('gruppen.neu')}
+          onClose={() => {
+            setIsEditing(false);
+          }}
+        >
+          <GroupEditor
+            persons={activePersons}
+            customGames={customGames ?? []}
+            onSaved={() => {
+              setIsEditing(false);
+            }}
+          />
+        </EditorDialog>
       )}
     </Page>
   );

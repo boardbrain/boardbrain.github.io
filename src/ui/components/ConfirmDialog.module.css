@@ -1,0 +1,47 @@
+/* Design I1-F: small window in the middle above everything, also above the editor dialog. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: var(--color-backdrop);
+}
+
+.dialog {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 25rem);
+  padding: 20px;
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4);
+  box-shadow: 0 10px 30px var(--color-shadow);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.text {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.buttons > * {
+  flex: 1 1 8rem;
+}
+
+.cancel {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}

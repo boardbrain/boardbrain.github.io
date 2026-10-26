@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import {
   sortByName,
   type CustomGame,
+  type GameId,
   type Group,
   type GroupId,
   type Person,
@@ -49,6 +50,17 @@ export function usePerson(db: BoardBrainDb, id: PersonId | null): Person | null 
 export function useGroup(db: BoardBrainDb, id: GroupId | null): Group | null | undefined {
   return useLiveQuery(
     async () => (id === null ? null : ((await db.groups.get(id)) ?? null)),
+    [db, id],
+  );
+}
+
+/**
+ * One custom game (US-VW-07); `undefined` while loading, `null` if there is no such custom game
+ * or no valid id. Supported games such as Catan are not custom games and give `null`.
+ */
+export function useCustomGame(db: BoardBrainDb, id: GameId | null): CustomGame | null | undefined {
+  return useLiveQuery(
+    async () => (id === null ? null : ((await db.games.get(id)) ?? null)),
     [db, id],
   );
 }

@@ -16,6 +16,15 @@ export const de = {
     speichern: 'Speichern',
     abbrechen: 'Abbrechen',
     zurueck: 'Zurück',
+    zitat: '„{name}“',
+    liste: '{vorne} und {letzter}',
+  },
+  verwerfen: {
+    titel: 'Änderungen verwerfen?',
+    name: 'Der neue Name „{name}“ ist noch nicht gespeichert.',
+    tisch: 'Deine Änderungen an „{name}“ sind noch nicht gespeichert.',
+    weiter: 'Weiter bearbeiten',
+    verwerfen: 'Verwerfen',
   },
   navigation: {
     titel: 'Hauptnavigation',
@@ -68,6 +77,16 @@ export const de = {
     wenigerTische: 'Weniger ▴',
     sitztNirgends: '{name} sitzt noch an keinem Tisch.',
     nichtGefunden: 'Diese Person gibt es nicht.',
+    umbenennen: 'Umbenennen',
+    neuerName: 'Neuer Name',
+    konfliktEiner:
+      'Am Tisch {tische} sitzt schon jemand namens „{name}“. An einem Tisch müssen die Namen verschieden sein.',
+    konfliktMehrere:
+      'An den Tischen {tische} sitzt schon jemand namens „{name}“. An einem Tisch müssen die Namen verschieden sein.',
+    konfliktAllgemein:
+      'An einem ihrer Tische sitzt schon jemand namens „{name}“. An einem Tisch müssen die Namen verschieden sein.',
+    gleicherNameUmbenennen: 'Es gibt bereits eine Person namens „{name}“. Trotzdem umbenennen?',
+    trotzdemUmbenennen: 'Trotzdem umbenennen',
   },
   gruppen: {
     titel: 'Tische',
@@ -132,6 +151,14 @@ export const de = {
     amTisch: 'Am Tisch · {anzahl}',
     mitglieder: 'Mitglieder',
     nichtGefunden: 'Diesen Tisch gibt es nicht.',
+    bearbeiten: 'Bearbeiten',
+    bearbeitenTitel: 'Tisch bearbeiten',
+    amTischTitel: 'Am Tisch',
+    personenAnzahl: '{count} Personen',
+    mitgliederFest:
+      'Wer am Tisch sitzt, bleibt fest. Für eine andere Runde legst du einen neuen Tisch an.',
+    aenderungenSpeichern: 'Änderungen speichern',
+    fehlerBearbeiten: 'Die Änderungen konnten nicht gespeichert werden. Bitte prüfe deine Angaben.',
   },
   farben: {
     red: 'Rot',
@@ -155,6 +182,24 @@ export const de = {
     eigeneLeer: 'Noch keine eigenen Spiele angelegt.',
     neu: 'Neues eigenes Spiel',
     gleicherName: 'Es gibt bereits ein Spiel namens „{name}“. Bitte wähle einen anderen Namen.',
+    eigeneAnzahl: 'Eigene Spiele · {anzahl}',
+    festEingebaut: 'fest eingebaut',
+    catanBeschreibung: 'mit Brett, Farben und Siegpunkten',
+    keinEigenerTisch: 'kein eigener Tisch',
+    einTischNurDafuer: '1 Tisch nur dafür',
+    tischeNurDafuer: '{anzahl} Tische nur dafür',
+    spiel: 'Spiel',
+    umbenennen: 'Umbenennen',
+    neuerName: 'Neuer Spielname',
+    angelegtAm: 'eigenes Spiel · angelegt am {datum}',
+    tisch: 'Tisch',
+    tische: 'Tische',
+    tischeUeberschrift: 'Tische nur für {spiel} · {anzahl}',
+    tischeListe: 'Tische nur für {spiel}',
+    keinTisch:
+      'Noch kein Tisch spielt nur {spiel}. Gespielt werden kann es an jedem Tisch für alle Spiele.',
+    personenAnzahl: '{anzahl} Personen',
+    nichtGefunden: 'Dieses Spiel gibt es nicht.',
     namen: {
       catan: 'Catan',
     },

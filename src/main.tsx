@@ -17,6 +17,7 @@ import { ErrorScreen } from '@/ui/components/ErrorScreen';
 import { installGlobalErrorHandlers } from '@/ui/globalErrorHandlers';
 import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
 import { GamesView } from '@/ui/views/management/GamesView';
+import { GameView } from '@/ui/views/management/GameView';
 import { GroupsView } from '@/ui/views/management/GroupsView';
 import { GroupView } from '@/ui/views/management/GroupView';
 import { ManagementView } from '@/ui/views/management/ManagementView';
@@ -74,7 +75,9 @@ const router = createHashRouter([
       { path: '/verwaltung/personen/:personId', element: view(<PersonView />) },
       { path: '/verwaltung/gruppen', element: view(<GroupsView />) },
       { path: '/verwaltung/gruppen/:groupId', element: view(<GroupView />) },
+      { path: '/verwaltung/gruppen/:groupId/bearbeiten', element: view(<GroupView isEditing />) },
       { path: '/verwaltung/spiele', element: view(<GamesView />) },
+      { path: '/verwaltung/spiele/:gameId', element: view(<GameView />) },
       {
         path: '/diagnose',
         element: view(<DiagnosticsView diagnostics={diagnostics} version={__APP_VERSION__} />),
