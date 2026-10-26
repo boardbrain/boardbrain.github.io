@@ -1,7 +1,15 @@
 import { InvariantError } from '@/core/shared';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { isUuidV4, parseGroupId, parsePersonId, toGameId, toGroupId, toPersonId } from './ids';
+import {
+  isUuidV4,
+  parseGameId,
+  parseGroupId,
+  parsePersonId,
+  toGameId,
+  toGroupId,
+  toPersonId,
+} from './ids';
 
 const FC_SEED = 20261007;
 
@@ -62,6 +70,10 @@ describe('US-VW-05 identifiers from an address', () => {
     expect(parseGroupId(uuid)).toEqual({ ok: true, value: uuid });
   });
 
+  it('US-VW-07: reads a game id from a valid UUID', () => {
+    expect(parseGameId(uuid)).toEqual({ ok: true, value: uuid });
+  });
+
   it.each([
     ['mistyped', 'c47a0000'],
     ['empty', ''],
@@ -69,5 +81,6 @@ describe('US-VW-05 identifiers from an address', () => {
   ])('returns an expected error for a %s value instead of throwing', (_case, value) => {
     expect(parsePersonId(value)).toEqual({ ok: false, error: 'id-invalid' });
     expect(parseGroupId(value)).toEqual({ ok: false, error: 'id-invalid' });
+    expect(parseGameId(value)).toEqual({ ok: false, error: 'id-invalid' });
   });
 });

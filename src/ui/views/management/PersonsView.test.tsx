@@ -113,22 +113,24 @@ describe('US-PG-01 Create a person (person management)', () => {
     expect(save).toBeEnabled();
   });
 
-  it('AK-3: points out a same-named person and does not save without confirmation', async () => {
+  it('AK-3: shows a same-named person while typing and blocks saving', async () => {
     const user = userEvent.setup();
     const { db } = renderWithApp(<PersonsView />);
-    await db.persons.add(aPerson({ name: 'Anna' }));
+    await db.persons.add(aPerson({ name: 'Anna', archived: true }));
     await expect.poll(personNames).toEqual(['Anna']);
 
     await openForm(user);
     await user.type(await nameField(), ' anna');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
 
-    const hint = await screen.findByRole('alert');
-    expect(hint).toHaveTextContent('Es gibt bereits eine Person namens „anna“. Trotzdem anlegen?');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Es gibt bereits eine Person namens „anna“. Bitte wähle einen anderen Namen.',
+    );
+    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    await user.keyboard('{Enter}');
     expect(await db.persons.count()).toBe(1);
   });
 
-  it('AK-3: saves the same-named person after confirmation', async () => {
+  it('AK-3: changing the name removes the error', async () => {
     const user = userEvent.setup();
     const { db } = renderWithApp(<PersonsView />);
     await db.persons.add(aPerson({ name: 'Anna' }));
@@ -136,44 +138,10 @@ describe('US-PG-01 Create a person (person management)', () => {
 
     await openForm(user);
     await user.type(await nameField(), 'Anna');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
-    await user.click(await screen.findByRole('button', { name: 'Trotzdem anlegen' }));
-
-    await expect.poll(personNames).toEqual(['Anna', 'Anna']);
-    await waitFor(() => {
-      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    });
-  });
-
-  it('AK-3: cancelling the hint keeps the name and saves nothing', async () => {
-    const user = userEvent.setup();
-    const { db } = renderWithApp(<PersonsView />);
-    await db.persons.add(aPerson({ name: 'Anna' }));
-    await expect.poll(personNames).toEqual(['Anna']);
-
-    await openForm(user);
-    await user.type(await nameField(), 'Anna');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
-    await user.click(await screen.findByRole('button', { name: 'Abbrechen' }));
-
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Name')).toHaveValue('Anna');
-    expect(await db.persons.count()).toBe(1);
-  });
-
-  it('AK-3: changing the name removes the hint', async () => {
-    const user = userEvent.setup();
-    const { db } = renderWithApp(<PersonsView />);
-    await db.persons.add(aPerson({ name: 'Anna' }));
-    await expect.poll(personNames).toEqual(['Anna']);
-
-    await openForm(user);
-    await user.type(await nameField(), 'Anna');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
-    await screen.findByRole('alert');
     await user.type(screen.getByLabelText('Name'), 'lena');
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Speichern' })).toBeEnabled();
   });
 
   it('closes the form with "new person" once persons exist', async () => {

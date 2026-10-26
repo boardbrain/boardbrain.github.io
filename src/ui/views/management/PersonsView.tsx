@@ -1,6 +1,12 @@
 import { useState, useTransition } from 'react';
 import type { NameDuplicateError } from '@/app/services/masterDataService';
-import { cleanName, findPersons, tablesOfPerson, type NameEmptyError } from '@/core/model';
+import {
+  cleanName,
+  containsName,
+  findPersons,
+  tablesOfPerson,
+  type NameEmptyError,
+} from '@/core/model';
 import { useGroups, usePersons } from '@/infra/db/readHooks';
 import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
@@ -21,8 +27,8 @@ type Message = {
 
 /**
  * Person management `#/verwaltung/personen` (US-PG-01, US-VW-05, design I1-E L1): all persons
- * as playing cards with their tables, a search and "new person". A same-named person is only a
- * hint; saving is possible after confirmation (US-PG-01 AK-3).
+ * as playing cards with their tables, a search and "new person". A name that another person has
+ * is shown as an error while typing and cannot be saved (US-PG-01 AK-3, E-31).
  */
 export function PersonsView(): React.JSX.Element {
   const { db, masterData } = useAppDependencies();
@@ -35,12 +41,12 @@ export function PersonsView(): React.JSX.Element {
   const [query, setQuery] = useState('');
   const [isPending, startTransition] = useTransition();
 
-  function save(isDuplicateConfirmed: boolean): void {
+  function save(): void {
     // Unexpected errors in the transition reach the error boundary of the view (ADR-025).
     const submitted = name;
     setIsAdding(true);
     startTransition(async () => {
-      const result = await masterData.createPerson({ name: submitted, isDuplicateConfirmed });
+      const result = await masterData.createPerson({ name: submitted });
       startTransition(() => {
         if (result.ok) {
           // Keep a name that was typed while saving was still running.
@@ -54,6 +60,10 @@ export function PersonsView(): React.JSX.Element {
   }
 
   const visibleMessage = message?.submitted === name ? message : null;
+  const isTaken = containsName(
+    (persons ?? []).map((person) => person.name),
+    name,
+  );
   // Without persons the form is always there, so the first person can be created right away.
   const isFormOpen = isAdding || persons?.length === 0;
   const matches = findPersons(persons ?? [], query);
@@ -130,34 +140,13 @@ export function PersonsView(): React.JSX.Element {
           isPending={isPending}
           isFocused={isAdding}
           onValueChange={handleNameChange}
-          onSubmit={() => {
-            save(false);
-          }}
+          onSubmit={save}
+          error={isTaken ? t('personen.gleicherName', { name: cleanName(name) }) : null}
         >
-          {visibleMessage?.error === 'name-duplicate' && (
-            <Notice tone="warning">
+          {/* Only if a person was created in the meantime; the live check shows it right after. */}
+          {visibleMessage?.error === 'name-duplicate' && !isTaken && (
+            <Notice tone="error">
               <p>{t('personen.gleicherName', { name: cleanName(visibleMessage.submitted) })}</p>
-              <p>{t('personen.gleicherNameGruppe')}</p>
-              <div className={styles.noticeActions}>
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => {
-                    save(true);
-                  }}
-                >
-                  {t('personen.trotzdemAnlegen')}
-                </button>
-                <button
-                  type="button"
-                  className={styles.secondary}
-                  onClick={() => {
-                    setMessage(null);
-                  }}
-                >
-                  {t('allgemein.abbrechen')}
-                </button>
-              </div>
             </Notice>
           )}
           {visibleMessage?.error === 'name-empty' && (

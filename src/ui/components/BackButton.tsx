@@ -1,10 +1,7 @@
-import { useLocation, useNavigate } from 'react-router';
 import { t } from '@/i18n/t';
 import { BackIcon } from './Icons';
 import styles from './BackButton.module.css';
-
-// React Router gives the first entry of a session this key; there is no page to go back to.
-const FIRST_ENTRY = 'default';
+import { useGoBack } from './useGoBack';
 
 type BackButtonProps = {
   /** Destination when the page was opened directly, e.g. via a saved address. */
@@ -17,17 +14,7 @@ type BackButtonProps = {
  * fallback.
  */
 export function BackButton({ fallback }: BackButtonProps): React.JSX.Element {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  function goBack(): void {
-    if (location.key === FIRST_ENTRY) {
-      void navigate(fallback, { replace: true });
-      return;
-    }
-    void navigate(-1);
-  }
-
+  const goBack = useGoBack(fallback);
   return (
     <button
       type="button"

@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.13 |
+| Version | 0.14 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 25.10.2026 |
+| Stand | 26.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -27,6 +27,7 @@
 | 0.11 | 08.10.2026 | Design D-3: Rahmen mit Logo, Hauptnavigation als Kartenhand am unteren Rand, Startansicht ohne Scrollen, Zurück zur vorherigen Seite, Hinweis zum Drehen auf Smartphones im Querformat, Design-Referenz in `docs/design/` (13.1, NFA-PL-04, E-29); Tests ohne Smartphone im Querformat (14.5) |
 | 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, E-30) in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
 | 0.13 | 25.10.2026 | Bündel I1-E: Detailansichten `#/verwaltung/personen/‹id›` und `#/verwaltung/gruppen/‹id›`, Kennungen aus der Adresse als `Result`, Design-Referenz `docs/design/i1e-persons-tables-final-preview.html` (13.1) |
+| 0.14 | 26.10.2026 | Bündel I1-F: Bearbeiten im `MasterDataService` mit `update` in den Repositories (4.4, 7.3); Umbenennen an Ort und Stelle, Spielseite `#/verwaltung/spiele/‹id›`, Editor unter `#/verwaltung/gruppen/‹id›/bearbeiten`, Rückfrage bei ungespeicherten Änderungen über `useBlocker`, Design-Referenz `docs/design/i1f-edit-final-preview.html` (13.1); Komponententests mit Daten-Router (14.1) |
 
 ## Inhaltsverzeichnis
 
@@ -958,6 +959,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 - **Startansicht:** Personen, Tische und Spiele als Fächer aus Spielkarten mit der Anzahl in den Ecken, direkt über der Kartenhand; die Ansicht scrollt nie, die Karten passen ihre Größe dem Platz an. Darüber erscheinen später „Neue Partie“ (I2, als Nachziehstapel) und oben die Banner; sie verschieben den Inhalt nicht, solange der Platz reicht.
 - **Verwaltung:** dieselben Spielkarten als Raster mit den ersten Namen jedes Bereichs.
 - **Personen und Tische im Überblick (US-VW-05, FA-VW-06):** Die Personenliste zeigt jede Person als Spielkarte mit ihren Tischen; jede Karte öffnet `#/verwaltung/personen/‹id›`, jeder Tisch im Spielraum und auf der Personenseite `#/verwaltung/gruppen/‹id›`, jeder Platz und jedes Mitglied auf der Tischseite wieder die Person. Die Kennung aus der Adresse liest `parsePersonId` bzw. `parseGroupId` als `Result` (ADR-025); eine unbekannte oder ungültige Kennung zeigt einen Hinweis statt eines Fehlers. Die Lesehooks `usePerson` und `useGroup` liefern `null` für „nicht vorhanden“. Catan-Farben erscheinen nur im Editor. Aussehen und Maße legt `docs/design/i1e-persons-tables-final-preview.html` fest; dort ist auch zu sehen, wo Bearbeiten (I1-F), Ergebnisse und Statistik (I3) sowie Archivieren (I5) andocken. *(neu in 0.13)*
+- **Bearbeiten (US-VW-06, US-VW-02, US-VW-07, FA-VW-01, FA-VW-02, FA-VW-04):** Auf Personen-, Tisch- und Spielseite sitzen die Aktionen als kleine Pillen unter den Angaben („✎ Umbenennen“ bzw. „✎ Bearbeiten“; Archivieren und Löschen kommen mit I5 daneben). Person und eigenes Spiel werden an Ort und Stelle umbenannt: Feld und „Abbrechen | Speichern“ ersetzen das Profil neben der Karte, Meldungen erscheinen darunter. Personen-, Tisch- und Spielnamen sind app-weit eindeutig, archivierte eingeschlossen (FA-PG-09, E-31). Die Oberfläche prüft schon beim Tippen, beim Anlegen wie beim Bearbeiten: Ein leerer oder vergebener Name zeigt sofort einen Fehler und sperrt „Speichern“; der Dienst prüft in der Transaktion noch einmal (`name-duplicate`). Eigene Spiele haben eine Seite `#/verwaltung/spiele/‹id›` mit den Tischen, die nur dieses Spiel spielen; Catan hat keine (Lesehook `useCustomGame`, Kennung über `parseGameId`). „Bearbeiten“ am Tisch öffnet unter `#/verwaltung/gruppen/‹id›/bearbeiten` denselben Editor wie „Neuer Tisch“, ohne Bank, weil die Mitglieder fest sind; die eigene Adresse lässt die Zurück-Taste unter Android den Editor schließen. Ungespeicherte Änderungen fragen beim Verlassen „Änderungen verwerfen?“ (`UnsavedChangesGuard` mit `useBlocker`); „Abbrechen“ verwirft ohne Rückfrage. Der Router kann nur Navigationen aufhalten, die er selbst angelegt hat; nach einer von Hand eingetippten Adresse führt Zurück ohne Rückfrage weiter. Aussehen legt `docs/design/i1f-edit-final-preview.html` fest. *(neu in 0.14)*
 - **Zurück:** Unterseiten haben links neben dem Titel einen Zurück-Knopf. Er führt wie die Zurück-Taste unter Android zur vorherigen Seite (`navigate(-1)`); wurde die Seite direkt aufgerufen, zur Verwaltung.
 - **Smartphone im Querformat (NFA-PL-04, E-29):** Ein Fenster im Querformat, das niedriger als 500 px ist, gilt als Smartphone; der Rahmen zeigt dann per Media Query nur den Hinweis, das Gerät zu drehen. Das wirkt auf Android und iOS gleich; eine Sperre im Manifest entfällt, weil iOS sie nicht kennt und sie unter Android auch Tablets sperren würde.
 - **Kartenhand:** Die Bereiche stehen als Liste in `AppLayout`; ein weiterer Bereich ist ein Eintrag. Drehung und Breite berechnet `cardHand.ts` (9° je Karte, ab sechs Karten 70 px breit und 6°).
@@ -1036,6 +1038,8 @@ Zwei eigene SVG-Komponenten: Liniendiagramm der kumulierten Siege und Verteilung
 | Exakter Nachweis | Vitest | Verzerrungsfreiheit von `uniformIntFromWords` | `npm test` |
 | Statistische Tests | Vitest, eigene Suite | Gleichverteilung mit dem echten Generator; Sackgassenquote | `npm run test:stat`, vor jedem Merge nach `main` |
 | Datenbanktests | Vitest mit `fake-indexeddb` (je Test eine eigene `IDBFactory`); in Komponententests zusätzlich global eingebunden, weil Dexies Live-Abfragen ein globales IndexedDB voraussetzen | Repositories, Transaktionen, Migrationen, Sicherungspunkte | `npm test` |
+
+Komponententests rendern über `renderWithApp` mit einem Daten-Router (`createMemoryRouter`) wie die App, damit `useBlocker` funktioniert. *(neu in 0.14)*
 | Komponententests | Vitest mit React Testing Library | Formulare, Dialoge, Entscheidungsdialoge beim Import | `npm test` |
 | Ende-zu-Ende-Tests | Playwright (Chromium, WebKit; Smartphone- und Tablet-Formate) | Vollständige Abläufe im Browser | `npm run test:e2e`, vor jedem Merge |
 | Manuelle Abnahme | Checkliste | Echte Geräte: Android (Brave), iPhone und iPad (Safari), Windows (Brave) | Vor jedem Release |

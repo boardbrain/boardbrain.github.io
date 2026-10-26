@@ -1,4 +1,4 @@
-/* Design I1-E D9: small playing card on the left, profile on the right. */
+/* Design I1-E D9 (person) and I1-F (game): small playing card on the left, profile on the right. */
 .profile {
   display: flex;
   gap: 16px;
@@ -76,4 +76,22 @@
 .since {
   font-size: var(--font-size-small);
   color: var(--color-text-muted);
+}
+
+/* The die of a game in the place of the initial (design I1-F). */
+.gameIcon {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  color: var(--color-accent-text);
+  border: 2px solid var(--color-accent-text);
+  border-radius: 12px;
+}
+
+/* Row of small actions below the card (design I1-F, variant B). */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }

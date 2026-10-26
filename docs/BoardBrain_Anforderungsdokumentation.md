@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.16 |
+| Version | 0.17 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 09.10.2026 |
+| Stand | 26.10.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -30,6 +30,7 @@
 | 0.14 | 08.10.2026 | Abnahme von I1-C: globale Gruppen können Catan ausschließen (FA-PG-04, E-27); überarbeitete Gruppenfarben-Palette und Kontrastregel für Spielfarben (E-28, E-26 angepasst) |
 | 0.15 | 08.10.2026 | Design D-3: Smartphones nur im Hochformat, Tablets und PC in beiden Ausrichtungen (NFA-PL-04 präzisiert, E-29) |
 | 0.16 | 09.10.2026 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus (FA-SP-06, E-30) |
+| 0.17 | 26.10.2026 | Abnahme von I1-F: Personen- und Gruppennamen app-weit eindeutig, auch gegenüber archivierten (FA-PG-09, FA-VW-01, FA-VW-02, E-31) |
 
 ## Inhaltsverzeichnis
 
@@ -160,7 +161,7 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | FA-PG-06 | Die Spielfarbe einer Person kann für eine einzelne Partie abweichend gewählt werden, ohne die Standardfarbe zu verändern. |
 | FA-PG-07 | Jede Person hat innerhalb einer Gruppe eine Gruppenfarbe aus einer modernen, spielunabhängigen Palette, die auch die vier Catan-Farben enthält. Gruppenfarbe und Catan-Farbe dürfen gleich sein. In an Catan gebundenen Gruppen ist die Catan-Farbe zugleich die Gruppenfarbe. *(neu in 0.4)* |
 | FA-PG-08 | Farben gelten ausschließlich innerhalb einer Gruppe und sind dort je Farbart eindeutig. Wird eine bereits belegte Farbe gewählt, tauschen die beiden Personen ihre Farben. Beim Anlegen einer Gruppe werden freie Farben automatisch der Reihe nach vergeben; Farben aus anderen Gruppen werden weder übernommen noch vorgeschlagen. *(neu in 0.4)* |
-| FA-PG-09 | Eine Gruppe hat einen Namen und 2 bis 12 Mitglieder. Die Mitglieder sind nach dem Anlegen unveränderlich. Innerhalb einer Gruppe sind die Personennamen eindeutig, damit Personen beim Import eindeutig zugeordnet werden können. *(neu in 0.4, ergänzt in 0.5)* |
+| FA-PG-09 | Eine Gruppe hat einen Namen und 2 bis 12 Mitglieder. Die Mitglieder sind nach dem Anlegen unveränderlich. Personennamen sind app-weit eindeutig, ebenso Gruppennamen, jeweils auch gegenüber archivierten Datensätzen, damit Personen und Gruppen unterscheidbar bleiben und beim Import eindeutig zugeordnet werden können. *(neu in 0.4, ergänzt in 0.5, geändert in 0.17)* |
 | FA-PG-10 | Catan kann nur von Gruppen mit 2 bis 4 Mitgliedern gespielt werden. Eine an Catan gebundene Gruppe hat höchstens 4 Mitglieder. *(neu in 0.4)* |
 
 ### 5.3 Ablauf einer Partie mit Generierung
@@ -292,8 +293,8 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 
 | ID | Anforderung |
 |---|---|
-| FA-VW-01 | Personen können umbenannt werden, sofern dadurch in keiner ihrer Gruppen ein doppelter Name entsteht, und archiviert werden. Löschen ist nur möglich, wenn die Person keiner Gruppe angehört, auch keiner archivierten. *(ergänzt in 0.5)* |
-| FA-VW-02 | Gruppen können umbenannt, in ihren Farben geändert und in ihrer Spielbindung geändert werden, sofern alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen. Die Mitglieder sind nicht änderbar. |
+| FA-VW-01 | Personen können umbenannt werden, sofern der neue Name noch nicht vergeben ist (FA-PG-09), und archiviert werden. Löschen ist nur möglich, wenn die Person keiner Gruppe angehört, auch keiner archivierten. *(ergänzt in 0.5, geändert in 0.17)* |
+| FA-VW-02 | Gruppen können umbenannt (mit eindeutigem Namen, FA-PG-09), in ihren Farben geändert und in ihrer Spielbindung geändert werden, sofern alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen. Die Mitglieder sind nicht änderbar. *(ergänzt in 0.17)* |
 | FA-VW-03 | Gruppen können archiviert und wiederbelebt werden; Partien und Statistik bleiben dabei erhalten. Aktive und archivierte Gruppen können nach deutlicher Warnung gelöscht werden; dabei werden alle ihre Partien entfernt. |
 | FA-VW-04 | Eigene Spiele können umbenannt und archiviert werden. Löschen ist nur ohne zugehörige Ergebnisse möglich. Catan kann weder umbenannt noch archiviert noch gelöscht werden. |
 | FA-VW-05 | Archivierte Personen, Gruppen und Spiele erscheinen in keiner Auswahlliste für neue Daten, bleiben aber in bestehenden Daten und Statistiken sichtbar. |
@@ -499,6 +500,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-28 | Überarbeitete Gruppenfarben-Palette mit 12 gut unterscheidbaren, gedeckten Farben: Rot, Blau, Orange und Weiß (Catan-Töne), Gelb, Moosgrün, Indigo (hell), Petrol, Magenta, Kaffee, Rosé, Steingrau. Spielfarben erreichen mindestens 3 : 1 zum Hintergrund jedes Designs und mindestens 2,3 : 1 auf dessen Karten *(neu in 0.14)* | Die Unterscheidbarkeit der Personenfarben untereinander hat Vorrang vor dem Kontrast zum Hintergrund: In der Palette aus D-1 waren Grün, Limette und Petrol sowie Violett und Indigo zu ähnlich (Farbabstand ΔE bis 13); die neue Palette erreicht mindestens ΔE 29. Ausgewählt vom Product Owner in der Farbvorschau auf den Abnahmegeräten, in allen vier Designs geprüft |
 | E-29 | Smartphones nur im Hochformat; im Querformat erscheint statt der App ein Hinweis zum Drehen. Tablets (auch aufgeklappte Falt-Smartphones) und PC in beiden Ausrichtungen *(neu in 0.15)* | Im Querformat ist ein Smartphone zu niedrig für Navigation und Inhalt; ein Hinweis wirkt auf Android und iOS gleich, eine echte Sperre gibt es nur unter Android und würde dort auch Tablets sperren. Entscheidung des Product Owners in Design D-3 |
 | E-30 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus; Einschalten nur nach Warnung und Bestätigung; umkehrbar ohne Änderung gespeicherter Gruppeneinstellungen; Gruppen, die währenddessen angelegt werden, schließen Catan aus und können es später wieder zulassen *(neu in 0.16)* | Voraussichtlich nutzen viele die App ganz ohne Catan, nur für Ergebnisse und Statistik; für sie sind Generierung, Catan-Farben und Catan-Auswahl nur Ballast. Entscheidung des Product Owners nach Design D-3 |
+| E-31 | Personen- und Gruppennamen sind app-weit eindeutig, auch gegenüber archivierten Datensätzen; Groß- und Kleinschreibung sowie Leerzeichen am Anfang und Ende zählen nicht. Die App prüft schon bei der Eingabe *(neu in 0.17)* | Personen und Tische bleiben in Listen, Suche, Ergebnissen und beim Import unterscheidbar; ein bloßer Hinweis ließe Verwechslungen zu. Entscheidung des Product Owners bei der Abnahme von I1-F |
 
 ---
 

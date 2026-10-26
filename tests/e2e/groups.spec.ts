@@ -91,7 +91,7 @@ test.describe('US-PG-02 and US-PG-03 The room and the editor', () => {
     await page.getByRole('button', { name: 'Speichern' }).click();
     await expect(
       page.getByRole('region', { name: 'Eigene Spiele' }).getByRole('listitem'),
-    ).toHaveText(['Uno']);
+    ).toHaveText([/^Uno/]);
     await createPersons(page, 'Anna', 'Ben');
     await openRoom(page);
     await openEditor(page);

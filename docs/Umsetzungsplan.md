@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.13 |
-| Stand | 25.10.2026 |
+| Version | 0.14 |
+| Stand | 26.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.10 (19) |
 | Sprache | Deutsch |
 
@@ -26,6 +26,7 @@
 | 0.11 | 08.10.2026 | D-3 umgesetzt (#17): Kartenhand, Startansicht mit Spielkarten, Logo, Zurück, Smartphones nur im Hochformat (E-29); Abnahme von I1-D angepasst; Design-Referenz `docs/design/d3-start-navigation-final-preview.html` mit Verweisen je Inkrement, Platz für „Ergebnis eintragen“ auf dem Start (7) |
 | 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, Spezifikation 0.10) in I6 eingeplant (7) |
 | 0.13 | 25.10.2026 | I1-E umgesetzt (#19): Personenliste als Spielkarten, Personenseite „Karte und Steckbrief“, Tischseite „Großer Tisch“; Design-Referenz `docs/design/i1e-persons-tables-final-preview.html`; Catan-Farben nur im Editor (5) |
+| 0.14 | 26.10.2026 | I1-F umgesetzt (#20): Umbenennen an Ort und Stelle, Spielseite, Tisch bearbeiten wie „Neuer Tisch“ ohne Bank, kleine Pillen als Aktionen, Rückfrage bei ungespeicherten Änderungen; Design-Referenz `docs/design/i1f-edit-final-preview.html`; Personen- und Tischnamen app-weit eindeutig (E-31); US-VW-02 AK-7 mit I6 (2, 5) |
 
 ## 1. Zweck
 
@@ -38,7 +39,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | # | Schritt | Wann | Status |
 |---|---|---|---|
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
-| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C umgesetzt (#15), I1-E umgesetzt (#19) |
+| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C umgesetzt (#15), I1-E umgesetzt (#19), I1-F umgesetzt (#20) |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
@@ -108,7 +109,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 | I1-B Personen, Spiele, Datenbank | US-PG-01, US-SP-02 | Opus, high | `feat/us-pg-01-persons-and-games` | umgesetzt (#12) |
 | I1-C Gruppen und Farben | US-PG-02, US-PG-03 | Sonnet, medium | `feat/us-pg-02-groups-and-colors` | umgesetzt (#15) |
 | I1-E Personen und Gruppen im Überblick | US-VW-05 | Sonnet, medium | `feat/us-vw-05-persons-and-groups-overview` | umgesetzt (#19) |
-| I1-F Bearbeiten | US-VW-06, US-VW-02, US-VW-07 | Sonnet, medium | `feat/us-vw-06-edit-master-data` | offen |
+| I1-F Bearbeiten | US-VW-06, US-VW-02, US-VW-07 | Sonnet, medium | `feat/us-vw-06-edit-master-data` | umgesetzt (#20) |
 | I1-D Brett und Installation | US-PL-01 | Opus, high | `feat/us-pl-01-board-and-install` | offen |
 
 ### I1-A Zufall und Losbaustein
@@ -160,9 +161,16 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 - **Reihenfolge:** nach I1-E (die Detailansichten sind der Ort zum Bearbeiten) und vor I1-D.
 - **Inhalt:** Person umbenennen mit Prüfung gleichnamiger Mitglieder in ihren Gruppen (US-VW-06); Gruppe bearbeiten: Name, Farben, Bindung einschließlich „Catan ausschließen“, Mitglieder unveränderlich (US-VW-02); eigenes Spiel umbenennen mit eindeutigem Namen, Catan nicht umbenennbar (US-VW-07).
 - **Warum vorgezogen:** Wunsch des Product Owners (Spezifikation 0.8). Tippfehler oder eine falsche Bindung sollen vor dem ersten Spieleabend mit I2 korrigierbar sein. Archivieren und Löschen bleiben in I5, weil sie Partien (I3) und Sicherungspunkte (I4) brauchen.
-- **Hinweis:** US-VW-02 AK-3 (bestehende Partien) wird mit I3 nachgewiesen, AK-5 (laufende Partie) mit I2; US-VW-06 AK-1 für Ergebnisse und Statistiken mit I3.
+- **Hinweis:** US-VW-02 AK-3 (bestehende Partien) wird mit I3 nachgewiesen, AK-5 (laufende Partie) mit I2; US-VW-06 AK-1 für Ergebnisse und Statistiken mit I3. US-VW-02 AK-7 („Ich hasse Catan!“) wird mit US-SP-05 in I6 nachgewiesen, weil es die Einstellung erst dann gibt. *(ergänzt in 0.14)*
 - **Pakete:** keine.
 - **Abnahme durch den Product Owner:** Person, Gruppe und eigenes Spiel umbenennen; Farbe und Bindung einer Gruppe ändern, Catan ausschließen und wieder zulassen; Konflikte (gleichnamige Person in einer Gruppe, doppelter Spielname, 5 Mitglieder an Catan) werden verhindert.
+- **Ergebnis der Designrunden (0.14):**
+  - **Aktionen:** auf Personen-, Tisch- und Spielseite gleich als kleine Pillen unter den Angaben („✎ Umbenennen“, „✎ Bearbeiten“); Archivieren und Löschen kommen in I5 als Pillen daneben.
+  - **Umbenennen** von Person und eigenem Spiel an Ort und Stelle: Feld und „Abbrechen | Speichern“ ersetzen das Profil neben der Karte, darunter verschiebt sich nichts. Geprüft wird schon beim Tippen, bei Person, Spiel und Tisch gleich: Fehler erscheinen sofort und sperren „Speichern“. Personen- und Tischnamen sind app-weit eindeutig, auch beim Anlegen (E-31, Anforderungsdokumentation 0.17, Spezifikation 0.11; Entscheidungen des Product Owners).
+  - **Spielseite** `#/verwaltung/spiele/‹id›` für eigene Spiele; Catan ist „fest eingebaut“ und hat keine.
+  - **Tisch bearbeiten** wie „Neuer Tisch“, ohne Bank, unter einer eigenen Adresse.
+  - **Rückfrage** „Änderungen verwerfen?“ beim Verlassen mit ungespeicherten Änderungen.
+  - Verbindliche Referenz ist `docs/design/i1f-edit-final-preview.html`.
 
 ### I1-D Brett und Installation
 

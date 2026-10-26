@@ -14,16 +14,16 @@ test.describe('US-SP-02 Create a custom game', () => {
     await page.getByRole('link', { name: /^Spiele: / }).click();
     const supported = page.getByRole('region', { name: 'Unterstützte Spiele' });
     const custom = page.getByRole('region', { name: 'Eigene Spiele' });
-    await expect(supported.getByRole('listitem')).toHaveText(['Catan']);
+    await expect(supported.getByRole('listitem')).toHaveText([/^Catan/]);
     await expect(custom.getByText('Noch keine eigenen Spiele angelegt.')).toBeVisible();
 
     await createGame(page, 'Uno');
 
-    await expect(custom.getByRole('listitem')).toHaveText(['Uno']);
-    await expect(supported.getByRole('listitem')).toHaveText(['Catan']);
+    await expect(custom.getByRole('listitem')).toHaveText([/^Uno/]);
+    await expect(supported.getByRole('listitem')).toHaveText([/^Catan/]);
 
     await page.reload();
-    await expect(custom.getByRole('listitem')).toHaveText(['Uno']);
+    await expect(custom.getByRole('listitem')).toHaveText([/^Uno/]);
   });
 
   test('AK-2: a game with the same name, including Catan, is pointed out and not saved', async ({
@@ -32,17 +32,18 @@ test.describe('US-SP-02 Create a custom game', () => {
     await page.goto('/#/verwaltung/spiele');
     const custom = page.getByRole('region', { name: 'Eigene Spiele' });
     await createGame(page, 'Uno');
-    await expect(custom.getByRole('listitem')).toHaveText(['Uno']);
+    await expect(custom.getByRole('listitem')).toHaveText([/^Uno/]);
 
-    await createGame(page, 'uno');
-    await expect(page.getByRole('alert')).toContainText('Es gibt bereits ein Spiel namens „uno“.');
-
-    await createGame(page, 'CATAN');
-    await expect(page.getByRole('alert')).toContainText(
-      'Es gibt bereits ein Spiel namens „CATAN“.',
-    );
+    // Checked while typing; saving stays blocked.
+    for (const taken of ['uno', 'CATAN']) {
+      await page.getByLabel('Name').fill(taken);
+      await expect(page.getByRole('alert')).toContainText(
+        `Es gibt bereits ein Spiel namens „${taken}“.`,
+      );
+      await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    }
 
     await page.reload();
-    await expect(custom.getByRole('listitem')).toHaveText(['Uno']);
+    await expect(custom.getByRole('listitem')).toHaveText([/^Uno/]);
   });
 });

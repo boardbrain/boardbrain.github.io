@@ -78,3 +78,40 @@ export function createCustomGame(
     updatedAt: fields.now,
   });
 }
+
+// Renaming keeps everything but the name and moves `updatedAt` forward.
+function renamed<T extends Person | CustomGame>(
+  record: T,
+  name: string,
+  now: IsoTimestamp,
+): Result<T, NameEmptyError> {
+  const cleaned = cleanName(name);
+  if (cleaned === '') {
+    return err('name-empty');
+  }
+  return ok({ ...record, name: cleaned, updatedAt: now });
+}
+
+/**
+ * Gives a person a new, cleaned name (US-VW-06 AK-1, FA-VW-01). Uniqueness among all persons
+ * is checked by the caller, which knows the other persons (E-31).
+ */
+export function renamePerson(
+  person: Person,
+  name: string,
+  now: IsoTimestamp,
+): Result<Person, NameEmptyError> {
+  return renamed(person, name, now);
+}
+
+/**
+ * Gives a custom game a new, cleaned name (US-VW-07 AK-1, FA-VW-04). Uniqueness among all
+ * games is checked by the caller, which knows the other games.
+ */
+export function renameCustomGame(
+  game: CustomGame,
+  name: string,
+  now: IsoTimestamp,
+): Result<CustomGame, NameEmptyError> {
+  return renamed(game, name, now);
+}

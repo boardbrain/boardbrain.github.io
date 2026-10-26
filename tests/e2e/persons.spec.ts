@@ -40,35 +40,20 @@ test.describe('US-PG-01 Create a person', () => {
     await expect(save).toBeDisabled();
   });
 
-  test('AK-3: a same-named person is pointed out and saved after confirmation', async ({
+  test('AK-3: a same-named person is an error while typing and cannot be saved', async ({
     page,
   }) => {
     await page.goto('/#/verwaltung/personen');
     await createPerson(page, 'Anna');
     await expect(personCards(page)).toHaveCount(1);
 
-    await createPerson(page, ' anna ');
+    await page.getByLabel('Name').fill(' anna ');
 
     await expect(page.getByRole('alert')).toContainText(
-      'Es gibt bereits eine Person namens „anna“. Trotzdem anlegen?',
+      'Es gibt bereits eine Person namens „anna“. Bitte wähle einen anderen Namen.',
     );
-    await expect(personCards(page)).toHaveCount(1);
-
-    await page.getByRole('button', { name: 'Trotzdem anlegen' }).click();
-
-    await expect(page.getByRole('alert')).toHaveCount(0);
-    await expect(personCards(page)).toHaveCount(2);
-  });
-
-  test('AK-3: cancelling the hint saves nothing', async ({ page }) => {
-    await page.goto('/#/verwaltung/personen');
-    await createPerson(page, 'Anna');
-    await expect(personCards(page)).toHaveCount(1);
-
-    await createPerson(page, 'ANNA');
-    await page.getByRole('button', { name: 'Abbrechen' }).click();
-
-    await expect(page.getByRole('alert')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    await page.getByLabel('Name').press('Enter');
     await page.reload();
     await expect(personCards(page)).toHaveCount(1);
   });

@@ -178,3 +178,14 @@ export function PlusIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Pen for "rename" and "edit". Decorative: the button around it carries the label.
+ */
+export function PenIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4" />
+    </Outline>
+  );
+}

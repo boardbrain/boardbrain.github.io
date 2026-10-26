@@ -7,6 +7,7 @@ import {
   type Group,
   type Person,
 } from '@/core/model';
+import { assert } from '@/core/shared';
 
 /**
  * Fixed time for tests.
@@ -54,6 +55,12 @@ export class InMemoryMasterDataStore implements MasterDataStore {
           persons.push(person);
           return Promise.resolve();
         },
+        update: (person) => {
+          const index = persons.findIndex((stored) => stored.id === person.id);
+          assert(index !== -1, `the person ${person.id} exists`);
+          persons[index] = person;
+          return Promise.resolve();
+        },
       },
       groups: {
         listAll: () => Promise.resolve([...groups]),
@@ -61,11 +68,23 @@ export class InMemoryMasterDataStore implements MasterDataStore {
           groups.push(group);
           return Promise.resolve();
         },
+        update: (group) => {
+          const index = groups.findIndex((stored) => stored.id === group.id);
+          assert(index !== -1, `the group ${group.id} exists`);
+          groups[index] = group;
+          return Promise.resolve();
+        },
       },
       customGames: {
         listAll: () => Promise.resolve([...customGames]),
         add: (game) => {
           customGames.push(game);
+          return Promise.resolve();
+        },
+        update: (game) => {
+          const index = customGames.findIndex((stored) => stored.id === game.id);
+          assert(index !== -1, `the game ${game.id} exists`);
+          customGames[index] = game;
           return Promise.resolve();
         },
       },

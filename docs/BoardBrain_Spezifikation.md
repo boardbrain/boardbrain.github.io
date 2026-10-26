@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.10 |
+| Version | 0.11 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 09.10.2026 |
+| Stand | 26.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -24,6 +24,7 @@
 | 0.8 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Gruppen können Catan ausschließen (FA-PG-04, E-27; 3.3, 3.4, US-PG-02 AK-7, US-PG-03 AK-2 und AK-4, US-AB-01 AK-1, US-VW-02 AK-6); Farbwerte nach E-28 (3.3). Bearbeiten nach Wunsch des Product Owners vorgezogen: neu US-VW-06 „Person umbenennen“ und US-VW-07 „Eigenes Spiel umbenennen“ (Must, I1) aus US-VW-01 und US-VW-04; US-VW-02 „Gruppe bearbeiten“ wird Must in I1; US-VW-01 und US-VW-04 behalten Archivieren und Löschen (2.3, 2.5, 4.3, 6) |
 | 0.9 | 08.10.2026 | Design D-3 (Anforderungsdokumentation 0.15, E-29): Smartphones nur im Hochformat, im Querformat ein Hinweis zum Drehen; Tablets in beiden Ausrichtungen (US-PL-01 AK-3, NFA-PL-04) |
 | 0.10 | 09.10.2026 | Neue Story US-SP-05 „Catan app-weit ausblenden („Ich hasse Catan!“)“ (Must, I6) zu FA-SP-06 und E-30 (Anforderungsdokumentation 0.16); US-VW-02 AK-7 (2.3, 2.5, 4.1, 4.3, 6) |
+| 0.11 | 26.10.2026 | Abnahme von I1-F (Anforderungsdokumentation 0.17, E-31): Personen- und Gruppennamen app-weit eindeutig, geprüft schon bei der Eingabe (3.4, US-PG-01 AK-3, neu US-PG-02 AK-8, US-VW-02 AK-1, US-VW-06 AK-2, A-02); „Neu anlegen“ beim Import mit vergebenem Namen nur mit anderem Namen (3.9) |
 
 ## Inhaltsverzeichnis
 
@@ -241,7 +242,7 @@ Regeln:
 | An Catan gebunden | nur Catan | 2 bis 4 |
 | An ein eigenes Spiel gebunden | nur dieses Spiel | 2 bis 12 |
 
-Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Innerhalb einer Gruppe sind die Personennamen eindeutig (ohne Beachtung von Groß- und Kleinschreibung sowie von Leerzeichen am Anfang und Ende), damit Personen beim Import eindeutig zugeordnet werden können.
+Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen sind app-weit eindeutig, ebenso Gruppennamen, jeweils auch gegenüber archivierten Datensätzen (ohne Beachtung von Groß- und Kleinschreibung sowie von Leerzeichen am Anfang und Ende), damit Personen und Gruppen unterscheidbar bleiben und beim Import eindeutig zugeordnet werden können. Die App prüft das schon bei der Eingabe und lässt das Speichern eines vergebenen Namens nicht zu. *(geändert in 0.11)*
 
 ### 3.5 Lebenszyklus einer laufenden Partie
 
@@ -327,7 +328,7 @@ Regeln:
 6. Das Exportformat ist versioniert. Exporte älterer Formatversionen werden übernommen; Exporte neuerer Formatversionen werden mit dem Hinweis abgelehnt, die App zu aktualisieren. Eine fehlerhafte oder unvollständige Datei wird vollständig abgelehnt.
 7. Der Archivstatus zählt beim Vergleich nicht zum Inhalt. Bei vorhandenen Datensätzen bleibt der lokale Archivstatus erhalten; neu angelegte Datensätze übernehmen den Status aus der Datei.
 8. Importierte Partien behalten ihre Kennung. Bei einem erneuten Import werden sie nach Anwendung der neu getroffenen Zuordnungen verglichen; bei gleicher Zuordnung ergibt sich K1, bei abweichender K2.
-9. Würde eine Option eine Regel verletzen (z. B. doppelte Personennamen in einer Gruppe, eine Spielbindung, die nicht zu den Partien passt, oder die Zuordnung zweier importierter Personen zu gleichnamigen Personen), wird sie deaktiviert und mit Begründung angezeigt. Mindestens eine zulässige Option („Meine behalten“ bzw. „Neu anlegen“) bleibt stets verfügbar.
+9. Würde eine Option eine Regel verletzen (z. B. doppelte Personennamen in einer Gruppe, eine Spielbindung, die nicht zu den Partien passt, oder die Zuordnung zweier importierter Personen zu gleichnamigen Personen), wird sie deaktiviert und mit Begründung angezeigt. Mindestens eine zulässige Option („Meine behalten“ bzw. „Neu anlegen“) bleibt stets verfügbar. Ist der Name einer neu anzulegenden Person oder Gruppe schon vergeben, verlangt „Neu anlegen“ einen anderen Namen (→ 3.4). *(ergänzt in 0.11)*
 10. Enthält die Datei Einstellungen, fragt die App einmal, ob sie übernommen werden sollen. In einen leeren Datenbestand werden alle Datensätze ohne Rückfrage mit ihren Kennungen übernommen.
 11. Der Sicherungspunkt „Vor Import“ wird unmittelbar vor der Übernahme angelegt, nachdem alle Entscheidungen getroffen sind. Ein abgebrochener Import erzeugt keinen Sicherungspunkt und erscheint nicht in der Liste der letzten Importe.
 12. Während einer laufenden Partie ist der Import gesperrt (→ 3.5).
@@ -427,7 +428,7 @@ Bezug: FA-PG-01
 
 - **AK-1:** Gegeben die Personenverwaltung, wenn ich einen Namen eingebe und speichere, dann erscheint die Person in der Personenliste.
 - **AK-2:** Gegeben ein leerer Name, wenn ich speichern will, dann ist das nicht möglich.
-- **AK-3:** Gegeben eine Person mit gleichem Namen existiert bereits, wenn ich speichere, dann weist die App darauf hin und lässt das Speichern nach Bestätigung zu. In eine gemeinsame Gruppe können gleichnamige Personen nicht aufgenommen werden (→ 3.4).
+- **AK-3:** Gegeben eine Person mit gleichem Namen existiert bereits (auch archiviert), wenn ich den Namen eingebe, dann zeigt die App das sofort an und lässt das Speichern nicht zu (→ 3.4). *(geändert in 0.11)*
 
 #### US-PG-02 Gruppe anlegen · M
 Als Nutzer möchte ich Gruppen mit fester Zusammensetzung anlegen, damit Statistiken vergleichbar bleiben.
@@ -440,6 +441,7 @@ Bezug: FA-PG-02, FA-PG-03, FA-PG-04, FA-PG-09, FA-PG-10 → 3.4
 - **AK-5:** Gegeben eine Person gehört bereits einer Gruppe an, wenn ich sie einer weiteren Gruppe hinzufüge, dann ist das zulässig.
 - **AK-6:** Gegeben zwei ausgewählte Personen haben denselben Namen (ohne Beachtung von Groß- und Kleinschreibung), wenn ich speichern will, dann verhindert die App das und nennt die betroffenen Personen.
 - **AK-7:** Gegeben ich lege eine globale Gruppe mit 2 bis 4 Mitgliedern an, dann kann ich Catan ausschließen; die Gruppe kann dann kein Catan spielen. Bei mehr als 4 Mitgliedern ist Catan ohnehin ausgeschlossen. *(neu in 0.8)*
+- **AK-8:** Gegeben eine Gruppe mit gleichem Namen existiert bereits (auch archiviert), auch wenn es der vorgeschlagene Name ist, dann zeigt die App das sofort an und lässt das Speichern nicht zu (→ 3.4). *(neu in 0.11)*
 
 #### US-PG-03 Farben einer Gruppe festlegen · M
 Als Nutzer möchte ich jeder Person in einer Gruppe Farben zuweisen, damit sie auf dem Brett und in Statistiken erkennbar ist.
@@ -474,7 +476,7 @@ Bezug: FA-VW-01, FA-VW-05
 Als Nutzer möchte ich Name, Farben und Spielbindung einer Gruppe ändern können, damit sie zur Realität passt.
 Bezug: FA-VW-02 → 3.3, 3.4
 
-- **AK-1:** Gegeben eine Gruppe, dann kann ich Namen und Farben ändern.
+- **AK-1:** Gegeben eine Gruppe, dann kann ich Namen und Farben ändern; der Name muss eindeutig sein wie in US-PG-02 AK-8. *(ergänzt in 0.11)*
 - **AK-2:** Gegeben eine Gruppe, dann bietet die App keine Möglichkeit, Mitglieder hinzuzufügen oder zu entfernen.
 - **AK-3:** Gegeben ich ändere die Spielbindung, wenn alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen, dann wird die Änderung übernommen; andernfalls verhindert die App sie und nennt den Grund.
 - **AK-4:** Gegeben die neue Bindung erfordert zusätzliche Farben, dann werden diese gemäß 3.3 automatisch belegt und sind änderbar.
@@ -519,7 +521,7 @@ Als Nutzer möchte ich Personen umbenennen, damit ich Tippfehler korrigieren kan
 Bezug: FA-VW-01, FA-PG-09
 
 - **AK-1:** Gegeben eine Person, wenn ich sie umbenenne, dann erscheint der neue Name überall, auch in bestehenden Ergebnissen und Statistiken. *(bisher US-VW-01 AK-1; Ergebnisse und Statistiken werden mit I3 nachgewiesen)*
-- **AK-2:** Gegeben der neue Name gleicht dem Namen eines anderen Mitglieds einer ihrer Gruppen, wenn ich umbenenne, dann verhindert die App das und nennt die betroffene Gruppe. *(bisher US-VW-01 AK-5)*
+- **AK-2:** Gegeben der neue Name gleicht dem Namen einer anderen Person (auch archiviert), wenn ich ihn eingebe, dann zeigt die App das sofort an und lässt das Umbenennen nicht zu (→ 3.4). *(bisher US-VW-01 AK-5, geändert in 0.11)*
 
 #### US-VW-07 Eigenes Spiel umbenennen · M
 Als Nutzer möchte ich eigene Spiele umbenennen, damit ich Tippfehler korrigieren kann. *(neu in 0.8, aus US-VW-04)*
@@ -990,7 +992,7 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-PG-05 | US-PG-03 |
 | FA-PG-06 | US-PG-04 |
 | FA-PG-07, FA-PG-08 | US-PG-03 |
-| FA-PG-09 | US-PG-02, US-VW-01 |
+| FA-PG-09 | US-PG-01, US-PG-02, US-VW-01, US-VW-02, US-VW-06 |
 | FA-PG-10 | US-PG-02, US-AB-01 |
 | FA-VW-01 | US-VW-01, US-VW-06 |
 | FA-VW-02 | US-VW-02 |
@@ -1067,7 +1069,7 @@ Die folgenden Punkte wurden in der Klärung nicht ausdrücklich entschieden, in 
 | ID | Annahme |
 |---|---|
 | A-01 | Die Palette der Gruppenfarben umfasst 12 Farben; eine Gruppe hat daher höchstens 12 Mitglieder. |
-| A-02 | Gleichnamige Personen sind in der Personenliste nach Hinweis erlaubt, innerhalb einer Gruppe jedoch nicht; Spielnamen müssen eindeutig sein. *(geändert in 0.2)* |
+| A-02 | Personen-, Gruppen- und Spielnamen sind app-weit eindeutig. *(geändert in 0.2 und 0.11)* |
 | A-03 | Der Export eines Spiels umfasst alle Partien dieses Spiels über alle Gruppen. |
 | A-04 | Schritte können wiederholt werden, solange die Partie läuft, also auch nach Abschluss der Generierung. |
 | A-05 | Die Wiederholung von LS-02 verwirft die Platzierung, nicht aber bereits gezogene Startrohstoffe. |
