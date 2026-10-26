@@ -115,6 +115,49 @@ export function suggestGroupName(persons: readonly Person[]): string {
   return `${names.slice(0, -1).join(', ')} & ${last}`;
 }
 
+// Combines persons and colours into members and checks that the colours fit the colour scheme
+// of the binding (Specification 3.3). Wrong colours are a programming error of the caller.
+function membersWithColors(
+  personIds: readonly PersonId[],
+  colors: readonly MemberColors[],
+  binding: GroupBinding,
+  boundGame: BoundGame | null,
+): GroupMember[] {
+  const count = personIds.length;
+  assert(colors.length === count, 'there is one colour entry per person');
+  const scheme = colorSchemeOf({
+    memberCount: count,
+    boundGame,
+    maxPlayersWithColors: GROUP_MAX_PLAYERS_WITH_COLORS,
+    excludesCatan: binding.kind === 'global' && binding.excludesCatan === true,
+  });
+  const members = personIds.map((personId, index): GroupMember => {
+    const memberColors = colors[index];
+    assert(memberColors !== undefined, 'the colours of the person exist');
+    assert(
+      (scheme === 'group-only') === (memberColors.catanColor === undefined),
+      'a Catan colour exists exactly where the scheme has one',
+    );
+    assert(
+      scheme !== 'catan-only' || memberColors.groupColor === memberColors.catanColor,
+      'the Catan colour is the group colour in a group bound to Catan',
+    );
+    return memberColors.catanColor === undefined
+      ? { personId, groupColor: memberColors.groupColor }
+      : { personId, groupColor: memberColors.groupColor, catanColor: memberColors.catanColor };
+  });
+  assert(
+    new Set(members.map((member) => member.groupColor)).size === count,
+    'group colours are unique within the group',
+  );
+  assert(
+    new Set(members.flatMap((member) => (member.catanColor ? [member.catanColor] : []))).size ===
+      members.filter((member) => member.catanColor !== undefined).length,
+    'Catan colours are unique within the group',
+  );
+  return members;
+}
+
 /**
  * Creates a new, active group (US-PG-02). Members must be 2 to 12 persons with different
  * names (AK-3, AK-6); a group bound to a game must not have more members than the game allows
@@ -141,36 +184,11 @@ export function createGroup(fields: NewGroupFields): Result<Group, GroupError> {
   if (findSameNamedPersons(fields.persons).length > 0) {
     return err('same-named-members');
   }
-  assert(fields.colors.length === count, 'there is one colour entry per person');
-  const scheme = colorSchemeOf({
-    memberCount: count,
-    boundGame: fields.boundGame,
-    maxPlayersWithColors: GROUP_MAX_PLAYERS_WITH_COLORS,
-    excludesCatan: fields.binding.kind === 'global' && fields.binding.excludesCatan === true,
-  });
-  const members = fields.persons.map((person, index): GroupMember => {
-    const colors = fields.colors[index];
-    assert(colors !== undefined, 'the colours of the person exist');
-    assert(
-      (scheme === 'group-only') === (colors.catanColor === undefined),
-      'a Catan colour exists exactly where the scheme has one',
-    );
-    assert(
-      scheme !== 'catan-only' || colors.groupColor === colors.catanColor,
-      'the Catan colour is the group colour in a group bound to Catan',
-    );
-    return colors.catanColor === undefined
-      ? { personId: person.id, groupColor: colors.groupColor }
-      : { personId: person.id, groupColor: colors.groupColor, catanColor: colors.catanColor };
-  });
-  assert(
-    new Set(members.map((member) => member.groupColor)).size === count,
-    'group colours are unique within the group',
-  );
-  assert(
-    new Set(members.flatMap((member) => (member.catanColor ? [member.catanColor] : []))).size ===
-      members.filter((member) => member.catanColor !== undefined).length,
-    'Catan colours are unique within the group',
+  const members = membersWithColors(
+    fields.persons.map((person) => person.id),
+    fields.colors,
+    fields.binding,
+    fields.boundGame,
   );
   return ok({
     id: fields.id,
@@ -181,4 +199,69 @@ export function createGroup(fields: NewGroupFields): Result<Group, GroupError> {
     createdAt: fields.now,
     updatedAt: fields.now,
   });
+}
+
+/**
+ * Changes of a group (US-VW-02). `colors` has one entry per member, in the order of the
+ * members; the members themselves cannot be changed (AK-2).
+ */
+export type GroupChanges = {
+  readonly name: string;
+  readonly binding: GroupBinding;
+  /** `null` for a global group. */
+  readonly boundGame: BoundGame | null;
+  readonly colors: readonly MemberColors[];
+  readonly now: IsoTimestamp;
+};
+
+/**
+ * Expected reasons why a group cannot be changed.
+ */
+export type GroupEditError = 'name-empty' | 'binding-too-many-members';
+
+/**
+ * Changes name, colours and binding of a group and keeps its members (US-VW-02 AK-1, AK-2,
+ * FA-VW-02). A binding the number of members does not fit is rejected (AK-3, FA-PG-10).
+ * @throws {InvariantError} if the colours do not belong to the members or do not fit the
+ *   colour scheme of the new binding.
+ */
+export function editGroup(group: Group, changes: GroupChanges): Result<Group, GroupEditError> {
+  const name = cleanName(changes.name);
+  if (name === '') {
+    return err('name-empty');
+  }
+  if (changes.boundGame !== null && group.members.length > changes.boundGame.maxPlayers) {
+    return err('binding-too-many-members');
+  }
+  const members = membersWithColors(
+    group.members.map((member) => member.personId),
+    changes.colors,
+    changes.binding,
+    changes.boundGame,
+  );
+  return ok({ ...group, name, binding: changes.binding, members, updatedAt: changes.now });
+}
+
+/**
+ * Groups of the person in which another member has the given name (US-VW-06 AK-2, FA-VW-01):
+ * renaming the person to this name would make two names in the group equal. `persons` must
+ * contain the members of the groups.
+ */
+export function findNameConflicts(
+  groups: readonly Group[],
+  persons: readonly Person[],
+  personId: PersonId,
+  name: string,
+): Group[] {
+  return groups.filter(
+    (group) =>
+      group.members.some((member) => member.personId === personId) &&
+      group.members.some((member) => {
+        if (member.personId === personId) {
+          return false;
+        }
+        const other = persons.find((person) => person.id === member.personId);
+        return other !== undefined && isSameName(other.name, name);
+      }),
+  );
 }

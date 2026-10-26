@@ -2,6 +2,7 @@ import { aCustomGame, aGroup, aPerson } from '@tests/support/masterDataFakes';
 import { createTestDb } from '@tests/support/testDatabase';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { MasterDataStore } from '@/app/ports';
+import { InvariantError } from '@/core/shared';
 import type { BoardBrainDb } from './database';
 import { createDexieMasterDataStore } from './masterDataStore';
 
@@ -92,4 +93,55 @@ describe('Architecture 4.4 transaction boundary', () => {
     expect(await db.persons.count()).toBe(0);
     expect(await db.meta.get('state')).toBeUndefined();
   });
+});
+
+describe('US-VW-02, US-VW-06, US-VW-07 updating master data', () => {
+  it('replaces a stored person and records the change', async () => {
+    const anna = aPerson({ name: 'Ana', updatedAt: EARLIER });
+    await store.transaction(({ persons }) => persons.add(anna));
+
+    const renamed = { ...anna, name: 'Anna', updatedAt: LATER };
+    await store.transaction(({ persons }) => persons.update(renamed));
+
+    expect(await db.persons.toArray()).toEqual([renamed]);
+    expect((await db.meta.get('state'))?.value.lastUserDataChangeAt).toBe(LATER);
+  });
+
+  it('replaces a stored group', async () => {
+    const group = aGroup({ updatedAt: EARLIER });
+    await store.transaction(({ groups }) => groups.add(group));
+
+    const edited = { ...group, name: 'Die Zwei', updatedAt: LATER };
+    await store.transaction(({ groups }) => groups.update(edited));
+
+    expect(await db.groups.toArray()).toEqual([edited]);
+  });
+
+  it('replaces a stored custom game', async () => {
+    const uno = aCustomGame({ name: 'Unno', updatedAt: EARLIER });
+    await store.transaction(({ customGames }) => customGames.add(uno));
+
+    const renamed = { ...uno, name: 'Uno', updatedAt: LATER };
+    await store.transaction(({ customGames }) => customGames.update(renamed));
+
+    expect(await db.games.toArray()).toEqual([renamed]);
+  });
+
+  it.each(['persons', 'groups', 'customGames'] as const)(
+    'refuses to update a record of %s that does not exist',
+    async (repository) => {
+      await expect(
+        store.transaction((repositories) => {
+          if (repository === 'persons') {
+            return repositories.persons.update(aPerson());
+          }
+          if (repository === 'groups') {
+            return repositories.groups.update(aGroup());
+          }
+          return repositories.customGames.update(aCustomGame());
+        }),
+      ).rejects.toThrow(InvariantError);
+      expect(await db.meta.get('state')).toBeUndefined();
+    },
+  );
 });

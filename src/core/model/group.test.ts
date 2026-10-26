@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { InvariantError } from '@/core/shared';
-import { createGroup, findSameNamedPersons, suggestGroupName, type NewGroupFields } from './group';
-import { defaultColors } from './groupColors';
+import {
+  createGroup,
+  editGroup,
+  findNameConflicts,
+  findSameNamedPersons,
+  suggestGroupName,
+  type Group,
+  type GroupChanges,
+  type NewGroupFields,
+} from './group';
+import { defaultColors, normalizeColors, type MemberColors } from './groupColors';
 import { toGameId, toGroupId, toPersonId } from './ids';
 import type { Person } from './entities';
 
@@ -271,5 +280,218 @@ describe('E-27 global group that excludes Catan', () => {
         }),
       ),
     ).toThrow(InvariantError);
+  });
+});
+
+const LATER = '2026-10-26T20:00:00.000Z';
+const CATAN_ID = toGameId('c47a0000-0000-4000-8000-000000000001');
+const UNO = { maxPlayers: 12, hasPlayerColors: false };
+
+function aStoredGroup(persons: Person[]): Group {
+  const result = createGroup(fields(persons));
+  if (!result.ok) {
+    throw new Error('the test group is valid');
+  }
+  return result.value;
+}
+
+function colorsOf(group: Group): MemberColors[] {
+  return group.members.map(({ groupColor, catanColor }) =>
+    catanColor === undefined ? { groupColor } : { groupColor, catanColor },
+  );
+}
+
+function changes(group: Group, overrides: Partial<GroupChanges> = {}): GroupChanges {
+  return {
+    name: group.name,
+    binding: group.binding,
+    boundGame: null,
+    colors: colorsOf(group),
+    now: LATER,
+    ...overrides,
+  };
+}
+
+describe('US-VW-02 Edit a group', () => {
+  it('AK-1: changes name and colours and keeps id and creation time', () => {
+    const group = aStoredGroup(people('Anna', 'Ben'));
+    const colors: MemberColors[] = [
+      { groupColor: 'green', catanColor: 'white' },
+      { groupColor: 'red', catanColor: 'orange' },
+    ];
+
+    const result = editGroup(group, changes(group, { name: '  Die Zwei ', colors }));
+
+    expect(result).toEqual({
+      ok: true,
+      value: {
+        ...group,
+        name: 'Die Zwei',
+        members: group.members.map((member, index) => ({
+          personId: member.personId,
+          ...colors[index],
+        })),
+        updatedAt: LATER,
+      },
+    });
+  });
+
+  it('AK-1: requires a name', () => {
+    const group = aStoredGroup(people('Anna', 'Ben'));
+
+    expect(editGroup(group, changes(group, { name: '  ' }))).toEqual({
+      ok: false,
+      error: 'name-empty',
+    });
+  });
+
+  it('AK-2: keeps the members and their order', () => {
+    const group = aStoredGroup(people('Anna', 'Ben', 'Clara'));
+
+    const result = editGroup(group, changes(group, { name: 'Neu' }));
+
+    expect(result.ok && result.value.members.map((member) => member.personId)).toEqual(
+      group.members.map((member) => member.personId),
+    );
+  });
+
+  it('AK-3: rejects binding a group of 5 to Catan', () => {
+    const group = aStoredGroup(people('A', 'B', 'C', 'D', 'E'));
+
+    const result = editGroup(
+      group,
+      changes(group, { binding: { kind: 'game', gameId: CATAN_ID }, boundGame: CATAN }),
+    );
+
+    expect(result).toEqual({ ok: false, error: 'binding-too-many-members' });
+  });
+
+  it('AK-3: binds a group of 4 to Catan with one colour for both purposes', () => {
+    const group = aStoredGroup(people('A', 'B', 'C', 'D'));
+
+    const result = editGroup(
+      group,
+      changes(group, {
+        binding: { kind: 'game', gameId: CATAN_ID },
+        boundGame: CATAN,
+        colors: normalizeColors(colorsOf(group), 'catan-only'),
+      }),
+    );
+
+    expect(result.ok && result.value.binding).toEqual({ kind: 'game', gameId: CATAN_ID });
+    expect(
+      result.ok && result.value.members.every((member) => member.groupColor === member.catanColor),
+    ).toBe(true);
+  });
+
+  it('AK-4: assigns Catan colours when a group bound to a custom game becomes global', () => {
+    const uno = toGameId('00000000-0000-4000-8000-0000000000b1');
+    const group = aStoredGroup(people('Anna', 'Ben'));
+    const unoColors: MemberColors[] = [{ groupColor: 'green' }, { groupColor: 'magenta' }];
+    const bound = editGroup(
+      group,
+      changes(group, { binding: { kind: 'game', gameId: uno }, boundGame: UNO, colors: unoColors }),
+    );
+    if (!bound.ok) {
+      throw new Error('binding to Uno is valid');
+    }
+
+    const result = editGroup(
+      bound.value,
+      changes(bound.value, {
+        binding: { kind: 'global' },
+        colors: normalizeColors(colorsOf(bound.value), 'both'),
+      }),
+    );
+
+    expect(result.ok && colorsOf(result.value)).toEqual([
+      { groupColor: 'green', catanColor: 'red' },
+      { groupColor: 'magenta', catanColor: 'blue' },
+    ]);
+  });
+
+  it('AK-6: drops the Catan colours when Catan is excluded', () => {
+    const group = aStoredGroup(people('Anna', 'Ben'));
+
+    const result = editGroup(
+      group,
+      changes(group, {
+        binding: { kind: 'global', excludesCatan: true },
+        colors: normalizeColors(colorsOf(group), 'group-only'),
+      }),
+    );
+
+    expect(result.ok && result.value.binding).toEqual({ kind: 'global', excludesCatan: true });
+    expect(result.ok && colorsOf(result.value)).toEqual([
+      { groupColor: 'red' },
+      { groupColor: 'blue' },
+    ]);
+  });
+
+  it('AK-6: assigns Catan colours again when Catan is allowed again', () => {
+    const created = createGroup(
+      fields(people('Anna', 'Ben'), {
+        binding: { kind: 'global', excludesCatan: true },
+        colors: [{ groupColor: 'green' }, { groupColor: 'red' }],
+      }),
+    );
+    if (!created.ok) {
+      throw new Error('the test group is valid');
+    }
+
+    const result = editGroup(
+      created.value,
+      changes(created.value, {
+        binding: { kind: 'global' },
+        colors: normalizeColors(colorsOf(created.value), 'both'),
+      }),
+    );
+
+    expect(result.ok && colorsOf(result.value)).toEqual([
+      { groupColor: 'green', catanColor: 'red' },
+      { groupColor: 'red', catanColor: 'blue' },
+    ]);
+  });
+
+  it('rejects colours that do not fit the new binding (invariant)', () => {
+    const group = aStoredGroup(people('Anna', 'Ben'));
+
+    expect(() =>
+      editGroup(group, changes(group, { binding: { kind: 'global', excludesCatan: true } })),
+    ).toThrow(InvariantError);
+  });
+
+  it('rejects colours for a different number of members (invariant)', () => {
+    const group = aStoredGroup(people('Anna', 'Ben'));
+
+    expect(() => editGroup(group, changes(group, { colors: defaultColors(3, 'both') }))).toThrow(
+      InvariantError,
+    );
+  });
+});
+
+describe('US-VW-06 AK-2: name conflicts in the groups of a person', () => {
+  const persons = people('Anna', 'Ben', 'Clara', 'Dora');
+  const [anna, ben, clara, dora] = persons;
+  if (anna === undefined || ben === undefined || clara === undefined || dora === undefined) {
+    throw new Error('four test persons exist');
+  }
+  const annaBen = aStoredGroup([anna, ben]);
+  const claraDora = {
+    ...aStoredGroup([clara, dora]),
+    id: toGroupId('00000000-0000-4000-8000-0000000000c2'),
+  };
+  const groups = [annaBen, claraDora];
+
+  it('finds the group in which another member has the new name, ignoring case', () => {
+    expect(findNameConflicts(groups, persons, anna.id, ' BEN ')).toEqual([annaBen]);
+  });
+
+  it('ignores groups the person is not a member of', () => {
+    expect(findNameConflicts(groups, persons, anna.id, 'Clara')).toEqual([]);
+  });
+
+  it('ignores the person itself', () => {
+    expect(findNameConflicts(groups, persons, anna.id, 'anna')).toEqual([]);
   });
 });

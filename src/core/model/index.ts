@@ -18,9 +18,13 @@ export {
   type NameEmptyError,
   type NewRecordFields,
   type Person,
+  renameCustomGame,
+  renamePerson,
 } from './entities';
 export {
   createGroup,
+  editGroup,
+  findNameConflicts,
   findSameNamedPersons,
   GROUP_MAX_PLAYERS_WITH_COLORS,
   GROUP_SIZE,
@@ -28,6 +32,8 @@ export {
   type BoundGame,
   type Group,
   type GroupBinding,
+  type GroupChanges,
+  type GroupEditError,
   type GroupError,
   type GroupMember,
   type NewGroupFields,

@@ -8,6 +8,8 @@ export type PersonRepository = {
   listAll(): Promise<readonly Person[]>;
   /** Adds a new person and records the change of user data. */
   add(person: Person): Promise<void>;
+  /** Replaces a stored person with the same id and records the change of user data. */
+  update(person: Person): Promise<void>;
 };
 
 /**
@@ -18,6 +20,8 @@ export type CustomGameRepository = {
   listAll(): Promise<readonly CustomGame[]>;
   /** Adds a new custom game and records the change of user data. */
   add(game: CustomGame): Promise<void>;
+  /** Replaces a stored custom game with the same id and records the change of user data. */
+  update(game: CustomGame): Promise<void>;
 };
 
 /**
@@ -28,6 +32,8 @@ export type GroupRepository = {
   listAll(): Promise<readonly Group[]>;
   /** Adds a new group and records the change of user data. */
   add(group: Group): Promise<void>;
+  /** Replaces a stored group with the same id and records the change of user data. */
+  update(group: Group): Promise<void>;
 };
 
 /**
