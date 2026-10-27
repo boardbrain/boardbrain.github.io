@@ -49,6 +49,7 @@ export const de = {
     gruppen: 'Tische',
     spiele: 'Spiele',
     nameLeer: 'Bitte gib einen Namen ein.',
+    diagnose: 'Diagnose',
   },
   personen: {
     titel: 'Personen',

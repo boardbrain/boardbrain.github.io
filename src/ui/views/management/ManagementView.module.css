@@ -1,4 +1,5 @@
 .page {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 20px;
@@ -7,6 +8,17 @@
   max-width: 900px;
   padding: 20px 16px 28px;
   margin: 0 auto;
+}
+
+/* In the bottom padding of the page, so it moves none of the cards (I1-D). */
+.diagnostics {
+  position: absolute;
+  right: 16px;
+  bottom: 6px;
+  font-size: var(--font-size-tiny);
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  text-decoration: none;
 }
 
 .title {

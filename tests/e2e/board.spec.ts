@@ -60,9 +60,11 @@ test.describe('US-PL-01 board (design I1-D)', () => {
     expect(isScrollable).toBe(false);
   });
 
-  test('is reached from the diagnostics view and leads back there', async ({ page }) => {
-    await page.goto('/#/diagnose');
+  test('is reached via management and diagnostics, as in the installed app', async ({ page }) => {
+    await page.goto('/#/verwaltung');
 
+    await page.getByRole('link', { name: 'Diagnose' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Diagnose' })).toBeVisible();
     await page.getByRole('link', { name: 'Brett ansehen' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Brett' })).toBeVisible();
     await page.getByRole('button', { name: 'Zurück' }).click();
