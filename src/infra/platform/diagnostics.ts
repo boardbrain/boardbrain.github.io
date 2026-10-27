@@ -6,7 +6,8 @@ export type DiagnosticsScope = {
   readonly isSecureContext: boolean;
   readonly crypto?: { readonly randomUUID?: unknown } | undefined;
   readonly navigator: {
-    readonly serviceWorker?: unknown;
+    /** `controller` is set as soon as a service worker controls the page. */
+    readonly serviceWorker?: { readonly controller?: unknown } | undefined;
     readonly storage?: { readonly persisted?: () => Promise<boolean> } | undefined;
     readonly standalone?: boolean;
   };
@@ -24,6 +25,8 @@ export type Diagnostics = {
   readonly storageApi: boolean;
   readonly persisted: boolean | undefined;
   readonly installed: boolean;
+  /** A service worker controls the page, so the app also starts without a network (NFA-PL-03). */
+  readonly offlineReady: boolean;
 };
 
 async function readPersisted(scope: DiagnosticsScope): Promise<boolean | undefined> {
@@ -54,5 +57,8 @@ export async function readDiagnostics(scope: DiagnosticsScope = window): Promise
     // Architecture 12.1: standalone display mode, on iOS also navigator.standalone.
     installed:
       scope.matchMedia('(display-mode: standalone)').matches || scope.navigator.standalone === true,
+    offlineReady:
+      scope.navigator.serviceWorker?.controller !== undefined &&
+      scope.navigator.serviceWorker.controller !== null,
   };
 }

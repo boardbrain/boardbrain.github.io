@@ -10,6 +10,7 @@ import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
 import { readDiagnostics } from '@/infra/platform/diagnostics';
 import { systemClock } from '@/infra/platform/systemClock';
 import { uuidGenerator } from '@/infra/random/uuidGenerator';
+import { registerServiceWorker } from '@/infra/update/serviceWorker';
 import { AppDependenciesProvider, type AppDependencies } from '@/ui/AppDependencies';
 import { AppLayout } from '@/ui/components/AppLayout';
 import { ErrorBoundary } from '@/ui/components/ErrorBoundary';
@@ -40,6 +41,11 @@ installGlobalErrorHandlers(window, (error) => {
   console.error('Unexpected error outside a view', error);
   root.render(<ErrorScreen error={error} />);
 });
+
+// Architecture 11.4: only the production build has a service worker; the dev server runs without.
+if (import.meta.env.PROD) {
+  void registerServiceWorker();
+}
 
 // The diagnostics only read; they are determined once at startup.
 const diagnostics = readDiagnostics();

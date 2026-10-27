@@ -36,6 +36,9 @@ export default defineConfig({
     baseURL,
     ignoreHTTPSErrors: hasCertificate,
     trace: 'retain-on-failure',
+    // The preview build registers the service worker; tests stay independent of its cache. Only
+    // the offline test allows it (install.spec.ts).
+    serviceWorkers: 'block',
   },
   projects: Object.entries(DEVICES).map(([name, device]) => ({
     name,

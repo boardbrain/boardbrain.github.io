@@ -22,6 +22,7 @@ describe('Architecture 13.1 diagnostics view: check values', () => {
       storageApi: true,
       persisted: false,
       installed: false,
+      offlineReady: false,
     });
   });
 
@@ -49,6 +50,14 @@ describe('Architecture 13.1 diagnostics view: check values', () => {
     const diagnostics = await readDiagnostics(aScope({ navigator: { standalone: true } }));
 
     expect(diagnostics.installed).toBe(true);
+  });
+
+  it('NFA-PL-03: reports the app as ready offline once a service worker controls the page', async () => {
+    const diagnostics = await readDiagnostics(
+      aScope({ navigator: { serviceWorker: { controller: {} } } }),
+    );
+
+    expect(diagnostics.offlineReady).toBe(true);
   });
 
   it('reports storage protection as unknown when the query fails', async () => {

@@ -852,7 +852,7 @@
       function iconParts(id) {
         const wood = `<radialGradient id="${id}w" cx="0.5" cy="0.05" r="0.9"><stop offset="0" stop-color="${C.glow}"/><stop offset="1" stop-color="${C.bg}"/></radialGradient>`;
         const face = `<linearGradient id="${id}f" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="${C.overlay}"/><stop offset="1" stop-color="${C.raised}"/></linearGradient>`;
-        const shadow = `<filter id="${id}s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.6"/></filter>`;
+        const shadow = `<filter id="${id}s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.55"/></filter>`;
         const card = (x, y, w, hgt, fill, stroke, sw) => `<rect x="${x}" y="${y}" width="${w}" height="${hgt}" rx="${w * 0.13}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
         const front = (x, y, w, hgt, sw, logoWidth) =>
           `<g filter="url(#${id}s)">${card(x, y, w, hgt, `url(#${id}f)`, C.accentText, sw)}</g>${pips(x + w * 0.19, y + hgt * 0.13, x + w * 0.81, y + hgt * 0.87, w * 0.07, C.accentText)}${logo(logoWidth, C.accentText, x + w / 2, y + hgt / 2)}`;

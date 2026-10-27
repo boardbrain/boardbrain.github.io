@@ -10,6 +10,7 @@ export type TextTree = { readonly [key: string]: string | TextTree };
 export const de = {
   app: {
     name: 'BoardBrain',
+    beschreibung: 'Faire Zufallsentscheidungen und Statistik für den Spieleabend',
   },
   allgemein: {
     name: 'Name',
@@ -210,6 +211,7 @@ export const de = {
     speicherSchnittstelle: 'Persistenter Speicher (Schnittstelle)',
     speicherGeschuetzt: 'Speicher geschützt',
     installiert: 'Als App installiert',
+    offlineBereit: 'Offline bereit (Service Worker aktiv)',
     vorhanden: 'vorhanden',
     fehlt: 'fehlt',
     ja: 'ja',

@@ -31,5 +31,6 @@
       "@tests/*": ["./tests/*"]
     }
   },
-  "include": ["src", "tests/support", "tests/statistical"]
+  "include": ["src", "tests/support", "tests/statistical"],
+  "exclude": ["src/sw"]
 }

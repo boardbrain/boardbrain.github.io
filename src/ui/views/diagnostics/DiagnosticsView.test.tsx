@@ -12,6 +12,7 @@ const ALL_AVAILABLE: Diagnostics = {
   storageApi: true,
   persisted: false,
   installed: false,
+  offlineReady: false,
 };
 
 async function renderView(diagnostics: Diagnostics): Promise<void> {
@@ -56,6 +57,14 @@ describe('Architecture 13.1 diagnostics view', () => {
 
     const infos = screen.getByRole('region', { name: 'Informationen' });
     expect(within(infos).getByText('unbekannt')).toBeInTheDocument();
+    expect(within(infos).getByText('ja')).toBeInTheDocument();
+  });
+
+  it('NFA-PL-03: shows whether the app is ready offline', async () => {
+    await renderView({ ...ALL_AVAILABLE, offlineReady: true });
+
+    const infos = screen.getByRole('region', { name: 'Informationen' });
+    expect(within(infos).getByText('Offline bereit (Service Worker aktiv)')).toBeInTheDocument();
     expect(within(infos).getByText('ja')).toBeInTheDocument();
   });
 

@@ -10,13 +10,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && vite build",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && tsc -p tsconfig.sw.json && vite build",
     "preview": "vite preview",
     "test": "vitest run --project unit --project dom",
     "test:stat": "vitest run --project statistical",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
-    "check": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && eslint --max-warnings=0 . && stylelint \"**/*.css\" && prettier --check . && depcruise src && vitest run --project unit --project dom --coverage"
+    "icons": "node scripts/generate-icons.mjs",
+    "check": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && tsc -p tsconfig.sw.json && eslint --max-warnings=0 . && stylelint \"**/*.css\" && prettier --check . && depcruise src && vitest run --project unit --project dom --coverage"
   },
   "dependencies": {
     "dexie": "4.4.6",
@@ -61,6 +62,7 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.1",
     "vite": "8.3.3",
+    "vite-plugin-pwa": "2.0.0",
     "vitest": "5.0.3"
   }
 }

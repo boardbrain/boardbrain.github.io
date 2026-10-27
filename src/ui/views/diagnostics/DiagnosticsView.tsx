@@ -35,6 +35,7 @@ export function DiagnosticsView({ diagnostics, version }: DiagnosticsViewProps):
   const infos: readonly Info[] = [
     { label: 'diagnose.speicherGeschuetzt', value: yesNoUnknown(values.persisted) },
     { label: 'diagnose.installiert', value: yesNoUnknown(values.installed) },
+    { label: 'diagnose.offlineBereit', value: yesNoUnknown(values.offlineReady) },
   ];
 
   return (
