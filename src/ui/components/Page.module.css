@@ -11,6 +11,12 @@
   max-width: 64rem;
 }
 
+/* Header, introduction and content fill the visible area, e.g. the board (design I1-D). */
+.fill {
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100%;
+}
+
 .header {
   display: flex;
   gap: var(--space-3);

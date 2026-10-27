@@ -1,4 +1,5 @@
 import { use } from 'react';
+import { Link } from 'react-router';
 import { t, type TextKey } from '@/i18n/t';
 import type { Diagnostics } from '@/infra/platform/diagnostics';
 import styles from './DiagnosticsView.module.css';
@@ -67,6 +68,11 @@ export function DiagnosticsView({ diagnostics, version }: DiagnosticsViewProps):
           ))}
         </dl>
       </section>
+
+      {/* I1-D: the board has no place in the navigation until the placement of I2. */}
+      <p>
+        <Link to="/brett">{t('diagnose.brettAnsehen')}</Link>
+      </p>
     </main>
   );
 }

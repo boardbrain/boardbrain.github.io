@@ -1,0 +1,63 @@
+/* Board from design I1-D (docs/design/i1d-board-final-preview.html); measures in SVG units. */
+.board {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.woodTop {
+  stop-color: var(--color-board-wood-top);
+}
+
+.woodBottom {
+  stop-color: var(--color-board-wood-bottom);
+}
+
+.shadow {
+  flood-color: var(--color-shadow);
+}
+
+.wave {
+  fill: none;
+  stroke: var(--color-board-wave);
+  stroke-width: 0.5;
+}
+
+.sea {
+  fill: var(--color-board-sea);
+}
+
+.seaRim {
+  fill: none;
+  stroke: var(--color-board-sea-deep);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.shallow {
+  fill: none;
+  stroke: var(--color-board-shallow);
+  stroke-width: 9;
+  stroke-linejoin: round;
+}
+
+.sand {
+  fill: var(--color-board-sand);
+  stroke: var(--color-board-sand);
+  stroke-width: 3.6;
+  stroke-linejoin: round;
+}
+
+.tile {
+  stroke: var(--color-board-wood-edge);
+  stroke-width: 0.45;
+  stroke-linejoin: round;
+}
+
+.highlight {
+  fill: none;
+  stroke: var(--color-board-highlight);
+  stroke-width: 0.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

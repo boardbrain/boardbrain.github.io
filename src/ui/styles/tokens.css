@@ -26,6 +26,17 @@
   --color-group-gray: #9aa1ab;
   --color-group-white: var(--color-catan-white);
 
+  /* Board (US-PL-01, design I1-D, docs/design/i1d-board-final-preview.html): the same in every design */
+  --color-board-sea: #1c4a5c;
+  --color-board-sea-deep: #123241;
+  --color-board-shallow: #2f7480;
+  --color-board-wave: #e8f3ef33;
+  --color-board-sand: #d9b77e;
+  --color-board-wood-top: #b48a5a;
+  --color-board-wood-bottom: #93683c;
+  --color-board-wood-edge: #d0a877;
+  --color-board-highlight: #ffffff2e;
+
   /* Accent palette (NFA-GB-03): fill carries --color-on-accent text, text variant sits on surfaces */
   --color-accent-indigo: #4f46e5;
   --color-accent-indigo-text: #a5a8ff;

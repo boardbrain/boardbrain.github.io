@@ -192,6 +192,12 @@ export const de = {
       catan: 'Catan',
     },
   },
+  brett: {
+    titel: 'Brett',
+    einleitung:
+      'So zeigt BoardBrain das Spielbrett. Ab „Partie“ setzt die App hier Gebäude und Straßen.',
+    beschreibung: 'Spielbrett mit 19 Feldern',
+  },
   diagnose: {
     titel: 'Diagnose',
     einleitung: 'Technische Prüfwerte dieses Geräts für die Abnahme.',
@@ -209,6 +215,7 @@ export const de = {
     ja: 'ja',
     nein: 'nein',
     unbekannt: 'unbekannt',
+    brettAnsehen: 'Brett ansehen',
   },
   fehler: {
     titel: 'Etwas ist schiefgelaufen',

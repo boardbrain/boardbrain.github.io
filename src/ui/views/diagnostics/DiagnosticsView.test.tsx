@@ -1,5 +1,6 @@
 import { act, render, screen, within } from '@testing-library/react';
 import { Suspense } from 'react';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import type { Diagnostics } from '@/infra/platform/diagnostics';
 import { DiagnosticsView } from './DiagnosticsView';
@@ -17,9 +18,11 @@ async function renderView(diagnostics: Diagnostics): Promise<void> {
   // The view waits for the values with use(); act waits until they are rendered.
   await act(async () => {
     render(
-      <Suspense fallback={null}>
-        <DiagnosticsView diagnostics={Promise.resolve(diagnostics)} version="0.1.0" />
-      </Suspense>,
+      <MemoryRouter>
+        <Suspense fallback={null}>
+          <DiagnosticsView diagnostics={Promise.resolve(diagnostics)} version="0.1.0" />
+        </Suspense>
+      </MemoryRouter>,
     );
     await Promise.resolve();
   });
@@ -54,5 +57,11 @@ describe('Architecture 13.1 diagnostics view', () => {
     const infos = screen.getByRole('region', { name: 'Informationen' });
     expect(within(infos).getByText('unbekannt')).toBeInTheDocument();
     expect(within(infos).getByText('ja')).toBeInTheDocument();
+  });
+
+  it('US-PL-01: links to the board view, which has no place in the navigation yet', async () => {
+    await renderView(ALL_AVAILABLE);
+
+    expect(screen.getByRole('link', { name: 'Brett ansehen' })).toHaveAttribute('href', '/brett');
   });
 });
