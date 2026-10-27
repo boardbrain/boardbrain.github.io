@@ -1,6 +1,7 @@
-/* The frame fills the screen; only the view in between scrolls (design D-3). */
+/* The frame fills the screen inside the safe areas (padding of body); only the view in between
+   scrolls (design D-3). */
 .layout {
-  height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  height: 100%;
   overflow: hidden;
 }
 

@@ -1,5 +1,8 @@
+/* The document does not scroll (global.css); a long error scrolls here. */
 .screen {
+  height: 100%;
   max-width: 40rem;
+  overflow-y: auto;
   padding: var(--space-6) var(--space-4);
   margin: 0 auto;
 }
