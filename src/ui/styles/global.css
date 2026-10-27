@@ -29,6 +29,23 @@ body {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
 }
 
+/* Installed app on iPadOS and iOS: with the translucent status bar the document was shorter than
+   the screen by the status bar (1156 instead of 1180 on the iPad), so a strip remained at the
+   bottom. The large viewport is the whole screen; only with html that high does the window reach
+   the bottom edge. Fixed, the body cannot scroll by the difference. In installed apps on Android
+   and Windows the large viewport equals the document height (I1-D). */
+@media (display-mode: standalone) {
+  html {
+    height: 100lvh;
+  }
+
+  body {
+    position: fixed;
+    inset: 0 0 auto;
+    height: 100lvh;
+  }
+}
+
 #root {
   height: 100%;
 }
