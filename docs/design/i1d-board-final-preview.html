@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>I1-D Brett und Installation</title>
+    <style>
+      :root {
+        --bg: #231d18;
+        --raised: #2d2620;
+        --overlay: #383028;
+        --border: #4b4036;
+        --text: #f4ece1;
+        --muted: #b8ab9b;
+        --accent: #b45309;
+        --accent-text: #f5be5b;
+        --on-accent: #fff;
+        --shadow: #0000008c;
+        --bg-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg-image) fixed, var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+        line-height: 1.5;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        background: none;
+        border: 0;
+        padding: 0;
+      }
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+      h2 {
+        font-size: 1rem;
+      }
+
+      /* ---------- picker (not sticky) ---------- */
+      .picker {
+        display: grid;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+      .picker .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .picker .label {
+        min-width: 80px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .chip {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .chip[aria-pressed='true'] {
+        font-weight: 600;
+        color: var(--accent-text);
+        background: var(--overlay);
+        border-color: var(--accent-text);
+      }
+      .intro {
+        max-width: 1220px;
+        margin: 0 auto;
+        padding: 12px 16px 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .intro b {
+        color: var(--text);
+      }
+      .stage {
+        padding: 16px;
+      }
+
+      /* ---------- device frames ---------- */
+      .frame {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto;
+        overflow: hidden;
+        background: var(--bg-image), var(--bg);
+        border: 1px dashed var(--border);
+        border-radius: 24px;
+      }
+      .frame.phoneP {
+        width: min(100%, 390px);
+        height: 780px;
+      }
+      .frame.tabletP {
+        width: min(100%, 780px);
+        height: 1020px;
+      }
+      .frame.wide {
+        width: min(100%, 1180px);
+        height: 760px;
+      }
+      .frame.device {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        width: auto;
+        height: auto;
+        border: 0;
+        border-radius: 0;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+          env(safe-area-inset-left);
+      }
+      .exit {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        z-index: 60;
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 56px;
+        color: var(--muted);
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-left: 0;
+        border-radius: 0 12px 12px 0;
+        opacity: 0.8;
+      }
+
+      /* ---------- app frame (D-3) ---------- */
+      .app {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .a-head {
+        display: flex;
+        justify-content: center;
+        padding: 10px 14px;
+      }
+      .logo {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      .logo svg {
+        color: var(--accent-text);
+      }
+      .main {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        width: 100%;
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 24px 16px;
+      }
+      .e-hand {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        flex: none;
+        justify-content: center;
+        height: 104px;
+        background: linear-gradient(180deg, transparent, var(--raised));
+      }
+      .e-navCard {
+        position: relative;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 2px;
+        width: 86px;
+        height: 104px;
+        margin: 0 -8px;
+        font-size: 0.7rem;
+        text-align: center;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 -4px 12px var(--shadow);
+        transform-origin: 50% 140%;
+      }
+      .pageHead {
+        display: flex;
+        flex: none;
+        gap: 12px;
+        align-items: center;
+      }
+      .pageHead h1 {
+        flex: 1;
+        min-width: 0;
+      }
+      .iconBtn {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        color: var(--text);
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 0.85rem;
+      }
+      .card {
+        padding: 14px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 8px 20px;
+        font-weight: 600;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 8px;
+      }
+
+      /* ---------- board ---------- */
+      .boardArea {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        place-items: center;
+      }
+      .boardArea svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .ph {
+        position: relative;
+        outline: 1px dashed var(--accent-text);
+        outline-offset: 3px;
+        border-radius: 8px;
+      }
+      .ph-tag {
+        position: absolute;
+        top: -10px;
+        right: 6px;
+        padding: 0 6px;
+        font-size: 0.65rem;
+        color: var(--accent-text);
+        background: var(--bg);
+        border-radius: 6px;
+      }
+      .stepRow {
+        display: flex;
+        flex: none;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .who {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        font-weight: 600;
+      }
+      .dot {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--bg);
+        border-radius: 3px;
+      }
+      .legend {
+        display: flex;
+        flex: none;
+        flex-wrap: wrap;
+        gap: 6px 14px;
+        justify-content: center;
+        font-size: 0.85rem;
+      }
+      .legend span {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .footRow {
+        display: flex;
+        flex: none;
+        justify-content: center;
+      }
+
+      /* ---------- icon screens ---------- */
+      .iconGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+        gap: 16px;
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+      .panel {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+      .screen {
+        position: relative;
+        display: grid;
+        align-content: start;
+        justify-items: center;
+        overflow: hidden;
+        height: 420px;
+        padding: 28px 18px;
+        border: 1px dashed var(--border);
+        border-radius: 22px;
+      }
+      .wallAndroid {
+        background: linear-gradient(160deg, #3b4a6b, #141a26 70%);
+      }
+      .wallIos {
+        background: linear-gradient(200deg, #6b4a7a, #1d1a33 70%);
+      }
+      .wallWin {
+        align-content: end;
+        padding: 0;
+        background: linear-gradient(160deg, #1d4f7a, #0d1c2e 70%);
+      }
+      .home {
+        display: grid;
+        grid-template-columns: repeat(4, 48px);
+        gap: 20px 12px;
+      }
+      .appSlot {
+        display: grid;
+        justify-items: center;
+        gap: 6px;
+        font-size: 0.7rem;
+        color: #fff;
+      }
+      .dummy {
+        width: 48px;
+        height: 48px;
+        background: #ffffff2e;
+      }
+      .taskbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 56px;
+        background: #202733e6;
+      }
+      .taskbar .dummy {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+      }
+      .winWindow {
+        position: absolute;
+        top: 30px;
+        left: 20px;
+        right: 20px;
+        display: grid;
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid #ffffff33;
+        border-radius: 8px;
+      }
+      .winTitle {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        height: 32px;
+        padding: 0 10px;
+        font-size: 0.75rem;
+        color: #fff;
+        background: #231d18;
+      }
+      .winBody {
+        height: 200px;
+        background: var(--bg-image), var(--bg);
+      }
+      .splash {
+        place-content: center;
+        gap: 18px;
+        background: var(--bg);
+      }
+      .splash .name {
+        font-weight: 700;
+        text-align: center;
+      }
+      .sizes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        align-items: end;
+        justify-content: center;
+        padding: 18px;
+      }
+      .sizes figure {
+        display: grid;
+        justify-items: center;
+        gap: 6px;
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .spec ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="picker">
+      <div class="row" id="view-row"></div>
+      <div class="row" id="board-row"></div>
+      <div class="row" id="icon-row"></div>
+      <div class="row" id="frame-row"></div>
+    </div>
+    <div class="intro" id="intro"></div>
+    <div class="stage" id="stage"></div>
+
+    <script>
+      // Final reference for I1-D (Development Guidelines 2.5). Not app code. App colours mirror
+      // src/ui/styles/tokens.css (design Holz); the board colours are the new tokens --color-board-*.
+      const C = {
+        bg: '#231d18', raised: '#2d2620', overlay: '#383028', border: '#4b4036', text: '#f4ece1', muted: '#b8ab9b',
+        accent: '#b45309', accentText: '#f5be5b', glow: '#4a3420', woodDark: '#5b3d22',
+        red: '#ef5359', blue: '#4189f5', white: '#f1f1f4', orange: '#f5852b',
+        sand: '#d9b77e',
+      };
+      const WOOD = { base: { top: '#b48a5a', bottom: '#93683c', edge: '#d0a877' } };
+      const SEA = { blue: { deep: '#123241', sea: '#1c4a5c', shallow: '#2f7480', foam: '#e8f3ef' } };
+      // Chosen board H1 (round 5): hexagonal sea, wood tiles with soft shadow, sand coast, shallow water.
+      const VARIANTS = { H1: { wood: 'base', sea: 'blue', gap: 0.92, sand: 3.6, shallow: 9, pattern: 'arcs', rim: 'dark' } };
+      const SCENARIOS = {
+        shore: 'Am Ufer (späterer Modus, PP-01)',
+        cityUpLeft: 'Städte, Straße nach oben links',
+        example: 'Beispiel',
+        touch: 'Straßen berühren sich',
+        edge: 'Nah am Rand (Standard)',
+        blueWhite: 'Blau und Weiß am Wasser',
+        dense: 'Dicht gedrängt',
+      };
+      const VIEWS = { page: 'Jetzt in I1-D: Brett #/brett', later: 'Mit späteren Funktionen: Platzierung (I2)', icon: 'App-Symbol' };
+      const FRAMES = { phoneP: 'Handy hoch', tabletP: 'Tablet hoch', wide: 'Tablet quer / PC', device: '⛶ Vollbild auf diesem Gerät' };
+      // Chosen: buildings G1, roads R1, dark outline, icon D8.
+      const state = { view: 'page', variant: 'H1', scenario: 'example', building: 'G1', road: 'R1', outline: 'dark', frame: 'phoneP', lastFrame: 'phoneP' };
+
+      // ---------- helpers ----------
+      function h(tag, attrs, ...kids) {
+        const el = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          if (v == null || v === false) continue;
+          if (k === 'class') el.className = v;
+          else if (k === 'style') Object.assign(el.style, v);
+          else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+          else el.setAttribute(k, v === true ? '' : v);
+        }
+        for (const c of kids.flat(Infinity)) {
+          if (c == null || c === false) continue;
+          el.append(c instanceof Node ? c : String(c));
+        }
+        return el;
+      }
+      function svgEl(viewBox, inner, attrs = {}) {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('viewBox', viewBox);
+        svg.setAttribute('aria-hidden', 'true');
+        for (const [k, v] of Object.entries(attrs)) svg.setAttribute(k, v);
+        svg.innerHTML = inner;
+        return svg;
+      }
+      const ICONS = {
+        home: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+        folder: 'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+        back: 'M15 5l-7 7 7 7',
+        close: 'M6 6l12 12M18 6L6 18',
+      };
+      function icon(name, size = 22) {
+        return svgEl('0 0 24 24', `<path d="${ICONS[name]}"/>`, { width: size, height: size, fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+      }
+      function mix(a, b, t) {
+        const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
+        const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
+        return '#' + pa.map((v, i) => Math.round(v + (pb[i] - v) * t).toString(16).padStart(2, '0')).join('');
+      }
+
+      // ---------- logo (design D-3 "Eine Kontur") ----------
+      const OUTLINE =
+        'M24 8.5C21 5 14 5.5 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42.5 22 40.5 23 41 23.5 41 24 40.5 24.5 41 25 41 26 40.5 30 42.5 35 41 36 37 40 38 43 33 41 29 45 27 45 20 41 18 43 15 41 10 36 10 34 5.5 27 5 24 8.5Z';
+      let uid = 0;
+      function logoInner(color) {
+        const id = 'lg' + uid++;
+        let squares = '';
+        for (let c = 0; c < 5; c++)
+          for (let r = -5; r < 5; r++)
+            if ((((c + r) % 2) + 2) % 2 === 0)
+              squares += `<rect x="${(24 - 5.4 * (c + 1)).toFixed(2)}" y="${(24 + 5.4 * r).toFixed(2)}" width="5.4" height="5.4"/>`;
+        return `<clipPath id="${id}o"><path d="${OUTLINE}"/></clipPath><clipPath id="${id}l"><rect x="0" y="0" width="24" height="48"/></clipPath><g clip-path="url(#${id}o)"><g clip-path="url(#${id}l)" fill="${color}">${squares}</g></g><g fill="none" stroke="${color}" stroke-linecap="round" stroke-linejoin="round"><path stroke-width="2.2" d="M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6"/><path stroke-width="2.6" d="${OUTLINE}"/><path stroke-width="2.6" d="M24 8.5V40.5"/></g>`;
+      }
+      function logoMark(size) {
+        return svgEl('0 0 48 48', logoInner('currentColor'), { width: size, height: size });
+      }
+
+      // ---------- board geometry (same idea as core/board: all hexes with distance <= 2) ----------
+      const S = 10;
+      const SQ3 = Math.sqrt(3);
+      const LAND = [];
+      for (let r = -2; r <= 2; r++) for (let q = -2; q <= 2; q++) if (Math.abs(q + r) <= 2) LAND.push({ q, r });
+      const BY_ROW = [...LAND].sort((a, b) => a.r - b.r || a.q - b.q);
+      const center = ({ q, r }) => [S * SQ3 * (q + r / 2), S * 1.5 * r];
+      function corners(hex, scale = 1) {
+        const [cx, cy] = center(hex);
+        return Array.from({ length: 6 }, (_, i) => {
+          const a = ((60 * i - 90) * Math.PI) / 180;
+          return [cx + scale * S * Math.cos(a), cy + scale * S * Math.sin(a)];
+        });
+      }
+      const f = ([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`;
+      const pts = (list) => list.map(f).join(' ');
+      const key = ([x, y]) => `${Math.round(x * 10)}|${Math.round(y * 10)}`;
+
+      const COAST = (() => {
+        const point = new Map();
+        const count = new Map();
+        LAND.forEach((hx) => {
+          const c = corners(hx);
+          c.forEach((p, i) => {
+            const a = key(p), b = key(c[(i + 1) % 6]);
+            point.set(a, p);
+            const e = a < b ? a + '#' + b : b + '#' + a;
+            count.set(e, (count.get(e) || 0) + 1);
+          });
+        });
+        const adj = new Map();
+        for (const [e, n] of count) {
+          if (n !== 1) continue;
+          const [a, b] = e.split('#');
+          if (!adj.has(a)) adj.set(a, []);
+          if (!adj.has(b)) adj.set(b, []);
+          adj.get(a).push(b);
+          adj.get(b).push(a);
+        }
+        const start = [...adj.keys()][0];
+        const out = [point.get(start)];
+        let prev = null, cur = start;
+        for (;;) {
+          const next = adj.get(cur).find((k) => k !== prev);
+          if (next === start) break;
+          out.push(point.get(next));
+          prev = cur;
+          cur = next;
+        }
+        return out;
+      })();
+      const coastD = 'M' + COAST.map(f).join('L') + 'Z';
+      const AVG = COAST.reduce((sum, [x, y]) => sum + Math.hypot(x, y), 0) / COAST.length;
+      function ring(d, wobble = 0, flatten = 0.3) {
+        const ps = COAST.map(([x, y], i) => {
+          const len = Math.hypot(x, y);
+          const target = len * (1 - flatten) + AVG * flatten + d + wobble * Math.sin(i * 1.7);
+          return [(x * target) / len, (y * target) / len];
+        });
+        const n = ps.length;
+        let path = 'M' + f(ps[0]);
+        for (let i = 0; i < n; i++) {
+          const p0 = ps[(i - 1 + n) % n], p1 = ps[i], p2 = ps[(i + 1) % n], p3 = ps[(i + 2) % n];
+          const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+          const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+          path += `C${f(c1)} ${f(c2)} ${f(p2)}`;
+        }
+        return path + 'Z';
+      }
+      const flatHexPts = (R) => Array.from({ length: 6 }, (_, i) => [R * Math.cos((i * Math.PI) / 3), R * Math.sin((i * Math.PI) / 3)]);
+      function roundedHex(R, rad) {
+        const p = flatHexPts(R);
+        let d = '';
+        for (let i = 0; i < 6; i++) {
+          const prev = p[(i + 5) % 6], cur = p[i], next = p[(i + 1) % 6];
+          const toward = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+          const a = toward(cur, prev, rad / R), b = toward(cur, next, rad / R);
+          d += (i === 0 ? 'M' : 'L') + f(a) + 'Q' + f(cur) + ' ' + f(b);
+        }
+        return d + 'Z';
+      }
+
+      // Vertices: n = number of land hexes at the vertex; 3 means inland (FA-PL rules, Requirements 6.1).
+      const vertexMap = new Map();
+      LAND.forEach((hex) => corners(hex).forEach((p) => { const k = key(p); vertexMap.set(k, { p, n: (vertexMap.get(k)?.n || 0) + 1 }); }));
+      const VERTICES = [...vertexMap.values()];
+      const nOf = (p) => vertexMap.get(key(p)).n;
+      const INLAND = VERTICES.filter((v) => v.n === 3).map((v) => v.p);
+      const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+      const neighbours = (p) => VERTICES.map((v) => v.p).filter((o) => Math.abs(dist(o, p) - S) < 0.1);
+      const angleOf = ([x, y]) => (Math.atan2(y, x) + 2 * Math.PI) % (2 * Math.PI);
+      const free = (chosen, p) => chosen.every((c) => dist(c.p, p) > S * 1.5);
+      // Inland vertices next to the coast: a road from there can reach the water.
+      const RIM = INLAND.filter((p) => neighbours(p).some((o) => nOf(o) < 3)).sort((a, b) => angleOf(a) - angleOf(b));
+
+      const PLAYERS = [['Anna', 'red'], ['Ben', 'blue'], ['Clara', 'white'], ['David', 'orange']];
+      // Placement order P1..P4, P4..P1: the first four are settlements, the last four cities (Cities & Knights).
+      const ORDER = [0, 1, 2, 3, 3, 2, 1, 0];
+      function scenario(name) {
+        const chosen = [];
+        const add = (p, player, roadTo) => chosen.push({ p, player, city: chosen.length >= 4, roadTo });
+        const toCoast = (p) => neighbours(p).find((o) => nOf(o) < 3);
+        if (name === 'shore') {
+          // PP-01: coast vertices with two land hexes; every colour with a settlement and a city right
+          // at the water. Settlements' roads run along the coast, cities' roads inland.
+          const shore = VERTICES.filter((v) => v.n === 2).map((v) => v.p).sort((a, b) => angleOf(a) - angleOf(b));
+          ORDER.forEach((player, i) => {
+            for (let k = 0; k < shore.length; k++) {
+              const p = shore[(Math.round((i * shore.length) / 8) + k) % shore.length];
+              if (!free(chosen, p)) continue;
+              const along = neighbours(p).find((o) => nOf(o) < 3);
+              const inward = neighbours(p).find((o) => nOf(o) === 3) || along;
+              add(p, player, i < 4 ? along : inward);
+              return;
+            }
+          });
+        } else if (name === 'cityUpLeft') {
+          // One city per colour, each road pointing up and to the left.
+          const upLeft = (p) => neighbours(p).find((o) => o[0] < p[0] - 1 && o[1] < p[1] - 1);
+          const candidates = INLAND.filter((p) => upLeft(p)).sort((a, b) => angleOf(a) - angleOf(b));
+          [0, 1, 2, 3].forEach((player, i) => {
+            for (let k = 0; k < candidates.length; k++) {
+              const p = candidates[(Math.round((i * candidates.length) / 4) + k) % candidates.length];
+              if (free(chosen, p)) { chosen.push({ p, player, city: true, roadTo: upLeft(p) }); break; }
+            }
+          });
+        } else if (name === 'example') {
+          const sorted = [...INLAND].sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+          const wish = [4, 19, 9, 14, 22, 1, 16, 7];
+          ORDER.forEach((player, i) => {
+            for (let step = 0; step < sorted.length; step++) {
+              const p = sorted[(wish[i] + step) % sorted.length];
+              if (free(chosen, p)) { add(p, player, neighbours(p)[(i * 2) % neighbours(p).length]); break; }
+            }
+          });
+        } else if (name === 'edge') {
+          // Every colour on the rim, each with a road to the coast; only six fit there, the rest go inside.
+          const step = RIM.length / 8;
+          ORDER.forEach((player, i) => {
+            for (let k = 0; k < RIM.length; k++) {
+              const p = RIM[(Math.round(i * step * 3) + k) % RIM.length];
+              if (free(chosen, p)) { add(p, player, toCoast(p)); return; }
+            }
+            const p = INLAND.find((o) => free(chosen, o));
+            if (p) add(p, player, neighbours(p)[i % 3]);
+          });
+        } else if (name === 'blueWhite') {
+          // Blue and white on the rim with roads into the water; red and orange in the middle.
+          const rimPlayers = [1, 2, 2, 1];
+          rimPlayers.forEach((player, i) => {
+            for (let k = 0; k < RIM.length; k++) {
+              const p = RIM[(i * 3 + k) % RIM.length];
+              if (free(chosen, p)) { chosen.push({ p, player, city: i >= 2, roadTo: toCoast(p) }); break; }
+            }
+          });
+          const inner = [...INLAND].filter((p) => !RIM.some((r) => key(r) === key(p))).sort((a, b) => angleOf(a) - angleOf(b));
+          [0, 3, 3, 0].forEach((player, i) => {
+            for (const p of inner) if (free(chosen, p)) { chosen.push({ p, player, city: i >= 2, roadTo: neighbours(p)[i % 3] }); break; }
+          });
+        } else if (name === 'touch') {
+          // Two buildings with one free vertex between them; both roads end at that vertex.
+          const pairs = [[0, 1], [2, 3], [3, 1], [2, 0]];
+          const middles = INLAND.filter((m) => neighbours(m).filter((o) => nOf(o) === 3).length >= 2).sort((a, b) => angleOf(a) - angleOf(b));
+          for (const [pa, pb] of pairs) {
+            for (const m of middles) {
+              if (!free(chosen, m) || chosen.some((c) => key(c.roadTo) === key(m))) continue;
+              const ends = neighbours(m).filter((o) => nOf(o) === 3 && free(chosen, o));
+              if (ends.length < 2) continue;
+              const [a, b] = ends;
+              if (!free([{ p: a }], b)) continue;
+              chosen.push({ p: a, player: pa, city: chosen.length % 4 === 1, roadTo: m });
+              chosen.push({ p: b, player: pb, city: chosen.length % 4 === 0, roadTo: m });
+              break;
+            }
+          }
+        } else {
+          // As close together as the distance rule allows, starting in the middle.
+          const sorted = [...INLAND].sort((a, b) => Math.hypot(...a) - Math.hypot(...b) || angleOf(a) - angleOf(b));
+          ORDER.forEach((player, i) => {
+            for (const p of sorted) if (free(chosen, p)) { add(p, player, [...neighbours(p)].sort((x, y) => Math.hypot(...x) - Math.hypot(...y))[0]); break; }
+          });
+        }
+        return chosen;
+      }
+
+      // ---------- building and road symbols ----------
+      const shapes = {
+        G1: {
+          settlement: ([x, y], s) => `<path d="M${x - s} ${y + s * 0.8}V${y - s * 0.15}L${x} ${y - s}L${x + s} ${y - s * 0.15}V${y + s * 0.8}Z"/>`,
+          city: ([x, y], s) => { const l = x - s * 1.25, r = x + s * 1.25, b = y + s * 0.8; return `<path d="M${l} ${b}V${y - s * 0.55}L${l + s * 0.6} ${y - s * 1.15}L${l + s * 1.2} ${y - s * 0.55}V${y - s * 0.05}H${r}V${b}Z"/>`; },
+        },
+      };
+      const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      // Outline widths per mode: [outer light halo, dark contour].
+      const OUTLINE_STYLE = { dark: [0, 0.9], light: [0, 0], double: [2.4, 0.8] };
+      function roadSvg(from, to, color, style, outline) {
+        const [halo, contour] = OUTLINE_STYLE[outline];
+        const light = C.text;
+        const line = (a, b, w, col, cap = 'round', extra = '') => `<line x1="${a[0].toFixed(2)}" y1="${a[1].toFixed(2)}" x2="${b[0].toFixed(2)}" y2="${b[1].toFixed(2)}" stroke="${col}" stroke-width="${w}" stroke-linecap="${cap}" ${extra}/>`;
+        const layers = (a, b, w, cap) => (halo ? line(a, b, w + 1.4 + halo, light, cap) : '') + (outline === 'light' ? line(a, b, w + 1, light, cap) : '') + (contour ? line(a, b, w + 1.4, C.bg, cap) : '') + line(a, b, w, color, cap);
+        return layers(lerp(from, to, 0.34), lerp(from, to, 0.86), 2, 'round');
+      }
+      function buildingSvg(item) {
+        const color = C[PLAYERS[item.player][1]];
+        const kind = shapes[state.building];
+        const s = 3;
+        const body = item.city ? kind.city(item.p, s * 1.05, color) : kind.settlement(item.p, s, color);
+        const [halo, contour] = OUTLINE_STYLE[state.outline];
+        const haloSvg = halo ? `<g fill="${C.text}" stroke="${C.text}" stroke-width="${halo + 0.9}" stroke-linejoin="round">${body}</g>` : '';
+        const stroke = state.outline === 'light' ? `stroke="${C.text}" stroke-width="0.8"` : `stroke="${C.bg}" stroke-width="${contour}"`;
+        return haloSvg + `<g fill="${color}" ${stroke} stroke-linejoin="round">${body}</g>`;
+      }
+      function buildingsSvg() {
+        const items = scenario(state.scenario);
+        return items.map((it) => roadSvg(it.p, it.roadTo, C[PLAYERS[it.player][1]], state.road, state.outline)).join('') + items.map(buildingSvg).join('');
+      }
+
+      // ---------- board ----------
+      const tilesSvg = (scale, attrs) => LAND.map((hx) => `<polygon points="${pts(corners(hx, scale))}" ${attrs}/>`).join('');
+      const bevel = (scale, opacity) => LAND.map((hx) => { const c = corners(hx, scale); return `<polyline points="${pts([c[4], c[5], c[0], c[1]])}" fill="none" stroke="#fff" stroke-opacity="${opacity}" stroke-width="0.7" stroke-linejoin="round" stroke-linecap="round"/>`; }).join('');
+      function boardSvg(withBuildings) {
+        const V = VARIANTS[state.variant];
+        const T = WOOD[V.wood];
+        const M = SEA[V.sea];
+        const sandColor = C[V.sandColor || 'sand'];
+        const seaShape = V.corner ? `<path d="${roundedHex(58, V.corner)}" ATTR/>` : `<polygon points="${pts(flatHexPts(58))}" ATTR/>`;
+        const sea = (attr) => seaShape.replace('ATTR', attr);
+        const defs = `<defs>
+          <linearGradient id="tileTop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${T.top}"/><stop offset="1" stop-color="${T.bottom}"/></linearGradient>
+          <filter id="tileShadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="1.1" stdDeviation="0.9" flood-color="#000" flood-opacity="0.55"/></filter>
+          <filter id="plateShadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.55"/></filter>
+          <radialGradient id="seaDeepen" cx="0.5" cy="0.5" r="0.55"><stop offset="0.5" stop-color="${M.sea}"/><stop offset="1" stop-color="${M.deep}"/></radialGradient>
+          <pattern id="arcs" width="8" height="5" patternUnits="userSpaceOnUse"><path d="M0 3q2 -2.4 4 0t4 0" fill="none" stroke="${M.foam}" stroke-opacity="0.2" stroke-width="0.5"/></pattern>
+          <pattern id="fine" width="5" height="3.4" patternUnits="userSpaceOnUse"><path d="M0 2q1.25 -1.5 2.5 0t2.5 0" fill="none" stroke="${M.foam}" stroke-opacity="0.16" stroke-width="0.35"/></pattern>
+          <pattern id="grain" width="22" height="5" patternUnits="userSpaceOnUse"><path d="M0 1.6q5.5 0.9 11 0t11 0M0 3.9q7 -0.7 14 0t8 0" fill="none" stroke="${T.grain}" stroke-opacity="0.45" stroke-width="0.32"/></pattern>
+          <clipPath id="seaClip">${sea('')}</clipPath>
+        </defs>`;
+        let body = sea(`fill="${V.deepen ? 'url(#seaDeepen)' : M.sea}" filter="url(#plateShadow)"`);
+        if (V.pattern === 'arcs' || V.pattern === 'fine') body += sea(`fill="url(#${V.pattern})"`);
+        if (V.pattern === 'rings')
+          body += `<g clip-path="url(#seaClip)">${[[7, 0.35, '3 2.4'], [12, 0.24, '5 3'], [17, 0.14, '7 4']].map(([d, op, dash]) => `<path d="${ring(d, 0.3, 0.8)}" fill="none" stroke="${M.foam}" stroke-opacity="${op}" stroke-width="0.6" stroke-linecap="round" stroke-dasharray="${dash}"/>`).join('')}</g>`;
+        if (V.rim === 'dark') body += sea(`fill="none" stroke="${M.deep}" stroke-width="1.6" stroke-linejoin="round"`);
+        if (V.rim === 'foam') body += sea(`fill="none" stroke="${M.foam}" stroke-opacity="0.3" stroke-width="0.7" stroke-linejoin="round"`) + `<polygon points="${pts(flatHexPts(55.5))}" fill="none" stroke="${M.foam}" stroke-opacity="0.12" stroke-width="0.4" stroke-linejoin="round"/>`;
+        if (V.shallow) body += `<path d="${coastD}" fill="none" stroke="${M.shallow}" stroke-width="${V.shallow}" stroke-linejoin="round" ${V.deepen ? 'stroke-opacity="0.85"' : ''}/>`;
+        if (V.surf) body += `<path d="${coastD}" fill="none" stroke="${M.foam}" stroke-opacity="0.4" stroke-width="${V.surf + V.sand}" stroke-linejoin="round"/>`;
+        body += `<path d="${coastD}" fill="${sandColor}" stroke="${sandColor}" stroke-width="${V.sand}" stroke-linejoin="round"/>`;
+        // Tiles: rounded corners via a stroke of the same colour; optional edge, grain and bevel.
+        const scale = V.tileRound ? V.gap - V.tileRound / S / 1.1 : V.gap;
+        const round = V.tileRound ? ` stroke-width="${V.tileRound * 2}" stroke="url(#tileTop)"` : ` stroke="${T.edge}" stroke-width="0.45"`;
+        let tileBody = '';
+        if (V.edge) {
+          const dn = ([x, y]) => [x, y + V.edge];
+          BY_ROW.forEach((hx) => {
+            const c = corners(hx, scale);
+            tileBody += `<polygon points="${pts([c[2], c[3], dn(c[3]), dn(c[2])])}" fill="${T.sideA}"/><polygon points="${pts([c[3], c[4], dn(c[4]), dn(c[3])])}" fill="${T.sideB}"/><polygon points="${pts(c)}" fill="url(#tileTop)"${round} stroke-linejoin="round"/>`;
+          });
+        } else tileBody = tilesSvg(scale, `fill="url(#tileTop)"${round} stroke-linejoin="round"`);
+        body += `<g filter="url(#tileShadow)"${V.edge ? ` transform="translate(0 ${-V.edge / 2})"` : ''}>${tileBody}</g>`;
+        if (V.grain) body += tilesSvg(scale, `fill="url(#grain)"`);
+        body += bevel(scale - 0.05, 0.18);
+        return svgEl('-60 -53 120 106', defs + body + (withBuildings ? buildingsSvg() : ''), { preserveAspectRatio: 'xMidYMid meet', role: 'img' });
+      }
+
+      // ---------- app screens ----------
+      function hand() {
+        const all = [['home', 'Start'], ['folder', 'Verwaltung']];
+        return h('nav', { class: 'e-hand' }, all.map(([ic, l], i) => h('button', { class: 'e-navCard', style: { transform: `rotate(${(i - 0.5) * 9}deg) translateY(16px)` } }, icon(ic, 22), l)));
+      }
+      function pageHead(title) {
+        return h('div', { class: 'pageHead' }, h('button', { class: 'iconBtn', 'aria-label': 'Zurück' }, icon('back')), h('h1', {}, title));
+      }
+      function checkPage() {
+        return h('main', { class: 'main' },
+          pageHead('Brett'),
+          h('p', { class: 'muted', style: { flex: 'none' } }, 'So zeigt BoardBrain das Spielbrett. Ab „Partie“ setzt die App hier Gebäude und Straßen.'),
+          h('div', { class: 'boardArea' }, boardSvg(false)),
+        );
+      }
+      function legendMark(color, city) {
+        const item = { p: [5, 5.4], player: PLAYERS.findIndex(([, c]) => c === color), city };
+        return svgEl('0 0 10 10', buildingSvg(item), { width: 18, height: 18 });
+      }
+      function laterPage() {
+        return h('main', { class: 'main' },
+          pageHead('Platzierung'),
+          h('div', { class: 'stepRow ph' }, h('span', { class: 'ph-tag' }, 'später · I2, Gestaltung folgt dort'),
+            h('span', { class: 'who' }, legendMark('red', false), 'Anna setzt eine Straße'),
+            h('span', { class: 'muted small' }, 'Schritt 16 von 16'),
+          ),
+          h('div', { class: 'boardArea' }, boardSvg(true)),
+          h('div', { class: 'legend' }, PLAYERS.map(([n, c]) => h('span', {}, legendMark(c, false), legendMark(c, true), n))),
+          h('div', { class: 'footRow ph' }, h('span', { class: 'ph-tag' }, 'später · I2'), h('button', { class: 'primary' }, 'Weiter')),
+        );
+      }
+      function appView() {
+        return h('div', { class: 'app' },
+          h('header', { class: 'a-head' }, h('span', { class: 'logo' }, logoMark(28), 'BoardBrain')),
+          state.view === 'later' ? laterPage() : checkPage(),
+          hand(),
+        );
+      }
+
+      // ---------- app icon D8 ----------
+      // Logo centred at (cx, cy) with the given width.
+      const logo = (width, color, cx = 24, cy = 24) => { const s = width / 48; return `<g transform="translate(${cx - 24 * s} ${cy - 24 * s}) scale(${s})">${logoInner(color)}</g>`; };
+      const hexPts = (cx, cy, r) => Array.from({ length: 6 }, (_, i) => { const a = ((60 * i - 90) * Math.PI) / 180; return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`; }).join(' ');
+      // Small hexagons in two corners, like the counts in the corners of the app's cards.
+      const pips = (x1, y1, x2, y2, r, color) => `<polygon points="${hexPts(x1, y1, r)}" fill="${color}"/><polygon points="${hexPts(x2, y2, r)}" fill="${color}"/>`;
+
+      // Each variant: background (always fills the square) and content (scaled into the safe zone on Android).
+      // D8: two fanned cards; the front card is styled like the app's cards.
+      function iconParts(id) {
+        const wood = `<radialGradient id="${id}w" cx="0.5" cy="0.05" r="0.9"><stop offset="0" stop-color="${C.glow}"/><stop offset="1" stop-color="${C.bg}"/></radialGradient>`;
+        const face = `<linearGradient id="${id}f" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="${C.overlay}"/><stop offset="1" stop-color="${C.raised}"/></linearGradient>`;
+        const shadow = `<filter id="${id}s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.6"/></filter>`;
+        const card = (x, y, w, hgt, fill, stroke, sw) => `<rect x="${x}" y="${y}" width="${w}" height="${hgt}" rx="${w * 0.13}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+        const front = (x, y, w, hgt, sw, logoWidth) =>
+          `<g filter="url(#${id}s)">${card(x, y, w, hgt, `url(#${id}f)`, C.accentText, sw)}</g>${pips(x + w * 0.19, y + hgt * 0.13, x + w * 0.81, y + hgt * 0.87, w * 0.07, C.accentText)}${logo(logoWidth, C.accentText, x + w / 2, y + hgt / 2)}`;
+        return {
+          defs: wood + face + shadow,
+          bg: `<rect width="48" height="48" fill="url(#${id}w)"/>`,
+          content: `<g transform="rotate(-8 24 42)" filter="url(#${id}s)">${card(9.5, 3.5, 28, 39, C.raised, C.accentText, 1.1)}</g><g transform="rotate(4 24 42)">${front(11, 4, 28, 40, 1.9, 24)}</g>`,
+        };
+      }
+      // purpose 'any': iOS, Windows, files; 'maskable': Android cuts a circle, so the cards shrink into the safe zone.
+      function appIcon(size, mask, purpose = mask === 'circle' ? 'maskable' : 'any') {
+        const radius = { circle: '50%', ios: '22.5%', square: '12%', none: '0' }[mask];
+        const p = iconParts('i' + uid++);
+        const content = purpose === 'maskable' ? `<g transform="translate(24 24) scale(0.8) translate(-24 -24)">${p.content}</g>` : p.content;
+        const svg = svgEl('0 0 48 48', `<defs>${p.defs}</defs>${p.bg}${content}`, { width: size, height: size });
+        return h('span', { style: { display: 'block', width: size + 'px', height: size + 'px', overflow: 'hidden', borderRadius: radius, boxShadow: mask === 'none' ? 'none' : '0 2px 8px #0006' } }, svg);
+      }
+      function dummy(mask) {
+        return h('span', { class: 'dummy', style: { borderRadius: mask === 'circle' ? '50%' : '22.5%' } });
+      }
+      function homeScreen(wall, mask) {
+        const slots = [];
+        for (let i = 0; i < 12; i++)
+          slots.push(i === 5 ? h('span', { class: 'appSlot' }, appIcon(48, mask), 'BoardBrain') : h('span', { class: 'appSlot' }, dummy(mask), ' '));
+        return h('div', { class: 'screen ' + wall }, h('div', { class: 'home' }, slots));
+      }
+      function iconPage() {
+        const panel = (title, text, body) => h('div', { class: 'panel' }, h('h2', {}, title), h('p', { class: 'muted small' }, text), body);
+        return h('div', { class: 'iconGrid' },
+          panel('Galaxy S26 · Brave', 'Android schneidet das Symbol rund zu; dafür gibt es eine eigene Datei, in der die Karten in der sicheren Mitte liegen (maskable).', homeScreen('wallAndroid', 'circle')),
+          panel('iPad und iPhone · Safari', '„Zum Home-Bildschirm“ nutzt das Symbol mit abgerundeten Ecken (apple-touch-icon, 180 px).', homeScreen('wallIos', 'ios')),
+          panel('Windows 11 · Brave', 'Als eigenes Fenster und in der Taskleiste.', h('div', { class: 'screen wallWin' },
+            h('div', { class: 'winWindow' }, h('div', { class: 'winTitle' }, appIcon(18, 'none'), 'BoardBrain'), h('div', { class: 'winBody' })),
+            h('div', { class: 'taskbar' }, h('span', { class: 'dummy' }), h('span', { class: 'dummy' }), appIcon(32, 'square'), h('span', { class: 'dummy' })),
+          )),
+          panel('Startbild unter Android', 'Beim Öffnen zeigt Android kurz das Symbol auf der Hintergrundfarbe der App (--color-surface).', h('div', { class: 'screen splash' }, appIcon(120, 'circle'), h('span', { class: 'name' }, 'BoardBrain'))),
+          panel('Dateien', 'icon-192.png, icon-512.png (any), icon-maskable-512.png, apple-touch-icon.png (180 px); der Browser-Tab behält favicon.svg.', h('div', { class: 'card sizes' },
+            [192, 96, 48, 32].map((s) => h('figure', {}, appIcon(s, 'none'), s + ' px')),
+            h('figure', {}, appIcon(96, 'none', 'maskable'), 'maskable'),
+          )),
+        );
+      }
+
+      // ---------- picker and render ----------
+      function chips(label, entries, current, onPick) {
+        return h('div', { class: 'row' }, h('span', { class: 'label' }, label), entries.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': String(k === current), onclick: () => { onPick(k); render(); } }, l)));
+      }
+      function render() {
+        uid = 0;
+        const isIcon = state.view === 'icon';
+        const isLater = state.view === 'later';
+        document.querySelector('.picker').replaceChildren(
+          chips('Umfang', Object.entries(VIEWS), state.view, (k) => (state.view = k)),
+          isLater && chips('Aufstellung', Object.entries(SCENARIOS), state.scenario, (k) => (state.scenario = k)),
+          !isIcon && chips('Gerät', Object.entries(FRAMES), state.frame, (k) => { if (k !== 'device') state.lastFrame = k; state.frame = k; }),
+        );
+        document.getElementById('intro').replaceChildren(
+          h('span', {}, h('b', {}, 'Verbindliche Referenz für I1-D Brett und Installation (US-PL-01). '),
+            'Gewählt in fünf Runden: Brett H1 (sechseckiges Meer, Holzfelder mit Schatten, Sandküste), Gebäude G1, Straßen R1 mit dunkler Kontur, App-Symbol D8 (zwei Karten). „Jetzt in I1-D“ zeigt genau den Umfang des Bündels: das leere Brett unter #/brett. „Mit späteren Funktionen“ zeigt, wie Gebäude und Straßen in I2 aussehen, auch am Ufer für den geparkten Modus PP-01. Für Kopfzeile und Kartenhand gilt die Referenz aus D-3.'),
+        );
+        let content;
+        if (isIcon) content = iconPage();
+        else {
+          content = h('div', { class: 'frame ' + state.frame }, appView());
+          if (state.frame === 'device') content.append(h('button', { class: 'exit', 'aria-label': 'Vollbild verlassen', onclick: () => { state.frame = state.lastFrame; render(); } }, icon('close', 16)));
+        }
+        document.getElementById('stage').replaceChildren(content, notes());
+      }
+      function notes() {
+        const spec = (title, rows) => h('div', { class: 'card spec' }, h('h2', {}, title), h('ul', {}, rows.map((r) => h('li', { class: 'small' }, r))));
+        return h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 20rem), 1fr))', gap: '14px', maxWidth: '1180px', margin: '24px auto 0' } },
+          spec('Brett (US-PL-01)', [
+            '19 Holzfelder mit Spitze oben in Reihen 3, 4, 5, 4, 3; oben und unten gerade, links und rechts spitz (AK-1). Keine Landschaften, keine Zahlen, keine Originalgrafiken (AK-2).',
+            'SVG mit festem viewBox -60 -53 120 106 (Feldradius 10), skaliert mit xMidYMid meet in die freie Fläche, ohne sich zu drehen (AK-3): auf dem Handy so breit wie möglich, auf Tablet quer und PC so hoch wie möglich.',
+            'Meer: flaches Sechseck (Radius 58) mit Schatten und dunklem Rand, Wellenmuster; flaches Wasser als 9 breites Band an der Küste; Sandküste 3,6 breit.',
+            'Felder: 92 % Größe, damit Fugen bleiben; Holzverlauf von oben nach unten, heller Rand, weicher Schatten, helle Kante oben.',
+            'Neue Tokens in tokens.css, in allen Designs gleich: --color-board-sea, -sea-deep, -shallow, -foam, -sand, -wood-top, -wood-bottom, -wood-edge.',
+          ]),
+          spec('Seite #/brett (I1-D)', [
+            'Titel „Brett“ mit Zurück-Knopf wie die Unterseiten der Verwaltung; darunter ein Satz zur Erklärung, darunter das Brett im restlichen Platz. Die Seite scrollt nicht.',
+            'Nur über die Adresse und den Verweis „Brett ansehen“ in der Diagnose erreichbar, nicht in der Kartenhand. In I2 zieht das Brett in die Platzierung um.',
+            'Smartphones quer zeigen weiter den Hinweis zum Drehen (E-29).',
+          ]),
+          spec('Gebäude und Straßen (I2, US-PL-04)', [
+            'G1: Siedlung als Haus, Stadt als Haus mit Turm; sie unterscheiden sich durch die Form (AK-2). In der Catan-Farbe der Person (AK-1).',
+            'R1: abgerundeter Balken auf der Kante, vom Gebäude bis kurz vor die nächste Kreuzung.',
+            'Dunkle Kontur (--color-surface) um alle Gebäude und Straßen, damit Weiß auf Holz und Blau am Wasser erkennbar bleiben (AK-3).',
+            'Gebäude stehen im Modus „Standard“ nur auf Inlandkreuzungen; Straßen dürfen bis an die Küste. „Am Ufer“ zeigt den geparkten Modus PP-01.',
+          ]),
+          spec('App-Symbol D8 (Installation)', [
+            'Zwei gefächerte Karten: hinten eine dunkle Karte mit Bernsteinrand, vorne eine Karte wie die Karten der App mit Bernsteinrand, Sechsecken in den Ecken und dem Logo.',
+            'Für Android eine eigene Datei, in der die Karten auf 80 % in die sichere Mitte rücken (maskable).',
+            'Hintergrundfarbe im Manifest und Startbild: --color-surface; theme_color ebenfalls --color-surface.',
+          ]),
+        );
+      }
+      window.addEventListener('resize', () => { if (state.frame === 'device') render(); });
+      render();
+    </script>
+  </body>
+</html>
