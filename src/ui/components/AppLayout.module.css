@@ -39,12 +39,14 @@
   display: none;
 }
 
-/* Main navigation as a hand of cards; the cards stick out below and are cut off by the frame. */
+/* Main navigation as a hand of cards; the cards stick out below and are cut off by the frame.
+   The hand reaches into the bottom safe area (home indicator on iPad and iPhone), so no strip of
+   plain background remains below it; only the content of the cards keeps clear of it (I1-D). */
 .hand {
   display: flex;
   flex: none;
   justify-content: center;
-  height: 104px;
+  height: calc(104px + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, transparent, var(--color-surface-raised));
 }
 
@@ -71,7 +73,8 @@
   place-items: center;
   align-content: center;
   width: 86px;
-  height: 104px;
+  height: calc(104px + env(safe-area-inset-bottom));
+  padding: 0 0 env(safe-area-inset-bottom);
   font-size: 0.7rem;
   color: var(--color-text);
   text-decoration: none;
@@ -80,7 +83,9 @@
   border-radius: 10px;
   box-shadow: 0 -4px 12px var(--color-shadow);
   transform: translateY(16px);
-  transform-origin: 50% 140%;
+
+  /* 140 % of the card height without the safe area, so the fan looks the same everywhere. */
+  transform-origin: 50% 145.6px;
 }
 
 /* The active card is pulled out of the hand. */

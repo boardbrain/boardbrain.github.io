@@ -21,12 +21,12 @@ html {
   text-size-adjust: 100%;
 }
 
+/* No padding at the bottom: the card hand reaches into the safe area itself (AppLayout). */
 body {
   height: 100%;
   margin: 0;
   overflow: hidden;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
 }
 
 #root {
