@@ -74,7 +74,10 @@
   border-radius: 10px;
   box-shadow: 0 -4px 12px var(--color-shadow);
 
-  /* No callout menu on a long press in Safari (Android: onContextMenu). */
+  /* No callout menu on a long press in Safari (Android: onContextMenu). No blue tap highlight on
+     Android: it would also colour the invisible tap area above a folded card; the card itself
+     rises when pressed. */
+  -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
 
