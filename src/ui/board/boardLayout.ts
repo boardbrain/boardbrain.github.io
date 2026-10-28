@@ -9,6 +9,8 @@ const SEA_MARGIN = 14.4;
 // Room around the sea for its shadow.
 const SHADOW_ROOM = { x: 2, y: 2.8 };
 const CORNER_COUNT = 6;
+// Waves: one crest and one trough per 8 units, a row every 5 units, the first row at y = 3.
+const WAVE = { length: 8, rowGap: 5, rowOffset: 3, crest: 2.4 };
 // Corners of the upper edge of a tile, from the lower left to the lower right: 4, 5, 0, 1.
 const UPPER_EDGE = [4, 5, 0, 1];
 
@@ -29,6 +31,8 @@ export type BoardLayout = {
   readonly tiles: readonly TileShape[];
   /** Light upper edge of each tile. */
   readonly highlights: readonly TileShape[];
+  /** One continuous wave line per row across the sea, to be clipped to the sea. */
+  readonly waves: readonly string[];
 };
 
 function toSvg(point: BoardPoint): BoardPoint {
@@ -41,6 +45,21 @@ function formatPoint({ x, y }: BoardPoint): string {
 
 function pointList(points: readonly BoardPoint[]): string {
   return points.map(formatPoint).join(' ');
+}
+
+// Continuous lines instead of a tiled pattern: at the seams of pattern tiles the browser smooths
+// both edges and the dark sea shows through as thin lines.
+function waveRows(halfWidth: number, halfHeight: number): string[] {
+  const start = -Math.ceil(halfWidth / WAVE.length) * WAVE.length;
+  const count = (2 * -start) / WAVE.length;
+  const firstRow = Math.floor((-halfHeight - WAVE.rowOffset) / WAVE.rowGap);
+  const lastRow = Math.ceil((halfHeight - WAVE.rowOffset) / WAVE.rowGap);
+  const half = WAVE.length / 2;
+  const crests = ` t${String(WAVE.length)} 0`.repeat(count - 1);
+  return Array.from({ length: lastRow - firstRow + 1 }, (_, index) => {
+    const y = (firstRow + index) * WAVE.rowGap + WAVE.rowOffset;
+    return `M${String(start)} ${String(y)}q${String(half / 2)} ${String(-WAVE.crest)} ${String(half)} 0t${String(half)} 0${crests}`;
+  });
 }
 
 /**
@@ -71,6 +90,7 @@ export function layoutBoard(board: Board): BoardLayout {
       key: hexKey(hex.coord),
       points: pointList(hexCorners(hex.coord, TILE_SCALE).map(toSvg)),
     })),
+    waves: waveRows(halfWidth, halfHeight),
     highlights: board.hexes.map((hex) => {
       const corners = hexCorners(hex.coord, HIGHLIGHT_SCALE).map(toSvg);
       return {

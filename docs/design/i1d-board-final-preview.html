@@ -777,7 +777,13 @@
           <clipPath id="seaClip">${sea('')}</clipPath>
         </defs>`;
         let body = sea(`fill="${V.deepen ? 'url(#seaDeepen)' : M.sea}" filter="url(#plateShadow)"`);
-        if (V.pattern === 'arcs' || V.pattern === 'fine') body += sea(`fill="url(#${V.pattern})"`);
+        // Arcs as one continuous line per row: pattern tiles leave thin dark seams between them.
+        if (V.pattern === 'arcs') {
+          let rows = '';
+          for (let y = -57; y <= 53; y += 5) rows += `<path d="M-64 ${y}q2 -2.4 4 0t4 0${' t8 0'.repeat(15)}"/>`;
+          body += `<g clip-path="url(#seaClip)" fill="none" stroke="${M.foam}" stroke-opacity="0.2" stroke-width="0.5">${rows}</g>`;
+        }
+        if (V.pattern === 'fine') body += sea(`fill="url(#${V.pattern})"`);
         if (V.pattern === 'rings')
           body += `<g clip-path="url(#seaClip)">${[[7, 0.35, '3 2.4'], [12, 0.24, '5 3'], [17, 0.14, '7 4']].map(([d, op, dash]) => `<path d="${ring(d, 0.3, 0.8)}" fill="none" stroke="${M.foam}" stroke-opacity="${op}" stroke-width="0.6" stroke-linecap="round" stroke-dasharray="${dash}"/>`).join('')}</g>`;
         if (V.rim === 'dark') body += sea(`fill="none" stroke="${M.deep}" stroke-width="1.6" stroke-linejoin="round"`);

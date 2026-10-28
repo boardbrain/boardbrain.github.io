@@ -90,6 +90,16 @@ describe('US-PL-01 board layout (Architecture 13.5, design I1-D)', () => {
     expect(layout.highlights.every((edge) => parsePoints(edge.points).length === 4)).toBe(true);
   });
 
+  it('draws each row of waves as one continuous line across the whole viewBox', () => {
+    expect(layout.waves).toHaveLength(23);
+    const [first = '', ...rest] = layout.waves;
+
+    expect(first.startsWith('M-64 -57q2 -2.4 4 0t4 0')).toBe(true);
+    // 16 wave lengths of 8 units cover -64 to 64; no row is pieced together from tiles.
+    expect(first.split('t')).toHaveLength(17);
+    expect(rest.at(-1)?.startsWith('M-64 53')).toBe(true);
+  });
+
   it('NFA-EW-05: lays out other board shapes too', () => {
     const single = layoutBoard(createBoard([{ q: 0, r: 0 }]));
 

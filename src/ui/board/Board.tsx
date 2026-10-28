@@ -16,7 +16,7 @@ type BoardProps = {
 export function Board({ board }: BoardProps): React.JSX.Element {
   const id = useId();
   const wood = `${id}-wood`;
-  const waves = `${id}-waves`;
+  const seaClip = `${id}-sea-clip`;
   const tileShadow = `${id}-tile-shadow`;
   const seaShadow = `${id}-sea-shadow`;
   const layout = layoutBoard(board);
@@ -40,12 +40,16 @@ export function Board({ board }: BoardProps): React.JSX.Element {
         <filter id={seaShadow} x="-20%" y="-20%" width="140%" height="150%">
           <feDropShadow dx="0" dy="2" stdDeviation="2" className={styles.shadow} />
         </filter>
-        <pattern id={waves} width="8" height="5" patternUnits="userSpaceOnUse">
-          <path d="M0 3q2 -2.4 4 0t4 0" className={styles.wave} />
-        </pattern>
+        <clipPath id={seaClip}>
+          <polygon points={layout.sea} />
+        </clipPath>
       </defs>
       <polygon points={layout.sea} className={styles.sea} filter={`url(#${seaShadow})`} />
-      <polygon points={layout.sea} fill={`url(#${waves})`} />
+      <g clipPath={`url(#${seaClip})`}>
+        {layout.waves.map((path) => (
+          <path key={path} d={path} className={styles.wave} />
+        ))}
+      </g>
       <polygon points={layout.sea} className={styles.seaRim} />
       {layout.coastlines.map((path) => (
         <path key={`shallow-${path}`} d={path} className={styles.shallow} />
