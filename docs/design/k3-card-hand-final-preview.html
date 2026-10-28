@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>K-3 Kartenhand, finale Referenz</title>
+    <style>
+      :root {
+        --bg: #231d18;
+        --raised: #2d2620;
+        --overlay: #383028;
+        --border: #4b4036;
+        --text: #f4ece1;
+        --muted: #b8ab9b;
+        --accent: #b45309;
+        --accent-text: #f5be5b;
+        --shadow: #0000008c;
+        --backdrop: #000000b3;
+        --bg-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+        --spring: cubic-bezier(0.34, 1.32, 0.5, 1);
+        --ease: cubic-bezier(0.2, 0, 0, 1);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #120e0b;
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+        line-height: 1.5;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        background: none;
+        border: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .intro {
+        max-width: 80rem;
+        margin: 0 auto;
+        padding: 20px 16px 8px;
+      }
+      .intro h1 {
+        margin: 0 0 6px;
+        font-size: 1.3rem;
+      }
+      .intro p {
+        max-width: 52rem;
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .picker {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+      }
+      .picker > span {
+        min-width: 7.5rem;
+        color: var(--muted);
+      }
+      .pill {
+        padding: 6px 12px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .pill[aria-pressed='true'] {
+        color: var(--accent-text);
+        border-color: var(--accent-text);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 28px 20px;
+        max-width: 90rem;
+        margin: 0 auto;
+        padding: 16px 16px 48px;
+        justify-items: center;
+      }
+      .variant {
+        display: grid;
+        gap: 8px;
+        width: 100%;
+        max-width: 396px;
+      }
+      .variant h2 {
+        margin: 0;
+        font-size: 1rem;
+      }
+      .variant h2 b {
+        color: var(--accent-text);
+      }
+      .variant p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+        min-height: 5.4em;
+      }
+      .variant .space {
+        color: var(--text);
+        font-size: 0.8rem;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* ---------- phone ---------- */
+      .phone {
+        --safe: 0px;
+        --hand: calc(104px + var(--safe));
+        --reserve: 104px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 740px;
+        overflow: clip;
+        background: var(--bg-image), var(--bg);
+        border: 6px solid #000;
+        border-radius: 30px;
+      }
+      .phone.full {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        height: 100dvh;
+        max-width: none;
+        border: 0;
+        border-radius: 0;
+      }
+      .closeFull {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 11;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        background: #000c;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .sys-ios {
+        --safe: 20px;
+      }
+      .app {
+        position: relative;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        overflow: clip;
+      }
+      .head {
+        display: flex;
+        flex: none;
+        justify-content: center;
+        gap: 8px;
+        align-items: center;
+        padding: 10px 14px;
+        font-weight: 700;
+      }
+      .head svg {
+        color: var(--accent-text);
+      }
+      .scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: none;
+        padding: 4px 16px calc(var(--reserve) + var(--safe) + 16px);
+        transition: padding-bottom 0.4s var(--ease);
+      }
+      .scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .pageHead {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin: 4px 0 6px;
+      }
+      .pageHead h1 {
+        flex: 1;
+        margin: 0;
+        font-size: 1.5rem;
+      }
+      .round {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+      }
+      .muted {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .scroll h3 {
+        margin: 18px 0 8px;
+        font-size: 1rem;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        margin-bottom: 8px;
+        padding: 12px 14px;
+        text-align: left;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .row .val {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 8px;
+        border-radius: 50%;
+      }
+
+      /* start: fan of playing cards in the middle */
+      .startFan {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        min-height: 300px;
+      }
+      .playCard {
+        position: relative;
+        display: grid;
+        gap: 6px;
+        place-items: center;
+        align-content: center;
+        width: 104px;
+        aspect-ratio: 5 / 7;
+        margin: 0 -6px;
+        font-weight: 700;
+        background: linear-gradient(160deg, var(--overlay), var(--raised));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 6px 18px var(--shadow);
+      }
+      .playCard svg {
+        color: var(--accent-text);
+      }
+      .playCard .corner {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--accent-text);
+      }
+      .cardGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+        gap: 14px;
+        margin-top: 12px;
+      }
+      .cardGrid .playCard {
+        width: auto;
+        margin: 0;
+      }
+
+      /* ---------- hand ---------- */
+      .scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        background: var(--backdrop);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s var(--ease);
+      }
+      .scrim.on {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .hand {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 5;
+        height: var(--hand);
+        pointer-events: none;
+      }
+      /* N1: the content fades into the surface colour behind the hand. */
+      .handBg {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: var(--bgh, var(--hand));
+        background: linear-gradient(180deg, transparent, var(--bg) 48px);
+        transition:
+          height 0.4s var(--ease),
+          opacity 0.3s var(--ease);
+      }
+      .scrim.on ~ .hand .handBg {
+        opacity: 0;
+      }
+      .navCard {
+        --w: 86px;
+        --pt: 32px;
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: var(--w);
+        height: var(--hand);
+        margin-left: calc(var(--w) / -2);
+        font-size: 0.7rem;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 -4px 12px var(--shadow);
+        transform-origin: 50% 145.6px;
+        pointer-events: auto;
+        transition:
+          transform 0.5s var(--spring),
+          width 0.4s var(--ease),
+          margin-left 0.4s var(--ease),
+          border-color 0.3s var(--ease),
+          color 0.3s var(--ease);
+      }
+      .navCard.active {
+        font-weight: 700;
+        color: var(--accent-text);
+        border-color: var(--accent-text);
+      }
+      .navCard.ghost {
+        color: var(--muted);
+      }
+      .face,
+      .tab {
+        position: absolute;
+        right: 0;
+        left: 0;
+        transition:
+          top 0.4s var(--ease),
+          opacity 0.25s var(--ease);
+      }
+      .face {
+        top: var(--pt);
+        display: grid;
+        gap: 2px;
+        place-items: center;
+      }
+      .mini {
+        position: absolute;
+        top: var(--mt, 2px);
+        right: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        opacity: 0;
+        transition:
+          top 0.4s var(--ease),
+          opacity 0.25s var(--ease);
+      }
+      /* Invisible tap area over small folded stacks: at least 44 px high. */
+      .hit {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        z-index: 20;
+        display: none;
+        width: 180px;
+        height: calc(44px + var(--safe));
+        margin-left: -90px;
+        pointer-events: auto;
+      }
+      .hit.on,
+      .cardHit.on {
+        display: block;
+      }
+      .cardHit {
+        position: absolute;
+        bottom: 0;
+        display: none;
+        pointer-events: auto;
+        -webkit-touch-callout: none;
+        user-select: none;
+      }
+      .showHits .hit,
+      .showHits .cardHit {
+        background: #f5be5b26;
+        outline: 1px dashed var(--accent-text);
+        outline-offset: -1px;
+      }
+      .switchRow {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 18px;
+        padding: 12px 14px;
+        text-align: left;
+        background: var(--raised);
+        border: 1px dashed var(--accent-text);
+        border-radius: 10px;
+      }
+      .switchRow small {
+        display: block;
+        color: var(--muted);
+      }
+      .switch {
+        position: relative;
+        flex: none;
+        width: 44px;
+        height: 26px;
+        background: var(--border);
+        border-radius: 13px;
+        transition: background 0.2s var(--ease);
+      }
+      .switch::after {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 20px;
+        height: 20px;
+        content: '';
+        background: var(--text);
+        border-radius: 50%;
+        transition: transform 0.2s var(--ease);
+      }
+      .switchRow[aria-checked='true'] .switch {
+        background: var(--accent);
+      }
+      .switchRow[aria-checked='true'] .switch::after {
+        transform: translateX(18px);
+      }
+      .direct .chev {
+        display: none;
+      }
+      .navCard {
+        -webkit-touch-callout: none;
+        user-select: none;
+      }
+      .tab {
+        top: var(--tt, 7px);
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        opacity: 0;
+      }
+
+      /* system areas below the app */
+      .sys {
+        position: relative;
+        flex: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--bg);
+      }
+      .sys-gesture .sys {
+        height: 22px;
+      }
+      .sys-gesture .sys::after,
+      .sys-ios .sys::after {
+        width: 110px;
+        height: 4px;
+        content: '';
+        background: #ffffffa6;
+        border-radius: 4px;
+      }
+      .sys-buttons .sys {
+        gap: 72px;
+        height: 46px;
+        color: #ffffffb3;
+        font-size: 1.1rem;
+      }
+      .sys-ios .sys {
+        position: absolute;
+        right: 0;
+        bottom: 6px;
+        left: 0;
+        z-index: 6;
+        background: none;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="intro">
+      <h1>K-3 Kartenhand: finale Referenz</h1>
+      <p>
+        <b>Verbindliche Referenz für K-3</b> (gewählt in fünf Runden in <code>hand-stack-preview.html</code>, Variante E2 mit Stil D5, flachem Bogen aus D2 und 30 px). Nur
+        auf dem Start ist die Kartenhand wie in D-3 aufgefächert. Auf allen anderen Seiten, auch in der Verwaltung, fährt sie in einen flachen Bogen ein (3° je Karte); die
+        aktive Karte zeigt 30 px, die übrigen 25 px, jeweils mit einem Symbol von 16 px. Kurz tippen führt direkt in den Bereich; jede Karte hat eine Tippfläche von mindestens
+        44 px Höhe und der Breite ihres Platzes (70 px). Langes Drücken (450 ms) fächert die Hand mit Namen über dem abgedunkelten Inhalt auf; ein Tipp daneben oder Escape
+        schließt sie, ein Seitenwechsel ebenso. Die Seiten selbst sind hier vereinfacht; ihr Inhalt richtet sich nach ihren eigenen Referenzen.
+      </p>
+      <div class="picker" id="pickCards"><span>Karten:</span></div>
+      <div class="picker" id="pickSys"><span>Systemleiste:</span></div>
+      <div class="picker" id="pickHits"><span>Tippflächen:</span></div>
+    </div>
+    <div class="grid" id="grid"></div>
+
+    <script>
+      /* ---------- data ---------- */
+      const VARIANTS = [
+        ['now', 'Jetzt', 'Zum Vergleich: Die Hand bleibt auf jeder Seite aufgefächert und belegt unten 104 px.', '104 px'],
+        [
+          'stack',
+          'S1 Stapel',
+          'Auf Unterseiten schiebt sich die Hand in der Mitte zu einem lockeren Stapel zusammen. Oben liegt die Karte des Bereichs, in dem du gerade bist. Antippen fächert die Hand über abgedunkeltem Inhalt auf.',
+          '52 px',
+        ],
+        [
+          'corner',
+          'S2 Stapel in der Ecke',
+          'Der Stapel wandert nach rechts unten und fächert sich dort ein wenig, gut mit dem Daumen erreichbar. Die Mitte bleibt frei, rechts unten liegt er über dem Ende der Zeilen.',
+          'Ecke, rund 66 px',
+        ],
+        [
+          'tab',
+          'S3 Lasche',
+          'Die Hand fährt fast ganz ein. Übrig bleibt eine flache, breite Lasche mit Bereich und Pfeil, dahinter die Kanten der anderen Karten. Braucht am wenigsten Platz.',
+          '34 px',
+        ],
+        [
+          'sunk',
+          'S4 Abgesenkte Hand',
+          'Die Hand bleibt aufgefächert, sinkt aber bis auf die Symbole ab. Antippen hebt sie wieder an. Am nächsten an der heutigen Hand.',
+          '44 px',
+        ],
+        [
+          'edge',
+          'S5 Kante',
+          'Der Stapel steht gerade in der Mitte und sinkt fast ganz weg. Zu sehen sind die oberen Kanten der Karten und vorne der Bereich: bis 20 px nur ein kleines Symbol, ab 26 px Symbol, Name und Pfeil.',
+          '20 px',
+        ],
+        [
+          'rim',
+          'S6 Fächerrand',
+          'Wie S4, aber noch tiefer: Von der aufgefächerten Hand bleiben nur die runden Oberkanten als Bogen, bis 18 px nur die aktive Karte mit kleinem Symbol, ab 26 px jede Karte mit ihrem Symbol.',
+          '18 px',
+        ],
+        [
+          'edges',
+          'S7 Nur Kanten',
+          'Die Karten verschwinden bis auf schmale Kanten wie bei einem Stapel von der Seite. Kein Symbol, kein Text, nur die vorderste Kante in der Akzentfarbe.',
+          '10 px',
+        ],
+        [
+          'd1',
+          'D1 Bogen wie S6',
+          'Genau der Fächerrand aus S6, nur dass jede Karte direkt antippbar ist. Die äußeren Karten sinken durch die Drehung tiefer und zeigen weniger.',
+          '',
+        ],
+        [
+          'd2',
+          'D2 Flacher Bogen',
+          'Der Bogen wird beim Einfahren flacher (3° statt 9° je Karte). Alle Karten schauen fast gleich weit heraus, die Symbole sind gleich gut zu treffen.',
+          '',
+        ],
+        [
+          'd3',
+          'D3 Gerade Reihe',
+          'Ganz ohne Bogen: Die Kartenoberkanten liegen gerade nebeneinander wie Registerkarten. Am ruhigsten und am leichtesten zu treffen, aber am wenigsten Kartenhand.',
+          '',
+        ],
+        [
+          'd4',
+          'D4 Aktive Karte mit Namen',
+          'Flacher Bogen, die Karte des aktuellen Bereichs steht etwas höher und zeigt Symbol und Namen. Die anderen nur ihr Symbol. So siehst du immer, wo du bist.',
+          '',
+        ],
+        [
+          'd5',
+          'D5 Halten zeigt Namen',
+          'Wie D2. Kurz tippen führt direkt in den Bereich, lange drücken fächert die ganze Hand mit Namen über abgedunkeltem Inhalt auf, zum Nachschauen.',
+          '',
+        ],
+        [
+          'd6',
+          'D6 Karte wird herausgezogen',
+          'Wie D2, aber beim Antippen wird die Karte sichtbar mit Symbol und Namen aus dem Stapel gezogen, erst dann wechselt die Seite. Deutliche Rückmeldung.',
+          '',
+        ],
+      ];
+      VARIANTS.push(
+        [
+          'e1',
+          'E1 Start und Verwaltung groß',
+          'Wie bisher: Auf den Hauptseiten Start und Verwaltung ist die Hand ausgefahren, auf allen Unterseiten klein. Tippst du auf einer Unterseite die kleine „Verwaltung“ an, fährt die Hand mit der Verwaltung aus.',
+          '',
+        ],
+        [
+          'e2',
+          'K-3 Kartenhand',
+          'Beginnt auf „Personen“. „Rundgang zeigen“: Personen → kleine „Verwaltung“ antippen → kleines „Start“ antippen (Hand fährt aus) → Personen. Lange auf eine kleine Karte drücken fächert die Hand auf.',
+          '',
+        ],
+        [
+          'e3',
+          'E3 Immer klein',
+          'Die Hand ist überall klein, auch auf dem Start. Die Namen siehst du nur über die aktive Karte (D4) oder durch Halten (D5). Am meisten Platz, aber die Kartenhand als Erkennungszeichen geht verloren.',
+          '',
+        ],
+        [
+          'e4',
+          'E4 Einstellung',
+          'Wie E1, aber mit einem Schalter (hier zum Ausprobieren unten in der Verwaltung, später in den Einstellungen): Ausgeschaltet ist die Hand überall klein wie in E3.',
+          '',
+        ],
+      );
+      const EXPAND = ['e1', 'e2', 'e3', 'e4'];
+      const STYLES = [
+        ['d4', 'D4 Aktive Karte mit Namen'],
+        ['d5', 'D5 Halten zeigt Namen'],
+        ['d45', 'D4 und Halten'],
+      ];
+      const DIRECT = ['d1', 'd2', 'd3', 'd4', 'd5', 'd6'];
+      const MODES = [
+        ['instant', 'Sofort auf Unterseiten'],
+        ['scroll', 'Erst beim Scrollen nach unten'],
+      ];
+      const CARDS = [
+        ['2', 'Jetzt (2)'],
+        ['5', 'Später (5)'],
+      ];
+      const SYSTEMS = [
+        ['gesture', 'Android Gesten'],
+        ['buttons', 'Android drei Tasten'],
+        ['ios', 'iPad / iPhone'],
+      ];
+      const SIZES = [
+        ['r2', '20 / 18 px (Runde 2)'],
+        ['26', '26 px'],
+        ['30', '30 px'],
+        ['34', '34 px'],
+      ];
+      const SHOW = [
+        ['expand', 'Wann ausgefahren (E1–E4)'],
+        ['direct', 'Direkt antippen (D1–D6) und S6'],
+        ['focus', 'Nur S5 und S6'],
+        ['all', 'Alle Varianten'],
+      ];
+      const HITS = [
+        ['hide', 'unsichtbar'],
+        ['show', 'sichtbar'],
+      ];
+      const opts = { mode: 'instant', cards: '2', system: 'gesture', size: '30', show: 'expand', hits: 'hide', style: 'd5' };
+      // Visible height of the front card (S5) or the active card (S6, D), chosen above.
+      const sizeOf = (variant) => (opts.size === 'r2' ? (variant === 'edge' ? 20 : 18) : Number(opts.size));
+      // From this height the cards show more of the menu: symbol and name (S5), symbols on all cards (S6).
+      const BIG_FROM = 26;
+      const peekOf = (variant) =>
+        variant === 'd4' ? sizeOf(variant) + 10 : variant === 'edge' || variant === 'rim' || DIRECT.includes(variant) ? sizeOf(variant) : PEEK[variant];
+      // Distance between the cards when folded; also the width of each tap area.
+      const stepOf = (variant) => (variant === 'd3' ? 78 : FAN_STEP);
+
+      const ICON = {
+        home: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+        folder: 'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+        chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+        box: 'M3 7h18v4H3zM5 11v9h14v-9M10 15h4',
+        cog: 'M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+        people: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M22 21v-1a6 6 0 0 0-4-5.6',
+        table:
+          'M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zM12 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM12 22.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM3 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
+        dice: 'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01',
+        back: 'M15 5l-7 7 7 7',
+        search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.5-4.5',
+        up: 'M6 15l6-6 6 6',
+      };
+      const icon = (n, s = 22) =>
+        `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICON[n]}"/></svg>`;
+      const LOGO =
+        '<svg width="26" height="26" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M24 8.5C21 5 14 5.5 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42.5 22 40.5 23 41 23.5 41 24 40.5 24.5 41 25 41 26 40.5 30 42.5 35 41 36 37 40 38 43 33 41 29 45 27 45 20 41 18 43 15 41 10 36 10 34 5.5 27 5 24 8.5Z"/><path d="M24 8.5V40.5"/></svg>';
+
+      const AREAS = [
+        ['start', 'home', 'Start'],
+        ['verwaltung', 'folder', 'Verwaltung'],
+        ['statistik', 'chart', 'Statistik'],
+        ['daten', 'box', 'Daten'],
+        ['einstellungen', 'cog', 'Einstell.'],
+      ];
+      const TOP = AREAS.map(([id]) => id);
+      const PEOPLE = ['Anna', 'Ben', 'Carla', 'David', 'Elif', 'Finn', 'Greta', 'Hannes', 'Ida', 'Jonas', 'Kemal', 'Lea', 'Mats', 'Nora', 'Oskar', 'Pia'];
+      const TABLES = [
+        ['Familie', '#ef5359', 4],
+        ['Uni-Runde', '#4189f5', 5],
+        ['Nachbarn', '#8fb35a', 3],
+        ['Büro', '#e6cb72', 6],
+        ['Urlaub 2026', '#d46bc4', 4],
+        ['Spieleverein', '#5fbfb2', 8],
+      ];
+      const area = (screen) => (TOP.includes(screen) ? screen : 'verwaltung');
+      const isSub = (screen) => !TOP.includes(screen);
+
+      /* ---------- pages ---------- */
+      const playCard = (go, ic, title, count) =>
+        `<button class="playCard" data-go="${go}"><span class="corner">${count}</span>${icon(ic, 34)}<span>${title}</span></button>`;
+      const head = (title, withBack, action) =>
+        `<div class="pageHead">${withBack ? `<button class="round" data-back aria-label="Zurück">${icon('back')}</button>` : ''}<h1>${title}</h1>${action ? `<span class="round">${icon(action, 20)}</span>` : ''}</div>`;
+
+      function page(screen, kind, big) {
+        if (kind === 'e4' && screen === 'verwaltung')
+          return (
+            page(screen) +
+            `<button class="switchRow" role="switch" aria-checked="${big}" data-switch><span>Kartenhand auf Start und Verwaltung groß<small>Einstellung, später unter Einstellungen</small></span><span class="switch"></span></button>`
+          );
+        switch (screen) {
+          case 'start':
+            return `<div class="startFan"><span style="rotate:-8deg;translate:0 10px">${playCard('persons', 'people', 'Personen', 16)}</span><span>${playCard('tables', 'table', 'Tische', 6)}</span><span style="rotate:8deg;translate:0 10px">${playCard('games', 'dice', 'Spiele', 2)}</span></div>`;
+          case 'verwaltung':
+            return head('Verwaltung', false) + '<div class="cardGrid">' + playCard('persons', 'people', 'Personen', 16) + playCard('tables', 'table', 'Tische', 6) + playCard('games', 'dice', 'Spiele', 2) + '</div>';
+          case 'persons':
+            return (
+              head('Personen', true, 'search') +
+              '<p class="muted">16 Personen. Tippe eine Person an.</p>' +
+              PEOPLE.map((p, i) => `<button class="row" data-go="person"><span>${p}</span><span class="val">${(i % 3) + 1} ${i % 3 ? 'Tische' : 'Tisch'}</span></button>`).join('')
+            );
+          case 'person':
+            return (
+              head('Anna', true) +
+              '<p class="muted">Seit 12.03.2026 dabei</p><h3>Tische</h3>' +
+              TABLES.slice(0, 3).map(([n, c, k]) => `<div class="row"><span><span class="dot" style="background:${c}"></span>${n}</span><span class="val">${k} Personen</span></div>`).join('') +
+              '<h3>Zum Scrollen</h3>' +
+              PEOPLE.slice(0, 10).map((p) => `<div class="row"><span>Partie mit ${p}</span><span class="val">später</span></div>`).join('')
+            );
+          case 'tables':
+            return head('Tische', true, 'search') + TABLES.map(([n, c, k]) => `<div class="row"><span><span class="dot" style="background:${c}"></span>${n}</span><span class="val">${k} Personen</span></div>`).join('');
+          case 'games':
+            return head('Spiele', true) + '<div class="row"><span>Catan</span><span class="val">fest eingebaut</span></div><div class="row"><span>Carcassonne</span><span class="val">eigenes Spiel</span></div>';
+          default:
+            return head(AREAS.find(([id]) => id === screen)[2], false) + '<p class="muted">Kommt später. Hier nur, damit die Karte etwas tut.</p>';
+        }
+      }
+
+      /* ---------- hand geometry ---------- */
+      const FAN_STEP = 70;
+      const JITTER_R = [0, -5, 4, -3, 6];
+      const JITTER_X = [0, -3, 3, -2, 2];
+      // Height that stays reserved for the hand at the bottom, per variant when folded.
+      const PEEK = { stack: 52, corner: 66, tab: 34, sunk: 44, edge: 20, rim: 18, edges: 10 };
+      // Stacks whose back cards rise above the front card, px per card.
+      const RISE = { tab: 6, edge: 3, edges: 3 };
+      // Folded variants that are small: an invisible tap area of at least 44 px lies over them.
+      const HIT = ['tab', 'edge', 'rim', 'edges'];
+
+      function fanned(i, n, active) {
+        const c = i - (n - 1) / 2;
+        return { x: c * FAN_STEP, r: c * 9, y: active ? 4 : 16, pt: 32, w: 86, face: 1, tab: 0, mini: 0 };
+      }
+
+      function folded(variant, i, n, depth, active, width) {
+        switch (variant) {
+          case 'stack':
+            return { x: JITTER_X[depth], r: JITTER_R[depth], y: 104 - PEEK.stack, pt: 6, w: 86, face: depth === 0 ? 1 : 0, tab: 0 };
+          case 'corner':
+            return { x: width / 2 - 58 - depth * 14, r: -6 - depth * 9, y: 104 - PEEK.corner + depth * 6, pt: 8, w: 86, face: depth === 0 ? 1 : 0, tab: 0 };
+          case 'tab':
+            return { x: 0, r: 0, y: 104 - PEEK.tab - depth * 6, pt: 6, w: 136 - depth * 14, face: 0, tab: depth === 0 ? 1 : 0 };
+          case 'sunk': {
+            const f = fanned(i, n, active);
+            return { ...f, y: 104 - (active ? PEEK.sunk : PEEK.sunk - 8), pt: 6 };
+          }
+          case 'edge': {
+            const s = sizeOf('edge');
+            const big = s >= BIG_FROM;
+            return { x: 0, r: 0, y: 104 - s - depth * RISE.edge, pt: 6, w: (big ? 132 : 96) - depth * 8, face: 0, tab: depth === 0 && big ? 1 : 0, mini: depth === 0 && !big ? 1 : 0 };
+          }
+          case 'rim': {
+            const s = sizeOf('rim');
+            const f = fanned(i, n, active);
+            return { ...f, y: 104 - (active ? s : s - 7), face: 0, mini: active || s >= BIG_FROM ? 1 : 0 };
+          }
+          case 'edges':
+            return { x: 0, r: 0, y: 104 - PEEK.edges - depth * RISE.edges, pt: 6, w: 110 - depth * 10, face: 0, tab: 0, mini: 0 };
+          case 'd1': {
+            const s = sizeOf(variant);
+            return { ...fanned(i, n, active), y: 104 - (active ? s : s - 7), face: 0, mini: 1 };
+          }
+          case 'd2':
+          case 'd5':
+          case 'd6': {
+            const s = sizeOf(variant);
+            const c = i - (n - 1) / 2;
+            return { x: c * FAN_STEP, r: c * 3, y: 104 - (active ? s : s - 5), pt: 6, w: 86, face: 0, tab: 0, mini: 1 };
+          }
+          case 'd3': {
+            const s = sizeOf(variant);
+            const c = i - (n - 1) / 2;
+            return { x: c * stepOf(variant), r: 0, y: 104 - (active ? s : s - 4), pt: 6, w: 86, face: 0, tab: 0, mini: 1 };
+          }
+          case 'd4': {
+            const s = sizeOf(variant);
+            const c = i - (n - 1) / 2;
+            return { x: c * FAN_STEP, r: c * 2, y: 104 - (active ? s + 10 : s - 6), pt: 6, w: active ? 116 : 86, face: 0, tab: active ? 1 : 0, mini: active ? 0 : 1 };
+          }
+        }
+      }
+
+      // Pressing a folded card lifts it a little; in D6 it is pulled out far enough to show its name.
+      function pressed(variant, g) {
+        if (variant === 'd6') return { ...g, y: 104 - 60, pt: 8, face: 1, mini: 0, tab: 0 };
+        return { ...g, y: g.y - 8 };
+      }
+
+      /* ---------- one phone ---------- */
+      function createPhone(kind, full) {
+        // E variants use the geometry of D4 or D5 (both with the flat arc of D2).
+        const isExpand = EXPAND.includes(kind);
+        const variant = isExpand ? (opts.style === 'd5' ? 'd5' : 'd4') : kind;
+        const hold = variant === 'd5' || (isExpand && opts.style === 'd45');
+        const el = document.createElement('div');
+        el.className = `phone sys-${opts.system}${full ? ' full' : ''}${DIRECT.includes(variant) ? ' direct' : ''}${opts.hits === 'show' ? ' showHits' : ''}`;
+        el.innerHTML =
+          `<div class="app"><header class="head">${LOGO}BoardBrain</header><div class="scroll"></div><div class="scrim"></div>` +
+          '<nav class="hand" aria-label="Hauptnavigation"><div class="handBg"></div><button class="hit" aria-label="Navigation öffnen"></button></nav></div>' +
+          (opts.system === 'buttons' ? '<div class="sys"><span>◁</span><span>○</span><span>□</span></div>' : '<div class="sys"></div>');
+        const scroll = el.querySelector('.scroll');
+        const scrim = el.querySelector('.scrim');
+        const hand = el.querySelector('.hand');
+        const handBg = el.querySelector('.handBg');
+        const hit = el.querySelector('.hit');
+        hit.onclick = () => {
+          if (opts.mode === 'scroll') st.scrolled = false;
+          else st.open = true;
+          update();
+        };
+        const areas = AREAS.slice(0, Number(opts.cards));
+        const st = { history: ['verwaltung', 'persons'], open: false, scrolled: false, lastY: 0, pressed: -1, held: false, big: true };
+        const isDirect = DIRECT.includes(variant);
+        const screen = () => st.history[st.history.length - 1];
+
+        const cards = areas.map(([id, ic, label]) => {
+          const b = document.createElement('button');
+          b.className = 'navCard' + (TOP.indexOf(id) > 1 ? ' ghost' : '');
+          b.innerHTML = `<span class="face">${icon(ic)}${label}</span><span class="tab">${icon(ic, 16)}${label === 'Einstell.' ? 'Einstellungen' : label}<span class="chev">${icon('up', 16)}</span></span><span class="mini">${icon(ic, 16)}</span>`;
+          b.onclick = () => {
+            // The click after a long press only lifts the finger; it must not leave the page.
+            if (st.held) {
+              st.held = false;
+              return;
+            }
+            if (handState() === 'folded' && !isDirect) {
+              if (opts.mode === 'scroll') st.scrolled = false;
+              else st.open = true;
+              update();
+            } else go(id, true);
+          };
+          hand.append(b);
+          return b;
+        });
+
+        // Direct variants: one tap area per card, at least 44 px high (WCAG target size).
+        const cardHits = areas.map(([id, , label], i) => {
+          const h = document.createElement('button');
+          h.className = 'cardHit';
+          h.setAttribute('aria-label', label === 'Einstell.' ? 'Einstellungen' : label);
+          let timer = 0;
+          const release = () => {
+            clearTimeout(timer);
+            if (st.pressed === i) {
+              st.pressed = -1;
+              update();
+            }
+          };
+          h.addEventListener('pointerdown', () => {
+            st.pressed = i;
+            st.held = false;
+            update();
+            if (hold)
+              timer = setTimeout(() => {
+                st.held = true;
+                st.pressed = -1;
+                st.open = true;
+                update();
+              }, 450);
+          });
+          h.addEventListener('pointerup', () => clearTimeout(timer));
+          h.addEventListener('pointercancel', release);
+          h.addEventListener('pointerleave', release);
+          h.addEventListener('contextmenu', (e) => e.preventDefault());
+          h.onclick = () => {
+            if (st.held) {
+              st.held = false;
+              return;
+            }
+            if (variant === 'd6') {
+              st.pressed = i;
+              update();
+              setTimeout(() => go(id, true), 220);
+            } else go(id, true);
+          };
+          hand.append(h);
+          return h;
+        });
+
+        // folded: stack; fanned: normal hand; open: fanned over a dimmed subpage.
+        function handState() {
+          if (isExpand) {
+            const here = screen();
+            const big = kind === 'e1' ? !isSub(here) : kind === 'e2' ? here === 'start' : kind === 'e4' ? st.big && !isSub(here) : false;
+            if (big) return 'fanned';
+            return st.open ? 'open' : 'folded';
+          }
+          if (variant === 'now' || !isSub(screen())) return 'fanned';
+          if (opts.mode === 'scroll') return st.scrolled ? 'folded' : 'fanned';
+          return st.open ? 'open' : 'folded';
+        }
+
+        function update() {
+          const state = handState();
+          const n = areas.length;
+          const activeIndex = areas.findIndex(([id]) => id === area(screen()));
+          const order = [activeIndex, ...areas.map((_, i) => i).filter((i) => i !== activeIndex)];
+          const width = el.querySelector('.app').clientWidth || 360;
+          cards.forEach((card, i) => {
+            const depth = order.indexOf(i);
+            const active = i === activeIndex;
+            const base = state === 'folded' ? folded(variant, i, n, depth, active, width) : fanned(i, n, active);
+            const g = state === 'folded' && isDirect && st.pressed === i ? pressed(variant, base) : base;
+            card.classList.toggle('active', active);
+            card.style.transform = `translateX(${g.x}px) rotate(${g.r}deg) translateY(${g.y}px)`;
+            card.style.setProperty('--w', g.w + 'px');
+            card.style.setProperty('--pt', g.pt + 'px');
+            card.style.zIndex = state === 'folded' ? String(10 - depth) : active ? '10' : String(i + 1);
+            card.querySelector('.face').style.opacity = g.face;
+            card.querySelector('.tab').style.opacity = g.tab;
+            card.querySelector('.mini').style.opacity = g.mini ?? 0;
+            // Centre the small symbol and the tab line in the visible part (the fan turns cards down a bit).
+            const visible = 104 - 145.6 + (145.6 - g.y) * Math.cos((g.r * Math.PI) / 180);
+            card.style.setProperty('--mt', Math.max(1, (visible - 16) / 2) + 'px');
+            card.style.setProperty('--tt', (variant === 'edge' ? Math.max(3, (visible - 18) / 2) : 7) + 'px');
+            // Flat stacks: a short shadow so the edges of the back cards stay visible.
+            card.style.boxShadow = state === 'folded' && RISE[variant] ? '0 -1px 3px var(--shadow)' : '';
+            // Folding in: the top card goes first; fanning out: from the middle outwards.
+            card.style.transitionDelay = (state === 'folded' ? depth * 25 : Math.abs(i - (n - 1) / 2) * 30) + 'ms';
+            if (!isDirect) card.setAttribute('aria-expanded', String(state !== 'folded'));
+            // Tap area over the visible top of the card; the fan shifts the top sideways.
+            const h = cardHits[i];
+            h.classList.toggle('on', state === 'folded' && isDirect);
+            if (isDirect) {
+              const cx = base.x + (145.6 - base.y) * Math.sin((base.r * Math.PI) / 180);
+              const hw = stepOf(variant);
+              const vis = 104 - 145.6 + (145.6 - base.y) * Math.cos((base.r * Math.PI) / 180);
+              h.style.left = `${width / 2 + cx - hw / 2}px`;
+              h.style.width = `${hw}px`;
+              h.style.height = `calc(${Math.max(44, Math.round(vis) + 6)}px + var(--safe))`;
+              h.style.zIndex = String(20 + (active ? 10 : 0));
+            }
+          });
+          scrim.classList.toggle('on', state === 'open');
+          hit.classList.toggle('on', state === 'folded' && HIT.includes(variant) && !isDirect);
+          const reserve = state === 'folded' ? (variant === 'corner' ? 40 : peekOf(variant) + (RISE[variant] ?? 0) * (n - 1)) : 104;
+          el.style.setProperty('--reserve', reserve + 'px');
+          handBg.style.background = state === 'folded' ? 'linear-gradient(180deg, transparent, var(--bg) 32px)' : '';
+          handBg.style.setProperty('--bgh', state === 'folded' ? (variant === 'corner' ? '0px' : `calc(${peekOf(variant) + 16}px + var(--safe))`) : 'var(--hand)');
+        }
+
+        function render() {
+          scroll.innerHTML = page(screen(), kind, st.big);
+          scroll.querySelectorAll('[data-switch]').forEach(
+            (b) =>
+              (b.onclick = () => {
+                st.big = !st.big;
+                b.setAttribute('aria-checked', String(st.big));
+                update();
+              }),
+          );
+          scroll.scrollTop = 0;
+          st.lastY = 0;
+          scroll.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => go(b.dataset.go)));
+          scroll.querySelectorAll('[data-back]').forEach((b) => (b.onclick = back));
+          update();
+        }
+        function go(target, fromHand) {
+          if (fromHand && target === screen()) {
+            st.open = false;
+            update();
+            return;
+          }
+          st.history.push(target);
+          st.pressed = -1;
+          st.open = false;
+          st.scrolled = false;
+          render();
+        }
+        function back() {
+          if (st.history.length > 1) st.history.pop();
+          st.open = false;
+          st.scrolled = false;
+          render();
+        }
+        scrim.onclick = () => {
+          st.open = false;
+          update();
+        };
+        scroll.addEventListener('scroll', () => {
+          const y = scroll.scrollTop;
+          if (opts.mode === 'scroll' && isSub(screen())) {
+            if (y - st.lastY > 12 && y > 40) st.scrolled = true;
+            else if (st.lastY - y > 12 || y < 8) st.scrolled = false;
+            else return;
+            update();
+          }
+          st.lastY = y;
+        });
+        new ResizeObserver(update).observe(el);
+
+        el.tour = () => {
+          st.history = ['verwaltung', 'persons'];
+          st.open = false;
+          render();
+          const steps = [
+            () => {
+              const i = areas.findIndex(([id]) => id === 'verwaltung');
+              st.pressed = i;
+              update();
+            },
+            () => go('verwaltung', true),
+            () => {
+              st.pressed = 0;
+              update();
+            },
+            () => go('start', true),
+            () => go('persons'),
+          ];
+          steps.forEach((step, k) => setTimeout(step, 1100 + k * 900 + (k > 1 ? 600 : 0) + (k > 3 ? 600 : 0)));
+        };
+        el.replay = () => {
+          st.history = ['verwaltung'];
+          st.open = false;
+          st.scrolled = false;
+          render();
+          setTimeout(() => go('persons'), 1000);
+        };
+        render();
+        return el;
+      }
+
+      /* ---------- page ---------- */
+      function pills(id, list, key) {
+        const box = document.getElementById(id);
+        box.querySelectorAll('button').forEach((b) => b.remove());
+        for (const [value, label] of list) {
+          const b = document.createElement('button');
+          b.className = 'pill';
+          b.textContent = label;
+          b.setAttribute('aria-pressed', String(opts[key] === value));
+          b.onclick = () => {
+            opts[key] = value;
+            renderAll();
+          };
+          box.append(b);
+        }
+      }
+
+      function renderAll() {
+        pills('pickCards', CARDS, 'cards');
+        pills('pickSys', SYSTEMS, 'system');
+        pills('pickHits', HITS, 'hits');
+        const grid = document.getElementById('grid');
+        grid.replaceChildren();
+        for (const [id, name, text, fixedSpace] of VARIANTS) {
+          if (opts.show === 'focus' && id !== 'edge' && id !== 'rim') continue;
+          if (opts.show === 'direct' && id !== 'rim' && !DIRECT.includes(id)) continue;
+          if (id !== 'e2') continue;
+          if (opts.show !== 'expand' && EXPAND.includes(id)) continue;
+          const space =
+            id === 'd4'
+              ? `${peekOf(id)} px aktive Karte, sonst ${sizeOf(id) - 6} px (Höhe oben wählbar)`
+              : EXPAND.includes(id)
+                ? opts.style === 'd5'
+                  ? `${sizeOf(id)} px auf kleinen Seiten`
+                  : `${sizeOf(id) + 10} px auf kleinen Seiten (aktive Karte)`
+              : id === 'edge' || id === 'rim' || DIRECT.includes(id)
+                ? `${sizeOf(id)} px (Höhe oben wählbar)`
+                : fixedSpace;
+          const sec = document.createElement('section');
+          sec.className = 'variant';
+          const [code, ...rest] = name.split(' ');
+          const label = opts.show === 'direct' && id === 'rim' ? `${rest.join(' ')} <span class="space">(zum Vergleich: Tippen fächert auf)</span>` : rest.join(' ');
+          sec.innerHTML = `<h2><b>${code}</b> ${label}</h2><p>${text}</p><span class="space">Platz unten auf Unterseiten: ${space}</span><div class="actions"><button class="pill" data-replay>Einfahren zeigen</button><button class="pill" data-full>Vollbild</button></div>`;
+          const ph = createPhone(id, false);
+          sec.append(ph);
+          if (EXPAND.includes(id)) {
+            const b = sec.querySelector('[data-replay]');
+            b.textContent = 'Rundgang zeigen';
+            b.onclick = () => ph.tour();
+          } else sec.querySelector('[data-replay]').onclick = () => ph.replay();
+          sec.querySelector('[data-full]').onclick = () => openFull(id);
+          grid.append(sec);
+        }
+      }
+
+      function openFull(id) {
+        const ph = createPhone(id, true);
+        const close = document.createElement('button');
+        close.className = 'closeFull';
+        close.textContent = 'Schließen';
+        document.body.append(ph, close);
+        document.body.style.overflow = 'hidden';
+        close.onclick = () => {
+          ph.remove();
+          close.remove();
+          document.body.style.overflow = '';
+        };
+      }
+
+      renderAll();
+    </script>
+  </body>
+</html>

@@ -4,10 +4,10 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Manuelle Abnahme auf echten Geräten vor jedem Release |
-| Version | 0.1 |
+| Version | 0.2 |
 | Status | Angelegt mit Bündel I1-D; die Punkte späterer Inkremente gelten ab dem genannten Inkrement |
-| Stand | 27.10.2026 |
-| Grundlage | BoardBrain_Architektur.md v0.15 (12.1, 14.6), BoardBrain_Spezifikation.md v0.11 (Kapitel 5), Entwicklungsrichtlinien.md v0.6 (3.8) |
+| Stand | 28.10.2026 |
+| Grundlage | BoardBrain_Architektur.md v0.16 (12.1, 13.1, 14.6), BoardBrain_Spezifikation.md v0.11 (Kapitel 5), Entwicklungsrichtlinien.md v0.6 (3.8) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -15,6 +15,7 @@
 | Version | Datum | Änderung |
 |---|---|---|
 | 0.1 | 27.10.2026 | Erstfassung mit I1-D: Geräte, Vorbereitung, Installation, Start im Flugmodus, Brett; Punkte der Inkremente I2 bis I5 vorgemerkt |
+| 0.2 | 28.10.2026 | K-15 mit K-3: eingefahrene Kartenhand, Antippen und langes Drücken auf echten Geräten |
 
 ## 1. Zweck
 
@@ -57,6 +58,7 @@ Ein Punkt gilt erst ab dem Inkrement in der Spalte „ab“. Ein Punkt, der sche
 | K-12 | I4 | iOS: Seite im Safari-Tab öffnen (US-IS-01) | Ausschließlich die bebilderte Installationsanleitung | – | ☐ | ☐ | – |
 | K-13 | I5 | Ton mit und ohne Stummschaltung, während Musik läuft (US-IN-03, FA-IN-07) | Stummschalter wird respektiert; laufende Musik wird nicht unterbrochen | ☐ | ☐ | ☐ | ☐ |
 | K-14 | I5 | Installationshinweis im Browser-Tab (US-IS-02) | Erscheint unter Android und Windows, lässt sich wegklicken und kommt nicht wieder | ☐ | – | – | ☐ |
+| K-15 | I1 | Auf einer Unterseite (z. B. Personen) kurz auf das kleine „Start“ tippen; zurück, dann lange auf eine kleine Karte drücken und daneben tippen (Architektur 13.1, K-3) | Tippen führt sofort zum Start, dort ist die Hand aufgefächert; langes Drücken fächert die Hand mit Namen über abgedunkeltem Inhalt auf, ohne Browsermenü und ohne Seitenwechsel; Tipp daneben fährt sie wieder ein; wie in `docs/design/k3-card-hand-final-preview.html` | ☐ | ☐ | ☐ | ☐ |
 
 ## 5. Bekannte Grenzen der automatischen Tests
 

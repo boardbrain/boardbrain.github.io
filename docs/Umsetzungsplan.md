@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.15 |
-| Stand | 27.10.2026 |
-| Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.15 (19) |
+| Version | 0.16 |
+| Stand | 28.10.2026 |
+| Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.16 (19) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -28,6 +28,7 @@
 | 0.13 | 25.10.2026 | I1-E umgesetzt (#19): Personenliste als Spielkarten, Personenseite „Karte und Steckbrief“, Tischseite „Großer Tisch“; Design-Referenz `docs/design/i1e-persons-tables-final-preview.html`; Catan-Farben nur im Editor (5) |
 | 0.14 | 26.10.2026 | I1-F umgesetzt (#20): Umbenennen an Ort und Stelle, Spielseite, Tisch bearbeiten wie „Neuer Tisch“ ohne Bank, kleine Pillen als Aktionen, Rückfrage bei ungespeicherten Änderungen; Design-Referenz `docs/design/i1f-edit-final-preview.html`; Personen- und Tischnamen app-weit eindeutig (E-31); US-VW-02 AK-7 mit I6 (2, 5) |
 | 0.15 | 27.10.2026 | I1-D umgesetzt (#21), Inkrement I1 damit vollständig: Brett H1 unter `#/brett`, Gebäude G1 und Straßen R1 für I2 festgelegt, App-Symbol D8, Manifest und minimaler Service Worker, `docs/Abnahme-Checkliste.md`; Design-Referenz `docs/design/i1d-board-final-preview.html` (2, 5, 7) |
+| 0.16 | 28.10.2026 | K-3 umgesetzt: Kartenhand nur auf dem Start aufgefächert, sonst eingefahren (Variante E2, Stil D5, 30 px); Design-Referenz `docs/design/k3-card-hand-final-preview.html`; Motion 14.2.0; offener Punkt „Einstellung für die Kartenhand“ bei I6 (7) |
 
 ## 1. Zweck
 
@@ -43,6 +44,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | umgesetzt: I1-A (#11), I1-B (#12), I1-C (#15), I1-E (#19), I1-F (#20), I1-D (#21) |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
+| 2b | Kleine Aufgabe K-3: Kartenhand einfahren | nach I1, vor I2 | umgesetzt (Abnahme durch den Product Owner offen) |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
@@ -185,7 +187,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
   - **App-Symbol D8 „Zwei Karten“:** zwei gefächerte Karten, vorne eine Karte der App mit Logo; für Android in die sichere Mitte gerückt.
   - **Service Worker** zunächst nur zum Speichern und Ausliefern ohne Netz; eine neue Version wird wie üblich aktiv, wenn alle Fenster der App geschlossen waren. Der kontrollierte Wechsel mit Bestätigung (ADR-015) folgt mit I4 (Entscheidung des Product Owners).
   - **Diagnose in der installierten App:** Weil installierte Apps keine Adressleiste haben, führt ein unauffälliger Verweis „Diagnose“ unten rechts in der Verwaltung zur Diagnose, ohne die Karten zu verschieben; ab I6 über zehnmaliges Tippen auf die Versionsnummer in den Einstellungen (Kapitel 7, Entscheidung des Product Owners).
-  - **Rahmen aus der Abnahme auf Geräten:** Höhe ohne `100dvh` (die Seite war nach dem Herunterziehen verschiebbar, Herunterziehen zum Aktualisieren entfällt), volle Bildschirmhöhe in der installierten App unter iPadOS, Kartenhand ohne harten Schnitt über dem Inhalt (Variante N1 aus `nav-preview.html`) und Wellen ohne Nähte (Architektur 13.1). Ein einfahrender Kartenstapel auf Unterseiten ist als eigener PR vorgemerkt.
+  - **Rahmen aus der Abnahme auf Geräten:** Höhe ohne `100dvh` (die Seite war nach dem Herunterziehen verschiebbar, Herunterziehen zum Aktualisieren entfällt), volle Bildschirmhöhe in der installierten App unter iPadOS, Kartenhand ohne harten Schnitt über dem Inhalt (Variante N1 aus `nav-preview.html`) und Wellen ohne Nähte (Architektur 13.1). Ein einfahrender Kartenstapel auf Unterseiten ist als eigener PR vorgemerkt (umgesetzt als K-3, Kapitel 6).
   - Verbindliche Referenz ist `docs/design/i1d-board-final-preview.html`.
 
 ### D-1 Farbwerte (OP-11)
@@ -212,6 +214,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 |---|---|---|---|
 | K-1 | Dependabot-PR #3 (`@babel/core` 7 → 8): prüfen, ob `babel-plugin-react-compiler` mit Babel 8 arbeitet (Bündel enthält `memo_cache_sentinel`, alle Prüfungen grün); dann Empfehlung „mergen“ oder „schließen und `@babel/core` in `dependabot.yml` auf Hauptversion 7 halten“ | Sonnet, medium | erledigt: Empfehlung „mergen“. Mit Babel 8.0.6 erzeugt der Build 8 Treffer für `memo_cache_sentinel`, genau wie mit Babel 7; `check` und `e2e` bestehen. Hinweis: `babel-plugin-react-compiler` 1.0.0 deklariert `@babel/types` ^7 als Abhängigkeit, arbeitet aber nachweislich mit Babel 8 |
 | K-2 | Hohe `npm audit`-Meldungen in Entwicklungswerkzeugen (über `braces`, siehe PR #2) prüfen, sobald Dependabot oder neue Versionen eine Korrektur bieten | Sonnet, medium | offen |
+| K-3 | Kartenhand einfahren: Auf allen Seiten außer dem Start fährt die Hand in einen flachen Bogen ein und zeigt nur die Symbole; Antippen führt direkt in den Bereich, langes Drücken fächert sie mit Namen auf. In fünf Runden Designvorschlägen (`hand-stack-preview.html`) gewählt: E2 „nur Start groß“, Stil D5 „Halten zeigt Namen“, flacher Bogen aus D2, 30 px, sofort eingefahren. Erstes Bündel mit Motion (14.2.0). Verbindliche Referenz `docs/design/k3-card-hand-final-preview.html`; Abnahme auf Geräten mit Punkt K-15 der Abnahme-Checkliste | Opus, medium | umgesetzt (Abnahme durch den Product Owner offen) |
 
 Dependabot öffnet monatlich weitere Pull Requests nach `develop`. Für jeden gilt der Auftrag „Prüfe Dependabot-PR #‹Nummer›“ (Sonnet, medium); Hauptversionssprünge prüft Claude Code wie K-1.
 
@@ -235,6 +238,6 @@ Die Stories je Inkrement stehen in Spezifikation 2.5. Der Zuschnitt in Bündel f
 | I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1): Antippen von „Partie“ dunkelt den Start ab und zeigt zwei Spielkarten – links vorne und in der Akzentfarbe „Ergebnis eintragen“ als Hauptaktion, rechts „Neue Partie“ (Variante K2 aus fünf Vorschlagsrunden, `result-entry-preview-v1.html` bis `result-entry-preview.html`; Begründung: viele werden die App ohne Catan nutzen) |
 | I4 | Banner (Sicherung, Update, Speicher) oben auf dem Start, ohne die Karten zu verschieben; Karte „Daten“ in der Kartenhand |
 | I5 | Vierte Karte „Archiv“ in der Verwaltung |
-| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen öffnet die Diagnose, der Verweis „Diagnose“ unten in der Verwaltung (seit I1-D) entfällt dann *(ergänzt in 0.15)*; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). Einstellung „Ich hasse Catan!“ (US-SP-05, Must): Einschalten mit Warnung und Bestätigung; danach zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Referenz, Schalter „Einstellung“), und alle übrigen bis dahin gebauten Ansichten blenden Catan aus |
+| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen öffnet die Diagnose, der Verweis „Diagnose“ unten in der Verwaltung (seit I1-D) entfällt dann *(ergänzt in 0.15)*; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). Einstellung „Ich hasse Catan!“ (US-SP-05, Must): Einschalten mit Warnung und Bestätigung; danach zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Referenz, Schalter „Einstellung“), und alle übrigen bis dahin gebauten Ansichten blenden Catan aus. **Offener Punkt aus K-3 (vor der Umsetzung mit dem Product Owner klären):** Soll es eine Einstellung für die Kartenhand geben (Variante E4 aus `hand-stack-preview.html`), etwa „auf Start und Verwaltung groß“ gegenüber „überall klein“? Eine solche Einstellung wäre eine neue Anforderung und ändert Anforderungsdokumentation und Spezifikation (Haltepunkt) |
 
 **Design-Referenz für Brett, Gebäude und Straßen (I1-D):** `docs/design/i1d-board-final-preview.html`, Umfang „Mit späteren Funktionen“. I2 zeigt die Platzierung auf dem Brett H1 mit Gebäuden G1 und Straßen R1 in den Catan-Farben mit dunkler Kontur, genau wie dort; die Prüfseite `#/brett` und ihr Verweis in der Diagnose entfallen dann. Der Aufbau der Platzierungsseite (Kopfzeile, Schrittanzeige, „Weiter“) ist dort nur angedeutet und wird in I2 gestaltet. *(neu in 0.15)*
