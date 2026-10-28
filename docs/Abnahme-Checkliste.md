@@ -7,7 +7,7 @@
 | Version | 0.1 |
 | Status | Angelegt mit Bündel I1-D; die Punkte späterer Inkremente gelten ab dem genannten Inkrement |
 | Stand | 27.10.2026 |
-| Grundlage | BoardBrain_Architektur.md v0.15 (12.1, 14.6), BoardBrain_Spezifikation.md v0.11 (Kapitel 5), Entwicklungsrichtlinien.md (3.8) |
+| Grundlage | BoardBrain_Architektur.md v0.15 (12.1, 14.6), BoardBrain_Spezifikation.md v0.11 (Kapitel 5), Entwicklungsrichtlinien.md v0.6 (3.8) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
