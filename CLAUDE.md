@@ -57,7 +57,7 @@ Frage mit begründetem Vorschlag und Alternativen. Alles andere entscheidest du 
 - Keine festen Texte: alles aus `src/i18n/de.ts` über `t()`.
 - Keine Farbwerte außerhalb von `src/ui/styles/tokens.css`.
 - Animationen nur über Motion, keine CSS-Animationen; nie per React-Zustand pro Bild.
-- Echte Bedienelemente (`button`, `a`, `label`) mit Beschriftung aus der Sprachdatei. Kein manuelles `useMemo`/`useCallback`/`memo`. `useEffect` nur für externe Systeme.
+- Echte Bedienelemente (`button`, `a`, `label`) mit Beschriftung aus der Sprachdatei; Knöpfe und Links nur als `PressableButton`/`PressableLink` (Karten mit `look="card"`, K-4). Kein manuelles `useMemo`/`useCallback`/`memo`. `useEffect` nur für externe Systeme.
 
 **Code**
 - **Code immer englisch** (ADR-027): Bezeichner nach Architektur 4.5, Kommentare, Testnamen, Fehlermeldungen. Deutsch nur UI-Texte in `de.ts`, Doku, Commits, PRs. Doku-Kommentar an jedem Export in `core`, `games`, `app`; Anforderungs-ID nennen, wo Code eine Regel umsetzt (`// FA-PL-03: …`).
