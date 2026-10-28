@@ -25,7 +25,10 @@
     background: var(--color-backdrop);
   }
 
+  /* Vertically centred while it fits (K-4 acceptance on the iPad); a taller editor starts at the
+     top and scrolls, so its header is never cut off. */
   .dialog {
+    margin-block: auto;
     background: var(--color-surface-overlay);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-4);
