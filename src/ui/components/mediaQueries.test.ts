@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { useHasFinePointer, useIsWideScreen } from './mediaQueries';
+import { useHasFinePointer, useIsPhone, useIsWideScreen } from './mediaQueries';
 
 const originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
 
@@ -53,6 +53,18 @@ describe('media query hooks', () => {
     });
 
     expect(result.current).toBe(true);
+  });
+
+  it('useIsPhone is true below the width of a small tablet', () => {
+    const media = fakeMatchMedia();
+    const { result } = renderHook(() => useIsPhone());
+    expect(result.current).toBe(true);
+
+    act(() => {
+      media.setMatching('(width >= 37.5rem)', true);
+    });
+
+    expect(result.current).toBe(false);
   });
 
   it('useHasFinePointer is true only with a mouse or trackpad', () => {

@@ -8,6 +8,11 @@ async function overflow(page: Page): Promise<{ horizontal: number; vertical: num
   }));
 }
 
+// Same breakpoint as useIsPhone: below the width of a small tablet.
+function isPhone(page: Page): boolean {
+  return (page.viewportSize()?.width ?? 0) < 600;
+}
+
 test.describe('Architecture 13.1 app frame and navigation (design D-3)', () => {
   test('the start address shows the start view with the cards', async ({ page }) => {
     await page.goto('/');
@@ -73,6 +78,54 @@ test.describe('Architecture 13.1 app frame and navigation (design D-3)', () => {
     expect(handBox).not.toBeNull();
     // The fan sits above the card hand.
     expect((cardsBox?.y ?? 0) + (cardsBox?.height ?? 0)).toBeLessThanOrEqual(handBox?.y ?? 0);
+  });
+
+  test('design K-3: off the start view the hand folds, a tap leads straight on, holding fans it out', async ({
+    page,
+  }) => {
+    test.skip(!isPhone(page), 'the hand folds only on phones');
+    await page.goto('/');
+    const navigation = page.getByRole('navigation', { name: 'Hauptnavigation' });
+    await expect(navigation).toHaveAttribute('data-state', 'fanned');
+
+    await navigation.getByRole('link', { name: 'Verwaltung' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Verwaltung' })).toBeVisible();
+    await expect(navigation).toHaveAttribute('data-state', 'folded');
+
+    // Hold the small Start card 12 px above the bottom edge: that point is on the card while it
+    // is still folding in and afterwards. The page stays, the whole hand fans out.
+    const start = navigation.getByRole('link', { name: 'Start' });
+    const box = await start.boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.move(
+      (box?.x ?? 0) + (box?.width ?? 0) / 2,
+      (page.viewportSize()?.height ?? 0) - 12,
+    );
+    await page.mouse.down();
+    await page.waitForTimeout(700);
+    await page.mouse.up();
+    await expect(navigation).toHaveAttribute('data-state', 'open');
+    await expect(page.getByRole('heading', { level: 1, name: 'Verwaltung' })).toBeVisible();
+
+    await page
+      .getByRole('button', { name: 'Navigation schließen' })
+      .click({ position: { x: 20, y: 200 } });
+    await expect(navigation).toHaveAttribute('data-state', 'folded');
+
+    await start.click();
+    await expect(page.getByRole('navigation', { name: 'Karten' })).toBeVisible();
+    await expect(navigation).toHaveAttribute('data-state', 'fanned');
+  });
+
+  test('design K-3: on tablets the hand stays fanned out, also on sub-pages', async ({ page }) => {
+    test.skip(isPhone(page), 'phones fold the hand');
+    await page.goto('/#/verwaltung/personen');
+    await expect(page.getByRole('heading', { level: 1, name: 'Personen' })).toBeVisible();
+
+    await expect(page.getByRole('navigation', { name: 'Hauptnavigation' })).toHaveAttribute(
+      'data-state',
+      'fanned',
+    );
   });
 
   for (const [path, heading] of [

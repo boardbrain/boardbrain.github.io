@@ -1,0 +1,133 @@
+/* Main navigation as a hand of cards over the bottom of the view; the cards stick out below and
+   are cut off by the frame. Below its top edge the content fades into the surface colour within
+   48px. A gradient instead of a mask on the view: a mask would make the view a stacking context
+   and trap overlays such as the table editor below the hand. Ending in the surface colour, the
+   hand passes into the area that Android paints behind the gesture bar in that colour. The
+   height comes from AppLayout (--hand-height); the cards keep their full height and reach up
+   out of a folded hand. */
+.hand,
+.foldedHand {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: var(--hand-height);
+  background: linear-gradient(180deg, transparent, var(--color-surface) 48px);
+}
+
+/* Design K-3: the folded hand is lower, so the content fades out over a shorter distance. */
+.foldedHand {
+  background: linear-gradient(180deg, transparent, var(--color-surface) 32px);
+}
+
+/* Design K-3: a long press dims the whole app below the opened hand; a tap closes it. Dialogs
+   (z-index 10 and up) stay above. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 0;
+  background: var(--color-backdrop);
+  border: 0;
+}
+
+.list,
+.compactList {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Rotation and shift per card come from cardHand.ts and are animated by Motion. */
+.item,
+.activeItem {
+  display: flex;
+  margin: 0 -8px;
+}
+
+/* The active card lies on top. */
+.activeItem {
+  z-index: 2;
+}
+
+.card,
+.activeCard {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 86px;
+  height: var(--card-height);
+  padding: 0 0 env(safe-area-inset-bottom);
+  font-size: 0.7rem;
+  color: var(--color-text);
+  text-decoration: none;
+  user-select: none;
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 -4px 12px var(--color-shadow);
+
+  /* No callout menu on a long press in Safari (Android: onContextMenu). No blue tap highlight on
+     Android: it would also colour the invisible tap area above a folded card; the card itself
+     rises when pressed. */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* The active card is pulled out of the hand. */
+.activeCard {
+  font-weight: 700;
+  color: var(--color-accent-text);
+  border-color: var(--color-accent-text);
+}
+
+/* Design K-3: in a folded hand a card shows only 25 to 30 px. The tap area reaches 20 px higher,
+   so that it is at least 44 px high, and is as wide as the place of the card in the hand. */
+.foldedHand .card::before,
+.foldedHand .activeCard::before {
+  position: absolute;
+  right: 8px;
+  bottom: 100%;
+  left: 8px;
+  height: 20px;
+  content: '';
+}
+
+.face {
+  display: grid;
+  gap: 2px;
+  place-items: center;
+}
+
+/* Small symbol at the top of a folded card; its distance from the top comes from cardHand.ts. */
+.foldedIcon {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* From six areas the cards get narrower so that all fit on a phone. */
+.compactList .item,
+.compactList .activeItem {
+  margin: 0 -6px;
+}
+
+.compactList .card,
+.compactList .activeCard {
+  width: 70px;
+}
+
+.compactList .card::before,
+.compactList .activeCard::before {
+  right: 6px;
+  left: 6px;
+}

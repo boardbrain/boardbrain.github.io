@@ -1,18 +1,27 @@
 /* The frame fills the screen inside the safe areas (padding of body); only the view in between
-   scrolls (design D-3). */
+   scrolls (design D-3). Clip instead of hidden: the folded cards reach below the frame, and the
+   browser would otherwise scroll the frame to show a focused card, moving the header away. */
 .layout {
   height: 100%;
-  overflow: hidden;
+  overflow: clip;
 }
 
-/* The hand reaches into the bottom safe area (home indicator on iPad and iPhone). */
-.app {
-  --hand-height: calc(104px + env(safe-area-inset-bottom));
+/* The hand reaches into the bottom safe area (home indicator on iPad and iPhone). The cards keep
+   their height; the hand and the space kept free below the view shrink when it is folded. */
+.app,
+.foldedApp {
+  --card-height: calc(104px + env(safe-area-inset-bottom));
+  --hand-height: var(--card-height);
 
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+/* Design K-3: off the start view the folded hand shows 30 px plus a 16 px fade. */
+.foldedApp {
+  --hand-height: calc(46px + env(safe-area-inset-bottom));
 }
 
 .header {
@@ -50,79 +59,6 @@
   display: none;
 }
 
-/* Main navigation as a hand of cards over the bottom of the view; the cards stick out below and
-   are cut off by the frame. Below its top edge the content fades into the surface colour within
-   48px. A gradient instead of a mask on the view: a mask would make the view a stacking context
-   and trap overlays such as the table editor below the hand. Ending in the surface colour, the
-   hand passes into the area that Android paints behind the gesture bar in that colour. */
-.hand {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  height: var(--hand-height);
-  background: linear-gradient(180deg, transparent, var(--color-surface) 48px);
-}
-
-.handList,
-.compactHand {
-  display: flex;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-.handItem {
-  display: flex;
-  margin: 0 -8px;
-}
-
-/* The rotation per card comes from cardHand.ts; the translation sinks the card into the hand. */
-.card,
-.activeCard {
-  position: relative;
-  display: grid;
-  gap: 2px;
-  place-items: center;
-  align-content: center;
-  width: 86px;
-  height: var(--hand-height);
-  padding: 0 0 env(safe-area-inset-bottom);
-  font-size: 0.7rem;
-  color: var(--color-text);
-  text-decoration: none;
-  background: var(--color-surface-overlay);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  box-shadow: 0 -4px 12px var(--color-shadow);
-  transform: translateY(16px);
-
-  /* 140 % of the card height without the safe area, so the fan looks the same everywhere. */
-  transform-origin: 50% 145.6px;
-}
-
-/* The active card is pulled out of the hand. */
-.activeCard {
-  z-index: 2;
-  font-weight: 700;
-  color: var(--color-accent-text);
-  border-color: var(--color-accent-text);
-  transform: translateY(4px);
-}
-
-/* From six areas the cards get narrower so that all fit on a phone. */
-.compactHand .handItem {
-  margin: 0 -6px;
-}
-
-.compactHand .card,
-.compactHand .activeCard {
-  width: 70px;
-}
-
 .rotateHint {
   display: none;
 }
@@ -130,7 +66,8 @@
 /* NFA-PL-04: phones are used upright. A low screen in landscape is a phone (tablets and PCs are
    higher), on Android and iOS alike. */
 @media (orientation: landscape) and (height < 500px) {
-  .app {
+  .app,
+  .foldedApp {
     display: none;
   }
 
