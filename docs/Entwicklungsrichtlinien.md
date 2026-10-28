@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.6 |
+| Version | 0.7 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 08.10.2026 |
+| Stand | 28.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -21,6 +21,7 @@
 | 0.4 | 07.10.2026 | Namensregel für React-Kontexte (4.3) (PR #12) |
 | 0.5 | 08.10.2026 | Designvorschläge vor dem Bau neuer oder geänderter Oberflächen (2.2, 2.5); Lehre aus I1-C, wo der Product Owner nach der Umsetzung einen anderen Aufbau wollte |
 | 0.6 | 08.10.2026 | Design D-3: Vorschauen heißen `…-preview….html` und stehen in `.gitignore`; frühere Runden werden archiviert, nie gelöscht; die finale Referenz eines Bündels kommt als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (2.5); E2E-Formate nach E-29: Smartphones im Hochformat, Tablets in beiden Ausrichtungen (8.3) |
+| 0.7 | 28.10.2026 | README auf Kurzbeschreibung, Adresse, Stand und Lizenz beschränkt, ohne Verweise auf `docs/` (11.2) |
 
 ## Inhaltsverzeichnis
 
@@ -517,7 +518,7 @@ Dependabot-Pull-Requests zielen auf `develop` und tragen das Präfix `deps:`. Ak
 | `Setup-Anleitung.md`, `Setup-DoD.md` | Einrichtung und deren Nachweis |
 | `Abnahme-Checkliste.md` | Manuelle Abnahme vor jedem Release (ab I1) |
 | `test-reports/` | Ergebnisse von Messungen, z. B. Sackgassenquote |
-| `README.md` (Wurzel) | Kurzbeschreibung, Adresse der App, Verweis auf `docs/` |
+| `README.md` (Wurzel) | Kurzbeschreibung, Adresse der App, Stand, Lizenz; keine Verweise auf `docs/` |
 | `CHANGELOG.md` (Wurzel) | Änderungen je Release |
 | `CLAUDE.md` (Wurzel) | Kurzfassung dieser Richtlinien für Claude Code |
 

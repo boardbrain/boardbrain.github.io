@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.16 |
+| Version | 0.17 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 28.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -30,6 +30,7 @@
 | 0.14 | 26.10.2026 | Bündel I1-F: Bearbeiten im `MasterDataService` mit `update` in den Repositories (4.4, 7.3); Umbenennen an Ort und Stelle, Spielseite `#/verwaltung/spiele/‹id›`, Editor unter `#/verwaltung/gruppen/‹id›/bearbeiten`, Rückfrage bei ungespeicherten Änderungen über `useBlocker`, Design-Referenz `docs/design/i1f-edit-final-preview.html` (13.1); Komponententests mit Daten-Router (14.1) |
 | 0.15 | 27.10.2026 | Bündel I1-D: Brettmodell mit Kennungen aus den Feldern, Küstenlinien und Zahl der Landfelder je Kreuzung (5.2); minimaler Service Worker mit Cache je Build, Registrierung in `infra/update`, eigene `tsconfig.sw.json` (11.4, 15); App-Symbol D8 aus `scripts/generate-icons.mjs`, Farben von Manifest und Statusleiste aus den Tokens (12.1, 16.2); Seite `#/brett`, „Offline bereit“ in der Diagnose und Verweis auf die Diagnose in der Verwaltung, Rahmenhöhe ohne `100dvh`, volle Höhe in der installierten App unter iPadOS, Kartenhand bis in die sichere Zone, Übergang N1 statt eines eigenen Streifens unter der Ansicht (13.1); Brett-Tokens (13.4); Design-Referenz `docs/design/i1d-board-final-preview.html` mit Gebäuden und Straßen für I2 (13.5); Offline-Test nur in Chromium (14.5) |
 | 0.16 | 28.10.2026 | Aufgabe K-3: Kartenhand auf dem Handy nur auf dem Start aufgefächert, sonst eingefahren; auf Tablet und PC überall aufgefächert mit direktem Antippen und Auffächern durch langes Drücken (`HandNavigation`, `cardHand.ts`); Rahmen mit `overflow: clip`; Design-Referenz `docs/design/k3-card-hand-final-preview.html` (13.1); Motion 14 installiert, über `LazyMotion` mit `domAnimation`, `m`-Komponenten und `MotionConfig reducedMotion="user"` (3.1, 13.6) |
+| 0.17 | 28.10.2026 | README ohne Verweise auf `docs/` (Ordnerstruktur in 15) |
 
 ## Inhaltsverzeichnis
 
@@ -1233,7 +1234,7 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  ├─ statistical/                    *.stat.test.ts
 │  └─ e2e/                            Playwright-Szenarien
 ├─ CLAUDE.md                          Kurzfassung der Entwicklungsrichtlinien für Claude Code
-├─ README.md                          Kurzbeschreibung, Adresse, Verweis auf docs/
+├─ README.md                          Kurzbeschreibung, Adresse, Stand, Lizenz
 ├─ LICENSE                            PolyForm Strict 1.0.0, Copyright (c) 2026 Jonasss29
 ├─ CHANGELOG.md                       Änderungen je Release (deutsch)
 ├─ .gitattributes                     LF für alle Textdateien
