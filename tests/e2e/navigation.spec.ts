@@ -75,6 +75,38 @@ test.describe('Architecture 13.1 app frame and navigation (design D-3)', () => {
     expect((cardsBox?.y ?? 0) + (cardsBox?.height ?? 0)).toBeLessThanOrEqual(handBox?.y ?? 0);
   });
 
+  test('design K-3: off the start view the hand folds, a tap leads straight on, holding fans it out', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const navigation = page.getByRole('navigation', { name: 'Hauptnavigation' });
+    await expect(navigation).toHaveAttribute('data-state', 'fanned');
+
+    await navigation.getByRole('link', { name: 'Verwaltung' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Verwaltung' })).toBeVisible();
+    await expect(navigation).toHaveAttribute('data-state', 'folded');
+
+    // Hold the visible top of the small Start card; the page stays, the whole hand fans out.
+    const start = navigation.getByRole('link', { name: 'Start' });
+    const box = await start.boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.move((box?.x ?? 0) + (box?.width ?? 0) / 2, (box?.y ?? 0) + 12);
+    await page.mouse.down();
+    await page.waitForTimeout(700);
+    await page.mouse.up();
+    await expect(navigation).toHaveAttribute('data-state', 'open');
+    await expect(page.getByRole('heading', { level: 1, name: 'Verwaltung' })).toBeVisible();
+
+    await page
+      .getByRole('button', { name: 'Navigation schließen' })
+      .click({ position: { x: 20, y: 200 } });
+    await expect(navigation).toHaveAttribute('data-state', 'folded');
+
+    await start.click();
+    await expect(page.getByRole('navigation', { name: 'Karten' })).toBeVisible();
+    await expect(navigation).toHaveAttribute('data-state', 'fanned');
+  });
+
   for (const [path, heading] of [
     ['/#/verwaltung', 'Verwaltung'],
     ['/#/verwaltung/personen', 'Personen'],

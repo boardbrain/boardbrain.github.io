@@ -29,6 +29,7 @@ export const de = {
     titel: 'Hauptnavigation',
     start: 'Start',
     verwaltung: 'Verwaltung',
+    schliessen: 'Navigation schließen',
   },
   start: {
     titel: 'Start',
