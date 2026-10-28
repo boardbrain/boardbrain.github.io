@@ -25,6 +25,13 @@
   border-radius: var(--radius-2);
 }
 
+/* Long names wrap, also inside a word, so that a larger system font does not push the page
+   sideways. */
+.row dt {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .row dd {
   margin: 0;
   font-weight: 600;
