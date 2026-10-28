@@ -2,6 +2,7 @@ import { t } from '@/i18n/t';
 import { BackIcon } from './Icons';
 import styles from './BackButton.module.css';
 import { useGoBack } from './useGoBack';
+import { PressableButton } from './Pressable';
 
 type BackButtonProps = {
   /** Destination when the page was opened directly, e.g. via a saved address. */
@@ -16,13 +17,13 @@ type BackButtonProps = {
 export function BackButton({ fallback }: BackButtonProps): React.JSX.Element {
   const goBack = useGoBack(fallback);
   return (
-    <button
+    <PressableButton
       type="button"
       className={styles.button}
       aria-label={t('allgemein.zurueck')}
       onClick={goBack}
     >
       <BackIcon />
-    </button>
+    </PressableButton>
   );
 }

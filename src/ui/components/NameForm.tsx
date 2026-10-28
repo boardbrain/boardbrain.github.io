@@ -3,6 +3,7 @@ import { isBlankName } from '@/core/model';
 import { t } from '@/i18n/t';
 import { Notice } from './Notice';
 import styles from './NameForm.module.css';
+import { PressableButton } from './Pressable';
 
 type NameFormProps = {
   readonly title: string;
@@ -60,9 +61,9 @@ export function NameForm({
             onValueChange(event.target.value);
           }}
         />
-        <button type="submit" disabled={isBlankName(value) || error !== null || isPending}>
+        <PressableButton type="submit" disabled={isBlankName(value) || error !== null || isPending}>
           {t('allgemein.speichern')}
-        </button>
+        </PressableButton>
       </div>
       {error !== null && (
         <Notice tone="error">

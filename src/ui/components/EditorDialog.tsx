@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { t } from '@/i18n/t';
 import { BackIcon, CloseIcon } from './Icons';
 import styles from './EditorDialog.module.css';
+import { PressableButton } from './Pressable';
 
 type EditorDialogProps = {
   readonly title: string;
@@ -32,7 +33,7 @@ export function EditorDialog({ title, onClose, children }: EditorDialogProps): R
     <div className={styles.backdrop}>
       <div className={styles.dialog} role="dialog" aria-modal="true" aria-label={title}>
         <div className={styles.dialogHeader}>
-          <button
+          <PressableButton
             type="button"
             className={styles.backButton}
             aria-label={t('gruppen.schliessen')}
@@ -44,7 +45,7 @@ export function EditorDialog({ title, onClose, children }: EditorDialogProps): R
             <span className={styles.closeIcon}>
               <CloseIcon />
             </span>
-          </button>
+          </PressableButton>
           <h2 className={styles.dialogTitle}>{title}</h2>
         </div>
         {children}

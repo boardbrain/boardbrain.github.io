@@ -1,6 +1,6 @@
-import { Link } from 'react-router';
 import { t } from '@/i18n/t';
 import styles from './PlayingCard.module.css';
+import { PressableLink } from './Pressable';
 
 const ICON_SIZE = 34;
 
@@ -29,8 +29,9 @@ export function PlayingCard({
   className,
 }: PlayingCardProps): React.JSX.Element {
   return (
-    <Link
+    <PressableLink
       to={to}
+      look="card"
       className={[styles.card, className].filter((name) => typeof name === 'string').join(' ')}
       aria-label={t('karten.karte', { name: title, anzahl: count })}
     >
@@ -43,6 +44,6 @@ export function PlayingCard({
       <span className={styles.cornerBottom} aria-hidden="true">
         {count}
       </span>
-    </Link>
+    </PressableLink>
   );
 }

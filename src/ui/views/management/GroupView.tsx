@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { parseGroupId, type Group, type Person } from '@/core/model';
 import { formatDate } from '@/i18n/format';
 import { t } from '@/i18n/t';
@@ -14,6 +14,7 @@ import { bindingLongLabel } from './groupBinding';
 import { GroupTable, type TableSeat } from './GroupTable';
 import overview from './Overview.module.css';
 import styles from './GroupView.module.css';
+import { PressableLink } from '@/ui/components/Pressable';
 
 const CHEVRON_SIZE = 18;
 const PILL_ICON_SIZE = 15;
@@ -118,7 +119,7 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
               return (
                 <li key={member.personId}>
                   {/* US-VW-05 AK-4: a member opens the person's page. */}
-                  <Link to={personHref(member.personId)} className={overview.row}>
+                  <PressableLink to={personHref(member.personId)} className={overview.row}>
                     <span
                       className={styles.seat}
                       style={{ background: `var(--color-group-${member.groupColor})` }}
@@ -133,7 +134,7 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
                     <span className={overview.chevron}>
                       <ChevronIcon size={CHEVRON_SIZE} />
                     </span>
-                  </Link>
+                  </PressableLink>
                 </li>
               );
             })}

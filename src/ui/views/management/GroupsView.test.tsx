@@ -77,7 +77,10 @@ describe('US-PG-02 The room with all tables', () => {
     const room = await screen.findByRole('list', { name: 'Alle Tische' });
     expect(await within(room).findByText('Anna & Ben')).toBeInTheDocument();
     expect(within(room).getByText('Alle Spiele · 2')).toBeInTheDocument();
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // The list can show the new table a moment before the editor closes after saving.
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
     expect(await db.groups.count()).toBe(1);
   });
 

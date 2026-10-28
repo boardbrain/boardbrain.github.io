@@ -5,6 +5,7 @@ import { t } from '@/i18n/t';
 import { Notice } from '@/ui/components/Notice';
 import { UnsavedChangesGuard } from '@/ui/components/UnsavedChangesGuard';
 import styles from './RenameForm.module.css';
+import { PressableButton } from '@/ui/components/Pressable';
 
 type RenameFormOptions<E extends string> = {
   readonly initialName: string;
@@ -80,12 +81,12 @@ export function useRenameForm<E extends string>({
         }}
       />
       <div className={styles.buttons}>
-        <button type="button" className={styles.cancel} onClick={onClose}>
+        <PressableButton type="button" className={styles.cancel} onClick={onClose}>
           {t('allgemein.abbrechen')}
-        </button>
-        <button type="submit" disabled={!canSave}>
+        </PressableButton>
+        <PressableButton type="submit" disabled={!canSave}>
           {t('allgemein.speichern')}
-        </button>
+        </PressableButton>
       </div>
       <UnsavedChangesGuard
         isDirty={isChanged && !isPending}

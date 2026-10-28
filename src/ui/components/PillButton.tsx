@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router';
 import styles from './PillButton.module.css';
+import { PressableButton, PressableLink } from './Pressable';
 
 type PillButtonProps = {
   readonly icon?: ReactNode;
@@ -23,14 +23,14 @@ export function PillButton({ icon, children, onClick, to }: PillButtonProps): Re
   );
   if (to !== undefined) {
     return (
-      <Link to={to} className={styles.pill}>
+      <PressableLink to={to} className={styles.pill}>
         {content}
-      </Link>
+      </PressableLink>
     );
   }
   return (
-    <button type="button" className={styles.pill} onClick={onClick}>
+    <PressableButton type="button" className={styles.pill} onClick={onClick}>
       {content}
-    </button>
+    </PressableButton>
   );
 }

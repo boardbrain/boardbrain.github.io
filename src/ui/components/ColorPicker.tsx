@@ -1,6 +1,7 @@
 import type { CatanColorKey, GroupColorKey } from '@/core/model';
 import { t } from '@/i18n/t';
 import styles from './ColorPicker.module.css';
+import { PressableButton } from './Pressable';
 
 type ColorPickerProps<K extends GroupColorKey> = {
   /** Accessible name of the whole group of colours, e.g. "Gruppenfarbe von Anna". */
@@ -39,7 +40,7 @@ export function ColorPicker<K extends GroupColorKey | CatanColorKey>({
         const name = t(`farben.${color}`);
         return (
           <div key={color} className={styles.item}>
-            <button
+            <PressableButton
               type="button"
               className={color === selected ? styles.selected : styles.swatch}
               style={{ background: `var(--color-${palette}-${color})` }}
@@ -52,7 +53,7 @@ export function ColorPicker<K extends GroupColorKey | CatanColorKey>({
               }}
             >
               {holder?.charAt(0)}
-            </button>
+            </PressableButton>
             <span className={styles.name}>{name}</span>
           </div>
         );

@@ -1,6 +1,6 @@
-import { Link } from 'react-router';
 import { GROUP_SIZE, type CatanColorKey, type GroupColorKey, type PersonId } from '@/core/model';
 import styles from './GroupTable.module.css';
+import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 
 /**
  * One seat at the table: a member with the colours they have in the group.
@@ -91,22 +91,24 @@ export function GroupTable({
         }
         if (seatHref !== undefined) {
           return (
-            <Link
+            <PressableLink
               key={seat.id}
               to={seatHref(seat.id)}
+              look="card"
               className={styles.seat}
               style={style}
               aria-label={seat.label}
             >
               {seat.initial}
               {mark}
-            </Link>
+            </PressableLink>
           );
         }
         return (
-          <button
+          <PressableButton
             key={seat.id}
             type="button"
+            look="card"
             className={seat.id === selectedId ? styles.seatSelected : styles.seat}
             style={style}
             aria-label={seat.label}
@@ -117,7 +119,7 @@ export function GroupTable({
           >
             {seat.initial}
             {mark}
-          </button>
+          </PressableButton>
         );
       })}
     </div>
