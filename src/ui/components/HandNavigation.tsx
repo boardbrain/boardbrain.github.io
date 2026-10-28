@@ -43,22 +43,25 @@ function cardTransform({ rotate, y }: TransformProperties): string {
 }
 
 /**
- * Main navigation as a hand of cards (designs D-3 and K-3). On the start view the cards are
- * fanned out with their names; on every other page the hand folds into a flat arc that shows
- * only the symbols. A tap on a folded card leads straight to its area; a long press fans out the
+ * Main navigation as a hand of cards (designs D-3 and K-3). On the start view and on tablets and
+ * PCs the cards are fanned out with their names; on a phone every other page folds the hand into
+ * a flat arc that shows only the symbols. A tap on a folded card leads straight to its area; a long press fans out the
  * whole hand with names over the dimmed view until a card or the backdrop is tapped.
  */
 export function HandNavigation({
   areas,
+  isPhone,
 }: {
   readonly areas: readonly HandArea[];
+  /** Only phones fold the hand; tablets and PCs keep it fanned out everywhere. */
+  readonly isPhone: boolean;
 }): React.JSX.Element {
   const { pathname } = useLocation();
   // The hand is open only on the page where it was opened, so a page change folds it again.
   const [openAt, setOpenAt] = useState<string | undefined>(undefined);
   const pressTimer = useRef<number | undefined>(undefined);
   const wasLongPress = useRef(false);
-  const state = handState(pathname, openAt === pathname);
+  const state = handState(pathname, isPhone, openAt === pathname);
   const isFolded = state === 'folded';
   const count = areas.length;
 

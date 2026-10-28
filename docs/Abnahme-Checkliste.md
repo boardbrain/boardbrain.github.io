@@ -15,7 +15,7 @@
 | Version | Datum | Änderung |
 |---|---|---|
 | 0.1 | 27.10.2026 | Erstfassung mit I1-D: Geräte, Vorbereitung, Installation, Start im Flugmodus, Brett; Punkte der Inkremente I2 bis I5 vorgemerkt |
-| 0.2 | 28.10.2026 | K-15 mit K-3: eingefahrene Kartenhand, Antippen und langes Drücken auf echten Geräten |
+| 0.2 | 28.10.2026 | K-15 mit K-3: eingefahrene Kartenhand auf dem Smartphone, Antippen und langes Drücken; auf Tablet und PC bleibt die Hand aufgefächert |
 
 ## 1. Zweck
 
@@ -58,7 +58,7 @@ Ein Punkt gilt erst ab dem Inkrement in der Spalte „ab“. Ein Punkt, der sche
 | K-12 | I4 | iOS: Seite im Safari-Tab öffnen (US-IS-01) | Ausschließlich die bebilderte Installationsanleitung | – | ☐ | ☐ | – |
 | K-13 | I5 | Ton mit und ohne Stummschaltung, während Musik läuft (US-IN-03, FA-IN-07) | Stummschalter wird respektiert; laufende Musik wird nicht unterbrochen | ☐ | ☐ | ☐ | ☐ |
 | K-14 | I5 | Installationshinweis im Browser-Tab (US-IS-02) | Erscheint unter Android und Windows, lässt sich wegklicken und kommt nicht wieder | ☐ | – | – | ☐ |
-| K-15 | I1 | Auf einer Unterseite (z. B. Personen) kurz auf das kleine „Start“ tippen; zurück, dann lange auf eine kleine Karte drücken und daneben tippen (Architektur 13.1, K-3) | Tippen führt sofort zum Start, dort ist die Hand aufgefächert; langes Drücken fächert die Hand mit Namen über abgedunkeltem Inhalt auf, ohne Browsermenü und ohne Seitenwechsel; Tipp daneben fährt sie wieder ein; wie in `docs/design/k3-card-hand-final-preview.html` | ☐ | ☐ | ☐ | ☐ |
+| K-15 | I1 | Smartphone: auf einer Unterseite (z. B. Personen) kurz auf das kleine „Start“ tippen; zurück, dann lange auf eine kleine Karte drücken und daneben tippen. Tablet und PC: eine Unterseite öffnen (Architektur 13.1, K-3) | Smartphone: Tippen führt sofort zum Start, dort ist die Hand aufgefächert; langes Drücken fächert die Hand mit Namen über abgedunkeltem Inhalt auf, ohne Browsermenü, ohne blaue Markierung und ohne Seitenwechsel; Tipp daneben fährt sie wieder ein; wie in `docs/design/k3-card-hand-final-preview.html`. Tablet und PC: Die Hand bleibt aufgefächert wie in D-3 | ☐ | ☐ | ☐ | ☐ |
 
 ## 5. Bekannte Grenzen der automatischen Tests
 

@@ -190,6 +190,27 @@ describe('Design K-3 folded card hand', () => {
     expect(navigation()).toHaveAttribute('data-state', 'folded');
   });
 
+  it('stays fanned out on tablets and PCs, also on sub-pages', () => {
+    const originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: (query: string) => ({
+        matches: query === '(width >= 37.5rem)',
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      }),
+    });
+    try {
+      renderAt('/verwaltung/personen');
+
+      expect(navigation()).toHaveAttribute('data-state', 'fanned');
+    } finally {
+      if (originalMatchMedia !== undefined) {
+        Object.defineProperty(window, 'matchMedia', originalMatchMedia);
+      }
+    }
+  });
+
   it('suppresses the browser menu of a long press only where the hand is folded', () => {
     renderAt('/verwaltung');
     // fireEvent returns false when the default action was prevented.

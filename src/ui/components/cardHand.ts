@@ -47,18 +47,19 @@ export function cardRotation(index: number, count: number): number {
 }
 
 /**
- * Whether the hand is folded on this page (design K-3, variant E2): only the start view shows the
- * fanned hand, every other page gets the space.
+ * Whether the hand is folded on this page (design K-3, variant E2): on a phone only the start
+ * view shows the fanned hand, every other page gets the space. Tablets and PCs have room for the
+ * fanned hand everywhere.
  */
-export function isHandFolded(pathname: string): boolean {
-  return pathname !== '/';
+export function isHandFolded(pathname: string, isPhone: boolean): boolean {
+  return isPhone && pathname !== '/';
 }
 
 /**
  * State of the hand on this page; a folded hand can be opened by a long press.
  */
-export function handState(pathname: string, isOpen: boolean): HandState {
-  if (!isHandFolded(pathname)) return 'fanned';
+export function handState(pathname: string, isPhone: boolean, isOpen: boolean): HandState {
+  if (!isHandFolded(pathname, isPhone)) return 'fanned';
   return isOpen ? 'open' : 'folded';
 }
 

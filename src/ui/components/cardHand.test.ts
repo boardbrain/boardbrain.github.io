@@ -26,17 +26,26 @@ describe('Design D-3 card hand', () => {
 });
 
 describe('Design K-3 folded card hand', () => {
-  it('is fanned out only on the start view', () => {
-    expect(isHandFolded('/')).toBe(false);
+  it('is fanned out on a phone only on the start view', () => {
+    expect(isHandFolded('/', true)).toBe(false);
     expect(
-      ['/verwaltung', '/verwaltung/personen/abc', '/brett', '/diagnose'].map(isHandFolded),
+      ['/verwaltung', '/verwaltung/personen/abc', '/brett', '/diagnose'].map((path) =>
+        isHandFolded(path, true),
+      ),
     ).toEqual([true, true, true, true]);
   });
 
+  it('stays fanned out on tablets and PCs', () => {
+    expect(
+      ['/', '/verwaltung', '/verwaltung/personen/abc'].map((path) => isHandFolded(path, false)),
+    ).toEqual([false, false, false]);
+  });
+
   it('opens by a long press only where it is folded', () => {
-    expect(handState('/', true)).toBe('fanned');
-    expect(handState('/verwaltung', false)).toBe('folded');
-    expect(handState('/verwaltung', true)).toBe('open');
+    expect(handState('/', true, true)).toBe('fanned');
+    expect(handState('/verwaltung', false, true)).toBe('fanned');
+    expect(handState('/verwaltung', true, false)).toBe('folded');
+    expect(handState('/verwaltung', true, true)).toBe('open');
   });
 
   it('keeps the poses of design D-3 when fanned or opened', () => {

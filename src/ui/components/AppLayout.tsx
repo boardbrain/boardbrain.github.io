@@ -5,6 +5,7 @@ import { HandNavigation, type HandArea } from './HandNavigation';
 import { isHandFolded } from './cardHand';
 import { FolderIcon, HomeIcon, RotateIcon } from './Icons';
 import { Logo } from './Logo';
+import { useIsPhone } from './mediaQueries';
 import styles from './AppLayout.module.css';
 
 const LOGO_SIZE = 28;
@@ -19,18 +20,20 @@ const AREAS: readonly HandArea[] = [
 
 /**
  * Frame of the app (Architecture 13.1, designs D-3 and K-3): header with logo, the view and the
- * main navigation as a hand of cards at the bottom, folded on every page but the start view. The
+ * main navigation as a hand of cards at the bottom; on a phone it is folded on every page but the
+ * start view. The
  * diagnostics view is deliberately missing from the navigation; it is reached via `#/diagnose`
  * only. Phones in landscape only see a hint to turn the phone (NFA-PL-04, E-29). Animations
  * follow the system setting to reduce motion.
  */
 export function AppLayout(): React.JSX.Element {
   const { pathname } = useLocation();
+  const isPhone = useIsPhone();
   return (
     <LazyMotion features={domAnimation} strict>
       <MotionConfig reducedMotion="user">
         <div className={styles.layout}>
-          <div className={isHandFolded(pathname) ? styles.foldedApp : styles.app}>
+          <div className={isHandFolded(pathname, isPhone) ? styles.foldedApp : styles.app}>
             <header className={styles.header}>
               <span className={styles.appName}>
                 <Logo size={LOGO_SIZE} />
@@ -40,7 +43,7 @@ export function AppLayout(): React.JSX.Element {
             <div className={styles.content}>
               <Outlet />
             </div>
-            <HandNavigation areas={AREAS} />
+            <HandNavigation areas={AREAS} isPhone={isPhone} />
           </div>
           <div className={styles.rotateHint}>
             <span className={styles.rotateIcon}>
