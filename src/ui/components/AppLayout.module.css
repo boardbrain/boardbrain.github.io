@@ -5,7 +5,11 @@
   overflow: hidden;
 }
 
+/* The hand reaches into the bottom safe area (home indicator on iPad and iPhone). */
 .app {
+  --hand-height: calc(104px + env(safe-area-inset-bottom));
+
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -28,10 +32,17 @@
   letter-spacing: 0.01em;
 }
 
+/* Design N1 (I1-D): the view reaches down behind the hand, so there is no hard cut above it. The
+   padding keeps views that fill their height (start, board) above the hand and lets the last
+   entry of a long view scroll clear of the cards. */
 .content {
   flex: 1;
   min-height: 0;
+  padding-bottom: var(--hand-height);
   overflow-y: auto;
+
+  /* An element scrolled into view (focus, search result) stops above the hand. */
+  scroll-padding-bottom: var(--hand-height);
   scrollbar-width: none;
 }
 
@@ -39,22 +50,20 @@
   display: none;
 }
 
-/* Main navigation as a hand of cards; the cards stick out below and are cut off by the frame.
-   The hand reaches into the bottom safe area (home indicator on iPad and iPhone), so no strip of
-   plain background remains below it; only the content of the cards keeps clear of it. At the
-   bottom edge the hand fades back into the surface colour: where Android paints the area behind
-   the gesture bar itself (in that colour), the hand passes into it without a visible step (I1-D). */
+/* Main navigation as a hand of cards over the bottom of the view; the cards stick out below and
+   are cut off by the frame. Below its top edge the content fades into the surface colour within
+   48px. A gradient instead of a mask on the view: a mask would make the view a stacking context
+   and trap overlays such as the table editor below the hand. Ending in the surface colour, the
+   hand passes into the area that Android paints behind the gesture bar in that colour. */
 .hand {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
   display: flex;
-  flex: none;
   justify-content: center;
-  height: calc(104px + env(safe-area-inset-bottom));
-  background: linear-gradient(
-    180deg,
-    transparent,
-    var(--color-surface-raised) 55%,
-    var(--color-surface)
-  );
+  height: var(--hand-height);
+  background: linear-gradient(180deg, transparent, var(--color-surface) 48px);
 }
 
 .handList,
@@ -80,7 +89,7 @@
   place-items: center;
   align-content: center;
   width: 86px;
-  height: calc(104px + env(safe-area-inset-bottom));
+  height: var(--hand-height);
   padding: 0 0 env(safe-area-inset-bottom);
   font-size: 0.7rem;
   color: var(--color-text);
