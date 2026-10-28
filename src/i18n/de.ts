@@ -10,6 +10,7 @@ export type TextTree = { readonly [key: string]: string | TextTree };
 export const de = {
   app: {
     name: 'BoardBrain',
+    beschreibung: 'Faire Zufallsentscheidungen und Statistik für den Spieleabend',
   },
   allgemein: {
     name: 'Name',
@@ -48,6 +49,7 @@ export const de = {
     gruppen: 'Tische',
     spiele: 'Spiele',
     nameLeer: 'Bitte gib einen Namen ein.',
+    diagnose: 'Diagnose',
   },
   personen: {
     titel: 'Personen',
@@ -192,6 +194,12 @@ export const de = {
       catan: 'Catan',
     },
   },
+  brett: {
+    titel: 'Brett',
+    einleitung:
+      'So zeigt BoardBrain das Spielbrett. Ab „Partie“ setzt die App hier Gebäude und Straßen.',
+    beschreibung: 'Spielbrett mit 19 Feldern',
+  },
   diagnose: {
     titel: 'Diagnose',
     einleitung: 'Technische Prüfwerte dieses Geräts für die Abnahme.',
@@ -204,11 +212,13 @@ export const de = {
     speicherSchnittstelle: 'Persistenter Speicher (Schnittstelle)',
     speicherGeschuetzt: 'Speicher geschützt',
     installiert: 'Als App installiert',
+    offlineBereit: 'Offline bereit (Service Worker aktiv)',
     vorhanden: 'vorhanden',
     fehlt: 'fehlt',
     ja: 'ja',
     nein: 'nein',
     unbekannt: 'unbekannt',
+    brettAnsehen: 'Brett ansehen',
   },
   fehler: {
     titel: 'Etwas ist schiefgelaufen',

@@ -17,6 +17,7 @@ Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBr
 | `npm run test:e2e` | Playwright |
 | `npm run test:stat` | Statistische Suite |
 | `npm run format` | Prettier schreibt |
+| `npm run icons` | App-Symbole aus Logo und Tokens neu erzeugen |
 
 ## Arbeitsablauf (EP-10, EP-11)
 

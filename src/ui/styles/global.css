@@ -5,7 +5,12 @@
   box-sizing: border-box;
 }
 
+/* The document never scrolls; only the view inside the frame does (Architecture 13.1). Heights
+   come from the document instead of 100dvh: after pull-to-refresh, Brave on Android reported a
+   larger dynamic viewport in the installed app, and the whole page could be moved (I1-D). */
 html {
+  height: 100%;
+  overflow: hidden;
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
@@ -16,11 +21,33 @@ html {
   text-size-adjust: 100%;
 }
 
+/* No padding at the bottom: the card hand reaches into the safe area itself (AppLayout). */
 body {
+  height: 100%;
   margin: 0;
-  min-height: 100dvh;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
+  overflow: hidden;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+
+/* Installed app on iPadOS and iOS: with the translucent status bar the document was shorter than
+   the screen by the status bar (1156 instead of 1180 on the iPad), so a strip remained at the
+   bottom. The large viewport is the whole screen; only with html that high does the window reach
+   the bottom edge. Fixed, the body cannot scroll by the difference. In installed apps on Android
+   and Windows the large viewport equals the document height (I1-D). */
+@media (display-mode: standalone) {
+  html {
+    height: 100lvh;
+  }
+
+  body {
+    position: fixed;
+    inset: 0 0 auto;
+    height: 100lvh;
+  }
+}
+
+#root {
+  height: 100%;
 }
 
 h2 {

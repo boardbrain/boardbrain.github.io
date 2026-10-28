@@ -1,0 +1,4 @@
+/* The board takes the remaining height of the page and never scrolls (US-PL-01 AK-3). */
+.area {
+  min-height: 0;
+}

@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.14 |
-| Stand | 26.10.2026 |
-| Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.10 (19) |
+| Version | 0.15 |
+| Stand | 27.10.2026 |
+| Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.15 (19) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -27,6 +27,7 @@
 | 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, Spezifikation 0.10) in I6 eingeplant (7) |
 | 0.13 | 25.10.2026 | I1-E umgesetzt (#19): Personenliste als Spielkarten, Personenseite „Karte und Steckbrief“, Tischseite „Großer Tisch“; Design-Referenz `docs/design/i1e-persons-tables-final-preview.html`; Catan-Farben nur im Editor (5) |
 | 0.14 | 26.10.2026 | I1-F umgesetzt (#20): Umbenennen an Ort und Stelle, Spielseite, Tisch bearbeiten wie „Neuer Tisch“ ohne Bank, kleine Pillen als Aktionen, Rückfrage bei ungespeicherten Änderungen; Design-Referenz `docs/design/i1f-edit-final-preview.html`; Personen- und Tischnamen app-weit eindeutig (E-31); US-VW-02 AK-7 mit I6 (2, 5) |
+| 0.15 | 27.10.2026 | I1-D umgesetzt (#21), Inkrement I1 damit vollständig: Brett H1 unter `#/brett`, Gebäude G1 und Straßen R1 für I2 festgelegt, App-Symbol D8, Manifest und minimaler Service Worker, `docs/Abnahme-Checkliste.md`; Design-Referenz `docs/design/i1d-board-final-preview.html` (2, 5, 7) |
 
 ## 1. Zweck
 
@@ -39,7 +40,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | # | Schritt | Wann | Status |
 |---|---|---|---|
 | 0 | Kleine Aufgabe K-1: Dependabot-PR #3 (`@babel/core` 8) prüfen | als Erstes | erledigt: Empfehlung „mergen“ |
-| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | in Arbeit: I1-A (#11) und I1-B (#12) umgesetzt, I1-C umgesetzt (#15), I1-E umgesetzt (#19), I1-F umgesetzt (#20) |
+| 1 | Inkrement I1 Fundament: Bündel I1-A, I1-B, I1-C, I1-E, I1-F, I1-D (Kapitel 5) | danach, in dieser Reihenfolge | umgesetzt: I1-A (#11), I1-B (#12), I1-C (#15), I1-E (#19), I1-F (#20), I1-D (#21) |
 | 2 | Design D-1: Farbwerte (OP-11) | parallel zu I1, spätestens vor der Abnahme von I1-C | erledigt (#14) |
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 3 | Inkrement I2 Generierung | nach I1 | offen |
@@ -110,7 +111,7 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 | I1-C Gruppen und Farben | US-PG-02, US-PG-03 | Sonnet, medium | `feat/us-pg-02-groups-and-colors` | umgesetzt (#15) |
 | I1-E Personen und Gruppen im Überblick | US-VW-05 | Sonnet, medium | `feat/us-vw-05-persons-and-groups-overview` | umgesetzt (#19) |
 | I1-F Bearbeiten | US-VW-06, US-VW-02, US-VW-07 | Sonnet, medium | `feat/us-vw-06-edit-master-data` | umgesetzt (#20) |
-| I1-D Brett und Installation | US-PL-01 | Opus, high | `feat/us-pl-01-board-and-install` | offen |
+| I1-D Brett und Installation | US-PL-01 | Opus, high | `feat/us-pl-01-board-and-install` | umgesetzt (#21) |
 
 ### I1-A Zufall und Losbaustein
 
@@ -176,8 +177,16 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 
 - **Inhalt:** Brettmodell in `core/board` mit 19 Feldern, Kreuzungen, Kanten und Nachbarschaften (Architektur 5.2) als Grundlage für die Platzierung in I2; Darstellung des Bretts (US-PL-01); Manifest und minimaler Service Worker mit `vite-plugin-pwa` (`injectManifest`), damit die Installation unter Brave für Android früh geprüft wird (Architektur 11, 12.1, 18.1, 19); `docs/Abnahme-Checkliste.md` anlegen (Architektur 14.6).
 - **Hinweis (0.11):** Die App-Symbole für Manifest und Startbildschirm entstehen aus dem Logo von D-3 (`src/ui/components/Logo.tsx`, `public/favicon.svg`).
-- **Pakete:** `vite-plugin-pwa`.
-- **Abnahme durch den Product Owner:** Brett auf dem S26 im Hochformat, auf iPad und PC in beiden Ausrichtungen (E-29); App unter Brave (S26) und Safari (iPad) zum Startbildschirm hinzufügen und starten; Start im Flugmodus.
+- **Pakete:** `vite-plugin-pwa` 2.0.0 (nur Entwicklung; bringt `workbox-build` für den Build mit, nichts davon landet in der App). Die App-Symbole erzeugt ein eigenes Skript mit dem vorhandenen Playwright (`npm run icons`), kein weiteres Paket.
+- **Abnahme durch den Product Owner:** Brett auf dem S26 im Hochformat, auf iPad und PC in beiden Ausrichtungen (E-29); App unter Brave (S26) und Safari (iPad) zum Startbildschirm hinzufügen und starten; Start im Flugmodus. Genau: Punkte K-1 bis K-6 aus `docs/Abnahme-Checkliste.md` über `npm run preview` (der Entwicklungsserver hat keinen Service Worker).
+- **Ergebnis (0.15):** In fünf Runden Designvorschlägen für das Brett (`board-preview-v1.html` bis `board-preview.html`) und zwei für das Symbol (`icon-preview-v1.html`, `icon-preview.html`) gewählt:
+  - **Brett H1:** sechseckiges Meer ohne Holzrahmen und ohne Kasten, Holzfelder mit weichem Schatten, Sandküste und flaches Wasser, Wellenmuster; eigene Grafik ohne Landschaften und Zahlen (AK-2, NFA-GB-06). Die Seite `#/brett` ist nur über die Adresse und den Verweis „Brett ansehen“ in der Diagnose erreichbar und entfällt, sobald I2 das Brett in der Platzierung zeigt.
+  - **Gebäude G1 und Straßen R1** mit dunkler Kontur für I2 (US-PL-04): Siedlung als Haus, Stadt als Haus mit Turm, Straße als abgerundeter Balken; geprüft auch mit Gebäuden direkt am Ufer für den geparkten Modus PP-01.
+  - **App-Symbol D8 „Zwei Karten“:** zwei gefächerte Karten, vorne eine Karte der App mit Logo; für Android in die sichere Mitte gerückt.
+  - **Service Worker** zunächst nur zum Speichern und Ausliefern ohne Netz; eine neue Version wird wie üblich aktiv, wenn alle Fenster der App geschlossen waren. Der kontrollierte Wechsel mit Bestätigung (ADR-015) folgt mit I4 (Entscheidung des Product Owners).
+  - **Diagnose in der installierten App:** Weil installierte Apps keine Adressleiste haben, führt ein unauffälliger Verweis „Diagnose“ unten rechts in der Verwaltung zur Diagnose, ohne die Karten zu verschieben; ab I6 über zehnmaliges Tippen auf die Versionsnummer in den Einstellungen (Kapitel 7, Entscheidung des Product Owners).
+  - **Rahmen aus der Abnahme auf Geräten:** Höhe ohne `100dvh` (die Seite war nach dem Herunterziehen verschiebbar, Herunterziehen zum Aktualisieren entfällt), volle Bildschirmhöhe in der installierten App unter iPadOS, Kartenhand ohne harten Schnitt über dem Inhalt (Variante N1 aus `nav-preview.html`) und Wellen ohne Nähte (Architektur 13.1). Ein einfahrender Kartenstapel auf Unterseiten ist als eigener PR vorgemerkt.
+  - Verbindliche Referenz ist `docs/design/i1d-board-final-preview.html`.
 
 ### D-1 Farbwerte (OP-11)
 
@@ -226,4 +235,6 @@ Die Stories je Inkrement stehen in Spezifikation 2.5. Der Zuschnitt in Bündel f
 | I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1): Antippen von „Partie“ dunkelt den Start ab und zeigt zwei Spielkarten – links vorne und in der Akzentfarbe „Ergebnis eintragen“ als Hauptaktion, rechts „Neue Partie“ (Variante K2 aus fünf Vorschlagsrunden, `result-entry-preview-v1.html` bis `result-entry-preview.html`; Begründung: viele werden die App ohne Catan nutzen) |
 | I4 | Banner (Sicherung, Update, Speicher) oben auf dem Start, ohne die Karten zu verschieben; Karte „Daten“ in der Kartenhand |
 | I5 | Vierte Karte „Archiv“ in der Verwaltung |
-| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). Einstellung „Ich hasse Catan!“ (US-SP-05, Must): Einschalten mit Warnung und Bestätigung; danach zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Referenz, Schalter „Einstellung“), und alle übrigen bis dahin gebauten Ansichten blenden Catan aus |
+| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen öffnet die Diagnose, der Verweis „Diagnose“ unten in der Verwaltung (seit I1-D) entfällt dann *(ergänzt in 0.15)*; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). Einstellung „Ich hasse Catan!“ (US-SP-05, Must): Einschalten mit Warnung und Bestätigung; danach zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Referenz, Schalter „Einstellung“), und alle übrigen bis dahin gebauten Ansichten blenden Catan aus |
+
+**Design-Referenz für Brett, Gebäude und Straßen (I1-D):** `docs/design/i1d-board-final-preview.html`, Umfang „Mit späteren Funktionen“. I2 zeigt die Platzierung auf dem Brett H1 mit Gebäuden G1 und Straßen R1 in den Catan-Farben mit dunkler Kontur, genau wie dort; die Prüfseite `#/brett` und ihr Verweis in der Diagnose entfallen dann. Der Aufbau der Platzierungsseite (Kopfzeile, Schrittanzeige, „Weiter“) ist dort nur angedeutet und wird in I2 gestaltet. *(neu in 0.15)*

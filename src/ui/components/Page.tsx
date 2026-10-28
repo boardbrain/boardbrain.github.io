@@ -9,6 +9,8 @@ type PageProps = {
   readonly actions?: ReactNode;
   /** Wider content area for grids. */
   readonly isWide?: boolean;
+  /** Fills the visible height instead of scrolling; the content gets the remaining space. */
+  readonly isFullHeight?: boolean;
   /** Shows a back button; the address is used when there is no previous page (design D-3). */
   readonly backFallback?: string;
   readonly children?: ReactNode;
@@ -22,11 +24,16 @@ export function Page({
   intro,
   actions,
   isWide,
+  isFullHeight,
   backFallback,
   children,
 }: PageProps): React.JSX.Element {
   return (
-    <main className={isWide === true ? styles.wide : styles.page}>
+    <main
+      className={[isWide === true ? styles.wide : styles.page, isFullHeight === true && styles.fill]
+        .filter((name) => typeof name === 'string')
+        .join(' ')}
+    >
       <div className={styles.header}>
         {backFallback !== undefined && <BackButton fallback={backFallback} />}
         <h1 className={styles.title}>{title}</h1>

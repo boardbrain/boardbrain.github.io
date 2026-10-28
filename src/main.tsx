@@ -10,11 +10,13 @@ import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
 import { readDiagnostics } from '@/infra/platform/diagnostics';
 import { systemClock } from '@/infra/platform/systemClock';
 import { uuidGenerator } from '@/infra/random/uuidGenerator';
+import { registerServiceWorker } from '@/infra/update/serviceWorker';
 import { AppDependenciesProvider, type AppDependencies } from '@/ui/AppDependencies';
 import { AppLayout } from '@/ui/components/AppLayout';
 import { ErrorBoundary } from '@/ui/components/ErrorBoundary';
 import { ErrorScreen } from '@/ui/components/ErrorScreen';
 import { installGlobalErrorHandlers } from '@/ui/globalErrorHandlers';
+import { BoardView } from '@/ui/views/board/BoardView';
 import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
 import { GamesView } from '@/ui/views/management/GamesView';
 import { GameView } from '@/ui/views/management/GameView';
@@ -40,6 +42,11 @@ installGlobalErrorHandlers(window, (error) => {
   root.render(<ErrorScreen error={error} />);
 });
 
+// Architecture 11.4: only the production build has a service worker; the dev server runs without.
+if (import.meta.env.PROD) {
+  void registerServiceWorker();
+}
+
 // The diagnostics only read; they are determined once at startup.
 const diagnostics = readDiagnostics();
 
@@ -63,8 +70,8 @@ function view(element: ReactNode): ReactNode {
   );
 }
 
-// ADR-019: hash routing. The diagnostics view is reachable via #/diagnose only
-// (Architecture 13.1).
+// ADR-019: hash routing. The diagnostics view is reachable via #/diagnose only, the board via
+// #/brett and the diagnostics view (Architecture 13.1).
 const router = createHashRouter([
   {
     element: <AppLayout />,
@@ -78,6 +85,7 @@ const router = createHashRouter([
       { path: '/verwaltung/gruppen/:groupId/bearbeiten', element: view(<GroupView isEditing />) },
       { path: '/verwaltung/spiele', element: view(<GamesView />) },
       { path: '/verwaltung/spiele/:gameId', element: view(<GameView />) },
+      { path: '/brett', element: view(<BoardView />) },
       {
         path: '/diagnose',
         element: view(<DiagnosticsView diagnostics={diagnostics} version={__APP_VERSION__} />),

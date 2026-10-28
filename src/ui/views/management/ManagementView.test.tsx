@@ -24,6 +24,14 @@ describe('Architecture 13.1 management overview (design D-3)', () => {
     ]);
   });
 
+  it('I1-D: links to the diagnostics outside the area cards, for installed apps', async () => {
+    renderWithApp(<ManagementView />);
+
+    const areas = screen.getByRole('navigation', { name: 'Bereiche der Verwaltung' });
+    expect(await within(areas).findAllByRole('link')).toHaveLength(3);
+    expect(screen.getByRole('link', { name: 'Diagnose' })).toHaveAttribute('href', '/diagnose');
+  });
+
   it('shows the first names of each area below the title', async () => {
     const { db } = renderWithApp(<ManagementView />);
     await db.persons.bulkAdd(

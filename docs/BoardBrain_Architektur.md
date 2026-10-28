@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.14 |
+| Version | 0.15 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 26.10.2026 |
+| Stand | 27.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -28,6 +28,7 @@
 | 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, E-30) in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
 | 0.13 | 25.10.2026 | Bündel I1-E: Detailansichten `#/verwaltung/personen/‹id›` und `#/verwaltung/gruppen/‹id›`, Kennungen aus der Adresse als `Result`, Design-Referenz `docs/design/i1e-persons-tables-final-preview.html` (13.1) |
 | 0.14 | 26.10.2026 | Bündel I1-F: Bearbeiten im `MasterDataService` mit `update` in den Repositories (4.4, 7.3); Umbenennen an Ort und Stelle, Spielseite `#/verwaltung/spiele/‹id›`, Editor unter `#/verwaltung/gruppen/‹id›/bearbeiten`, Rückfrage bei ungespeicherten Änderungen über `useBlocker`, Design-Referenz `docs/design/i1f-edit-final-preview.html` (13.1); Komponententests mit Daten-Router (14.1) |
+| 0.15 | 27.10.2026 | Bündel I1-D: Brettmodell mit Kennungen aus den Feldern, Küstenlinien und Zahl der Landfelder je Kreuzung (5.2); minimaler Service Worker mit Cache je Build, Registrierung in `infra/update`, eigene `tsconfig.sw.json` (11.4, 15); App-Symbol D8 aus `scripts/generate-icons.mjs`, Farben von Manifest und Statusleiste aus den Tokens (12.1, 16.2); Seite `#/brett`, „Offline bereit“ in der Diagnose und Verweis auf die Diagnose in der Verwaltung, Rahmenhöhe ohne `100dvh`, volle Höhe in der installierten App unter iPadOS, Kartenhand bis in die sichere Zone, Übergang N1 statt eines eigenen Streifens unter der Ansicht (13.1); Brett-Tokens (13.4); Design-Referenz `docs/design/i1d-board-final-preview.html` mit Gebäuden und Straßen für I2 (13.5); Offline-Test nur in Chromium (14.5) |
 
 ## Inhaltsverzeichnis
 
@@ -331,6 +332,8 @@ Das Brett wird aus einer Liste von Feldkoordinaten berechnet, nicht fest einprog
 - **Feldinhalt:** Jedes Feld hat ein optionales Feld `content` (Landschaft, Zahl), das in Version 1 leer bleibt (NFA-EW-03, FA-PL-08).
 
 Ein Test sichert die Eckdaten aus Anforderung 6.1 ab: 19 Felder, 54 Kreuzungen, 72 Kanten, 24 Inlandkreuzungen, und jede Inlandkreuzung hat genau 3 angrenzende Kanten. Die Darstellung (Kapitel 13.5) berechnet ihre Koordinaten aus demselben Modell.
+
+**Umsetzung (I1-D):** `createBoard(coords)` berechnet aus beliebigen Feldkoordinaten die Kreuzungen (`VertexId` aus den drei Feldern, auf jedem Gerät gleich), die Kanten (`EdgeId` aus den beiden Kreuzungen), Nachbarschaften, Inlandkreuzungen und die Küstenlinien als geschlossene Folgen von Kreuzungen; `STANDARD_BOARD` ist das Brett mit Radius 2. Jede Kreuzung und Kante kennt die Zahl ihrer Landfelder; ein späterer Modus mit Küstenkreuzungen (PP-01) ist damit nur eine weitere Regel (5.3). `hexCenter`, `hexCorners` und `vertexPoint` liefern Punkte in Brett-Einheiten für die Darstellung. Ein Eigenschaftstest prüft die Eckdaten für Bretter mit Radius 0 bis 5. *(neu in 0.15)*
 
 ### 5.3 Platzierungsregeln als Bausteine
 
@@ -901,6 +904,7 @@ Schlägt eine Datenmigration fehl, zeigt die App eine verständliche Meldung und
 - **Versionsanzeige:** App-Version und Build-Kennung stehen in den Einstellungen (US-UP-01 AK-5).
 - **Entwicklung:** Im Entwicklungsserver ist der Service Worker abgeschaltet. Update-Abläufe werden mit `npm run preview` (Produktions-Build über HTTPS) und in Playwright mit zwei aufeinanderfolgenden Builds getestet.
 - **Umsetzung:** `vite-plugin-pwa` im Modus `injectManifest` erzeugt die Liste der Dateien mit Prüfsummen; der Service Worker selbst ist eigener Code in `src/sw/` (rund 150 Zeilen).
+- **Stand I1 (I1-D):** Der Service Worker speichert jeden Build in einem eigenen Cache (`boardbrain-build-‹Prüfsumme›`), beantwortet Navigationen mit `index.html` und Dateien der eigenen Herkunft aus dem Cache und löscht ältere Caches. Ein neuer Build wird wie im Standardverfahren erst aktiv, wenn alle Fenster der App geschlossen waren; Zeiger, Benachrichtigung und Umschaltung auf Befehl (11.2, ADR-015) ersetzen das in I4. Bis dahin ist das unbedenklich, weil vor 1.0 nichts nach `main` geht (EP-02). `infra/update/serviceWorker.ts` registriert `/sw.js` nur im Produktions-Build. `vite-plugin-pwa` nennt Manifest und Symbole doppelt in der Dateiliste; der Service Worker entfernt Dubletten, weil `cache.addAll` sonst die Installation abbricht. Der Service Worker hat eine eigene Typprüfung mit den Typen für Worker (`tsconfig.sw.json`). *(neu in 0.15)*
 
 ---
 
@@ -925,6 +929,8 @@ export const isAppleMobile = () =>
 | Android, Windows | Volle Nutzung, wegklickbarer Installationshinweis (US-IS-02) | Volle Nutzung |
 
 Die Erkennung anderer Browser unter iOS ist nur näherungsweise möglich, weil manche die Kennung von Safari verwenden. Die Anleitung ist deshalb so formuliert, dass sie in jedem Fall zum Ziel führt („Öffne diese Seite in Safari und tippe auf ‚Teilen‘ …“).
+
+**Symbole und Manifest (I1-D):** App-Symbol D8 „Zwei Karten“ aus der Design-Referenz `docs/design/i1d-board-final-preview.html`. `npm run icons` (`scripts/generate-icons.mjs`) zeichnet es aus dem Logo und den Farben in `tokens.css` und rendert es mit Playwright als PNG nach `public/icons/`: `icon-192.png` und `icon-512.png` (Zweck `any`), `icon-maskable-512.png` (Karten in der sicheren Mitte, für den runden Zuschnitt unter Android) und `apple-touch-icon.png` (180 px, iOS und iPadOS). Das Manifest (`vite.config.ts`) nimmt Name und Beschreibung aus `de.ts` und Hintergrund- und Themenfarbe aus `--color-surface` des Designs „Holz“; es legt keine Ausrichtung fest (13.1, E-29). Für iOS kommen `apple-touch-icon`, `apple-mobile-web-app-title` und die Statusleiste `black-translucent` hinzu; der Rahmen hält mit `env(safe-area-inset-*)` Abstand. Der Browser-Tab behält `favicon.svg`. *(neu in 0.15)*
 
 ### 12.2 Persistenter Speicher
 
@@ -963,7 +969,8 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 - **Zurück:** Unterseiten haben links neben dem Titel einen Zurück-Knopf. Er führt wie die Zurück-Taste unter Android zur vorherigen Seite (`navigate(-1)`); wurde die Seite direkt aufgerufen, zur Verwaltung.
 - **Smartphone im Querformat (NFA-PL-04, E-29):** Ein Fenster im Querformat, das niedriger als 500 px ist, gilt als Smartphone; der Rahmen zeigt dann per Media Query nur den Hinweis, das Gerät zu drehen. Das wirkt auf Android und iOS gleich; eine Sperre im Manifest entfällt, weil iOS sie nicht kennt und sie unter Android auch Tablets sperren würde.
 - **Kartenhand:** Die Bereiche stehen als Liste in `AppLayout`; ein weiterer Bereich ist ein Eintrag. Drehung und Breite berechnet `cardHand.ts` (9° je Karte, ab sechs Karten 70 px breit und 6°).
-- **Logo:** ein Gehirn, dessen linke Hälfte ein Schachbrett ist (`Logo`, Farbe `--color-accent-text`); als Symbol im Browser-Tab `public/favicon.svg` mit festem Farbwert, weil eine Bilddatei die Tokens nicht lesen kann. Die Symbole für Startbildschirm und Manifest entstehen in I1-D aus derselben Grafik.
+- **Höhe und Ränder (I1-D):** Die Höhe des Rahmens kommt aus `html`, `body` und `#root` mit `height: 100%` und `overflow: hidden`, nicht aus `100dvh`: Brave unter Android meldete in der installierten App nach dem Herunterziehen zum Aktualisieren eine größere dynamische Höhe, und die ganze Seite ließ sich verschieben. Herunterziehen zum Aktualisieren entfällt damit (Entscheidung des Product Owners). In der installierten App (`display-mode: standalone`) sind `html` und `body` `100lvh` hoch, `body` fest positioniert: iPadOS und iOS machen das Dokument bei durchscheinender Statusleiste sonst um deren Höhe kürzer als den Bildschirm, und unten bliebe ein Streifen. Die Kartenhand reicht bis unter den Home-Strich (`env(safe-area-inset-bottom)`), nur der Inhalt der Karten hält Abstand. **Übergang N1:** Die Hand hat keinen eigenen Streifen mehr, sondern liegt über dem unteren Rand der Ansicht; die Ansicht reicht bis zum Rand, hält mit einem Innenabstand in Höhe der Hand Ansichten mit voller Höhe (Start, Brett) über ihr und lässt lange Ansichten so weit scrollen, dass der letzte Eintrag über den Karten steht. Unterhalb der Oberkante der Hand läuft ihr Hintergrund auf 48 px von durchsichtig in `--color-surface` über, sodass der Inhalt sanft verschwindet statt hart abgeschnitten zu werden. Bewusst ein Verlauf und keine Maske auf der Ansicht: Eine Maske machte die Ansicht zu einem eigenen Stapelkontext, und Overlays wie der Tisch-Editor lägen unter der Hand. Weil die Hand in der Grundfarbe endet, geht sie nahtlos in die Fläche über, die Android hinter der Gestenleiste selbst in dieser Farbe malt. Im Design „Glas“ verdeckt der Verlauf den Farbschein am unteren Rand; das ist hingenommen. Das ersetzt den Streifen aus D-3; maßgeblich ist `docs/design/i1d-board-final-preview.html`. *(neu in 0.15)*
+- **Logo:** ein Gehirn, dessen linke Hälfte ein Schachbrett ist (`Logo`, Farbe `--color-accent-text`); als Symbol im Browser-Tab `public/favicon.svg` mit festem Farbwert, weil eine Bilddatei die Tokens nicht lesen kann. Die Symbole für Startbildschirm und Manifest (D8, zwei Karten mit dem Logo) erzeugt `npm run icons` aus derselben Grafik (12.1). *(geändert in 0.15)*
 
 | Bereich | Ansichten |
 |---|---|
@@ -975,7 +982,8 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 | Daten | Export, Import mit Entscheidungsdialogen, Sicherung mit Sicherungspunkten und Importliste |
 | Einstellungen | Ton, „Ich hasse Catan!“ mit Bestätigung, Design, Akzentfarbe, Version |
 | Installation | Anleitung (iOS ausschließlich diese Ansicht im Browser) |
-| Diagnose | Technische Prüfwerte für die Abnahme auf Geräten: Version, sicherer Kontext, Verfügbarkeit von `crypto.randomUUID`, Service Worker und persistentem Speicher, Installationsstatus. Nur über die direkte Adresse `#/diagnose` erreichbar, nicht in der Navigation; entstand im Setup und war im Platzhalter-Release die Startansicht, seit I1-B ist `#/` die Startansicht |
+| Brett | `#/brett`: das leere Brett (US-PL-01), nur über die Adresse und den Verweis „Brett ansehen“ in der Diagnose erreichbar, nicht in der Kartenhand; mit I2 übernimmt die Platzierung das Brett *(neu in 0.15)* |
+| Diagnose | Technische Prüfwerte für die Abnahme auf Geräten: Version, sicherer Kontext, Verfügbarkeit von `crypto.randomUUID`, Service Worker und persistentem Speicher, Installationsstatus, „Offline bereit“ (ein Service Worker steuert die Seite, ab I1-D). Über die direkte Adresse `#/diagnose` erreichbar, nicht in der Kartenhand; weil installierte Apps keine Adressleiste haben, führt seit I1-D ein unauffälliger Verweis „Diagnose“ unten rechts in der Verwaltung dorthin, der nichts verschiebt. Ab I6 öffnet zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen die Diagnose; dann entfällt der Verweis *(geändert in 0.15)*; entstand im Setup und war im Platzhalter-Release die Startansicht, seit I1-B ist `#/` die Startansicht |
 
 ### 13.2 Zustand in der Oberfläche
 
@@ -1002,6 +1010,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 - Designs (NFA-GB-03): Jedes Design ist ein Satz Werte für Oberflächen, Text, Rahmen, Hintergrundbild (`--background-image`) und Standard-Akzent unter `:root[data-theme='‹key›']`. Standard ist `wood` („Holz“, auch unter `:root` ohne Merkmal); dazu `ocean`, `forest`, `glass`. Eine gewählte Akzentfarbe setzt `data-accent` am Wurzelelement und überschreibt den Standard-Akzent, weil ihre Regeln danach stehen. Ein weiteres Design ist ein weiterer Block, ohne Änderung an Komponenten.
 - Alle Designs sind dunkel (NFA-GB-02). Mindestkontrast für Text: 4,5 : 1 auf jeder Fläche jedes Designs. Catan- und Gruppenfarben: 3 : 1 zum Hintergrund (`--color-surface`) jedes Designs und 2,3 : 1 auf dessen Karten und Überlagerungen (`--color-surface-raised`, `--color-surface-overlay`); untereinander unterscheiden sich die Gruppenfarben um mindestens ΔE 25 (CIE76), Vorrang hat diese Unterscheidbarkeit (E-28). *(geändert in 0.10)* „Glas“ nutzt durchscheinende Flächen mit Unschärfe; das kostet Rechenleistung und wird in US-GB-01 auf älteren Geräten geprüft.
 - Gespeicherte Farbschlüssel werden über eine Zuordnung in Variablen übersetzt, z. B. `catanColor: 'white'` → `var(--color-catan-white)`.
+- Brett (US-PL-01, Design I1-D): `--color-board-sea`, `-sea-deep`, `-shallow`, `-wave`, `-sand`, `-wood-top`, `-wood-bottom`, `-wood-edge`, `-highlight`; in allen Designs gleich. *(neu in 0.15)*
 - Stylelint verbietet Farbwerte außerhalb von `tokens.css`; ESLint verbietet Farbwerte in TypeScript (NFA-GB-05).
 - Ein späterer Hellmodus (PP-09) ist ein zweiter Satz von Werten für dieselben Variablen.
 - Komponenten nutzen CSS Modules (`*.module.css`), sodass Stile nicht über Komponenten hinweg wirken.
@@ -1011,6 +1020,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 - Das Brett ist ein SVG mit festem `viewBox`, berechnet aus dem Brettmodell (Kapitel 5.2), und skaliert mit `preserveAspectRatio="xMidYMid meet"` in jede Fläche, ohne seine Ausrichtung zu ändern (US-PL-01 AK-3).
 - Felder ohne Inhalt, eigenständige Grafik ohne Originalgrafiken (NFA-GB-06).
 - Siedlung und Stadt unterscheiden sich durch ihre Form (US-PL-04 AK-2); alle Gebäude und Straßen haben eine Kontur, damit Weiß auf dunklem Grund erkennbar bleibt (AK-3).
+- Aussehen nach `docs/design/i1d-board-final-preview.html` (Variante H1): sechseckiges Meer mit Wellenmuster und Schatten, flaches Wasser und Sandküste entlang der Küstenlinie, Holzfelder auf 92 % mit weichem Schatten und heller Oberkante, `viewBox` `-60 -53 120 106`. `ui/board/boardLayout.ts` berechnet die Formen aus dem Brettmodell, `Board.tsx` zeichnet sie; Farben nur über Tokens (13.4). Für I2 legt die Referenz Gebäude G1 (Haus, Stadt mit Turm) und Straßen R1 (abgerundeter Balken) mit dunkler Kontur fest, auch für Gebäude am Ufer (PP-01). Meer, Küste, Felder, Gebäude und Straßen bleiben getrennte Bausteine, damit weitere Stile später ein Eintrag mehr sind. *(neu in 0.15)*
 
 ### 13.6 Animationen (ADR-004)
 
@@ -1107,7 +1117,7 @@ Playwright-Szenarien (Auswahl):
 
 - Vollständige Generierung mit 2, 3 und 4 Personen in beiden Spielversionen, mit allen Optionen und Wiederholungen.
 - Neustart während einer Animation und nach einer Bestätigung (US-AB-05).
-- Offline: alle Funktionen bei abgeschaltetem Netz (NFA-PL-03).
+- Offline: alle Funktionen bei abgeschaltetem Netz (NFA-PL-03). Seit I1-D prüft `install.spec.ts` Manifest, Symbole und den Start ohne Netz. Der Offline-Test läuft nur in Chromium, weil Playwrights WebKit unter Windows jedes Neuladen im Offline-Modus abbricht, auch wenn ein Service Worker antwortet; Safari wird auf dem iPad geprüft (14.6). Alle übrigen Tests sperren den Service Worker (`serviceWorkers: 'block'`), damit sie nicht von seinem Cache abhängen. *(ergänzt in 0.15)*
 - Export und Import mit allen Konfliktfällen; Rückgängig; Import aller Beispieldateien älterer Formatversionen.
 - Sicherungspunkte: Auslöser, Aufbewahrung, Wiederherstellung, Sperren während einer Partie.
 - Update: zwei aufeinanderfolgende Builds; neue Version bleibt nach Neustart inaktiv; Hinweis nicht während einer Partie; Sicherungsdialog; Sicherungspunkt „Vor Update“; Datenmigration.
@@ -1121,7 +1131,7 @@ WebKit unter Windows nähert Safari an, ersetzt aber nicht den Test auf echten A
 
 ### 14.6 Manuelle Abnahme vor jedem Release
 
-Eine Checkliste in `docs/Abnahme-Checkliste.md` (angelegt in Inkrement I1) umfasst je Plattform: Installation, Start im Flugmodus, eine vollständige Generierung, Neustart mitten in der Generierung, Ton mit und ohne Stummschaltung bei laufender Musik, Vollsicherung über das Teilen-Menü, Import auf einem zweiten Gerät, Update mit Sicherungsdialog und persistenten Speicher. Unter iOS zusätzlich: Verhalten im Safari-Tab (nur Anleitung).
+Eine Checkliste in `docs/Abnahme-Checkliste.md` (angelegt mit I1-D) umfasst je Plattform: Installation, Start im Flugmodus, eine vollständige Generierung, Neustart mitten in der Generierung, Ton mit und ohne Stummschaltung bei laufender Musik, Vollsicherung über das Teilen-Menü, Import auf einem zweiten Gerät, Update mit Sicherungsdialog und persistenten Speicher. Unter iOS zusätzlich: Verhalten im Safari-Tab (nur Anleitung).
 
 ### 14.7 Nachweis der Prüfkriterien (Spezifikation, Kapitel 5)
 
@@ -1172,9 +1182,11 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  ├─ Abnahme-Checkliste.md           Manuelle Abnahme vor Releases (ab I1)
 │  └─ test-reports/                   z. B. sackgassen.md
 ├─ public/
-│  ├─ icons/                          App-Symbole für alle Plattformen
+│  ├─ icons/                          App-Symbole für alle Plattformen (aus npm run icons)
 │  ├─ fonts/                          WOFF2-Schriften
 │  └─ sounds/                         Klänge und LICENSES.md
+├─ scripts/
+│  └─ generate-icons.mjs              App-Symbole aus Logo und Tokens erzeugen (12.1)
 ├─ src/
 │  ├─ core/                           Fachlogik, framework-frei
 │  │  ├─ shared/                      Result, assert, Hilfstypen (4.6)
@@ -1229,8 +1241,9 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 ├─ commitlint.config.js
 ├─ index.html                         mit Content-Security-Policy (12.4)
 ├─ package.json, package-lock.json
-├─ tsconfig.json                      Typprüfung von src und tests/support, tests/statistical
+├─ tsconfig.json                      Typprüfung von src (ohne src/sw) und tests/support, tests/statistical
 ├─ tsconfig.node.json                 Typprüfung der Konfigurationsdateien und tests/e2e
+├─ tsconfig.sw.json                   Typprüfung des Service Workers mit den Typen für Worker
 ├─ vite.config.ts
 ├─ vitest.config.ts
 ├─ playwright.config.ts
@@ -1276,6 +1289,7 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 | `npm run test:stat` | Statistische Suite |
 | `npm run test:e2e` | Playwright gegen `preview` (Chromium, WebKit; Smartphone- und Tablet-Formate) |
 | `npm run format` | Prettier formatiert alle Dateien außer `docs/` |
+| `npm run icons` | App-Symbole aus Logo und Tokens neu erzeugen (12.1); nur nach Änderungen an Logo oder Farben |
 | `npm run check` | Typen, ESLint, Stylelint, Prettier (nur prüfen), dependency-cruiser, `npm test` mit Abdeckungsprüfung |
 
 ### 16.3 Branches, Pull Requests und Auslieferung (ADR-023)
