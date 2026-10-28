@@ -1,8 +1,8 @@
-import { Link } from 'react-router';
 import { t } from '@/i18n/t';
 import { PlayingCard } from '@/ui/components/PlayingCard';
 import { useAreaCards } from '@/ui/views/areaCards';
 import styles from './ManagementView.module.css';
+import { PressableLink } from '@/ui/components/Pressable';
 
 /**
  * Overview of the management area `#/verwaltung` (Architecture 13.1, design D-3): persons,
@@ -32,9 +32,9 @@ export function ManagementView(): React.JSX.Element {
       {/* I1-D: installed apps have no address bar. Until the settings of I6 open the diagnostics
           after tapping the version ten times, this link sits in the bottom padding and moves
           nothing. */}
-      <Link to="/diagnose" className={styles.diagnostics}>
+      <PressableLink to="/diagnose" className={styles.diagnostics}>
         {t('verwaltung.diagnose')}
-      </Link>
+      </PressableLink>
     </main>
   );
 }

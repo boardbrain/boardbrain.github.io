@@ -130,6 +130,20 @@ const JSX_SYNTAX = [
   },
 ];
 
+// K-4: every button and link shows the app's own pressed state (Pressable.tsx). Exceptions are the
+// building blocks themselves, the card hand with its own lift and the error screen after a crash.
+const CONTROL_SYNTAX = [
+  {
+    selector: String.raw`JSXOpeningElement[name.name=/^(?:button|a|Link|NavLink)$/]`,
+    message: 'Use PressableButton or PressableLink from ui/components/Pressable (K-4).',
+  },
+];
+const CONTROL_EXCEPTIONS = [
+  'src/ui/components/Pressable.tsx',
+  'src/ui/components/HandNavigation.tsx',
+  'src/ui/components/ErrorScreen.tsx',
+];
+
 /**
  * Rules for one area of the repository.
  * @param {{ browser?: boolean, crypto?: boolean, getRandomValues?: boolean, randomUUID?: boolean, network?: boolean }} allowed
@@ -305,13 +319,24 @@ export default defineConfig([
     extends: [reactHooks.configs.flat.recommended],
     languageOptions: { globals: globals.browser },
     rules: {
+      'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...JSX_SYNTAX, ...CONTROL_SYNTAX],
+    },
+  },
+  {
+    files: CONTROL_EXCEPTIONS,
+    rules: {
       'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...JSX_SYNTAX],
     },
   },
   {
     files: ['src/ui/components/ErrorBoundary.tsx'],
     rules: {
-      'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...JSX_SYNTAX.slice(0, -1)],
+      'no-restricted-syntax': [
+        'error',
+        ...BASE_SYNTAX,
+        ...JSX_SYNTAX.slice(0, -1),
+        ...CONTROL_SYNTAX,
+      ],
     },
   },
 

@@ -68,17 +68,10 @@
   font-size: 0.7rem;
   color: var(--color-text);
   text-decoration: none;
-  user-select: none;
   background: var(--color-surface-overlay);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   box-shadow: 0 -4px 12px var(--color-shadow);
-
-  /* No callout menu on a long press in Safari (Android: onContextMenu). No blue tap highlight on
-     Android: it would also colour the invisible tap area above a folded card; the card itself
-     rises when pressed. */
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
 }
 
 /* The active card is pulled out of the hand. */

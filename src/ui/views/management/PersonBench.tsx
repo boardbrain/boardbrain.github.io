@@ -3,6 +3,7 @@ import type { Person, PersonId } from '@/core/model';
 import { t } from '@/i18n/t';
 import { useHasFinePointer, useIsWideScreen } from '@/ui/components/mediaQueries';
 import styles from './PersonBench.module.css';
+import { PressableButton } from '@/ui/components/Pressable';
 
 type PersonBenchProps = {
   readonly persons: readonly Person[];
@@ -51,7 +52,7 @@ export function PersonBench({
     return shown.map((person) => {
       const isSelected = selectedIds.includes(person.id);
       return (
-        <button
+        <PressableButton
           key={person.id}
           type="button"
           className={isSelected ? styles.chipOn : styles.chip}
@@ -62,7 +63,7 @@ export function PersonBench({
           }}
         >
           {person.name}
-        </button>
+        </PressableButton>
       );
     });
   }
@@ -86,7 +87,7 @@ export function PersonBench({
           {chips()}
         </div>
         {shown.length === 0 && <p className={styles.hint}>{t('gruppen.keinePerson')}</p>}
-        <button
+        <PressableButton
           type="button"
           className={styles.link}
           aria-expanded="true"
@@ -96,7 +97,7 @@ export function PersonBench({
           }}
         >
           {t('gruppen.weniger')}
-        </button>
+        </PressableButton>
       </div>
     );
   }
@@ -118,7 +119,7 @@ export function PersonBench({
       >
         {chips()}
       </div>
-      <button
+      <PressableButton
         type="button"
         className={styles.toggle}
         aria-expanded="false"
@@ -127,7 +128,7 @@ export function PersonBench({
         }}
       >
         {t(isWide ? 'gruppen.alleAnzeigen' : 'gruppen.alle', { count: persons.length })}
-      </button>
+      </PressableButton>
     </div>
   );
 }

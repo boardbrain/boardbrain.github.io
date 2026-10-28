@@ -32,6 +32,7 @@ import { BindingPicker, type BindingOption } from './BindingPicker';
 import { GroupTable, type TableSeat } from './GroupTable';
 import styles from './GroupEditor.module.css';
 import { PersonBench } from './PersonBench';
+import { PressableButton } from '@/ui/components/Pressable';
 
 type GroupEditorProps = {
   readonly persons: readonly Person[];
@@ -438,7 +439,7 @@ export function GroupEditor({
             }}
           />
           {choice === null && (
-            <button
+            <PressableButton
               type="button"
               className={styles.switchRow}
               role="switch"
@@ -460,7 +461,7 @@ export function GroupEditor({
                 className={isSwitchOn ? styles.switchOn : styles.switchOff}
                 aria-hidden="true"
               />
-            </button>
+            </PressableButton>
           )}
         </fieldset>
       </div>
@@ -471,9 +472,9 @@ export function GroupEditor({
         </Notice>
       )}
       <div className={styles.saveBar}>
-        <button type="submit" className={styles.save} disabled={!canSave}>
+        <PressableButton type="submit" className={styles.save} disabled={!canSave}>
           {t(group === undefined ? 'gruppen.speichern' : 'gruppen.aenderungenSpeichern')}
-        </button>
+        </PressableButton>
       </div>
     </form>
   );

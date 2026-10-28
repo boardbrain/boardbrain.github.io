@@ -1,7 +1,7 @@
-import { Link } from 'react-router';
 import type { Person, PersonTable } from '@/core/model';
 import { t } from '@/i18n/t';
 import styles from './PersonCard.module.css';
+import { PressableLink } from '@/ui/components/Pressable';
 
 // At most this many colour dots; with more tables one less plus "+n", so they fit in one line.
 const MAX_DOTS = 5;
@@ -24,7 +24,8 @@ export function PersonCard({ person, tables }: PersonCardProps): React.JSX.Eleme
   const dots = tables.length > MAX_DOTS ? tables.slice(0, MAX_DOTS - 1) : tables;
   const hidden = tables.length - dots.length;
   return (
-    <Link
+    <PressableLink
+      look="card"
       to={`/verwaltung/personen/${person.id}`}
       className={[styles.card, tables.length === 0 && styles.alone]
         .filter((name) => typeof name === 'string')
@@ -56,6 +57,6 @@ export function PersonCard({ person, tables }: PersonCardProps): React.JSX.Eleme
       <span className={styles.cornerBottom} aria-hidden="true">
         {tables.length}
       </span>
-    </Link>
+    </PressableLink>
   );
 }

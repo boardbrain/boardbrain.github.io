@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.7 |
+| Version | 0.8 |
 | Status | Verbindlich ab der Setup-Phase |
 | Stand | 28.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
@@ -22,6 +22,7 @@
 | 0.5 | 08.10.2026 | Designvorschläge vor dem Bau neuer oder geänderter Oberflächen (2.2, 2.5); Lehre aus I1-C, wo der Product Owner nach der Umsetzung einen anderen Aufbau wollte |
 | 0.6 | 08.10.2026 | Design D-3: Vorschauen heißen `…-preview….html` und stehen in `.gitignore`; frühere Runden werden archiviert, nie gelöscht; die finale Referenz eines Bündels kommt als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (2.5); E2E-Formate nach E-29: Smartphones im Hochformat, Tablets in beiden Ausrichtungen (8.3) |
 | 0.7 | 28.10.2026 | README auf Kurzbeschreibung, Adresse, Stand und Lizenz beschränkt, ohne Verweise auf `docs/` (11.2) |
+| 0.8 | 28.10.2026 | Aufgabe K-4: Knöpfe und Links nur über `PressableButton` und `PressableLink`, Karten mit `look="card"` (6) |
 
 ## Inhaltsverzeichnis
 
@@ -362,6 +363,7 @@ Kurzfassung der Architektur; Details in BoardBrain_Architektur.md.
 | Stile über CSS Modules; Inline-Stile nur für Motion-Werte und dynamische CSS-Variablen | nein (Review) |
 | Listen-Keys sind stabile Kennungen, nie der Index | teilweise, ESLint |
 | Echte Bedienelemente (`button`, `a`, `input` mit `label`) statt klickbarer `div`; jedes Bedienelement hat eine sichtbare oder hinterlegte Beschriftung aus der Sprachdatei. Grund ist sauberer Code und robuste Tests, nicht Barrierefreiheit, die kein Ziel ist (E-24) | nein (Review); Tests finden Elemente über Rolle und Name (8.3) |
+| Knöpfe und Links nur über `PressableButton` und `PressableLink` (`ui/components/Pressable.tsx`), damit jedes Bedienelement denselben Druckzustand zeigt (K-4, Architektur 13.6); kartenartige Elemente mit `look="card"` | ja, ESLint (Ausnahmen: die Bausteine selbst, Kartenhand, Fehlerbildschirm) |
 | Jede Ansicht ist von einer Error Boundary umschlossen (7.2) | nein (Review) |
 | Berührungsflächen sind auf Smartphones bequem treffbar (Richtwert 44 × 44 Pixel) | nein (Review, manuelle Abnahme) |
 

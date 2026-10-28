@@ -3,6 +3,7 @@ import type { GameId } from '@/core/model';
 import { t } from '@/i18n/t';
 import { useHasFinePointer } from '@/ui/components/mediaQueries';
 import styles from './BindingPicker.module.css';
+import { PressableButton } from '@/ui/components/Pressable';
 
 /** One game a group can be bound to. */
 export type BindingOption = {
@@ -65,7 +66,7 @@ export function BindingPicker({
   return (
     <div className={styles.picker}>
       <div className={styles.segment}>
-        <button
+        <PressableButton
           type="button"
           className={choice === null ? styles.on : styles.off}
           aria-pressed={choice === null}
@@ -74,9 +75,9 @@ export function BindingPicker({
           }}
         >
           {t('gruppen.bindungGlobal')}
-        </button>
+        </PressableButton>
         {supported.map((option) => (
-          <button
+          <PressableButton
             key={option.gameId}
             type="button"
             className={choice === option.gameId ? styles.on : styles.off}
@@ -87,10 +88,10 @@ export function BindingPicker({
             }}
           >
             {t('gruppen.bindungNur', { spiel: option.label })}
-          </button>
+          </PressableButton>
         ))}
         {custom.length > 0 && (
-          <button
+          <PressableButton
             type="button"
             className={chosenCustom === undefined ? styles.more : styles.on}
             aria-pressed={chosenCustom !== undefined}
@@ -101,7 +102,7 @@ export function BindingPicker({
             }}
           >
             {t(isOpen ? 'gruppen.zuklappen' : 'gruppen.aufklappen', { text: moreText })}
-          </button>
+          </PressableButton>
         )}
       </div>
       {supported
@@ -146,7 +147,7 @@ export function BindingPicker({
           }}
         >
           {shown.map((option) => (
-            <button
+            <PressableButton
               key={option.gameId}
               type="button"
               className={styles.item}
@@ -157,7 +158,7 @@ export function BindingPicker({
               }}
             >
               {t('gruppen.bindungNur', { spiel: option.label })}
-            </button>
+            </PressableButton>
           ))}
         </div>
       )}

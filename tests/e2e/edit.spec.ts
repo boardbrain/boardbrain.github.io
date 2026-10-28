@@ -96,6 +96,22 @@ test.describe('US-VW-06 Rename a person', () => {
     await page.getByRole('button', { name: 'Verwerfen' }).click();
     await expect(page.getByRole('heading', { name: 'Personen', level: 1 })).toBeVisible();
   });
+
+  // Found at the acceptance of K-4 on the S26: with a larger system font the field was wider than
+  // the screen and the page could be moved sideways.
+  test('the field fits the screen also with a larger system font', async ({ page }) => {
+    await createPersons(page, 'Ana');
+    await openPerson(page, 'Ana');
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = '130%';
+    });
+    await page.getByRole('button', { name: 'Umbenennen' }).click();
+
+    const field = await page.getByLabel('Neuer Name').boundingBox();
+    const width = page.viewportSize()?.width ?? 0;
+    expect(field).not.toBeNull();
+    expect((field?.x ?? 0) + (field?.width ?? 0)).toBeLessThanOrEqual(width);
+  });
 });
 
 test.describe('US-VW-02 Edit a table', () => {

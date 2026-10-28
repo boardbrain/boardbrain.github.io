@@ -19,6 +19,13 @@ html {
   background-image: var(--background-image);
   background-repeat: no-repeat;
   text-size-adjust: 100%;
+
+  /* K-4: no blue tap highlight (Android), no callout menu (iOS) and no selected text on a long
+     press anywhere in the app; controls show their own pressed state (Pressable). The browser
+     menu on Android is suppressed in touchMenu.ts. */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 /* No padding at the bottom: the card hand reaches into the safe area itself (AppLayout). */
@@ -74,7 +81,14 @@ button:disabled {
   opacity: 0.5;
 }
 
-/* At least 16px, otherwise Safari on iOS zooms in when the field gets focus. */
+/* At least 16px, otherwise Safari on iOS zooms in when the field gets focus. Text fields stay
+   selectable with their menu (K-4); without it Safari on iOS may not accept input at all. */
+input,
+textarea {
+  -webkit-touch-callout: default;
+  user-select: text;
+}
+
 input {
   min-height: var(--touch-target-min);
   padding: var(--space-2) var(--space-3);

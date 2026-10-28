@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import styles from './ConfirmDialog.module.css';
+import { PressableButton } from './Pressable';
 
 type ConfirmDialogProps = {
   readonly title: string;
@@ -42,12 +43,12 @@ export function ConfirmDialog({
           {text}
         </p>
         <div className={styles.buttons}>
-          <button type="button" className={styles.cancel} autoFocus onClick={onCancel}>
+          <PressableButton type="button" className={styles.cancel} autoFocus onClick={onCancel}>
             {cancelLabel}
-          </button>
-          <button type="button" onClick={onConfirm}>
+          </PressableButton>
+          <PressableButton type="button" onClick={onConfirm}>
             {confirmLabel}
-          </button>
+          </PressableButton>
         </div>
       </div>
     </div>

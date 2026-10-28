@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>K-4 Druckzustand final</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-surface: #231d18;
+        --color-surface-raised: #2d2620;
+        --color-surface-overlay: #383028;
+        --color-border: #4b4036;
+        --color-text: #f4ece1;
+        --color-text-muted: #b8ab9b;
+        --color-accent: #b45309;
+        --color-accent-text: #f5be5b;
+        --color-on-accent: #fff;
+        --color-shadow: #0000008c;
+        --g-red: #ef5359;
+        --g-blue: #4189f5;
+        --g-white: #f1f1f4;
+        --g-orange: #f5852b;
+        --g-green: #8fb35a;
+        --g-teal: #5fbfb2;
+        --g-pink: #eba3bf;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+        line-height: 1.5;
+        color: var(--color-text);
+        background: var(--color-surface);
+        background-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+        background-repeat: no-repeat;
+      }
+      body {
+        margin: 0;
+      }
+      .intro {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 16px 16px 0;
+      }
+      .intro h1 {
+        margin: 0 0 4px;
+        font-size: 1.25rem;
+      }
+      .intro p {
+        margin: 0 0 10px;
+        color: var(--color-text-muted);
+        font-size: 0.85rem;
+      }
+      .intro a {
+        color: var(--color-accent-text);
+      }
+      /* Picker: not sticky, so it never covers the preview. */
+      .picker {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 0 0 8px;
+      }
+      .picker button {
+        min-height: 40px;
+        padding: 6px 12px;
+        font: inherit;
+        font-size: 0.85rem;
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+      }
+      .picker button[aria-pressed='true'] {
+        color: var(--color-accent-text);
+        border-color: var(--color-accent-text);
+        font-weight: 700;
+      }
+      .desc {
+        min-height: 3em;
+      }
+
+      /* ---------- The app ---------- */
+      .app {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 8px 16px 40px;
+      }
+      .head {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin: 4px 0 12px;
+      }
+      .head h2 {
+        flex: 1;
+        margin: 0;
+        font-size: 1.5rem;
+      }
+      .back {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border);
+        border-radius: 50%;
+        font: inherit;
+      }
+      .pill {
+        position: relative;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        min-height: 34px;
+        padding: 4px 12px;
+        font: inherit;
+        font-size: 0.85rem;
+        color: var(--color-accent-text);
+        text-decoration: none;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      input {
+        width: 100%;
+        min-height: 44px;
+        margin-bottom: 14px;
+        padding: 8px 12px;
+        font: inherit;
+        font-size: 16px;
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border);
+        border-radius: 0.5rem;
+      }
+      h3 {
+        margin: 18px 0 8px;
+        font-size: 1rem;
+      }
+      .note {
+        margin: 0 0 8px;
+        font-size: 0.8rem;
+        color: var(--color-text-muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .person {
+        position: relative;
+        display: grid;
+        gap: 3px;
+        place-items: center;
+        align-content: start;
+        aspect-ratio: 5 / 7;
+        padding: 14px 8px 24px;
+        color: var(--color-text);
+        text-align: center;
+        text-decoration: none;
+        background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+        border: 1px solid var(--color-border);
+        border-radius: 14px;
+        box-shadow: 0 6px 18px var(--color-shadow);
+      }
+      .corner {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--color-accent-text);
+      }
+      .initial {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        margin-top: 6px;
+        font-weight: 800;
+        color: var(--color-accent-text);
+        border: 2px solid var(--color-accent-text);
+        border-radius: 50%;
+      }
+      .name {
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .dots {
+        display: flex;
+        gap: 4px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .tables {
+        font-size: 0.68rem;
+        line-height: 1.25;
+        color: var(--color-text-muted);
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        max-width: 280px;
+      }
+      .play {
+        position: relative;
+        display: grid;
+        gap: 6px;
+        place-items: center;
+        align-content: center;
+        aspect-ratio: 5 / 7;
+        padding: 18px 10px;
+        color: var(--color-text);
+        text-align: center;
+        text-decoration: none;
+        background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+        border: 1px solid var(--color-border);
+        border-radius: 14px;
+        box-shadow: 0 6px 18px var(--color-shadow);
+      }
+      .play b {
+        font-weight: 700;
+      }
+      .play small {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+      }
+      .rows {
+        display: grid;
+        gap: 8px;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 48px;
+        padding: 10px 14px;
+        color: var(--color-text);
+        text-decoration: none;
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+      }
+      .row span {
+        color: var(--color-text-muted);
+        font-size: 0.85rem;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .primary {
+        min-height: 44px;
+        padding: 8px 16px;
+        font: inherit;
+        color: var(--color-on-accent);
+        background: var(--color-accent);
+        border: 0;
+        border-radius: 0.5rem;
+      }
+      .primary:disabled {
+        opacity: 0.5;
+      }
+      .text {
+        margin-top: 18px;
+        font-size: 0.9rem;
+        color: var(--color-text-muted);
+      }
+      .log {
+        margin-top: 10px;
+        min-height: 1.5em;
+        font-size: 0.8rem;
+        color: var(--color-accent-text);
+      }
+
+      /* K-4: app-wide touch behaviour. Off in "Vorher", to compare with today. */
+      body.k4 {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      body.k4 :is(a, button, label) {
+        -webkit-touch-callout: none;
+      }
+      body.k4 input {
+        -webkit-user-select: text;
+        user-select: text;
+      }
+    </style>
+  </head>
+  <body class="k4">
+    <div class="intro">
+      <h1>K-4 Druckzustand (final)</h1>
+      <p>Verbindliche Referenz für K-4. Knöpfe, Pillen und Zeilen schimmern schnell in ihrer eigenen Textfarbe (Variante K); Personen- und Spielkarten heben sich weich um 3 px und werden etwas dunkler (Variante K1). Der Druckzustand beginnt sofort; die Seite wechselt sofort beim Loslassen. Kein Browsermenü und kein Markieren beim langen Drücken, außer im Suchfeld.</p>
+      <div class="picker" id="variants">
+        <button type="button" data-variant="final" aria-pressed="true">Final</button>
+        <button type="button" data-variant="before">Vorher (ohne K-4)</button>
+      </div>
+      <p class="desc" id="desc"></p>
+    </div>
+
+    <main class="app">
+      <div class="head">
+        <button class="back press" type="button" aria-label="Zurück">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
+        <h2>Personen</h2>
+      </div>
+
+      <div class="pills">
+        <button class="pill press" type="button">＋ Neue Person</button>
+        <a class="pill press" href="#">Archiv</a>
+      </div>
+
+      <input type="search" placeholder="Person suchen" value="Lange drücken: Menü bleibt" aria-label="Person suchen" />
+
+      <h3>Personenkarten (Links)</h3>
+      <p class="note">Emma öffnet ihre Seite wie in der App, sofort beim Loslassen.</p>
+      <div class="grid" id="persons"></div>
+
+      <h3>Spielkarten wie in der Verwaltung</h3>
+      <div class="cards">
+        <a class="play press" href="#"><span class="corner">P</span><b>Personen</b><small>12 Personen</small></a>
+        <a class="play press" href="#"><span class="corner">T</span><b>Tische</b><small>4 Tische</small></a>
+      </div>
+
+      <h3>Listenzeilen</h3>
+      <div class="rows">
+        <a class="row press" href="#">Catan <span>Unterstütztes Spiel</span></a>
+        <a class="row press" href="#">Uno <span>Eigenes Spiel</span></a>
+        <a class="row press" href="#">Wizard <span>Eigenes Spiel</span></a>
+      </div>
+
+      <div class="actions">
+        <button class="primary press" type="button">Speichern</button>
+        <button class="primary press" type="button" disabled>Gesperrt</button>
+      </div>
+
+      <p class="text">Normaler Text wie diese Erklärung lässt sich mit K-4 nicht mehr markieren; im Suchfeld oben bleibt Markieren und Einfügen möglich.</p>
+      <p class="log" id="log" aria-live="polite"></p>
+    </main>
+    <main class="app" id="detail" hidden>
+      <div class="head">
+        <button class="back press" type="button" aria-label="Zurück" id="detailBack">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
+        <h2 id="detailTitle"></h2>
+      </div>
+      <p class="text">Diese Seite öffnet sofort beim Loslassen, wie in der App. Mit dem Zurück-Knopf geht es zurück zur Liste.</p>
+    </main>
+
+    <script>
+      const PEOPLE = [
+        ['Anna', ['--g-red', '--g-teal'], 'Freitagsrunde, Familie'],
+        ['Ben', ['--g-blue'], 'Freitagsrunde'],
+        ['Carla', ['--g-white', '--g-pink'], 'Familie, Uni'],
+        ['David', ['--g-orange'], 'Uni'],
+        ['Emma', ['--g-green', '--g-red'], 'Freitagsrunde, Uni'],
+        ['Felix', ['--g-teal'], 'Familie'],
+        ['Greta', ['--g-pink'], 'Uni'],
+        ['Hannes', ['--g-blue', '--g-orange'], 'Freitagsrunde, Familie'],
+        ['Ida', ['--g-red'], 'Uni'],
+        ['Jonas', ['--g-orange', '--g-blue'], 'Freitagsrunde, Uni'],
+        ['Klara', ['--g-white'], 'Familie'],
+        ['Lukas', ['--g-green'], 'Freitagsrunde'],
+        ['Mia', ['--g-teal', '--g-pink'], 'Uni, Familie'],
+        ['Noah', ['--g-red'], 'Freitagsrunde'],
+        ['Olga', ['--g-blue'], 'Familie'],
+      ];
+      const grid = document.getElementById('persons');
+      PEOPLE.forEach(([name, colors, tables], i) => {
+        const a = document.createElement('a');
+        a.className = 'person press';
+        a.href = '#';
+        const corner = document.createElement('span');
+        corner.className = 'corner';
+        corner.textContent = String(i + 1);
+        const initial = document.createElement('span');
+        initial.className = 'initial';
+        initial.textContent = name[0];
+        const n = document.createElement('span');
+        n.className = 'name';
+        n.textContent = name;
+        const dots = document.createElement('span');
+        dots.className = 'dots';
+        colors.forEach((c) => {
+          const d = document.createElement('span');
+          d.className = 'dot';
+          d.style.background = `var(${c})`;
+          dots.append(d);
+        });
+        const t = document.createElement('span');
+        t.className = 'tables';
+        t.textContent = tables;
+        a.append(corner, initial, n, dots, t);
+        // Emma always opens her page, to compare a tap with page change next to the other cards.
+        if (name === 'Emma') a.dataset.navigate = '';
+        grid.append(a);
+      });
+
+      // Duration in and out (ms) and curves, as in Pressable.tsx.
+      const STANDARD = 'cubic-bezier(0.2, 0, 0, 1)';
+      const QUICK = { in: 90, out: 220, easeIn: STANDARD, easeOut: 'ease-out' };
+      const SMOOTH = { in: 180, out: 300, easeIn: 'ease-out', easeOut: 'ease-in-out' };
+      // Cards (person and playing cards) keep their drop shadow in every variant.
+      const CARD = '.person, .play';
+      const baseShadow = (el) => (el.matches(CARD) ? '0 6px 18px var(--color-shadow)' : '0 0 0 0 transparent');
+      const VARIANTS = {
+        before: {
+          text: 'Ohne K-4: blaue Tipp-Markierung, beim langen Drücken Browsermenü bzw. Linkvorschau, Text wird markiert.',
+        },
+        final: {
+          text: 'Knöpfe schimmern in 90 ms mit 16 % ihrer Textfarbe und klingen in 220 ms ab; Karten heben sich in 180 ms um 3 px mit zusätzlichem Schatten, werden um 15 % dunkler und gleiten in 300 ms zurück.',
+          timing: (el) => (el.matches(CARD) ? SMOOTH : QUICK),
+          pressed: (el) =>
+            el.matches(CARD)
+              ? { transform: 'translateY(-3px)', boxShadow: '0 10px 22px var(--color-shadow)', filter: 'brightness(0.85)' }
+              : { boxShadow: `inset 0 0 0 999px color-mix(in srgb, currentcolor 16%, transparent), ${baseShadow(el)}` },
+        },
+      };
+      const RESTING = {
+        transform: () => 'none',
+        filter: () => 'none',
+        boxShadow: (el) => baseShadow(el),
+      };
+      const resting = (el, pressed) => Object.fromEntries(Object.keys(pressed).map((k) => [k, RESTING[k](el)]));
+      // Controls react quickly (K), cards smoothly (K1).
+      const timingOf = (el) => {
+        const t = VARIANTS[variant].timing ?? QUICK;
+        return typeof t === 'function' ? t(el) : t;
+      };
+      let variant = 'final';
+      const delay = 0;
+
+      function setPressed(group, attr, value) {
+        group.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[attr] === value)));
+      }
+      document.getElementById('variants').addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        variant = b.dataset.variant;
+        setPressed(e.currentTarget, 'variant', variant);
+        document.body.classList.toggle('k4', variant !== 'before');
+        document.getElementById('desc').textContent = VARIANTS[variant].text;
+      });
+      document.getElementById('desc').textContent = VARIANTS[variant].text;
+
+      // Like whileTap in Motion: press on pointerdown, release on pointerup or pointercancel
+      // (the browser cancels when the finger starts to scroll). A quick tap still shows the
+      // pressed state briefly before it springs back.
+      const state = new WeakMap();
+      document.addEventListener('pointerdown', (e) => {
+        const el = e.target.closest('.press');
+        if (!el || el.disabled || variant === 'before') return;
+        const s = { pressedAt: 0, timer: 0, variant, t: timingOf(el) };
+        state.set(el, s);
+        const start = () => {
+          s.pressedAt = performance.now();
+          el.animate([resting(el, VARIANTS[variant].pressed(el)), VARIANTS[variant].pressed(el)], { duration: s.t.in, easing: s.t.easeIn, fill: 'forwards' });
+        };
+        if (delay) s.timer = setTimeout(start, delay);
+        else start();
+      });
+      function release(e) {
+        document.querySelectorAll('.press').forEach((el) => {
+          const s = state.get(el);
+          if (!s) return;
+          state.delete(el);
+          clearTimeout(s.timer);
+          if (!s.pressedAt) return;
+          const wait = Math.max(0, s.t.in - (performance.now() - s.pressedAt));
+          setTimeout(() => {
+            el.getAnimations().forEach((a) => a.cancel());
+            el.animate([VARIANTS[s.variant].pressed(el), resting(el, VARIANTS[s.variant].pressed(el))], { duration: s.t.out, easing: s.t.easeOut });
+          }, wait);
+        });
+      }
+      document.addEventListener('pointerup', release);
+      document.addEventListener('pointercancel', release);
+
+      // K-4: no browser menu on a long press with finger or pen; right click on a PC stays,
+      // text fields keep their menu.
+      let lastPointer = 'mouse';
+      document.addEventListener('pointerdown', (e) => (lastPointer = e.pointerType), true);
+      document.addEventListener('contextmenu', (e) => {
+        if (variant === 'before') return;
+        if (lastPointer === 'mouse') return;
+        if (e.target.closest('input, textarea, [contenteditable]')) return;
+        e.preventDefault();
+      });
+
+      // Optional: like the app, a tap on a link opens the next page at once on release, so the
+      // card disappears in whatever state its animation has reached.
+      const navigate = false;
+      const list = document.querySelector('.app');
+      const detail = document.getElementById('detail');
+      let scrollBack = 0;
+      list.addEventListener('click', (e) => {
+        const el = e.target.closest('a, button');
+        if (!el) return;
+        e.preventDefault();
+        const label = el.querySelector('.name, b')?.textContent ?? el.textContent.trim().replace(/\s+/g, ' ');
+        if (navigate || el.matches('[data-navigate]')) {
+          scrollBack = window.scrollY;
+          document.getElementById('detailTitle').textContent = label;
+          list.hidden = true;
+          detail.hidden = false;
+          window.scrollTo(0, detail.offsetTop - 8);
+          return;
+        }
+        document.getElementById('log').textContent = `Getippt: ${label}`;
+      });
+      document.getElementById('detailBack').addEventListener('click', () => {
+        detail.hidden = true;
+        list.hidden = false;
+        window.scrollTo(0, scrollBack);
+      });
+    </script>
+  </body>
+</html>

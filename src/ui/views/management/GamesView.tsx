@@ -1,5 +1,4 @@
 import { useId, useState, useTransition } from 'react';
-import { Link } from 'react-router';
 import type { NameDuplicateError } from '@/app/services/masterDataService';
 import {
   cleanName,
@@ -18,6 +17,7 @@ import { Notice } from '@/ui/components/Notice';
 import { Page } from '@/ui/components/Page';
 import overview from './Overview.module.css';
 import styles from './GamesView.module.css';
+import { PressableLink } from '@/ui/components/Pressable';
 
 // `submitted` is the input the message belongs to; the message is hidden once the input changes.
 type Message = {
@@ -133,7 +133,7 @@ export function GamesView(): React.JSX.Element {
             {customGames.map((game) => (
               <li key={game.id}>
                 {/* US-VW-07: a custom game opens its page, where it can be renamed. */}
-                <Link to={`/verwaltung/spiele/${game.id}`} className={overview.row}>
+                <PressableLink to={`/verwaltung/spiele/${game.id}`} className={overview.row}>
                   <span className={overview.rowText}>
                     <strong className={overview.rowTitle}>{game.name}</strong>
                     <span className={overview.rowNote}>{boundTablesText(game, groups ?? [])}</span>
@@ -141,7 +141,7 @@ export function GamesView(): React.JSX.Element {
                   <span className={overview.chevron}>
                     <ChevronIcon size={CHEVRON_SIZE} />
                   </span>
-                </Link>
+                </PressableLink>
               </li>
             ))}
           </ul>

@@ -83,6 +83,11 @@
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Pressed state (K-4, NFA-GB-04): cards rise and darken, controls shimmer in their text colour */
+  --press-lift: -3px;
+  --press-darken: 0.15;
+  --press-shimmer: 16%;
 }
 
 /*

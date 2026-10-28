@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { cleanName, containsName, parseGameId, type CustomGame, type Group } from '@/core/model';
 import { SUPPORTED_GAMES } from '@/games/registry';
 import { formatDate } from '@/i18n/format';
@@ -13,6 +13,7 @@ import { PillButton } from '@/ui/components/PillButton';
 import overview from './Overview.module.css';
 import styles from './Profile.module.css';
 import { useRenameForm } from './RenameForm';
+import { PressableLink } from '@/ui/components/Pressable';
 
 const DICE_SIZE = 28;
 const PILL_ICON_SIZE = 15;
@@ -167,7 +168,7 @@ export function GameView(): React.JSX.Element | null {
           <ul className={overview.rows} aria-label={t('spiele.tischeListe', { spiel: game.name })}>
             {tables.map((group) => (
               <li key={group.id}>
-                <Link to={`/verwaltung/gruppen/${group.id}`} className={overview.row}>
+                <PressableLink to={`/verwaltung/gruppen/${group.id}`} className={overview.row}>
                   <MiniTable seats={group.members} diameter={ROW_TABLE_DIAMETER} />
                   <span className={overview.rowText}>
                     <strong className={overview.rowTitle}>{group.name}</strong>
@@ -178,7 +179,7 @@ export function GameView(): React.JSX.Element | null {
                   <span className={overview.chevron}>
                     <ChevronIcon size={CHEVRON_SIZE} />
                   </span>
-                </Link>
+                </PressableLink>
               </li>
             ))}
           </ul>

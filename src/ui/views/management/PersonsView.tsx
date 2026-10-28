@@ -16,6 +16,7 @@ import { Notice } from '@/ui/components/Notice';
 import { Page } from '@/ui/components/Page';
 import { PersonCard } from './PersonCard';
 import styles from './PersonsView.module.css';
+import { PressableButton } from '@/ui/components/Pressable';
 
 const PLUS_CARD_ICON_SIZE = 28;
 
@@ -86,7 +87,7 @@ export function PersonsView(): React.JSX.Element {
       backFallback="/verwaltung"
       actions={
         <div className={styles.actions}>
-          <button
+          <PressableButton
             type="button"
             className={styles.iconButton}
             aria-label={t('personen.suchen')}
@@ -94,8 +95,8 @@ export function PersonsView(): React.JSX.Element {
             onClick={toggleSearch}
           >
             <SearchIcon />
-          </button>
-          <button
+          </PressableButton>
+          <PressableButton
             type="button"
             className={styles.addButton}
             aria-label={t('personen.neu')}
@@ -105,7 +106,7 @@ export function PersonsView(): React.JSX.Element {
             }}
           >
             <PlusIcon />
-          </button>
+          </PressableButton>
         </div>
       }
     >
@@ -123,14 +124,14 @@ export function PersonsView(): React.JSX.Element {
               setQuery(event.target.value);
             }}
           />
-          <button
+          <PressableButton
             type="button"
             className={styles.iconButton}
             aria-label={t('personen.suchfeldSchliessen')}
             onClick={toggleSearch}
           >
             <CloseIcon />
-          </button>
+          </PressableButton>
         </div>
       )}
       {isFormOpen && (
@@ -164,8 +165,9 @@ export function PersonsView(): React.JSX.Element {
         <ul className={styles.grid} aria-label={t('personen.liste')}>
           {trimmedQuery === '' && (
             <li>
-              <button
+              <PressableButton
                 type="button"
+                look="card"
                 className={styles.newCard}
                 onClick={() => {
                   setIsAdding(true);
@@ -173,7 +175,7 @@ export function PersonsView(): React.JSX.Element {
               >
                 <PlusIcon size={PLUS_CARD_ICON_SIZE} />
                 <span className={styles.newCardLabel}>{t('personen.neu')}</span>
-              </button>
+              </PressableButton>
             </li>
           )}
           {matches.map((person) => (

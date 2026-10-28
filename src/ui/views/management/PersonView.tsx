@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import {
   cleanName,
   countFellowPlayers,
@@ -22,6 +22,7 @@ import { bindingLabel } from './groupBinding';
 import overview from './Overview.module.css';
 import styles from './Profile.module.css';
 import { useRenameForm } from './RenameForm';
+import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 
 // From this many tables the list is collapsed to the first ones (design I1-E, D9).
 const COLLAPSE_FROM = 7;
@@ -49,7 +50,7 @@ function TableRows({ person, tables, customGames }: TableRowsProps): React.JSX.E
         {visible.map(({ group, member }) => (
           <li key={group.id}>
             {/* US-VW-05 AK-3: a table of the person opens the table page. */}
-            <Link to={`/verwaltung/gruppen/${group.id}`} className={overview.row}>
+            <PressableLink to={`/verwaltung/gruppen/${group.id}`} className={overview.row}>
               <MiniTable
                 seats={group.members}
                 diameter={ROW_TABLE_DIAMETER}
@@ -67,12 +68,12 @@ function TableRows({ person, tables, customGames }: TableRowsProps): React.JSX.E
               <span className={overview.chevron}>
                 <ChevronIcon size={CHEVRON_SIZE} />
               </span>
-            </Link>
+            </PressableLink>
           </li>
         ))}
       </ul>
       {isCollapsible && (
-        <button
+        <PressableButton
           type="button"
           className={overview.more}
           aria-expanded={isExpanded}
@@ -83,7 +84,7 @@ function TableRows({ person, tables, customGames }: TableRowsProps): React.JSX.E
           {isExpanded
             ? t('personen.wenigerTische')
             : t('personen.alleTische', { anzahl: tables.length })}
-        </button>
+        </PressableButton>
       )}
     </>
   );

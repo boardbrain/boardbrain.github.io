@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
 import { findGroups, type Group, type Person } from '@/core/model';
 import { t } from '@/i18n/t';
 import { useCustomGames, useGroups, usePersons } from '@/infra/db/readHooks';
@@ -12,6 +11,7 @@ import { GroupEditor } from './GroupEditor';
 import { bindingLabel } from './groupBinding';
 import { GroupTable, type TableSeat } from './GroupTable';
 import styles from './GroupsView.module.css';
+import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 
 const MIN_PERSONS_FOR_GROUP = 2;
 
@@ -57,7 +57,7 @@ export function GroupsView(): React.JSX.Element {
       isWide
       backFallback="/verwaltung"
       actions={
-        <button
+        <PressableButton
           type="button"
           className={styles.iconButton}
           aria-label={t('gruppen.suchen')}
@@ -65,7 +65,7 @@ export function GroupsView(): React.JSX.Element {
           onClick={toggleSearch}
         >
           <SearchIcon />
-        </button>
+        </PressableButton>
       }
     >
       {persons !== undefined && !canCreate && (
@@ -87,14 +87,14 @@ export function GroupsView(): React.JSX.Element {
               setQuery(event.target.value);
             }}
           />
-          <button
+          <PressableButton
             type="button"
             className={styles.iconButton}
             aria-label={t('gruppen.suchfeldSchliessen')}
             onClick={toggleSearch}
           >
             <CloseIcon />
-          </button>
+          </PressableButton>
         </div>
       )}
       {trimmedQuery !== '' && matches.length === 0 && (
@@ -102,8 +102,9 @@ export function GroupsView(): React.JSX.Element {
       )}
       <ul className={styles.room} aria-label={t('gruppen.liste')}>
         <li>
-          <button
+          <PressableButton
             type="button"
+            look="card"
             className={styles.newCard}
             disabled={!canCreate}
             onClick={() => {
@@ -112,12 +113,16 @@ export function GroupsView(): React.JSX.Element {
           >
             <span className={styles.plus} aria-hidden="true" />
             <strong>{t('gruppen.neu')}</strong>
-          </button>
+          </PressableButton>
         </li>
         {matches.map(({ group, memberNames }) => (
           <li key={group.id}>
             {/* US-VW-05 AK-3: a table opens its page. */}
-            <Link to={`/verwaltung/gruppen/${group.id}`} className={styles.card}>
+            <PressableLink
+              to={`/verwaltung/gruppen/${group.id}`}
+              look="card"
+              className={styles.card}
+            >
               <GroupTable seats={seatsOf(group, persons ?? [])} size="small" />
               <strong className={styles.name}>{group.name}</strong>
               <span className={styles.meta}>
@@ -134,7 +139,7 @@ export function GroupsView(): React.JSX.Element {
                   )}
                 </span>
               )}
-            </Link>
+            </PressableLink>
           </li>
         ))}
       </ul>
