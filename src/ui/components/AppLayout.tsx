@@ -1,4 +1,5 @@
 import { domAnimation, LazyMotion, MotionConfig } from 'motion/react';
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { t } from '@/i18n/t';
 import { HandNavigation, type HandArea } from './HandNavigation';
@@ -6,6 +7,7 @@ import { isHandFolded } from './cardHand';
 import { FolderIcon, HomeIcon, RotateIcon } from './Icons';
 import { Logo } from './Logo';
 import { useIsPhone } from './mediaQueries';
+import { suppressTouchContextMenu } from './touchMenu';
 import styles from './AppLayout.module.css';
 
 const LOGO_SIZE = 28;
@@ -24,11 +26,14 @@ const AREAS: readonly HandArea[] = [
  * start view. The
  * diagnostics view is deliberately missing from the navigation; it is reached via `#/diagnose`
  * only. Phones in landscape only see a hint to turn the phone (NFA-PL-04, E-29). Animations
- * follow the system setting to reduce motion.
+ * follow the system setting to reduce motion. A long press with a finger opens no browser menu
+ * anywhere in the app (K-4).
  */
 export function AppLayout(): React.JSX.Element {
   const { pathname } = useLocation();
   const isPhone = useIsPhone();
+  // External system: the browser's context menu on the whole document (K-4).
+  useEffect(() => suppressTouchContextMenu(document), []);
   return (
     <LazyMotion features={domAnimation} strict>
       <MotionConfig reducedMotion="user">

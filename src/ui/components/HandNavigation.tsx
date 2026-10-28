@@ -101,11 +101,6 @@ export function HandNavigation({
     setOpenAt(undefined);
   }
 
-  function preventMenu(event: React.MouseEvent): void {
-    // A long press on a link would open the browser menu "open in new tab".
-    if (state !== 'fanned') event.preventDefault();
-  }
-
   return (
     <>
       <AnimatePresence>
@@ -156,7 +151,6 @@ export function HandNavigation({
                   onPointerLeave={cancelPress}
                   onPointerCancel={cancelPress}
                   onClick={handleClick}
-                  onContextMenu={preventMenu}
                 >
                   <m.span
                     className={styles.face}

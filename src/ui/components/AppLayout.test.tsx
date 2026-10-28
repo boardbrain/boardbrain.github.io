@@ -211,14 +211,18 @@ describe('Design K-3 folded card hand', () => {
     }
   });
 
-  it('suppresses the browser menu of a long press only where the hand is folded', () => {
-    renderAt('/verwaltung');
+  // K-4: the frame suppresses the menu of a long press with a finger in the whole app, also on
+  // the fanned hand of the start view; a right click with the mouse keeps it.
+  it('K-4: suppresses the browser menu of a long press with a finger everywhere', () => {
+    renderAt('/');
+    fireEvent.pointerDown(link('Verwaltung'), { pointerType: 'touch' });
     // fireEvent returns false when the default action was prevented.
-    expect(fireEvent.contextMenu(link('Start'))).toBe(false);
+    expect(fireEvent.contextMenu(link('Verwaltung'))).toBe(false);
   });
 
-  it('keeps the browser menu on the start view', () => {
-    renderAt('/');
-    expect(fireEvent.contextMenu(link('Verwaltung'))).toBe(true);
+  it('K-4: keeps the browser menu for a right click with the mouse', () => {
+    renderAt('/verwaltung');
+    fireEvent.pointerDown(link('Start'), { pointerType: 'mouse' });
+    expect(fireEvent.contextMenu(link('Start'))).toBe(true);
   });
 });

@@ -33,5 +33,16 @@ export default {
         'function-disallowed-list': null,
       },
     },
+    // K-4: the shimmer mixes the element's own text colour (currentcolor) with transparent and
+    // depends on --press per element, so it cannot live in tokens.css. It adds no colour value.
+    {
+      files: ['src/ui/components/Pressable.module.css'],
+      rules: {
+        'function-disallowed-list': [
+          ['rgb', 'rgba', 'hsl', 'hsla', 'hwb', 'lab', 'lch', 'oklab', 'oklch', 'color'],
+          { message: COLOR_MESSAGE },
+        ],
+      },
+    },
   ],
 };
