@@ -77,9 +77,14 @@ describe('US-PL-03 Draw a road with the real random source', () => {
   });
 });
 
+// 100,000 complete placements take about 5 to 6 seconds on a development PC, right at the default
+// limit of 5 seconds; the measurement gets a limit of its own instead of failing by chance.
+const MEASUREMENT_TIMEOUT_MS = 60_000;
+
 describe('NFA-EW-08 Dead ends with 4 persons', () => {
   it.for(CATAN_EDITIONS)(
     'measures how often a placement is drawn again hidden (%s)',
+    { timeout: MEASUREMENT_TIMEOUT_MS },
     async (edition, { annotate }) => {
       // Architecture 14.4: 100,000 complete placements; the result goes into
       // docs/test-reports/sackgassen.md.
