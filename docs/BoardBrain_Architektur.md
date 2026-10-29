@@ -32,7 +32,7 @@
 | 0.16 | 28.10.2026 | Aufgabe K-3: Kartenhand auf dem Handy nur auf dem Start aufgefächert, sonst eingefahren; auf Tablet und PC überall aufgefächert mit direktem Antippen und Auffächern durch langes Drücken (`HandNavigation`, `cardHand.ts`); Rahmen mit `overflow: clip`; Design-Referenz `docs/design/k3-card-hand-final-preview.html` (13.1); Motion 14 installiert, über `LazyMotion` mit `domAnimation`, `m`-Komponenten und `MotionConfig reducedMotion="user"` (3.1, 13.6) |
 | 0.17 | 28.10.2026 | README ohne Verweise auf `docs/` (Ordnerstruktur in 15) |
 | 0.18 | 28.10.2026 | Aufgabe K-4: Berührungsverhalten app-weit; Druckzustand über `PressableButton` und `PressableLink` mit `whileTap` auf der CSS-Variable `--press` (Knöpfe schimmern in ihrer Textfarbe, Karten heben sich), keine Tipp-Markierung, keine Linkvorschau und kein Markieren außer in Textfeldern, Browsermenü bei Berührung zentral unterdrückt (`touchMenu.ts` in `AppLayout`), Links nicht ziehbar; ESLint verbietet nackte `button`, `a`, `Link`, `NavLink`; Design-Referenz `docs/design/k4-touch-final-preview.html` (13.6) |
-| 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19) |
+| 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19); reine Doku-Änderungen ohne lokale Prüfungen (14.1, 16.4; Entwicklungsrichtlinien 3.6) |
 
 ## Inhaltsverzeichnis
 
@@ -1063,7 +1063,7 @@ Komponententests rendern über `renderWithApp` mit einem Daten-Router (`createMe
 | Statische Prüfung | TypeScript, ESLint, Stylelint, Prettier, dependency-cruiser | Typen, Projektregeln, Form, Schichten | `npm run check` |
 | Konventionen auf GitHub | commitlint, Herkunftsprüfung | Titel des Pull Requests; Pull Requests nach `main` nur aus `develop` oder `hotfix/…` | bei jedem Pull Request (16.3) |
 
-`npm run check` bündelt Typprüfung, Lint-Regeln, Formatprüfung, Schichtprüfung und Unit-Tests mit Abdeckungsprüfung. Vor jedem Pull Request führt Claude Code `npm run check` und `npm run test:e2e` aus, vor einem Pull Request nach `main` zusätzlich `npm run test:stat`; dieselben Prüfungen laufen auf GitHub und sperren den Merge, bis sie bestanden sind (EP-06, 16.3).
+`npm run check` bündelt Typprüfung, Lint-Regeln, Formatprüfung, Schichtprüfung und Unit-Tests mit Abdeckungsprüfung. Vor jedem Pull Request führt Claude Code `npm run check` und `npm run test:e2e` aus, vor einem Pull Request nach `main` zusätzlich `npm run test:stat`; bei reinen Doku-Änderungen entfallen die lokalen Prüfungen (Entwicklungsrichtlinien 3.6). Dieselben Prüfungen laufen auf GitHub und sperren den Merge, bis sie bestanden sind (EP-06, 16.3).
 
 ### 14.2 Deterministische Tests
 
@@ -1331,7 +1331,7 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 
 ### 16.4 `CLAUDE.md`
 
-Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrichtlinien für Claude Code und verweist für Details auf diese. Sie enthält unter anderem: Arbeitsablauf mit Story-Bündeln und Haltepunkten (EP-10); Schichten und Abhängigkeitsregeln; durchgehend englischer Code; kein `Math.random`, Zufall nur über `RandomSource`; keine Farbwerte außerhalb der Tokens; keine festen Texte; Animationen nur über Motion; jeder Schreibzugriff über Repositories; Sperren in Diensten prüfen; Fehlerbehandlung nach 4.6; Tests zu jeder Fachlogik; Git-Konventionen; vor jedem Pull Request `npm run check` und `npm run test:e2e`, vor einem Pull Request nach `main` zusätzlich `npm run test:stat`. Sie verweist auf die Dokumente in `docs/`.
+Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrichtlinien für Claude Code und verweist für Details auf diese. Sie enthält unter anderem: Arbeitsablauf mit Story-Bündeln und Haltepunkten (EP-10); Schichten und Abhängigkeitsregeln; durchgehend englischer Code; kein `Math.random`, Zufall nur über `RandomSource`; keine Farbwerte außerhalb der Tokens; keine festen Texte; Animationen nur über Motion; jeder Schreibzugriff über Repositories; Sperren in Diensten prüfen; Fehlerbehandlung nach 4.6; Tests zu jeder Fachlogik; Git-Konventionen; vor jedem Pull Request `npm run check` und `npm run test:e2e` (außer bei reinen Doku-Änderungen), vor einem Pull Request nach `main` zusätzlich `npm run test:stat`. Sie verweist auf die Dokumente in `docs/`.
 
 ### 16.5 Claude Code
 
