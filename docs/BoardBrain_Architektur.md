@@ -33,7 +33,7 @@
 | 0.17 | 28.10.2026 | README ohne Verweise auf `docs/` (Ordnerstruktur in 15) |
 | 0.18 | 28.10.2026 | Aufgabe K-4: Berührungsverhalten app-weit; Druckzustand über `PressableButton` und `PressableLink` mit `whileTap` auf der CSS-Variable `--press` (Knöpfe schimmern in ihrer Textfarbe, Karten heben sich), keine Tipp-Markierung, keine Linkvorschau und kein Markieren außer in Textfeldern, Browsermenü bei Berührung zentral unterdrückt (`touchMenu.ts` in `AppLayout`), Links nicht ziehbar; ESLint verbietet nackte `button`, `a`, `Link`, `NavLink`; Design-Referenz `docs/design/k4-touch-final-preview.html` (13.6) |
 | 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19); reine Doku-Änderungen ohne lokale Prüfungen (14.1, 16.4; Entwicklungsrichtlinien 3.6) |
-| 0.20 | 29.10.2026 | Bündel I2-A: Was nur Catan betrifft, liegt im Catan-Modul (neu ADR-028): Brett, Platzierungsregeln, Sackgassen-Strategie, Gebäudearten, Spielversionen und Rohstoffe in `games/catan`, die Module `core/board` und `core/placement` entfallen (4.1, 4.3, 5.2 bis 5.6, 15); Farbmodell der Gruppen bleibt in `core/model`; Bezeichner für Rohstoffe und Zurücklegen (4.5); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) |
+| 0.20 | 29.10.2026 | Bündel I2-A: Was nur Catan betrifft, liegt im Catan-Modul (neu ADR-028): Brett, Platzierungsregeln, Sackgassen-Strategie, Gebäudearten, Spielversionen und Rohstoffe in `games/catan`, die Module `core/board` und `core/placement` entfallen (4.1, 4.3, 5.2 bis 5.6, 15); Farbmodell der Gruppen bleibt in `core/model`; Bezeichner für Rohstoffe und Zurücklegen (4.5); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) (PR #27) |
 
 ## Inhaltsverzeichnis
 

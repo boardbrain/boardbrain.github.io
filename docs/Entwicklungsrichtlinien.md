@@ -24,7 +24,7 @@
 | 0.7 | 28.10.2026 | README auf Kurzbeschreibung, Adresse, Stand und Lizenz beschränkt, ohne Verweise auf `docs/` (11.2) |
 | 0.8 | 28.10.2026 | Aufgabe K-4: Knöpfe und Links nur über `PressableButton` und `PressableLink`, Karten mit `look="card"` (6) |
 | 0.9 | 29.10.2026 | Reine Doku-Änderungen ohne lokale Prüfungen; auf GitHub laufen sie unverändert (2.2, 3.6, 12.1; Entscheidung des Product Owners) |
-| 0.10 | 29.10.2026 | Beispiel für Ordnernamen an die neue Struktur angepasst (`core/placement` entfällt, Architektur ADR-028) (4.4) |
+| 0.10 | 29.10.2026 | Beispiel für Ordnernamen an die neue Struktur angepasst (`core/placement` entfällt, Architektur ADR-028) (4.4) (PR #27) |
 
 ## Inhaltsverzeichnis
 
