@@ -1,6 +1,6 @@
-import type { Board, EdgeId, VertexId } from '../board/board';
 import { pick, type RandomSource } from '@/core/random';
 import { assert } from '@/core/shared';
+import type { Board, EdgeId, VertexId } from '../board/board';
 
 /**
  * Draws the road of a building just placed (US-PL-03, Requirements 6.3): each edge at the

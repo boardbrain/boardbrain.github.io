@@ -1,5 +1,5 @@
-import type { Board, VertexId } from '../board/board';
 import { pick, type RandomSource } from '@/core/random';
+import type { Board, VertexId } from '../board/board';
 
 /**
  * State of the board while buildings are placed: which vertices already carry a building.

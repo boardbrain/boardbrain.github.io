@@ -1,6 +1,6 @@
-import type { Board, VertexId } from '../board/board';
 import type { RandomSource } from '@/core/random';
 import { InvariantError } from '@/core/shared';
+import type { Board, VertexId } from '../board/board';
 import { drawBuilding, type VertexRule } from './rules';
 
 /**
