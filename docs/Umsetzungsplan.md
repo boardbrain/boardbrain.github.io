@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.18 |
+| Version | 0.19 |
 | Stand | 29.10.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.12 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.18 (9.3, 13, E-32), BoardBrain_Architektur.md v0.19 (19) |
 | Sprache | Deutsch |
@@ -31,6 +31,7 @@
 | 0.16 | 28.10.2026 | K-3 umgesetzt (#23): Kartenhand auf dem Handy nur auf dem Start aufgefächert, sonst eingefahren (Variante E2, Stil D5, 30 px); auf Tablet und PC unverändert; Design-Referenz `docs/design/k3-card-hand-final-preview.html`; Motion 14.2.0; offener Punkt „Einstellung für die Kartenhand“ bei I6 (7); neue Aufgabe K-4 „Berührungsverhalten app-weit“ als Nächstes vor I2 (2, 6) |
 | 0.17 | 28.10.2026 | K-4 umgesetzt (#25): Druckzustand für alle Knöpfe und Links (Knöpfe K, Karten K1), kein Browsermenü, keine Linkvorschau und kein Markieren beim langen Drücken; Design-Referenz `docs/design/k4-touch-final-preview.html`; offener Punkt „Druckzustand weicher machen und Hover am PC“ bei I6 (2, 6, 7) |
 | 0.18 | 29.10.2026 | Zuschnitt von I2 (E-32, Spezifikation 0.12): I2 als ganzer Block „Generierung“ mit Inszenierung, Startrohstoffen, abweichenden Farben und Überspringen der Platzierung; Bündel I2-A bis I2-F und Design D-2 (neu 8); I3 bis I6 grob nach Blöcken zugeschnitten, D-2 von vor I5 nach I2 (2, 7); Verweise auf die Kapitel der Bündel, reine Doku-Änderungen ohne lokale Prüfungen (4.1, 4.3; Entwicklungsrichtlinien 3.6) |
+| 0.19 | 29.10.2026 | Bündel I2-A umgesetzt; Inhalt von I2-A und I2-B nach ADR-028 präzisiert: Catan-Regeln, Rohstoffe und Schrittarten im Catan-Modul (8) |
 
 ## 1. Zweck
 
@@ -267,7 +268,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 
 ### I2-A Platzierung, Reihenfolge, Startrohstoffe
 
-- **Inhalt:** Platzierungsregeln als Bausteine in `core/placement` (Inlandkreuzung, Abstandsregel; Architektur 5.3); Strategie „bei Sackgasse verdeckt neu losen“ (`RetryOnDeadEnd`, 5.4, ADR-010); Straße gleichverteilt aus den an das neue Gebäude angrenzenden Kanten; in `core/draws` die Platzierungsreihenfolge in n−1 Drehs und die Startrohstoffe mit und ohne Zurücklegen (5.6).
+- **Inhalt:** Platzierungsregeln als Bausteine: Schnittstelle in `core/placement`, die Catan-Regeln (Inlandkreuzung, Abstandsregel; Architektur 5.3) im Catan-Modul (ADR-028); Strategie „bei Sackgasse verdeckt neu losen“ (`RetryOnDeadEnd`, 5.4, ADR-010); Straße gleichverteilt aus den an das neue Gebäude angrenzenden Kanten; in `core/draws` die Platzierungsreihenfolge in n−1 Drehs und das Ziehen aus einem Vorrat mit und ohne Zurücklegen, die Rohstoffe selbst im Catan-Modul (5.6). *(präzisiert in 0.19)*
 - **Nicht enthalten:** Oberfläche.
 - **Nachweis:** Eigenschaftstests mit festem Startwert; exaktes Durchzählen je Ziehung (Architektur 14.3); statistische Suite: alle n! Reihenfolgen für n = 2 bis 4 gleich häufig, Gleichverteilung je Gebäude-, Straßen- und Rohstoffziehung; die Zahl der Versuche bei 4 Personen wird gemessen und dokumentiert (NFA-EW-08).
 - **Pakete:** keine.
@@ -275,7 +276,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 
 ### I2-B Generierung und gespeicherte Partie
 
-- **Inhalt:** Schritte und spielunabhängige Ablaufsteuerung in `core/generation` (Architektur 5.5); der Catan-Ablauf aus Spezifikation 3.1 im Catan-Modul mit Spielversionen, Modus, `nextStep`, `invalidatedBy` und `summary`, einschließlich Startrohstoffen und übersprungener Platzierung; Farben der Partie mit Tausch (US-PG-04). `SessionService`: vorbereiten, starten, Schritt ausführen, bestätigen, wiederholen, beenden ohne Ergebnis; erst speichern, dann zeigen (ADR-014, 10.1). Die Sitzung liegt in der vorhandenen Tabelle `session`, eine Migration ist nicht nötig. Der `MasterDataService` sperrt die Spielbindung der beteiligten Gruppe (US-VW-02 AK-5, 10.4).
+- **Inhalt:** Schritte und spielunabhängige Ablaufsteuerung in `core/generation` (Architektur 5.5), die Catan-Schrittarten im Catan-Modul (ADR-028, *ergänzt in 0.19*); der Catan-Ablauf aus Spezifikation 3.1 im Catan-Modul mit Spielversionen, Modus, `nextStep`, `invalidatedBy` und `summary`, einschließlich Startrohstoffen und übersprungener Platzierung; Farben der Partie mit Tausch (US-PG-04). `SessionService`: vorbereiten, starten, Schritt ausführen, bestätigen, wiederholen, beenden ohne Ergebnis; erst speichern, dann zeigen (ADR-014, 10.1). Die Sitzung liegt in der vorhandenen Tabelle `session`, eine Migration ist nicht nötig. Der `MasterDataService` sperrt die Spielbindung der beteiligten Gruppe (US-VW-02 AK-5, 10.4).
 - **Nicht enthalten:** Oberfläche.
 - **Nachweis:** Unit-Tests je Zeile der Abhängigkeitstabelle in Spezifikation 3.1 und für die Zahl der Schritte (Beispiel mit 26 Schritten); Dienst-Tests gegen die Testdatenbank: Neustart nach „aufgedeckt“ und nach „bestätigt“ ergibt denselben Stand, die Sperre greift im Dienst.
 - **Pakete:** keine.

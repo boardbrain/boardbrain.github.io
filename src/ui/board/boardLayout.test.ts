@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createBoard, STANDARD_BOARD } from '@/core/board';
+import { createBoard } from '@/core/board';
+import { CATAN_BOARD } from '@/games/catan';
 import { layoutBoard } from './boardLayout';
 
 type Point = { x: number; y: number };
@@ -22,7 +23,7 @@ function parseViewBox(viewBox: string): {
 }
 
 describe('US-PL-01 board layout (Architecture 13.5, design I1-D)', () => {
-  const layout = layoutBoard(STANDARD_BOARD);
+  const layout = layoutBoard(CATAN_BOARD);
 
   it('AK-3: uses the fixed viewBox of the design reference', () => {
     expect(layout.viewBox).toBe('-60 -53 120 106');

@@ -42,5 +42,5 @@ Ein früherer Lauf am selben Tag ergab 26 bzw. 24 Sackgassen.
 - Sackgassen sind sehr selten: etwa 1 von 4.000 Platzierungen mit 4 Personen. Ein zweiter Durchlauf hat immer genügt.
 - Die Rechenzeit des Neulosens spielt keine Rolle; eine ganze Platzierung dauert Bruchteile einer Millisekunde.
 - Weil so selten neu gelost wird, verschiebt die Bedingung auf Durchläufe ohne Sackgasse die Gesamtverteilung nur geringfügig (Anforderungsdokumentation 6.2.6). Jede einzelne Ziehung bleibt exakt gleichverteilt.
-- Bei 2 und 3 Personen braucht die Platzierung nie mehr als einen Durchlauf. Das prüft ein Eigenschaftstest in `src/core/placement/planner.test.ts`.
+- Bei 2 und 3 Personen braucht die Platzierung nie mehr als einen Durchlauf. Das prüft ein Eigenschaftstest in `src/games/catan/placementPlanner.test.ts`.
 - Die vorausschauende Variante A (PP-14) ist nach diesen Zahlen nicht nötig.

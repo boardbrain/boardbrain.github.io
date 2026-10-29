@@ -1,4 +1,5 @@
-import { drawStartingResources, RESOURCES, type StartingResourcesOptions } from '@/core/draws';
+import type { PoolDrawOptions } from '@/core/draws';
+import { CATAN_RESOURCES, drawCatanStartingResources } from '@/games/catan';
 import { CryptoRandomSource } from '@/infra/random/cryptoRandomSource';
 import { describe, expect, it } from 'vitest';
 import { chiSquareAgainstUniform, criticalValue } from '../support/chiSquare';
@@ -7,11 +8,11 @@ import { chiSquareAgainstUniform, criticalValue } from '../support/chiSquare';
 const DRAWS = 100_000;
 
 // Counts how often each ordered result occurs.
-function countResults(options: StartingResourcesOptions): Map<string, number> {
+function countResults(options: PoolDrawOptions): Map<string, number> {
   const rng = new CryptoRandomSource();
   const counts = new Map<string, number>();
   for (let draw = 0; draw < DRAWS; draw++) {
-    const key = drawStartingResources(options, rng).join(',');
+    const key = drawCatanStartingResources(options, rng).join(',');
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return counts;
@@ -21,7 +22,7 @@ describe('US-SR-01 Draw starting resources with the real random source', () => {
   it('AK-3: with replacement a single draw is uniform over the five resources', () => {
     const counts = countResults({ count: 1, replacement: 'with' });
 
-    expect(counts.size).toBe(RESOURCES.length);
+    expect(counts.size).toBe(CATAN_RESOURCES.length);
     expect(chiSquareAgainstUniform([...counts.values()])).toBeLessThan(criticalValue(4));
   });
 

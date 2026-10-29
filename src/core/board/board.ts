@@ -1,5 +1,5 @@
 import { assert } from '@/core/shared';
-import { addHex, hexesWithin, hexKey, type HexCoord } from './hexCoord';
+import { addHex, hexKey, type HexCoord } from './hexCoord';
 
 declare const boardIdBrand: unique symbol;
 
@@ -206,15 +206,3 @@ export function createBoard(coords: readonly HexCoord[]): Board {
     coastlines: traceCoastlines(edges),
   };
 }
-
-/**
- * Radius of the standard board: all hexes at most two steps from the centre, rows 3, 4, 5,
- * 4, 3 (FA-PL-07).
- */
-export const STANDARD_BOARD_RADIUS = 2;
-
-/**
- * The standard board with 19 hexes, 54 vertices, 72 edges and 24 inland vertices
- * (Requirements 6.1, FA-PL-07).
- */
-export const STANDARD_BOARD: Board = createBoard(hexesWithin(STANDARD_BOARD_RADIUS));

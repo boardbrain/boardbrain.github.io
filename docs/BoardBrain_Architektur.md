@@ -33,7 +33,7 @@
 | 0.17 | 28.10.2026 | README ohne Verweise auf `docs/` (Ordnerstruktur in 15) |
 | 0.18 | 28.10.2026 | Aufgabe K-4: Berührungsverhalten app-weit; Druckzustand über `PressableButton` und `PressableLink` mit `whileTap` auf der CSS-Variable `--press` (Knöpfe schimmern in ihrer Textfarbe, Karten heben sich), keine Tipp-Markierung, keine Linkvorschau und kein Markieren außer in Textfeldern, Browsermenü bei Berührung zentral unterdrückt (`touchMenu.ts` in `AppLayout`), Links nicht ziehbar; ESLint verbietet nackte `button`, `a`, `Link`, `NavLink`; Design-Referenz `docs/design/k4-touch-final-preview.html` (13.6) |
 | 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19); reine Doku-Änderungen ohne lokale Prüfungen (14.1, 16.4; Entwicklungsrichtlinien 3.6) |
-| 0.20 | 29.10.2026 | Bündel I2-A: Bezeichner für Rohstoffe und Zurücklegen (4.5); Umsetzung der Platzierungsregeln, der Sackgassen-Strategie mit Straßen und Schlangenreihenfolge sowie der Reihenfolge und Startrohstoffe (5.3, 5.4, 5.6); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) |
+| 0.20 | 29.10.2026 | Bündel I2-A: Spielspezifisches nur im Spielmodul (neu ADR-028; 4.3, 15): Catan-Brett, Platzierungsregeln, Gebäudearten, Spielversionen und Rohstoffe in `games/catan`, in `core` nur spielunabhängige Bausteine; Bezeichner für Rohstoffe und Zurücklegen (4.5); Umsetzung der Platzierungsregeln, der Sackgassen-Strategie mit Straßen und Schlangenreihenfolge sowie der Reihenfolge und des Ziehens aus einem Vorrat (5.2 bis 5.6); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) |
 
 ## Inhaltsverzeichnis
 
@@ -222,9 +222,9 @@ Die Regeln prüft `dependency-cruiser` bei jedem `npm run check`. Die Zusammense
 |---|---|---|
 | `core/random` | Schnittstelle `RandomSource`, verzerrungsfreie Ganzzahl, Auswahl aus Listen | NFA-ZF-01 bis -03 |
 | `core/model` | Entitäten, Kennungstypen, Invarianten (Gruppengröße, eindeutige Namen, Verträglichkeit) | FA-PG-*, FA-VW-*, 3.4 |
-| `core/board` | Brettgeometrie: Felder, Kreuzungen, Kanten, Nachbarschaften, Inlandkreuzungen; optionaler Feldinhalt | FA-PL-07, NFA-EW-03 bis -05 |
-| `core/placement` | Platzierungsregeln als Bausteine; Strategie für Sackgassen | FA-PL-01 bis -04, NFA-EW-02, NFA-EW-08 |
-| `core/draws` | Person losen, Reihenfolge losen, Startrohstoffe ziehen | FA-LS-*, FA-SR-* |
+| `core/board` | Brettgeometrie: Felder, Kreuzungen, Kanten, Nachbarschaften, Inlandkreuzungen; optionaler Feldinhalt; das Catan-Brett selbst liegt im Catan-Modul (ADR-028) | FA-PL-07, NFA-EW-03 bis -05 |
+| `core/placement` | Schnittstelle für Platzierungsregeln, gleichverteilte Wahl von Kreuzung und Kante, Strategie für Sackgassen, Schlangenreihenfolge; die Regeln eines Spiels liegen in dessen Modul (ADR-028) | FA-PL-01 bis -04, NFA-EW-02, NFA-EW-08 |
+| `core/draws` | Person losen, Reihenfolge losen, aus einem Vorrat ziehen (für die Startrohstoffe) | FA-LS-*, FA-SR-* |
 | `core/generation` | Schritte, Ablaufsteuerung, Wiederholung mit Abhängigkeiten, Sitzungsmodell | FA-AB-*, 3.1, 3.5 |
 | `core/results` | Ergebnisregeln, Plausibilitätswarnungen, Sortierung von Partien | FA-ER-*, 3.6, 3.7 |
 | `core/stats` | Kennzahlen, Siegesserien, Rangliste, Diagrammdaten, Filter | FA-ST-*, 3.8 |
@@ -271,7 +271,7 @@ Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberflä
 | Siedlung, Stadt, Straße | `Settlement`, `City`, `Road` |
 | Sackgasse | `DeadEnd` |
 | Startrohstoffe | `startingResources` |
-| Holz, Lehm, Wolle, Getreide, Erz | `'lumber'`, `'brick'`, `'wool'`, `'grain'`, `'ore'` (`Resource`) |
+| Holz, Lehm, Wolle, Getreide, Erz | `'lumber'`, `'brick'`, `'wool'`, `'grain'`, `'ore'` (`CatanResource`) |
 | Mit / ohne Zurücklegen | `replacement: 'with'` / `'without'` |
 | Glücksrad, Aufblinken | `Wheel`, `Flash` |
 | Kennung | `id` |
@@ -340,7 +340,7 @@ Das Brett wird aus einer Liste von Feldkoordinaten berechnet, nicht fest einprog
 
 Ein Test sichert die Eckdaten aus Anforderung 6.1 ab: 19 Felder, 54 Kreuzungen, 72 Kanten, 24 Inlandkreuzungen, und jede Inlandkreuzung hat genau 3 angrenzende Kanten. Die Darstellung (Kapitel 13.5) berechnet ihre Koordinaten aus demselben Modell.
 
-**Umsetzung (I1-D):** `createBoard(coords)` berechnet aus beliebigen Feldkoordinaten die Kreuzungen (`VertexId` aus den drei Feldern, auf jedem Gerät gleich), die Kanten (`EdgeId` aus den beiden Kreuzungen), Nachbarschaften, Inlandkreuzungen und die Küstenlinien als geschlossene Folgen von Kreuzungen; `STANDARD_BOARD` ist das Brett mit Radius 2. Jede Kreuzung und Kante kennt die Zahl ihrer Landfelder; ein späterer Modus mit Küstenkreuzungen (PP-01) ist damit nur eine weitere Regel (5.3). `hexCenter`, `hexCorners` und `vertexPoint` liefern Punkte in Brett-Einheiten für die Darstellung. Ein Eigenschaftstest prüft die Eckdaten für Bretter mit Radius 0 bis 5. *(neu in 0.15)*
+**Umsetzung (I1-D):** `createBoard(coords)` berechnet aus beliebigen Feldkoordinaten die Kreuzungen (`VertexId` aus den drei Feldern, auf jedem Gerät gleich), die Kanten (`EdgeId` aus den beiden Kreuzungen), Nachbarschaften, Inlandkreuzungen und die Küstenlinien als geschlossene Folgen von Kreuzungen; `STANDARD_BOARD` ist das Brett mit Radius 2. Jede Kreuzung und Kante kennt die Zahl ihrer Landfelder; ein späterer Modus mit Küstenkreuzungen (PP-01) ist damit nur eine weitere Regel (5.3). `hexCenter`, `hexCorners` und `vertexPoint` liefern Punkte in Brett-Einheiten für die Darstellung. Ein Eigenschaftstest prüft die Eckdaten für Bretter mit Radius 0 bis 5. *(neu in 0.15)* Seit I2-A heißt das Brett mit Radius 2 `CATAN_BOARD` und liegt im Catan-Modul; seine Eckdaten aus Anforderung 6.1 prüft `games/catan/board.test.ts` (ADR-028). *(ergänzt in 0.20)*
 
 ### 5.3 Platzierungsregeln als Bausteine
 
@@ -367,7 +367,7 @@ export const catanStandardRules: VertexRule[] = [inlandOnly, distanceRule];
 
 Spätere Modi wie Küstenkreuzungen (PP-01) oder inhaltsabhängige Regeln (PP-04) ergänzen oder ersetzen Bausteine, ohne die bestehenden zu ändern.
 
-**Umsetzung (I2-A):** `VertexRule` ist ein Typ mit der Funktion `allows`; `inlandOnly` prüft die Zahl der Landfelder der Kreuzung (5.2), `CATAN_STANDARD_RULES` ist die Liste beider Regeln. `validVertices(board, rules, occupied)` liefert die gültigen Kreuzungen immer in der festen Reihenfolge des Bretts, damit derselbe Zufallswert stets dieselbe Kreuzung wählt. `drawBuilding` lost daraus mit `pick` und liefert bei einer Sackgasse `undefined`, ohne einen Zufallswert zu verbrauchen. *(neu in 0.20)*
+**Umsetzung (I2-A):** `VertexRule` ist ein Typ mit der Funktion `allows`. `validVertices(board, rules, occupied)` liefert die gültigen Kreuzungen immer in der festen Reihenfolge des Bretts, damit derselbe Zufallswert stets dieselbe Kreuzung wählt; `drawBuilding` lost daraus mit `pick` und liefert bei einer Sackgasse `undefined`, ohne einen Zufallswert zu verbrauchen. Beides liegt spielunabhängig in `core/placement`. Die Regeln `inlandOnly` (prüft die Zahl der Landfelder, 5.2) und `distanceRule` sowie die Liste `CATAN_STANDARD_RULES` liegen nach ADR-028 abweichend von der Skizze in `games/catan/placementRules.ts`. *(neu in 0.20)*
 
 ### 5.4 Sackgassen: verdeckte Vorausberechnung
 
@@ -409,7 +409,7 @@ Eigenschaften:
 
 Straßen hängen nicht von anderen Straßen oder fremden Gebäuden ab (Regel 6.3). Sie werden deshalb nicht vorausberechnet, sondern im jeweiligen Straßenschritt gleichverteilt aus den angrenzenden Kanten gelost.
 
-**Umsetzung (I2-A):** `BuildingPlanner` ist ein Typ, `RetryOnDeadEnd` eine Klasse mit der Obergrenze `MAX_PLAN_ATTEMPTS` = 10.000. Wird sie erreicht, wirft der Planer einen `InvariantError` statt eines eigenen `PlacementError`, weil das nur bei einem Programmierfehler geschehen kann (ADR-025). Ein Neuversuch beginnt immer beim ersten offenen Gebäude; feste Gebäude bleiben unverändert. Die Straße lost `drawRoad(board, building, rng)`. Die Schlangenreihenfolge liefert `placementSchedule(order, rounds)` in `core/placement`; welche Gebäudeart in welcher Runde gilt, ist eine Catan-Regel und steht als `catanPlacementRounds(edition)` im Catan-Modul. Gemessen wurde bei 4 Personen eine Sackgasse in rund 0,02 % der Durchläufe, nie mehr als zwei Durchläufe je Platzierung (`docs/test-reports/sackgassen.md`). *(neu in 0.20)*
+**Umsetzung (I2-A):** `BuildingPlanner` ist ein Typ, `RetryOnDeadEnd` eine Klasse mit der Obergrenze `MAX_PLAN_ATTEMPTS` = 10.000. Wird sie erreicht, wirft der Planer einen `InvariantError` statt eines eigenen `PlacementError`, weil das nur bei einem Programmierfehler geschehen kann (ADR-025). Ein Neuversuch beginnt immer beim ersten offenen Gebäude; feste Gebäude bleiben unverändert. Die Straße lost `drawRoad(board, building, rng)`. Die Schlangenreihenfolge liefert `placementSchedule(order, rounds)` in `core/placement` für beliebige Gebäudearten; die Gebäudearten von Catan (`CatanBuildingType`) und welche in welcher Runde gilt (`catanPlacementRounds(edition)`) stehen im Catan-Modul (ADR-028). Gemessen wurde bei 4 Personen eine Sackgasse in rund 0,02 % der Durchläufe, nie mehr als zwei Durchläufe je Platzierung (`docs/test-reports/sackgassen.md`). *(neu in 0.20)*
 
 ### 5.5 Generierung als Folge von Schritten
 
@@ -437,6 +437,8 @@ Das Catan-Modul liefert eine `GenerationDefinition` mit drei Funktionen:
 
 Die Ablaufsteuerung in `core/generation` ist spielunabhängig: Sie ruft `nextStep` auf, verwaltet Bestätigung und Wiederholung und kennt kein Catan-Detail. Der Baustein „Person losen“ (`core/draws/drawPerson`) ist unabhängig von Catan nutzbar (FA-LS-05).
 
+**Hinweis zu ADR-028 (0.20):** Die Skizze von `Step` oben zählt Catan-Schrittarten in `core` auf. Nach ADR-028 kennt `core/generation` nur einen allgemeinen Schritt mit Art, Ergebnis und Status; die Catan-Schrittarten (Gebäude, Straße, Startrohstoffe mit `CatanResource`) legt I2-B im Catan-Modul an.
+
 ### 5.6 Losschritte und Startrohstoffe
 
 | Ziehung | Verfahren | Anforderung |
@@ -446,7 +448,7 @@ Die Ablaufsteuerung in `core/generation` ist spielunabhängig: Sie ruft `nextSte
 | Startrohstoffe mit Zurücklegen | k Ziehungen `pick(alleFünf)` | FA-SR-03 |
 | Startrohstoffe ohne Zurücklegen | k Ziehungen `pick(nochNichtGezogene)` | FA-SR-03 |
 
-**Umsetzung (I2-A):** Weil jeder Dreh der Reihenfolge ein eigener Schritt ist (Spezifikation 3.1), gibt es neben `drawPlacementOrder` die Einzelteile `drawOrderSpin(persons, drawn, rng)` und `completeOrder(persons, drawn)`; `startingPerson(order)` liefert Platz 1. `drawStartingResources({ count, replacement }, rng)` zieht die Rohstoffe einer Person. Die fünf Rohstoffe stehen als `RESOURCES` in `core/draws` und nicht im Catan-Modul, weil die Schritte in `core/generation` sie speichern (5.5) und `core` das Catan-Modul nicht kennen darf (4.2). *(neu in 0.20)*
+**Umsetzung (I2-A):** Weil jeder Dreh der Reihenfolge ein eigener Schritt ist (Spezifikation 3.1), gibt es neben `drawPlacementOrder` die Einzelteile `drawOrderSpin(persons, drawn, rng)` und `completeOrder(persons, drawn)`; `startingPerson(order)` liefert Platz 1. Für die Startrohstoffe zieht der spielunabhängige Baustein `drawFromPool(pool, { count, replacement }, rng)` aus einer beliebigen Liste. Die fünf Rohstoffe (`CATAN_RESOURCES`), die erlaubte Anzahl 1 bis 5 und `drawCatanStartingResources` liegen im Catan-Modul (ADR-028). *(neu in 0.20)*
 
 ---
 
@@ -1209,8 +1211,8 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  │  ├─ random/                      RandomSource, uniformInt, pick
 │  │  ├─ model/                       Entitäten, Kennungen, Invarianten
 │  │  ├─ board/                       Brettgeometrie
-│  │  ├─ placement/                   Regeln (Bausteine), BuildingPlanner
-│  │  ├─ draws/                       Person losen, Reihenfolge, Startrohstoffe
+│  │  ├─ placement/                   Regel-Schnittstelle, BuildingPlanner, Schlangenreihenfolge
+│  │  ├─ draws/                       Person losen, Reihenfolge, aus einem Vorrat ziehen
 │  │  ├─ generation/                  Schritte, Ablauf, Wiederholung, Sitzungsmodell
 │  │  ├─ results/                     Ergebnisregeln, Plausibilität, Sortierung
 │  │  ├─ stats/                       Kennzahlen, Rangliste, Diagrammdaten
@@ -1219,7 +1221,7 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  ├─ games/
 │  │  ├─ types.ts                     Schnittstelle GameModule
 │  │  ├─ registry.ts                  Liste der unterstützten Spiele
-│  │  └─ catan/                       Spielmodul Catan
+│  │  └─ catan/                       Spielmodul Catan: Brett, Regeln, Spielversionen, Rohstoffe (ADR-028)
 │  ├─ app/
 │  │  ├─ ports.ts                     Schnittstellen zu infra
 │  │  └─ services/                    Anwendungsdienste (Kapitel 4.4)
@@ -1400,6 +1402,7 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | ADR-025 | Fehlerbehandlung mit Ergebnistyp | Angenommen |
 | ADR-026 | ESLint 10 ohne eslint-plugin-react | Angenommen |
 | ADR-027 | Code durchgehend englisch | Angenommen |
+| ADR-028 | Spielspezifisches nur im Spielmodul | Angenommen |
 
 ---
 
@@ -1805,6 +1808,27 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 **Betrachtete Optionen:** Deutsche Kommentare und Testnamen (ADR-008, Entwicklungsrichtlinien 8.2, bisher); nur Kommentare englisch (uneinheitlich).
 
 **Konsequenzen:** Code liest sich durchgehend englisch, passend zu Bezeichnern und Bibliotheken. Fachbegriffe folgen der Zuordnung in 4.5. Tests finden Elemente der Oberfläche weiterhin über deren deutsche Beschriftung. Die Sprache wird nicht automatisch geprüft (Review).
+
+---
+
+### ADR-028: Spielspezifisches nur im Spielmodul
+
+**Status:** Angenommen (Bündel I2-A, 29.10.2026; Entscheidung des Product Owners)
+
+**Kontext:** Die Skizzen in 5.2 bis 5.6 legten Teile, die nur Catan betreffen, in `core`: das Standardbrett, die Liste der Platzierungsregeln, die Gebäudearten Siedlung und Stadt, die Rohstoffe und die Schrittarten der Generierung. Das widerspricht NFA-EW-01 (Spiele als Module) und dem Grundsatz aus 5.5, dass die Ablaufsteuerung kein Catan-Detail kennt. Ein zweites Spiel müsste sonst `core` ändern.
+
+**Entscheidung:** `core` enthält nur spielunabhängige Bausteine: Brettgeometrie (`createBoard`), die Regel-Schnittstelle `VertexRule` mit gleichverteilter Wahl von Kreuzung und Kante, die Strategie für Sackgassen, die Schlangenreihenfolge für beliebige Gebäudearten, Person und Reihenfolge losen und das Ziehen aus einem Vorrat. Alles, was nur ein Spiel betrifft, liegt in dessen Modul unter `games/‹spiel›`, zusammen mit seinen Tests. Für Catan sind das:
+
+- das Brett (`CATAN_BOARD`),
+- die Platzierungsregeln (`inlandOnly`, `distanceRule`, `CATAN_STANDARD_RULES`),
+- Spielversionen und Gebäudearten (`CATAN_EDITIONS`, `CatanBuildingType`, `catanPlacementRounds`),
+- die Rohstoffe (`CATAN_RESOURCES`, `CATAN_STARTING_RESOURCES_COUNT`, `drawCatanStartingResources`).
+
+Ab I2-B gilt das auch für die Schrittarten: `core/generation` kennt einen allgemeinen Schritt, das Catan-Modul seine Schrittarten.
+
+**Betrachtete Optionen:** Catan-Teile in `core` wie in den Skizzen (einfacher, aber gegen NFA-EW-01).
+
+**Konsequenzen:** Die Schichtregel `core` ← `games` bleibt unverändert und wird von dependency-cruiser geprüft. Tests der Bausteine in `core` verwenden eigene kleine Spielzeugregeln und -bretter; die Abnahmekriterien zu Catan (US-PL-01 AK-1, US-PL-02, US-SR-01) werden im Catan-Modul nachgewiesen. Die Skizzen in 5.3 bis 5.5 bleiben zur Veranschaulichung stehen; die Abschnitte „Umsetzung (I2-A)“ nennen den tatsächlichen Ort. Offen ist noch, ob auch das Farbmodell der Gruppen (`catanColor`, `excludesCatan`, `CATAN_COLOR_KEYS` in `core/model`) ins Catan-Modul gehört; die Entscheidung des Product Owners steht aus.
 
 ---
 

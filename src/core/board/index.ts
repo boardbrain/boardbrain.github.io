@@ -5,8 +5,6 @@
  */
 export {
   createBoard,
-  STANDARD_BOARD,
-  STANDARD_BOARD_RADIUS,
   type Board,
   type Edge,
   type EdgeId,

@@ -1,13 +1,17 @@
-import { STANDARD_BOARD, type VertexId } from '@/core/board';
+import type { VertexId } from '@/core/board';
 import {
-  CATAN_STANDARD_RULES,
   drawBuilding,
   drawRoad,
   placementSchedule,
   RetryOnDeadEnd,
   validVertices,
 } from '@/core/placement';
-import { CATAN_EDITIONS, catanPlacementRounds } from '@/games/catan';
+import {
+  CATAN_BOARD,
+  CATAN_EDITIONS,
+  CATAN_STANDARD_RULES,
+  catanPlacementRounds,
+} from '@/games/catan';
 import { CryptoRandomSource } from '@/infra/random/cryptoRandomSource';
 import { describe, expect, it } from 'vitest';
 import { chiSquareAgainstUniform, criticalValue } from '../support/chiSquare';
@@ -16,7 +20,7 @@ import { centreBlockers } from '../support/placementCases';
 
 // NFA-ZF-02: 100,000 draws per check, chi-square against the uniform distribution, α = 0.001.
 const DRAWS = 100_000;
-const board = STANDARD_BOARD;
+const board = CATAN_BOARD;
 const rules = CATAN_STANDARD_RULES;
 
 const centreCorner = defined(

@@ -1,4 +1,4 @@
-import { STANDARD_BOARD } from '@/core/board';
+import { CATAN_BOARD } from '@/games/catan';
 import { t } from '@/i18n/t';
 import { Board } from '@/ui/board/Board';
 import { Page } from '@/ui/components/Page';
@@ -19,7 +19,7 @@ export function BoardView(): React.JSX.Element {
       isFullHeight
     >
       <div className={styles.area}>
-        <Board board={STANDARD_BOARD} />
+        <Board board={CATAN_BOARD} />
       </div>
     </Page>
   );
