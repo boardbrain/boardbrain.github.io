@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.19 |
+| Version | 0.20 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 29.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -33,6 +33,7 @@
 | 0.17 | 28.10.2026 | README ohne Verweise auf `docs/` (Ordnerstruktur in 15) |
 | 0.18 | 28.10.2026 | Aufgabe K-4: Berührungsverhalten app-weit; Druckzustand über `PressableButton` und `PressableLink` mit `whileTap` auf der CSS-Variable `--press` (Knöpfe schimmern in ihrer Textfarbe, Karten heben sich), keine Tipp-Markierung, keine Linkvorschau und kein Markieren außer in Textfeldern, Browsermenü bei Berührung zentral unterdrückt (`touchMenu.ts` in `AppLayout`), Links nicht ziehbar; ESLint verbietet nackte `button`, `a`, `Link`, `NavLink`; Design-Referenz `docs/design/k4-touch-final-preview.html` (13.6) |
 | 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19); reine Doku-Änderungen ohne lokale Prüfungen (14.1, 16.4; Entwicklungsrichtlinien 3.6) |
+| 0.20 | 29.10.2026 | Bündel I2-A: Bezeichner für Rohstoffe und Zurücklegen (4.5); Umsetzung der Platzierungsregeln, der Sackgassen-Strategie mit Straßen und Schlangenreihenfolge sowie der Reihenfolge und Startrohstoffe (5.3, 5.4, 5.6); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) |
 
 ## Inhaltsverzeichnis
 
@@ -270,6 +271,8 @@ Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberflä
 | Siedlung, Stadt, Straße | `Settlement`, `City`, `Road` |
 | Sackgasse | `DeadEnd` |
 | Startrohstoffe | `startingResources` |
+| Holz, Lehm, Wolle, Getreide, Erz | `'lumber'`, `'brick'`, `'wool'`, `'grain'`, `'ore'` (`Resource`) |
+| Mit / ohne Zurücklegen | `replacement: 'with'` / `'without'` |
 | Glücksrad, Aufblinken | `Wheel`, `Flash` |
 | Kennung | `id` |
 | Sicherungspunkt, Vollsicherung | `Snapshot`, `FullBackup` |
@@ -364,6 +367,8 @@ export const catanStandardRules: VertexRule[] = [inlandOnly, distanceRule];
 
 Spätere Modi wie Küstenkreuzungen (PP-01) oder inhaltsabhängige Regeln (PP-04) ergänzen oder ersetzen Bausteine, ohne die bestehenden zu ändern.
 
+**Umsetzung (I2-A):** `VertexRule` ist ein Typ mit der Funktion `allows`; `inlandOnly` prüft die Zahl der Landfelder der Kreuzung (5.2), `CATAN_STANDARD_RULES` ist die Liste beider Regeln. `validVertices(board, rules, occupied)` liefert die gültigen Kreuzungen immer in der festen Reihenfolge des Bretts, damit derselbe Zufallswert stets dieselbe Kreuzung wählt. `drawBuilding` lost daraus mit `pick` und liefert bei einer Sackgasse `undefined`, ohne einen Zufallswert zu verbrauchen. *(neu in 0.20)*
+
 ### 5.4 Sackgassen: verdeckte Vorausberechnung
 
 Die Behandlung von Sackgassen ist eine austauschbare Strategie (NFA-EW-08). Version 1 nutzt Variante B (E-09): Zu Beginn der Platzierung bzw. ab einem wiederholten Gebäude werden alle verbleibenden Gebäude verdeckt gelost. Endet ein Durchlauf in einer Sackgasse, wird er verworfen und neu gelost. Angezeigt wird erst danach, Schritt für Schritt.
@@ -404,6 +409,8 @@ Eigenschaften:
 
 Straßen hängen nicht von anderen Straßen oder fremden Gebäuden ab (Regel 6.3). Sie werden deshalb nicht vorausberechnet, sondern im jeweiligen Straßenschritt gleichverteilt aus den angrenzenden Kanten gelost.
 
+**Umsetzung (I2-A):** `BuildingPlanner` ist ein Typ, `RetryOnDeadEnd` eine Klasse mit der Obergrenze `MAX_PLAN_ATTEMPTS` = 10.000. Wird sie erreicht, wirft der Planer einen `InvariantError` statt eines eigenen `PlacementError`, weil das nur bei einem Programmierfehler geschehen kann (ADR-025). Ein Neuversuch beginnt immer beim ersten offenen Gebäude; feste Gebäude bleiben unverändert. Die Straße lost `drawRoad(board, building, rng)`. Die Schlangenreihenfolge liefert `placementSchedule(order, rounds)` in `core/placement`; welche Gebäudeart in welcher Runde gilt, ist eine Catan-Regel und steht als `catanPlacementRounds(edition)` im Catan-Modul. Gemessen wurde bei 4 Personen eine Sackgasse in rund 0,02 % der Durchläufe, nie mehr als zwei Durchläufe je Platzierung (`docs/test-reports/sackgassen.md`). *(neu in 0.20)*
+
 ### 5.5 Generierung als Folge von Schritten
 
 Die Generierung ist eine Liste von Schritten im Sinne von Spezifikation 3.1. Jeder Schritt hat eine Art, ein Ergebnis und einen Bestätigungsstatus.
@@ -438,6 +445,8 @@ Die Ablaufsteuerung in `core/generation` ist spielunabhängig: Sie ruft `nextSte
 | Platzierungsreihenfolge (LS-02) | n−1 Ziehungen `pick(verbleibende)`; der letzte Platz ergibt sich; alle n! Reihenfolgen gleich wahrscheinlich | FA-LS-02, US-LS-03 |
 | Startrohstoffe mit Zurücklegen | k Ziehungen `pick(alleFünf)` | FA-SR-03 |
 | Startrohstoffe ohne Zurücklegen | k Ziehungen `pick(nochNichtGezogene)` | FA-SR-03 |
+
+**Umsetzung (I2-A):** Weil jeder Dreh der Reihenfolge ein eigener Schritt ist (Spezifikation 3.1), gibt es neben `drawPlacementOrder` die Einzelteile `drawOrderSpin(persons, drawn, rng)` und `completeOrder(persons, drawn)`; `startingPerson(order)` liefert Platz 1. `drawStartingResources({ count, replacement }, rng)` zieht die Rohstoffe einer Person. Die fünf Rohstoffe stehen als `RESOURCES` in `core/draws` und nicht im Catan-Modul, weil die Schritte in `core/generation` sie speichern (5.5) und `core` das Catan-Modul nicht kennen darf (4.2). *(neu in 0.20)*
 
 ---
 
@@ -1116,7 +1125,7 @@ Die statistische Suite prüft mit dem echten `CryptoRandomSource` und jeweils 10
 
 Verfahren: Chi-Quadrat-Anpassungstest gegen die Gleichverteilung mit α = 0,001 je Test. Die kritischen Werte stehen als Tabelle in `tests/support`. Weil auch korrekter Code bei vielen Tests gelegentlich zufällig auffällt, wird ein fehlgeschlagener Test einmal wiederholt; erst ein zweiter Fehlschlag gilt als Fehler.
 
-Zusätzlich misst die Suite für 4 Personen in beiden Spielversionen über 100.000 vollständige Platzierungen, wie oft verdeckt neu gelost werden musste. Das Ergebnis wird in `docs/test-reports/sackgassen.md` festgehalten (NFA-EW-08).
+Zusätzlich misst die Suite für 4 Personen in beiden Spielversionen über 100.000 vollständige Platzierungen, wie oft verdeckt neu gelost werden musste. Das Ergebnis wird in `docs/test-reports/sackgassen.md` festgehalten (NFA-EW-08); `npm run test:stat` läuft mit dem ausführlichen Reporter und gibt die Messung bei jedem Lauf als Anmerkung aus.
 
 ### 14.5 Ende-zu-Ende-Tests
 
