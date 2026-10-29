@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createBoard } from './board';
+import { CATAN_BOARD } from './board';
 import { hexCenter, hexCorners, vertexPoint } from './geometry';
-import { hexesWithin, hexKey } from './hexCoord';
+import { hexKey } from './hexCoord';
 
 const SQRT3 = Math.sqrt(3);
-// A board of radius 2 has the shape of the Catan board (FA-PL-07).
-const RADIUS_TWO = createBoard(hexesWithin(2));
 
 describe('US-PL-01 board geometry (FA-PL-07, Architecture 13.5)', () => {
   it('places the centre hex at the origin and the rows 1.5 units apart', () => {
@@ -34,22 +32,22 @@ describe('US-PL-01 board geometry (FA-PL-07, Architecture 13.5)', () => {
   });
 
   it('AK-1: the outline is straight at the top and bottom and pointed at the left and right', () => {
-    const points = RADIUS_TWO.hexes.flatMap((hex) => hexCorners(hex.coord));
+    const points = CATAN_BOARD.hexes.flatMap((hex) => hexCorners(hex.coord));
     const top = Math.min(...points.map((point) => point.y));
     const left = Math.min(...points.map((point) => point.x));
 
     // The top row consists of three tips at the same height; on the far left a single hex.
     expect(points.filter((point) => Math.abs(point.y - top) < 1e-9)).toHaveLength(3);
     expect(
-      RADIUS_TWO.hexes.filter(
+      CATAN_BOARD.hexes.filter(
         (hex) => Math.abs(hexCenter(hex.coord).x - (left + SQRT3 / 2)) < 1e-9,
       ),
     ).toHaveLength(1);
   });
 
   it('places every vertex on a corner of each of its land hexes', () => {
-    const landKeys = new Set(RADIUS_TWO.hexes.map((hex) => hexKey(hex.coord)));
-    for (const vertex of RADIUS_TWO.vertices.values()) {
+    const landKeys = new Set(CATAN_BOARD.hexes.map((hex) => hexKey(hex.coord)));
+    for (const vertex of CATAN_BOARD.vertices.values()) {
       const point = vertexPoint(vertex);
       for (const hex of vertex.hexes.filter((coord) => landKeys.has(hexKey(coord)))) {
         const distances = hexCorners(hex).map((corner) =>

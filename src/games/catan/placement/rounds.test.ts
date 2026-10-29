@@ -1,6 +1,6 @@
-import { placementSchedule } from '@/core/placement';
+import { placementSchedule } from './schedule';
 import { describe, expect, it } from 'vitest';
-import { CATAN_EDITIONS, catanPlacementRounds } from './placementRounds';
+import { CATAN_EDITIONS, catanPlacementRounds } from './rounds';
 
 describe('US-PL-02 Buildings per edition of Catan (Requirements 6.4)', () => {
   it('knows the editions base game and Cities & Knights', () => {

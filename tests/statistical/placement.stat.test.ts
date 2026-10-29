@@ -1,11 +1,11 @@
-import type { VertexId } from '@/core/board';
+import type { VertexId } from '@/games/catan';
 import {
   drawBuilding,
   drawRoad,
   placementSchedule,
   RetryOnDeadEnd,
   validVertices,
-} from '@/core/placement';
+} from '@/games/catan';
 import {
   CATAN_BOARD,
   CATAN_EDITIONS,

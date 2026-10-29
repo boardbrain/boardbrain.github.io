@@ -1,4 +1,4 @@
-import type { Board, VertexId } from '@/core/board';
+import type { Board, VertexId } from '../board/board';
 import { pick, type RandomSource } from '@/core/random';
 
 /**
@@ -11,13 +11,37 @@ export type PlacementState = {
 
 /**
  * A placement rule decides whether a building may stand on a vertex in the current state
- * (Architecture 5.3, NFA-EW-02). A mode is a list of rules; later modes add or replace rules
- * without changing the existing ones. The concrete rules belong to the game module, e.g. the
- * rules of Catan in `games/catan` (ADR-028).
+ * (Architecture 5.3, NFA-EW-02). A mode is a list of rules; later modes such as coastal
+ * vertices (PP-01) add or replace rules without changing the existing ones.
  */
 export type VertexRule = {
   readonly allows: (vertex: VertexId, state: PlacementState) => boolean;
 };
+
+/**
+ * Requirements 6.2.1: buildings stand only on inland vertices, i.e. vertices with three land
+ * hexes.
+ */
+export const inlandOnly: VertexRule = {
+  allows: (vertex, state) => state.board.vertices.get(vertex)?.landHexCount === 3,
+};
+
+/**
+ * Requirements 6.2.2, distance rule: a vertex is free and none of its neighbours carries a
+ * building.
+ */
+export const distanceRule: VertexRule = {
+  allows: (vertex, state) =>
+    !state.occupied.has(vertex) &&
+    (state.board.vertices.get(vertex)?.neighbours ?? []).every(
+      (neighbour) => !state.occupied.has(neighbour),
+    ),
+};
+
+/**
+ * Rules of Catan, mode "Standard" (Requirements 6.2, FA-PL-01).
+ */
+export const CATAN_STANDARD_RULES: readonly VertexRule[] = [inlandOnly, distanceRule];
 
 /**
  * All vertices allowed by every rule, in the fixed order of the board, so the same random

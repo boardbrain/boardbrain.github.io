@@ -31,7 +31,7 @@
 | 0.16 | 28.10.2026 | K-3 umgesetzt (#23): Kartenhand auf dem Handy nur auf dem Start aufgefächert, sonst eingefahren (Variante E2, Stil D5, 30 px); auf Tablet und PC unverändert; Design-Referenz `docs/design/k3-card-hand-final-preview.html`; Motion 14.2.0; offener Punkt „Einstellung für die Kartenhand“ bei I6 (7); neue Aufgabe K-4 „Berührungsverhalten app-weit“ als Nächstes vor I2 (2, 6) |
 | 0.17 | 28.10.2026 | K-4 umgesetzt (#25): Druckzustand für alle Knöpfe und Links (Knöpfe K, Karten K1), kein Browsermenü, keine Linkvorschau und kein Markieren beim langen Drücken; Design-Referenz `docs/design/k4-touch-final-preview.html`; offener Punkt „Druckzustand weicher machen und Hover am PC“ bei I6 (2, 6, 7) |
 | 0.18 | 29.10.2026 | Zuschnitt von I2 (E-32, Spezifikation 0.12): I2 als ganzer Block „Generierung“ mit Inszenierung, Startrohstoffen, abweichenden Farben und Überspringen der Platzierung; Bündel I2-A bis I2-F und Design D-2 (neu 8); I3 bis I6 grob nach Blöcken zugeschnitten, D-2 von vor I5 nach I2 (2, 7); Verweise auf die Kapitel der Bündel, reine Doku-Änderungen ohne lokale Prüfungen (4.1, 4.3; Entwicklungsrichtlinien 3.6) |
-| 0.19 | 29.10.2026 | Bündel I2-A umgesetzt; Inhalt von I2-A und I2-B nach ADR-028 präzisiert: Catan-Regeln, Rohstoffe und Schrittarten im Catan-Modul (8) |
+| 0.19 | 29.10.2026 | Bündel I2-A umgesetzt; Inhalt von I2-A und I2-B nach ADR-028 präzisiert: Brett, Platzierung, Rohstoffe und Schrittarten im Catan-Modul (8) |
 
 ## 1. Zweck
 
@@ -268,7 +268,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 
 ### I2-A Platzierung, Reihenfolge, Startrohstoffe
 
-- **Inhalt:** Platzierungsregeln als Bausteine: Schnittstelle in `core/placement`, die Catan-Regeln (Inlandkreuzung, Abstandsregel; Architektur 5.3) im Catan-Modul (ADR-028); Strategie „bei Sackgasse verdeckt neu losen“ (`RetryOnDeadEnd`, 5.4, ADR-010); Straße gleichverteilt aus den an das neue Gebäude angrenzenden Kanten; in `core/draws` die Platzierungsreihenfolge in n−1 Drehs und das Ziehen aus einem Vorrat mit und ohne Zurücklegen, die Rohstoffe selbst im Catan-Modul (5.6). *(präzisiert in 0.19)*
+- **Inhalt:** im Catan-Modul (ADR-028): Platzierungsregeln als Bausteine (Inlandkreuzung, Abstandsregel; Architektur 5.3); Strategie „bei Sackgasse verdeckt neu losen“ (`RetryOnDeadEnd`, 5.4, ADR-010); Straße gleichverteilt aus den an das neue Gebäude angrenzenden Kanten; Startrohstoffe mit und ohne Zurücklegen (5.6). In `core/draws` die Platzierungsreihenfolge in n−1 Drehs, weil sie Personen betrifft. *(präzisiert in 0.19)*
 - **Nicht enthalten:** Oberfläche.
 - **Nachweis:** Eigenschaftstests mit festem Startwert; exaktes Durchzählen je Ziehung (Architektur 14.3); statistische Suite: alle n! Reihenfolgen für n = 2 bis 4 gleich häufig, Gleichverteilung je Gebäude-, Straßen- und Rohstoffziehung; die Zahl der Versuche bei 4 Personen wird gemessen und dokumentiert (NFA-EW-08).
 - **Pakete:** keine.

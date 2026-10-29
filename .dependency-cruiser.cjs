@@ -3,8 +3,6 @@ const CORE_MODULES = [
   'shared',
   'random',
   'model',
-  'board',
-  'placement',
   'draws',
   'generation',
   'results',

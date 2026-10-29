@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createBoard } from '@/core/board';
+import { createBoard } from '@/games/catan';
 import { CATAN_BOARD } from '@/games/catan';
 import { layoutBoard } from './boardLayout';
 

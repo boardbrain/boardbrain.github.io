@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import type { Board as BoardModel } from '@/core/board';
+import type { Board as BoardModel } from '@/games/catan';
 import { t } from '@/i18n/t';
 import { layoutBoard } from './boardLayout';
 import styles from './Board.module.css';

@@ -1,4 +1,4 @@
-import { createBoard, hexesWithin, type VertexId } from '@/core/board';
+import { CATAN_BOARD, type VertexId } from '../board/board';
 import { InvariantError } from '@/core/shared';
 import { defined } from '@tests/support/defined';
 import { ScriptedRandomSource } from '@tests/support/scriptedRandomSource';
@@ -8,8 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { drawRoad } from './road';
 
 const FC_SEED = 20261029;
-// Centre hex with its six neighbours: six inland vertices, the others on the coast.
-const board = createBoard(hexesWithin(1));
+const board = CATAN_BOARD;
 
 function edgesAt(vertex: VertexId): readonly string[] {
   return board.vertices.get(vertex)?.edges ?? [];

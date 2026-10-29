@@ -1,13 +1,19 @@
-import type { VertexId } from '@/core/board';
+import { CATAN_BOARD, type VertexId } from '../board/board';
 import { defined } from '@tests/support/defined';
 import { centreBlockers } from '@tests/support/placementCases';
 import { ScriptedRandomSource } from '@tests/support/scriptedRandomSource';
 import { SeededRandomSource } from '@tests/support/seededRandomSource';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { drawBuilding, RetryOnDeadEnd, validVertices, type VertexRule } from '@/core/placement';
-import { CATAN_BOARD } from './board';
-import { CATAN_STANDARD_RULES, distanceRule, inlandOnly } from './placementRules';
+import { RetryOnDeadEnd } from './planner';
+import {
+  CATAN_STANDARD_RULES,
+  distanceRule,
+  drawBuilding,
+  inlandOnly,
+  validVertices,
+  type VertexRule,
+} from './rules';
 
 const FC_SEED = 20261029;
 const board = CATAN_BOARD;

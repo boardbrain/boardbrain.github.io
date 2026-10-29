@@ -1,5 +1,5 @@
-import type { Board, VertexId } from '@/core/board';
-import { validVertices, type VertexRule } from '@/core/placement';
+import type { Board, VertexId } from '@/games/catan';
+import { validVertices, type VertexRule } from '@/games/catan';
 
 /**
  * The six inland vertices one edge outward from the corners of the centre hex. They are not

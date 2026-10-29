@@ -1,6 +1,10 @@
-import { createBoard, hexesWithin, type Board, type VertexId } from '@/core/board';
+import { InvariantError } from '@/core/shared';
+import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { CATAN_BOARD, CATAN_BOARD_RADIUS } from './board';
+import { CATAN_BOARD, createBoard, type Board, type VertexId } from './board';
+import { hexesWithin } from './hexCoord';
+
+const FC_SEED = 20261027;
 
 // Number of items per key, in the order the keys first occur.
 function countBy<T, K>(items: Iterable<T>, keyOf: (item: T) => K): Map<K, number> {
@@ -16,10 +20,6 @@ function neighboursOf(board: Board, id: VertexId): readonly VertexId[] {
 }
 
 describe('US-PL-01 Catan board (Requirements 6.1, FA-PL-07)', () => {
-  it('is the board of radius 2 around the centre hex', () => {
-    expect(CATAN_BOARD_RADIUS).toBe(2);
-  });
-
   it('AK-1: has 19 hexes in rows of 3, 4, 5, 4 and 3 from top to bottom', () => {
     const rows = countBy(CATAN_BOARD.hexes, (hex) => hex.coord.r);
 
@@ -103,5 +103,54 @@ describe('US-PL-01 Catan board (Requirements 6.1, FA-PL-07)', () => {
 
     expect([...again.vertices.keys()].sort()).toEqual([...CATAN_BOARD.vertices.keys()].sort());
     expect([...again.edges.keys()].sort()).toEqual([...CATAN_BOARD.edges.keys()].sort());
+  });
+});
+
+describe('NFA-EW-05 boards of other shapes', () => {
+  it('counts hexes, vertices, edges and inland vertices for any radius (property)', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 5 }), (n) => {
+        const board = createBoard(hexesWithin(n));
+        return (
+          board.hexes.length === 3 * n * n + 3 * n + 1 &&
+          board.vertices.size === 6 * (n + 1) * (n + 1) &&
+          board.edges.size === 3 * (n + 1) * (3 * n + 2) &&
+          board.inlandVertices.length === 6 * n * n &&
+          board.coastlines.length === 1 &&
+          board.coastlines[0]?.length === 12 * n + 6
+        );
+      }),
+      { seed: FC_SEED },
+    );
+  });
+
+  it('every vertex has two or three neighbours (property)', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 5 }), (n) =>
+        [...createBoard(hexesWithin(n)).vertices.values()].every(
+          (vertex) => vertex.neighbours.length === 2 || vertex.neighbours.length === 3,
+        ),
+      ),
+      { seed: FC_SEED },
+    );
+  });
+
+  it('finds one coastline per island', () => {
+    const board = createBoard([
+      { q: 0, r: 0 },
+      { q: 5, r: 0 },
+    ]);
+
+    expect(board.coastlines).toHaveLength(2);
+    expect(board.coastlines.map((coast) => coast.length)).toEqual([6, 6]);
+  });
+
+  it('rejects a hex that occurs twice', () => {
+    expect(() =>
+      createBoard([
+        { q: 0, r: 0 },
+        { q: 0, r: 0 },
+      ]),
+    ).toThrow(InvariantError);
   });
 });

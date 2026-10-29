@@ -1,5 +1,8 @@
-import type { PoolDrawOptions } from '@/core/draws';
-import { CATAN_RESOURCES, drawCatanStartingResources } from '@/games/catan';
+import {
+  CATAN_RESOURCES,
+  drawCatanStartingResources,
+  type StartingResourcesOptions,
+} from '@/games/catan';
 import { CryptoRandomSource } from '@/infra/random/cryptoRandomSource';
 import { describe, expect, it } from 'vitest';
 import { chiSquareAgainstUniform, criticalValue } from '../support/chiSquare';
@@ -8,7 +11,7 @@ import { chiSquareAgainstUniform, criticalValue } from '../support/chiSquare';
 const DRAWS = 100_000;
 
 // Counts how often each ordered result occurs.
-function countResults(options: PoolDrawOptions): Map<string, number> {
+function countResults(options: StartingResourcesOptions): Map<string, number> {
   const rng = new CryptoRandomSource();
   const counts = new Map<string, number>();
   for (let draw = 0; draw < DRAWS; draw++) {

@@ -1,4 +1,4 @@
-import { hexCorners, hexKey, vertexPoint, type Board, type BoardPoint } from '@/core/board';
+import { hexCorners, hexKey, vertexPoint, type Board, type BoardPoint } from '@/games/catan';
 
 // Measures in SVG units from design I1-D (docs/design/i1d-board-final-preview.html).
 const SVG_PER_BOARD_UNIT = 10;

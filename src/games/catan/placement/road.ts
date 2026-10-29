@@ -1,4 +1,4 @@
-import type { Board, EdgeId, VertexId } from '@/core/board';
+import type { Board, EdgeId, VertexId } from '../board/board';
 import { pick, type RandomSource } from '@/core/random';
 import { assert } from '@/core/shared';
 
