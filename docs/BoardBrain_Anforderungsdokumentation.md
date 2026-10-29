@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.17 |
+| Version | 0.18 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 26.10.2026 |
+| Stand | 29.10.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -31,6 +31,7 @@
 | 0.15 | 08.10.2026 | Design D-3: Smartphones nur im Hochformat, Tablets und PC in beiden Ausrichtungen (NFA-PL-04 präzisiert, E-29) |
 | 0.16 | 09.10.2026 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus (FA-SP-06, E-30) |
 | 0.17 | 26.10.2026 | Abnahme von I1-F: Personen- und Gruppennamen app-weit eindeutig, auch gegenüber archivierten (FA-PG-09, FA-VW-01, FA-VW-02, E-31) |
+| 0.18 | 29.10.2026 | Zuschnitt von I2: Umsetzung in fachlichen Blöcken einschließlich ihrer Should- und Could-Anteile (E-32); Design der Inszenierung (OP-06) innerhalb von I2 (13) |
 
 ## Inhaltsverzeichnis
 
@@ -501,6 +502,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-29 | Smartphones nur im Hochformat; im Querformat erscheint statt der App ein Hinweis zum Drehen. Tablets (auch aufgeklappte Falt-Smartphones) und PC in beiden Ausrichtungen *(neu in 0.15)* | Im Querformat ist ein Smartphone zu niedrig für Navigation und Inhalt; ein Hinweis wirkt auf Android und iOS gleich, eine echte Sperre gibt es nur unter Android und würde dort auch Tablets sperren. Entscheidung des Product Owners in Design D-3 |
 | E-30 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus; Einschalten nur nach Warnung und Bestätigung; umkehrbar ohne Änderung gespeicherter Gruppeneinstellungen; Gruppen, die währenddessen angelegt werden, schließen Catan aus und können es später wieder zulassen *(neu in 0.16)* | Voraussichtlich nutzen viele die App ganz ohne Catan, nur für Ergebnisse und Statistik; für sie sind Generierung, Catan-Farben und Catan-Auswahl nur Ballast. Entscheidung des Product Owners nach Design D-3 |
 | E-31 | Personen- und Gruppennamen sind app-weit eindeutig, auch gegenüber archivierten Datensätzen; Groß- und Kleinschreibung sowie Leerzeichen am Anfang und Ende zählen nicht. Die App prüft schon bei der Eingabe *(neu in 0.17)* | Personen und Tische bleiben in Listen, Suche, Ergebnissen und beim Import unterscheidbar; ein bloßer Hinweis ließe Verwechslungen zu. Entscheidung des Product Owners bei der Abnahme von I1-F |
+| E-32 | Umgesetzt wird in fachlichen Blöcken: Ein Inkrement schließt einen Block vollständig ab, mit allen zugehörigen Must-, Should- und Could-Stories. Die Generierung (I2) umfasst damit auch Inszenierung, Startrohstoffe, abweichende Farben einer Partie und das Überspringen der Platzierung. Präzisiert E-10; der Umfang von Version 1 bleibt unverändert *(neu in 0.18)* | Ein Bereich soll fertig sein, bevor ein anderer beginnt, statt über mehrere Inkremente verteilt zu bleiben. Animationen und Design gehören zum Kern der App. Entscheidung des Product Owners beim Zuschnitt von I2 |
 
 ---
 
@@ -556,5 +558,5 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 
 1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08) – *abgeschlossen am 07.10.2026 mit Release 0.1.0*
 2. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10); Reihenfolge, Zuschnitt und Ablauf in `docs/Umsetzungsplan.md`
-3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) vor Inkrement I5. Beides blockiert die vorherigen Inkremente nicht, weil Farbwerte nur in den Design-Tokens stehen und die Inszenierung erst in I5 umgesetzt wird – *OP-11 erledigt am 07.10.2026 (E-26)*
+3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) innerhalb von Inkrement I2, sobald der Ablauf einer Partie steht und bevor Glücksrad und Aufblinken gebaut werden (E-32). Die Farbwerte blockieren nichts, weil sie nur in den Design-Tokens stehen – *OP-11 erledigt am 07.10.2026 (E-26); OP-06 verschoben in 0.18*
 4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13)

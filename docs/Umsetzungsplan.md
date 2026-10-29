@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.17 |
-| Stand | 28.10.2026 |
-| Grundlage | BoardBrain_Spezifikation.md v0.8 (2.3), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.14 (9.3, 13), BoardBrain_Architektur.md v0.16 (19) |
+| Version | 0.18 |
+| Stand | 29.10.2026 |
+| Grundlage | BoardBrain_Spezifikation.md v0.12 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.18 (9.3, 13, E-32), BoardBrain_Architektur.md v0.19 (19) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -30,6 +30,7 @@
 | 0.15 | 27.10.2026 | I1-D umgesetzt (#21), Inkrement I1 damit vollständig: Brett H1 unter `#/brett`, Gebäude G1 und Straßen R1 für I2 festgelegt, App-Symbol D8, Manifest und minimaler Service Worker, `docs/Abnahme-Checkliste.md`; Design-Referenz `docs/design/i1d-board-final-preview.html` (2, 5, 7) |
 | 0.16 | 28.10.2026 | K-3 umgesetzt (#23): Kartenhand auf dem Handy nur auf dem Start aufgefächert, sonst eingefahren (Variante E2, Stil D5, 30 px); auf Tablet und PC unverändert; Design-Referenz `docs/design/k3-card-hand-final-preview.html`; Motion 14.2.0; offener Punkt „Einstellung für die Kartenhand“ bei I6 (7); neue Aufgabe K-4 „Berührungsverhalten app-weit“ als Nächstes vor I2 (2, 6) |
 | 0.17 | 28.10.2026 | K-4 umgesetzt (#25): Druckzustand für alle Knöpfe und Links (Knöpfe K, Karten K1), kein Browsermenü, keine Linkvorschau und kein Markieren beim langen Drücken; Design-Referenz `docs/design/k4-touch-final-preview.html`; offener Punkt „Druckzustand weicher machen und Hover am PC“ bei I6 (2, 6, 7) |
+| 0.18 | 29.10.2026 | Zuschnitt von I2 (E-32, Spezifikation 0.12): I2 als ganzer Block „Generierung“ mit Inszenierung, Startrohstoffen, abweichenden Farben und Überspringen der Platzierung; Bündel I2-A bis I2-F und Design D-2 (neu 8); I3 bis I6 grob nach Blöcken zugeschnitten, D-2 von vor I5 nach I2 (2, 7); Verweise auf die Kapitel der Bündel, reine Doku-Änderungen ohne lokale Prüfungen (4.1, 4.3; Entwicklungsrichtlinien 3.6) |
 
 ## 1. Zweck
 
@@ -47,16 +48,17 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 2b | Kleine Aufgabe K-3: Kartenhand einfahren | nach I1, vor I2 | umgesetzt (#23) |
 | 2c | Kleine Aufgabe K-4: Berührungsverhalten app-weit | direkt nach K-3, vor I2 | umgesetzt (#25) |
-| 3 | Inkrement I2 Generierung | nach I1 | offen |
+| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | offen |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
-| 7 | Design D-2: Glücksrad, Aufblinken, Klänge (OP-06) | vor I5 | offen |
-| 8 | Inkrement I5 Erlebnis und Ausbau (alle Should-Stories) | nach I4 | offen |
-| 9 | Inkrement I6 Feinschliff (alle Could-Stories) | nach I5 | offen |
-| 10 | Release 1.0 nach Richtlinien 3.8 mit manueller Abnahme (`docs/Abnahme-Checkliste.md`) | nach I6 | offen |
+| 7 | Inkrement I5 Verwaltung und Archiv | nach I4 | offen |
+| 8 | Inkrement I6 Einstellungen und Feinschliff | nach I5 | offen |
+| 9 | Release 1.0 nach Richtlinien 3.8 mit manueller Abnahme (`docs/Abnahme-Checkliste.md`) | nach I6 | offen |
 
-**Warum das Design nicht ganz vorn steht:** Der Code arbeitet mit Farbkennungen (etwa „rot“), die Farbwerte stehen nur in `src/ui/styles/tokens.css` und lassen sich jederzeit austauschen. OP-11 blockiert daher nichts. Die Inszenierung (OP-06) wird erst in I5 gebraucht.
+**Blöcke statt Stufen (E-32, seit 0.18):** Jedes Inkrement schließt einen fachlichen Block ganz ab, mit allen Must-, Should- und Could-Stories, die dazugehören (Spezifikation 2.2). Bis 0.17 kamen alle Should-Stories gesammelt in I5 und alle Could-Stories in I6; dann wäre zum Beispiel die Inszenierung erst nach Ergebnissen und Datensicherung gefolgt.
+
+**Warum das Design nicht ganz vorn steht:** Der Code arbeitet mit Farbkennungen (etwa „rot“), die Farbwerte stehen nur in `src/ui/styles/tokens.css` und lassen sich jederzeit austauschen. OP-11 blockiert daher nichts. Das Design der Inszenierung (D-2, OP-06) folgt in I2, sobald der Ablauf einer Partie in der App läuft, damit Glücksrad und Aufblinken am echten Ablauf beurteilt werden können.
 
 Bis Release 1.0 bleibt `main` auf dem Platzhalter 0.1.0 (Spezifikation 2.3, EP-02); es gibt keine weiteren Releases, sofern OP-13 nichts anderes ergibt.
 
@@ -79,11 +81,11 @@ Grundlage ist Anforderungsdokumentation 9.3. Modell und Aufwand stellt der Produ
 
 ### 4.1 Bündel
 
-1. **Product Owner:** neue Sitzung in VS Code beginnen (bzw. `/clear`), Modell und Aufwand nach Kapitel 5 (Bündel) bzw. 6 (kleine Aufgaben) einstellen, Auftrag senden:
+1. **Product Owner:** neue Sitzung in VS Code beginnen (bzw. `/clear`), Modell und Aufwand nach dem Kapitel des Inkrements (I1: 5, I2: 8) bzw. Kapitel 6 (kleine Aufgaben) einstellen, Auftrag senden:
    > Setze Bündel ‹ID› aus docs/Umsetzungsplan.md um.
 2. **Claude Code:** liest diesen Plan, die genannten Stories und Kapitel. Antwortet mit einem **kurzen Umsetzungsplan**: Schritte, Tests je Abnahmekriterium, neue Pakete mit Version, Fragen zu Haltepunkten. Beginnt erst nach „los“.
    **Bei neuen oder geänderten Oberflächen** zeigt Claude Code danach zuerst Designvorschläge als lokale, klickbare HTML-Datei (Richtlinien 2.5) und baut erst nach der Wahl des Product Owners. *(neu in 0.8)*
-3. **Claude Code:** Branch von aktuellem `develop` mit dem Namen aus Kapitel 5; umsetzen, testen, in Schritten committen; `npm run check`, `npm run test:e2e`, bei Zufall zusätzlich `npm run test:stat`; Status in Kapitel 2 und 5 auf „umgesetzt (#PR)“ setzen; Pull Request nach `develop` nach Vorlage.
+3. **Claude Code:** Branch von aktuellem `develop` mit dem Namen aus dem Kapitel des Inkrements; umsetzen, testen, in Schritten committen; `npm run check`, `npm run test:e2e`, bei Zufall zusätzlich `npm run test:stat` (bei reinen Doku-Änderungen entfallen sie, Entwicklungsrichtlinien 3.6); Status in Kapitel 2 und im Kapitel des Inkrements auf „umgesetzt (#PR)“ setzen; Pull Request nach `develop` nach Vorlage.
 4. **Claude Code:** startet den Entwicklungsserver frisch und nennt die Adressen (PC `https://localhost:5173/`, Mobilgeräte `https://192.168.178.20:5173/`) und die Testschritte je Gerät.
 5. **Product Owner:** testet, meldet Fehler im Chat. Claude Code behebt sie im selben Branch.
 6. **Product Owner:** Prüfungen grün → **Squash and merge** → schreibt „weiter“.
@@ -223,24 +225,99 @@ Dependabot öffnet monatlich weitere Pull Requests nach `develop`. Für jeden gi
 
 ## 7. Weitere Inkremente
 
-Die Stories je Inkrement stehen in Spezifikation 2.5. Der Zuschnitt in Bündel folgt zu Beginn des jeweiligen Inkrements (4.3). Vorgaben schon jetzt:
+Die Stories je Inkrement stehen in Spezifikation 2.5. Die Inkremente sind nach fachlichen Blöcken grob zugeschnitten (E-32, seit 0.18); den genauen Zuschnitt in Bündel legt Claude Code zu Beginn des jeweiligen Inkrements vor (4.3). I2 steht in Kapitel 8. Vorgaben schon jetzt:
 
-| Inkrement | Kritische Teile (Opus, high) |
-|---|---|
-| I2 Generierung | Platzierung und Sackgassen (Architektur 5.3, 5.4), Ablauf und Wiederaufnahme der laufenden Partie |
-| I3 Ergebnisse und Statistik | keine; Kennzahlen mit Eigenschaftstests |
-| I4 Daten und Updates | Import mit Konflikten, Sicherungspunkte, Service Worker und Updates, Speicherschutz; Paket `valibot` (aus I1-B zurückgestellt) |
-| I5 Erlebnis und Ausbau | Glücksrad mit Motion (nach D-2), Startrohstoffe (Zufall) |
-| I6 Feinschliff | keine |
+| Inkrement | Block | Stories | Kritische Teile (Opus, high) |
+|---|---|---|---|
+| I2 Generierung | gesamter Ablauf einer Partie mit Inszenierung | siehe Kapitel 8 | Platzierung und Sackgassen (Architektur 5.3, 5.4), Ablauf und Wiederaufnahme der laufenden Partie, Glücksrad mit Motion, Startrohstoffe (Zufall) |
+| I3 Ergebnisse und Statistik | Ergebnisse erfassen und ansehen, Statistik | US-ER-01, -04, -05, US-ST-01, -02 (M); US-ER-02, US-ST-03, -04 (S); US-ER-03 (C) | keine; Kennzahlen mit Eigenschaftstests |
+| I4 Daten und Updates | Export, Import, Sicherungspunkte, Updates, Installation, Speicherschutz | US-EI-01, -03 bis -06, US-DS-01, -02, US-UP-01, -02, US-IS-01, -03 (M); US-EI-02, -07, US-DS-04, US-IS-02 (S); US-DS-03 (C) | Import mit Konflikten, Sicherungspunkte, Service Worker und Updates, Speicherschutz; Paket `valibot` (aus I1-B zurückgestellt) |
+| I5 Verwaltung und Archiv | Archivieren, Wiederbeleben, Löschen; Spieleliste getrennt | US-VW-01, -03, -04, US-SP-03 (S) | Löschen mit Sicherungspunkt „Vor Löschen“ (Datenbank) |
+| I6 Einstellungen und Feinschliff | Einstellungen, offene Punkte aus K-3 und K-4 | US-SP-05 (M); US-GB-01 (C) | keine |
+
+Archivieren und Löschen (I5) brauchen Partien (I3) und Sicherungspunkte (I4); „Ich hasse Catan!“ (I6) blendet Catan in allen Ansichten aus und kommt deshalb, wenn alle Ansichten stehen.
 
 **Design-Referenz für Start und Navigation (D-3):** `docs/design/d3-start-navigation-final-preview.html`, Umfang „Mit späteren Funktionen“. Platz und Aussehen der folgenden Elemente sind dort festgelegt; das jeweilige Bündel baut sie genau so ein (Richtlinien 2.5):
 
 | Inkrement | Element aus der Referenz |
 |---|---|
-| I2 | Nachziehstapel mit klassischem Kartenrücken und der Beschriftung „Partie“ direkt über den Karten, ohne Untertitel; Antippen führt in I2 direkt zur neuen Partie. Hinweis „‹Gruppe› spielt gerade – Weiter“ oben auf dem Start |
+| I2 | Nachziehstapel mit klassischem Kartenrücken und der Beschriftung „Partie“ direkt über den Karten, ohne Untertitel; Antippen führt in I2 direkt zur neuen Partie. Hinweis „‹Gruppe› spielt gerade – Weiter“ oben auf dem Start. Karte „Einstellungen“ mit Zahnrad in der Kartenhand, mit I2-F zunächst nur mit dem Tonschalter (US-IN-03 AK-2) *(ergänzt in 0.18)* |
 | I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1): Antippen von „Partie“ dunkelt den Start ab und zeigt zwei Spielkarten – links vorne und in der Akzentfarbe „Ergebnis eintragen“ als Hauptaktion, rechts „Neue Partie“ (Variante K2 aus fünf Vorschlagsrunden, `result-entry-preview-v1.html` bis `result-entry-preview.html`; Begründung: viele werden die App ohne Catan nutzen) |
 | I4 | Banner (Sicherung, Update, Speicher) oben auf dem Start, ohne die Karten zu verschieben; Karte „Daten“ in der Kartenhand |
 | I5 | Vierte Karte „Archiv“ in der Verwaltung |
-| I6 | Karte „Einstellungen“ mit Zahnrad in der Kartenhand; zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen öffnet die Diagnose, der Verweis „Diagnose“ unten in der Verwaltung (seit I1-D) entfällt dann *(ergänzt in 0.15)*; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). **Offener Punkt aus K-4 (mit dem Product Owner abstimmen):** Druckzustand weicher machen, wenn alle Seiten stehen: Fassungen K1 bis K4 und die Verzögerung des Druckzustands (0 bis 120 ms) aus `touch-preview.html`, dazu ein Übergang beim Seitenwechsel statt einer künstlichen Verzögerung; zusammen mit dem Hover-Effekt am PC (NFA-GB-04, „Could“). Der Seitenwechsel bleibt sofort. Einstellung „Ich hasse Catan!“ (US-SP-05, Must): Einschalten mit Warnung und Bestätigung; danach zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Referenz, Schalter „Einstellung“), und alle übrigen bis dahin gebauten Ansichten blenden Catan aus. **Offener Punkt aus K-3 (vor der Umsetzung mit dem Product Owner klären):** Soll es eine Einstellung für die Kartenhand geben (Variante E4 aus `hand-stack-preview.html`), etwa „auf Start und Verwaltung groß“ gegenüber „überall klein“? Eine solche Einstellung wäre eine neue Anforderung und ändert Anforderungsdokumentation und Spezifikation (Haltepunkt) |
+| I6 | Die Einstellungen (Karte seit I2-F) erhalten Design, Akzentfarbe und „Ich hasse Catan!“ *(geändert in 0.18)*; zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen öffnet die Diagnose, der Verweis „Diagnose“ unten in der Verwaltung (seit I1-D) entfällt dann *(ergänzt in 0.15)*; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). **Offener Punkt aus K-4 (mit dem Product Owner abstimmen):** Druckzustand weicher machen, wenn alle Seiten stehen: Fassungen K1 bis K4 und die Verzögerung des Druckzustands (0 bis 120 ms) aus `touch-preview.html`, dazu ein Übergang beim Seitenwechsel statt einer künstlichen Verzögerung; zusammen mit dem Hover-Effekt am PC (NFA-GB-04, „Could“). Der Seitenwechsel bleibt sofort. Einstellung „Ich hasse Catan!“ (US-SP-05, Must): Einschalten mit Warnung und Bestätigung; danach zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Referenz, Schalter „Einstellung“), und alle übrigen bis dahin gebauten Ansichten blenden Catan aus. **Offener Punkt aus K-3 (vor der Umsetzung mit dem Product Owner klären):** Soll es eine Einstellung für die Kartenhand geben (Variante E4 aus `hand-stack-preview.html`), etwa „auf Start und Verwaltung groß“ gegenüber „überall klein“? Eine solche Einstellung wäre eine neue Anforderung und ändert Anforderungsdokumentation und Spezifikation (Haltepunkt) |
 
 **Design-Referenz für Brett, Gebäude und Straßen (I1-D):** `docs/design/i1d-board-final-preview.html`, Umfang „Mit späteren Funktionen“. I2 zeigt die Platzierung auf dem Brett H1 mit Gebäuden G1 und Straßen R1 in den Catan-Farben mit dunkler Kontur, genau wie dort; die Prüfseite `#/brett` und ihr Verweis in der Diagnose entfallen dann. Der Aufbau der Platzierungsseite (Kopfzeile, Schrittanzeige, „Weiter“) ist dort nur angedeutet und wird in I2 gestaltet. *(neu in 0.15)*
+
+## 8. Inkrement I2 Generierung *(neu in 0.18)*
+
+Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und am Spieleabend nutzbar (Spezifikation 2.3). Als ganzer Block nach E-32 umfasst I2 alle Stories zum Ablauf einer Partie, auch Inszenierung, Startrohstoffe, abweichende Farben einer Partie und das Überspringen der Platzierung. Neue Pakete sind nur die hier genannten; ihre genaue Version prüft Claude Code zu Beginn des Bündels und nennt sie im Umsetzungsplan. Jedes andere Paket ist ein Haltepunkt.
+
+| Bündel | Stories | Modell, Aufwand | Branch | Status |
+|---|---|---|---|---|
+| I2-A Platzierung, Reihenfolge, Startrohstoffe | US-PL-02, US-PL-03, US-LS-03, US-SR-01 (Fachlogik) | Opus, high | `feat/us-pl-02-placement-and-dead-ends` | offen |
+| I2-B Generierung und gespeicherte Partie | US-AB-03, US-AB-05, US-AB-06, US-LS-02, US-PG-04, US-PL-05 (Fachlogik und Dienst), US-VW-02 AK-5 | Opus, high | `feat/us-ab-03-generation-session` | offen |
+| I2-C Neue Partie vorbereiten und durchlaufen | US-SP-01, US-SP-04, US-AB-01, US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PG-04, US-SR-01, US-PL-05 (Oberfläche) | Sonnet, medium | `feat/us-ab-01-new-match` | offen |
+| I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-03, US-AB-04, US-AB-05, US-AB-06 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | offen |
+| D-2 Design der Inszenierung (OP-06) | Glücksrad, Aufblinken, Tempo, Klänge | Opus, medium | `chore/op-06-staging-design` | offen |
+| I2-E Glücksrad und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-wheel` | offen |
+| I2-F Aufblinken und Klänge | US-IN-02, US-IN-03 | Sonnet, medium | `feat/us-in-02-highlight-and-sound` | offen |
+
+**Warum diese Reihenfolge:** Erst die Fachlogik ohne Oberfläche (A, B), weil dort die strengsten Prüfkriterien gelten (Zufall, Sackgassen, erst speichern, dann zeigen). Dann der Ablauf in der App (C, D), sodass am Spieleabend schon gespielt werden kann. D-2 folgt, wenn der Ablauf läuft, damit Rad und Aufblinken am echten Ablauf beurteilt werden. Die Inszenierung (E, F) ersetzt dann nur Bausteine der Oberfläche; Fachlogik und Datenbank bleiben unverändert, weil jede Animation ihr Ergebnis fertig erhält (Architektur 13.6).
+
+### I2-A Platzierung, Reihenfolge, Startrohstoffe
+
+- **Inhalt:** Platzierungsregeln als Bausteine in `core/placement` (Inlandkreuzung, Abstandsregel; Architektur 5.3); Strategie „bei Sackgasse verdeckt neu losen“ (`RetryOnDeadEnd`, 5.4, ADR-010); Straße gleichverteilt aus den an das neue Gebäude angrenzenden Kanten; in `core/draws` die Platzierungsreihenfolge in n−1 Drehs und die Startrohstoffe mit und ohne Zurücklegen (5.6).
+- **Nicht enthalten:** Oberfläche.
+- **Nachweis:** Eigenschaftstests mit festem Startwert; exaktes Durchzählen je Ziehung (Architektur 14.3); statistische Suite: alle n! Reihenfolgen für n = 2 bis 4 gleich häufig, Gleichverteilung je Gebäude-, Straßen- und Rohstoffziehung; die Zahl der Versuche bei 4 Personen wird gemessen und dokumentiert (NFA-EW-08).
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** Pull Request lesen (Tabelle Abnahmekriterium → Test), Prüfung `stat` bzw. lokale Ausgabe von `npm run test:stat` ansehen.
+
+### I2-B Generierung und gespeicherte Partie
+
+- **Inhalt:** Schritte und spielunabhängige Ablaufsteuerung in `core/generation` (Architektur 5.5); der Catan-Ablauf aus Spezifikation 3.1 im Catan-Modul mit Spielversionen, Modus, `nextStep`, `invalidatedBy` und `summary`, einschließlich Startrohstoffen und übersprungener Platzierung; Farben der Partie mit Tausch (US-PG-04). `SessionService`: vorbereiten, starten, Schritt ausführen, bestätigen, wiederholen, beenden ohne Ergebnis; erst speichern, dann zeigen (ADR-014, 10.1). Die Sitzung liegt in der vorhandenen Tabelle `session`, eine Migration ist nicht nötig. Der `MasterDataService` sperrt die Spielbindung der beteiligten Gruppe (US-VW-02 AK-5, 10.4).
+- **Nicht enthalten:** Oberfläche.
+- **Nachweis:** Unit-Tests je Zeile der Abhängigkeitstabelle in Spezifikation 3.1 und für die Zahl der Schritte (Beispiel mit 26 Schritten); Dienst-Tests gegen die Testdatenbank: Neustart nach „aufgedeckt“ und nach „bestätigt“ ergibt denselben Stand, die Sperre greift im Dienst.
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** Pull Request lesen (Tabelle Abnahmekriterium → Test).
+
+### I2-C Neue Partie vorbereiten und durchlaufen
+
+- **Design zuerst:** eine Runde Designvorschläge für alle Ansichten einer Partie, damit sie zusammenpassen: Nachziehstapel „Partie“ auf dem Start (Referenz D-3), Spielauswahl, Vorbereitung (Gruppe, Spielversion, Losschritte, Startrohstoffe, Farben der Partie), Losschritt als Satz, Reihenfolge mit Startperson, Platzierung auf dem Brett H1 mit Gebäuden G1 und Straßen R1, „Platzierung überspringen“, Startrohstoffe mit Symbol und Namen, „Weiter“ und „Wiederholen“, Warnung beim Wiederholen, Übersicht der laufenden Partie. Verbindliche Referenz wird `docs/design/i2-match-final-preview.html`; I2-D baut danach ohne weitere Runde. Glücksrad und Aufblinken sind dort nur Platzhalter, sie gestaltet D-2.
+- **Inhalt:** Spielauswahl (nur Catan, US-SP-01), Vorbereitung (US-AB-01, US-SP-04, US-PG-04), alle Schritte nacheinander mit „Weiter“ (US-AB-02) und schlichtem Einblenden über Motion, Darstellung von Gebäuden und Straßen (US-PL-04), „Partie beenden ohne Ergebnis“, damit eine Testpartie nicht hängen bleibt.
+- **Nachweis:** Ende-zu-Ende-Test einer vollständigen Generierung mit 2, 3 und 4 Personen in beiden Spielversionen, mit Startrohstoffen und mit übersprungener Platzierung.
+- **Pakete:** `zustand` (Architektur 3.1) für die Vorbereitung, falls sie über mehrere Adressen geht.
+- **Abnahme durch den Product Owner:** Designvorschlag wählen; danach Partien mit 3 und 4 Personen auf S26, iPad und PC durchlaufen; Punkt K-7 der Abnahme-Checkliste.
+
+### I2-D Laufende Partie: wiederholen, einsehen, fortsetzen
+
+- **Inhalt:** jeden Schritt wiederholen, mit Warnung, die die verworfenen Schritte nennt (US-AB-03); Übersicht der laufenden Partie (US-AB-04); Hinweis „‹Gruppe› spielt gerade – Weiter“ auf dem Start und Rückkehr mit einem Tipp; Rückfrage, wenn trotz laufender Partie eine neue beginnen soll (US-AB-05 AK-2); nach einem Neustart während einer Animation wird sie erneut abgespielt (AK-3); Meldung bei gesperrter Spielbindung mit dem Angebot, die Partie zu beenden (Spezifikation 3.5). Die Prüfseite `#/brett` und ihr Verweis in der Diagnose entfallen.
+- **Nachweis:** Ende-zu-Ende-Tests mit Wiederholungen und mit Neuladen während und nach einem Schritt (Architektur 14.5).
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** Losschritt, Dreh der Reihenfolge, Gebäude und Straße wiederholen; App während eines Schritts schließen und wieder öffnen; Punkte K-7 und K-8.
+
+### D-2 Design der Inszenierung (OP-06)
+
+- **Auftrag:** „Erledige Design D-2 aus docs/Umsetzungsplan.md.“ (Opus, medium)
+- **Inhalt:** Vorschläge für Glücksrad (Segmente mit Name und Catan-Farbe, Drehen und Anhalten), Aufblinken von Kreuzungen und Kanten, Tempo und Klänge als klickbare Vorschau im Stil der Referenz aus I2-C. Ergebnis ist die Referenz `docs/design/d2-staging-final-preview.html`; OP-06 wird in Anforderungsdokumentation und Architektur als geklärt vermerkt. Zu klären ist dabei, woher die Klänge kommen (im Browser über Web Audio erzeugt oder als Dateien); fremde Klangdateien oder eine Bibliothek wären ein Haltepunkt.
+- **Pakete:** keine.
+
+### I2-E Glücksrad und Überspringen
+
+- **Inhalt:** Glücksrad für LS-01, LS-03, LS-04 und jeden Dreh der Reihenfolge mit Motion (Architektur 13.6); der Zielwinkel ergibt sich aus dem gelosten und gespeicherten Ergebnis (US-IN-01 AK-2); Knopf „Animation überspringen“ (US-IN-04).
+- **Nachweis:** Unit-Tests für die Winkelberechnung; Ende-zu-Ende-Tests: Das Rad hält bei der gelosten Person, Überspringen zeigt sofort das Ergebnis, Tippen daneben ändert nichts.
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** Rad auf S26, iPad und PC; flüssig, auch beim Neustart während des Drehens.
+
+### I2-F Aufblinken und Klänge
+
+- **Inhalt:** Aufblinken gültiger Kreuzungen und angrenzender Kanten vor der Festlegung, dekorativ gelost über dieselbe `RandomSource` (Architektur 13.6); Klänge über Web Audio mit Audio-Session „ambient“ (12.3, ADR-017); Tonschalter in einer ersten Einstellungsseite mit der Karte „Einstellungen“ (`SettingsService`, Kapitel 7); keine Vibration.
+- **Nachweis:** Unit-Tests, dass nur gültige Kreuzungen bzw. angrenzende Kanten aufblinken; Ende-zu-Ende-Test für den Tonschalter (bleibt nach Neuladen erhalten).
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** Aufblinken bei einer ganzen Platzierung; Punkt K-13 der Abnahme-Checkliste.
+
+### Hinweise
+
+- **„Ergebnis eintragen“** aus der Übersicht (US-AB-06 AK-1 und AK-2) wird mit US-ER-01 in I3 nachgewiesen, weil das Ergebnisformular zum Block „Ergebnisse“ gehört. In I2 endet eine Partie mit „Partie beenden ohne Ergebnis“, und der Stapel „Partie“ führt direkt zur neuen Partie; die Wahl zwischen „Ergebnis eintragen“ und „Neue Partie“ (Variante K2, Kapitel 7) kommt mit I3.
+- **US-VW-02 AK-5** aus I1-F wird hier nachgewiesen: im Dienst mit I2-B, die Meldung in der Oberfläche mit I2-D.
+- **Animationen bis I2-E:** In I2-C und I2-D erscheinen Ergebnisse mit schlichtem Einblenden; damit sind US-AB-02 AK-2 (eigene Animation je Schritt) und US-AB-05 AK-3 (erneutes Abspielen) schon nachweisbar. I2-E und I2-F ersetzen das Einblenden durch Rad und Aufblinken.

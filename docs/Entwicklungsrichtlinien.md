@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.8 |
+| Version | 0.9 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 28.10.2026 |
+| Stand | 29.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -23,6 +23,7 @@
 | 0.6 | 08.10.2026 | Design D-3: Vorschauen heißen `…-preview….html` und stehen in `.gitignore`; frühere Runden werden archiviert, nie gelöscht; die finale Referenz eines Bündels kommt als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (2.5); E2E-Formate nach E-29: Smartphones im Hochformat, Tablets in beiden Ausrichtungen (8.3) |
 | 0.7 | 28.10.2026 | README auf Kurzbeschreibung, Adresse, Stand und Lizenz beschränkt, ohne Verweise auf `docs/` (11.2) |
 | 0.8 | 28.10.2026 | Aufgabe K-4: Knöpfe und Links nur über `PressableButton` und `PressableLink`, Karten mit `look="card"` (6) |
+| 0.9 | 29.10.2026 | Reine Doku-Änderungen ohne lokale Prüfungen; auf GitHub laufen sie unverändert (2.2, 3.6, 12.1; Entscheidung des Product Owners) |
 
 ## Inhaltsverzeichnis
 
@@ -71,7 +72,7 @@ Ein **Story-Bündel** ist eine Gruppe zusammengehöriger User Stories, die gemei
 1. **Auftrag:** Der Product Owner nennt das Bündel.
 2. **Designvorschläge:** Enthält das Bündel eine neue oder sichtbar geänderte Oberfläche, zeigt Claude Code zuerst Designvorschläge (2.5) und baut erst nach der Wahl des Product Owners. *(neu in 0.5)*
 3. **Umsetzung:** Claude Code legt den Arbeitsbranch von `develop` an, programmiert, schreibt Tests, aktualisiert betroffene Dokumente und committet in sinnvollen Zwischenschritten.
-4. **Lokale Prüfung:** Claude Code führt `npm run check` und `npm run test:e2e` aus und behebt alle Fehler.
+4. **Lokale Prüfung:** Claude Code führt `npm run check` und `npm run test:e2e` aus und behebt alle Fehler; bei reinen Doku-Änderungen entfällt das (3.6).
 5. **Pull Request:** Claude Code pusht und eröffnet den Pull Request nach `develop` mit einer Beschreibung nach Vorlage (3.4), einschließlich Testanleitung für den Product Owner.
 6. **Abnahme:** Claude Code startet den Entwicklungsserver mit diesem Stand; der Product Owner testet am PC und bei Bedarf auf Mobilgeräten. Gleichzeitig laufen die Prüfungen auf GitHub.
 7. **Nachbesserung:** Rückmeldungen behebt Claude Code im selben Branch; der Pull Request aktualisiert sich.
@@ -215,6 +216,8 @@ Automatisch geprüft: ja, die Schutzregeln (Rulesets) erlauben je Branch nur die
 |---|---|---|
 | `develop` | `npm run check`, `npm run test:e2e` | `check`, `e2e`, `pr-title` |
 | `main` | zusätzlich `npm run test:stat` | zusätzlich `stat` und `guard-main` (nur aus `develop` oder `hotfix/…`) |
+
+**Reine Doku-Änderungen** *(neu in 0.9)*: Ändert ein Pull Request nur Dateien unter `docs/` sowie `README.md` oder `CLAUDE.md`, entfallen die lokalen Prüfungen. Keine von ihnen prüft diese Dateien (Prettier lässt Markdown aus, 4.2), und der Code ist derselbe, der auf `develop` schon bestanden hat. Claude Code belegt das vor dem Push mit `git diff --name-only origin/develop` und nennt es in der Beschreibung des Pull Requests. Ist auch nur eine andere Datei geändert, gelten die lokalen Prüfungen wie oben. Auf GitHub laufen alle Prüfungen unverändert.
 
 Details der Jobs: Architektur 16.3.
 
@@ -539,7 +542,7 @@ Markdown, deutsch, Tabellen für Festlegungen, Codebeispiele nur als Skizzen. Pr
 ### 12.1 Je Pull Request (Story-Bündel)
 
 1. Alle Abnahmekriterien der enthaltenen Stories sind erfüllt; jedes hat einen automatisierten Test oder einen manuellen Prüfschritt in der Beschreibung des Pull Requests.
-2. `npm run check` und `npm run test:e2e` sind lokal und auf GitHub bestanden, ohne neue Warnungen.
+2. `npm run check` und `npm run test:e2e` sind lokal und auf GitHub bestanden, ohne neue Warnungen; bei reinen Doku-Änderungen nur auf GitHub (3.6).
 3. Texte stammen aus der Sprachdatei, Farben aus den Tokens, Zufall aus `RandomSource`.
 4. Neue Abläufe in der Oberfläche haben einen Ende-zu-Ende-Test für den Hauptweg.
 5. Betroffene Dokumente in `docs/` sind im selben Pull Request angepasst.
