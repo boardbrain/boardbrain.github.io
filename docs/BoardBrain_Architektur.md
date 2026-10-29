@@ -1826,9 +1826,9 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 
 Ab I2-B gilt das auch für die Schrittarten: `core/generation` kennt einen allgemeinen Schritt, das Catan-Modul seine Schrittarten.
 
-**Betrachtete Optionen:** Catan-Teile in `core` wie in den Skizzen (einfacher, aber gegen NFA-EW-01).
+**Betrachtete Optionen:** Catan-Teile in `core` wie in den Skizzen (einfacher, aber gegen NFA-EW-01); das Farbmodell sofort zu einer allgemeinen Spielerfarbe je Spiel verallgemeinern (verworfen vom Product Owner: ohne zweites Spiel mit Farben wäre die allgemeine Form geraten).
 
-**Konsequenzen:** Die Schichtregel `core` ← `games` bleibt unverändert und wird von dependency-cruiser geprüft. Tests der Bausteine in `core` verwenden eigene kleine Spielzeugregeln und -bretter; die Abnahmekriterien zu Catan (US-PL-01 AK-1, US-PL-02, US-SR-01) werden im Catan-Modul nachgewiesen. Die Skizzen in 5.3 bis 5.5 bleiben zur Veranschaulichung stehen; die Abschnitte „Umsetzung (I2-A)“ nennen den tatsächlichen Ort. Offen ist noch, ob auch das Farbmodell der Gruppen (`catanColor`, `excludesCatan`, `CATAN_COLOR_KEYS` in `core/model`) ins Catan-Modul gehört; die Entscheidung des Product Owners steht aus.
+**Konsequenzen:** Die Schichtregel `core` ← `games` bleibt unverändert und wird von dependency-cruiser geprüft. Tests der Bausteine in `core` verwenden eigene kleine Spielzeugregeln und -bretter; die Abnahmekriterien zu Catan (US-PL-01 AK-1, US-PL-02, US-SR-01) werden im Catan-Modul nachgewiesen. Die Skizzen in 5.3 bis 5.5 bleiben zur Veranschaulichung stehen; die Abschnitte „Umsetzung (I2-A)“ nennen den tatsächlichen Ort. Ausgenommen bleibt das Farbmodell der Gruppen (`catanColor`, `excludesCatan`, `CATAN_COLOR_KEYS` in `core/model`): Die Catan-Farbe und „Catan ausschließen“ sind nach Spezifikation 3.3 und FA-PG-04 Eigenschaften der Gruppe und Teil der gespeicherten Daten (7.1). Es wird erst verallgemeinert, wenn ein zweites Spiel mit Spielfarben hinzukommt, dann mit einer Datenmigration (8.2).
 
 ---
 
