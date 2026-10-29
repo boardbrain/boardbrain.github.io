@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.20 |
+| Version | 0.21 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 29.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -34,6 +34,7 @@
 | 0.18 | 28.10.2026 | Aufgabe K-4: Berührungsverhalten app-weit; Druckzustand über `PressableButton` und `PressableLink` mit `whileTap` auf der CSS-Variable `--press` (Knöpfe schimmern in ihrer Textfarbe, Karten heben sich), keine Tipp-Markierung, keine Linkvorschau und kein Markieren außer in Textfeldern, Browsermenü bei Berührung zentral unterdrückt (`touchMenu.ts` in `AppLayout`), Links nicht ziehbar; ESLint verbietet nackte `button`, `a`, `Link`, `NavLink`; Design-Referenz `docs/design/k4-touch-final-preview.html` (13.6) |
 | 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19); reine Doku-Änderungen ohne lokale Prüfungen (14.1, 16.4; Entwicklungsrichtlinien 3.6) |
 | 0.20 | 29.10.2026 | Bündel I2-A: Was nur Catan betrifft, liegt im Catan-Modul (neu ADR-028): Brett, Platzierungsregeln, Sackgassen-Strategie, Gebäudearten, Spielversionen und Rohstoffe in `games/catan`, die Module `core/board` und `core/placement` entfallen (4.1, 4.3, 5.2 bis 5.6, 15); Farbmodell der Gruppen bleibt in `core/model`; Bezeichner für Rohstoffe und Zurücklegen (4.5); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) (PR #27) |
+| 0.21 | 29.10.2026 | Bündel I2-B: spielunabhängige Ablaufsteuerung mit allgemeinem Schritt und `GenerationDefinition` in `core/generation`, Catan-Ablauf mit Schrittarten, Optionen, verdecktem Plan und Überspringen der Platzierung in `games/catan/generation` (4.3, 5.5, 15); Farben der Partie mit Tausch in `core/model` (5.5); gespeicherte Sitzung mit `setup` statt `options` und `matchColors`, Port `SessionStore`, `SessionService` (10.2, 10.3); Sperre der Spielbindung im `MasterDataService` in derselben Transaktion (10.4); Dienst-Tests mit Speicher-Attrappe, Neustart im Datenbanktest über eine neue Verbindung (14.1) (PR #28) |
 
 ## Inhaltsverzeichnis
 
@@ -229,7 +230,7 @@ Die Regeln prüft `dependency-cruiser` bei jedem `npm run check`. Die Zusammense
 | `core/exchange` | Exportformat, Schema, Migrationskette, Teilumfang, Importanalyse (K1 bis K4), Prüfung von Optionen | FA-EI-*, 3.9 |
 | `core/backup` | Aufbewahrung (15, geschützte Importpunkte), Auslöser „Täglich“, Erinnerungslogik | FA-DS-*, FA-EI-05, 3.10, 3.11 |
 
-Brett, Platzierung und Startrohstoffe betreffen nur Catan und liegen deshalb seit I2-A im Catan-Modul: `games/catan/board` (Brettgeometrie, FA-PL-07, NFA-EW-03 bis -05), `games/catan/placement` (Regeln, Sackgassen-Strategie, Straße, Schlangenreihenfolge, Spielversionen; FA-PL-01 bis -04, NFA-EW-02, NFA-EW-08) und `games/catan/startingResources.ts` (FA-SR-*). In `core` liegt nur, was auch Personen, Gruppen oder andere Spiele betrifft (ADR-028). *(neu in 0.20)*
+Brett, Platzierung und Startrohstoffe betreffen nur Catan und liegen deshalb seit I2-A im Catan-Modul: `games/catan/board` (Brettgeometrie, FA-PL-07, NFA-EW-03 bis -05), `games/catan/placement` (Regeln, Sackgassen-Strategie, Straße, Schlangenreihenfolge, Spielversionen; FA-PL-01 bis -04, NFA-EW-02, NFA-EW-08) und `games/catan/startingResources.ts` (FA-SR-*). In `core` liegt nur, was auch Personen, Gruppen oder andere Spiele betrifft (ADR-028). *(neu in 0.20)* Seit I2-B kommt `games/catan/generation` hinzu: Schrittarten, Optionen, Ablauf und Übersicht einer Catan-Partie (5.5). *(ergänzt in 0.21)*
 | `core/shared` | Gemeinsame Bausteine ohne Fachbezug: Ergebnistyp `Result`, `assert` für Invarianten, Hilfstypen (Kapitel 4.6) | – |
 
 ### 4.4 Anwendungsdienste (`app`)
@@ -438,6 +439,10 @@ Das Catan-Modul liefert eine `GenerationDefinition` mit drei Funktionen:
 Die Ablaufsteuerung in `core/generation` ist spielunabhängig: Sie ruft `nextStep` auf, verwaltet Bestätigung und Wiederholung und kennt kein Catan-Detail. Der Baustein „Person losen“ (`core/draws/drawPerson`) ist unabhängig von Catan nutzbar (FA-LS-05).
 
 **Hinweis zu ADR-028 (0.20):** Die Skizze von `Step` oben zählt Catan-Schrittarten in `core` auf. Nach ADR-028 kennt `core/generation` nur einen allgemeinen Schritt mit Art, Ergebnis und Status; die Catan-Schrittarten (Gebäude und Straße mit `VertexId` und `EdgeId`, Startrohstoffe mit `CatanResource`) legt I2-B im Catan-Modul an.
+
+**Umsetzung (I2-B):** `core/generation` kennt `StepRecord<S>` (Schritt mit Status `revealed` oder `confirmed`), `Generation<S, G>` (Zustand `generation` oder `running`, Schritte in der Reihenfolge des Ablaufs, Zustand des Spielmoduls `G`) und `GenerationDefinition<C, S, G>` mit der Einrichtung einer Partie `C`. Die Definition hat vier Funktionen: `nextStep` lost den ersten fehlenden Schritt des Ablaufs und nennt die Stelle, an der er eingefügt wird; `isComplete` prüft, ohne zu losen, ob ein Schritt fehlt; `invalidatedBy` liefert die abhängigen Schritte; `gameStateAfterRepeat` passt den Zustand des Spielmoduls an. `summary` gehört nicht zur Steuerung, weil nur die Oberfläche die Übersicht braucht; Catan liefert sie als `catanSummary`. Die reinen Funktionen `drawNextStep`, `confirmStep`, `repeatStep` und `stepsDiscardedBy` bilden die Steuerung. **Wiederholen** verwirft den Schritt und seine abhängigen Schritte und lost dann den ersten fehlenden Schritt des Ablaufs; das ist genau der wiederholte. Andere Schritte behalten Ergebnis und Stelle (US-AB-03 AK-3), verworfene werden danach wieder einzeln durchlaufen. Solange ein Schritt auf „Weiter“ wartet, wird nichts anderes gelost oder wiederholt (`step-pending`). Der Zustand `running` ergibt sich, sobald kein Schritt fehlt und keiner wartet; eine Wiederholung in der Übersicht (AK-6) führt zurück nach `generation`.
+
+Im Catan-Modul (`games/catan/generation`) liegen `CatanStep` (Losschritt, Dreh, Gebäude, Straße, Startrohstoffe; Drehs, Gebäude und Straßen zählen ab 0), `CatanOptions` (Spielversion, Modus `standard`, LS-01/03/04 einzeln, Startrohstoffe oder `null`), `CatanSetup` (Beteiligte in der Reihenfolge der Gruppe, Optionen, Farben der Partie) und `CATAN_GENERATION`. Der Ablauf ergibt sich aus den Optionen und den bisherigen Ergebnissen: Platzierung und Startrohstoffe folgen erst, wenn die Reihenfolge vollständig ist. Beim ersten Gebäude und nach einem wiederholten Gebäude lost `RetryOnDeadEnd` alle restlichen Gebäude verdeckt; `CatanGameState.hiddenPlan` hält die noch nicht gezeigten, jedes Gebäude nimmt das nächste daraus. Wiederholte Gebäude und Drehs verwerfen den Plan. `skipCatanPlacement` überspringt die Platzierung, solange die Reihenfolge bestätigt und noch kein Gebäude gelost ist (US-PL-05). Wird danach ein Dreh der Reihenfolge wiederholt, beginnt die Platzierung wieder und kann erneut übersprungen werden (Entscheidung des Product Owners in I2-B). Startrohstoffe bleiben bei einer neuen Reihenfolge als Schritte unverändert; die Übersicht zeigt sie in der neuen Platzierungsreihenfolge. `canPlayCatan` prüft, ob eine Gruppe eine Partie beginnen kann (US-AB-01 AK-1). Die Farben einer Partie (`MatchColor`, `matchColorsOf`, `setMatchColor` mit Tausch nach US-PG-04) liegen beim Farbmodell in `core/model` (ADR-028). *(neu in 0.21)*
 
 ### 5.6 Losschritte und Startrohstoffe
 
@@ -853,6 +858,8 @@ export interface StoredSession {
 }
 ```
 
+**Umsetzung (I2-B):** Die gespeicherte Sitzung ist `Session<C, S, G>` aus `core/generation`, in `app/ports` als `StoredSession` für Catan festgelegt. Statt `options`, `matchColors` und `hiddenPlan` enthält sie die Einrichtung `setup` (Beteiligte, Optionen, Farben der Partie als Liste in der Reihenfolge der Gruppe) und die Generierung `generation` mit Zustand, Schritten und Zustand des Spielmoduls (verdeckter Plan, übersprungene Platzierung). So bleibt `core` frei von Catan (ADR-028). `SESSION_SCHEMA_VERSION` ist 1. Der Port `SessionStore` öffnet eine Transaktion über `session` und lesend über `groups`; das Schreiben der Sitzung zählt nicht als Änderung der Nutzerdaten (7.4). *(neu in 0.21)*
+
 ### 10.3 Verhalten
 
 | Situation | Verhalten |
@@ -866,9 +873,13 @@ export interface StoredSession {
 
 Weil Updates während einer Partie gesperrt sind (FA-UP-02), wechselt eine Sitzung nie die App-Version. `schemaVersion` dient dennoch als Schutz: Eine unbekannte Version führt zu einer verständlichen Meldung statt zu einem Absturz.
 
+**Umsetzung (I2-B):** Der `SessionService` bietet `current`, `isSessionActive`, `prepare` (Startwerte zu einer Gruppe: alle Mitglieder, Standardoptionen, Catan-Farben der Gruppe), `start`, `drawNextStep`, `confirmStep`, `repeatStep`, `skipPlacement` und `endWithoutResult`. Jede Änderung liest, ändert und speichert die Sitzung in einer Transaktion; erst danach erhält die Oberfläche das Ergebnis. `start` speichert die Sitzung ohne Schritt, den ersten Schritt lost erst `drawNextStep`. Erwartbare Fehler sind `no-session`, `session-unsupported` (unbekannte `schemaVersion`), `session-active`, `group-not-eligible`, `step-pending`, `no-step-revealed`, `generation-complete` und `placement-not-skippable`. Eine Sitzung unbekannter Version zählt für die Sperren als laufend und lässt sich mit `endWithoutResult` beenden. Die Warnung vor dem Wiederholen erhält ihre Liste aus `stepsDiscardedBy`. In `src/main.tsx` wird der Dienst zusammen mit der Oberfläche in I2-C eingebunden. *(neu in 0.21)*
+
 ### 10.4 Sperren
 
 Der `SessionService` stellt `isSessionActive()` bereit. `ImportService`, `BackupService.restore`, `MasterDataService` (Archivieren, Löschen, Bindung der beteiligten Gruppe) und `UpdateService` prüfen diese Sperre selbst, nicht nur die Oberfläche (FA-AB-09, E-20).
+
+**Umsetzung (I2-B):** Der `MasterDataService` liest die Sitzung in derselben Transaktion wie die Gruppe (`MasterDataRepositories.session`), damit Prüfung und Änderung nicht auseinanderfallen. `editGroup` lehnt eine geänderte Spielbindung der beteiligten Gruppe mit `group-in-session` ab; Name und Farben bleiben änderbar, weil die Partie ihre Farben beim Start übernommen hat (US-VW-02 AK-5). Archivieren und Löschen folgen mit ihren Bündeln. *(neu in 0.21)*
 
 ---
 
@@ -1061,11 +1072,11 @@ Zwei eigene SVG-Komponenten: Liniendiagramm der kumulierten Siege und Verteilung
 
 | Ebene | Werkzeug | Gegenstand | Wann |
 |---|---|---|---|
-| Unit-Tests | Vitest | `core`, `games`, `app` (mit Speicher-Attrappen); Mindestabdeckung 90 % für `core` und `games` | `npm test`, in `npm run check` mit Abdeckungsprüfung |
+| Unit-Tests | Vitest | `core`, `games`, `app` (mit Speicher-Attrappen; einen Neustart bildet ein neuer Dienst auf derselben Attrappe ab); Mindestabdeckung 90 % für `core` und `games` | `npm test`, in `npm run check` mit Abdeckungsprüfung |
 | Eigenschaftstests | Vitest mit fast-check | Invarianten über viele zufällige Fälle mit festem Startwert | `npm test` |
 | Exakter Nachweis | Vitest | Verzerrungsfreiheit von `uniformIntFromWords` | `npm test` |
 | Statistische Tests | Vitest, eigene Suite | Gleichverteilung mit dem echten Generator; Sackgassenquote | `npm run test:stat`, vor jedem Merge nach `main` |
-| Datenbanktests | Vitest mit `fake-indexeddb` (je Test eine eigene `IDBFactory`); in Komponententests zusätzlich global eingebunden, weil Dexies Live-Abfragen ein globales IndexedDB voraussetzen | Repositories, Transaktionen, Migrationen, Sicherungspunkte | `npm test` |
+| Datenbanktests | Vitest mit `fake-indexeddb` (je Test eine eigene `IDBFactory`); in Komponententests zusätzlich global eingebunden, weil Dexies Live-Abfragen ein globales IndexedDB voraussetzen | Repositories, Transaktionen, Migrationen, Sicherungspunkte; Neustart über eine neue Verbindung zur selben `IDBFactory` | `npm test` |
 
 Komponententests rendern über `renderWithApp` mit einem Daten-Router (`createMemoryRouter`) wie die App, damit `useBlocker` funktioniert. *(neu in 0.14)*
 | Komponententests | Vitest mit React Testing Library | Formulare, Dialoge, Entscheidungsdialoge beim Import | `npm test` |
@@ -1222,6 +1233,7 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  │  └─ catan/                       Spielmodul Catan (ADR-028)
 │  │     ├─ board/                    Brettgeometrie, CATAN_BOARD
 │  │     ├─ placement/                Regeln, BuildingPlanner, Straße, Schlangenreihenfolge, Spielversionen
+│  │     ├─ generation/               Schrittarten, Optionen, Ablauf, Übersicht (ab I2-B)
 │  │     └─ startingResources.ts      Rohstoffe und Startrohstoffe
 │  ├─ app/
 │  │  ├─ ports.ts                     Schnittstellen zu infra

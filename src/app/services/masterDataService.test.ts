@@ -7,10 +7,20 @@ import {
   sequentialIds,
   TEST_NOW,
 } from '@tests/support/masterDataFakes';
+import { aCatanSetup } from '@tests/support/catanGeneration';
 import { describe, expect, it } from 'vitest';
-import type { MasterDataStore } from '@/app/ports';
-import { defaultColors, toGameId, toGroupId, toPersonId, type PersonId } from '@/core/model';
+import type { MasterDataStore, StoredSession } from '@/app/ports';
+import { startGeneration } from '@/core/generation';
+import {
+  defaultColors,
+  toGameId,
+  toGroupId,
+  toPersonId,
+  type GroupId,
+  type PersonId,
+} from '@/core/model';
 import { InvariantError } from '@/core/shared';
+import { CATAN_INITIAL_GAME_STATE } from '@/games/catan';
 import {
   createMasterDataService,
   type CreateGroupInput,
@@ -521,6 +531,70 @@ describe('US-VW-02 Edit a group', () => {
     });
     expect(store.groups).toHaveLength(1);
     expect(store.groups[0]?.name).toBe('Die Zwei');
+  });
+
+  function sessionOf(groupId: GroupId): StoredSession {
+    return {
+      id: 'current',
+      schemaVersion: 1,
+      gameId: catanId,
+      groupId,
+      setup: aCatanSetup(2),
+      generation: startGeneration(CATAN_INITIAL_GAME_STATE),
+      startedAt: TEST_NOW,
+    };
+  }
+
+  it('AK-5: refuses changing the binding while the group is in a match', async () => {
+    const store = storeWithGroup();
+    store.session = sessionOf(aGroup().id);
+    const service = editSetUp(store);
+
+    const result = await service.editGroup({
+      groupId: aGroup().id,
+      name: 'Anna & Ben',
+      binding: { kind: 'global', excludesCatan: true },
+      colors: [{ groupColor: 'red' }, { groupColor: 'blue' }],
+    });
+
+    expect(result).toEqual({ ok: false, error: 'group-in-session' });
+    expect(store.groups).toEqual([aGroup()]);
+  });
+
+  it('AK-5: keeps name and colours changeable while the group is in a match', async () => {
+    const store = storeWithGroup();
+    store.session = sessionOf(aGroup().id);
+    const service = editSetUp(store);
+
+    const result = await service.editGroup({
+      groupId: aGroup().id,
+      name: 'Die Zwei',
+      binding: { kind: 'global' },
+      colors: [
+        { groupColor: 'blue', catanColor: 'blue' },
+        { groupColor: 'red', catanColor: 'red' },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('AK-5: a match of another group does not lock the binding', async () => {
+    const store = storeWithGroup();
+    store.session = sessionOf(toGroupId('00000000-0000-4000-8000-0000000000c9'));
+    const service = editSetUp(store);
+
+    const result = await service.editGroup({
+      groupId: aGroup().id,
+      name: 'Anna & Ben',
+      binding: { kind: 'game', gameId: catanId },
+      colors: [
+        { groupColor: 'red', catanColor: 'red' },
+        { groupColor: 'blue', catanColor: 'blue' },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
   });
 
   it('AK-3: refuses binding a group of 5 to Catan and saves nothing', async () => {

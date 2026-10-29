@@ -49,6 +49,13 @@ export {
 } from './groupColors';
 export { findGroups, type GroupMatch } from './groupSearch';
 export {
+  areMatchColorsValid,
+  matchColorsOf,
+  setMatchColor,
+  type MatchColor,
+  type MatchColors,
+} from './matchColors';
+export {
   isUuidV4,
   parseGameId,
   parseGroupId,
