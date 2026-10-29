@@ -17,6 +17,47 @@ export {
 export { hexCenter, hexCorners, vertexPoint, type BoardPoint } from './board/geometry';
 export { addHex, hexDistance, hexesWithin, hexKey, type HexCoord } from './board/hexCoord';
 export { CATAN_GAME_ID, CATAN_MODULE } from './catanModule';
+export { canPlayCatan } from './eligibility';
+export {
+  CATAN_GENERATION,
+  CATAN_INITIAL_GAME_STATE,
+  canSkipCatanPlacement,
+  catanPlacementOrder,
+  createCatanGeneration,
+  skipCatanPlacement,
+  type CatanGameState,
+  type CatanGeneration,
+  type CatanGenerationDefinition,
+  type PlacementNotSkippableError,
+} from './generation/definition';
+export {
+  CATAN_DEFAULT_OPTIONS,
+  CATAN_DEFAULT_STARTING_RESOURCES,
+  CATAN_MODES,
+  CATAN_PERSON_DRAWS,
+  enabledPersonDraws,
+  type CatanMode,
+  type CatanOptions,
+  type CatanPersonDraw,
+  type CatanSetup,
+} from './generation/options';
+export type {
+  CatanBuildingStep,
+  CatanOrderSpinStep,
+  CatanPersonDrawStep,
+  CatanRoadStep,
+  CatanStartingResourcesStep,
+  CatanStep,
+} from './generation/steps';
+export {
+  catanSummary,
+  type CatanSummary,
+  type CatanSummaryBuilding,
+  type CatanSummaryOrderSpin,
+  type CatanSummaryPersonDraw,
+  type CatanSummaryRoad,
+  type CatanSummaryStartingResources,
+} from './generation/summary';
 export {
   MAX_PLAN_ATTEMPTS,
   RetryOnDeadEnd,
