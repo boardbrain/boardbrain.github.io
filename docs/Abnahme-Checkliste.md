@@ -4,10 +4,10 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Manuelle Abnahme auf echten Geräten vor jedem Release |
-| Version | 0.3 |
+| Version | 0.4 |
 | Status | Angelegt mit Bündel I1-D; die Punkte späterer Inkremente gelten ab dem genannten Inkrement |
-| Stand | 28.10.2026 |
-| Grundlage | BoardBrain_Architektur.md v0.18 (12.1, 13.1, 13.6, 14.6), BoardBrain_Spezifikation.md v0.11 (Kapitel 5), Entwicklungsrichtlinien.md v0.6 (3.8) |
+| Stand | 29.10.2026 |
+| Grundlage | BoardBrain_Architektur.md v0.19 (12.1, 13.1, 13.6, 14.6), BoardBrain_Spezifikation.md v0.12 (2.5, Kapitel 5), Entwicklungsrichtlinien.md v0.6 (3.8) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -17,6 +17,7 @@
 | 0.1 | 27.10.2026 | Erstfassung mit I1-D: Geräte, Vorbereitung, Installation, Start im Flugmodus, Brett; Punkte der Inkremente I2 bis I5 vorgemerkt |
 | 0.2 | 28.10.2026 | K-15 mit K-3: eingefahrene Kartenhand auf dem Smartphone, Antippen und langes Drücken; auf Tablet und PC bleibt die Hand aufgefächert |
 | 0.3 | 28.10.2026 | K-16 mit K-4: Druckzustand, kein Browsermenü, keine Linkvorschau und kein Markieren beim langen Drücken; Grenze der automatischen Tests bei der Linkvorschau (5) |
+| 0.4 | 29.10.2026 | Zuschnitt von I2 (Spezifikation 0.12): K-13 (Ton) gilt ab I2, K-14 (Installationshinweis) ab I4 |
 
 ## 1. Zweck
 
@@ -57,8 +58,8 @@ Ein Punkt gilt erst ab dem Inkrement in der Spalte „ab“. Ein Punkt, der sche
 | K-10 | I4 | Update mit Sicherungsdialog (US-UP-01, US-UP-02) | Hinweis erscheint nicht während einer Partie; neue Version erst nach Bestätigung aktiv, auch nach Neustart; Sicherungspunkt „Vor Update“ vorhanden | ☐ | ☐ | ☐ | ☐ |
 | K-11 | I4 | Persistenter Speicher (US-IS-03) | Im Bereich „Sicherung“ als geschützt angezeigt; sonst die Warnung mit Ursachen | ☐ | ☐ | ☐ | ☐ |
 | K-12 | I4 | iOS: Seite im Safari-Tab öffnen (US-IS-01) | Ausschließlich die bebilderte Installationsanleitung | – | ☐ | ☐ | – |
-| K-13 | I5 | Ton mit und ohne Stummschaltung, während Musik läuft (US-IN-03, FA-IN-07) | Stummschalter wird respektiert; laufende Musik wird nicht unterbrochen | ☐ | ☐ | ☐ | ☐ |
-| K-14 | I5 | Installationshinweis im Browser-Tab (US-IS-02) | Erscheint unter Android und Windows, lässt sich wegklicken und kommt nicht wieder | ☐ | – | – | ☐ |
+| K-13 | I2 | Ton mit und ohne Stummschaltung, während Musik läuft (US-IN-03, FA-IN-07) | Stummschalter wird respektiert; laufende Musik wird nicht unterbrochen | ☐ | ☐ | ☐ | ☐ |
+| K-14 | I4 | Installationshinweis im Browser-Tab (US-IS-02) | Erscheint unter Android und Windows, lässt sich wegklicken und kommt nicht wieder | ☐ | – | – | ☐ |
 | K-15 | I1 | Smartphone: auf einer Unterseite (z. B. Personen) kurz auf das kleine „Start“ tippen; zurück, dann lange auf eine kleine Karte drücken und daneben tippen. Tablet und PC: eine Unterseite öffnen (Architektur 13.1, K-3) | Smartphone: Tippen führt sofort zum Start, dort ist die Hand aufgefächert; langes Drücken fächert die Hand mit Namen über abgedunkeltem Inhalt auf, ohne Browsermenü, ohne blaue Markierung und ohne Seitenwechsel; Tipp daneben fährt sie wieder ein; wie in `docs/design/k3-card-hand-final-preview.html`. Tablet und PC: Die Hand bleibt aufgefächert wie in D-3 | ☐ | ☐ | ☐ | ☐ |
 | K-16 | I1 | Personen mit einigen Karten öffnen: Karten, Pillen, „Speichern“ und „Zurück“ kurz antippen; eine Personenkarte, einen Knopf und eine Überschrift lange drücken, auch lange drücken und dabei wegziehen; lange ins Namensfeld drücken; am PC Rechtsklick auf eine Karte (K-4) | Keine blaue Tipp-Markierung, kein Browsermenü, keine Linkvorschau, nichts markiert; Knöpfe schimmern kurz in ihrer Textfarbe, Karten heben sich weich und werden dunkler und gehen nach dem Loslassen oder Wegziehen zurück, wie in `docs/design/k4-touch-final-preview.html`; Antippen einer Karte öffnet sofort die Person; im Namensfeld erscheint das Menü mit „Einfügen“; am PC erscheint das Kontextmenü | ☐ | ☐ | ☐ | ☐ |
 

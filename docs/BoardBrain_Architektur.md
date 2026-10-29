@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.18 |
+| Version | 0.19 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 28.10.2026 |
+| Stand | 29.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -32,6 +32,7 @@
 | 0.16 | 28.10.2026 | Aufgabe K-3: Kartenhand auf dem Handy nur auf dem Start aufgefächert, sonst eingefahren; auf Tablet und PC überall aufgefächert mit direktem Antippen und Auffächern durch langes Drücken (`HandNavigation`, `cardHand.ts`); Rahmen mit `overflow: clip`; Design-Referenz `docs/design/k3-card-hand-final-preview.html` (13.1); Motion 14 installiert, über `LazyMotion` mit `domAnimation`, `m`-Komponenten und `MotionConfig reducedMotion="user"` (3.1, 13.6) |
 | 0.17 | 28.10.2026 | README ohne Verweise auf `docs/` (Ordnerstruktur in 15) |
 | 0.18 | 28.10.2026 | Aufgabe K-4: Berührungsverhalten app-weit; Druckzustand über `PressableButton` und `PressableLink` mit `whileTap` auf der CSS-Variable `--press` (Knöpfe schimmern in ihrer Textfarbe, Karten heben sich), keine Tipp-Markierung, keine Linkvorschau und kein Markieren außer in Textfeldern, Browsermenü bei Berührung zentral unterdrückt (`touchMenu.ts` in `AppLayout`), Links nicht ziehbar; ESLint verbietet nackte `button`, `a`, `Link`, `NavLink`; Design-Referenz `docs/design/k4-touch-final-preview.html` (13.6) |
+| 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19) |
 
 ## Inhaltsverzeichnis
 
@@ -1829,5 +1830,5 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 
 1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0. *Abgeschlossen am 07.10.2026.*
 2. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10) nach `docs/Umsetzungsplan.md`: zuerst `core/random` mit dem Losbaustein, weil dort die strengsten Prüfkriterien gelten; `core/board` in I1, `core/placement` als erstes Bündel von I2; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
-3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 vor I5. *OP-11 erledigt am 07.10.2026 (13.4).*
+3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 innerhalb von I2, bevor Glücksrad und Aufblinken gebaut werden (Anforderungsdokumentation E-32). *OP-11 erledigt am 07.10.2026 (13.4).*
 4. **Nach I2:** Entscheidung über Vorabversionen (OP-13).

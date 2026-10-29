@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.11 |
+| Version | 0.12 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 26.10.2026 |
+| Stand | 29.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -25,6 +25,7 @@
 | 0.9 | 08.10.2026 | Design D-3 (Anforderungsdokumentation 0.15, E-29): Smartphones nur im Hochformat, im Querformat ein Hinweis zum Drehen; Tablets in beiden Ausrichtungen (US-PL-01 AK-3, NFA-PL-04) |
 | 0.10 | 09.10.2026 | Neue Story US-SP-05 „Catan app-weit ausblenden („Ich hasse Catan!“)“ (Must, I6) zu FA-SP-06 und E-30 (Anforderungsdokumentation 0.16); US-VW-02 AK-7 (2.3, 2.5, 4.1, 4.3, 6) |
 | 0.11 | 26.10.2026 | Abnahme von I1-F (Anforderungsdokumentation 0.17, E-31): Personen- und Gruppennamen app-weit eindeutig, geprüft schon bei der Eingabe (3.4, US-PG-01 AK-3, neu US-PG-02 AK-8, US-VW-02 AK-1, US-VW-06 AK-2, A-02); „Neu anlegen“ beim Import mit vergebenem Namen nur mit anderem Namen (3.9) |
+| 0.12 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation 0.18, E-32): Umsetzung in fachlichen Blöcken (2.2); Inkremente neu nach Blöcken geschnitten, I5 wird „Verwaltung und Archiv“, I6 „Einstellungen und Feinschliff“ (2.3); US-PG-04, US-SR-01, US-IN-01 bis US-IN-04 und US-PL-05 nach I2, US-ER-02, US-ER-03, US-ST-03 und US-ST-04 nach I3, US-EI-02, US-EI-07, US-DS-03, US-DS-04 und US-IS-02 nach I4 (2.5); Summe in 2.5 berichtigt (61 statt 59 Stories) |
 
 ## Inhaltsverzeichnis
 
@@ -67,27 +68,29 @@ Version 1.0 wird erst veröffentlicht, wenn **alle** User Stories dieser Spezifi
 
 ### 2.2 Bedeutung der MoSCoW-Stufen
 
-Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang erscheint, steuert MoSCoW in diesem Projekt die **Reihenfolge der Umsetzung**, nicht den Umfang.
+Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang erscheint, bestimmt MoSCoW in diesem Projekt **nicht den Umfang**.
 
 | Stufe | Bedeutung |
 |---|---|
-| Must | Kern. Ohne ihn ist die App am Spieleabend nicht sinnvoll nutzbar. Wird zuerst umgesetzt. |
-| Should | Wichtig für das vorgesehene Erlebnis und den Alltag. Wird nach allen Must-Stories umgesetzt. |
-| Could | Komfort und Feinschliff. Wird zuletzt umgesetzt. |
+| Must | Kern. Ohne ihn ist die App am Spieleabend nicht sinnvoll nutzbar. |
+| Should | Wichtig für das vorgesehene Erlebnis und den Alltag. |
+| Could | Komfort und Feinschliff. |
 | Won't (V1) | Nicht Teil von Version 1. Entspricht dem Parkplatz (Anforderungsdokumentation, Kapitel 12). |
+
+**Reihenfolge nach Blöcken (E-32):** Umgesetzt wird in fachlichen Blöcken. Ein Inkrement schließt seinen Block vollständig ab, mit allen zugehörigen Must-, Should- und Could-Stories, bevor das nächste beginnt (2.3). Innerhalb eines Blocks kommen die Must-Stories in der Regel zuerst; Bündel und ihre Reihenfolge legt der Umsetzungsplan fest. *(geändert in 0.12; bis 0.11 kamen alle Should-Stories nach allen Must-Stories)*
 
 ### 2.3 Umsetzungsinkremente
 
 | Inkrement | Inhalt | Ergebnis |
 |---|---|---|
 | I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Umbenennen und Gruppen bearbeiten, Brettdarstellung, Losbaustein *(ergänzt in 0.8)* | Stammdaten anlegbar und korrigierbar, Brett sichtbar |
-| I2 Generierung | Ablauf, Losschritte, Platzierung | Vollständige Generierung ohne Inszenierung, am Spieleabend testbar |
-| I3 Ergebnisse und Statistik | Ergebniserfassung, Ergebnisliste, Kennzahlen, Rangliste | Langzeitstatistik nutzbar |
-| I4 Daten und Updates | Vollsicherung und Export, Import mit Konflikten und Zuordnung, Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS, Speicherschutz | Daten sicher und teilbar |
-| I5 Erlebnis und Ausbau | Alle Should-Stories | Vorgesehenes Spielerlebnis |
-| I6 Feinschliff | Alle Could-Stories sowie US-SP-05 „Ich hasse Catan!“ (Must; kommt mit der Einstellungsansicht) *(ergänzt in 0.10)* | Kandidat für Release 1.0 |
+| I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Glücksrad, Aufblinken, Klängen und Überspringen der Animation *(geändert in 0.12)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
+| I3 Ergebnisse und Statistik | Ergebniserfassung mit Siegpunkten und Catan-Farben, Ergebnisliste, Kennzahlen, Rangliste, Filter, Diagramme *(geändert in 0.12)* | Langzeitstatistik nutzbar |
+| I4 Daten und Updates | Vollsicherung, Teilexport und Export-Erinnerung, Import mit Konflikten und Zuordnung, automatische und manuelle Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS und Hinweis unter Android und Windows, Speicherschutz und Hinweis zum Schutz vor Datenverlust *(geändert in 0.12)* | Daten sicher und teilbar |
+| I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen; unterstützte und eigene Spiele getrennt *(geändert in 0.12)* | Stammdaten vollständig pflegbar |
+| I6 Einstellungen und Feinschliff | US-SP-05 „Ich hasse Catan!“, Design und Akzentfarbe *(geändert in 0.12)* | Kandidat für Release 1.0 |
 
-Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwickelt, die jeweils ein Bündel zusammengehöriger User Stories enthalten (etwa zwei bis vier Bündel je Inkrement; der Zuschnitt wird zu Beginn eines Inkrements festgelegt), und vom Product Owner im Pull Request abgenommen (EP-11). Nach `main` gelangt vor Release 1.0 nur der Platzhalter aus der Setup-Phase (Release 0.1.0, EP-02); danach erst der abgenommene Stand von Release 1.0. Über Vorabversionen wird nach I2 entschieden (OP-13). *(präzisiert in 0.5)*
+Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwickelt, die jeweils ein Bündel zusammengehöriger User Stories enthalten (etwa zwei bis vier Bündel je Inkrement, bei einem großen Block wie I2 mehr; der Zuschnitt wird zu Beginn eines Inkrements festgelegt), und vom Product Owner im Pull Request abgenommen (EP-11). Nach `main` gelangt vor Release 1.0 nur der Platzhalter aus der Setup-Phase (Release 0.1.0, EP-02); danach erst der abgenommene Stand von Release 1.0. Über Vorabversionen wird nach I2 entschieden (OP-13). *(präzisiert in 0.5)*
 
 ### 2.4 Abgrenzung: nicht in Version 1
 
@@ -105,7 +108,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-PG-01 | Person anlegen | M | I1 |
 | US-PG-02 | Gruppe anlegen | M | I1 |
 | US-PG-03 | Farben einer Gruppe festlegen | M | I1 |
-| US-PG-04 | Catan-Farbe für eine Partie abweichend wählen | S | I5 |
+| US-PG-04 | Catan-Farbe für eine Partie abweichend wählen | S | I2 |
 | US-VW-01 | Person archivieren und löschen | S | I5 |
 | US-VW-02 | Gruppe bearbeiten | M | I1 |
 | US-VW-03 | Gruppe archivieren, wiederbeleben und löschen | S | I5 |
@@ -126,40 +129,40 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-PL-02 | Gebäude zufällig platzieren | M | I2 |
 | US-PL-03 | Straßen zufällig platzieren | M | I2 |
 | US-PL-04 | Gebäude und Straßen erkennbar darstellen | M | I2 |
-| US-PL-05 | Platzierung überspringen | C | I6 |
-| US-SR-01 | Startrohstoffe ziehen | S | I5 |
-| US-IN-01 | Glücksrad | S | I5 |
-| US-IN-02 | Aufblinken bei der Platzierung | S | I5 |
-| US-IN-03 | Soundeffekte und Tonschalter | S | I5 |
-| US-IN-04 | Animation überspringen | S | I5 |
+| US-PL-05 | Platzierung überspringen | C | I2 |
+| US-SR-01 | Startrohstoffe ziehen | S | I2 |
+| US-IN-01 | Glücksrad | S | I2 |
+| US-IN-02 | Aufblinken bei der Platzierung | S | I2 |
+| US-IN-03 | Soundeffekte und Tonschalter | S | I2 |
+| US-IN-04 | Animation überspringen | S | I2 |
 | US-ER-01 | Ergebnis erfassen | M | I3 |
-| US-ER-02 | Siegpunkte erfassen | S | I5 |
-| US-ER-03 | Catan-Farben im Ergebnis | C | I6 |
+| US-ER-02 | Siegpunkte erfassen | S | I3 |
+| US-ER-03 | Catan-Farben im Ergebnis | C | I3 |
 | US-ER-04 | Ergebnisse einer Gruppe ansehen | M | I3 |
 | US-ER-05 | Ergebnis bearbeiten und löschen | M | I3 |
 | US-ST-01 | Kennzahlen je Person | M | I3 |
 | US-ST-02 | Rangliste | M | I3 |
-| US-ST-03 | Statistik filtern | S | I5 |
-| US-ST-04 | Diagramme | S | I5 |
+| US-ST-03 | Statistik filtern | S | I3 |
+| US-ST-04 | Diagramme | S | I3 |
 | US-EI-01 | Vollsicherung exportieren | M | I4 |
-| US-EI-02 | Teilumfang exportieren | S | I5 |
+| US-EI-02 | Teilumfang exportieren | S | I4 |
 | US-EI-03 | Daten importieren | M | I4 |
 | US-EI-04 | Konflikte beim Import im Einzelfall lösen | M | I4 |
 | US-EI-05 | Importierte Daten vorhandenen Daten zuordnen | M | I4 |
 | US-EI-06 | Import rückgängig machen | M | I4 |
-| US-EI-07 | Export-Erinnerung | S | I5 |
+| US-EI-07 | Export-Erinnerung | S | I4 |
 | US-DS-01 | Automatische Sicherungspunkte | M | I4 |
 | US-DS-02 | Sicherungspunkt wiederherstellen | M | I4 |
-| US-DS-03 | Manuellen Sicherungspunkt anlegen | C | I6 |
-| US-DS-04 | Hinweis zum Schutz vor Datenverlust | S | I5 |
+| US-DS-03 | Manuellen Sicherungspunkt anlegen | C | I4 |
+| US-DS-04 | Hinweis zum Schutz vor Datenverlust | S | I4 |
 | US-UP-01 | Update-Hinweis und selbstbestimmtes Update | M | I4 |
 | US-UP-02 | Sicherung vor dem Update | M | I4 |
 | US-IS-01 | Nutzung unter iOS nur als installierte App | M | I4 |
-| US-IS-02 | Installationshinweis unter Android und Windows | S | I5 |
+| US-IS-02 | Installationshinweis unter Android und Windows | S | I4 |
 | US-IS-03 | Persistenten Speicher sicherstellen | M | I4 |
 | US-GB-01 | Design und Akzentfarbe wählen | C | I6 |
 
-Summe: 59 User Stories (37 Must, 18 Should, 4 Could).
+Summe: 61 User Stories (40 Must, 17 Should, 4 Could). *(berichtigt in 0.12)*
 
 ---
 
