@@ -3,3 +3,4 @@
  * through this file (Development Guidelines 4.5).
  */
 export { CATAN_GAME_ID, CATAN_MODULE } from './catanModule';
+export { CATAN_EDITIONS, catanPlacementRounds, type CatanEdition } from './placementRounds';
