@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.9 |
+| Version | 0.10 |
 | Status | Verbindlich ab der Setup-Phase |
 | Stand | 29.10.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
@@ -24,6 +24,7 @@
 | 0.7 | 28.10.2026 | README auf Kurzbeschreibung, Adresse, Stand und Lizenz beschränkt, ohne Verweise auf `docs/` (11.2) |
 | 0.8 | 28.10.2026 | Aufgabe K-4: Knöpfe und Links nur über `PressableButton` und `PressableLink`, Karten mit `look="card"` (6) |
 | 0.9 | 29.10.2026 | Reine Doku-Änderungen ohne lokale Prüfungen; auf GitHub laufen sie unverändert (2.2, 3.6, 12.1; Entscheidung des Product Owners) |
+| 0.10 | 29.10.2026 | Beispiel für Ordnernamen an die neue Struktur angepasst (`core/placement` entfällt, Architektur ADR-028) (4.4) (PR #27) |
 
 ## Inhaltsverzeichnis
 
@@ -304,7 +305,7 @@ Abkürzungen nur, wenn allgemein üblich (`id`, `url`). Namen beschreiben den In
 |---|---|---|
 | Komponentendateien PascalCase, ihr CSS-Modul daneben | `GroupForm.tsx`, `GroupForm.module.css` | ja, ESLint `check-file` |
 | Andere Dateien camelCase | `buildingPlanner.ts` | ja |
-| Ordner klein, bei Bedarf mit Bindestrich | `core/placement/` | ja |
+| Ordner klein, bei Bedarf mit Bindestrich | `core/draws/` | ja |
 | Unit-Tests neben dem Code, Endung `.test.ts(x)`; statistische Tests `*.stat.test.ts` in `tests/statistical`; Ende-zu-Ende-Tests `*.spec.ts` in `tests/e2e` | `placement.test.ts` | ja (Testkonfiguration findet nur diese Muster) |
 | Eine exportierte Komponente je Datei | – | nein (Review) |
 
