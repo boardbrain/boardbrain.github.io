@@ -35,6 +35,7 @@ export {
   CATAN_DEFAULT_STARTING_RESOURCES,
   CATAN_MODES,
   CATAN_PERSON_DRAWS,
+  areCatanOptionsValid,
   enabledPersonDraws,
   type CatanMode,
   type CatanOptions,

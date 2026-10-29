@@ -35,6 +35,12 @@ import { findSupportedGame, gameCapabilities } from '@/games/registry';
 export type NameDuplicateError = 'name-duplicate';
 
 /**
+ * Error code when the binding of a group is changed while the group takes part in a match in
+ * generation or running (US-VW-02 AK-5, Specification 3.5, FA-AB-09).
+ */
+export type GroupInSessionError = 'group-in-session';
+
+/**
  * Input for creating a person.
  */
 export type CreatePersonInput = {
@@ -110,10 +116,13 @@ export type MasterDataService = {
   ): Promise<Result<Person, NameEmptyError | NameDuplicateError>>;
   /**
    * Changes name, colours and binding of a group; the members stay the same (US-VW-02). A name
-   * that another group has is rejected with `name-duplicate` (AK-1). A group or game that does
-   * not exist throws.
+   * that another group has is rejected with `name-duplicate` (AK-1). While the group takes part
+   * in a match in generation or running, a changed binding is rejected with `group-in-session`
+   * (AK-5). A group or game that does not exist throws.
    */
-  editGroup(input: EditGroupInput): Promise<Result<Group, GroupEditError | NameDuplicateError>>;
+  editGroup(
+    input: EditGroupInput,
+  ): Promise<Result<Group, GroupEditError | NameDuplicateError | GroupInSessionError>>;
   /**
    * Renames a custom game (US-VW-07). Names of other games, including supported ones such as
    * Catan, are rejected with `name-duplicate`. Supported games are not custom games and cannot
@@ -234,10 +243,15 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
     },
 
     async editGroup({ groupId, name, binding, colors }) {
-      return store.transaction(async ({ customGames, groups }) => {
+      return store.transaction(async ({ customGames, groups, session }) => {
         const allGroups = await groups.listAll();
         const group = allGroups.find((candidate) => candidate.id === groupId);
         assert(group !== undefined, `group ${groupId} exists`);
+        // US-VW-02 AK-5, Architecture 10.4: the service checks the lock itself, not only the UI.
+        // Name and colours stay changeable; the match keeps the colours it started with.
+        if (!isSameBinding(group.binding, binding) && (await session.get())?.groupId === groupId) {
+          return err('group-in-session');
+        }
         const boundGame =
           binding.kind === 'global'
             ? null
@@ -298,4 +312,15 @@ function boundGameOf(gameId: GameId, customGames: readonly CustomGame[]): BoundG
     'the bound game exists',
   );
   return { maxPlayers: GROUP_SIZE.max, hasPlayerColors: false };
+}
+
+function isSameBinding(a: GroupBinding, b: GroupBinding): boolean {
+  if (a.kind === 'global' || b.kind === 'global') {
+    return (
+      a.kind === b.kind &&
+      (a.kind === 'global' && a.excludesCatan === true) ===
+        (b.kind === 'global' && b.excludesCatan === true)
+    );
+  }
+  return a.gameId === b.gameId;
 }

@@ -1,4 +1,5 @@
 import { Dexie, type DexieOptions, type Table, type Transaction } from 'dexie';
+import type { StoredSession } from '@/app/ports';
 import type {
   CustomGame,
   GameId,
@@ -61,14 +62,15 @@ export const DATABASE_NAME = 'boardbrain';
 
 /**
  * The IndexedDB database of BoardBrain (Architecture 7.3, ADR-007). Only `infra/db` uses it;
- * writes go through the repositories. Tables of matches, snapshots and the session
- * get their types with their increments.
+ * writes go through the repositories. Tables of matches and snapshots get their types with
+ * their increments.
  */
 export class BoardBrainDb extends Dexie {
   readonly persons: Table<Person, PersonId>;
   readonly groups: Table<Group, GroupId>;
   readonly games: Table<CustomGame, GameId>;
   readonly meta: Table<MetaEntry, MetaEntry['key']>;
+  readonly session: Table<StoredSession, StoredSession['id']>;
 
   /**
    * @param name Database name; tests use a separate name or factory per test.
@@ -91,5 +93,6 @@ export class BoardBrainDb extends Dexie {
     this.groups = this.table('groups');
     this.games = this.table('games');
     this.meta = this.table('meta');
+    this.session = this.table('session');
   }
 }

@@ -3,7 +3,7 @@ import {
   CATAN_STARTING_RESOURCES_COUNT,
   type StartingResourcesOptions,
 } from '../startingResources';
-import type { CatanEdition } from '../placement/rounds';
+import { CATAN_EDITIONS, type CatanEdition } from '../placement/rounds';
 
 /**
  * Modes of Catan; in version 1 only "Standard" (US-SP-04 AK-2, Architecture 4.5).
@@ -73,4 +73,20 @@ export type CatanSetup = {
  */
 export function enabledPersonDraws(options: CatanOptions): CatanPersonDraw[] {
   return CATAN_PERSON_DRAWS.filter((draw) => options.personDraws[draw]);
+}
+
+/**
+ * Whether the options are complete and in range (FA-AB-02, FA-SR-02): a known edition and
+ * mode and, if switched on, 1 to 5 starting resources.
+ */
+export function areCatanOptionsValid(options: CatanOptions): boolean {
+  const resources = options.startingResources;
+  return (
+    CATAN_EDITIONS.includes(options.edition) &&
+    CATAN_MODES.includes(options.mode) &&
+    (resources === null ||
+      (Number.isInteger(resources.count) &&
+        resources.count >= CATAN_STARTING_RESOURCES_COUNT.min &&
+        resources.count <= CATAN_STARTING_RESOURCES_COUNT.max))
+  );
 }

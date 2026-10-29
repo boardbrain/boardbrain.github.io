@@ -1,4 +1,5 @@
 import type { MasterDataRepositories, MasterDataStore } from '@/app/ports';
+import { CURRENT_SESSION_ID } from '@/core/generation';
 import type { IsoTimestamp } from '@/core/model';
 import { assert } from '@/core/shared';
 import type { BoardBrainDb } from './database';
@@ -57,17 +58,23 @@ function repositories(db: BoardBrainDb): MasterDataRepositories {
         await recordUserDataChange(db, game.updatedAt);
       },
     },
+    session: {
+      get: () => db.session.get(CURRENT_SESSION_ID),
+    },
   };
 }
 
 /**
  * Master data storage on IndexedDB (Architecture 7.3). A transaction spans persons, groups, custom
- * games and `meta`; Dexie rolls it back completely if `work` throws.
+ * games, `meta` and, for the locks during a match, the session; Dexie rolls it back completely
+ * if `work` throws.
  */
 export function createDexieMasterDataStore(db: BoardBrainDb): MasterDataStore {
   const repos = repositories(db);
   return {
     transaction: (work) =>
-      db.transaction('rw', [db.persons, db.groups, db.games, db.meta], () => work(repos)),
+      db.transaction('rw', [db.persons, db.groups, db.games, db.meta, db.session], () =>
+        work(repos),
+      ),
   };
 }

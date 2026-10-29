@@ -1,4 +1,10 @@
-import type { Clock, IdGenerator, MasterDataRepositories, MasterDataStore } from '@/app/ports';
+import type {
+  Clock,
+  IdGenerator,
+  MasterDataRepositories,
+  MasterDataStore,
+  StoredSession,
+} from '@/app/ports';
 import {
   toGameId,
   toGroupId,
@@ -43,6 +49,8 @@ export class InMemoryMasterDataStore implements MasterDataStore {
   persons: readonly Person[] = [];
   customGames: readonly CustomGame[] = [];
   groups: readonly Group[] = [];
+  /** The running match, only read by the master data service (Architecture 10.4). */
+  session: StoredSession | undefined = undefined;
 
   async transaction<T>(work: (repositories: MasterDataRepositories) => Promise<T>): Promise<T> {
     const persons = [...this.persons];
@@ -87,6 +95,9 @@ export class InMemoryMasterDataStore implements MasterDataStore {
           customGames[index] = game;
           return Promise.resolve();
         },
+      },
+      session: {
+        get: () => Promise.resolve(this.session),
       },
     });
     this.persons = persons;
