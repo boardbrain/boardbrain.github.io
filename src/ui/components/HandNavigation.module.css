@@ -35,12 +35,15 @@
   border: 0;
 }
 
+/* Only the cards take taps: the list keeps the full card height even when the cards are folded
+   down, and would otherwise catch taps on buttons right above the hand (I2-C). */
 .list,
 .compactList {
   display: flex;
   justify-content: center;
   padding: 0;
   margin: 0;
+  pointer-events: none;
   list-style: none;
 }
 
@@ -49,6 +52,7 @@
 .activeItem {
   display: flex;
   margin: 0 -8px;
+  pointer-events: auto;
 }
 
 /* The active card lies on top. */

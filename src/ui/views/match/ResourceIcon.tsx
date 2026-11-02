@@ -15,7 +15,7 @@ import {
 } from '@/ui/art/ResourceSymbols';
 import styles from './ResourceIcon.module.css';
 
-function Symbol({ resource }: { resource: CatanResource }): React.JSX.Element {
+function ResourceSymbol({ resource }: { resource: CatanResource }): React.JSX.Element {
   const props = { className: styles.symbol };
   switch (resource) {
     case 'lumber':
@@ -48,7 +48,7 @@ export function ResourceIcon({
       style={{ background: `var(--color-resource-${resource})`, width: size, height: size }}
       aria-hidden="true"
     >
-      <Symbol resource={resource} />
+      <ResourceSymbol resource={resource} />
     </span>
   );
 }

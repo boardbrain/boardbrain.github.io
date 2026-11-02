@@ -26,6 +26,8 @@ export type HandArea = {
   readonly icon: (props: { readonly size?: number | undefined }) => React.JSX.Element;
   /** Active only on exactly this address (the start view). */
   readonly isEnd?: boolean;
+  /** Further addresses on which the card is active, e.g. a match belongs to the start (I2-C). */
+  readonly alsoOn?: readonly string[];
 };
 
 function cardClass({ isActive }: { readonly isActive: boolean }): string | undefined {
@@ -128,7 +130,10 @@ export function HandNavigation({
         <ul className={isCompactHand(count) ? styles.compactList : styles.list}>
           {areas.map((area, index) => {
             const isActive =
-              matchPath({ path: area.to, end: area.isEnd === true }, pathname) !== null;
+              matchPath({ path: area.to, end: area.isEnd === true }, pathname) !== null ||
+              (area.alsoOn ?? []).some(
+                (path) => matchPath({ path, end: false }, pathname) !== null,
+              );
             const pose = cardPose(index, count, isActive, state);
             return (
               <m.li
