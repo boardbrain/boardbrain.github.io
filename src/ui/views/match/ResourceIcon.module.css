@@ -1,0 +1,15 @@
+/* Resource symbols on their disc (design I2-C, US-SR-01 AK-5). */
+.icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  color: var(--color-piece-outline);
+  border-radius: 50%;
+}
+
+/* The symbol takes 62 % of the disc. */
+.symbol {
+  display: block;
+  width: 62%;
+  height: 62%;
+}

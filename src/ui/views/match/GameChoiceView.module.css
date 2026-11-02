@@ -1,0 +1,29 @@
+/* Design I2-C, page 1 (form A, card K2). */
+.gameGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.gameLink {
+  display: block;
+  width: min(64cqw, 240px);
+  color: inherit;
+  text-decoration: none;
+  border-radius: 14px;
+}
+
+.gameLink > * {
+  display: flex;
+  width: 100%;
+}
+
+.lead {
+  font-size: 0.92rem;
+}
+
+.note {
+  color: var(--color-text-muted);
+}

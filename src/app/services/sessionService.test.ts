@@ -11,7 +11,7 @@ import { SeededRandomSource } from '@tests/support/seededRandomSource';
 import { InMemorySessionStore } from '@tests/support/sessionFakes';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { StoredSession } from '@/app/ports';
-import { stepsDiscardedBy } from '@/core/generation';
+import { revealedStepIndex, stepsDiscardedBy } from '@/core/generation';
 import { CATAN_COLOR_KEYS, toGroupId, type Group, type MemberColors } from '@/core/model';
 import { InvariantError, type Result } from '@/core/shared';
 import {
@@ -76,13 +76,19 @@ async function startFour(service: SessionService, options = ALL_ON): Promise<Sto
 async function advance(service: SessionService, count: number): Promise<StoredSession> {
   let session: StoredSession | undefined;
   for (let step = 0; step < count; step++) {
-    session = await value(service.advance());
+    session = await value(service.advance(shown()));
   }
   return defined(session, 'session');
 }
 
 function stored(): StoredSession | undefined {
   return store.session;
+}
+
+// The step the person sees: the one waiting for confirmation, if any.
+function shown(): number | null {
+  const session = store.session;
+  return session === undefined ? null : (revealedStepIndex(session.generation) ?? null);
 }
 
 beforeEach(() => {
@@ -175,7 +181,7 @@ describe('US-AB-01 Prepare and start a match', () => {
     expect(session.generation.state).toBe('running');
     expect(session.generation.steps).toHaveLength(26);
     expect(session.generation.steps.every((record) => record.status === 'confirmed')).toBe(true);
-    expect(await service.advance()).toEqual({ ok: false, error: 'generation-complete' });
+    expect(await service.advance(shown())).toEqual({ ok: false, error: 'generation-complete' });
   });
 
   it('FA-LS-07: an order set by hand has no spins; the placement follows it', async () => {
@@ -238,7 +244,7 @@ describe('US-AB-05 The running match survives a restart', () => {
 
     expect(await second.service.current()).toEqual({ ok: true, value: revealed });
     // The same result is shown again, nothing is drawn anew; "Losen" confirms it.
-    const next = await value(second.service.advance());
+    const next = await value(second.service.advance(shown()));
     expect(next.generation.steps.slice(0, 8).map((record) => record.step)).toEqual(
       revealed.generation.steps.map((record) => record.step),
     );
@@ -264,7 +270,7 @@ describe('US-AB-05 The running match survives a restart', () => {
     store.session = { ...session, schemaVersion: 99 };
 
     expect(await service.current()).toEqual({ ok: false, error: 'session-unsupported' });
-    expect(await service.advance()).toEqual({ ok: false, error: 'session-unsupported' });
+    expect(await service.advance(shown())).toEqual({ ok: false, error: 'session-unsupported' });
     expect(await service.isSessionActive()).toBe(true);
     await service.endWithoutResult();
     expect(await service.current()).toEqual({ ok: true, value: null });
@@ -276,11 +282,22 @@ describe('US-AB-02 and US-AB-03 Confirm and repeat steps (service)', () => {
     const { service } = launch();
     const started = await startFour(service);
 
-    const next = await value(service.advance());
+    const next = await value(service.advance(shown()));
 
     expect(next.generation.steps.map((record) => record.status)).toEqual(['confirmed', 'revealed']);
     expect(next.generation.steps[0]?.step).toEqual(started.generation.steps[0]?.step);
     expect(stored()).toEqual(next);
+  });
+
+  it('US-AB-02 AK-1: a second quick tap on the step already confirmed changes nothing', async () => {
+    const { service } = launch();
+    await startFour(service);
+
+    const [first, second] = await Promise.all([service.advance(0), service.advance(0)]);
+
+    expect(first.ok).toBe(true);
+    expect(second).toEqual({ ok: false, error: 'step-changed' });
+    expect(stored()?.generation.steps).toHaveLength(2);
   });
 
   it('AK-1, AK-4: stores the repeated step as revealed and discards the dependent steps', async () => {
@@ -310,7 +327,7 @@ describe('US-AB-02 and US-AB-03 Confirm and repeat steps (service)', () => {
     await advance(service, 26);
 
     await value(service.repeatStep(0));
-    const confirmed = await value(service.advance());
+    const confirmed = await value(service.advance(shown()));
 
     expect(confirmed.generation.state).toBe('running');
   });
@@ -321,7 +338,7 @@ describe('US-AB-02 and US-AB-03 Confirm and repeat steps (service)', () => {
     const before = await advance(service, 26);
 
     await value(service.repeatStep(25));
-    const after = await value(service.advance());
+    const after = await value(service.advance(shown()));
 
     expect(Object.keys(after)).toEqual(Object.keys(before));
     expect(Object.keys(after.generation)).toEqual(Object.keys(before.generation));
@@ -372,7 +389,7 @@ describe('US-AB-06 End a match', () => {
     expect(stored()).toBeUndefined();
     expect(await service.current()).toEqual({ ok: true, value: null });
     expect(await service.isSessionActive()).toBe(false);
-    expect(await service.advance()).toEqual({ ok: false, error: 'no-session' });
+    expect(await service.advance(shown())).toEqual({ ok: false, error: 'no-session' });
   });
 
   it('AK-3: can end a match that is already running', async () => {

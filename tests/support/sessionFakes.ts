@@ -8,18 +8,26 @@ import { SeededRandomSource } from './seededRandomSource';
 
 /**
  * Storage stand-in for tests of the session service (Architecture 14.1). A transaction works
- * on a copy and only takes it over if `work` completes, like a database transaction. Stored
- * sessions are deep copies, so a test notices if the service relies on objects it kept.
+ * on a copy and only takes it over if `work` completes, like a database transaction; like
+ * read-write transactions of IndexedDB on the same store, transactions run one after the other.
+ * Stored sessions are deep copies, so a test notices if the service relies on objects it kept.
  */
 export class InMemorySessionStore implements SessionStore {
   session: StoredSession | undefined = undefined;
   groups: readonly Group[];
+  private queue: Promise<unknown> = Promise.resolve();
 
   constructor(groups: readonly Group[] = []) {
     this.groups = groups;
   }
 
-  async transaction<T>(work: (repositories: SessionRepositories) => Promise<T>): Promise<T> {
+  transaction<T>(work: (repositories: SessionRepositories) => Promise<T>): Promise<T> {
+    const run = this.queue.then(() => this.run(work));
+    this.queue = run.catch(() => undefined);
+    return run;
+  }
+
+  private async run<T>(work: (repositories: SessionRepositories) => Promise<T>): Promise<T> {
     let session = this.session;
     const groups = [...this.groups];
     const result = await work({

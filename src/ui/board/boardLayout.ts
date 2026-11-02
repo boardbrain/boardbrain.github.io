@@ -1,4 +1,12 @@
-import { hexCorners, hexKey, vertexPoint, type Board, type BoardPoint } from '@/games/catan';
+import {
+  hexCorners,
+  hexKey,
+  vertexPoint,
+  type Board,
+  type BoardPoint,
+  type EdgeId,
+  type VertexId,
+} from '@/games/catan';
 
 // Measures in SVG units from design I1-D (docs/design/i1d-board-final-preview.html).
 const SVG_PER_BOARD_UNIT = 10;
@@ -37,6 +45,36 @@ export type BoardLayout = {
 
 function toSvg(point: BoardPoint): BoardPoint {
   return { x: point.x * SVG_PER_BOARD_UNIT, y: point.y * SVG_PER_BOARD_UNIT };
+}
+
+/**
+ * Position of a vertex in SVG units, e.g. for a building (US-PL-04).
+ * @throws {Error} if the board has no such vertex.
+ */
+export function vertexInSvg(board: Board, id: VertexId): BoardPoint {
+  const vertex = board.vertices.get(id);
+  if (vertex === undefined) {
+    throw new Error(`The board has no vertex ${id}`);
+  }
+  return toSvg(vertexPoint(vertex));
+}
+
+/**
+ * Both ends of an edge in SVG units, starting at `from`, e.g. for a road from its building
+ * outwards (US-PL-03, R1).
+ * @throws {Error} if the board has no such edge or `from` is not one of its ends.
+ */
+export function edgeInSvg(
+  board: Board,
+  id: EdgeId,
+  from: VertexId,
+): { readonly from: BoardPoint; readonly to: BoardPoint } {
+  const edge = board.edges.get(id);
+  if (!edge?.vertices.includes(from)) {
+    throw new Error(`The board has no edge ${id} at vertex ${from}`);
+  }
+  const to = edge.vertices[0] === from ? edge.vertices[1] : edge.vertices[0];
+  return { from: vertexInSvg(board, from), to: vertexInSvg(board, to) };
 }
 
 function formatPoint({ x, y }: BoardPoint): string {

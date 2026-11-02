@@ -1,6 +1,10 @@
 import { useId } from 'react';
 import { t } from '@/i18n/t';
+import { useCurrentSession } from '@/infra/db/readHooks';
+import { useAppDependencies } from '@/ui/AppDependencies';
+import { ChevronIcon, PlayIcon } from '@/ui/components/Icons';
 import { PlayingCard } from '@/ui/components/PlayingCard';
+import { PressableLink } from '@/ui/components/Pressable';
 import { useAreaCards } from '@/ui/views/areaCards';
 import styles from './StartView.module.css';
 
@@ -8,11 +12,14 @@ const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
 
 /**
  * Start view `#/` (Architecture 13.1, design D-3): persons, tables and games as a fan of
- * playing cards right above the card hand; the view never scrolls. "New match" (I2) and the
- * banners (I4, I2) get their place above the cards later.
+ * playing cards right above the card hand; the view never scrolls. Above them the draw pile
+ * "Partie" (I2, US-SP-01 AK-1): it starts a new match, or leads to the running one. The banners
+ * (I4, I2-D) get their place at the top later.
  */
 export function StartView(): React.JSX.Element {
+  const { db } = useAppDependencies();
   const cards = useAreaCards();
+  const current = useCurrentSession(db);
   const headingId = useId();
   return (
     <main className={styles.start}>
@@ -21,28 +28,49 @@ export function StartView(): React.JSX.Element {
           not push the cards down while there is room. Look and sizes:
           docs/design/d3-start-navigation-final-preview.html, scope "Mit späteren Funktionen". */}
       <div className={styles.spacer} />
-      {/* Place for "new match" (I2) as a draw pile right above the cards, together with them in
-          one column with a 14px gap (same reference). */}
-      <nav className={styles.cards} aria-labelledby={headingId}>
-        <h2 id={headingId} className={styles.heading}>
-          {t('karten.titel')}
-        </h2>
-        <div className={styles.fan}>
-          {cards?.map((card, index) => (
-            <PlayingCard
-              key={card.key}
-              to={card.to}
-              title={card.title}
-              count={card.count}
-              icon={card.icon}
-              note={
-                card.key === 'personen' && card.count === 0 ? t('karten.hierAnfangen') : undefined
-              }
-              className={FAN_POSITIONS[index]}
-            />
-          ))}
-        </div>
-      </nav>
+      {/* "Partie" as a draw pile right above the cards, together with them in one column with a
+          14px gap (same reference, docs/design/i2-match-final-preview.html). */}
+      <div className={styles.column}>
+        <PressableLink
+          to={current !== undefined && current.status !== 'none' ? '/partie' : '/partie/neu'}
+          look="card"
+          className={styles.pile}
+        >
+          <span className={styles.pileStack} aria-hidden="true">
+            <span className={styles.back} />
+            <span className={styles.back} />
+            <span className={styles.back}>
+              <span className={styles.backBadge}>
+                <PlayIcon size={18} />
+              </span>
+            </span>
+          </span>
+          <strong className={styles.pileTitle}>{t('start.partie')}</strong>
+          <span className={styles.pileArrow}>
+            <ChevronIcon size={20} />
+          </span>
+        </PressableLink>
+        <nav className={styles.cards} aria-labelledby={headingId}>
+          <h2 id={headingId} className={styles.heading}>
+            {t('karten.titel')}
+          </h2>
+          <div className={styles.fan}>
+            {cards?.map((card, index) => (
+              <PlayingCard
+                key={card.key}
+                to={card.to}
+                title={card.title}
+                count={card.count}
+                icon={card.icon}
+                note={
+                  card.key === 'personen' && card.count === 0 ? t('karten.hierAnfangen') : undefined
+                }
+                className={FAN_POSITIONS[index]}
+              />
+            ))}
+          </div>
+        </nav>
+      </div>
       <div className={styles.spacerLow} />
     </main>
   );

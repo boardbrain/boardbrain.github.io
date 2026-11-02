@@ -3,6 +3,7 @@ import {
   CURRENT_SESSION_ID,
   drawNextStep,
   repeatStep,
+  revealedStepIndex,
   SESSION_SCHEMA_VERSION,
   startGeneration,
   withGameState,
@@ -58,6 +59,12 @@ export type SessionActiveError = 'session-active';
  * Error code when the group cannot play Catan (US-AB-01 AK-1, Specification 3.4).
  */
 export type GroupNotEligibleError = 'group-not-eligible';
+
+/**
+ * Error code when the step shown is no longer the one waiting for confirmation, e.g. after a
+ * second quick tap on "Losen"; nothing is changed.
+ */
+export type StepChangedError = 'step-changed';
 
 /**
  * Why the stored session cannot be worked with.
@@ -118,10 +125,15 @@ export type SessionService = {
   /**
    * "Losen" and "Zur Übersicht" (US-AB-02 AK-1): confirms the revealed step and draws the next
    * one in one transaction, stored as revealed before it is shown (ADR-014, Architecture
-   * 10.1). After the last step the match is running. Rejected once nothing is left to confirm
-   * or draw.
+   * 10.1). After the last step the match is running. `shownStep` is the index of the step the
+   * person saw, `null` if none waits; if it is no longer the step waiting, nothing happens, so
+   * two quick taps advance only once. Rejected once nothing is left to confirm or draw.
    */
-  advance(): Promise<Result<StoredSession, SessionAccessError | GenerationCompleteError>>;
+  advance(
+    shownStep: number | null,
+  ): Promise<
+    Result<StoredSession, SessionAccessError | StepChangedError | GenerationCompleteError>
+  >;
   /**
    * Repeats step `index` (US-AB-03): discards it and the steps that depend on it and stores the
    * step drawn again as revealed. The steps that are discarded are listed beforehand by
@@ -268,16 +280,21 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
       });
     },
 
-    advance() {
-      return change((session): Result<CatanGeneration, GenerationCompleteError> => {
-        const confirmed = confirmRevealed(session.setup, session.generation);
-        if (confirmed !== session.generation && confirmed.state === 'running') {
-          return ok(confirmed);
-        }
-        const drawn = drawNextStep(CATAN_GENERATION, session.setup, confirmed, rng);
-        // After confirming nothing is revealed, so the only reason is that no step is missing.
-        return drawn.ok ? drawn : err('generation-complete');
-      });
+    advance(shownStep) {
+      return change(
+        (session): Result<CatanGeneration, StepChangedError | GenerationCompleteError> => {
+          if ((revealedStepIndex(session.generation) ?? null) !== shownStep) {
+            return err('step-changed');
+          }
+          const confirmed = confirmRevealed(session.setup, session.generation);
+          if (confirmed !== session.generation && confirmed.state === 'running') {
+            return ok(confirmed);
+          }
+          const drawn = drawNextStep(CATAN_GENERATION, session.setup, confirmed, rng);
+          // After confirming nothing is revealed, so the only reason is that no step is missing.
+          return drawn.ok ? drawn : err('generation-complete');
+        },
+      );
     },
 
     repeatStep(index) {

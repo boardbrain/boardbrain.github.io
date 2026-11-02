@@ -1,0 +1,51 @@
+/* Design I2-C, page 4 (C1). */
+.colorRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  min-height: 56px;
+  padding: 8px 14px;
+}
+
+.who {
+  flex: 1 1 7rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.changed {
+  font-size: 0.7rem;
+  color: var(--color-accent-text);
+}
+
+.swatches {
+  display: flex;
+  gap: 6px;
+}
+
+.swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--color-on-catan);
+  border: 2px solid var(--color-surface);
+  border-radius: 8px;
+}
+
+.swatch[aria-pressed='true'] {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.initial {
+  opacity: 0.75;
+}

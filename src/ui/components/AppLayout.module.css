@@ -17,6 +17,10 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  /* Design I2-C: cards of a match are sized and laid out by the size of the app (cqw, cqh,
+     @container), not of the window. */
+  container-type: size;
 }
 
 /* Design K-3: off the start view the folded hand shows 30 px plus a 16 px fade. */
