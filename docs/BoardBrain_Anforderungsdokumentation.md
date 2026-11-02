@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.18 |
+| Version | 0.19 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 29.10.2026 |
+| Stand | 02.11.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -32,6 +32,7 @@
 | 0.16 | 09.10.2026 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus (FA-SP-06, E-30) |
 | 0.17 | 26.10.2026 | Abnahme von I1-F: Personen- und Gruppennamen app-weit eindeutig, auch gegenüber archivierten (FA-PG-09, FA-VW-01, FA-VW-02, E-31) |
 | 0.18 | 29.10.2026 | Zuschnitt von I2: Umsetzung in fachlichen Blöcken einschließlich ihrer Should- und Could-Anteile (E-32); Design der Inszenierung (OP-06) innerhalb von I2 (13) |
+| 0.19 | 02.11.2026 | Design I2-C (Entscheidungen des Product Owners): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung spielen (5.4, FA-AB-02, neu FA-LS-07, FA-PL-09, FA-SR-04, E-33); Vorwärts-Knopf nennt, was er tut, und Rückblick auf frühere Schritte (FA-AB-03, neu FA-AB-10, E-34) |
 
 ## Inhaltsverzeichnis
 
@@ -170,18 +171,19 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | ID | Anforderung |
 |---|---|
 | FA-AB-01 | Der Ablauf beginnt mit der Auswahl von Spiel und Gruppe. Alle Mitglieder der Gruppe gelten als beteiligt. |
-| FA-AB-02 | Vor der Generierung werden Spielversion, Modus und Optionen festgelegt, insbesondere welche Losschritte aktiv sind und ob Startrohstoffe gezogen werden. |
-| FA-AB-03 | Jeder Schritt der Generierung muss vom Nutzer ausdrücklich bestätigt werden, bevor der nächste beginnt. Es gibt keinen automatischen Durchlauf. Ein Schritt ist ein Dreh des Glücksrads, ein Gebäude, eine Straße oder die Startrohstoffe einer Person; jedes Gebäude und jede Straße hat eine eigene Animation. *(präzisiert in 0.4)* |
+| FA-AB-02 | Vor der Generierung werden Spielversion, Modus und Optionen festgelegt, insbesondere welche Losschritte aktiv sind, ob die Platzierungsreihenfolge gelost, selbst festgelegt oder ohne Platzierung gespielt wird und ob Startrohstoffe gezogen werden. *(ergänzt in 0.19)* |
+| FA-AB-03 | Jeder Schritt der Generierung muss vom Nutzer ausdrücklich bestätigt werden, bevor der nächste beginnt. Es gibt keinen automatischen Durchlauf. Ein Schritt ist ein Dreh des Glücksrads, ein Gebäude, eine Straße oder die Startrohstoffe einer Person; jedes Gebäude und jede Straße hat eine eigene Animation. Der Knopf zum Bestätigen nennt, was er tut: „Losen“, wenn er den nächsten Schritt lost, „Zur Übersicht“ nach dem letzten Schritt. *(präzisiert in 0.4, ergänzt in 0.19)* |
 | FA-AB-04 | Jeder Schritt kann wiederholt werden, solange die Partie läuft. Vor der Wiederholung erscheint eine Warnung. Verworfen werden nur die vom wiederholten Schritt abhängigen Folgeschritte: bei einem Gebäude die zugehörige Straße und alle späteren Gebäude und Straßen, bei der Platzierungsreihenfolge die Platzierung; bei LS-01, LS-03, LS-04, einer Straße oder Startrohstoffen keine. Wiederholungen werden nicht protokolliert. *(präzisiert in 0.4)* |
 | FA-AB-05 | Nach Abschluss der Generierung bleibt das Ergebnis während der laufenden Partie einsehbar. |
 | FA-AB-06 | Nach der Generierung bietet die App das Eintragen eines Ergebnisses an. Dies ist optional und kein Pflichtschritt. |
 | FA-AB-07 | Es gibt höchstens eine laufende Partie. Sie übersteht das Schließen und Neustarten der App unverändert. Das Ergebnis eines Schritts steht fest, bevor seine Animation beginnt; wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt. *(neu in 0.4, ergänzt in 0.7)* |
 | FA-AB-08 | Eine laufende Partie endet mit dem Speichern eines Ergebnisses oder mit „Beenden ohne Ergebnis“. Danach wird die Generierung verworfen; gespeichert bleibt nur ein ggf. erfasstes Ergebnis. *(neu in 0.4)* |
 | FA-AB-09 | Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. *(neu in 0.7)* |
+| FA-AB-10 | Während der Generierung lassen sich frühere Schritte mit ihrem gespeicherten Ergebnis ansehen (Rückblick), ohne dass etwas gelost wird. *(neu in 0.19)* |
 
 ### 5.4 Losschritte (Catan, Modus „Standard“)
 
-Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt; anschließend folgen Platzierung und Startrohstoffe. LS-01, LS-03 und LS-04 sind einzeln aktivierbar bzw. überspringbar. LS-02 ist immer aktiv, da die Platzierung zum Kern gehört. *(geändert in 0.4)*
+Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt; anschließend folgen Platzierung und Startrohstoffe. LS-01, LS-03 und LS-04 sind einzeln aktivierbar bzw. überspringbar. LS-02 ist Standard; statt zu losen, kann die Reihenfolge selbst festgelegt oder ohne Platzierung gespielt werden (FA-LS-07). *(geändert in 0.4 und 0.19)*
 
 | ID | Anforderung |
 |---|---|
@@ -191,6 +193,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | FA-LS-04 | Losen, welche Person die Zahlenchips aus dem Beutel auf die Felder legt. |
 | FA-LS-05 | Das Losen einer Person (FA-LS-01, 03, 04) wird als wiederverwendbarer, spielunabhängiger Baustein umgesetzt. |
 | FA-LS-06 | Die Ziehungen von FA-LS-01, 03 und 04 sind unabhängig; dieselbe Person kann mehrfach gelost werden. *(neu in 0.4)* |
+| FA-LS-07 | Statt die Platzierungsreihenfolge zu losen, kann die bedienende Person sie selbst festlegen, indem sie die Personen der Reihe nach antippt (der letzte Platz ergibt sich; die Platzierung folgt dieser Reihenfolge), oder ohne Platzierung spielen. Standard ist Losen. *(neu in 0.19)* |
 
 ### 5.5 Platzierung von Gebäuden und Straßen
 
@@ -204,7 +207,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | FA-PL-06 | Gebäude und Straßen werden in der Farbe der jeweiligen Person dargestellt. |
 | FA-PL-07 | Die Darstellung des Bretts entspricht der Ausrichtung des physischen Bretts: Felder mit nach oben zeigender Spitze in Reihen mit 3, 4, 5, 4 und 3 Feldern von oben nach unten; der Umriss des Bretts ist oben und unten gerade und links und rechts spitz. *(präzisiert in 0.4, vereinheitlicht in 0.7)* |
 | FA-PL-08 | Die App kennt in Version 1 weder Landschaften noch Zahlenchips. Das Brett wird ohne Inhalte dargestellt. |
-| FA-PL-09 | Die Platzierung ist fester Bestandteil der Generierung. Zu ihrem Beginn bietet ein kleiner Button an, sie ausnahmsweise zu überspringen. *(neu in 0.4)* |
+| FA-PL-09 | Die Platzierung gehört zur Generierung, sofern eine Platzierungsreihenfolge feststeht (FA-LS-07). Nach dem Losen der Reihenfolge bietet ein kleiner Button an, sie ausnahmsweise zu überspringen. *(neu in 0.4, geändert in 0.19)* |
 
 ### 5.6 Startrohstoffe
 
@@ -213,7 +216,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | FA-SR-01 | Das Ziehen der Startrohstoffe ist eine aktivierbare Option. Standard ist deaktiviert. *(präzisiert in 0.4)* |
 | FA-SR-02 | Jede Person erhält eine einstellbare Anzahl von 1 bis 5 Startrohstoffen (Standard: 2), die zufällig aus den fünf Rohstoffarten gezogen werden (Holz, Lehm, Wolle, Getreide, Erz). |
 | FA-SR-03 | Einstellbar ist, ob mit oder ohne Zurücklegen gezogen wird. Standard ist mit Zurücklegen, wobei doppelte Rohstoffe möglich sind. Ohne Zurücklegen erhält jede Person nur unterschiedliche Rohstoffe. |
-| FA-SR-04 | Die Startrohstoffe werden nach der Platzierung gezogen, je Person ein Schritt in Platzierungsreihenfolge. *(neu in 0.4)* |
+| FA-SR-04 | Die Startrohstoffe werden nach der Platzierung gezogen, je Person ein Schritt in Platzierungsreihenfolge; ohne Reihenfolge in der Sitzreihenfolge der Gruppe. *(neu in 0.4, ergänzt in 0.19)* |
 
 ### 5.7 Inszenierung
 
@@ -503,6 +506,8 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-30 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus; Einschalten nur nach Warnung und Bestätigung; umkehrbar ohne Änderung gespeicherter Gruppeneinstellungen; Gruppen, die währenddessen angelegt werden, schließen Catan aus und können es später wieder zulassen *(neu in 0.16)* | Voraussichtlich nutzen viele die App ganz ohne Catan, nur für Ergebnisse und Statistik; für sie sind Generierung, Catan-Farben und Catan-Auswahl nur Ballast. Entscheidung des Product Owners nach Design D-3 |
 | E-31 | Personen- und Gruppennamen sind app-weit eindeutig, auch gegenüber archivierten Datensätzen; Groß- und Kleinschreibung sowie Leerzeichen am Anfang und Ende zählen nicht. Die App prüft schon bei der Eingabe *(neu in 0.17)* | Personen und Tische bleiben in Listen, Suche, Ergebnissen und beim Import unterscheidbar; ein bloßer Hinweis ließe Verwechslungen zu. Entscheidung des Product Owners bei der Abnahme von I1-F |
 | E-32 | Umgesetzt wird in fachlichen Blöcken: Ein Inkrement schließt einen Block vollständig ab, mit allen zugehörigen Must-, Should- und Could-Stories. Die Generierung (I2) umfasst damit auch Inszenierung, Startrohstoffe, abweichende Farben einer Partie und das Überspringen der Platzierung. Präzisiert E-10; der Umfang von Version 1 bleibt unverändert *(neu in 0.18)* | Ein Bereich soll fertig sein, bevor ein anderer beginnt, statt über mehrere Inkremente verteilt zu bleiben. Animationen und Design gehören zum Kern der App. Entscheidung des Product Owners beim Zuschnitt von I2 |
+| E-33 | Die Platzierungsreihenfolge ist abschaltbar: Statt zu losen, wird sie selbst festgelegt (die Platzierung folgt ihr) oder es wird ohne Platzierung gespielt; Startrohstoffe folgen dann der festgelegten Reihenfolge bzw. der Sitzreihenfolge der Gruppe *(neu in 0.19)* | Manche Gruppen wollen Reihenfolge oder Startaufstellung selbst bestimmen und trotzdem Losschritte und Startrohstoffe der App nutzen. Entscheidung des Product Owners im Design von I2-C |
+| E-34 | Der Vorwärts-Knopf im Ablauf nennt, was er tut („Losen“, „Blättern“, „Zur Übersicht“); frühere Schritte lassen sich im Rückblick ansehen, ohne neu zu losen *(neu in 0.19)* | Am Tisch soll niemand versehentlich einen Schritt losen, der schon feststeht; bei Unklarheiten kann man nachschauen, ohne etwas zu verändern. Entscheidung des Product Owners im Design von I2-C |
 
 ---
 
