@@ -67,14 +67,18 @@ export type CatanSummary = {
   readonly personDraws: readonly CatanSummaryPersonDraw[];
   /** In the order of the positions. */
   readonly orderSpins: readonly CatanSummaryOrderSpin[];
-  /** The complete placement order, or `null` while spins are missing. */
+  /**
+   * The complete placement order, drawn or set by hand, or `null` while spins are missing and
+   * if the match has no order (FA-LS-07).
+   */
   readonly order: readonly PersonId[] | null;
-  /** Place 1 of the order (US-LS-03 AK-3), or `null` while spins are missing. */
+  /** Place 1 of the order (US-LS-03 AK-3), or `null` without an order. */
   readonly startingPersonId: PersonId | null;
+  /** Skipped during the flow (US-PL-05) or no placement from the start (US-PL-05 AK-3). */
   readonly placementSkipped: boolean;
   readonly buildings: readonly CatanSummaryBuilding[];
   readonly roads: readonly CatanSummaryRoad[];
-  /** In placement order (US-SR-01 AK-1). */
+  /** In placement order, without an order in the order of the seats (US-SR-01 AK-1). */
   readonly startingResources: readonly CatanSummaryStartingResources[];
 };
 
@@ -135,7 +139,7 @@ export function catanSummary(setup: CatanSetup, generation: CatanGeneration): Ca
     orderSpins: orderSpins.sort((a, b) => a.position - b.position),
     order,
     startingPersonId: order === null ? null : startingPerson(order),
-    placementSkipped: generation.gameState.placementSkipped,
+    placementSkipped: generation.gameState.placementSkipped || setup.options.order.mode === 'none',
     buildings,
     roads,
     startingResources: startingResources.sort((a, b) => placeOf(a.personId) - placeOf(b.personId)),

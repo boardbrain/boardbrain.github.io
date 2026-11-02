@@ -69,6 +69,30 @@ describe('US-AB-04 Overview of the running match (Catan summary)', () => {
     expect(overview.roads).toEqual([]);
   });
 
+  it('FA-LS-07, US-LS-03 AK-3: an order set by hand with place 1 as starting person', () => {
+    const order = [...setup.participants].reverse();
+    const manual = aCatanSetup(4, { order: { mode: 'manual', order } });
+
+    const overview = catanSummary(manual, runCatanGeneration(manual, new SeededRandomSource(3)));
+
+    expect(overview.orderSpins).toEqual([]);
+    expect(overview.order).toEqual(order);
+    expect(overview.startingPersonId).toBe(order[0]);
+    expect(overview.buildings).toHaveLength(8);
+  });
+
+  it('US-PL-05 AK-3: without placement, no order, no starting person, resources by seat', () => {
+    const none = aCatanSetup(3, {
+      order: { mode: 'none' },
+      startingResources: { count: 2, replacement: 'with' },
+    });
+
+    const overview = catanSummary(none, runCatanGeneration(none, new SeededRandomSource(4)));
+
+    expect(overview).toMatchObject({ order: null, startingPersonId: null, placementSkipped: true });
+    expect(overview.startingResources.map((line) => line.personId)).toEqual(none.participants);
+  });
+
   it('has no order while spins are missing', () => {
     const early = runCatanGeneration(setup, new SeededRandomSource(1), undefined, 4);
 

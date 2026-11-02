@@ -23,6 +23,7 @@ import {
   canSkipCatanPlacement,
   createCatanGeneration,
   skipCatanPlacement,
+  type CatanGameState,
   type CatanGeneration,
 } from './definition';
 import type { CatanSetup } from './options';
@@ -338,6 +339,69 @@ describe('US-PL-05 Skip the placement', () => {
     expect(canSkipCatanPlacement(setup, reordered)).toBe(true);
     const placed = runCatanGeneration(setup, new SeededRandomSource(6), reordered);
     expect(stepsOf(placed).filter((step) => step.kind === 'building')).toHaveLength(6);
+  });
+});
+
+describe('FA-LS-07 Order set by hand or no placement', () => {
+  const reversed = [...CATAN_TEST_PERSONS.slice(0, 3)].reverse();
+  const manual = aCatanSetup(3, {
+    order: { mode: 'manual', order: reversed },
+    startingResources: { count: 1, replacement: 'with' },
+  });
+  const none = aCatanSetup(3, {
+    order: { mode: 'none' },
+    startingResources: { count: 1, replacement: 'with' },
+  });
+
+  it('US-AB-01 AK-3: an order set by hand has no spins; the placement follows it', () => {
+    const steps = stepsOf(complete(manual, 12));
+    const firstRound = steps.flatMap((step) =>
+      step.kind === 'building' && step.index < 3 ? [step.personId] : [],
+    );
+
+    expect(steps.some((step) => step.kind === 'order-spin')).toBe(false);
+    expect(steps).toHaveLength(3 + 12 + 3);
+    expect(firstRound).toEqual(reversed);
+    expect(
+      steps.flatMap((step) => (step.kind === 'starting-resources' ? [step.personId] : [])),
+    ).toEqual(reversed);
+  });
+
+  it('US-PL-05 AK-3: without placement there are no spins, buildings or roads', () => {
+    const generation = complete(none, 13);
+
+    expect(kinds(generation)).toEqual([
+      'person-draw:landscapes',
+      'person-draw:harbors',
+      'person-draw:numbers',
+      ...Array<string>(3).fill('starting-resources'),
+    ]);
+    expect(generation.state).toBe('running');
+  });
+
+  it('US-SR-01 AK-1: without an order the starting resources follow the seats', () => {
+    const owners = stepsOf(complete(none, 14)).flatMap((step) =>
+      step.kind === 'starting-resources' ? [step.personId] : [],
+    );
+
+    expect(owners).toEqual(none.participants);
+  });
+
+  it('US-PL-05 AK-1: the placement after an order set by hand cannot be skipped', () => {
+    const atPlacement = runCatanGeneration(manual, new SeededRandomSource(15), undefined, 3);
+
+    expect(canSkipCatanPlacement(manual, atPlacement)).toBe(false);
+  });
+
+  it('a match without any step is complete at once', () => {
+    const empty = aCatanSetup(2, {
+      order: { mode: 'none' },
+      personDraws: { landscapes: false, harbors: false, numbers: false },
+    });
+    const generation = startGeneration<CatanStep, CatanGameState>(CATAN_INITIAL_GAME_STATE);
+
+    expect(CATAN_GENERATION.isComplete(empty, generation)).toBe(true);
+    expect(CATAN_GENERATION.nextStep(empty, generation, new SeededRandomSource(1))).toBeNull();
   });
 });
 

@@ -95,12 +95,17 @@ function buildings(steps: readonly CatanStep[]): CatanBuildingStep[] {
 }
 
 /**
- * The placement order once all n − 1 spins are drawn (US-LS-03 AK-2), otherwise `undefined`.
+ * The placement order: once all n − 1 spins are drawn (US-LS-03 AK-2) or as set by hand
+ * (FA-LS-07); `undefined` while spins are missing and if the match has no order.
  */
 export function catanPlacementOrder(
   setup: CatanSetup,
   steps: readonly CatanStep[],
 ): PersonId[] | undefined {
+  const { order } = setup.options;
+  if (order.mode !== 'draw') {
+    return order.mode === 'manual' ? [...order.order] : undefined;
+  }
   const drawn = orderSpins(steps).map((step) => step.result);
   return drawn.length === orderSpinCount(setup.participants.length)
     ? completeOrder(setup.participants, drawn)
@@ -108,15 +113,27 @@ export function catanPlacementOrder(
 }
 
 // FA-AB-02, Specification 3.1: the flow of the phases 4 to 9. The placement and the starting
-// resources follow the order, so they are known only once the order is complete.
+// resources follow the order, so they are known only once the order is complete. Without an
+// order there is no placement, and the starting resources follow the seats (FA-LS-07, FA-SR-04).
 function slotsOf(setup: CatanSetup, generation: CatanGeneration): Slot[] {
   const steps = generation.steps.map((record) => record.step);
   const slots: Slot[] = enabledPersonDraws(setup.options).map((draw) => ({
     kind: 'person-draw',
     draw,
   }));
-  for (let position = 0; position < orderSpinCount(setup.participants.length); position++) {
-    slots.push({ kind: 'order-spin', position });
+  const { mode } = setup.options.order;
+  if (mode === 'none') {
+    if (setup.options.startingResources !== null) {
+      for (const personId of setup.participants) {
+        slots.push({ kind: 'starting-resources', personId });
+      }
+    }
+    return slots;
+  }
+  if (mode === 'draw') {
+    for (let position = 0; position < orderSpinCount(setup.participants.length); position++) {
+      slots.push({ kind: 'order-spin', position });
+    }
   }
   const order = catanPlacementOrder(setup, steps);
   if (order === undefined) {
@@ -279,12 +296,14 @@ export function createCatanGeneration(
 export const CATAN_GENERATION: CatanGenerationDefinition = createCatanGeneration();
 
 /**
- * Whether the placement can be skipped now (US-PL-05 AK-1): the order is complete and
- * confirmed, and no building has been drawn yet.
+ * Whether the placement can be skipped now (US-PL-05 AK-1): the order is drawn completely and
+ * confirmed, and no building has been drawn yet. An order set by hand is not skipped; without
+ * placement is an option of its own (FA-LS-07).
  */
 export function canSkipCatanPlacement(setup: CatanSetup, generation: CatanGeneration): boolean {
   const steps = generation.steps.map((record) => record.step);
   return (
+    setup.options.order.mode === 'draw' &&
     !generation.gameState.placementSkipped &&
     revealedStepIndex(generation) === undefined &&
     catanPlacementOrder(setup, steps) !== undefined &&

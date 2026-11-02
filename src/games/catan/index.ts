@@ -39,9 +39,17 @@ export {
   enabledPersonDraws,
   type CatanMode,
   type CatanOptions,
+  type CatanOrderOption,
   type CatanPersonDraw,
   type CatanSetup,
 } from './generation/options';
+export {
+  CATAN_PHASES,
+  catanPhaseOf,
+  catanProgress,
+  type CatanPhase,
+  type CatanPhaseProgress,
+} from './generation/progress';
 export type {
   CatanBuildingStep,
   CatanOrderSpinStep,

@@ -3,12 +3,15 @@ import { createRoot } from 'react-dom/client';
 import { createHashRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { createMasterDataService } from '@/app/services/masterDataService';
+import { createSessionService } from '@/app/services/sessionService';
 import { SUPPORTED_GAMES } from '@/games/registry';
 import { t } from '@/i18n/t';
 import { BoardBrainDb } from '@/infra/db/database';
 import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
+import { createDexieSessionStore } from '@/infra/db/sessionStore';
 import { readDiagnostics } from '@/infra/platform/diagnostics';
 import { systemClock } from '@/infra/platform/systemClock';
+import { CryptoRandomSource } from '@/infra/random/cryptoRandomSource';
 import { uuidGenerator } from '@/infra/random/uuidGenerator';
 import { registerServiceWorker } from '@/infra/update/serviceWorker';
 import { AppDependenciesProvider, type AppDependencies } from '@/ui/AppDependencies';
@@ -58,6 +61,11 @@ const dependencies: AppDependencies = {
     ids: uuidGenerator,
     clock: systemClock,
     supportedGameNames: SUPPORTED_GAMES.map((game) => t(game.nameKey)),
+  }),
+  session: createSessionService({
+    store: createDexieSessionStore(db),
+    clock: systemClock,
+    rng: new CryptoRandomSource(),
   }),
 };
 
