@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from 'react';
+import { cx } from '@/ui/components/classNames';
 import { PressableButton } from '@/ui/components/Pressable';
 import shared from './Match.module.css';
 import styles from './MatchDialog.module.css';
@@ -69,9 +70,7 @@ export function MatchDialog({
           {confirmLabel !== undefined && (
             <PressableButton
               type="button"
-              className={[shared.primary, isDanger && shared.danger]
-                .filter((name) => typeof name === 'string')
-                .join(' ')}
+              className={cx(shared.primary, isDanger && shared.danger)}
               onClick={onConfirm}
             >
               {confirmLabel}

@@ -206,14 +206,12 @@ export function MatchOverviewView(): React.JSX.Element | null {
 
   return (
     <main
-      className={[
+      className={cx(
         shared.main,
         shared.wideMain,
         tab === 'board' && shared.fill,
         tab === 'board' && styles.boardTab,
-      ]
-        .filter((name) => typeof name === 'string')
-        .join(' ')}
+      )}
     >
       <div className={shared.pageHead}>
         <PressableButton
