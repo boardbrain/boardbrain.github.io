@@ -14,6 +14,7 @@ function renderAt(path: string): void {
           { path: '/', element: <h1>start page</h1> },
           { path: '/verwaltung', element: <h1>management page</h1> },
           { path: '/verwaltung/personen', element: <h1>persons page</h1> },
+          { path: '/partie/neu/tisch', element: <h1>table choice</h1> },
         ],
       },
     ],
@@ -50,6 +51,17 @@ describe('Architecture 13.1 app frame and navigation', () => {
     );
     expect(within(navigation()).getByRole('link', { name: 'Start' })).not.toHaveAttribute(
       'aria-current',
+    );
+  });
+
+  it('shows Start as the current area during a match (design I2-C)', () => {
+    renderAt('/partie/neu/tisch');
+
+    expect(within(navigation()).getByRole('link', { name: 'Start' }).className).toMatch(
+      /activeCard/,
+    );
+    expect(within(navigation()).getByRole('link', { name: 'Verwaltung' }).className).not.toMatch(
+      /activeCard/,
     );
   });
 

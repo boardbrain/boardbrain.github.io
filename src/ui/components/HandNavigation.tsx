@@ -30,10 +30,6 @@ export type HandArea = {
   readonly alsoOn?: readonly string[];
 };
 
-function cardClass({ isActive }: { readonly isActive: boolean }): string | undefined {
-  return isActive ? styles.activeCard : styles.card;
-}
-
 function withUnit(value: string | number | undefined, unit: string): string {
   return typeof value === 'number' ? `${String(value)}${unit}` : (value ?? `0${unit}`);
 }
@@ -149,7 +145,7 @@ export function HandNavigation({
                 <NavLink
                   to={area.to}
                   end={area.isEnd === true}
-                  className={cardClass}
+                  className={isActive ? styles.activeCard : styles.card}
                   draggable={false}
                   onPointerDown={startPress}
                   onPointerUp={cancelPress}
