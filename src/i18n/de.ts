@@ -199,7 +199,6 @@ export const de = {
   partie: {
     neu: 'Neue Partie',
     spielFrage: 'Welches Spiel spielt ihr?',
-    nurCatan: 'Bisher wird nur Catan unterstützt',
     catanPersonen: '2 bis 4 Personen',
     catanAufstellung: 'Zufällige Startaufstellung',
     schritt: '{spiel} · Schritt {nummer} von 3',

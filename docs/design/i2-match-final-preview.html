@@ -3832,8 +3832,7 @@
             h('p', { class: 'muted small' }, 'Bisher wird nur Catan unterstützt'));
         }
         return h('main', { class: 'main' }, head,
-          h('section', { class: 'section' }, title, h('div', { class: 'gameGrid' }, catanCard(ui.face.startsWith('K') ? 'min(64cqw, 240px)' : 'min(58cqw, 220px)', 136))),
-          hint);
+          h('section', { class: 'section' }, title, h('div', { class: 'gameGrid' }, catanCard(ui.face.startsWith('K') ? 'min(64cqw, 240px)' : 'min(58cqw, 220px)', 136))));
       }
       // All pictures side by side below the frame, to compare them.
       function emblemGallery() {
@@ -5287,7 +5286,7 @@
             'Stapel „Partie“ wie in D-3. Läuft eine Partie, steht oben das Band „‹Tisch› spielt gerade · Weiter“.',
           ]),
           spec('Seite 1 Spielauswahl (US-SP-01)', [
-            'Form A, Karte K2 „Entwicklungskarte dunkel“ mit Landschaft, „2 bis 4 Personen“, „Zufällige Startaufstellung“, Hinweis „Bisher wird nur Catan unterstützt“ (entfällt mit der gemeinsamen Spielliste in I3).',
+            'Form A, Karte K2 „Entwicklungskarte dunkel“ mit Landschaft, „2 bis 4 Personen“, „Zufällige Startaufstellung“, ohne Hinweis darunter (entfernt auf Wunsch des Product Owners am 03.11.2026).',
             'E6 (Schachtelbild über die ganze Karte, „CATAN“ oben, „2 bis 4 Personen“, ohne Zahl in den Ecken) ist nicht gewählt und für spätere Entwicklungen aufbewahrt (oben unter „Spielkarte“ zu sehen).',
           ]),
           spec('Seite 2 Tisch (US-SP-04, US-PG-04)', [

@@ -35,7 +35,6 @@ export function GameChoiceView(): React.JSX.Element {
           </PressableLink>
         </div>
       </section>
-      <p className={shared.hint}>{t('partie.nurCatan')}</p>
     </main>
   );
 }
