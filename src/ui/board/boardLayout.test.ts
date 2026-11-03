@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createBoard } from '@/games/catan';
 import { CATAN_BOARD } from '@/games/catan';
-import { layoutBoard } from './boardLayout';
+import { edgeInSvg, layoutBoard, vertexInSvg } from './boardLayout';
 
 type Point = { x: number; y: number };
 
@@ -106,5 +106,28 @@ describe('US-PL-01 board layout (Architecture 13.5, design I1-D)', () => {
 
     expect(single.tiles).toHaveLength(1);
     expect(single.coastlines).toHaveLength(1);
+  });
+});
+
+describe('Design I2-C points of pieces', () => {
+  const [edge] = CATAN_BOARD.edges.values();
+  const [from, to] = edge?.vertices ?? [];
+
+  it('places an edge from the vertex of its building', () => {
+    if (edge === undefined || from === undefined || to === undefined) throw new Error('edge');
+
+    expect(edgeInSvg(CATAN_BOARD, edge.id, from)).toEqual({
+      from: vertexInSvg(CATAN_BOARD, from),
+      to: vertexInSvg(CATAN_BOARD, to),
+    });
+    expect(edgeInSvg(CATAN_BOARD, edge.id, to).from).toEqual(vertexInSvg(CATAN_BOARD, to));
+  });
+
+  it('rejects a vertex that is not on the edge', () => {
+    if (edge === undefined) throw new Error('edge');
+    const elsewhere = [...CATAN_BOARD.vertices.keys()].find((id) => !edge.vertices.includes(id));
+    if (elsewhere === undefined) throw new Error('vertex');
+
+    expect(() => edgeInSvg(CATAN_BOARD, edge.id, elsewhere)).toThrow('no edge');
   });
 });
