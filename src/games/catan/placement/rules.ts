@@ -23,6 +23,7 @@ export type VertexRule = {
  * hexes.
  */
 export const inlandOnly: VertexRule = {
+  /** Allows only vertices with three land hexes. */
   allows: (vertex, state) => state.board.vertices.get(vertex)?.landHexCount === 3,
 };
 
@@ -31,6 +32,7 @@ export const inlandOnly: VertexRule = {
  * building.
  */
 export const distanceRule: VertexRule = {
+  /** Allows only free vertices without a building on a neighbour. */
   allows: (vertex, state) =>
     !state.occupied.has(vertex) &&
     (state.board.vertices.get(vertex)?.neighbours ?? []).every(
