@@ -20,6 +20,7 @@ import { MatchDialog } from './MatchDialog';
 import { DRAW_NAMES } from './matchTexts';
 import { isOrderComplete, tapForOrder, type MatchPreparation } from './preparation';
 import { useChosenPreparation } from './PreparationLayout';
+import { Unfold } from './Unfold';
 import { WizardDots } from './WizardDots';
 import shared from './Match.module.css';
 import styles from './OptionsView.module.css';
@@ -136,7 +137,7 @@ export function OptionsView(): React.JSX.Element | null {
               change({ isOrderDrawn: !preparation.isOrderDrawn });
             }}
           />
-          {!preparation.isOrderDrawn && (
+          <Unfold isOpen={!preparation.isOrderDrawn}>
             <div className={styles.optColumn}>
               <Segmented
                 options={[
@@ -164,7 +165,7 @@ export function OptionsView(): React.JSX.Element | null {
                 <small className={shared.muted}>{t('partie.keineGebaeude')}</small>
               )}
             </div>
-          )}
+          </Unfold>
         </div>
       </section>
 
@@ -179,53 +180,51 @@ export function OptionsView(): React.JSX.Element | null {
               change({ hasStartingResources: !preparation.hasStartingResources });
             }}
           />
-          {preparation.hasStartingResources && (
-            <>
-              <div className={styles.optRow}>
-                <span className={styles.txt}>{t('partie.anzahlJePerson')}</span>
-                <span className={styles.stepper}>
-                  <PressableButton
-                    type="button"
-                    aria-label={t('partie.weniger')}
-                    disabled={preparation.resourceCount <= CATAN_STARTING_RESOURCES_COUNT.min}
-                    onClick={() => {
-                      change({ resourceCount: preparation.resourceCount - 1 });
-                    }}
-                  >
-                    {t('partie.zeichenMinus')}
-                  </PressableButton>
-                  <output>{preparation.resourceCount}</output>
-                  <PressableButton
-                    type="button"
-                    aria-label={t('partie.mehr')}
-                    disabled={preparation.resourceCount >= CATAN_STARTING_RESOURCES_COUNT.max}
-                    onClick={() => {
-                      change({ resourceCount: preparation.resourceCount + 1 });
-                    }}
-                  >
-                    {t('partie.zeichenPlus')}
-                  </PressableButton>
-                </span>
-              </div>
-              <div className={styles.optColumn}>
-                <Segmented
-                  options={[
-                    ['with', t('partie.mitZuruecklegen')],
-                    ['without', t('partie.ohneZuruecklegen')],
-                  ]}
-                  selected={preparation.replacement}
-                  onSelect={(replacement) => {
-                    change({ replacement });
+          <Unfold isOpen={preparation.hasStartingResources}>
+            <div className={styles.optRow}>
+              <span className={styles.txt}>{t('partie.anzahlJePerson')}</span>
+              <span className={styles.stepper}>
+                <PressableButton
+                  type="button"
+                  aria-label={t('partie.weniger')}
+                  disabled={preparation.resourceCount <= CATAN_STARTING_RESOURCES_COUNT.min}
+                  onClick={() => {
+                    change({ resourceCount: preparation.resourceCount - 1 });
                   }}
-                />
-                <small className={shared.muted}>
-                  {preparation.replacement === 'with'
-                    ? t('partie.mitZuruecklegenText')
-                    : t('partie.ohneZuruecklegenText')}
-                </small>
-              </div>
-            </>
-          )}
+                >
+                  {t('partie.zeichenMinus')}
+                </PressableButton>
+                <output>{preparation.resourceCount}</output>
+                <PressableButton
+                  type="button"
+                  aria-label={t('partie.mehr')}
+                  disabled={preparation.resourceCount >= CATAN_STARTING_RESOURCES_COUNT.max}
+                  onClick={() => {
+                    change({ resourceCount: preparation.resourceCount + 1 });
+                  }}
+                >
+                  {t('partie.zeichenPlus')}
+                </PressableButton>
+              </span>
+            </div>
+            <div className={styles.optColumn}>
+              <Segmented
+                options={[
+                  ['with', t('partie.mitZuruecklegen')],
+                  ['without', t('partie.ohneZuruecklegen')],
+                ]}
+                selected={preparation.replacement}
+                onSelect={(replacement) => {
+                  change({ replacement });
+                }}
+              />
+              <small className={shared.muted}>
+                {preparation.replacement === 'with'
+                  ? t('partie.mitZuruecklegenText')
+                  : t('partie.ohneZuruecklegenText')}
+              </small>
+            </div>
+          </Unfold>
         </div>
       </section>
 
