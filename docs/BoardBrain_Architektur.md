@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.22 |
+| Version | 0.23 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 03.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -36,6 +36,7 @@
 | 0.20 | 29.10.2026 | Bündel I2-A: Was nur Catan betrifft, liegt im Catan-Modul (neu ADR-028): Brett, Platzierungsregeln, Sackgassen-Strategie, Gebäudearten, Spielversionen und Rohstoffe in `games/catan`, die Module `core/board` und `core/placement` entfallen (4.1, 4.3, 5.2 bis 5.6, 15); Farbmodell der Gruppen bleibt in `core/model`; Bezeichner für Rohstoffe und Zurücklegen (4.5); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) (PR #27) |
 | 0.21 | 29.10.2026 | Bündel I2-B: spielunabhängige Ablaufsteuerung mit allgemeinem Schritt und `GenerationDefinition` in `core/generation`, Catan-Ablauf mit Schrittarten, Optionen, verdecktem Plan und Überspringen der Platzierung in `games/catan/generation` (4.3, 5.5, 15); Farben der Partie mit Tausch in `core/model` (5.5); gespeicherte Sitzung mit `setup` statt `options` und `matchColors`, Port `SessionStore`, `SessionService` (10.2, 10.3); Sperre der Spielbindung im `MasterDataService` in derselben Transaktion (10.4); Dienst-Tests mit Speicher-Attrappe, Neustart im Datenbanktest über eine neue Verbindung (14.1) (PR #28) |
 | 0.22 | 03.11.2026 | Bündel I2-C: kein Paket Zustand; laufende Partie über den Lesehook `useCurrentSession`, Vorbereitung im Zustand der Layout-Route `#/partie/neu` mit Outlet-Kontext (neu ADR-029; 3.1, 10.3, 13.2, 15); `start` lost den ersten Schritt in derselben Transaktion, `advance(shownStep)` mit `step-changed` statt `drawNextStep` und `confirmStep`, `skipPlacement` lost den nächsten Schritt (10.3); Reihenfolge abschaltbar und Fortschritt in Phasen im Catan-Modul (5.5, FA-LS-07); Adressen der Partie, Laden bei Bedarf, Startstapel, Gedrückt halten, niedrige Tablets im Querformat (13.1); Tokens für Landschaften, Rohstoffe, Karten und Illustrationen (13.4); Gebäude und Straßen auf dem Brett (13.5); schlichtes Einblenden (13.6); fester Startwert des Zufalls in Ende-zu-Ende-Tests (14.5); Design-Referenz `docs/design/i2-match-final-preview.html`; Rohstoffkarten und Landschaft der Catan-Karte als erzeugte Bilder aus SVG-Quellen (`npm run art`, neu ADR-030; 13.4, 15, 16) |
+| 0.23 | 03.11.2026 | Lokal höchstens vier Ende-zu-Ende-Tests gleichzeitig, weil WebKit unter Windows bei mehr parallelen Browsern gelegentlich einfror (14.5) |
 
 ## Inhaltsverzeichnis
 
@@ -1166,7 +1167,7 @@ Playwright-Szenarien (Auswahl):
 
 Die Ende-zu-Ende-Tests laufen gegen `npm run preview`; lokal baut `npm run test:e2e` vorher den aktuellen Stand. Lokal laufen sie mit dem mkcert-Zertifikat über HTTPS; weil Playwrights WebKit unter Windows dem Zertifikatsspeicher von Windows nicht vertraut, ignorieren die Tests Zertifikatsfehler (die Seite bleibt ein sicherer Kontext). Auf GitHub laufen sie über `http://localhost`, das Browser ebenfalls als sicheren Kontext behandeln. Eine Fixture lässt jeden Test zusätzlich bei Fehlern in der Browser-Konsole fehlschlagen, darunter Verstöße gegen die Content-Security-Policy.
 
-WebKit unter Windows nähert Safari an, ersetzt aber nicht den Test auf echten Apple-Geräten.
+WebKit unter Windows nähert Safari an, ersetzt aber nicht den Test auf echten Apple-Geräten. Es zeichnet ohne Grafikkarte; mit sechs gleichzeitigen Läufen fror bei den langen Partie-Tests gelegentlich eine Seite ganz ein. Lokal laufen deshalb höchstens vier Tests gleichzeitig (`workers` in `playwright.config.ts`), auf GitHub gilt die Voreinstellung. *(neu in 0.23)*
 
 ### 14.6 Manuelle Abnahme vor jedem Release
 
