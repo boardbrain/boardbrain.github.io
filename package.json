@@ -17,6 +17,7 @@
     "test:e2e": "playwright test",
     "format": "prettier --write .",
     "icons": "node scripts/generate-icons.mjs",
+    "art": "node scripts/generate-art.mjs",
     "check": "tsc -p tsconfig.json && tsc -p tsconfig.node.json && tsc -p tsconfig.sw.json && eslint --max-warnings=0 . && stylelint \"**/*.css\" && prettier --check . && depcruise src && vitest run --project unit --project dom --coverage"
   },
   "dependencies": {

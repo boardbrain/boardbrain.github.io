@@ -55,10 +55,16 @@
   box-shadow: inset 0 0 8px var(--color-card-art-shadow);
 }
 
-.art svg {
+.art svg,
+.art img {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* A picture fills the window like the drawing did (`slice`): cut, not squeezed. */
+.art img {
+  object-fit: cover;
 }
 
 .text {

@@ -110,7 +110,11 @@ const JSX_SYNTAX = [
     message: JSX_TEXT_MESSAGE,
   },
   { selector: 'JSXElement > JSXExpressionContainer > TemplateLiteral', message: JSX_TEXT_MESSAGE },
-  { selector: `JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > Literal`, message: JSX_TEXT_MESSAGE },
+  // An empty text is allowed: `alt=""` marks a decorative picture for screen readers.
+  {
+    selector: String.raw`JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > Literal[value=/\S/]`,
+    message: JSX_TEXT_MESSAGE,
+  },
   {
     selector: `JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > JSXExpressionContainer > :matches(Literal[raw=/^['"]/], TemplateLiteral)`,
     message: JSX_TEXT_MESSAGE,

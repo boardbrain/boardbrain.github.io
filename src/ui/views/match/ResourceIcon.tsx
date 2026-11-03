@@ -1,12 +1,5 @@
 import type { CatanResource } from '@/games/catan';
 import {
-  BrickCardArt,
-  GrainCardArt,
-  OreCardArt,
-  WoodCardArt,
-  WoolCardArt,
-} from '@/ui/art/ResourceCardArt';
-import {
   BrickSymbol,
   GrainSymbol,
   OreSymbol,
@@ -51,28 +44,4 @@ export function ResourceIcon({
       <ResourceSymbol resource={resource} />
     </span>
   );
-}
-
-/**
- * The picture of a resource card S4 (design I2-C, page 8). Decorative.
- */
-export function ResourceCardArt({
-  resource,
-  className,
-}: {
-  readonly resource: CatanResource;
-  readonly className?: string | undefined;
-}): React.JSX.Element {
-  switch (resource) {
-    case 'lumber':
-      return <WoodCardArt className={className} />;
-    case 'brick':
-      return <BrickCardArt className={className} />;
-    case 'wool':
-      return <WoolCardArt className={className} />;
-    case 'grain':
-      return <GrainCardArt className={className} />;
-    case 'ore':
-      return <OreCardArt className={className} />;
-  }
 }

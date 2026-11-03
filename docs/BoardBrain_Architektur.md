@@ -35,7 +35,7 @@
 | 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19); reine Doku-Änderungen ohne lokale Prüfungen (14.1, 16.4; Entwicklungsrichtlinien 3.6) |
 | 0.20 | 29.10.2026 | Bündel I2-A: Was nur Catan betrifft, liegt im Catan-Modul (neu ADR-028): Brett, Platzierungsregeln, Sackgassen-Strategie, Gebäudearten, Spielversionen und Rohstoffe in `games/catan`, die Module `core/board` und `core/placement` entfallen (4.1, 4.3, 5.2 bis 5.6, 15); Farbmodell der Gruppen bleibt in `core/model`; Bezeichner für Rohstoffe und Zurücklegen (4.5); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) (PR #27) |
 | 0.21 | 29.10.2026 | Bündel I2-B: spielunabhängige Ablaufsteuerung mit allgemeinem Schritt und `GenerationDefinition` in `core/generation`, Catan-Ablauf mit Schrittarten, Optionen, verdecktem Plan und Überspringen der Platzierung in `games/catan/generation` (4.3, 5.5, 15); Farben der Partie mit Tausch in `core/model` (5.5); gespeicherte Sitzung mit `setup` statt `options` und `matchColors`, Port `SessionStore`, `SessionService` (10.2, 10.3); Sperre der Spielbindung im `MasterDataService` in derselben Transaktion (10.4); Dienst-Tests mit Speicher-Attrappe, Neustart im Datenbanktest über eine neue Verbindung (14.1) (PR #28) |
-| 0.22 | 03.11.2026 | Bündel I2-C: kein Paket Zustand; laufende Partie über den Lesehook `useCurrentSession`, Vorbereitung im Zustand der Layout-Route `#/partie/neu` mit Outlet-Kontext (neu ADR-029; 3.1, 10.3, 13.2, 15); `start` lost den ersten Schritt in derselben Transaktion, `advance(shownStep)` mit `step-changed` statt `drawNextStep` und `confirmStep`, `skipPlacement` lost den nächsten Schritt (10.3); Reihenfolge abschaltbar und Fortschritt in Phasen im Catan-Modul (5.5, FA-LS-07); Adressen der Partie, Laden bei Bedarf, Startstapel, Gedrückt halten, niedrige Tablets im Querformat (13.1); Tokens für Landschaften, Rohstoffe, Karten und Illustrationen (13.4); Gebäude und Straßen auf dem Brett (13.5); schlichtes Einblenden (13.6); fester Startwert des Zufalls in Ende-zu-Ende-Tests (14.5); Design-Referenz `docs/design/i2-match-final-preview.html` |
+| 0.22 | 03.11.2026 | Bündel I2-C: kein Paket Zustand; laufende Partie über den Lesehook `useCurrentSession`, Vorbereitung im Zustand der Layout-Route `#/partie/neu` mit Outlet-Kontext (neu ADR-029; 3.1, 10.3, 13.2, 15); `start` lost den ersten Schritt in derselben Transaktion, `advance(shownStep)` mit `step-changed` statt `drawNextStep` und `confirmStep`, `skipPlacement` lost den nächsten Schritt (10.3); Reihenfolge abschaltbar und Fortschritt in Phasen im Catan-Modul (5.5, FA-LS-07); Adressen der Partie, Laden bei Bedarf, Startstapel, Gedrückt halten, niedrige Tablets im Querformat (13.1); Tokens für Landschaften, Rohstoffe, Karten und Illustrationen (13.4); Gebäude und Straßen auf dem Brett (13.5); schlichtes Einblenden (13.6); fester Startwert des Zufalls in Ende-zu-Ende-Tests (14.5); Design-Referenz `docs/design/i2-match-final-preview.html`; Rohstoffkarten und Landschaft der Catan-Karte als erzeugte Bilder aus SVG-Quellen (`npm run art`, neu ADR-030; 13.4, 15, 16) |
 
 ## Inhaltsverzeichnis
 
@@ -1044,7 +1044,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 - Alle Designs sind dunkel (NFA-GB-02). Mindestkontrast für Text: 4,5 : 1 auf jeder Fläche jedes Designs. Catan- und Gruppenfarben: 3 : 1 zum Hintergrund (`--color-surface`) jedes Designs und 2,3 : 1 auf dessen Karten und Überlagerungen (`--color-surface-raised`, `--color-surface-overlay`); untereinander unterscheiden sich die Gruppenfarben um mindestens ΔE 25 (CIE76), Vorrang hat diese Unterscheidbarkeit (E-28). *(geändert in 0.10)* „Glas“ nutzt durchscheinende Flächen mit Unschärfe; das kostet Rechenleistung und wird in US-GB-01 auf älteren Geräten geprüft.
 - Gespeicherte Farbschlüssel werden über eine Zuordnung in Variablen übersetzt, z. B. `catanColor: 'white'` → `var(--color-catan-white)`.
 - Brett (US-PL-01, Design I1-D): `--color-board-sea`, `-sea-deep`, `-shallow`, `-wave`, `-sand`, `-wood-top`, `-wood-bottom`, `-wood-edge`, `-highlight`; in allen Designs gleich. *(neu in 0.15)*
-- Partie (Design I2-C): Landschaften, Häfen und Rohstoffe (`--color-resource-‹rohstoff›`), Karten (`--color-card-paper`, `-ribbon-…`, `-frame`, `-glow` u. a.), Schrift auf Catan-Farben (`--color-on-catan`, `-strong`), Bänder je Catan-Farbe (`--color-catan-‹key›-band-light/-dark`), Konturen der Stücke (`--color-piece-outline`) und `--color-danger`; die Illustrationen der Referenz (Landschaft, Losschritte, Symbole, Rohstoffkarten S4) nutzen eine eigene Palette `--color-art-‹familie›-‹n›`. Die Grafiken liegen als Komponenten in `ui/art`, aus der Referenz übernommen; Kennungen ihrer Verläufe kommen aus `useId`. In allen Designs gleich. *(neu in 0.22)*
+- Partie (Design I2-C): Landschaften, Häfen und Rohstoffe (`--color-resource-‹rohstoff›`), Karten (`--color-card-paper`, `-ribbon-…`, `-frame`, `-glow` u. a.), Schrift auf Catan-Farben (`--color-on-catan`, `-strong`), Bänder je Catan-Farbe (`--color-catan-‹key›-band-light/-dark`), Konturen der Stücke (`--color-piece-outline`) und `--color-danger`; die Illustrationen der Referenz (Landschaft, Losschritte, Symbole, Rohstoffkarten S4) nutzen eine eigene Palette `--color-art-‹familie›-‹n›`. Kleine Grafiken (Losschritte, Symbole der Optionen und Rohstoffe) liegen als Komponenten in `ui/art`, aus der Referenz übernommen; Kennungen ihrer Verläufe kommen aus `useId`. Die großen Bilder, die Rohstoffkarten und die Landschaft der Catan-Karte, sind erzeugte Bilder (ADR-030): Quellen als SVG in `scripts/art` mit Verweisen auf die Tokens, `npm run art` (`scripts/generate-art.mjs`) zeichnet sie mit Playwright und den Werten aus `tokens.css` als WebP mit Transparenz in 1200 px Breite nach `public/art/`; `ui/art/Pictures.tsx` zeigt sie als Bild mit leerem `alt`. Der Service Worker hält sie für die Offline-Nutzung vor. In allen Designs gleich. *(neu in 0.22)*
 - Stylelint verbietet Farbwerte außerhalb von `tokens.css`; ESLint verbietet Farbwerte in TypeScript (NFA-GB-05).
 - Ein späterer Hellmodus (PP-09) ist ein zweiter Satz von Werten für dieselben Variablen.
 - Komponenten nutzen CSS Modules (`*.module.css`), sodass Stile nicht über Komponenten hinweg wirken.
@@ -1222,9 +1222,12 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  └─ test-reports/                   z. B. sackgassen.md
 ├─ public/
 │  ├─ icons/                          App-Symbole für alle Plattformen (aus npm run icons)
+│  ├─ art/                            Rohstoffkarten und Landschaft als WebP (aus npm run art, ADR-030)
 │  ├─ fonts/                          WOFF2-Schriften
 │  └─ sounds/                         Klänge und LICENSES.md
 ├─ scripts/
+│  ├─ art/                            SVG-Quellen der großen Bilder einer Partie (ADR-030)
+│  ├─ generate-art.mjs                Bilder aus den SVG-Quellen und Tokens erzeugen (ADR-030)
 │  └─ generate-icons.mjs              App-Symbole aus Logo und Tokens erzeugen (12.1)
 ├─ src/
 │  ├─ core/                           Fachlogik, framework-frei
@@ -1331,6 +1334,7 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 | `npm run test:e2e` | Playwright gegen `preview` (Chromium, WebKit; Smartphone- und Tablet-Formate) |
 | `npm run format` | Prettier formatiert alle Dateien außer `docs/` |
 | `npm run icons` | App-Symbole aus Logo und Tokens neu erzeugen (12.1); nur nach Änderungen an Logo oder Farben |
+| `npm run art` | Rohstoffkarten und Landschaft aus den SVG-Quellen in `scripts/art` und den Tokens neu erzeugen (ADR-030); nur nach Änderungen an einer Quelle oder an Farben |
 | `npm run check` | Typen, ESLint, Stylelint, Prettier (nur prüfen), dependency-cruiser, `npm test` mit Abdeckungsprüfung |
 
 ### 16.3 Branches, Pull Requests und Auslieferung (ADR-023)
@@ -1427,6 +1431,7 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | ADR-027 | Code durchgehend englisch | Angenommen |
 | ADR-028 | Spielspezifisches nur im Spielmodul | Angenommen |
 | ADR-029 | Laufende Partie über Lesehook, Vorbereitung in einer Layout-Route | Angenommen |
+| ADR-030 | Große Illustrationen als erzeugte Bilder | Angenommen |
 
 ---
 
@@ -1869,6 +1874,20 @@ In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betri
 **Betrachtete Optionen:** Zustand wie in ADR-019 (eine Abhängigkeit mehr und ein zweiter Stand neben der Datenbank); React Context mit eigenem Provider für die Vorbereitung (gleichwertig, aber ein zusätzlicher Baustein neben der ohnehin nötigen Layout-Route); Vorbereitung in der Adresse (lange Adressen, Personen und Farben ließen sich von Hand verfälschen).
 
 **Konsequenzen:** Eine Quelle der Wahrheit für die Partie; ein Neustart, ein zweiter Tab oder ein doppelter Tipp zeigen immer den gespeicherten Stand, den Doppeltipp fängt `advance(shownStep)` ab (10.3). Die Vorbereitung verschwindet, sobald man `#/partie/neu` verlässt; das entspricht Spezifikation 3.5. Braucht später eine weitere Ansicht sie, liegt sie unter derselben Layout-Route.
+
+---
+
+### ADR-030: Große Illustrationen als erzeugte Bilder
+
+**Status:** Angenommen (Bündel I2-C, 03.11.2026; Entscheidung des Product Owners)
+
+**Kontext:** Die Illustrationen der Referenz I2 waren als SVG-Komponenten in die App übernommen und wurden bei jeder Anzeige mit SVG-Filtern gezeichnet (heller Rand um das Symbol, Weichzeichner). Safari unter iPadOS malte um das große Symbol der Rohstoffkarten einen dunklen Kasten; Chrome unter Android und Playwrights WebKit unter Windows zeigten keinen Fehler. Allein die Rohstoffkarten waren rund 10.600 Zeilen und der größte Teil des Partie-Codes (530 kB).
+
+**Entscheidung:** Die großen Illustrationen, die fünf Rohstoffkarten und die Landschaft der Catan-Karte, sind fertige Bilder. Ihre Quellen liegen als SVG in `scripts/art` und verweisen auf die Tokens (`var(--color-art-…)`); `npm run art` (`scripts/generate-art.mjs`) zeichnet sie mit Playwright und den Werten aus `tokens.css` und speichert sie als WebP mit Transparenz in 1200 px Breite in `public/art/`. Die Bilder werden mit committet, wie die App-Symbole (12.1). Kleine Grafiken ohne Probleme bleiben SVG-Komponenten in `ui/art`.
+
+**Betrachtete Optionen:** SVG-Komponenten behalten und den Filter für Safari umbauen (ungewiss, ohne iPad nicht nachstellbar, Code bleibt groß); Bilder von Hand mit einem Grafikprogramm erstellen (Farben nicht mehr aus den Tokens, keine reproduzierbare Quelle); PNG statt WebP (rund doppelt so groß bei gleicher Schärfe).
+
+**Konsequenzen:** Alle Browser zeigen dieselben Pixel. Der Partie-Code schrumpft von 530 auf 101 kB (gepackt von 93 auf 26 kB); die sechs Bilder sind zusammen rund 720 kB und liegen im Speicher des Service Workers. Eine Farbe oder Form ändert man in Tokens oder Quelle und erzeugt die Bilder mit `npm run art` neu; vergisst man das, zeigt die App den alten Stand. Die Bilder sind auf 1200 px Breite begrenzt, das reicht für die größten Karten in dreifacher Auflösung (Entscheidung des Product Owners: hohe Auflösung).
 
 ---
 

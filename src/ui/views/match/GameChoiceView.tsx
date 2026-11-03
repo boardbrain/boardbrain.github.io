@@ -1,5 +1,5 @@
 import { t } from '@/i18n/t';
-import { LandscapeArt } from '@/ui/art/LandscapeArt';
+import { LandscapePicture } from '@/ui/art/Pictures';
 import { BackButton } from '@/ui/components/BackButton';
 import { PressableLink } from '@/ui/components/Pressable';
 import { DevCard } from './DevCard';
@@ -28,7 +28,7 @@ export function GameChoiceView(): React.JSX.Element {
             className={styles.gameLink}
             aria-label={t('spiele.namen.catan')}
           >
-            <DevCard title={t('spiele.namen.catan')} art={<LandscapeArt />}>
+            <DevCard title={t('spiele.namen.catan')} art={<LandscapePicture />}>
               <strong className={styles.lead}>{t('partie.catanPersonen')}</strong>
               <span className={styles.note}>{t('partie.catanAufstellung')}</span>
             </DevCard>

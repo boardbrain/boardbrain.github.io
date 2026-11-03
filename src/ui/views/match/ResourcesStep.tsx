@@ -3,11 +3,11 @@ import type { PersonId } from '@/core/model';
 import type { CatanStartingResourcesStep } from '@/games/catan';
 import { t } from '@/i18n/t';
 import { ResourcesOptionIcon } from '@/ui/art/OptionIcons';
+import { ResourceCardPicture } from '@/ui/art/Pictures';
 import { cx } from '@/ui/components/classNames';
 import { colorOf } from './matchColors';
 import { orderOrSeats } from './matchFlow';
 import { RESOURCE_NAMES } from './matchTexts';
-import { ResourceCardArt } from './ResourceIcon';
 import { Reveal } from './Reveal';
 import { TurnBand } from './TurnBand';
 import styles from './MatchView.module.css';
@@ -35,7 +35,7 @@ export function ResourcesStep({ session, step, nameOf }: ResourcesStepProps): Re
       <Reveal className={cx(styles.resGrid, size)}>
         {step.result.map((resource, position) => (
           <div key={`${resource}-${String(position)}`} className={styles.resCard}>
-            <ResourceCardArt resource={resource} className={styles.resCardArt} />
+            <ResourceCardPicture resource={resource} className={styles.resCardArt} />
             <span className={styles.resName}>{t(RESOURCE_NAMES[resource])}</span>
           </div>
         ))}

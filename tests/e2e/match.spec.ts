@@ -194,3 +194,18 @@ test.describe('US-AB-03, US-PL-05, US-AB-06 repeat, skip and end', () => {
     await expect(page.getByRole('heading', { name: 'Neue Partie' })).toBeVisible();
   });
 });
+
+test.describe('Architecture ADR-030 pictures of a match', () => {
+  test('the Catan card and all resource cards are pictures that load', async ({ page }) => {
+    await page.goto('/#/partie/neu');
+    const landscape = page.getByRole('link', { name: 'Catan' }).locator('img');
+    await expect(landscape).toBeVisible();
+    expect(await landscape.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1200);
+
+    for (const card of ['wood', 'brick', 'wool', 'grain', 'ore']) {
+      const response = await page.request.get(`/art/card-${card}.webp`);
+      expect(response.ok(), card).toBe(true);
+      expect(response.headers()['content-type'], card).toBe('image/webp');
+    }
+  });
+});
