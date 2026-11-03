@@ -2732,6 +2732,10 @@
       .main.ovBoardTab {
         gap: 12px;
       }
+      /* The tab bar keeps its place when switching tabs (PO, 03.11.2026): 12 px below the title on both tabs. */
+      .main:not(.ovBoardTab) > .tabs {
+        margin-top: -8px;
+      }
       @container (max-width: 719px) {
         .ovBoardTab .ovBoard {
           margin: 0 -8px;
