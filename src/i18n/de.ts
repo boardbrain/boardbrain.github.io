@@ -284,7 +284,6 @@ export const de = {
     fortschritt: 'Fortschritt',
     wiederholen: 'Wiederholen',
     losen: 'Losen',
-    blaettern: 'Blättern',
     zurUebersicht: 'Zur Übersicht',
     legtSieAus: 'legt sie aus',
     start: 'Start',
@@ -331,7 +330,6 @@ export const de = {
     selbstSetzen: 'Gebäude und Straßen setzt ihr selbst, Reihenfolge unten',
     ohnePlatzierungText: 'Gebäude und Straßen setzt ihr selbst',
     sitzreihenfolge: 'Reihenfolge am Tisch',
-    keinePartie: 'Gerade läuft keine Partie.',
     unbekannteVersion:
       'Diese Partie stammt aus einer anderen Version von BoardBrain und lässt sich nicht fortsetzen.',
     rohstoff: {
