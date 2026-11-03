@@ -1,4 +1,4 @@
-import { lazy, StrictMode, Suspense, type ReactNode } from 'react';
+import { StrictMode, Suspense, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createHashRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
@@ -31,18 +31,16 @@ import { PersonView } from '@/ui/views/management/PersonView';
 import type * as MatchViews from '@/ui/views/match/matchViews';
 import { StartView } from '@/ui/views/start/StartView';
 
-// The views of a match load on first use; their pictures are large (design I2-C). In an object,
-// because a component in a plain variable would need a capital letter.
+// Design I2-C: the views of a match load on first use, their pictures are large. As a lazy route
+// of React Router they load during the navigation, and the previous view stays until then;
+// `lazy()` with Suspense showed them only after React's hold-back of 300 ms for a fallback.
 const loadMatch = (): Promise<typeof MatchViews> => import('@/ui/views/match/matchViews');
-const lazyMatch = {
-  PreparationLayout: lazy(async () => ({ default: (await loadMatch()).PreparationLayout })),
-  GameChoiceView: lazy(async () => ({ default: (await loadMatch()).GameChoiceView })),
-  TableChoiceView: lazy(async () => ({ default: (await loadMatch()).TableChoiceView })),
-  OptionsView: lazy(async () => ({ default: (await loadMatch()).OptionsView })),
-  ColorsView: lazy(async () => ({ default: (await loadMatch()).ColorsView })),
-  MatchView: lazy(async () => ({ default: (await loadMatch()).MatchView })),
-  MatchOverviewView: lazy(async () => ({ default: (await loadMatch()).MatchOverviewView })),
-};
+function matchRoute(
+  pick: (views: typeof MatchViews) => ReactNode,
+): () => Promise<{ element: ReactNode }> {
+  return async () => ({ element: pick(await loadMatch()) });
+}
+
 import '@/ui/styles/tokens.css';
 import '@/ui/styles/global.css';
 
@@ -109,16 +107,19 @@ const router = createHashRouter([
       { path: '/verwaltung/spiele/:gameId', element: view(<GameView />) },
       {
         path: '/partie/neu',
-        element: view(<lazyMatch.PreparationLayout />),
+        lazy: matchRoute((match) => view(<match.PreparationLayout />)),
         children: [
-          { index: true, element: <lazyMatch.GameChoiceView /> },
-          { path: 'tisch', element: <lazyMatch.TableChoiceView /> },
-          { path: 'optionen', element: <lazyMatch.OptionsView /> },
-          { path: 'farben', element: <lazyMatch.ColorsView /> },
+          { index: true, lazy: matchRoute((match) => <match.GameChoiceView />) },
+          { path: 'tisch', lazy: matchRoute((match) => <match.TableChoiceView />) },
+          { path: 'optionen', lazy: matchRoute((match) => <match.OptionsView />) },
+          { path: 'farben', lazy: matchRoute((match) => <match.ColorsView />) },
         ],
       },
-      { path: '/partie', element: view(<lazyMatch.MatchView />) },
-      { path: '/partie/uebersicht', element: view(<lazyMatch.MatchOverviewView />) },
+      { path: '/partie', lazy: matchRoute((match) => view(<match.MatchView />)) },
+      {
+        path: '/partie/uebersicht',
+        lazy: matchRoute((match) => view(<match.MatchOverviewView />)),
+      },
       { path: '/brett', element: view(<BoardView />) },
       {
         path: '/diagnose',
