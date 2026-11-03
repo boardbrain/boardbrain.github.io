@@ -129,21 +129,23 @@ describe('US-PG-02 The room with all tables', () => {
 });
 
 describe('US-VW-05 Search in the room', () => {
+  // The two tables are written straight into the database; creating them in the editor is
+  // tested below (US-PG-02), here only the search counts.
   async function withGroups(): Promise<{ user: User }> {
     const user = userEvent.setup();
     const { db } = renderWithApp(<GroupsView />);
     await addPersons(db, 3);
-    await openEditor(user);
-    await bring(user, 'Anna', 'Ben');
-    await user.clear(screen.getByLabelText('Gruppenname'));
-    await user.type(screen.getByLabelText('Gruppenname'), 'Freitag');
-    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
-    await screen.findByText('Freitag');
-    await openEditor(user);
-    await bring(user, 'Ben', 'Clara');
-    await user.clear(screen.getByLabelText('Gruppenname'));
-    await user.type(screen.getByLabelText('Gruppenname'), 'Familie');
-    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
+    await db.groups.bulkAdd([
+      aGroup({ id: toGroupId('00000000-0000-4000-8000-0000000000c1'), name: 'Freitag' }),
+      aGroup({
+        id: toGroupId('00000000-0000-4000-8000-0000000000c2'),
+        name: 'Familie',
+        members: [
+          { personId: toPersonId('00000000-0000-4000-8000-0000000000a2'), groupColor: 'red' },
+          { personId: toPersonId('00000000-0000-4000-8000-0000000000a3'), groupColor: 'blue' },
+        ],
+      }),
+    ]);
     await screen.findByText('Familie');
     return { user };
   }
@@ -214,7 +216,9 @@ describe('US-PG-02 Bring persons to the table', () => {
   });
 
   it('AK-3: the 13th person cannot join', async () => {
-    const user = userEvent.setup();
+    // Twelve taps in a row: without the pause after each one, so the test stays well within its
+    // time limit when the whole suite runs at once.
+    const user = userEvent.setup({ delay: null });
     const { db } = renderWithApp(<GroupsView />);
     await db.persons.bulkAdd(
       Array.from({ length: 13 }, (_, index) =>
