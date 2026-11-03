@@ -10,6 +10,7 @@ import {
   isCompactHand,
   LONG_PRESS_MS,
 } from './cardHand';
+import { cx } from './classNames';
 import styles from './HandNavigation.module.css';
 
 const ICON_SIZE = 22;
@@ -145,7 +146,7 @@ export function HandNavigation({
                 <NavLink
                   to={area.to}
                   end={area.isEnd === true}
-                  className={isActive ? styles.activeCard : styles.card}
+                  className={cx(isActive ? styles.activeCard : styles.card)}
                   draggable={false}
                   onPointerDown={startPress}
                   onPointerUp={cancelPress}

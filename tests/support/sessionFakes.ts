@@ -1,7 +1,7 @@
 import type { SessionRepositories, SessionStore, StoredSession } from '@/app/ports';
 import { drawNextStep } from '@/core/generation';
 import type { Group } from '@/core/model';
-import { CATAN_GAME_ID, CATAN_GENERATION } from '@/games/catan';
+import { CATAN_GAME_ID, CATAN_GENERATION, type CatanSetup } from '@/games/catan';
 import { aCatanSetup, runCatanGeneration } from './catanGeneration';
 import { aGroup, TEST_NOW } from './masterDataFakes';
 import { SeededRandomSource } from './seededRandomSource';
@@ -70,4 +70,25 @@ export function aStoredSession(fields: Partial<StoredSession> = {}): StoredSessi
     startedAt: TEST_NOW,
     ...fields,
   };
+}
+
+/**
+ * Stored session of `setup` after `confirmed` confirmed steps (seed 5); with `isRevealed` the
+ * next step is drawn and waits for confirmation, as on the screen after "Losen".
+ */
+export function aSessionAfter(
+  setup: CatanSetup,
+  confirmed: number,
+  isRevealed = false,
+): StoredSession {
+  const rng = new SeededRandomSource(5);
+  const generation = runCatanGeneration(setup, rng, undefined, confirmed);
+  if (!isRevealed) {
+    return aStoredSession({ setup, generation });
+  }
+  const revealed = drawNextStep(CATAN_GENERATION, setup, generation, rng);
+  if (!revealed.ok) {
+    throw new Error(revealed.error);
+  }
+  return aStoredSession({ setup, generation: revealed.value });
 }
