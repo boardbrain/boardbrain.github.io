@@ -3993,7 +3993,7 @@
         render();
       }
       function tablesHint() {
-        if (ui.tableHint === 'H1') return h('p', { class: 'muted small' }, 'Nur Tische mit 2 bis 4 Personen, die Catan spielen · Gedrückt halten zeigt alle Personen');
+        if (ui.tableHint === 'H1') return h('p', { class: 'muted small' }, 'Gedrückt halten für Details');
         return h('div', { class: 'hiddenTables' }, h('p', { class: 'muted small' }, 'Nicht dabei, weil Catan 2 bis 4 Personen braucht oder der Tisch Catan ausschließt:'),
           h('ul', {}, HIDDEN_TABLES.map((x) => h('li', { class: 'small' }, h('span', {}, x.name), h('span', { class: 'muted' }, x.why)))));
       }
@@ -4360,7 +4360,7 @@
       function endDialog() {
         return {
           title: 'Partie beenden ohne Ergebnis?',
-          body: ['Generierung wird verworfen', 'Kein Ergebnis mehr eintragbar'],
+          body: ['Generierung wird verworfen', 'Ergebnis bleibt eintragbar, ohne diese Aufstellung'],
           confirm: 'Beenden', danger: true,
           onConfirm: () => { app.session = null; go('start'); },
         };
@@ -5063,7 +5063,7 @@
             pieceBtn({ kind: 'building', i }, fitMark(s.colors[pid], b.city ? 'city' : 'settlement', 16), `${b.city ? 'Stadt' : 'Siedlung'} von ${nameOf(pid)}`),
             pieceBtn({ kind: 'road', i }, fitMark(s.colors[pid], 'road', 16), `Straße von ${nameOf(pid)}`),
           ]))));
-        const placeLines = h('section', { class: 'section' }, h('h2', {}, 'Gebäude und Straßen'), h('div', { class: 'lines' }, s.skipped ? h('div', { class: 'line' }, h('span', { class: 'lbl muted' }, 'Übersprungen, setzt ihr selbst')) : ui.ovPlace === 'G2' ? perPerson() : s.buildings.map((b, i) => [
+        const placeLines = h('section', { class: 'section' }, h('h2', {}, 'Gebäude und Straßen'), h('div', { class: 'lines' }, s.skipped ? h('div', { class: 'line' }, h('span', { class: 'lbl muted' }, 'Übersprungen')) : ui.ovPlace === 'G2' ? perPerson() : s.buildings.map((b, i) => [
           line({ kind: 'building', i }, `${b.city ? 'Stadt' : 'Siedlung'} von ${nameOf(b.pid)}`, null, pieceMark(s.colors[b.pid], b.city, 22)),
           line({ kind: 'road', i }, `Straße von ${nameOf(b.pid)}`, null, roadMark(s.colors[b.pid], 22)),
         ])));
