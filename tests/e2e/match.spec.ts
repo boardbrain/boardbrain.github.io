@@ -147,7 +147,7 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
     await expect(page.getByText('Ohne Platzierung')).toBeVisible();
     await expect(page.getByTestId('board-settlement')).toHaveCount(0);
     await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
-    await expect(page.getByRole('heading', { name: 'Reihenfolge am Tisch' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Personen am Tisch' })).toBeVisible();
   });
 });
 

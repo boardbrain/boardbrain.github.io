@@ -126,7 +126,7 @@ export function MatchOverviewView(): React.JSX.Element | null {
       )}
       <section className={shared.section}>
         <h2 className={shared.sectionTitle}>
-          {hasOrder ? t('partie.reihenfolge') : t('partie.sitzreihenfolge')}
+          {hasOrder ? t('partie.reihenfolge') : t('partie.personenAmTisch')}
         </h2>
         <div className={styles.lines}>
           {order.map((personId, place) => (

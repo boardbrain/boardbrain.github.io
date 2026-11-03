@@ -86,7 +86,7 @@ describe('US-AB-04 Overview of the running match', () => {
 
     await user.click(screen.getByRole('tab', { name: 'Ergebnisse' }));
 
-    expect(screen.getByRole('heading', { name: 'Reihenfolge am Tisch' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Personen am Tisch' })).toBeInTheDocument();
   });
 
   it('US-PL-05 AK-2: a skipped placement says the order still counts', async () => {
