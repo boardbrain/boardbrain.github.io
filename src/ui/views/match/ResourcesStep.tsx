@@ -3,6 +3,7 @@ import type { PersonId } from '@/core/model';
 import type { CatanStartingResourcesStep } from '@/games/catan';
 import { t } from '@/i18n/t';
 import { ResourcesOptionIcon } from '@/ui/art/OptionIcons';
+import { cx } from '@/ui/components/classNames';
 import { colorOf } from './matchColors';
 import { orderOrSeats } from './matchFlow';
 import { RESOURCE_NAMES } from './matchTexts';
@@ -31,7 +32,7 @@ export function ResourcesStep({ session, step, nameOf }: ResourcesStepProps): Re
     count <= FEW_UP_TO ? styles.resGridFew : count >= MANY_FROM ? styles.resGridMany : undefined;
   return (
     <>
-      <Reveal className={[styles.resGrid, size].filter((part) => part !== undefined).join(' ')}>
+      <Reveal className={cx(styles.resGrid, size)}>
         {step.result.map((resource, position) => (
           <div key={`${resource}-${String(position)}`} className={styles.resCard}>
             <ResourceCardArt resource={resource} className={styles.resCardArt} />

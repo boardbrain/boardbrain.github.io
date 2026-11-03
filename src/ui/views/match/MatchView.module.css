@@ -78,16 +78,28 @@
   flex: 1;
 }
 
-/* Page 5: the result of a draw as a development card D2. */
+/* Page 5: the result of a draw as a development card D2. Its width follows the app as in the
+   reference; on low screens (tablets in landscape) it also stays within the room left between
+   the progress and the buttons. The width of the reference is computed here, against the app,
+   and passed on as a length. */
+@property --draw-card-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 240px;
+}
+
 .resultCard {
+  --draw-card-width: min(60cqw, 40cqh, 240px);
+
   display: grid;
   flex: 1;
   place-items: center;
   min-height: 0;
+  container-type: size;
 }
 
 .drawCard {
-  width: min(60cqw, 40cqh, 240px);
+  width: min(var(--draw-card-width), 100cqh * 5 / 7.4);
 }
 
 .who {
@@ -406,13 +418,46 @@
   }
 }
 
-/* Page 8: the starting resources as resource cards S4. */
+/* Low tablets in landscape (Galaxy Tab, iPad): the list does not fit above the hand, so the band
+   shows the order again, as in portrait, and the buttons stay clear of the hand. The frames of
+   the reference are higher and keep the list. */
+@container (width >= 720px) and (orientation: landscape) and (height < 720px) {
+  .placeMain .wOrder {
+    display: none;
+  }
+
+  .placeMain .tbOrder {
+    display: inline-flex;
+  }
+}
+
+/* Page 8: the starting resources as resource cards S4. As with the draw card, the width of the
+   reference is computed against the app; on low screens a card (2 : 3 and its name) also stays
+   within the room left above the band. */
+@property --res-card-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 124px;
+}
+
 .resGrid {
+  --res-card-width: min(28cqw, 124px);
+
   display: flex;
   flex: 1;
   flex-wrap: wrap;
   gap: 12px;
   place-content: center center;
+  min-height: 0;
+  container-type: size;
+}
+
+.resGridFew {
+  --res-card-width: min(38cqw, 23cqh, 170px);
+}
+
+.resGridMany {
+  --res-card-width: min(22cqw, 96px);
 }
 
 .resCard {
@@ -420,15 +465,7 @@
   display: grid;
   gap: 6px;
   justify-items: center;
-  width: min(28cqw, 124px);
-}
-
-.resGridFew .resCard {
-  width: min(38cqw, 23cqh, 170px);
-}
-
-.resGridMany .resCard {
-  width: min(22cqw, 96px);
+  width: min(var(--res-card-width), (100cqh - 24px) * 2 / 3);
 }
 
 .resCardArt {
