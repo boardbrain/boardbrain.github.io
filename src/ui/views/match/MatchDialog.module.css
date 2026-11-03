@@ -1,0 +1,46 @@
+/* Design I2-C: dialog in the middle above everything. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--color-backdrop);
+}
+
+.dialog {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 25rem);
+  padding: 20px;
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px var(--color-shadow);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.lines {
+  display: grid;
+  gap: 6px;
+}
+
+.line {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.buttons > * {
+  flex: 1 1 8rem;
+}

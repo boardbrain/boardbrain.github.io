@@ -15,18 +15,21 @@ type MiniTableProps = {
   readonly diameter: number;
   /** This person's seat gets a ring, the others are dimmed (US-VW-05, personal page). */
   readonly highlightId?: PersonId | undefined;
+  /** Seats with a dark rim, a little further out, as on the table choice (design I2-C). */
+  readonly hasSeatRims?: boolean;
 };
 
 // From this many seats they get smaller so they still fit around the table.
 const DENSE_FROM = 7;
 const FULL_CIRCLE_DEGREES = 360;
 const SEAT_RADIUS_PERCENT = 40;
+const RIMMED_SEAT_RADIUS_PERCENT = 41;
 
-function seatPosition(index: number, count: number): { left: string; top: string } {
+function seatPosition(index: number, count: number, radius: number): { left: string; top: string } {
   const radians = (((index / count) * FULL_CIRCLE_DEGREES - 90) * Math.PI) / 180;
   return {
-    left: `${String(50 + SEAT_RADIUS_PERCENT * Math.cos(radians))}%`,
-    top: `${String(50 + SEAT_RADIUS_PERCENT * Math.sin(radians))}%`,
+    left: `${String(50 + radius * Math.cos(radians))}%`,
+    top: `${String(50 + radius * Math.sin(radians))}%`,
   };
 }
 
@@ -41,8 +44,18 @@ function seatClass(seat: MiniSeat, highlightId: PersonId | undefined): string | 
  * Small round table with coloured seats, e.g. in a row of a person's tables (design I1-E).
  * Decorative: the row around it names the table.
  */
-export function MiniTable({ seats, diameter, highlightId }: MiniTableProps): React.JSX.Element {
-  const className = [styles.table, seats.length >= DENSE_FROM && styles.dense]
+export function MiniTable({
+  seats,
+  diameter,
+  highlightId,
+  hasSeatRims = false,
+}: MiniTableProps): React.JSX.Element {
+  const radius = hasSeatRims ? RIMMED_SEAT_RADIUS_PERCENT : SEAT_RADIUS_PERCENT;
+  const className = [
+    styles.table,
+    seats.length >= DENSE_FROM && styles.dense,
+    hasSeatRims && styles.rimmed,
+  ]
     .filter((name) => typeof name === 'string')
     .join(' ');
   return (
@@ -53,7 +66,7 @@ export function MiniTable({ seats, diameter, highlightId }: MiniTableProps): Rea
           key={seat.personId}
           className={seatClass(seat, highlightId)}
           style={{
-            ...seatPosition(index, seats.length),
+            ...seatPosition(index, seats.length, radius),
             background: `var(--color-group-${seat.groupColor})`,
           }}
         />

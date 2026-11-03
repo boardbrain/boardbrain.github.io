@@ -88,7 +88,7 @@ function progressiveWebApp(): Plugin[] {
     injectRegister: false,
     injectManifest: {
       rollupFormat: 'iife',
-      globPatterns: ['**/*.{html,js,css,svg,png,woff2,webmanifest}'],
+      globPatterns: ['**/*.{html,js,css,svg,png,webp,woff2,webmanifest}'],
     },
     manifest: {
       id: '/',

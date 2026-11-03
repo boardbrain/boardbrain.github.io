@@ -1,0 +1,481 @@
+/* Design I2-C, pages 5 to 8: the flow of a match. */
+.progWrap {
+  position: relative;
+  display: grid;
+  flex: none;
+  gap: 10px;
+}
+
+/* F2: each phase is as wide as its longest possible label; nothing wraps, nothing moves. */
+.phases {
+  display: flex;
+  gap: 4px;
+}
+
+.phase {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.phase > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.segBar {
+  height: 5px;
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  border-radius: 3px;
+}
+
+.segBar > span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent-text);
+}
+
+.phaseNow {
+  font-weight: 700;
+  color: var(--color-accent-text);
+}
+
+.phaseOff {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+
+.stepBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.actionsCol {
+  display: grid;
+  flex: none;
+  gap: 4px;
+  justify-items: center;
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.forward {
+  flex: 1;
+}
+
+/* Page 5: the result of a draw as a development card D2. Its width follows the app as in the
+   reference; on low screens (tablets in landscape) it also stays within the room left between
+   the progress and the buttons. The width of the reference is computed here, against the app,
+   and passed on as a length. */
+@property --draw-card-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 240px;
+}
+
+.resultCard {
+  --draw-card-width: min(60cqw, 40cqh, 240px);
+
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 0;
+  container-type: size;
+}
+
+.drawCard {
+  width: min(var(--draw-card-width), 100cqh * 5 / 7.4);
+}
+
+.who {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  justify-self: center;
+  color: var(--color-text);
+}
+
+.whoCoin {
+  width: 24px;
+  height: 24px;
+  font-family: var(--font-family-base);
+  font-size: 0.75rem;
+}
+
+.whoName {
+  font-size: 1.1rem;
+}
+
+.task {
+  color: var(--color-text-muted);
+}
+
+/* Page 6: the order as a row of cards Q3. */
+.qRow {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+  align-content: center;
+  align-items: center;
+  min-height: 0;
+}
+
+.qCard {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  align-content: center;
+  aspect-ratio: 5 / 7.4;
+  min-width: 0;
+  padding: 30px 4px 14px;
+  overflow: hidden;
+  text-align: center;
+  background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.qNow {
+  border-color: var(--color-accent-text);
+  box-shadow:
+    0 0 0 1px var(--color-accent-text),
+    0 10px 22px var(--color-shadow);
+}
+
+.qName {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stripe {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 7px;
+}
+
+.qBand {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  padding: 4px 2px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-card-ribbon-ink);
+  background: linear-gradient(
+    180deg,
+    var(--color-card-ribbon-top),
+    var(--color-card-ribbon-bottom)
+  );
+}
+
+.qBack {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 5px, var(--color-border) 5px 6px),
+    repeating-linear-gradient(-45deg, transparent 0 5px, var(--color-border) 5px 6px),
+    var(--color-surface-raised);
+  box-shadow:
+    inset 0 0 0 3px var(--color-surface-raised),
+    inset 0 0 0 4px var(--color-accent-text),
+    0 4px 12px var(--color-shadow);
+}
+
+.qPlace {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-weight: 800;
+  color: var(--color-accent-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-accent-text);
+  border-radius: 50%;
+}
+
+.qLast {
+  opacity: 0.6;
+}
+
+/* Page 7: the board with the band of the person at turn (P9). */
+.placement {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.boardArea {
+  position: relative;
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 0;
+}
+
+.turnBand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 5px 10px 5px 5px;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 10px var(--color-shadow);
+}
+
+.tbPiece {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-band-shade);
+  border-radius: 50%;
+}
+
+.tbResources,
+.tbResources svg {
+  display: grid;
+  width: 22px;
+  height: 22px;
+}
+
+.tbLine {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tbName {
+  font-size: 1.15rem;
+}
+
+.tbOrder {
+  display: inline-flex;
+  flex: none;
+  gap: 3px;
+  padding: 3px;
+  background: var(--color-band-shade);
+  border-radius: 999px;
+}
+
+.mCoin {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--color-on-catan);
+  border: 1.5px solid var(--color-on-catan);
+  border-radius: 50%;
+  opacity: 0.55;
+}
+
+.mCoinNow {
+  box-shadow: 0 0 0 2px var(--color-text);
+  opacity: 1;
+}
+
+/* W2: the order as a list beside the board, only in landscape. */
+.wOrder {
+  display: none;
+  gap: 8px;
+  align-content: start;
+}
+
+.wOrderTitle {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.wRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 50px;
+  padding: 6px 12px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.wRowNow {
+  border-width: 1px;
+}
+
+.pNum {
+  width: 1rem;
+  font-weight: 800;
+  color: var(--color-accent-text);
+}
+
+.wName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wSlots {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+  align-items: center;
+}
+
+.wSlots > svg {
+  flex: none;
+}
+
+.faded {
+  opacity: 0.22;
+}
+
+/* The board on the phone as large as possible, edge to edge. */
+@container (width <= 719px) {
+  .boardArea {
+    margin: 0 -8px;
+  }
+}
+
+/* Tablet landscape and PC: the board on the left over the whole height; title, progress, band,
+   order and buttons on the right. Only in landscape: a portrait tablet stacks like a phone. */
+@container (width >= 720px) and (orientation: landscape) {
+  .placeMain {
+    display: grid;
+    grid-template:
+      'board head' auto
+      'board prog' auto
+      'board band' auto
+      'board list' auto
+      'board .' minmax(0, 1fr)
+      'board act' auto / minmax(0, 1.7fr) minmax(17rem, 1fr);
+    gap: 16px 32px;
+    max-width: 80rem;
+  }
+
+  .placeMain > .stepBody,
+  .placeMain .placement {
+    display: contents;
+  }
+
+  .placeMain > :first-child {
+    grid-area: head;
+  }
+
+  .placeMain .progWrap {
+    grid-area: prog;
+  }
+
+  .placeMain .turnBand {
+    grid-area: band;
+  }
+
+  .placeMain .boardArea {
+    grid-area: board;
+  }
+
+  .placeMain .wOrder {
+    display: grid;
+    grid-area: list;
+  }
+
+  .placeMain .tbOrder {
+    display: none;
+  }
+
+  .placeMain .actionsCol {
+    grid-area: act;
+  }
+}
+
+/* Low tablets in landscape (Galaxy Tab, iPad): the list does not fit above the hand, so the band
+   shows the order again, as in portrait, and the buttons stay clear of the hand. The frames of
+   the reference are higher and keep the list. */
+@container (width >= 720px) and (orientation: landscape) and (height < 720px) {
+  .placeMain .wOrder {
+    display: none;
+  }
+
+  .placeMain .tbOrder {
+    display: inline-flex;
+  }
+}
+
+/* Page 8: the starting resources as resource cards S4. As with the draw card, the width of the
+   reference is computed against the app; on low screens a card (2 : 3 and its name) also stays
+   within the room left above the band. */
+@property --res-card-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 124px;
+}
+
+.resGrid {
+  --res-card-width: min(28cqw, 124px);
+
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 12px;
+  place-content: center center;
+  min-height: 0;
+  container-type: size;
+}
+
+.resGridFew {
+  --res-card-width: min(38cqw, 23cqh, 170px);
+}
+
+.resGridMany {
+  --res-card-width: min(22cqw, 96px);
+}
+
+.resCard {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  width: min(var(--res-card-width), (100cqh - 24px) * 2 / 3);
+}
+
+.resCardArt {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 10px var(--color-resource-card-shadow));
+}
+
+.resName {
+  font-size: 0.85rem;
+  font-weight: 700;
+}

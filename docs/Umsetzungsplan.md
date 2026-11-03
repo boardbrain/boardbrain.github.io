@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.20 |
-| Stand | 29.10.2026 |
-| Grundlage | BoardBrain_Spezifikation.md v0.12 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.5 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.18 (9.3, 13, E-32), BoardBrain_Architektur.md v0.19 (19) |
+| Version | 0.22 |
+| Stand | 03.11.2026 |
+| Grundlage | BoardBrain_Spezifikation.md v0.13 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.11 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.19 (9.3, 13, E-32), BoardBrain_Architektur.md v0.22 (19) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -33,6 +33,8 @@
 | 0.18 | 29.10.2026 | Zuschnitt von I2 (E-32, Spezifikation 0.12): I2 als ganzer Block „Generierung“ mit Inszenierung, Startrohstoffen, abweichenden Farben und Überspringen der Platzierung; Bündel I2-A bis I2-F und Design D-2 (neu 8); I3 bis I6 grob nach Blöcken zugeschnitten, D-2 von vor I5 nach I2 (2, 7); Verweise auf die Kapitel der Bündel, reine Doku-Änderungen ohne lokale Prüfungen (4.1, 4.3; Entwicklungsrichtlinien 3.6) |
 | 0.19 | 29.10.2026 | Bündel I2-A umgesetzt; Inhalt von I2-A und I2-B nach ADR-028 präzisiert: Brett, Platzierung, Rohstoffe und Schrittarten im Catan-Modul (8) (#27) |
 | 0.20 | 29.10.2026 | Bündel I2-B umgesetzt: Ablaufsteuerung, Catan-Ablauf, gespeicherte Partie, `SessionService` und Sperre der Spielbindung; nach Wiederholung eines Drehs der Reihenfolge beginnt eine übersprungene Platzierung wieder (Entscheidung des Product Owners) (2, 8) (#28) |
+| 0.21 | 02.11.2026 | Einstieg ab I3 neu (Entscheidung des Product Owners): „Partie“ führt zu einer gemeinsamen Spielliste, eigene Spiele direkt zum Ergebnis, Catan fragt „Neue Partie“ oder „Ergebnis eintragen“; im Formular erst Spiel, dann Gruppe; ersetzt Variante K2; offener Punkt Sortierung der Spielliste (7, 8) |
+| 0.22 | 03.11.2026 | I2-C umgesetzt (#31): Vorbereitung über Spiel, Tisch, Optionen und Farben, Ablauf mit „Losen“ und „Wiederholen“, Übersicht zum Ansehen, Startstapel „Partie“; Reihenfolge abschaltbar (FA-LS-07, Anforderungsdokumentation 0.19, Spezifikation 0.13); kein Paket `zustand` (Architektur ADR-029); Wiederholen aus der Übersicht und Rückblick („Blättern“, US-AB-04 AK-3, AK-4) gehören zu I2-D (Entscheidung des Product Owners) (8) |
 
 ## 1. Zweck
 
@@ -50,7 +52,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 2b | Kleine Aufgabe K-3: Kartenhand einfahren | nach I1, vor I2 | umgesetzt (#23) |
 | 2c | Kleine Aufgabe K-4: Berührungsverhalten app-weit | direkt nach K-3, vor I2 | umgesetzt (#25) |
-| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28) |
+| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31) |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
@@ -244,7 +246,7 @@ Archivieren und Löschen (I5) brauchen Partien (I3) und Sicherungspunkte (I4); �
 | Inkrement | Element aus der Referenz |
 |---|---|
 | I2 | Nachziehstapel mit klassischem Kartenrücken und der Beschriftung „Partie“ direkt über den Karten, ohne Untertitel; Antippen führt in I2 direkt zur neuen Partie. Hinweis „‹Gruppe› spielt gerade – Weiter“ oben auf dem Start. Karte „Einstellungen“ mit Zahnrad in der Kartenhand, mit I2-F zunächst nur mit dem Tonschalter (US-IN-03 AK-2) *(ergänzt in 0.18)* |
-| I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1): Antippen von „Partie“ dunkelt den Start ab und zeigt zwei Spielkarten – links vorne und in der Akzentfarbe „Ergebnis eintragen“ als Hauptaktion, rechts „Neue Partie“ (Variante K2 aus fünf Vorschlagsrunden, `result-entry-preview-v1.html` bis `result-entry-preview.html`; Begründung: viele werden die App ohne Catan nutzen) |
+| I3 | Karte „Statistik“ in der Kartenhand. „Ergebnis eintragen“ vom Start (US-ER-01 AK-1) über eine gemeinsame Spielliste *(geändert in 0.21, Entscheidung des Product Owners; ersetzt Variante K2 aus `result-entry-preview-v1.html` bis `result-entry-preview.html`)*: „Partie“ zeigt alle Spiele einschließlich Catan. Eigene Spiele führen direkt zu „Ergebnis eintragen“; Catan fragt mit zwei Karten nach „Neue Partie“ (Hauptaktion) oder „Ergebnis eintragen“. Läuft eine Partie, führt „Partie“ zur laufenden Partie. Im Ergebnisformular steht das Spiel damit fest, danach folgt die Gruppe (erst Spiel, dann Gruppe). Der Platz für „Ergebnis eintragen“ auf dem Start aus D-3 entfällt. Begründung: eine Liste statt zwei, weniger Schritte für alle ohne Catan, „Ich hasse Catan!“ blendet Catan nur aus der Liste aus. Ändert die Spezifikation (US-SP-01 AK-1 und AK-2, US-ER-01 AK-1, US-SP-05 AK-3); anpassen bei der Vorbereitung von I3, Gestaltung (Spielliste, Catan-Frage, Formular) als Vorschlagsrunde in I3. **Offener Punkt (in I3 entscheiden):** Sortierung der Spielliste, etwa zuletzt gespielte zuerst oder Sortieroptionen, und wie Catan hervorgehoben wird |
 | I4 | Banner (Sicherung, Update, Speicher) oben auf dem Start, ohne die Karten zu verschieben; Karte „Daten“ in der Kartenhand |
 | I5 | Vierte Karte „Archiv“ in der Verwaltung |
 | I6 | Die Einstellungen (Karte seit I2-F) erhalten Design, Akzentfarbe und „Ich hasse Catan!“ *(geändert in 0.18)*; zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen öffnet die Diagnose, der Verweis „Diagnose“ unten in der Verwaltung (seit I1-D) entfällt dann *(ergänzt in 0.15)*; ab sechs Karten wird die Hand schmaler (`src/ui/components/cardHand.ts`). **Offener Punkt aus K-4 (mit dem Product Owner abstimmen):** Druckzustand weicher machen, wenn alle Seiten stehen: Fassungen K1 bis K4 und die Verzögerung des Druckzustands (0 bis 120 ms) aus `touch-preview.html`, dazu ein Übergang beim Seitenwechsel statt einer künstlichen Verzögerung; zusammen mit dem Hover-Effekt am PC (NFA-GB-04, „Could“). Der Seitenwechsel bleibt sofort. Einstellung „Ich hasse Catan!“ (US-SP-05, Must): Einschalten mit Warnung und Bestätigung; danach zeigt der Start statt „Partie“ nur die Zeile „Ergebnis eintragen“ (Referenz, Schalter „Einstellung“), und alle übrigen bis dahin gebauten Ansichten blenden Catan aus. **Offener Punkt aus K-3 (vor der Umsetzung mit dem Product Owner klären):** Soll es eine Einstellung für die Kartenhand geben (Variante E4 aus `hand-stack-preview.html`), etwa „auf Start und Verwaltung groß“ gegenüber „überall klein“? Eine solche Einstellung wäre eine neue Anforderung und ändert Anforderungsdokumentation und Spezifikation (Haltepunkt) |
@@ -259,7 +261,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 |---|---|---|---|---|
 | I2-A Platzierung, Reihenfolge, Startrohstoffe | US-PL-02, US-PL-03, US-LS-03, US-SR-01 (Fachlogik) | Opus, high | `feat/us-pl-02-placement-and-dead-ends` | umgesetzt (#27) |
 | I2-B Generierung und gespeicherte Partie | US-AB-03, US-AB-05, US-AB-06, US-LS-02, US-PG-04, US-PL-05 (Fachlogik und Dienst), US-VW-02 AK-5 | Opus, high | `feat/us-ab-03-generation-session` | umgesetzt (#28) |
-| I2-C Neue Partie vorbereiten und durchlaufen | US-SP-01, US-SP-04, US-AB-01, US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PG-04, US-SR-01, US-PL-05 (Oberfläche) | Sonnet, medium | `feat/us-ab-01-new-match` | offen |
+| I2-C Neue Partie vorbereiten und durchlaufen | US-SP-01, US-SP-04, US-AB-01, US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PG-04, US-SR-01, US-PL-05 (Oberfläche) | Sonnet, medium | `feat/us-ab-01-new-match` | umgesetzt (#31) |
 | I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-03, US-AB-04, US-AB-05, US-AB-06 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | offen |
 | D-2 Design der Inszenierung (OP-06) | Glücksrad, Aufblinken, Tempo, Klänge | Opus, medium | `chore/op-06-staging-design` | offen |
 | I2-E Glücksrad und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-wheel` | offen |
@@ -288,12 +290,13 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 - **Design zuerst:** eine Runde Designvorschläge für alle Ansichten einer Partie, damit sie zusammenpassen: Nachziehstapel „Partie“ auf dem Start (Referenz D-3), Spielauswahl, Vorbereitung (Gruppe, Spielversion, Losschritte, Startrohstoffe, Farben der Partie), Losschritt als Satz, Reihenfolge mit Startperson, Platzierung auf dem Brett H1 mit Gebäuden G1 und Straßen R1, „Platzierung überspringen“, Startrohstoffe mit Symbol und Namen, „Weiter“ und „Wiederholen“, Warnung beim Wiederholen, Übersicht der laufenden Partie. Verbindliche Referenz wird `docs/design/i2-match-final-preview.html`; I2-D baut danach ohne weitere Runde. Glücksrad und Aufblinken sind dort nur Platzhalter, sie gestaltet D-2.
 - **Inhalt:** Spielauswahl (nur Catan, US-SP-01), Vorbereitung (US-AB-01, US-SP-04, US-PG-04), alle Schritte nacheinander mit „Weiter“ (US-AB-02) und schlichtem Einblenden über Motion, Darstellung von Gebäuden und Straßen (US-PL-04), „Partie beenden ohne Ergebnis“, damit eine Testpartie nicht hängen bleibt.
 - **Nachweis:** Ende-zu-Ende-Test einer vollständigen Generierung mit 2, 3 und 4 Personen in beiden Spielversionen, mit Startrohstoffen und mit übersprungener Platzierung.
-- **Pakete:** `zustand` (Architektur 3.1) für die Vorbereitung, falls sie über mehrere Adressen geht.
+- **Pakete:** keine. `zustand` entfällt: Die laufende Partie liest jede Ansicht über einen Lesehook, die Vorbereitung hält eine Layout-Route (Architektur ADR-029, Entscheidung des Product Owners). *(geändert in 0.22)*
+- **Umgesetzt (0.22):** Startstapel „Partie“; Spielwahl, Tischwahl (Tippen führt weiter, Gedrückt halten zeigt alle Personen, Tische alphabetisch wie unter „Tische“), Optionen und Farben unter `#/partie/neu`; die Reihenfolge lässt sich abschalten mit „Selbst festlegen“ oder „Ohne Platzierung“ (FA-LS-07). Der Ablauf unter `#/partie` zeigt die Phasen, das Ergebnis mit schlichtem Einblenden, „Wiederholen“ des angezeigten Schritts mit Warnung, den Vorwärts-Knopf „Losen“ bzw. „Zur Übersicht“ und „Platzierung überspringen“; ein doppelter Tipp lost nur einmal. Die Übersicht `#/partie/uebersicht` ist nur zum Ansehen; „Partie beenden ohne Ergebnis“ im Ablauf und in der Übersicht. Auf niedrigen Tablets im Querformat (Galaxy Tab, iPad) passen Karten und Platzierung in die Höhe; dort steht die Reihenfolge im Band statt als Liste (Architektur 13.1). Ende-zu-Ende-Tests mit festem Startwert des Zufalls (`tests/e2e/seededRandom.ts`, Architektur 14.5). Rohstoffkarten und Landschaft der Catan-Karte sind erzeugte Bilder (`npm run art`, Architektur ADR-030), weil Safari unter iPadOS die SVG-Filter falsch zeichnete.
 - **Abnahme durch den Product Owner:** Designvorschlag wählen; danach Partien mit 3 und 4 Personen auf S26, iPad und PC durchlaufen; Punkt K-7 der Abnahme-Checkliste.
 
 ### I2-D Laufende Partie: wiederholen, einsehen, fortsetzen
 
-- **Inhalt:** jeden Schritt wiederholen, mit Warnung, die die verworfenen Schritte nennt (US-AB-03); Übersicht der laufenden Partie (US-AB-04); Hinweis „‹Gruppe› spielt gerade – Weiter“ auf dem Start und Rückkehr mit einem Tipp; Rückfrage, wenn trotz laufender Partie eine neue beginnen soll (US-AB-05 AK-2); nach einem Neustart während einer Animation wird sie erneut abgespielt (AK-3); Meldung bei gesperrter Spielbindung mit dem Angebot, die Partie zu beenden (Spezifikation 3.5). Die Prüfseite `#/brett` und ihr Verweis in der Diagnose entfallen.
+- **Inhalt:** jeden früheren Schritt wiederholen, aus der Übersicht und im Rückblick, mit Warnung, die die verworfenen Schritte nennt (US-AB-03; den angezeigten Schritt wiederholt schon I2-C); Rückblick mit „Zurück“ im Ablauf und „Blättern“ bis zum neuesten Schritt (US-AB-04 AK-3, AK-4, FA-AB-10) *(neu in 0.22)*; Übersicht der laufenden Partie (US-AB-04); Hinweis „‹Gruppe› spielt gerade – Weiter“ auf dem Start und Rückkehr mit einem Tipp; Rückfrage, wenn trotz laufender Partie eine neue beginnen soll (US-AB-05 AK-2); nach einem Neustart während einer Animation wird sie erneut abgespielt (AK-3); Meldung bei gesperrter Spielbindung mit dem Angebot, die Partie zu beenden (Spezifikation 3.5). Die Prüfseite `#/brett` und ihr Verweis in der Diagnose entfallen.
 - **Nachweis:** Ende-zu-Ende-Tests mit Wiederholungen und mit Neuladen während und nach einem Schritt (Architektur 14.5).
 - **Pakete:** keine.
 - **Abnahme durch den Product Owner:** Losschritt, Dreh der Reihenfolge, Gebäude und Straße wiederholen; App während eines Schritts schließen und wieder öffnen; Punkte K-7 und K-8.
@@ -320,6 +323,6 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 
 ### Hinweise
 
-- **„Ergebnis eintragen“** aus der Übersicht (US-AB-06 AK-1 und AK-2) wird mit US-ER-01 in I3 nachgewiesen, weil das Ergebnisformular zum Block „Ergebnisse“ gehört. In I2 endet eine Partie mit „Partie beenden ohne Ergebnis“, und der Stapel „Partie“ führt direkt zur neuen Partie; die Wahl zwischen „Ergebnis eintragen“ und „Neue Partie“ (Variante K2, Kapitel 7) kommt mit I3.
+- **„Ergebnis eintragen“** aus der Übersicht (US-AB-06 AK-1 und AK-2) wird mit US-ER-01 in I3 nachgewiesen, weil das Ergebnisformular zum Block „Ergebnisse“ gehört. In I2 endet eine Partie mit „Partie beenden ohne Ergebnis“, und der Stapel „Partie“ führt direkt zur neuen Partie; der Einstieg über die gemeinsame Spielliste (Kapitel 7) kommt mit I3.
 - **US-VW-02 AK-5** aus I1-F wird hier nachgewiesen: im Dienst mit I2-B, die Meldung in der Oberfläche mit I2-D.
 - **Animationen bis I2-E:** In I2-C und I2-D erscheinen Ergebnisse mit schlichtem Einblenden; damit sind US-AB-02 AK-2 (eigene Animation je Schritt) und US-AB-05 AK-3 (erneutes Abspielen) schon nachweisbar. I2-E und I2-F ersetzen das Einblenden durch Rad und Aufblinken.

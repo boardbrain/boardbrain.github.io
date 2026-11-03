@@ -1,5 +1,6 @@
 import { createContext, use, type ReactNode } from 'react';
 import type { MasterDataService } from '@/app/services/masterDataService';
+import type { SessionService } from '@/app/services/sessionService';
 import type { BoardBrainDb } from '@/infra/db/database';
 
 /**
@@ -9,6 +10,7 @@ import type { BoardBrainDb } from '@/infra/db/database';
 export type AppDependencies = {
   readonly db: BoardBrainDb;
   readonly masterData: MasterDataService;
+  readonly session: SessionService;
 };
 
 const AppDependenciesContext = createContext<AppDependencies | null>(null);

@@ -1,0 +1,249 @@
+/* Design I2-C, page 3 (O1, E2, R1). */
+.edCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.edCard {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+  min-width: 0;
+  min-height: 0;
+  padding: 9px 12px 10px;
+  color: var(--color-text);
+  text-align: left;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.edCard[aria-pressed='true'] {
+  background: var(--color-surface-overlay);
+  border-color: var(--color-accent-text);
+  box-shadow: inset 0 0 0 1px var(--color-accent-text);
+}
+
+.edSub {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.edPieces {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  align-items: end;
+}
+
+.modeLine {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.infoBtn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  min-height: 32px;
+  height: 32px;
+  padding: 0;
+  margin: -6px 0;
+  color: var(--color-text-muted);
+  background: none;
+  border-radius: 50%;
+}
+
+.optRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 14px;
+  color: var(--color-text);
+  text-align: left;
+  background: none;
+  border-radius: 0;
+}
+
+.optColumn {
+  display: grid;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 14px;
+}
+
+.txt {
+  flex: 1;
+  min-width: 0;
+}
+
+.optIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: var(--color-accent-text);
+}
+
+.optIcon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.switch {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 28px;
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.switch::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  content: '';
+  background: var(--color-text-muted);
+  border-radius: 50%;
+}
+
+[aria-checked='true'] > .switch {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+[aria-checked='true'] > .switch::after {
+  background: var(--color-on-accent);
+  transform: translateX(18px);
+}
+
+.seg {
+  display: flex;
+  flex: none;
+  padding: 3px;
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.seg > button {
+  flex: 1;
+  min-height: 42px;
+  padding: 4px 8px;
+  font-size: 0.92rem;
+  color: var(--color-text);
+  background: none;
+  border-radius: 9px;
+}
+
+.seg > button[aria-pressed='true'] {
+  font-weight: 600;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+}
+
+.stepper {
+  display: inline-flex;
+  flex: none;
+  gap: 4px;
+  align-items: center;
+}
+
+.stepper > button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 1.2rem;
+  color: var(--color-text);
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.stepper > button:disabled {
+  opacity: 0.35;
+}
+
+.stepper > output {
+  min-width: 1.8rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.orderPick {
+  display: grid;
+  gap: 8px;
+}
+
+.orderChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.orderChip {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 4px 14px 4px 6px;
+  color: var(--color-text);
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.orderChip[aria-pressed='true'] {
+  border-color: var(--color-accent-text);
+}
+
+.orderNum,
+.orderNumEmpty {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-radius: 50%;
+}
+
+.orderNumEmpty {
+  background: none;
+  border: 2px dashed var(--color-border);
+}
+
+.dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.ruleList {
+  display: grid;
+  gap: 6px;
+  padding-left: 20px;
+  margin: 0;
+  color: var(--color-text);
+}

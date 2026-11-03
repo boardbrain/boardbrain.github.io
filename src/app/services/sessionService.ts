@@ -3,10 +3,11 @@ import {
   CURRENT_SESSION_ID,
   drawNextStep,
   repeatStep,
+  revealedStepIndex,
   SESSION_SCHEMA_VERSION,
   startGeneration,
+  withGameState,
   type GenerationCompleteError,
-  type NoStepRevealedError,
   type StepPendingError,
 } from '@/core/generation';
 import {
@@ -28,8 +29,11 @@ import {
   CATAN_GENERATION,
   CATAN_INITIAL_GAME_STATE,
   skipCatanPlacement,
+  type CatanGameState,
   type CatanGeneration,
   type CatanOptions,
+  type CatanSetup,
+  type CatanStep,
   type PlacementNotSkippableError,
 } from '@/games/catan';
 import type { Clock, SessionRepositories, SessionStore, StoredSession } from '@/app/ports';
@@ -55,6 +59,12 @@ export type SessionActiveError = 'session-active';
  * Error code when the group cannot play Catan (US-AB-01 AK-1, Specification 3.4).
  */
 export type GroupNotEligibleError = 'group-not-eligible';
+
+/**
+ * Error code when the step shown is no longer the one waiting for confirmation, e.g. after a
+ * second quick tap on "Losen"; nothing is changed.
+ */
+export type StepChangedError = 'step-changed';
 
 /**
  * Why the stored session cannot be worked with.
@@ -103,29 +113,37 @@ export type SessionService = {
    */
   prepare(groupId: GroupId): Promise<Result<CatanPreparation, GroupNotEligibleError>>;
   /**
-   * Starts the generation without drawing a step yet (Specification 3.5). Rejected while
-   * another match is in generation or running (US-AB-05 AK-2). Options and colours that do
-   * not fit, or a group that does not exist, are programming errors and throw.
+   * Starts the generation ("Generierung starten", Specification 3.5) and draws the first step
+   * in the same transaction, stored as revealed before it is shown (ADR-014). A match without
+   * any step is running at once. Rejected while another match is in generation or running
+   * (US-AB-05 AK-2). Options and colours that do not fit, or a group that does not exist, are
+   * programming errors and throw.
    */
   start(
     input: StartSessionInput,
   ): Promise<Result<StoredSession, SessionActiveError | GroupNotEligibleError>>;
   /**
-   * Draws the next step and stores it as revealed before it is shown (ADR-014, Architecture
-   * 10.1). Rejected while a step waits for confirmation (US-AB-02 AK-1).
+   * "Losen" and "Zur Übersicht" (US-AB-02 AK-1): confirms the revealed step and draws the next
+   * one in one transaction, stored as revealed before it is shown (ADR-014, Architecture
+   * 10.1). After the last step the match is running. `shownStep` is the index of the step the
+   * person saw, `null` if none waits; if it is no longer the step waiting, nothing happens, so
+   * two quick taps advance only once. Rejected once nothing is left to confirm or draw.
    */
-  drawNextStep(): Promise<
-    Result<StoredSession, SessionAccessError | StepPendingError | GenerationCompleteError>
+  advance(
+    shownStep: number | null,
+  ): Promise<
+    Result<StoredSession, SessionAccessError | StepChangedError | GenerationCompleteError>
   >;
-  /** Confirms the revealed step ("Weiter", US-AB-02 AK-1) and stores it at once. */
-  confirmStep(): Promise<Result<StoredSession, SessionAccessError | NoStepRevealedError>>;
   /**
    * Repeats step `index` (US-AB-03): discards it and the steps that depend on it and stores the
    * step drawn again as revealed. The steps that are discarded are listed beforehand by
    * `stepsDiscardedBy` (AK-2). A step that does not exist throws.
    */
   repeatStep(index: number): Promise<Result<StoredSession, SessionAccessError | StepPendingError>>;
-  /** Skips the placement at its beginning (US-PL-05). */
+  /**
+   * Skips the placement at its beginning (US-PL-05): confirms the revealed last spin, skips the
+   * placement and draws the next step, all in one transaction.
+   */
   skipPlacement(): Promise<Result<StoredSession, SessionAccessError | PlacementNotSkippableError>>;
   /**
    * Ends the match without a result: the generation is discarded and nothing is stored
@@ -162,6 +180,12 @@ async function findGroup(repositories: SessionRepositories, groupId: GroupId): P
   const group = (await repositories.groups.listAll()).find((candidate) => candidate.id === groupId);
   assert(group !== undefined, `group ${groupId} exists`);
   return group;
+}
+
+// Confirms the revealed step, if there is one (US-AB-02 AK-1).
+function confirmRevealed(setup: CatanSetup, generation: CatanGeneration): CatanGeneration {
+  const confirmed = confirmStep(CATAN_GENERATION, setup, generation);
+  return confirmed.ok ? confirmed.value : generation;
 }
 
 /**
@@ -232,18 +256,23 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
           return err('group-not-eligible');
         }
         const participants = group.members.map((member) => member.personId);
-        assert(areCatanOptionsValid(options), 'the options of the match are valid');
+        assert(areCatanOptionsValid(options, participants), 'the options of the match are valid');
         assert(
           areMatchColorsValid(colors, participants),
           'the colours of the match belong to the members',
         );
+        const setup: CatanSetup = { participants, options, colors };
+        const started = startGeneration<CatanStep, CatanGameState>(CATAN_INITIAL_GAME_STATE);
+        const first = drawNextStep(CATAN_GENERATION, setup, started, rng);
         const session: StoredSession = {
           id: CURRENT_SESSION_ID,
           schemaVersion: SESSION_SCHEMA_VERSION,
           gameId: CATAN_GAME_ID,
           groupId,
-          setup: { participants, options, colors },
-          generation: startGeneration(CATAN_INITIAL_GAME_STATE),
+          setup,
+          generation: first.ok
+            ? first.value
+            : withGameState(CATAN_GENERATION, setup, started, started.gameState),
           startedAt: clock.now(),
         };
         await repositories.session.put(session);
@@ -251,14 +280,21 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
       });
     },
 
-    drawNextStep() {
-      return change((session) =>
-        drawNextStep(CATAN_GENERATION, session.setup, session.generation, rng),
+    advance(shownStep) {
+      return change(
+        (session): Result<CatanGeneration, StepChangedError | GenerationCompleteError> => {
+          if ((revealedStepIndex(session.generation) ?? null) !== shownStep) {
+            return err('step-changed');
+          }
+          const confirmed = confirmRevealed(session.setup, session.generation);
+          if (confirmed !== session.generation && confirmed.state === 'running') {
+            return ok(confirmed);
+          }
+          const drawn = drawNextStep(CATAN_GENERATION, session.setup, confirmed, rng);
+          // After confirming nothing is revealed, so the only reason is that no step is missing.
+          return drawn.ok ? drawn : err('generation-complete');
+        },
       );
-    },
-
-    confirmStep() {
-      return change((session) => confirmStep(CATAN_GENERATION, session.setup, session.generation));
     },
 
     repeatStep(index) {
@@ -268,7 +304,18 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
     },
 
     skipPlacement() {
-      return change((session) => skipCatanPlacement(session.setup, session.generation));
+      return change((session): Result<CatanGeneration, PlacementNotSkippableError> => {
+        const skipped = skipCatanPlacement(
+          session.setup,
+          confirmRevealed(session.setup, session.generation),
+        );
+        if (!skipped.ok || skipped.value.state === 'running') {
+          return skipped;
+        }
+        const drawn = drawNextStep(CATAN_GENERATION, session.setup, skipped.value, rng);
+        assert(drawn.ok, 'after skipping, the next step can be drawn');
+        return drawn;
+      });
     },
 
     endWithoutResult() {

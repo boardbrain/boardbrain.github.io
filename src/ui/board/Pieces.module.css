@@ -1,0 +1,20 @@
+/* Pieces G1 and R1 (design I2-C); measures in SVG units of the board. */
+.building {
+  stroke: var(--color-piece-outline);
+  stroke-width: 0.9;
+  stroke-linejoin: round;
+}
+
+.roadOutline,
+.road {
+  stroke-linecap: round;
+}
+
+.roadOutline {
+  stroke: var(--color-piece-outline);
+  stroke-width: 3.4;
+}
+
+.road {
+  stroke-width: 2;
+}

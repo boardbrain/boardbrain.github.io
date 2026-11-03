@@ -189,3 +189,48 @@ export function PenIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Triangle for "start". Decorative: the button around it carries the label.
+ */
+export function PlayIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M7 4l13 8-13 8z" />
+    </Outline>
+  );
+}
+
+/**
+ * Circular arrow for "repeat". Decorative: the button around it carries the label.
+ */
+export function AgainIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4" />
+    </Outline>
+  );
+}
+
+/**
+ * Letter i in a circle for more information. Decorative: the button around it carries the label.
+ */
+export function InfoIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5.5M12 7.6v.01" />
+    </Outline>
+  );
+}
+
+/**
+ * Door with an arrow out for "end the match" (design I2-C, X2). Decorative: the button around it
+ * carries the label.
+ */
+export function ExitDoorIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M14 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h8M10 12h11M17.5 8.5L21 12l-3.5 3.5" />
+    </Outline>
+  );
+}

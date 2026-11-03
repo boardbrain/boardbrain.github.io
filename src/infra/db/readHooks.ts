@@ -1,4 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import type { StoredSession } from '@/app/ports';
+import { CURRENT_SESSION_ID, SESSION_SCHEMA_VERSION } from '@/core/generation';
 import {
   sortByName,
   type CustomGame,
@@ -63,4 +65,30 @@ export function useCustomGame(db: BoardBrainDb, id: GameId | null): CustomGame |
     async () => (id === null ? null : ((await db.games.get(id)) ?? null)),
     [db, id],
   );
+}
+
+/**
+ * The stored match as the views read it (Architecture 13.2): none, of a version this app does
+ * not know (Architecture 10.3), or in generation or running.
+ */
+export type CurrentSession =
+  | { readonly status: 'none' }
+  | { readonly status: 'unsupported' }
+  | { readonly status: 'active'; readonly session: StoredSession };
+
+/**
+ * The match in generation or running (US-AB-05 AK-1); `undefined` while loading. The views
+ * update themselves on every stored step; they change the match only through the session
+ * service (ADR-029).
+ */
+export function useCurrentSession(db: BoardBrainDb): CurrentSession | undefined {
+  return useLiveQuery(async (): Promise<CurrentSession> => {
+    const session = await db.session.get(CURRENT_SESSION_ID);
+    if (session === undefined) {
+      return { status: 'none' };
+    }
+    return session.schemaVersion === SESSION_SCHEMA_VERSION
+      ? { status: 'active', session }
+      : { status: 'unsupported' };
+  }, [db]);
 }

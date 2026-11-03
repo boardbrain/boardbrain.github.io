@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.10 |
+| Version | 0.12 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 29.10.2026 |
+| Stand | 03.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -25,6 +25,8 @@
 | 0.8 | 28.10.2026 | Aufgabe K-4: Knöpfe und Links nur über `PressableButton` und `PressableLink`, Karten mit `look="card"` (6) |
 | 0.9 | 29.10.2026 | Reine Doku-Änderungen ohne lokale Prüfungen; auf GitHub laufen sie unverändert (2.2, 3.6, 12.1; Entscheidung des Product Owners) |
 | 0.10 | 29.10.2026 | Beispiel für Ordnernamen an die neue Struktur angepasst (`core/placement` entfällt, Architektur ADR-028) (4.4) (PR #27) |
+| 0.11 | 03.11.2026 | I2-C: fester Startwert für den Zufall in Ende-zu-Ende-Tests über `tests/e2e/seededRandom.ts`, die einzige Ausnahme von der `crypto`-Regel außerhalb von `infra` und `tests/statistical` (8.2) |
+| 0.12 | 03.11.2026 | Vorschauen im Ordner `previews/` (2.5); während der Arbeit nur betroffene Tests, volle Suiten vor dem Push (8.2); Ende-zu-Ende-Tests dürfen Personen und Tische direkt in die Datenbank schreiben (8.3); Entscheidungen des Product Owners |
 
 ## Inhaltsverzeichnis
 
@@ -105,7 +107,7 @@ Fehlerbehebungen, Dokumentationsänderungen und Abhängigkeits-Updates folgen de
 
 Vor dem Bau einer neuen oder sichtbar geänderten Oberfläche (Ansicht, Ablauf, Farben) zeigt Claude Code mehrere Vorschläge. Das spart Rückschritte: Ein Aufbau lässt sich in einer Vorschau in Minuten ändern, in fertigem Code mit Tests erst nach Stunden.
 
-- **Form:** eine lokale, klickbare HTML-Datei im Wurzelordner des Repositorys (z. B. `groups-preview.html`, `color-preview.html`). Der Name enthält immer `-preview`; das Muster `/*-preview*.html` in `.gitignore` hält alle Vorschauen aus dem Repository. *(geändert in 0.6)* Der Entwicklungsserver liefert sie mit aus, sodass der Product Owner sie auf allen Abnahmegeräten öffnen kann (`https://192.168.178.20:5173/‹datei›`).
+- **Form:** eine lokale, klickbare HTML-Datei im Ordner `previews/` (z. B. `previews/groups-preview.html`). Der Name enthält immer `-preview`; `.gitignore` hält den Ordner `/previews/` und zur Sicherheit jede Datei `/*-preview*.html` im Wurzelordner aus dem Repository. *(geändert in 0.12)* Der Entwicklungsserver liefert sie mit aus, sodass der Product Owner sie auf allen Abnahmegeräten öffnen kann (`https://192.168.178.20:5173/previews/‹datei›`).
 - **Inhalt:** mindestens zwei, besser drei bis fünf deutlich verschiedene Ansätze, umschaltbar; Handy hochkant und Tablet quer; die echten Farbwerte aus `tokens.css` und realistische Datenmengen (auch eine volle Liste); bei Farben die Kontraste und Farbabstände als Zahl.
 - **Ablauf:** Der Product Owner wählt, kombiniert oder wünscht weitere Varianten; jede Runde bleibt als eigene Datei zum Vergleich erhalten (`…-preview-v1.html`) und wird nie gelöscht. Die gewählte Variante hält Claude Code im Pull Request fest.
 - **Finale Referenz:** Nach der Wahl erstellt Claude Code eine finale Vorschau nur mit der gewählten Variante: umschaltbar nach Gerät, Datenstand und Umfang („jetzt gebaut“ / „mit späteren Funktionen“), darunter Bauangaben mit Maßen, Abständen und Verhalten. Nach Abnahme durch den Product Owner kommt sie als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (z. B. `d3-start-navigation-final-preview.html`) und ist die verbindliche Vorlage für dieses und spätere Bündel, die dort andocken. Nach dem Bau vergleicht Claude Code Vorlage und App per Screenshot in denselben Zuständen und behebt Abweichungen, bevor es „fertig“ meldet. *(neu in 0.6)*
@@ -433,10 +435,11 @@ Die Teststrategie steht in Architektur Kapitel 14. Übersicht:
 | Mindestabdeckung 90 % (Zeilen und Verzweigungen) für `src/core` und `src/games` | ja, Vitest |
 | Testnamen englisch, als Verhalten formuliert, mit Bezug: `describe('US-AB-03 Repeat step')`, `it('AK-2: discards all following steps')` (Architektur ADR-027) | nein (Review) |
 | Aufbau jedes Tests: Ausgangslage herstellen, Handlung ausführen, Ergebnis prüfen | nein (Review) |
-| Kein echter Zufall in Unit-, Komponenten- und Ende-zu-Ende-Tests: nur `SeededRandomSource` oder `ScriptedRandomSource`; fast-check mit festem Startwert. Echter Zufall nur in der statistischen Suite | teilweise, ESLint (`Math.random` überall verboten, `crypto` außerhalb von `infra` und `tests/statistical`) |
+| Kein echter Zufall in Unit-, Komponenten- und Ende-zu-Ende-Tests: nur `SeededRandomSource` oder `ScriptedRandomSource`; fast-check mit festem Startwert. Echter Zufall nur in der statistischen Suite | teilweise, ESLint (`Math.random` überall verboten, `crypto` außerhalb von `infra` und `tests/statistical`). Ende-zu-Ende-Tests ersetzen `crypto.getRandomValues` im Browser über `useSeededRandom` aus `tests/e2e/seededRandom.ts` durch einen Generator mit festem Startwert (Architektur 14.5); nur diese Datei darf dafür `crypto` verwenden |
 | Testdaten über Hilfsfunktionen aus `tests/support` (z. B. `aGroup({ … })`), nicht über lange Literale in jedem Test | nein (Review) |
 | Neue Abläufe in der Oberfläche erhalten mindestens einen Ende-zu-Ende-Test für den Hauptweg | nein (Definition of Done) |
 | Kein vergessenes `.only`; übersprungene Tests nur mit Begründung im Kommentar | ja, ESLint und Playwright (`forbidOnly`) |
+| Während der Arbeit laufen nur die betroffenen Tests: einzelne Testdateien mit Vitest, Ende-zu-Ende-Tests einzeln und auf einem Gerät (`--project=chromium-phone`). Die vollen Suiten laufen vor dem Push (2.2) und auf GitHub. Entscheidung des Product Owners, um Wartezeit zu sparen; sie kann zurückgenommen werden | nein (Arbeitsweise) |
 | Ein unzuverlässiger Test wird repariert, nicht wiederholt. Einzige Ausnahme: die festgelegte einmalige Wiederholung in der statistischen Suite (NFA-ZF-02) | nein (Review) |
 
 ### 8.3 Ende-zu-Ende-Tests
@@ -444,7 +447,7 @@ Die Teststrategie steht in Architektur Kapitel 14. Übersicht:
 - Elemente werden über Rolle und Beschriftung gefunden (`getByRole('button', { name: 'Speichern' })`), nicht über CSS-Klassen oder interne Kennungen.
 - Der Netzwerkwächter lässt jeden Test fehlschlagen, der eine fremde Adresse anfragt (NFA-DH-01).
 - Formate: Smartphones im Hochformat, Tablets im Hoch- und Querformat; der Hinweis zum Drehen auf Smartphones im Querformat hat einen eigenen Test (NFA-PL-04, E-29). *(geändert in 0.6)*
-- Jeder Test beginnt mit leerer Datenbank oder einem definierten Datenstand aus `tests/fixtures`.
+- Jeder Test beginnt mit leerer Datenbank oder einem definierten Datenstand aus `tests/fixtures`. Braucht ein Test nur Personen und Tische als Ausgangslage, schreibt er sie direkt in die Datenbank (`seedDatabase` aus `tests/e2e/seedDatabase.ts`); wie man sie über die Oberfläche anlegt, prüfen die eigenen Tests der Verwaltung. *(neu in 0.12)*
 
 ---
 

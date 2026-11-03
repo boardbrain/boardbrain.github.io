@@ -110,7 +110,11 @@ const JSX_SYNTAX = [
     message: JSX_TEXT_MESSAGE,
   },
   { selector: 'JSXElement > JSXExpressionContainer > TemplateLiteral', message: JSX_TEXT_MESSAGE },
-  { selector: `JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > Literal`, message: JSX_TEXT_MESSAGE },
+  // An empty text is allowed: `alt=""` marks a decorative picture for screen readers.
+  {
+    selector: String.raw`JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > Literal[value=/\S/]`,
+    message: JSX_TEXT_MESSAGE,
+  },
   {
     selector: `JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > JSXExpressionContainer > :matches(Literal[raw=/^['"]/], TemplateLiteral)`,
     message: JSX_TEXT_MESSAGE,
@@ -193,6 +197,12 @@ const AREAS = [
     name: 'statistical',
     files: ['tests/statistical/**'],
     allowed: { crypto: true, getRandomValues: true, randomUUID: true },
+  },
+  // Replaces crypto.getRandomValues in the browser with a seeded generator (I2-C, variant A).
+  {
+    name: 'e2e-seeded-random',
+    files: ['tests/e2e/seededRandom.ts'],
+    allowed: { crypto: true, getRandomValues: true },
   },
 ];
 const AREA_FILES = AREAS.flatMap((area) => area.files);

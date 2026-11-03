@@ -1,0 +1,191 @@
+/* Design I2-C, page 2 (T2, N1, L2, H1). */
+.roomGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 12px;
+}
+
+.roomCard {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  row-gap: 4px;
+  justify-items: center;
+  align-content: start;
+  min-width: 0;
+  height: 15.25rem;
+  padding: 16px 8px 12px;
+  color: var(--color-text);
+  text-align: center;
+  touch-action: manipulation;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.roomCard[aria-pressed='true'] {
+  background: var(--color-surface-overlay);
+  border-color: var(--color-accent-text);
+  box-shadow: inset 0 0 0 1px var(--color-accent-text);
+}
+
+/* L2: over the whole width, in front of the table, shortened only at the end. */
+.boundTag {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 2;
+  max-width: calc(100% - 14px);
+  padding: 0 6px;
+  overflow: hidden;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--color-accent-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--color-tag-glass);
+  border: 1px solid var(--color-accent-text);
+  border-radius: 999px;
+  backdrop-filter: blur(2px);
+}
+
+.mini {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cardText {
+  display: grid;
+  gap: 2px;
+  align-self: start;
+  min-width: 0;
+}
+
+.tableName {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.names {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.count {
+  align-self: end;
+  padding-top: 4px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.emptyTables {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.detailHead {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  text-align: center;
+}
+
+.detailTitle {
+  margin: 6px 0 0;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+/* The large table of the details, like the table editor: initial on the group colour, the
+   Catan colour as a square. */
+.seatTable {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 132px;
+  height: 132px;
+  margin: 4px 0 10px;
+}
+
+.seatTableTop {
+  position: absolute;
+  inset: 20%;
+  background: radial-gradient(
+    circle at 40% 35%,
+    var(--color-surface-overlay),
+    var(--color-surface-raised)
+  );
+  border: 3px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.seat,
+.denseSeat {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 26%;
+  aspect-ratio: 1;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-surface);
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.denseSeat {
+  width: 18%;
+  font-size: 0.7rem;
+}
+
+.catanMark {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 42%;
+  height: 42%;
+  border: 2px solid var(--color-surface);
+  border-radius: 4px;
+}
+
+.detailPeople {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 6px 12px;
+  max-height: 11rem;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  color: var(--color-text);
+  list-style: none;
+}
+
+.detailPerson {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}

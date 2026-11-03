@@ -1,0 +1,9 @@
+/* Clips the rows while opening; the rows inside are divided like the rows of a group. */
+.unfold {
+  display: grid;
+  overflow: hidden;
+}
+
+.unfold > * + * {
+  border-top: 1px solid var(--color-border);
+}

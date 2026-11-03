@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.12 |
+| Version | 0.13 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 29.10.2026 |
+| Stand | 02.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -26,6 +26,7 @@
 | 0.10 | 09.10.2026 | Neue Story US-SP-05 „Catan app-weit ausblenden („Ich hasse Catan!“)“ (Must, I6) zu FA-SP-06 und E-30 (Anforderungsdokumentation 0.16); US-VW-02 AK-7 (2.3, 2.5, 4.1, 4.3, 6) |
 | 0.11 | 26.10.2026 | Abnahme von I1-F (Anforderungsdokumentation 0.17, E-31): Personen- und Gruppennamen app-weit eindeutig, geprüft schon bei der Eingabe (3.4, US-PG-01 AK-3, neu US-PG-02 AK-8, US-VW-02 AK-1, US-VW-06 AK-2, A-02); „Neu anlegen“ beim Import mit vergebenem Namen nur mit anderem Namen (3.9) |
 | 0.12 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation 0.18, E-32): Umsetzung in fachlichen Blöcken (2.2); Inkremente neu nach Blöcken geschnitten, I5 wird „Verwaltung und Archiv“, I6 „Einstellungen und Feinschliff“ (2.3); US-PG-04, US-SR-01, US-IN-01 bis US-IN-04 und US-PL-05 nach I2, US-ER-02, US-ER-03, US-ST-03 und US-ST-04 nach I3, US-EI-02, US-EI-07, US-DS-03, US-DS-04 und US-IS-02 nach I4 (2.5); Summe in 2.5 berichtigt (61 statt 59 Stories) |
+| 0.13 | 02.11.2026 | Design I2-C (Anforderungsdokumentation 0.19, E-33, E-34): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung (3.1, US-AB-01 AK-3, US-LS-03 AK-1 und AK-3, US-PL-05 AK-1, neu AK-3, US-SR-01 AK-1); Vorwärts-Knopf „Losen“, „Blättern“, „Zur Übersicht“ (US-AB-02 AK-1); Rückblick auf frühere Schritte (neu US-AB-04 AK-3 und AK-4); Rückverfolgbarkeit (6) |
 
 ## Inhaltsverzeichnis
 
@@ -182,14 +183,14 @@ Dieses Kapitel bündelt die in der Spezifikationsphase geklärten fachlichen Reg
 | 4 | LS-01: Wer legt die Landschaftsfelder aus? | abschaltbar, Standard an |
 | 5 | LS-03: Wer legt die Häfen aus? | abschaltbar, Standard an |
 | 6 | LS-04: Wer legt die Zahlenchips aus? | abschaltbar, Standard an |
-| 7 | LS-02: Platzierungsreihenfolge | immer |
-| 8 | Platzierung von Gebäuden und Straßen | immer, kann zu Beginn übersprungen werden |
+| 7 | LS-02: Platzierungsreihenfolge | Standard: gelost; abschaltbar: selbst festlegen oder ohne Platzierung *(geändert in 0.13)* |
+| 8 | Platzierung von Gebäuden und Straßen | wenn eine Reihenfolge feststeht; kann nach dem Losen der Reihenfolge übersprungen werden *(geändert in 0.13)* |
 | 9 | Startrohstoffe | abschaltbar, Standard aus |
 | 10 | Abschluss: Übersicht der laufenden Partie | immer |
 
 **Ein Schritt** ist die kleinste Einheit, die einzeln animiert, bestätigt und wiederholt wird:
 
-- ein Dreh des Glücksrads (LS-01, LS-03 und LS-04 je ein Dreh; LS-02 besteht aus n−1 Drehs, der letzte Platz ergibt sich automatisch),
+- ein Dreh des Glücksrads (LS-01, LS-03 und LS-04 je ein Dreh; LS-02 besteht aus n−1 Drehs, wenn die Reihenfolge gelost wird, der letzte Platz ergibt sich automatisch),
 - ein Gebäude (Siedlung oder Stadt),
 - eine Straße,
 - die Startrohstoffe einer Person.
@@ -541,7 +542,7 @@ Bezug: FA-AB-01, FA-AB-02, FA-PG-10 → 3.1, 3.4
 
 - **AK-1:** Gegeben ich habe Catan gewählt, dann zeigt die App nur aktive Gruppen, die Catan spielen können (globale Gruppen mit 2 bis 4 Mitgliedern, die Catan nicht ausschließen, und an Catan gebundene Gruppen). *(präzisiert in 0.8)*
 - **AK-2:** Gegeben ich habe eine Gruppe gewählt, dann zeigt die App alle Mitglieder als Beteiligte an; eine Abwahl einzelner Mitglieder ist nicht möglich.
-- **AK-3:** Gegeben die Optionen, dann kann ich LS-01, LS-03 und LS-04 einzeln an- und abschalten (Standard: an); LS-02 wird als immer aktiv angezeigt.
+- **AK-3:** Gegeben die Optionen, dann kann ich LS-01, LS-03 und LS-04 einzeln an- und abschalten (Standard: an). „Reihenfolge losen“ (LS-02) ist an; schalte ich es ab, wähle ich „Selbst festlegen“ (ich tippe die Personen der Reihe nach an, der letzte Platz ergibt sich; erneutes Antippen nimmt ab dieser Person zurück) oder „Ohne Platzierung“. Weiter geht es erst, wenn die selbst festgelegte Reihenfolge vollständig ist. *(geändert in 0.13, FA-LS-07)*
 - **AK-4:** Gegeben die Optionen, dann kann ich die Startrohstoffe aktivieren (Standard: aus) und dabei die Anzahl von 1 bis 5 (Standard: 2) sowie „mit Zurücklegen“ (Standard) oder „ohne Zurücklegen“ einstellen.
 - **AK-5:** Gegeben ich starte die Generierung, dann laufen die aktiven Phasen in der Reihenfolge aus 3.1 ab.
 
@@ -549,7 +550,7 @@ Bezug: FA-AB-01, FA-AB-02, FA-PG-10 → 3.1, 3.4
 Als bedienende Person möchte ich jeden Schritt selbst bestätigen, damit alle am Tisch jedes Ergebnis sehen und umsetzen können.
 Bezug: FA-AB-03 → 3.1
 
-- **AK-1:** Gegeben ein Schritt ist abgeschlossen, dann bleibt sein Ergebnis sichtbar, bis ich „Weiter“ wähle; es gibt keinen automatischen Übergang.
+- **AK-1:** Gegeben ein Schritt ist abgeschlossen, dann bleibt sein Ergebnis sichtbar, bis ich den Vorwärts-Knopf wähle; es gibt keinen automatischen Übergang. Der Knopf heißt „Losen“ auf dem neuesten Schritt (bestätigt ihn und lost den nächsten), „Blättern“, solange spätere Schritte schon gelost sind (geht einen Schritt vor, ohne zu losen), und „Zur Übersicht“ auf dem letzten Schritt. *(geändert in 0.13)*
 - **AK-2:** Gegeben die Platzierung, dann ist jedes Gebäude und jede Straße ein eigener Schritt mit eigener Animation und eigener Bestätigung.
 
 #### US-AB-03 Schritt wiederholen · M
@@ -570,6 +571,8 @@ Bezug: FA-AB-05
 
 - **AK-1:** Gegeben die Generierung ist abgeschlossen, dann zeigt eine Übersicht das Brett mit allen Gebäuden und Straßen, die Ergebnisse von LS-01, LS-03 und LS-04, die Platzierungsreihenfolge mit Kennzeichnung der Startperson und ggf. die Startrohstoffe.
 - **AK-2:** Gegeben eine laufende Partie, wenn ich die Startansicht öffne, dann gelange ich mit einem Tipp zurück zur Übersicht.
+- **AK-3:** Gegeben die Generierung läuft und ich bin nicht auf dem ersten Schritt, wenn ich „Zurück“ wähle, dann zeigt die App den vorherigen Schritt mit seinem gespeicherten Ergebnis und dem Hinweis „Rückblick“ mit „Zum aktuellen Schritt“; es wird nichts gelost. *(neu in 0.13, FA-AB-10)*
+- **AK-4:** Gegeben der Rückblick oder die Wiederholung eines früheren Schritts, dann führt „Blättern“ genau einen Schritt weiter bis zum neuesten; erst dort lost der Knopf wieder. *(neu in 0.13)*
 
 #### US-AB-05 Laufende Partie übersteht einen Neustart · M
 Als bedienende Person möchte ich, dass die laufende Partie erhalten bleibt, auch wenn die App geschlossen wird, damit nichts verloren geht.
@@ -610,9 +613,9 @@ Bezug: FA-LS-01, FA-LS-03, FA-LS-04 → 3.1
 Als Spielende möchten wir eine zufällige Platzierungsreihenfolge, damit niemand dauerhaft den Vorteil des ersten Zugs hat.
 Bezug: FA-LS-02 → 3.1
 
-- **AK-1:** Gegeben die Generierung, dann wird LS-02 immer nach LS-04 ausgeführt.
+- **AK-1:** Gegeben die Reihenfolge wird gelost, dann wird LS-02 nach LS-04 ausgeführt. *(geändert in 0.13)*
 - **AK-2:** Gegeben n Personen, dann wird die Reihenfolge in n−1 Drehs aus den jeweils verbleibenden Personen gelost; der letzte Platz ergibt sich automatisch.
-- **AK-3:** Gegeben die Reihenfolge steht fest, dann ist die Person auf Platz 1 als Startperson des Spiels gekennzeichnet.
+- **AK-3:** Gegeben die Reihenfolge steht fest (gelost oder selbst festgelegt, *ergänzt in 0.13*), dann ist die Person auf Platz 1 als Startperson des Spiels gekennzeichnet.
 - **AK-4:** Gegeben n Personen, dann ist jede der n! Reihenfolgen gleich wahrscheinlich (Nachweis durch automatisierte Tests).
 
 ### 4.6 Platzierung (PL)
@@ -653,8 +656,9 @@ Bezug: FA-PL-05, FA-PL-06
 Als bedienende Person möchte ich die Platzierung ausnahmsweise überspringen können, damit wir die App auch nutzen können, wenn wir einmal selbst wählen wollen.
 Bezug: FA-PL-09
 
-- **AK-1:** Gegeben der Beginn der Platzierung, dann gibt es einen kleinen, unauffälligen Button „Platzierung überspringen“.
+- **AK-1:** Gegeben der Beginn der Platzierung nach einer gelosten Reihenfolge *(ergänzt in 0.13)*, dann gibt es einen kleinen, unauffälligen Button „Platzierung überspringen“.
 - **AK-2:** Gegeben ich bestätige das Überspringen, dann geht es mit den Startrohstoffen (falls aktiv) oder mit dem Abschluss weiter; die Übersicht zeigt Reihenfolge und Startperson, aber keine Gebäude.
+- **AK-3:** Gegeben „Ohne Platzierung“, dann entfällt die Platzierung von Anfang an; die Übersicht zeigt die Sitzreihenfolge ohne Startperson und keine Gebäude. *(neu in 0.13, FA-LS-07)*
 
 ### 4.7 Startrohstoffe (SR)
 
@@ -662,7 +666,7 @@ Bezug: FA-PL-09
 Als Spielende möchten wir auf Wunsch zufällige Startrohstoffe erhalten, damit der Spielbeginn abwechslungsreicher wird.
 Bezug: FA-SR-01 bis FA-SR-04
 
-- **AK-1:** Gegeben die Option ist aktiv, dann werden die Startrohstoffe nach der Platzierung (bzw. nach LS-02, falls die Platzierung übersprungen wurde) gezogen, je Person ein Schritt in Platzierungsreihenfolge.
+- **AK-1:** Gegeben die Option ist aktiv, dann werden die Startrohstoffe nach der Platzierung (bzw. nach LS-02, falls die Platzierung übersprungen wurde) gezogen, je Person ein Schritt in Platzierungsreihenfolge; ohne Reihenfolge („Ohne Platzierung“) in der Sitzreihenfolge der Gruppe. *(ergänzt in 0.13)*
 - **AK-2:** Gegeben die eingestellte Anzahl k, dann erhält jede Person genau k Rohstoffe aus Holz, Lehm, Wolle, Getreide und Erz.
 - **AK-3:** Gegeben „mit Zurücklegen“, dann ist jede Ziehung gleichverteilt über alle fünf Rohstoffe und Doppelungen sind möglich.
 - **AK-4:** Gegeben „ohne Zurücklegen“, dann erhält jede Person nur unterschiedliche Rohstoffe, und jede Ziehung ist gleichverteilt über die für diese Person noch verbleibenden.
@@ -1007,13 +1011,14 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-AB-02 | US-SP-04, US-AB-01 |
 | FA-AB-03 | US-AB-02 |
 | FA-AB-04 | US-AB-03 |
-| FA-AB-05 | US-AB-04 |
+| FA-AB-05, FA-AB-10 | US-AB-04 |
 | FA-AB-06 | US-AB-06 |
 | FA-AB-07 | US-AB-05 |
 | FA-AB-08 | US-AB-06 |
 | FA-AB-09 | US-VW-02, US-VW-03, US-EI-03, US-DS-02 |
 | FA-LS-01, FA-LS-03, FA-LS-04 | US-LS-02 |
 | FA-LS-02 | US-LS-03 |
+| FA-LS-07 | US-AB-01, US-LS-03, US-PL-05, US-SR-01 |
 | FA-LS-05, FA-LS-06 | US-LS-01 |
 | FA-PL-01 | US-PL-02, US-PL-03 |
 | FA-PL-02 bis FA-PL-04 | US-PL-02 |

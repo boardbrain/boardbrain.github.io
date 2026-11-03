@@ -38,3 +38,8 @@
 .seatDimmed {
   opacity: 0.3;
 }
+
+/* Design I2-C, table choice: a dark rim around each seat. */
+.rimmed .seat {
+  border: 1.5px solid var(--color-surface);
+}
