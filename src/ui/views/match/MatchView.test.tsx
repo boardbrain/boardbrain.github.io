@@ -1,5 +1,6 @@
 import { aGroup, aPerson } from '@tests/support/masterDataFakes';
 import { renderWithApp } from '@tests/support/renderWithApp';
+import { aStoredSession } from '@tests/support/sessionFakes';
 import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { RouteObject } from 'react-router';
@@ -186,6 +187,28 @@ describe('US-AB-06 End a match without a result', () => {
   });
 });
 
+describe('US-PL-04 Buildings and roads on the board', () => {
+  it('AK-1: shows the building drawn and whose turn it is', async () => {
+    const user = userEvent.setup();
+    await startMatch({ personDraws: NO_DRAWS });
+    await screen.findByRole('heading', { name: 'Reihenfolge' });
+
+    for (let spin = 0; spin < 3; spin++) {
+      await tapForward(user);
+    }
+
+    expect(await screen.findByRole('heading', { name: 'Platzierung' })).toBeInTheDocument();
+    expect(progress()).toContain('Platzierung 1/16');
+    expect(screen.getAllByTestId('board-settlement')).toHaveLength(1);
+    expect(screen.getByText('· Siedlung')).toBeInTheDocument();
+
+    await tapForward(user);
+
+    expect(await screen.findByText('· Straße')).toBeInTheDocument();
+    expect(screen.getAllByTestId('board-road')).toHaveLength(1);
+  });
+});
+
 describe('Architecture 13.2 match from the database', () => {
   it('leads to the start without a match', async () => {
     renderWithApp(null, { path: '/partie', routes: ROUTES });
@@ -197,5 +220,24 @@ describe('Architecture 13.2 match from the database', () => {
     await startMatch({ personDraws: NO_DRAWS, order: { mode: 'none' } });
 
     expect(await screen.findByRole('heading', { name: 'overview page' })).toBeInTheDocument();
+  });
+
+  it('Architecture 10.3: a match of an unknown version shows a message and can be ended', async () => {
+    const user = userEvent.setup();
+    const { db, router } = renderWithApp(null, { routes: ROUTES });
+    await db.session.put({ ...aStoredSession(), schemaVersion: 99 });
+    await act(() => router.navigate('/partie'));
+
+    expect(
+      await screen.findByText(/stammt aus einer anderen Version von BoardBrain/),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Partie beenden ohne Ergebnis' }));
+    await user.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Beenden' }),
+    );
+
+    expect(await screen.findByRole('heading', { name: 'start page' })).toBeInTheDocument();
+    expect(await db.session.count()).toBe(0);
   });
 });
