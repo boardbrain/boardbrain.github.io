@@ -39,5 +39,7 @@ desktop.ini
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# Local design previews and archived proposals (Development Guidelines 2.5)
+# Local design previews and archived proposals in their own folder (Development Guidelines 2.5);
+# a preview left in the root folder stays out of the repository as well
+/previews/
 /*-preview*.html
