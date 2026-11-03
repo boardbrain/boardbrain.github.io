@@ -51,7 +51,9 @@ export function MatchOverviewView(): React.JSX.Element | null {
   if (session.generation.state !== 'running') {
     return <Navigate to="/partie" replace />;
   }
-  if (group === undefined) {
+  // Tables are never deleted, so a match always has one; `null` is the result of the query
+  // before the match was read and only means "still loading".
+  if (group === undefined || group === null) {
     return null;
   }
   const nameOf = (personId: PersonId): string =>
@@ -226,7 +228,7 @@ export function MatchOverviewView(): React.JSX.Element | null {
           <h1 className={shared.title}>{t('partie.laufendePartie')}</h1>
           <div className={shared.sub}>
             {t('partie.uebersichtUnterzeile', {
-              tisch: group?.name ?? '',
+              tisch: group.name,
               version: editionName(session.setup.options.edition),
               modus: t('partie.standard'),
             })}

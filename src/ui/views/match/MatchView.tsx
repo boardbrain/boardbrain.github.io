@@ -70,7 +70,9 @@ export function MatchView(): React.JSX.Element | null {
   if (session.generation.state === 'running' || index === null) {
     return <Navigate to="/partie/uebersicht" replace />;
   }
-  if (group === undefined) {
+  // Tables are never deleted, so a match always has one; `null` is the result of the query
+  // before the match was read and only means "still loading".
+  if (group === undefined || group === null) {
     return null;
   }
   const record = session.generation.steps[index];
@@ -117,21 +119,19 @@ export function MatchView(): React.JSX.Element | null {
 
   return (
     <main
-      className={[
+      className={cx(
         shared.main,
         shared.fill,
         isPlacement && shared.wideMain,
         isPlacement && styles.placeMain,
-      ]
-        .filter((name) => typeof name === 'string')
-        .join(' ')}
+      )}
     >
       <div className={shared.pageHead}>
         <div className={shared.titles}>
           <h1 className={shared.title}>{t(STEP_TITLES[step.kind])}</h1>
           <div className={shared.sub}>
             {t('partie.unterzeile', {
-              tisch: group?.name ?? '',
+              tisch: group.name,
               version: editionName(session.setup.options.edition),
             })}
           </div>
@@ -251,9 +251,7 @@ function PhaseProgress({ session, stepIndex }: PhaseProgressProps): React.JSX.El
           <div
             key={phase}
             role="listitem"
-            className={[styles.phase, isCurrent && styles.phaseNow, isOff && styles.phaseOff]
-              .filter((part) => typeof part === 'string')
-              .join(' ')}
+            className={cx(styles.phase, isCurrent && styles.phaseNow, isOff && styles.phaseOff)}
             style={{ flex: `${String(longest.length)} 1 0` }}
           >
             <div className={styles.segBar}>
