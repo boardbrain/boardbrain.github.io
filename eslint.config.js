@@ -194,6 +194,12 @@ const AREAS = [
     files: ['tests/statistical/**'],
     allowed: { crypto: true, getRandomValues: true, randomUUID: true },
   },
+  // Replaces crypto.getRandomValues in the browser with a seeded generator (I2-C, variant A).
+  {
+    name: 'e2e-seeded-random',
+    files: ['tests/e2e/seededRandom.ts'],
+    allowed: { crypto: true, getRandomValues: true },
+  },
 ];
 const AREA_FILES = AREAS.flatMap((area) => area.files);
 

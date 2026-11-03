@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.10 |
+| Version | 0.11 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 29.10.2026 |
+| Stand | 03.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -25,6 +25,7 @@
 | 0.8 | 28.10.2026 | Aufgabe K-4: Knöpfe und Links nur über `PressableButton` und `PressableLink`, Karten mit `look="card"` (6) |
 | 0.9 | 29.10.2026 | Reine Doku-Änderungen ohne lokale Prüfungen; auf GitHub laufen sie unverändert (2.2, 3.6, 12.1; Entscheidung des Product Owners) |
 | 0.10 | 29.10.2026 | Beispiel für Ordnernamen an die neue Struktur angepasst (`core/placement` entfällt, Architektur ADR-028) (4.4) (PR #27) |
+| 0.11 | 03.11.2026 | I2-C: fester Startwert für den Zufall in Ende-zu-Ende-Tests über `tests/e2e/seededRandom.ts`, die einzige Ausnahme von der `crypto`-Regel außerhalb von `infra` und `tests/statistical` (8.2) |
 
 ## Inhaltsverzeichnis
 
@@ -433,7 +434,7 @@ Die Teststrategie steht in Architektur Kapitel 14. Übersicht:
 | Mindestabdeckung 90 % (Zeilen und Verzweigungen) für `src/core` und `src/games` | ja, Vitest |
 | Testnamen englisch, als Verhalten formuliert, mit Bezug: `describe('US-AB-03 Repeat step')`, `it('AK-2: discards all following steps')` (Architektur ADR-027) | nein (Review) |
 | Aufbau jedes Tests: Ausgangslage herstellen, Handlung ausführen, Ergebnis prüfen | nein (Review) |
-| Kein echter Zufall in Unit-, Komponenten- und Ende-zu-Ende-Tests: nur `SeededRandomSource` oder `ScriptedRandomSource`; fast-check mit festem Startwert. Echter Zufall nur in der statistischen Suite | teilweise, ESLint (`Math.random` überall verboten, `crypto` außerhalb von `infra` und `tests/statistical`) |
+| Kein echter Zufall in Unit-, Komponenten- und Ende-zu-Ende-Tests: nur `SeededRandomSource` oder `ScriptedRandomSource`; fast-check mit festem Startwert. Echter Zufall nur in der statistischen Suite | teilweise, ESLint (`Math.random` überall verboten, `crypto` außerhalb von `infra` und `tests/statistical`). Ende-zu-Ende-Tests ersetzen `crypto.getRandomValues` im Browser über `useSeededRandom` aus `tests/e2e/seededRandom.ts` durch einen Generator mit festem Startwert (Architektur 14.5); nur diese Datei darf dafür `crypto` verwenden |
 | Testdaten über Hilfsfunktionen aus `tests/support` (z. B. `aGroup({ … })`), nicht über lange Literale in jedem Test | nein (Review) |
 | Neue Abläufe in der Oberfläche erhalten mindestens einen Ende-zu-Ende-Test für den Hauptweg | nein (Definition of Done) |
 | Kein vergessenes `.only`; übersprungene Tests nur mit Begründung im Kommentar | ja, ESLint und Playwright (`forbidOnly`) |
