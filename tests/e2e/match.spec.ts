@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './fixtures';
+import { seedDatabase } from './seedDatabase';
 import { useSeededRandom } from './seededRandom';
 
 // I2-C: every run draws the same steps (variant A); real randomness is checked in
@@ -19,26 +20,14 @@ async function tap(locator: Locator): Promise<void> {
   await locator.click();
 }
 
-async function createTable(page: Page, ...names: string[]): Promise<void> {
-  await page.goto('/#/verwaltung/personen');
-  for (const name of names) {
-    await page.getByLabel('Name').fill(name);
-    await page.getByRole('button', { name: 'Speichern' }).click();
-    await expect(page.getByRole('list', { name: 'Alle Personen' })).toContainText(name);
-  }
-  await page.goto('/#/verwaltung/gruppen');
-  await page.getByRole('button', { name: 'Neuer Tisch' }).click();
-  const editor = page.getByRole('dialog', { name: 'Neuer Tisch' });
-  for (const name of names) {
-    await editor.getByRole('button', { name, exact: true }).click();
-  }
-  await tap(page.getByRole('button', { name: 'Gruppe anlegen' }));
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+// The persons of a table as the starting point; creating them in the user interface is tested by
+// persons.spec.ts and groups.spec.ts.
+async function seedTable(page: Page, name: string, ...members: string[]): Promise<void> {
+  await seedDatabase(page, [{ name, members }]);
 }
 
-// Start → "Partie" → Catan → the table, up to the options.
+// From the start view: "Partie" → Catan → the table, up to the options.
 async function openOptions(page: Page, table: RegExp): Promise<void> {
-  await page.goto('/#/');
   await tap(page.getByRole('link', { name: 'Partie' }));
   await tap(page.getByRole('link', { name: 'Catan' }));
   await tap(page.getByRole('button', { name: table }));
@@ -78,8 +67,8 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
   test('AK-1 to AK-4: four persons, base game, all steps drawn and kept after a reload', async ({
     page,
   }) => {
-    await createTable(page, 'Anna', 'Ben', 'Clara', 'David');
-    await openOptions(page, /^Anna, Ben, Clara & David:/);
+    await seedTable(page, 'Freitagsrunde', 'Anna', 'Ben', 'Clara', 'David');
+    await openOptions(page, /^Freitagsrunde:/);
     await startGeneration(page);
 
     await expect(page.getByRole('heading', { name: 'Losen' })).toBeVisible();
@@ -103,8 +92,8 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
   test('US-SP-04, US-SR-01: three persons, Cities & Knights, resources without replacement', async ({
     page,
   }) => {
-    await createTable(page, 'Anna', 'Ben', 'Clara');
-    await openOptions(page, /^Anna, Ben & Clara:/);
+    await seedTable(page, 'Dreier', 'Anna', 'Ben', 'Clara');
+    await openOptions(page, /^Dreier:/);
     await tap(page.getByRole('button', { name: /^Städte & Ritter/ }));
     await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
     await tap(page.getByRole('button', { name: 'ohne Zurücklegen' }));
@@ -124,8 +113,8 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
   test('FA-LS-07: two persons with an order set by hand and resources with replacement', async ({
     page,
   }) => {
-    await createTable(page, 'Anna', 'Ben');
-    await openOptions(page, /^Anna & Ben:/);
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
     await tap(page.getByRole('switch', { name: 'Reihenfolge losen' }));
     const next = page.getByRole('button', { name: 'Weiter zu den Farben' });
     await expect(next).toBeDisabled();
@@ -146,8 +135,8 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
   test('FA-LS-07, US-PL-05 AK-3: without placement no buildings, the seats of the table', async ({
     page,
   }) => {
-    await createTable(page, 'Anna', 'Ben');
-    await openOptions(page, /^Anna & Ben:/);
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
     await tap(page.getByRole('switch', { name: 'Reihenfolge losen' }));
     await tap(page.getByRole('button', { name: 'Ohne Platzierung' }));
     await startGeneration(page);
@@ -164,8 +153,8 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
 
 test.describe('US-AB-03, US-PL-05, US-AB-06 repeat, skip and end', () => {
   test.beforeEach(async ({ page }) => {
-    await createTable(page, 'Anna', 'Ben', 'Clara');
-    await openOptions(page, /^Anna, Ben & Clara:/);
+    await seedTable(page, 'Dreier', 'Anna', 'Ben', 'Clara');
+    await openOptions(page, /^Dreier:/);
     for (const draw of ['Landschaftsfelder', 'Häfen', 'Zahlenchips']) {
       await tap(page.getByRole('switch', { name: draw }));
     }
