@@ -48,7 +48,10 @@ describe('Architecture 13.1 management overview (design D-3)', () => {
     expect(await screen.findByRole('link', { name: 'Personen: 4' })).toHaveTextContent(
       'Anna, Ben, Clara',
     );
-    expect(screen.getByRole('link', { name: 'Tische: 1' })).toHaveTextContent('Freitagsrunde');
-    expect(screen.getByRole('link', { name: 'Spiele: 2' })).toHaveTextContent('Catan, Uno');
+    // Each area has its own live query, so wait for every count separately.
+    expect(await screen.findByRole('link', { name: 'Tische: 1' })).toHaveTextContent(
+      'Freitagsrunde',
+    );
+    expect(await screen.findByRole('link', { name: 'Spiele: 2' })).toHaveTextContent('Catan, Uno');
   });
 });

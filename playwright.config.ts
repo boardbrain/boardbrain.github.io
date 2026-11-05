@@ -31,6 +31,10 @@ export default defineConfig({
   forbidOnly: isCi,
   retries: 0,
   fullyParallel: true,
+  // Locally at most four runs at once: WebKit on Windows draws without a graphics card, and with
+  // more parallel browsers a page now and then froze completely during the long match tests
+  // (1 in 96 with six runs, none with three; measured 03.11.2026). GitHub keeps its default.
+  ...(isCi ? {} : { workers: 4 }),
   reporter: isCi ? [['github'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL,
