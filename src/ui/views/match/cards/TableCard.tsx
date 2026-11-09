@@ -9,6 +9,13 @@ import styles from './Cards.module.css';
 
 // Turning a card over by hand (design I2-D, page 8): 0.34 s.
 const FLIP = { duration: 0.34, ease: 'easeInOut' } as const;
+// The face turned away is hidden from the middle of the turn on: WebKit does not hide it by
+// backface-visibility alone and would draw the back over the front.
+const FACE_SWITCH = { duration: 0, delay: FLIP.duration / 2 } as const;
+
+// Fronts are laid out for cards of at least this width (an order card on a phone); smaller
+// cards, as on low tablets in landscape, show the front scaled down as a whole.
+const FRONT_WIDTH = 83;
 
 type TableCardProps = {
   readonly box: CardBox;
@@ -48,11 +55,36 @@ export function TableCard({
         transition={FLIP}
       >
         {front !== undefined && (
-          <div className={cx(styles.front, isBareFront && styles.bareFront)}>{front}</div>
+          <m.div
+            className={cx(styles.front, isBareFront && styles.bareFront)}
+            initial={false}
+            animate={{ opacity: isFaceDown ? 0 : 1 }}
+            transition={FACE_SWITCH}
+          >
+            {box.w < FRONT_WIDTH ? (
+              <div
+                className={styles.scaledFront}
+                style={{
+                  width: FRONT_WIDTH,
+                  height: (FRONT_WIDTH * box.h) / box.w,
+                  transform: `scale(${String(box.w / FRONT_WIDTH)})`,
+                }}
+              >
+                {front}
+              </div>
+            ) : (
+              front
+            )}
+          </m.div>
         )}
-        <div className={styles.back}>
+        <m.div
+          className={styles.back}
+          initial={false}
+          animate={{ opacity: isFaceDown ? 1 : 0 }}
+          transition={FACE_SWITCH}
+        >
           <CardBack />
-        </div>
+        </m.div>
       </m.div>
     </div>
   );

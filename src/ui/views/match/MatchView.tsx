@@ -1,5 +1,5 @@
 import { useRef, useState, useTransition } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router';
 import type { StoredSession } from '@/app/ports';
 import { revealedStepIndex } from '@/core/generation';
 import type { PersonId } from '@/core/model';
@@ -85,6 +85,10 @@ function pathOf(page: FlowPage | null, session: StoredSession): string {
     : `/partie?schritt=${String(page.index)}`;
 }
 
+function isFromStart(state: unknown): boolean {
+  return typeof state === 'object' && state !== null && 'from' in state && state.from === 'start';
+}
+
 // The step number in the address, `null` without one.
 function lookBackOf(value: string | null): number | null {
   return value !== null && /^\d+$/.test(value) ? Number(value) : null;
@@ -105,6 +109,7 @@ export function MatchView(): React.JSX.Element | null {
   const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
   const navigate = useNavigate();
   const [search] = useSearchParams();
+  const location = useLocation();
   const [dialog, setDialog] = useState<Dialog>(null);
   const [isPending, startTransition] = useTransition();
   const noteRef = useRef<HTMLDivElement>(null);
@@ -125,7 +130,14 @@ export function MatchView(): React.JSX.Element | null {
     return <UnsupportedSession />;
   }
   if (page === null) {
-    return <Navigate to="/partie/uebersicht" replace />;
+    // The overview leads back to where it came from: the start, or else this flow.
+    return (
+      <Navigate
+        to="/partie/uebersicht"
+        replace
+        state={{ from: isFromStart(location.state) ? 'start' : 'flow' }}
+      />
+    );
   }
   // Tables are never deleted, so a match always has one; `null` is the result of the query
   // before the match was read and only means "still loading".
@@ -212,6 +224,8 @@ export function MatchView(): React.JSX.Element | null {
         isPlacement && shared.wideMain,
         isPlacement && styles.placeMain,
       )}
+      // The page and what the forward button does; end-to-end tests wait for it to change.
+      data-page={`${page.kind === 'step' ? `step-${String(page.index)}` : `next-${String(page.at)}`}:${forward}`}
     >
       <div className={shared.pageHead}>
         {back !== null && (

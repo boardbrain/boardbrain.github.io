@@ -117,12 +117,15 @@ export type ResourcesLayout = {
  * lines instead of shrinking into one, where the cards come out larger that way.
  */
 export function resourcesLayout(width: number, height: number, count: number): ResourcesLayout {
-  const rw = Math.min(64, (width - 4 * 8) / RESOURCE_KINDS);
-  const rh = rw * RESOURCE_RATIO;
   const band = 44;
   const name = 20;
   const gap = 12;
   const line = 8;
+  // On low tablets in landscape the cards below take at most 40 % of the free height, so the
+  // places keep a usable size; on phones and portrait tablets they keep their size.
+  const free = height - (8 + 14 + band + 18 + 8);
+  const rw = Math.min(64, (width - 4 * 8) / RESOURCE_KINDS, (free * 0.4) / RESOURCE_RATIO);
+  const rh = rw * RESOURCE_RATIO;
   const fixed = 8 + 14 + band + 18 + rh + 8;
   const most = Math.min(120, (width - 2 * gap) / 3);
   const perRow = (rows: number): number => Math.ceil(count / rows);
