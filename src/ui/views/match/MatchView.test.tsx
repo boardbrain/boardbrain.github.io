@@ -86,7 +86,8 @@ describe('US-AB-02 Go through the generation', () => {
     expect(screen.getByText('Wer?')).toBeInTheDocument();
     expect(screen.getByText('Freitagsrunde · Basisspiel')).toBeInTheDocument();
     expect(progress()).toEqual(['Losen 0/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
-    expect(screen.queryByRole('button', { name: 'Wiederholen' })).not.toBeInTheDocument();
+    // PO 09.11.2026: the button stays in its place, but there is nothing to repeat yet.
+    expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Zurück' })).not.toBeInTheDocument();
     const [stored] = await db.session.toArray();
     expect(stored?.generation.steps).toHaveLength(0);
@@ -102,7 +103,7 @@ describe('US-AB-02 Go through the generation', () => {
     expect(await screen.findByText('legt sie aus')).toBeInTheDocument();
     expect(screen.queryByText('Wer?')).not.toBeInTheDocument();
     expect(progress()[0]).toBe('Losen 1/3');
-    expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeEnabled();
     await tapForward(user, 'Weiter');
 
     expect(await screen.findByText('Häfen')).toBeInTheDocument();

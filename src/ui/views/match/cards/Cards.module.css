@@ -153,11 +153,13 @@
   box-shadow: none;
 }
 
-/* Page 8: the band between the places and the cards. */
-.band {
-  position: absolute;
-  right: 0;
-  left: 0;
+/* Page 8: table, band and buttons as on the placement, so the band keeps its place. */
+.withBand {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
 }
 
 .cardSpot {

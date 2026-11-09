@@ -26,6 +26,8 @@ type PlacementStepProps = {
    */
   readonly announced: CatanSlot | null;
   readonly nameOf: (personId: PersonId) => string;
+  /** "Platzierung überspringen" on the empty board, over its lower edge; it takes no room. */
+  readonly skip?: ReactNode;
   /** "Wiederholen" and the forward button, placed with the layout of the board. */
   readonly actions: ReactNode;
 };
@@ -53,6 +55,7 @@ export function PlacementStep({
   newest,
   announced,
   nameOf,
+  skip,
   actions,
 }: PlacementStepProps): React.JSX.Element {
   const summary = catanSummary(session.setup, session.generation);
@@ -99,6 +102,7 @@ export function PlacementStep({
           })}
           newestKey={newest === null ? undefined : `${newest.kind}-${String(newest.index)}`}
         />
+        {skip !== undefined && skip !== false && <div className={styles.skipOver}>{skip}</div>}
       </div>
       {atTurn === null ? (
         <DoneBand

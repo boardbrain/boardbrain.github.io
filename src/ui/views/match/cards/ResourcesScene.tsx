@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type ReactNode } from 'react';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
 import { CATAN_RESOURCES, type CatanResource } from '@/games/catan';
@@ -29,6 +29,8 @@ type ResourcesSceneProps = {
   /** Turns over card `index`; `undefined` where the cards cannot be turned, e.g. in the look back. */
   readonly onTurn?: ((index: number) => void) | undefined;
   readonly nameOf: (personId: PersonId) => string;
+  /** "Wiederholen" and the forward button, right below the band as on the placement. */
+  readonly actions: ReactNode;
 };
 
 function ResourceFront({ resource }: { readonly resource: CatanResource }): React.JSX.Element {
@@ -37,7 +39,8 @@ function ResourceFront({ resource }: { readonly resource: CatanResource }): Reac
 
 /**
  * Page 8, the starting resources of a person with cards (US-SR-01, design I2-D): as many places
- * as resources, below them the band "Name · n Rohstoffe" and the cards. Before the first person
+ * as resources, below them the cards and the band "Name · n Rohstoffe"; the band lies where it
+ * lies on the placement, so it does not jump between the pages (PO 09.11.2026). Before the first person
  * draws, the five kinds lie face up; after that the stack stays face down. The drawn cards lie
  * face down on the places until the person turns them over (FA-SR-05, US-SR-01 AK-6). With
  * replacement the stack is complete again at once; without, it lacks this person's cards.
@@ -49,6 +52,7 @@ export function ResourcesScene({
   opened,
   onTurn,
   nameOf,
+  actions,
 }: ResourcesSceneProps): React.JSX.Element | null {
   const ref = useRef<HTMLDivElement>(null);
   const { width, height } = tableSize(useElementSize(ref));
@@ -63,15 +67,66 @@ export function ResourcesScene({
   const stackCount =
     options.replacement === 'with' ? CATAN_RESOURCES.length : CATAN_RESOURCES.length - count;
   return (
-    <div ref={ref} className={styles.table}>
-      {layout.slots.map((box, place) => (
-        <Place
-          key={`place-${String(place)}`}
-          box={box}
-          label={t('partie.fragezeichen')}
-          isFilled={result !== null}
-        />
-      ))}
+    <div className={styles.withBand}>
+      <div ref={ref} className={styles.table}>
+        {layout.slots.map((box, place) => (
+          <Place
+            key={`place-${String(place)}`}
+            box={box}
+            label={t('partie.fragezeichen')}
+            isFilled={result !== null}
+          />
+        ))}
+        {result === null && isFirst
+          ? CATAN_RESOURCES.map((resource, index) => {
+              const box = layout.kinds[index];
+              return (
+                box !== undefined && (
+                  <TableCard
+                    key={resource}
+                    box={box}
+                    z={10}
+                    className={styles.resource}
+                    front={<ResourceFront resource={resource} />}
+                  />
+                )
+              );
+            })
+          : Array.from({ length: stackCount }, (_, level) => (
+              <TableCard
+                key={`stack-${String(level)}`}
+                box={layout.stack(level)}
+                z={10 + level}
+                className={styles.resource}
+                isFaceDown
+              />
+            ))}
+        {result !== null && (
+          <Reveal className={styles.layer}>
+            {result.map((resource, place) => {
+              const box = layout.slots[place];
+              return (
+                box !== undefined && (
+                  <DrawnResource
+                    key={`${resource}-${String(place)}`}
+                    box={box}
+                    number={place + 1}
+                    resource={resource}
+                    isOpen={opened.includes(place)}
+                    onTurn={
+                      onTurn === undefined
+                        ? undefined
+                        : () => {
+                            onTurn(place);
+                          }
+                    }
+                  />
+                )
+              );
+            })}
+          </Reveal>
+        )}
+      </div>
       <TurnBand
         icon={
           <span className={shared.tbResources}>
@@ -88,58 +143,8 @@ export function ResourcesScene({
         }))}
         currentId={personId}
         isReveal={false}
-        className={styles.band}
-        top={layout.bandY}
       />
-      {result === null && isFirst
-        ? CATAN_RESOURCES.map((resource, index) => {
-            const box = layout.kinds[index];
-            return (
-              box !== undefined && (
-                <TableCard
-                  key={resource}
-                  box={box}
-                  z={10}
-                  className={styles.resource}
-                  front={<ResourceFront resource={resource} />}
-                />
-              )
-            );
-          })
-        : Array.from({ length: stackCount }, (_, level) => (
-            <TableCard
-              key={`stack-${String(level)}`}
-              box={layout.stack(level)}
-              z={10 + level}
-              className={styles.resource}
-              isFaceDown
-            />
-          ))}
-      {result !== null && (
-        <Reveal className={styles.layer}>
-          {result.map((resource, place) => {
-            const box = layout.slots[place];
-            return (
-              box !== undefined && (
-                <DrawnResource
-                  key={`${resource}-${String(place)}`}
-                  box={box}
-                  number={place + 1}
-                  resource={resource}
-                  isOpen={opened.includes(place)}
-                  onTurn={
-                    onTurn === undefined
-                      ? undefined
-                      : () => {
-                          onTurn(place);
-                        }
-                  }
-                />
-              )
-            );
-          })}
-        </Reveal>
-      )}
+      {actions}
     </div>
   );
 }

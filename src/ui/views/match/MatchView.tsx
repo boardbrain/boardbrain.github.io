@@ -203,10 +203,6 @@ export function MatchView(): React.JSX.Element | null {
       forward={forward}
       isPending={isPending}
       canRepeat={page.kind === 'step'}
-      canSkip={canOfferSkip(session, page)}
-      onSkip={() => {
-        setDialog('skip');
-      }}
       onRepeat={() => {
         setDialog('repeat');
       }}
@@ -214,6 +210,21 @@ export function MatchView(): React.JSX.Element | null {
     />
   );
   const isPlacement = slot.kind === 'building' || slot.kind === 'road';
+  // On the empty board; it lies over the board, so the board does not move when it goes.
+  const skip = canOfferSkip(session, page) && (
+    <PressableButton
+      type="button"
+      className={shared.linkBtn}
+      disabled={isPending}
+      onClick={() => {
+        setDialog('skip');
+      }}
+    >
+      {t('partie.platzierungUeberspringen')}
+    </PressableButton>
+  );
+  // Placement and starting resources bring the buttons below their band.
+  const isResources = slot.kind === 'starting-resources';
   const following = page.kind === 'step' ? followingSlot(session, page.index) : null;
 
   return (
@@ -222,13 +233,18 @@ export function MatchView(): React.JSX.Element | null {
         shared.main,
         shared.fill,
         isPlacement && shared.wideMain,
+        // In portrait as wide as the placement, so its band does not move (PO 09.11.2026).
+        isResources && styles.resourcesMain,
         isPlacement && styles.placeMain,
       )}
       // The page and what the forward button does; end-to-end tests wait for it to change.
       data-page={`${page.kind === 'step' ? `step-${String(page.index)}` : `next-${String(page.at)}`}:${forward}`}
     >
       <div className={shared.pageHead}>
-        {back !== null && (
+        {back === null ? (
+          // Keeps the title in its place on the first step (PO 09.11.2026).
+          <span className={shared.iconSpace} aria-hidden="true" />
+        ) : (
           <PressableButton
             type="button"
             className={shared.iconBtn}
@@ -295,6 +311,7 @@ export function MatchView(): React.JSX.Element | null {
                   : null
             }
             nameOf={nameOf}
+            skip={skip}
             actions={actions}
           />
         )}
@@ -318,10 +335,11 @@ export function MatchView(): React.JSX.Element | null {
                 : undefined
             }
             nameOf={nameOf}
+            actions={actions}
           />
         )}
       </div>
-      {!isPlacement && actions}
+      {!isPlacement && !isResources && actions}
 
       {dialog === 'repeat' && step !== undefined && page.kind === 'step' && (
         <MatchDialog
@@ -428,48 +446,33 @@ function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element
 type StepActionsProps = {
   readonly forward: ForwardAction;
   readonly isPending: boolean;
-  /** Without a result there is nothing to repeat (E-35). */
+  /** Without a result there is nothing to repeat (E-35); the button stays, but disabled. */
   readonly canRepeat: boolean;
-  readonly canSkip: boolean;
-  readonly onSkip: () => void;
   readonly onRepeat: () => void;
   readonly onForward: () => void;
 };
 
-// "Wiederholen" and the forward button; extra links sit above them, so they never move.
+// "Wiederholen" and the forward button. "Wiederholen" is always there, so the forward button
+// keeps its width when a result appears (PO 09.11.2026).
 function StepActions({
   forward,
   isPending,
   canRepeat,
-  canSkip,
-  onSkip,
   onRepeat,
   onForward,
 }: StepActionsProps): React.JSX.Element {
   return (
     <Reveal className={styles.actionsCol}>
-      {canSkip && (
+      <div className={styles.actions}>
         <PressableButton
           type="button"
-          className={shared.linkBtn}
-          disabled={isPending}
-          onClick={onSkip}
+          className={shared.secondary}
+          disabled={isPending || !canRepeat}
+          onClick={onRepeat}
         >
-          {t('partie.platzierungUeberspringen')}
+          <AgainIcon size={18} />
+          {t('partie.wiederholen')}
         </PressableButton>
-      )}
-      <div className={styles.actions}>
-        {canRepeat && (
-          <PressableButton
-            type="button"
-            className={shared.secondary}
-            disabled={isPending}
-            onClick={onRepeat}
-          >
-            <AgainIcon size={18} />
-            {t('partie.wiederholen')}
-          </PressableButton>
-        )}
         <PressableButton
           type="button"
           className={cx(shared.primary, styles.forward)}

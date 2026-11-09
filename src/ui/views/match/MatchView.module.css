@@ -271,10 +271,38 @@
   min-height: 0;
 }
 
+/* Page 8 in portrait as wide as the placement before it (Match.module.css, .wideMain), so the
+   band keeps its place; in landscape the placement has its own layout. */
+@media (orientation: portrait) {
+  .resourcesMain {
+    max-width: 64rem;
+  }
+}
+
+/* "Platzierung überspringen" over the lower edge of the board: it appears and goes without moving
+   the board (PO 09.11.2026). */
+.skipOver {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.skipOver > * {
+  pointer-events: auto;
+}
+
 .turnBand {
   display: flex;
   gap: 10px;
   align-items: center;
+
+  /* As high as with "Als Nächstes" (N1), so the board does not move when the line appears
+     (PO 09.11.2026). */
+  min-height: 50px;
   padding: 5px 10px 5px 5px;
   font-size: 0.85rem;
   border-radius: 999px;

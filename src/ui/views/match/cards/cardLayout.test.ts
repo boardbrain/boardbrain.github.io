@@ -60,6 +60,15 @@ describe('Design I2-D page 5: draw of a person', () => {
     expect(layout.task.width * 1.48 + layout.slot.h + 40).toBeCloseTo(TABLET_LANDSCAPE.height);
   });
 
+  it('PO 09.11.: on tall rooms the cards lie together in the middle', () => {
+    const height = 900;
+    const layout = drawLayout(TABLET.width, height);
+    const row = defined(layout.row(3)[0]);
+    const taskHeight = layout.task.width * 1.48;
+    expect(row.y - layout.task.y - taskHeight).toBeCloseTo(40);
+    expect(layout.task.y).toBeCloseTo(height - row.y - row.h);
+  });
+
   it('the person cards lie in a centred row below, at most 12 px apart', () => {
     const row = drawLayout(PHONE.width, PHONE.height).row(3);
     const first = defined(row[0]);
@@ -68,6 +77,9 @@ describe('Design I2-D page 5: draw of a person', () => {
     expect(defined(row[1]).x - first.x - first.w).toBeCloseTo(12);
   });
 });
+
+// Page 8: the band and its gap lie below the table since the PO's feedback of 09.11.2026.
+const BAND = 44 + 12;
 
 describe('Design I2-D page 8: starting resources', () => {
   it('PO 09.11.: the places keep one size, at most as wide as in a row of three', () => {
@@ -81,21 +93,28 @@ describe('Design I2-D page 8: starting resources', () => {
   });
 
   it('many resources go into two lines where the cards come out larger', () => {
-    const phone = resourcesLayout(PHONE.width, PHONE.height, 5);
+    const phone = resourcesLayout(PHONE.width, PHONE.height - BAND, 5);
     expect(new Set(phone.slots.map((slot) => slot.y)).size).toBe(2);
-    expect(Math.round(defined(phone.slots[0]).w)).toBe(80);
-    const small = resourcesLayout(SMALL_PHONE.width, SMALL_PHONE.height, 5);
+    expect(Math.round(defined(phone.slots[0]).w)).toBe(79);
+    const small = resourcesLayout(SMALL_PHONE.width, SMALL_PHONE.height - BAND, 5);
     expect(new Set(small.slots.map((slot) => slot.y)).size).toBe(1);
     expect(Math.round(defined(small.slots[0]).w)).toBe(56);
   });
 
-  it('band, the five kinds and the stack lie below the places', () => {
+  it('PO 09.11.: the five kinds and the stack lie at the bottom, right above the band', () => {
     const layout = resourcesLayout(PHONE.width, PHONE.height, 2);
-    const slot = defined(layout.slots[0]);
-    expect(layout.bandY).toBeCloseTo(slot.y + slot.h + 20 + 14);
+    const kind = defined(layout.kinds[0]);
     expect(layout.kinds).toHaveLength(5);
-    expect(defined(layout.kinds[0]).y).toBeGreaterThan(layout.bandY + 44);
+    expect(kind.y + kind.h).toBeCloseTo(PHONE.height - 6);
+    expect(layout.stack(0).y).toBe(kind.y);
     expect(layout.stack(1).y).toBe(layout.stack(0).y - 2);
+  });
+
+  it('the places lie in the middle of the room above the cards', () => {
+    const layout = resourcesLayout(TABLET.width, TABLET.height, 2);
+    const slot = defined(layout.slots[0]);
+    const kind = defined(layout.kinds[0]);
+    expect(slot.y - 8).toBeCloseTo(kind.y - 26 - (slot.y + slot.h + 20));
   });
 });
 

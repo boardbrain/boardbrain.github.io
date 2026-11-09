@@ -39,12 +39,19 @@ type BoardProps = {
   readonly newestKey?: string | undefined;
 };
 
-// I2-C: the new piece fades in; D-2 designs the highlighting on its own.
-const NEWEST = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  transition: { duration: 0.52, ease: 'easeOut' },
-} as const;
+// I2-C: the new piece fades in; D-2 designs the highlighting on its own. Every piece keeps the
+// target, so a fade cut short by the next piece still ends opaque (PO 09.11.2026: pieces stayed
+// partly transparent when the next one came within the fade).
+const FADE = { duration: 0.52, ease: 'easeOut' } as const;
+const OPAQUE = { opacity: 1 } as const;
+
+function fadeIn(isNewest: boolean): {
+  initial: { opacity: number } | false;
+  animate: typeof OPAQUE;
+  transition: typeof FADE;
+} {
+  return { initial: isNewest ? { opacity: 0 } : false, animate: OPAQUE, transition: FADE };
+}
 
 /**
  * The board as SVG (US-PL-01, Architecture 13.5, design I1-D): wooden tiles without content on
@@ -120,7 +127,7 @@ export function Board({
         const { from, to } = edgeInSvg(board, road.edge, road.from);
         const line = roadLine(from, to);
         return (
-          <m.g key={road.key} data-testid="board-road" {...(road.key === newestKey ? NEWEST : {})}>
+          <m.g key={road.key} data-testid="board-road" {...fadeIn(road.key === newestKey)}>
             <RoadShape start={line.start} end={line.end} color={road.color} />
           </m.g>
         );
@@ -128,7 +135,7 @@ export function Board({
       {buildings.map((building) => (
         <m.path
           key={building.key}
-          {...(building.key === newestKey ? NEWEST : {})}
+          {...fadeIn(building.key === newestKey)}
           d={buildingPath(building.type, vertexInSvg(board, building.vertex))}
           className={pieceStyles.building}
           fill={`var(--color-catan-${building.color})`}

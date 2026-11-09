@@ -1,4 +1,12 @@
 /* Design I2-C, page 4 (C1). */
+
+/* The title keeps the height of the pill "Wie am Tisch", so nothing moves when it appears
+   (PO 09.11.2026). */
+.titleWithPill {
+  align-items: center;
+  min-height: 34px;
+}
+
 .colorRow {
   display: flex;
   flex-wrap: wrap;

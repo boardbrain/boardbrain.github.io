@@ -112,7 +112,7 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
     await expect(page.getByRole('heading', { name: 'Losen' })).toBeVisible();
     await expect(progress(page)).toContainText('Losen 0/3');
     await expect(page.getByText('Wer?')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Wiederholen' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
     const { phases, taps } = await drawAll(page);
 
     expect(count(phases, 'Losen')).toBe(3);
@@ -223,7 +223,7 @@ test.describe('US-AB-03, US-AB-04, US-PL-05, US-AB-06 repeat, look back, skip an
 
     await expect(dialog).toHaveCount(0);
     await expect(progress(page)).toContainText('Reihenfolge 0/2');
-    await expect(page.getByRole('button', { name: 'Wiederholen' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
   });
 
   test('US-AB-04 AK-3, AK-4: the look back shows an earlier step without drawing', async ({

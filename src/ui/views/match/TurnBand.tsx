@@ -24,8 +24,6 @@ type TurnBandProps = {
   /** Fades in with a new result; a page without a result shows it at rest (E-35). */
   readonly isReveal?: boolean;
   readonly className?: string | undefined;
-  /** Distance from the top of a positioned parent, e.g. on the card table of page 8. */
-  readonly top?: number | undefined;
 };
 
 /**
@@ -42,7 +40,6 @@ export function TurnBand({
   note,
   isReveal = true,
   className,
-  top,
 }: TurnBandProps): React.JSX.Element {
   const content = (
     <>
@@ -69,7 +66,6 @@ export function TurnBand({
   const look = {
     color: inkOn(color),
     background: `linear-gradient(160deg, var(--color-catan-${color}-band-light), var(--color-catan-${color}-band-dark))`,
-    ...(top === undefined ? {} : { top }),
   };
   return isReveal ? (
     <Reveal data-solid="" className={cx(styles.turnBand, className)} style={look}>

@@ -47,7 +47,9 @@ export type DrawLayout = {
 };
 
 /**
- * Layout of page 5 for a card table of `width` × `height`.
+ * Layout of page 5 for a card table of `width` × `height`. Development card and person cards
+ * lie together in the middle of the table (PO 09.11.2026: on tall tablets they sat far up), with
+ * a gap between them of 16 to 40 px.
  */
 export function drawLayout(width: number, height: number): DrawLayout {
   const w = Math.min(76, (width - 30) / 4.4);
@@ -55,11 +57,13 @@ export function drawLayout(width: number, height: number): DrawLayout {
   const taskWidth = Math.min(TASK_CARD_WIDTH, width - w - 30, (height - h - 40) / CARD_RATIO);
   const taskHeight = taskWidth * CARD_RATIO;
   const x0 = (width - (taskWidth + 20 + w)) / 2;
-  const zoneTop = 6 + taskHeight + 16;
-  const y = rowBelow(zoneTop, height, h);
+  const rest = height - taskHeight - h;
+  const gap = Math.min(40, Math.max(16, rest / 3));
+  const top = Math.max(6, (rest - gap) / 2);
+  const y = top + taskHeight + gap;
   return {
-    task: { x: x0, y: 6, width: taskWidth },
-    slot: { x: x0 + taskWidth + 20, y: 6 + (taskHeight - h) / 2, w, h },
+    task: { x: x0, y: top, width: taskWidth },
+    slot: { x: x0 + taskWidth + 20, y: top + (taskHeight - h) / 2, w, h },
     row: (count) => rowXs(width, w, count, 12).map((x) => ({ x, y, w, h })),
   };
 }
@@ -99,12 +103,11 @@ export function orderLayout(width: number, height: number, persons: number): Ord
 }
 
 /**
- * Page 8, the starting resources of a person: places, their names, the band and the cards.
+ * Page 8, the starting resources of a person: places, their names and the cards. The band
+ * "Name · n Rohstoffe" lies below the table, where the band of the placement lies.
  */
 export type ResourcesLayout = {
   readonly slots: CardBox[];
-  /** Top of the band "Name · n Rohstoffe". */
-  readonly bandY: number;
   /** The five kinds in a row before the first draw. */
   readonly kinds: CardBox[];
   /** Card `index` of the stack, from the bottom; the stack is a little higher with each card. */
@@ -112,50 +115,56 @@ export type ResourcesLayout = {
 };
 
 /**
- * Layout of page 8 for `count` starting resources (decision of the product owner 09.11.2026):
+ * Layout of page 8 for `count` starting resources (decisions of the product owner 09.11.2026):
  * the places keep one size, at most as wide as in a row of three; many resources go into two
- * lines instead of shrinking into one, where the cards come out larger that way.
+ * lines instead of shrinking into one, where the cards come out larger that way. The stack or
+ * the five kinds lie at the bottom, right above the band; the places in the middle of the room
+ * above them.
  */
 export function resourcesLayout(width: number, height: number, count: number): ResourcesLayout {
-  const band = 44;
   const name = 20;
   const gap = 12;
   const line = 8;
+  const top = 8;
+  // Room between the names and the stack, and below the stack for its shadow; the stack grows
+  // upwards by 2 px per card.
+  const between = 26;
+  const bottom = 6;
   // On low tablets in landscape the cards below take at most 40 % of the free height, so the
   // places keep a usable size; on phones and portrait tablets they keep their size.
-  const free = height - (8 + 14 + band + 18 + 8);
+  const free = height - (top + between + bottom);
   const rw = Math.min(64, (width - 4 * 8) / RESOURCE_KINDS, (free * 0.4) / RESOURCE_RATIO);
   const rh = rw * RESOURCE_RATIO;
-  const fixed = 8 + 14 + band + 18 + rh + 8;
+  const room = height - (top + between + rh + bottom);
   const most = Math.min(120, (width - 2 * gap) / 3);
   const perRow = (rows: number): number => Math.ceil(count / rows);
   const sizeFor = (rows: number): number =>
     Math.min(
       most,
       (width - (perRow(rows) - 1) * gap) / perRow(rows),
-      ((height - fixed + line) / rows - name - line) / RESOURCE_RATIO,
+      ((room + line) / rows - name - line) / RESOURCE_RATIO,
     );
   const rows = count > 3 && sizeFor(2) > sizeFor(1) ? 2 : 1;
   const sw = sizeFor(rows);
   const sh = sw * RESOURCE_RATIO;
   const per = perRow(rows);
+  const block = rows * (sh + name) + (rows - 1) * line;
+  const first = top + Math.max(0, (room - block) / 2);
   const slots = Array.from({ length: count }, (_, index) => {
     const at = Math.floor(index / per);
     const inLine = Math.min(per, count - at * per);
     const total = inLine * sw + (inLine - 1) * gap;
     return {
       x: (width - total) / 2 + (index - at * per) * (sw + gap),
-      y: 8 + at * (sh + name + line),
+      y: first + at * (sh + name + line),
       w: sw,
       h: sh,
     };
   });
-  const bandY = 8 + rows * (sh + name) + (rows - 1) * line + 14;
-  const y = bandY + band + Math.max(18, (height - bandY - band - rh) / 2);
+  const y = height - bottom - rh;
   const kindGap = (width - RESOURCE_KINDS * rw) / (RESOURCE_KINDS + 1);
   return {
     slots,
-    bandY,
     kinds: Array.from({ length: RESOURCE_KINDS }, (_, index) => ({
       x: kindGap + index * (rw + kindGap),
       y,
