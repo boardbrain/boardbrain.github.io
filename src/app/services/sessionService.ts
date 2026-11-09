@@ -8,7 +8,6 @@ import {
   startGeneration,
   withGameState,
   type GenerationCompleteError,
-  type StepPendingError,
 } from '@/core/generation';
 import {
   areMatchColorsValid,
@@ -28,6 +27,7 @@ import {
   CATAN_GAME_ID,
   CATAN_GENERATION,
   CATAN_INITIAL_GAME_STATE,
+  openCatanResources,
   skipCatanPlacement,
   type CatanGameState,
   type CatanGeneration,
@@ -67,6 +67,11 @@ export type GroupNotEligibleError = 'group-not-eligible';
 export type StepChangedError = 'step-changed';
 
 /**
+ * Error code when "Weiter" is tapped but no step waits for confirmation.
+ */
+export type NothingToConfirmError = 'nothing-to-confirm';
+
+/**
  * Why the stored session cannot be worked with.
  */
 export type SessionAccessError = NoSessionError | SessionUnsupportedError;
@@ -97,7 +102,9 @@ export type StartSessionInput = {
 /**
  * Preparing a match, starting the generation, drawing, confirming and repeating steps and
  * ending the match (Architecture 4.4, 10). Every step is drawn and stored before it is shown
- * (ADR-014); a restart therefore never draws a different result (US-AB-05).
+ * (ADR-014); a restart therefore never draws a different result (US-AB-05). Whether a step is
+ * shown without a result is not stored: it is the next missing step while none waits for
+ * confirmation (US-AB-02 AK-3, E-35).
  */
 export type SessionService = {
   /**
@@ -113,38 +120,55 @@ export type SessionService = {
    */
   prepare(groupId: GroupId): Promise<Result<CatanPreparation, GroupNotEligibleError>>;
   /**
-   * Starts the generation ("Generierung starten", Specification 3.5) and draws the first step
-   * in the same transaction, stored as revealed before it is shown (ADR-014). A match without
-   * any step is running at once. Rejected while another match is in generation or running
-   * (US-AB-05 AK-2). Options and colours that do not fit, or a group that does not exist, are
-   * programming errors and throw.
+   * Starts the generation ("Generierung starten", Specification 3.5). Nothing is drawn yet: the
+   * first step is shown without a result (US-AB-02 AK-3). A match without any step is running at
+   * once. Rejected while another match is in generation or running (US-AB-05 AK-2). Options and
+   * colours that do not fit, or a group that does not exist, are programming errors and throw.
    */
   start(
     input: StartSessionInput,
   ): Promise<Result<StoredSession, SessionActiveError | GroupNotEligibleError>>;
   /**
-   * "Losen" and "Zur Übersicht" (US-AB-02 AK-1): confirms the revealed step and draws the next
-   * one in one transaction, stored as revealed before it is shown (ADR-014, Architecture
-   * 10.1). After the last step the match is running. `shownStep` is the index of the step the
-   * person saw, `null` if none waits; if it is no longer the step waiting, nothing happens, so
-   * two quick taps advance only once. Rejected once nothing is left to confirm or draw.
+   * "Losen" (US-AB-02 AK-1): confirms the revealed step, if there is one, and draws the next
+   * one in one transaction, stored as revealed before it is shown (ADR-014, Architecture 10.1).
+   * `shownStep` is the index of the step the person saw, `null` on a step without a result; if
+   * it is no longer the step waiting, nothing happens, so two quick taps draw only once.
+   * Rejected once no step is missing.
    */
-  advance(
+  draw(
     shownStep: number | null,
   ): Promise<
     Result<StoredSession, SessionAccessError | StepChangedError | GenerationCompleteError>
   >;
   /**
-   * Repeats step `index` (US-AB-03): discards it and the steps that depend on it and stores the
-   * step drawn again as revealed. The steps that are discarded are listed beforehand by
-   * `stepsDiscardedBy` (AK-2). A step that does not exist throws.
+   * "Weiter" and "Zur Übersicht" (US-AB-02 AK-1): confirms the revealed step without drawing;
+   * the next view shows its step without a result (AK-3). After the last step the match is
+   * running. `shownStep` as for `draw`.
    */
-  repeatStep(index: number): Promise<Result<StoredSession, SessionAccessError | StepPendingError>>;
+  confirm(
+    shownStep: number,
+  ): Promise<Result<StoredSession, SessionAccessError | StepChangedError | NothingToConfirmError>>;
   /**
-   * Skips the placement at its beginning (US-PL-05): confirms the revealed last spin, skips the
-   * placement and draws the next step, all in one transaction.
+   * Repeats step `index` (US-AB-03): confirms another step waiting for confirmation, then
+   * discards step `index` and the steps that depend on it. The step is then shown without a
+   * result, and `draw` draws it again (AK-1, E-35). The steps that are discarded are listed
+   * beforehand by `stepsDiscardedBy` (AK-2). A step that does not exist throws.
+   */
+  repeatStep(index: number): Promise<Result<StoredSession, SessionAccessError>>;
+  /**
+   * Skips the placement at its beginning (US-PL-05): confirms a revealed last spin and skips
+   * the placement in one transaction; the starting resources then start without a result.
    */
   skipPlacement(): Promise<Result<StoredSession, SessionAccessError | PlacementNotSkippableError>>;
+  /**
+   * Turns over cards of the starting resources of a person (FA-SR-05, US-SR-01 AK-6), indices
+   * into the result; they stay turned over, also after a restart. Nothing is drawn. A person
+   * without starting resources drawn, or a card that does not exist, throws.
+   */
+  openResources(
+    personId: PersonId,
+    cards: readonly number[],
+  ): Promise<Result<StoredSession, SessionAccessError>>;
   /**
    * Ends the match without a result: the generation is discarded and nothing is stored
    * (US-AB-06 AK-3, AK-4). Also possible for a session of unknown version.
@@ -263,16 +287,14 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
         );
         const setup: CatanSetup = { participants, options, colors };
         const started = startGeneration<CatanStep, CatanGameState>(CATAN_INITIAL_GAME_STATE);
-        const first = drawNextStep(CATAN_GENERATION, setup, started, rng);
         const session: StoredSession = {
           id: CURRENT_SESSION_ID,
           schemaVersion: SESSION_SCHEMA_VERSION,
           gameId: CATAN_GAME_ID,
           groupId,
           setup,
-          generation: first.ok
-            ? first.value
-            : withGameState(CATAN_GENERATION, setup, started, started.gameState),
+          // E-35: nothing is drawn yet; without any step the match is running at once.
+          generation: withGameState(CATAN_GENERATION, setup, started, started.gameState),
           startedAt: clock.now(),
         };
         await repositories.session.put(session);
@@ -280,16 +302,13 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
       });
     },
 
-    advance(shownStep) {
+    draw(shownStep) {
       return change(
         (session): Result<CatanGeneration, StepChangedError | GenerationCompleteError> => {
           if ((revealedStepIndex(session.generation) ?? null) !== shownStep) {
             return err('step-changed');
           }
           const confirmed = confirmRevealed(session.setup, session.generation);
-          if (confirmed !== session.generation && confirmed.state === 'running') {
-            return ok(confirmed);
-          }
           const drawn = drawNextStep(CATAN_GENERATION, session.setup, confirmed, rng);
           // After confirming nothing is revealed, so the only reason is that no step is missing.
           return drawn.ok ? drawn : err('generation-complete');
@@ -297,25 +316,43 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
       );
     },
 
-    repeatStep(index) {
-      return change((session) =>
-        repeatStep(CATAN_GENERATION, session.setup, session.generation, index, rng),
+    confirm(shownStep) {
+      return change(
+        (session): Result<CatanGeneration, StepChangedError | NothingToConfirmError> => {
+          const revealed = revealedStepIndex(session.generation);
+          if (revealed === undefined) {
+            return err('nothing-to-confirm');
+          }
+          if (revealed !== shownStep) {
+            return err('step-changed');
+          }
+          return ok(confirmRevealed(session.setup, session.generation));
+        },
       );
     },
 
-    skipPlacement() {
-      return change((session): Result<CatanGeneration, PlacementNotSkippableError> => {
-        const skipped = skipCatanPlacement(
-          session.setup,
-          confirmRevealed(session.setup, session.generation),
-        );
-        if (!skipped.ok || skipped.value.state === 'running') {
-          return skipped;
-        }
-        const drawn = drawNextStep(CATAN_GENERATION, session.setup, skipped.value, rng);
-        assert(drawn.ok, 'after skipping, the next step can be drawn');
-        return drawn;
+    repeatStep(index) {
+      return change((session) => {
+        // A step waiting elsewhere was seen already, e.g. when repeating from the look back.
+        const revealed = revealedStepIndex(session.generation);
+        const generation =
+          revealed === undefined || revealed === index
+            ? session.generation
+            : confirmRevealed(session.setup, session.generation);
+        const repeated = repeatStep(CATAN_GENERATION, session.setup, generation, index);
+        assert(repeated.ok, 'no other step waits for confirmation');
+        return repeated;
       });
+    },
+
+    skipPlacement() {
+      return change((session) =>
+        skipCatanPlacement(session.setup, confirmRevealed(session.setup, session.generation)),
+      );
+    },
+
+    openResources(personId, cards) {
+      return change((session) => ok(openCatanResources(session.generation, personId, cards)));
     },
 
     endWithoutResult() {

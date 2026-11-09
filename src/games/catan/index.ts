@@ -22,12 +22,17 @@ export {
   CATAN_GENERATION,
   CATAN_INITIAL_GAME_STATE,
   canSkipCatanPlacement,
+  catanNextSlot,
+  catanOpenedResources,
   catanPlacementOrder,
   createCatanGeneration,
+  openCatanResources,
   skipCatanPlacement,
   type CatanGameState,
   type CatanGeneration,
   type CatanGenerationDefinition,
+  type CatanOpenedResources,
+  type CatanSlot,
   type PlacementNotSkippableError,
 } from './generation/definition';
 export {

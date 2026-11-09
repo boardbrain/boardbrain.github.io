@@ -110,7 +110,12 @@ export function MatchView(): React.JSX.Element | null {
       }}
       onForward={() => {
         act(async () => {
-          const advanced = await sessions.advance(revealedStepIndex(session.generation) ?? null);
+          // Reworked with the pages without a result (I2-D, US-AB-02 AK-3).
+          const revealed = revealedStepIndex(session.generation) ?? null;
+          const advanced =
+            forward === 'overview' && revealed !== null
+              ? await sessions.confirm(revealed)
+              : await sessions.draw(revealed);
           return advanced.ok && advanced.value.generation.state === 'running';
         });
       }}

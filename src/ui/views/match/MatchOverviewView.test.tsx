@@ -45,10 +45,18 @@ async function runMatch(options: Partial<CatanOptions> = {}): Promise<BoardBrain
   });
   if (!started.ok) throw new Error(started.error);
   let current: StoredSession = started.value;
+  // "Losen" until no step is missing, then "Zur Übersicht".
   while (current.generation.state !== 'running') {
-    const advanced = await session.advance(revealedStepIndex(current.generation) ?? null);
-    if (!advanced.ok) throw new Error(advanced.error);
-    current = advanced.value;
+    const revealed = revealedStepIndex(current.generation) ?? null;
+    const drawn = await session.draw(revealed);
+    if (drawn.ok) {
+      current = drawn.value;
+      continue;
+    }
+    if (drawn.error !== 'generation-complete' || revealed === null) throw new Error(drawn.error);
+    const confirmed = await session.confirm(revealed);
+    if (!confirmed.ok) throw new Error(confirmed.error);
+    current = confirmed.value;
   }
   await act(() => router.navigate('/partie/uebersicht'));
   return db;
@@ -108,7 +116,9 @@ describe('US-AB-04 Overview of the running match', () => {
       colors: prepared.value.colors,
     });
     if (!started.ok) throw new Error(started.error);
-    await session.advance(0);
+    // Both spins of the order, then skip.
+    await session.draw(null);
+    await session.draw(0);
     await session.skipPlacement();
     await act(() => router.navigate('/partie/uebersicht'));
 

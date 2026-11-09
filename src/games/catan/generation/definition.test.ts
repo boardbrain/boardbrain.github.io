@@ -21,7 +21,11 @@ import {
   CATAN_GENERATION,
   CATAN_INITIAL_GAME_STATE,
   canSkipCatanPlacement,
+  catanNextSlot,
+  catanOpenedResources,
+  catanPlacementOrder,
   createCatanGeneration,
+  openCatanResources,
   skipCatanPlacement,
   type CatanGameState,
   type CatanGeneration,
@@ -58,15 +62,12 @@ function repeat(
   index: number,
   seed: number,
 ): CatanGeneration {
-  const repeated = repeatStep(
-    CATAN_GENERATION,
-    setup,
-    generation,
-    index,
-    new SeededRandomSource(seed),
-  );
+  // E-35: repeating discards; "Losen" then draws the step again.
+  const repeated = repeatStep(CATAN_GENERATION, setup, generation, index);
   if (!repeated.ok) throw new Error(repeated.error);
-  return repeated.value;
+  const drawn = drawNextStep(CATAN_GENERATION, setup, repeated.value, new SeededRandomSource(seed));
+  if (!drawn.ok) throw new Error(drawn.error);
+  return drawn.value;
 }
 
 // The steps that are not discarded keep their result and position among each other.
@@ -248,9 +249,11 @@ describe('US-PL-02 and US-PL-03 Placement as steps', () => {
     );
     const third = indexOf(generation, (step) => step.kind === 'building' && step.index === 2);
 
-    const repeated = repeatStep(definition, setup, generation, third, new SeededRandomSource(1));
+    const repeated = repeatStep(definition, setup, generation, third);
+    if (!repeated.ok) throw new Error(repeated.error);
+    const drawn = drawNextStep(definition, setup, repeated.value, new SeededRandomSource(1));
 
-    expect(repeated.ok).toBe(true);
+    expect(drawn.ok).toBe(true);
     expect(inputs.map((input) => [input.fixed.length, input.total])).toEqual([
       [0, 4],
       [2, 4],
@@ -279,6 +282,67 @@ describe('US-SR-01 Draw starting resources', () => {
     );
 
     expect(resources.map((list) => new Set(list).size)).toEqual([5, 5]);
+  });
+});
+
+describe('US-AB-02 AK-3 The next step without a result', () => {
+  it('E-35: names the first missing step without drawing it', () => {
+    const setup = aCatanSetup(3, { startingResources: { count: 2, replacement: 'with' } });
+    const start = runCatanGeneration(setup, new SeededRandomSource(3), undefined, 0);
+
+    expect(catanNextSlot(setup, start)).toEqual({ kind: 'person-draw', draw: 'landscapes' });
+    const atPlacement = runCatanGeneration(setup, new SeededRandomSource(3), undefined, 5);
+    const first = catanNextSlot(setup, atPlacement);
+    expect(first).toMatchObject({ kind: 'building', index: 0, type: 'settlement' });
+    expect(first?.kind === 'building' && first.personId).toBe(
+      catanPlacementOrder(setup, stepsOf(atPlacement))?.[0],
+    );
+    expect(atPlacement.steps).toHaveLength(5);
+    expect(catanNextSlot(setup, complete(setup, 3))).toBeNull();
+  });
+});
+
+describe('US-SR-01 AK-6 Turn over the starting resources (FA-SR-05)', () => {
+  const setup = aCatanSetup(2, { startingResources: { count: 3, replacement: 'with' } });
+  const finished = complete(setup, 41);
+  const personId = defined(setup.participants[1], 'person');
+
+  it('adds the cards turned over, ascending and once each; nothing else changes', () => {
+    const once = openCatanResources(finished, personId, [2]);
+    const twice = openCatanResources(once, personId, [0, 2]);
+
+    expect(catanOpenedResources(finished, personId)).toEqual([]);
+    expect(catanOpenedResources(twice, personId)).toEqual([0, 2]);
+    expect(twice.steps).toEqual(finished.steps);
+    expect(twice.state).toBe(finished.state);
+  });
+
+  it('keeps the cards turned over when the order is drawn again or the placement skipped', () => {
+    const opened = openCatanResources(finished, personId, [0, 1, 2]);
+    const spin = indexOf(opened, (step) => step.kind === 'order-spin');
+
+    const repeated = repeatStep(CATAN_GENERATION, setup, opened, spin);
+    if (!repeated.ok) throw new Error(repeated.error);
+
+    expect(catanOpenedResources(repeated.value, personId)).toEqual([0, 1, 2]);
+    // Only the module state matters here: the placement is skipped before any resource is drawn.
+    const fresh = runCatanGeneration(setup, new SeededRandomSource(41), undefined, 4);
+    const atPlacement: CatanGeneration = {
+      ...fresh,
+      gameState: { ...fresh.gameState, openedResources: [{ personId, cards: [1] }] },
+    };
+    const skipped = skipCatanPlacement(setup, atPlacement);
+    expect(skipped.ok && skipped.value.gameState.openedResources).toEqual(
+      atPlacement.gameState.openedResources,
+    );
+  });
+
+  it('throws for a person without starting resources drawn and for a card that does not exist', () => {
+    const start = runCatanGeneration(setup, new SeededRandomSource(41), undefined, 0);
+
+    expect(() => openCatanResources(start, personId, [0])).toThrow(InvariantError);
+    expect(() => openCatanResources(finished, personId, [3])).toThrow(InvariantError);
+    expect(() => openCatanResources(finished, personId, [0.5])).toThrow(InvariantError);
   });
 });
 
