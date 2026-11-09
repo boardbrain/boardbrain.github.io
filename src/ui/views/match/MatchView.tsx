@@ -1,27 +1,45 @@
-import { useState, useTransition } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { useRef, useState, useTransition } from 'react';
+import { Navigate, useNavigate, useSearchParams } from 'react-router';
 import type { StoredSession } from '@/app/ports';
 import { revealedStepIndex } from '@/core/generation';
 import type { PersonId } from '@/core/model';
-import { catanProgress, type CatanPhase, type CatanStep } from '@/games/catan';
+import {
+  catanOpenedResources,
+  catanProgress,
+  type CatanPhase,
+  type CatanSlot,
+} from '@/games/catan';
 import { t, type TextKey } from '@/i18n/t';
 import { useCurrentSession, useGroup, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
-import { AgainIcon, ChevronIcon, ExitDoorIcon } from '@/ui/components/Icons';
+import { cx } from '@/ui/components/classNames';
+import { AgainIcon, BackIcon, ChevronIcon, ExitDoorIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
-import { DrawStep } from './DrawStep';
+import { DrawScene } from './cards/DrawScene';
+import { OrderScene } from './cards/OrderScene';
+import { ResourcesScene } from './cards/ResourcesScene';
 import { EndMatchDialog } from './EndMatchDialog';
+import { LookBackNote, useLookBackFits } from './LookBackNote';
 import { MatchDialog } from './MatchDialog';
-import { canOfferSkip, forwardAction, shownStepIndex } from './matchFlow';
+import {
+  canOfferSkip,
+  followingSlot,
+  forwardAction,
+  isLookBack,
+  isSameView,
+  nextPage,
+  pageAt,
+  previousPage,
+  sessionUpTo,
+  type FlowPage,
+  type ForwardAction,
+} from './matchFlow';
 import { editionName, repeatLines, stepTitle } from './matchTexts';
-import { OrderStep } from './OrderStep';
 import { PlacementStep } from './PlacementStep';
-import { ResourcesStep } from './ResourcesStep';
 import { Reveal } from './Reveal';
 import { UnsupportedSession } from './UnsupportedSession';
 import shared from './Match.module.css';
 import styles from './MatchView.module.css';
-import { cx } from '@/ui/components/classNames';
 
 const PHASE_NAMES: Readonly<Record<CatanPhase, TextKey>> = {
   draws: 'partie.phaseLosen',
@@ -30,7 +48,15 @@ const PHASE_NAMES: Readonly<Record<CatanPhase, TextKey>> = {
   resources: 'partie.phaseRohstoffe',
 };
 
-const STEP_TITLES: Readonly<Record<CatanStep['kind'], TextKey>> = {
+const PHASE_OF: Readonly<Record<CatanSlot['kind'], CatanPhase>> = {
+  'person-draw': 'draws',
+  'order-spin': 'order',
+  building: 'placement',
+  road: 'placement',
+  'starting-resources': 'resources',
+};
+
+const STEP_TITLES: Readonly<Record<CatanSlot['kind'], TextKey>> = {
   'person-draw': 'partie.titelLosen',
   'order-spin': 'partie.titelReihenfolge',
   building: 'partie.titelPlatzierung',
@@ -38,14 +64,39 @@ const STEP_TITLES: Readonly<Record<CatanStep['kind'], TextKey>> = {
   'starting-resources': 'partie.titelStartrohstoffe',
 };
 
+const FORWARD_LABELS: Readonly<Record<ForwardAction, TextKey>> = {
+  draw: 'partie.losen',
+  next: 'partie.weiter',
+  overview: 'partie.zurUebersicht',
+  browse: 'partie.blaettern',
+  'turn-all': 'partie.alleUmdrehen',
+};
+
 type Dialog = 'repeat' | 'skip' | 'end' | null;
 
+// The address of a page: the current page has none, a look back names its step (US-AB-04 AK-3).
+function pathOf(page: FlowPage | null, session: StoredSession): string {
+  if (page === null) {
+    return '/partie/uebersicht';
+  }
+  const current = pageAt(session, null);
+  return page.kind === 'pending' || (current?.kind === 'step' && current.index === page.index)
+    ? '/partie'
+    : `/partie?schritt=${String(page.index)}`;
+}
+
+// The step number in the address, `null` without one.
+function lookBackOf(value: string | null): number | null {
+  return value !== null && /^\d+$/.test(value) ? Number(value) : null;
+}
+
 /**
- * The flow of a match `#/partie` (US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PL-05, US-SR-01,
- * design I2-C pages 5 to 8): the current step with its stored result, the progress in phases,
- * "Wiederholen" and the forward button. The match is read from the database (ADR-029) and
- * changed only through the session service; every result is stored before it is shown
- * (ADR-014).
+ * The flow of a match `#/partie` (US-AB-02, US-AB-03, US-AB-04, US-LS-02, US-LS-03, US-PL-04,
+ * US-PL-05, US-SR-01, design I2-C pages 5 to 8 and I2-D): a step without a result before
+ * "Losen" (E-35), a drawn step with its stored result, earlier steps in the look back
+ * (`#/partie?schritt=N`), the progress in phases, "Wiederholen" and the forward button. The
+ * match is read from the database (ADR-029) and changed only through the session service; every
+ * result is stored before it is shown (ADR-014).
  */
 export function MatchView(): React.JSX.Element | null {
   const { db, session: sessions } = useAppDependencies();
@@ -53,8 +104,16 @@ export function MatchView(): React.JSX.Element | null {
   const persons = usePersons(db);
   const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
   const navigate = useNavigate();
+  const [search] = useSearchParams();
   const [dialog, setDialog] = useState<Dialog>(null);
   const [isPending, startTransition] = useTransition();
+  const noteRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  const session = current?.status === 'active' ? current.session : null;
+  const page = session === null ? null : pageAt(session, lookBackOf(search.get('schritt')));
+  const pageKey = page === null ? '' : JSON.stringify(page);
+  const isNoteFloating = useLookBackFits(noteRef, bodyRef, pageKey);
 
   if (current === undefined || persons === undefined) {
     return null;
@@ -62,12 +121,10 @@ export function MatchView(): React.JSX.Element | null {
   if (current.status === 'none') {
     return <Navigate to="/" replace />;
   }
-  if (current.status === 'unsupported') {
+  if (session === null) {
     return <UnsupportedSession />;
   }
-  const { session } = current;
-  const index = shownStepIndex(session);
-  if (session.generation.state === 'running' || index === null) {
+  if (page === null) {
     return <Navigate to="/partie/uebersicht" replace />;
   }
   // Tables are never deleted, so a match always has one; `null` is the result of the query
@@ -75,52 +132,77 @@ export function MatchView(): React.JSX.Element | null {
   if (group === undefined || group === null) {
     return null;
   }
-  const record = session.generation.steps[index];
-  if (record === undefined) {
+  const step = page.kind === 'step' ? session.generation.steps[page.index]?.step : undefined;
+  const slot: CatanSlot | undefined = page.kind === 'pending' ? page.slot : step;
+  if (slot === undefined) {
     return null;
   }
-  const { step } = record;
   const nameOf = (personId: PersonId): string =>
     persons.find((person) => person.id === personId)?.name ?? '';
+  const revealed = revealedStepIndex(session.generation);
+  const forward = forwardAction(session, page);
+  const back = previousPage(page);
+  // A look back shows the match as it was right after its step.
+  const shown = page.kind === 'step' ? sessionUpTo(session, page.index) : session;
 
+  const go = (target: FlowPage | null): void => {
+    void navigate(pathOf(target, session), { replace: true });
+  };
   const act = (work: () => Promise<boolean>): void => {
     setDialog(null);
     startTransition(async () => {
-      if (await work()) {
-        await navigate('/partie/uebersicht', { replace: true });
-      }
+      const isRunning = await work();
+      await navigate(isRunning ? '/partie/uebersicht' : '/partie', {
+        replace: true,
+        state: { from: 'flow' },
+      });
     });
   };
-  const forward = forwardAction(session);
-  const isPlacement = step.kind === 'building' || step.kind === 'road';
-  // A new key per result starts its fade-in, also after a restart (US-AB-05 AK-3).
-  const revealKey = `${String(index)}:${JSON.stringify(step)}`;
+  const onForward = (): void => {
+    if (forward === 'browse') {
+      go(nextPage(session, page));
+      return;
+    }
+    act(async () => {
+      if (forward === 'turn-all') {
+        if (step?.kind === 'starting-resources') {
+          await sessions.openResources(
+            step.personId,
+            step.result.map((_, index) => index),
+          );
+        }
+        return false;
+      }
+      if (forward === 'draw') {
+        const drawn = await sessions.draw(revealed ?? null);
+        return drawn.ok && drawn.value.generation.state === 'running';
+      }
+      if (revealed === undefined) {
+        return false;
+      }
+      const confirmed = await sessions.confirm(revealed);
+      return confirmed.ok && confirmed.value.generation.state === 'running';
+    });
+  };
 
   const actions = (
     <StepActions
-      key={revealKey}
+      key={pageKey}
       forward={forward}
       isPending={isPending}
-      canSkip={canOfferSkip(session)}
+      canRepeat={page.kind === 'step'}
+      canSkip={canOfferSkip(session, page)}
       onSkip={() => {
         setDialog('skip');
       }}
       onRepeat={() => {
         setDialog('repeat');
       }}
-      onForward={() => {
-        act(async () => {
-          // Reworked with the pages without a result (I2-D, US-AB-02 AK-3).
-          const revealed = revealedStepIndex(session.generation) ?? null;
-          const advanced =
-            forward === 'overview' && revealed !== null
-              ? await sessions.confirm(revealed)
-              : await sessions.draw(revealed);
-          return advanced.ok && advanced.value.generation.state === 'running';
-        });
-      }}
+      onForward={onForward}
     />
   );
+  const isPlacement = slot.kind === 'building' || slot.kind === 'road';
+  const following = page.kind === 'step' ? followingSlot(session, page.index) : null;
 
   return (
     <main
@@ -132,8 +214,20 @@ export function MatchView(): React.JSX.Element | null {
       )}
     >
       <div className={shared.pageHead}>
+        {back !== null && (
+          <PressableButton
+            type="button"
+            className={shared.iconBtn}
+            aria-label={t('allgemein.zurueck')}
+            onClick={() => {
+              go(back);
+            }}
+          >
+            <BackIcon />
+          </PressableButton>
+        )}
         <div className={shared.titles}>
-          <h1 className={shared.title}>{t(STEP_TITLES[step.kind])}</h1>
+          <h1 className={shared.title}>{t(STEP_TITLES[slot.kind])}</h1>
           <div className={shared.sub}>
             {t('partie.unterzeile', {
               tisch: group.name,
@@ -154,34 +248,71 @@ export function MatchView(): React.JSX.Element | null {
         </PressableButton>
       </div>
       <div className={styles.progWrap}>
-        <PhaseProgress session={session} stepIndex={index} />
+        <PhaseProgress session={session} page={page} />
+        {isLookBack(session, page) && (
+          <LookBackNote
+            ref={noteRef}
+            isInFlow={!isNoteFloating}
+            onCurrent={() => {
+              go(pageAt(session, null));
+            }}
+          />
+        )}
       </div>
-      <div className={styles.stepBody}>
-        {step.kind === 'person-draw' && (
-          <DrawStep key={revealKey} session={session} step={step} nameOf={nameOf} />
+      <div ref={bodyRef} className={styles.stepBody}>
+        {slot.kind === 'person-draw' && (
+          <DrawScene
+            session={shown}
+            draw={slot.draw}
+            result={step?.kind === 'person-draw' ? step.result : null}
+            nameOf={nameOf}
+          />
         )}
-        {step.kind === 'order-spin' && (
-          <OrderStep key={revealKey} session={session} step={step} nameOf={nameOf} />
-        )}
+        {slot.kind === 'order-spin' && <OrderScene session={shown} nameOf={nameOf} />}
         {isPlacement && (
           <PlacementStep
-            key={revealKey}
-            session={session}
-            stepIndex={index}
+            session={shown}
+            newest={step?.kind === 'building' || step?.kind === 'road' ? step : null}
+            announced={
+              page.kind === 'pending'
+                ? page.slot
+                : following !== null && isSameView(slot.kind, following.kind)
+                  ? following
+                  : null
+            }
             nameOf={nameOf}
             actions={actions}
           />
         )}
-        {step.kind === 'starting-resources' && (
-          <ResourcesStep key={revealKey} session={session} step={step} nameOf={nameOf} />
+        {slot.kind === 'starting-resources' && (
+          <ResourcesScene
+            session={shown}
+            personId={slot.personId}
+            result={step?.kind === 'starting-resources' ? step.result : null}
+            opened={
+              step?.kind === 'starting-resources'
+                ? catanOpenedResources(session.generation, step.personId)
+                : []
+            }
+            onTurn={
+              step?.kind === 'starting-resources' && page.kind === 'step' && page.index === revealed
+                ? (index) => {
+                    startTransition(async () => {
+                      await sessions.openResources(step.personId, [index]);
+                    });
+                  }
+                : undefined
+            }
+            nameOf={nameOf}
+          />
         )}
       </div>
       {!isPlacement && actions}
 
-      {dialog === 'repeat' && (
+      {dialog === 'repeat' && step !== undefined && page.kind === 'step' && (
         <MatchDialog
           title={t('partie.wiederholenFrage', { schritt: stepTitle(step, nameOf) })}
-          lines={repeatLinesOrOnly(session, index)}
+          lines={repeatLinesOrOnly(session, page.index)}
           cancelLabel={t('allgemein.abbrechen')}
           confirmLabel={t('partie.wiederholen')}
           onCancel={() => {
@@ -189,7 +320,7 @@ export function MatchView(): React.JSX.Element | null {
           }}
           onConfirm={() => {
             act(async () => {
-              await sessions.repeatStep(index);
+              await sessions.repeatStep(page.index);
               return false;
             });
           }}
@@ -241,12 +372,18 @@ function repeatLinesOrOnly(session: StoredSession, index: number): string[] {
 
 type PhaseProgressProps = {
   readonly session: StoredSession;
-  readonly stepIndex: number;
+  readonly page: FlowPage;
 };
 
-// F2: four phases; each is as wide as its longest possible label, fixed for the whole match.
-function PhaseProgress({ session, stepIndex }: PhaseProgressProps): React.JSX.Element {
-  const phases = catanProgress(session.setup, session.generation, stepIndex);
+// F2: four phases; each is as wide as its longest possible label, fixed for the whole match. On a
+// page without a result, its phase is the current one with the steps before it.
+function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element {
+  const stepIndex = page.kind === 'step' ? page.index : page.at - 1;
+  const phases = catanProgress(session.setup, session.generation, stepIndex).map((phase) =>
+    page.kind === 'pending'
+      ? { ...phase, isCurrent: phase.phase === PHASE_OF[page.slot.kind] }
+      : phase,
+  );
   return (
     <div className={styles.phases} role="list" aria-label={t('partie.fortschritt')}>
       {phases.map(({ phase, total, done, isCurrent, isOff }) => {
@@ -275,8 +412,10 @@ function PhaseProgress({ session, stepIndex }: PhaseProgressProps): React.JSX.El
 }
 
 type StepActionsProps = {
-  readonly forward: 'draw' | 'overview';
+  readonly forward: ForwardAction;
   readonly isPending: boolean;
+  /** Without a result there is nothing to repeat (E-35). */
+  readonly canRepeat: boolean;
   readonly canSkip: boolean;
   readonly onSkip: () => void;
   readonly onRepeat: () => void;
@@ -287,6 +426,7 @@ type StepActionsProps = {
 function StepActions({
   forward,
   isPending,
+  canRepeat,
   canSkip,
   onSkip,
   onRepeat,
@@ -305,22 +445,24 @@ function StepActions({
         </PressableButton>
       )}
       <div className={styles.actions}>
-        <PressableButton
-          type="button"
-          className={shared.secondary}
-          disabled={isPending}
-          onClick={onRepeat}
-        >
-          <AgainIcon size={18} />
-          {t('partie.wiederholen')}
-        </PressableButton>
+        {canRepeat && (
+          <PressableButton
+            type="button"
+            className={shared.secondary}
+            disabled={isPending}
+            onClick={onRepeat}
+          >
+            <AgainIcon size={18} />
+            {t('partie.wiederholen')}
+          </PressableButton>
+        )}
         <PressableButton
           type="button"
           className={cx(shared.primary, styles.forward)}
           disabled={isPending}
           onClick={onForward}
         >
-          {forward === 'draw' ? t('partie.losen') : t('partie.zurUebersicht')}
+          {t(FORWARD_LABELS[forward])}
           <ChevronIcon size={18} />
         </PressableButton>
       </div>

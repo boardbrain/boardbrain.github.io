@@ -24,6 +24,7 @@ const TABLE = aGroup({
   })),
 });
 const NO_DRAWS = { landscapes: false, harbors: false, numbers: false };
+const FORWARD = /^(Losen|Weiter|Blättern|Alle umdrehen|Zur Übersicht)$/;
 
 const ROUTES: RouteObject[] = [
   { path: '/', element: <h1>start page</h1> },
@@ -53,17 +54,21 @@ async function startMatch(
   return { db, session };
 }
 
-// Taps the forward button of the step shown and waits until the step is replaced: the button
-// belongs to the step and is new for every step.
-async function tapForward(user: User, name = 'Losen'): Promise<void> {
+// Taps the forward button with this name and waits until it has done its work: the button of a
+// page is new for every page, "Alle umdrehen" turns into "Weiter".
+async function tapForward(user: User, name: string): Promise<void> {
   const button = await screen.findByRole('button', { name });
   await waitFor(() => {
     expect(button).toBeEnabled();
   });
   await user.click(button);
   await waitFor(() => {
-    expect(button).not.toBeInTheDocument();
+    expect(button.isConnected && button.textContent === name).toBe(false);
   });
+}
+
+function forwardName(): string {
+  return screen.getByRole('button', { name: FORWARD }).textContent;
 }
 
 function progress(): string[] {
@@ -73,30 +78,63 @@ function progress(): string[] {
 }
 
 describe('US-AB-02 Go through the generation', () => {
-  it('AK-1: shows the stored first step with its phase', async () => {
+  it('AK-3: shows the first step without a result; nothing is drawn yet', async () => {
     const { db } = await startMatch();
 
     expect(await screen.findByRole('heading', { name: 'Losen' })).toBeInTheDocument();
     expect(screen.getByText('Landschaftsfelder')).toBeInTheDocument();
+    expect(screen.getByText('Wer?')).toBeInTheDocument();
     expect(screen.getByText('Freitagsrunde · Basisspiel')).toBeInTheDocument();
-    expect(progress()).toEqual(['Losen 1/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
+    expect(progress()).toEqual(['Losen 0/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
+    expect(screen.queryByRole('button', { name: 'Wiederholen' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Zurück' })).not.toBeInTheDocument();
     const [stored] = await db.session.toArray();
-    expect(stored?.generation.steps).toHaveLength(1);
+    expect(stored?.generation.steps).toHaveLength(0);
   });
 
-  it('AK-1: "Losen" confirms the step and shows the next one', async () => {
+  it('AK-1: "Losen" draws the step; "Weiter" leads to the next draw without drawing it', async () => {
     const user = userEvent.setup();
     const { db } = await startMatch();
-    await screen.findByText('Landschaftsfelder');
+    await screen.findByText('Wer?');
 
-    await tapForward(user);
+    await tapForward(user, 'Losen');
+
+    expect(await screen.findByText('legt sie aus')).toBeInTheDocument();
+    expect(screen.queryByText('Wer?')).not.toBeInTheDocument();
+    expect(progress()[0]).toBe('Losen 1/3');
+    expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeInTheDocument();
+    await tapForward(user, 'Weiter');
 
     expect(await screen.findByText('Häfen')).toBeInTheDocument();
-    expect(progress()[0]).toBe('Losen 2/3');
+    expect(screen.getByText('Wer?')).toBeInTheDocument();
     const [stored] = await db.session.toArray();
-    expect(stored?.generation.steps.map((record) => record.status)).toEqual([
-      'confirmed',
-      'revealed',
+    expect(stored?.generation.steps.map((record) => record.status)).toEqual(['confirmed']);
+  });
+
+  it('US-SR-01 AK-6: the starting resources are turned over before going on', async () => {
+    const user = userEvent.setup();
+    const { db } = await startMatch({
+      personDraws: NO_DRAWS,
+      order: { mode: 'none' },
+      startingResources: { count: 2, replacement: 'with' },
+    });
+    expect(await screen.findByRole('heading', { name: 'Startrohstoffe' })).toBeInTheDocument();
+    expect(progress()).toEqual(['Platzierung', 'Rohstoffe 0/4']);
+
+    await tapForward(user, 'Losen');
+    expect(await screen.findAllByText('Antippen')).toHaveLength(2);
+    await user.click(screen.getByRole('button', { name: 'Karte 1 umdrehen' }));
+    await waitFor(() => {
+      expect(screen.getAllByText('Antippen')).toHaveLength(1);
+    });
+    expect(forwardName()).toBe('Alle umdrehen');
+    await tapForward(user, 'Alle umdrehen');
+
+    expect(screen.queryByText('Antippen')).not.toBeInTheDocument();
+    expect(forwardName()).toBe('Weiter');
+    const [stored] = await db.session.toArray();
+    expect(stored?.generation.gameState.openedResources).toEqual([
+      { personId: TABLE.members[0]?.personId, cards: [0, 1] },
     ]);
   });
 
@@ -105,13 +143,16 @@ describe('US-AB-02 Go through the generation', () => {
     await startMatch({
       personDraws: NO_DRAWS,
       order: { mode: 'none' },
-      startingResources: { count: 2, replacement: 'with' },
+      startingResources: { count: 1, replacement: 'with' },
     });
-    expect(await screen.findByRole('heading', { name: 'Startrohstoffe' })).toBeInTheDocument();
-    expect(progress()).toEqual(['Platzierung', 'Rohstoffe 1/4']);
+    await screen.findByRole('heading', { name: 'Startrohstoffe' });
 
-    for (let step = 0; step < 3; step++) {
-      await tapForward(user);
+    for (let person = 0; person < 4; person++) {
+      await tapForward(user, 'Losen');
+      await tapForward(user, 'Alle umdrehen');
+      if (person < 3) {
+        await tapForward(user, 'Weiter');
+      }
     }
     await tapForward(user, 'Zur Übersicht');
 
@@ -119,32 +160,58 @@ describe('US-AB-02 Go through the generation', () => {
   });
 });
 
-describe('US-AB-03 Repeat a step', () => {
-  it('AK-1: warns that only this step is drawn again, and draws it again', async () => {
+describe('US-AB-04 AK-3, AK-4 Look back', () => {
+  it('shows an earlier step with the note, "Blättern" and back to the current step', async () => {
     const user = userEvent.setup();
     const { db } = await startMatch();
-    await screen.findByText('Landschaftsfelder');
+    await tapForward(user, 'Losen');
+    await tapForward(user, 'Weiter');
+    await tapForward(user, 'Losen');
+    expect(await screen.findByText('Häfen')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Wiederholen' }));
+    await user.click(screen.getByRole('button', { name: 'Zurück' }));
+
+    expect(await screen.findByText('Rückblick')).toBeInTheDocument();
+    expect(screen.getByText('Landschaftsfelder')).toBeInTheDocument();
+    expect(forwardName()).toBe('Blättern');
+    expect(screen.queryByRole('button', { name: 'Zurück' })).not.toBeInTheDocument();
+    await tapForward(user, 'Blättern');
+    expect(await screen.findByText('Häfen')).toBeInTheDocument();
+    expect(screen.queryByText('Rückblick')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Zurück' }));
+    await user.click(await screen.findByRole('button', { name: 'Zum aktuellen Schritt' }));
+    expect(await screen.findByText('Häfen')).toBeInTheDocument();
+    // Nothing was drawn while looking back.
+    const [stored] = await db.session.toArray();
+    expect(stored?.generation.steps).toHaveLength(2);
+  });
+});
+
+describe('US-AB-03 Repeat a step', () => {
+  it('AK-1: warns that only this step is drawn again, then shows it without a result', async () => {
+    const user = userEvent.setup();
+    const { db } = await startMatch();
+    await tapForward(user, 'Losen');
+
+    await user.click(await screen.findByRole('button', { name: 'Wiederholen' }));
     const dialog = screen.getByRole('alertdialog');
     expect(within(dialog).getByText('Landschaftsfelder wiederholen?')).toBeInTheDocument();
     expect(within(dialog).getByText('Nur dieser Schritt wird neu gelost')).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: 'Wiederholen' }));
 
-    await waitFor(() => {
-      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
-    });
+    expect(await screen.findByText('Wer?')).toBeInTheDocument();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     const [stored] = await db.session.toArray();
-    expect(stored?.generation.steps).toHaveLength(1);
-    expect(screen.getByText('Landschaftsfelder')).toBeInTheDocument();
+    expect(stored?.generation.steps).toHaveLength(0);
   });
 
   it('can be cancelled', async () => {
     const user = userEvent.setup();
     await startMatch();
-    await screen.findByText('Landschaftsfelder');
+    await tapForward(user, 'Losen');
 
-    await user.click(screen.getByRole('button', { name: 'Wiederholen' }));
+    await user.click(await screen.findByRole('button', { name: 'Wiederholen' }));
     await user.click(screen.getByRole('button', { name: 'Abbrechen' }));
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
@@ -152,19 +219,26 @@ describe('US-AB-03 Repeat a step', () => {
 });
 
 describe('US-PL-05 Skip the placement', () => {
-  it('AK-1, AK-2: offered on the last spin, the match is complete without resources', async () => {
+  it('AK-1, AK-2: offered on the empty board, the match is complete without resources', async () => {
     const user = userEvent.setup();
     await startMatch({ personDraws: NO_DRAWS });
     expect(await screen.findByRole('heading', { name: 'Reihenfolge' })).toBeInTheDocument();
+
+    // FA-LS-02: the last place follows by itself after the third spin.
+    for (let spin = 0; spin < 3; spin++) {
+      await tapForward(user, 'Losen');
+    }
     expect(
       screen.queryByRole('button', { name: 'Platzierung überspringen' }),
     ).not.toBeInTheDocument();
-
-    await tapForward(user);
-    await tapForward(user);
-    await user.click(await screen.findByRole('button', { name: 'Platzierung überspringen' }));
+    await tapForward(user, 'Weiter');
+    const skip = await screen.findByRole('button', { name: 'Platzierung überspringen' });
+    await waitFor(() => {
+      expect(skip).toBeEnabled();
+    });
+    await user.click(skip);
     await user.click(
-      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Überspringen' }),
+      within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Überspringen' }),
     );
 
     expect(await screen.findByRole('heading', { name: 'overview page' })).toBeInTheDocument();
@@ -188,23 +262,27 @@ describe('US-AB-06 End a match without a result', () => {
 });
 
 describe('US-PL-04 Buildings and roads on the board', () => {
-  it('AK-1: shows the building drawn and whose turn it is', async () => {
+  it('AK-1: the empty board names the first piece; each drawn piece announces the next (N1)', async () => {
     const user = userEvent.setup();
     await startMatch({ personDraws: NO_DRAWS });
     await screen.findByRole('heading', { name: 'Reihenfolge' });
-
     for (let spin = 0; spin < 3; spin++) {
-      await tapForward(user);
+      await tapForward(user, 'Losen');
     }
+    await tapForward(user, 'Weiter');
 
     expect(await screen.findByRole('heading', { name: 'Platzierung' })).toBeInTheDocument();
-    expect(progress()).toContain('Platzierung 1/16');
-    expect(screen.getAllByTestId('board-settlement')).toHaveLength(1);
+    expect(progress()).toContain('Platzierung 0/16');
+    expect(screen.queryAllByTestId('board-settlement')).toHaveLength(0);
     expect(screen.getByText('· Siedlung')).toBeInTheDocument();
+    expect(screen.queryByText('Als Nächstes')).not.toBeInTheDocument();
 
-    await tapForward(user);
+    await tapForward(user, 'Losen');
 
-    expect(await screen.findByText('· Straße')).toBeInTheDocument();
+    expect(screen.getAllByTestId('board-settlement')).toHaveLength(1);
+    expect(screen.getByText('Als Nächstes')).toBeInTheDocument();
+    expect(screen.getByText('· Straße')).toBeInTheDocument();
+    await tapForward(user, 'Losen');
     expect(screen.getAllByTestId('board-road')).toHaveLength(1);
   });
 });

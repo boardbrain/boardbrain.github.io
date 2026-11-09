@@ -80,5 +80,16 @@ describe('US-AB-04 the match pile on the start', () => {
     await waitFor(() => {
       expect(screen.getByRole('link', { name: 'Partie' })).toHaveAttribute('href', '/partie');
     });
+    // Design I2-D: a banner names the table and leads back as well.
+    expect(await screen.findByText(aGroup().name)).toBeInTheDocument();
+    expect(screen.getByText(/spielt gerade/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Weiter' })).toHaveAttribute('href', '/partie');
+  });
+
+  it('shows no banner while no match runs', async () => {
+    renderWithApp(<StartView />);
+
+    await screen.findByRole('link', { name: 'Partie' });
+    expect(screen.queryByText(/spielt gerade/)).not.toBeInTheDocument();
   });
 });

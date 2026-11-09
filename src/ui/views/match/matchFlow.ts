@@ -1,32 +1,204 @@
 import type { StoredSession } from '@/app/ports';
-import { confirmStep, revealedStepIndex } from '@/core/generation';
+import { revealedStepIndex } from '@/core/generation';
 import type { PersonId } from '@/core/model';
-import { CATAN_GENERATION, canSkipCatanPlacement, catanPlacementOrder } from '@/games/catan';
+import {
+  canSkipCatanPlacement,
+  catanNextSlot,
+  catanOpenedResources,
+  catanPlacementOrder,
+  type CatanSlot,
+  type CatanStep,
+} from '@/games/catan';
 
 /**
- * Index of the step the flow shows: the one waiting for confirmation, otherwise the newest;
- * `null` without any step.
+ * What the flow `#/partie` shows (design I2-D): a step with its stored result, or the next step
+ * without a result before "Losen" (US-AB-02 AK-3, E-35).
  */
-export function shownStepIndex(session: StoredSession): number | null {
-  const { steps } = session.generation;
-  return revealedStepIndex(session.generation) ?? (steps.length > 0 ? steps.length - 1 : null);
+export type FlowPage =
+  | { readonly kind: 'step'; readonly index: number }
+  | { readonly kind: 'pending'; readonly slot: CatanSlot; readonly at: number };
+
+/**
+ * What the forward button does (US-AB-02 AK-1, US-AB-04 AK-4, US-SR-01 AK-6): "Losen" draws,
+ * "Weiter" confirms and leads to the next view, "Zur Übersicht" confirms the last step,
+ * "Blättern" goes one step forward without drawing, "Alle umdrehen" turns over the starting
+ * resources.
+ */
+export type ForwardAction = 'draw' | 'next' | 'overview' | 'browse' | 'turn-all';
+
+/**
+ * The current page of the flow: the step waiting for confirmation, otherwise the next missing
+ * step without a result; `null` once the match is running.
+ */
+export function currentPage(session: StoredSession): FlowPage | null {
+  const revealed = revealedStepIndex(session.generation);
+  if (revealed !== undefined) {
+    return { kind: 'step', index: revealed };
+  }
+  const next = catanNextSlot(session.setup, session.generation);
+  return next === null ? null : { kind: 'pending', ...next };
 }
 
 /**
- * What the forward button does on the step shown (US-AB-02 AK-1): "Losen" draws the next step,
- * "Zur Übersicht" follows the last one. "Blättern" comes with the look back (I2-D).
+ * The page for the address `#/partie?schritt=N` (US-AB-04 AK-3): step N in the look back, or the
+ * current page without a valid N or once N is the current step.
  */
-export function forwardAction(session: StoredSession): 'draw' | 'overview' {
-  return CATAN_GENERATION.isComplete(session.setup, session.generation) ? 'overview' : 'draw';
+export function pageAt(session: StoredSession, lookBack: number | null): FlowPage | null {
+  const current = currentPage(session);
+  if (
+    lookBack === null ||
+    !Number.isInteger(lookBack) ||
+    lookBack < 0 ||
+    lookBack >= lastReachable(session)
+  ) {
+    return current;
+  }
+  return { kind: 'step', index: lookBack };
+}
+
+// Steps up to this index can be looked at; with a step waiting without a result, only those
+// before it (the later ones are reached again after drawing it).
+function lastReachable(session: StoredSession): number {
+  const current = currentPage(session);
+  return current?.kind === 'pending' ? current.at : session.generation.steps.length;
 }
 
 /**
- * Whether "Platzierung überspringen" is offered (US-PL-05 AK-1): on the last spin of the order,
- * as long as no building is placed.
+ * Whether the page is a look back at an earlier step (US-AB-04 AK-3): it shows the note
+ * "Rückblick". The current page is none, and neither is the newest step while an earlier,
+ * repeated step waits for confirmation (I2-D: browsing ends there).
  */
-export function canOfferSkip(session: StoredSession): boolean {
-  const confirmed = confirmStep(CATAN_GENERATION, session.setup, session.generation);
-  return confirmed.ok && canSkipCatanPlacement(session.setup, confirmed.value);
+export function isLookBack(session: StoredSession, page: FlowPage): boolean {
+  if (page.kind === 'pending') {
+    return false;
+  }
+  const revealed = revealedStepIndex(session.generation);
+  if (revealed === undefined) {
+    return true;
+  }
+  return page.index !== revealed && page.index !== session.generation.steps.length - 1;
+}
+
+/**
+ * The page "Zurück" leads to (US-AB-04 AK-3), or `null` on the first step: there is no back
+ * button there.
+ */
+export function previousPage(page: FlowPage): FlowPage | null {
+  const index = page.kind === 'pending' ? page.at - 1 : page.index - 1;
+  return index >= 0 ? { kind: 'step', index } : null;
+}
+
+/**
+ * The page "Blättern" leads to (US-AB-04 AK-4): one step forward, at the end the current page.
+ */
+export function nextPage(session: StoredSession, page: FlowPage): FlowPage | null {
+  if (page.kind === 'pending') {
+    return null;
+  }
+  const target = page.index + 1;
+  const revealed = revealedStepIndex(session.generation);
+  return target >= lastReachable(session) || target === revealed
+    ? currentPage(session)
+    : { kind: 'step', index: target };
+}
+
+/**
+ * Whether two steps are shown in the same view (E-35): the spins of the order, or the pieces of
+ * the placement. Every draw of a person and every person's starting resources have a view of
+ * their own.
+ */
+export function isSameView(a: CatanStep['kind'], b: CatanStep['kind']): boolean {
+  const view = (kind: CatanStep['kind']): string =>
+    kind === 'road' ? 'building' : kind === 'order-spin' || kind === 'building' ? kind : '';
+  return view(a) !== '' && view(a) === view(b);
+}
+
+/**
+ * The slot that follows step `index` in the flow: the next step if it is drawn already,
+ * otherwise the next missing one (`null` at the end). The band of the placement announces it
+ * (N1).
+ */
+export function followingSlot(session: StoredSession, index: number): CatanSlot | null {
+  const after = session.generation.steps[index + 1]?.step;
+  if (after !== undefined && index + 1 < lastReachable(session)) {
+    return after;
+  }
+  return catanNextSlot(session.setup, session.generation)?.slot ?? null;
+}
+
+/**
+ * What the forward button does on a page (US-AB-02 AK-1, US-AB-04 AK-4, US-SR-01 AK-6).
+ */
+export function forwardAction(session: StoredSession, page: FlowPage): ForwardAction {
+  if (page.kind === 'pending') {
+    return 'draw';
+  }
+  const revealed = revealedStepIndex(session.generation);
+  const step = session.generation.steps[page.index]?.step;
+  if (
+    page.index === revealed &&
+    step?.kind === 'starting-resources' &&
+    !areResourcesOpen(session, page.index)
+  ) {
+    return 'turn-all';
+  }
+  if (revealed === undefined || page.index < session.generation.steps.length - 1) {
+    return 'browse';
+  }
+  const next = catanNextSlot(session.setup, session.generation);
+  if (next === null) {
+    return 'overview';
+  }
+  return step !== undefined && isSameView(step.kind, next.slot.kind) ? 'draw' : 'next';
+}
+
+/**
+ * Whether every card of the starting resources at step `index` is turned over (FA-SR-05).
+ */
+export function areResourcesOpen(session: StoredSession, index: number): boolean {
+  const step = session.generation.steps[index]?.step;
+  if (step?.kind !== 'starting-resources') {
+    return true;
+  }
+  return catanOpenedResources(session.generation, step.personId).length === step.result.length;
+}
+
+/**
+ * Whether "Platzierung überspringen" is offered (US-PL-05 AK-1): on the empty board before the
+ * first building, as long as no building is placed.
+ */
+export function canOfferSkip(session: StoredSession, page: FlowPage): boolean {
+  return (
+    page.kind === 'pending' &&
+    page.slot.kind === 'building' &&
+    canSkipCatanPlacement(session.setup, session.generation)
+  );
+}
+
+/**
+ * The match as it was right after step `index`, for showing that step (look back): the later
+ * steps are left out.
+ */
+export function sessionUpTo(session: StoredSession, index: number): StoredSession {
+  return {
+    ...session,
+    generation: {
+      ...session.generation,
+      steps: session.generation.steps.slice(0, index + 1),
+    },
+  };
+}
+
+/**
+ * Index of the first step that `matches`, or `null`, e.g. for a row of the overview (US-AB-03
+ * AK-6).
+ */
+export function stepIndexWhere(
+  session: StoredSession,
+  matches: (step: CatanStep) => boolean,
+): number | null {
+  const index = session.generation.steps.findIndex((record) => matches(record.step));
+  return index === -1 ? null : index;
 }
 
 /**

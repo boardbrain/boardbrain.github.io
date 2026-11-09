@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { t } from '@/i18n/t';
-import { useCurrentSession } from '@/infra/db/readHooks';
+import { useCurrentSession, useGroup } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { ChevronIcon, PlayIcon } from '@/ui/components/Icons';
 import { PlayingCard } from '@/ui/components/PlayingCard';
@@ -13,13 +13,15 @@ const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
 /**
  * Start view `#/` (Architecture 13.1, design D-3): persons, tables and games as a fan of
  * playing cards right above the card hand; the view never scrolls. Above them the draw pile
- * "Partie" (I2, US-SP-01 AK-1): it starts a new match, or leads to the running one. The banners
- * (I4, I2-D) get their place at the top later.
+ * "Partie" (I2, US-SP-01 AK-1): it starts a new match, or leads to the running one. At the top
+ * the banner of a running match leads back to it with one tap (US-AB-04 AK-2, design I2-D);
+ * the banners of I4 follow there.
  */
 export function StartView(): React.JSX.Element {
   const { db } = useAppDependencies();
   const cards = useAreaCards();
   const current = useCurrentSession(db);
+  const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
   const headingId = useId();
   return (
     <main className={styles.start}>
@@ -27,12 +29,25 @@ export function StartView(): React.JSX.Element {
       {/* Place for the banners (reminder I4, update I4, running match I2) at the top; they must
           not push the cards down while there is room. Look and sizes:
           docs/design/d3-start-navigation-final-preview.html, scope "Mit späteren Funktionen". */}
+      {group !== undefined && group !== null && (
+        <div className={styles.banner}>
+          <span className={styles.bannerText}>
+            <b>{group.name}</b>
+            {t('start.spieltGerade')}
+          </span>
+          <PressableLink to="/partie" state={{ from: 'start' }} className={styles.pill}>
+            {t('start.weiter')}
+            <ChevronIcon size={14} />
+          </PressableLink>
+        </div>
+      )}
       <div className={styles.spacer} />
       {/* "Partie" as a draw pile right above the cards, together with them in one column with a
           14px gap (same reference, docs/design/i2-match-final-preview.html). */}
       <div className={styles.column}>
         <PressableLink
           to={current !== undefined && current.status !== 'none' ? '/partie' : '/partie/neu'}
+          state={{ from: 'start' }}
           look="card"
           className={styles.pile}
         >

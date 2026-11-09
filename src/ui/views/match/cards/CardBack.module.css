@@ -1,0 +1,63 @@
+/* Card back R1 (design I2-D). */
+.back {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.woodTop {
+  stop-color: var(--color-card-back-top);
+}
+
+.woodBottom {
+  stop-color: var(--color-card-back-bottom);
+}
+
+.medalLight {
+  stop-color: var(--color-card-back-medal-light);
+}
+
+.medalDark {
+  stop-color: var(--color-card-back-medal-dark);
+}
+
+.lozenge {
+  stroke: var(--color-card-back-gold);
+  stroke-opacity: 0.16;
+  stroke-width: 0.6;
+}
+
+.frame,
+.innerFrame,
+.ring {
+  fill: none;
+  stroke: var(--color-card-back-gold);
+}
+
+.frame {
+  stroke-width: 1.3;
+}
+
+.innerFrame {
+  stroke-opacity: 0.5;
+  stroke-width: 0.7;
+}
+
+.ring {
+  stroke-opacity: 0.45;
+  stroke-width: 0.6;
+}
+
+.gold {
+  fill: var(--color-card-back-gold);
+}
+
+.medal {
+  stroke: var(--color-card-back-gold);
+  stroke-width: 1.6;
+}
+
+/* The logo in the gold of the back instead of the accent colour. */
+.logo {
+  --color-accent-text: var(--color-card-back-gold);
+}

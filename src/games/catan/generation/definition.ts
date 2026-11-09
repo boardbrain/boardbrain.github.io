@@ -173,6 +173,19 @@ function slotsOf(setup: CatanSetup, generation: CatanGeneration): CatanSlot[] {
   return slots;
 }
 
+// Number of steps before slot `position` of the flow. Steps that come later in the flow, or no
+// longer have a place in it, stay behind.
+function stepsBefore(
+  slots: readonly CatanSlot[],
+  generation: CatanGeneration,
+  position: number,
+): number {
+  const rank = new Map(slots.map((other, index) => [slotKey(other), index]));
+  return generation.steps.filter(
+    (record) => (rank.get(slotKey(record.step)) ?? Infinity) < position,
+  ).length;
+}
+
 function placementTotal(setup: CatanSetup): number {
   return setup.participants.length * catanPlacementRounds(setup.options.edition).length;
 }
@@ -248,12 +261,10 @@ export function createCatanGeneration(
       if (slot === undefined) {
         return null;
       }
-      // Steps that come later in the flow, or no longer have a place in it, stay behind.
-      const rank = new Map(slots.map((other, index) => [slotKey(other), index]));
-      const at = generation.steps.filter(
-        (record) => (rank.get(slotKey(record.step)) ?? Infinity) < position,
-      ).length;
-      return { ...drawSlot(slot, setup, generation, rng), at };
+      return {
+        ...drawSlot(slot, setup, generation, rng),
+        at: stepsBefore(slots, generation, position),
+      };
     },
 
     isComplete(setup, generation) {
@@ -357,12 +368,22 @@ export function skipCatanPlacement(
 }
 
 /**
- * The first missing slot of the flow, without drawing it, or `null` once no step is missing. The
- * flow shows it without a result until "Losen" draws it (US-AB-02 AK-3, E-35).
+ * The first missing slot of the flow without drawing it, and `at`, the number of steps before it
+ * in the flow; `null` once no step is missing. The flow shows it without a result until "Losen"
+ * draws it (US-AB-02 AK-3, E-35).
  */
-export function catanNextSlot(setup: CatanSetup, generation: CatanGeneration): CatanSlot | null {
+export function catanNextSlot(
+  setup: CatanSetup,
+  generation: CatanGeneration,
+): { readonly slot: CatanSlot; readonly at: number } | null {
+  const slots = slotsOf(setup, generation);
   const present = new Set(generation.steps.map((record) => slotKey(record.step)));
-  return slotsOf(setup, generation).find((slot) => !present.has(slotKey(slot))) ?? null;
+  const position = slots.findIndex((slot) => !present.has(slotKey(slot)));
+  const slot = slots[position];
+  if (slot === undefined) {
+    return null;
+  }
+  return { slot, at: stepsBefore(slots, generation, position) };
 }
 
 /**

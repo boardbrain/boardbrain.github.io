@@ -12,6 +12,10 @@ type MatchDialogProps = {
   readonly children?: ReactNode;
   readonly cancelLabel: string;
   readonly onCancel: () => void;
+  /** The cancel button is the destructive choice, in red; the confirm button gets the focus. */
+  readonly isCancelDanger?: boolean;
+  /** A tap beside the window; without it, it cancels. */
+  readonly onDismiss?: () => void;
   /** Without a confirm button the dialog only informs. */
   readonly confirmLabel?: string;
   readonly isDanger?: boolean;
@@ -28,6 +32,8 @@ export function MatchDialog({
   children,
   cancelLabel,
   onCancel,
+  isCancelDanger = false,
+  onDismiss = onCancel,
   confirmLabel,
   isDanger = false,
   onConfirm,
@@ -38,7 +44,7 @@ export function MatchDialog({
       className={styles.backdrop}
       onClick={(event) => {
         if (event.target === event.currentTarget) {
-          onCancel();
+          onDismiss();
         }
       }}
     >
@@ -64,13 +70,19 @@ export function MatchDialog({
         )}
         {children}
         <div className={styles.buttons}>
-          <PressableButton type="button" className={shared.secondary} autoFocus onClick={onCancel}>
+          <PressableButton
+            type="button"
+            className={cx(shared.secondary, isCancelDanger && shared.dangerText)}
+            autoFocus={!isCancelDanger}
+            onClick={onCancel}
+          >
             {cancelLabel}
           </PressableButton>
           {confirmLabel !== undefined && (
             <PressableButton
               type="button"
               className={cx(shared.primary, isDanger && shared.danger)}
+              autoFocus={isCancelDanger}
               onClick={onConfirm}
             >
               {confirmLabel}

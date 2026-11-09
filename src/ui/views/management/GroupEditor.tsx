@@ -23,16 +23,19 @@ import {
 } from '@/core/model';
 import { findSupportedGame, gameCapabilities, SUPPORTED_GAMES } from '@/games/registry';
 import { t } from '@/i18n/t';
+import { useCurrentSession } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { ColorPicker } from '@/ui/components/ColorPicker';
-import { PeopleIcon } from '@/ui/components/Icons';
+import { LockIcon, PeopleIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
 import { UnsavedChangesGuard } from '@/ui/components/UnsavedChangesGuard';
+import { EndMatchDialog } from '@/ui/views/match/EndMatchDialog';
 import { BindingPicker, type BindingOption } from './BindingPicker';
 import { GroupTable, type TableSeat } from './GroupTable';
 import styles from './GroupEditor.module.css';
 import { PersonBench } from './PersonBench';
 import { PressableButton } from '@/ui/components/Pressable';
+import { cx } from '@/ui/components/classNames';
 
 type GroupEditorProps = {
   readonly persons: readonly Person[];
@@ -121,7 +124,12 @@ export function GroupEditor({
   group,
   takenNames,
 }: GroupEditorProps): React.JSX.Element {
-  const { masterData } = useAppDependencies();
+  const { db, masterData, session: sessions } = useAppDependencies();
+  // Specification 3.5, US-VW-02 AK-5: the game of a table in a match is fixed until it ends.
+  const current = useCurrentSession(db);
+  const isBindingLocked =
+    group !== undefined && current?.status === 'active' && current.session.groupId === group.id;
+  const [isAskingEnd, setIsAskingEnd] = useState(false);
   const [memberIds, setMemberIds] = useState<readonly PersonId[]>(
     group?.members.map((member) => member.personId) ?? [],
   );
@@ -429,11 +437,27 @@ export function GroupEditor({
 
         <fieldset className={styles.section}>
           <legend className={styles.label}>{t('gruppen.spiele')}</legend>
+          {isBindingLocked && (
+            <p className={cx(styles.lockNote, styles.matchLock)}>
+              <LockIcon size={LOCK_ICON_SIZE} />
+              <span className={styles.lockText}>{t('gruppen.partieLaeuft')}</span>
+              <PressableButton
+                type="button"
+                className={styles.lockPill}
+                onClick={() => {
+                  setIsAskingEnd(true);
+                }}
+              >
+                {t('gruppen.partieBeenden')}
+              </PressableButton>
+            </p>
+          )}
           <BindingPicker
             supported={supportedOptions}
             custom={customOptions}
             choice={choice}
             memberCount={members.length}
+            isLocked={isBindingLocked}
             onChoose={(next) => {
               change(memberIds, colors, next, isCatanExcluded);
             }}
@@ -441,10 +465,10 @@ export function GroupEditor({
           {choice === null && (
             <PressableButton
               type="button"
-              className={styles.switchRow}
+              className={cx(styles.switchRow, isBindingLocked && styles.locked)}
               role="switch"
               aria-checked={isSwitchOn}
-              disabled={members.length > GROUP_MAX_PLAYERS_WITH_COLORS}
+              disabled={isBindingLocked || members.length > GROUP_MAX_PLAYERS_WITH_COLORS}
               onClick={() => {
                 change(memberIds, colors, choice, !isCatanExcluded);
               }}
@@ -470,6 +494,19 @@ export function GroupEditor({
         <Notice tone="error">
           <p>{t(group === undefined ? 'gruppen.fehlerSpeichern' : 'gruppen.fehlerBearbeiten')}</p>
         </Notice>
+      )}
+      {isAskingEnd && (
+        <EndMatchDialog
+          onCancel={() => {
+            setIsAskingEnd(false);
+          }}
+          onEnd={() => {
+            setIsAskingEnd(false);
+            startTransition(async () => {
+              await sessions.endWithoutResult();
+            });
+          }}
+        />
       )}
       <div className={styles.saveBar}>
         <PressableButton type="submit" className={styles.save} disabled={!canSave}>

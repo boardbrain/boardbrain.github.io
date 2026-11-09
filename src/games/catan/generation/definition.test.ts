@@ -286,19 +286,34 @@ describe('US-SR-01 Draw starting resources', () => {
 });
 
 describe('US-AB-02 AK-3 The next step without a result', () => {
-  it('E-35: names the first missing step without drawing it', () => {
+  it('E-35: names the first missing step and its place in the flow without drawing it', () => {
     const setup = aCatanSetup(3, { startingResources: { count: 2, replacement: 'with' } });
     const start = runCatanGeneration(setup, new SeededRandomSource(3), undefined, 0);
 
-    expect(catanNextSlot(setup, start)).toEqual({ kind: 'person-draw', draw: 'landscapes' });
+    expect(catanNextSlot(setup, start)).toEqual({
+      slot: { kind: 'person-draw', draw: 'landscapes' },
+      at: 0,
+    });
     const atPlacement = runCatanGeneration(setup, new SeededRandomSource(3), undefined, 5);
-    const first = catanNextSlot(setup, atPlacement);
-    expect(first).toMatchObject({ kind: 'building', index: 0, type: 'settlement' });
-    expect(first?.kind === 'building' && first.personId).toBe(
+    const next = catanNextSlot(setup, atPlacement);
+    expect(next).toMatchObject({ slot: { kind: 'building', index: 0, type: 'settlement' }, at: 5 });
+    expect(next?.slot.kind === 'building' && next.slot.personId).toBe(
       catanPlacementOrder(setup, stepsOf(atPlacement))?.[0],
     );
     expect(atPlacement.steps).toHaveLength(5);
     expect(catanNextSlot(setup, complete(setup, 3))).toBeNull();
+  });
+
+  it('E-35: a repeated step is missing before the later steps', () => {
+    const setup = aCatanSetup(3);
+    const finished = complete(setup, 3);
+    const repeated = repeatStep(CATAN_GENERATION, setup, finished, 1);
+    if (!repeated.ok) throw new Error(repeated.error);
+
+    expect(catanNextSlot(setup, repeated.value)).toEqual({
+      slot: { kind: 'person-draw', draw: 'harbors' },
+      at: 1,
+    });
   });
 });
 

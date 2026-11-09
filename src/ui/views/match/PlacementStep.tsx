@@ -1,56 +1,77 @@
 import type { ReactNode } from 'react';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
-import { CATAN_BOARD, catanPlacementRounds, catanSummary } from '@/games/catan';
+import { CATAN_BOARD, catanPlacementRounds, catanSummary, type CatanSlot } from '@/games/catan';
 import { t } from '@/i18n/t';
 import { Board } from '@/ui/board/Board';
 import { PieceMark } from '@/ui/board/PieceMark';
 import type { PieceKind } from '@/ui/board/pieces';
+import { CheckIcon } from '@/ui/components/Icons';
 import { Coin } from './Coin';
 import { colorOf } from './matchColors';
 import { orderOrSeats } from './matchFlow';
 import { pieceName } from './matchTexts';
-import { TurnBand } from './TurnBand';
+import { DoneBand, TurnBand } from './TurnBand';
 import styles from './MatchView.module.css';
 import { cx } from '@/ui/components/classNames';
 
 type PlacementStepProps = {
+  /** The match as shown: in the look back only up to the step shown. */
   readonly session: StoredSession;
-  readonly stepIndex: number;
+  /** The piece just drawn, `null` on the empty board before drawing (US-AB-02 AK-3). */
+  readonly newest: { readonly kind: 'building' | 'road'; readonly index: number } | null;
+  /**
+   * The piece the band names: the one waiting to be drawn, or after a drawn piece the next one
+   * (N1); `null` once the placement is finished.
+   */
+  readonly announced: CatanSlot | null;
   readonly nameOf: (personId: PersonId) => string;
   /** "Wiederholen" and the forward button, placed with the layout of the board. */
   readonly actions: ReactNode;
 };
 
+// A new piece in the band fades in.
+function pieceKey(slot: CatanSlot & { readonly kind: 'building' | 'road' }): string {
+  return `${slot.kind}-${String(slot.index)}`;
+}
+
+function pieceKind(slot: CatanSlot): PieceKind {
+  if (slot.kind === 'road') {
+    return 'road';
+  }
+  return slot.kind === 'building' && slot.type === 'city' ? 'city' : 'settlement';
+}
+
 /**
- * A building or a road on the board (US-PL-02, US-PL-03, US-PL-04, design I2-C page 7): the
- * board H1 with the pieces G1 and R1, the new piece without a mark of its own. Below it the
- * band of the person at turn (P9); in landscape the order as a list with everyone's pieces
- * (W2).
+ * The placement on the board (US-PL-02, US-PL-03, US-PL-04, design I2-C page 7 and I2-D): the
+ * board H1 with the pieces G1 and R1. Below it the band (P9): before drawing the piece waiting,
+ * after a drawn piece "Als Nächstes" and the next one, after the last "Platzierung fertig" (N1).
+ * In landscape the order as a list with everyone's pieces (W2).
  */
 export function PlacementStep({
   session,
-  stepIndex,
+  newest,
+  announced,
   nameOf,
   actions,
-}: PlacementStepProps): React.JSX.Element | null {
-  const record = session.generation.steps[stepIndex];
-  if (record === undefined || (record.step.kind !== 'building' && record.step.kind !== 'road')) {
-    return null;
-  }
-  const { step } = record;
+}: PlacementStepProps): React.JSX.Element {
   const summary = catanSummary(session.setup, session.generation);
   const vertexOf = new Map(summary.buildings.map((building) => [building.index, building.vertex]));
-  const isCity =
-    summary.buildings.find((building) => building.index === step.index)?.type === 'city';
-  const color = colorOf(session, step.personId);
   const order = orderOrSeats(session);
-  const kind: PieceKind = step.kind === 'road' ? 'road' : isCity ? 'city' : 'settlement';
   const rounds = catanPlacementRounds(session.setup.options.edition);
+  const coins = order.map((personId) => ({
+    personId,
+    name: nameOf(personId),
+    color: colorOf(session, personId),
+  }));
+  const atTurn =
+    announced !== null && (announced.kind === 'building' || announced.kind === 'road')
+      ? announced
+      : null;
 
   return (
     <div className={styles.placement}>
-      <div className={styles.boardArea}>
+      <div className={styles.boardArea} data-board="">
         <Board
           board={CATAN_BOARD}
           label={t('partie.brett', {
@@ -76,32 +97,46 @@ export function PlacementStep({
                   },
                 ];
           })}
-          newestKey={`${step.kind === 'road' ? 'road' : 'building'}-${String(step.index)}`}
+          newestKey={newest === null ? undefined : `${newest.kind}-${String(newest.index)}`}
         />
       </div>
-      <TurnBand
-        icon={<PieceMark kind={kind} color={color} size={20} />}
-        name={nameOf(step.personId)}
-        what={t('partie.stueck', { stueck: pieceName(step) })}
-        color={color}
-        order={order.map((personId) => ({
-          personId,
-          name: nameOf(personId),
-          color: colorOf(session, personId),
-        }))}
-        currentId={step.personId}
-      />
+      {atTurn === null ? (
+        <DoneBand
+          text={t('partie.platzierungFertig')}
+          icon={<CheckIcon size={20} />}
+          order={coins}
+        />
+      ) : (
+        <TurnBand
+          key={pieceKey(atTurn)}
+          icon={
+            <PieceMark
+              kind={pieceKind(atTurn)}
+              color={colorOf(session, atTurn.personId)}
+              size={20}
+            />
+          }
+          name={nameOf(atTurn.personId)}
+          what={t('partie.stueck', { stueck: pieceName(atTurn) })}
+          color={colorOf(session, atTurn.personId)}
+          order={coins}
+          currentId={atTurn.personId}
+          note={newest === null ? undefined : t('partie.alsNaechstes')}
+          isReveal={newest !== null}
+        />
+      )}
       <div className={styles.wOrder}>
         <h2 className={styles.wOrderTitle}>{t('partie.reihenfolge')}</h2>
         {order.map((personId, place) => {
           const own = summary.buildings.filter((building) => building.personId === personId);
           const personColor = colorOf(session, personId);
+          const isAtTurn = personId === atTurn?.personId;
           return (
             <div
               key={personId}
-              className={cx(styles.wRow, personId === step.personId && styles.wRowNow)}
+              className={cx(styles.wRow, isAtTurn && styles.wRowNow)}
               style={
-                personId === step.personId
+                isAtTurn
                   ? {
                       borderColor: `var(--color-catan-${personColor})`,
                       boxShadow: `inset 4px 0 0 var(--color-catan-${personColor}), 0 6px 14px var(--color-shadow)`,

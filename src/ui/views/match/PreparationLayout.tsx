@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Navigate, Outlet, useOutletContext } from 'react-router';
-import { useCurrentSession } from '@/infra/db/readHooks';
+import { useState, useTransition } from 'react';
+import { Navigate, Outlet, useLocation, useNavigate, useOutletContext } from 'react-router';
+import { t } from '@/i18n/t';
+import { useCurrentSession, useGroup } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
+import { MatchDialog } from './MatchDialog';
 import type { MatchPreparation } from './preparation';
 
 /**
@@ -15,20 +17,57 @@ export type PreparationContext = {
 /**
  * Layout route `#/partie/neu` (Architecture 13.1, 13.2): holds the preparation in memory for
  * the game choice, table, options and colours (Specification 3.5). While a match is in
- * generation or running, it leads to that match, also when the back button lands here.
+ * generation or running, the game choice asks first (US-AB-05 AK-2, design I2-D, Q1): "Zur
+ * Partie" leads back to it, "Neu beginnen" ends it without a result. This also covers the back
+ * button and old links landing on the game choice; the later pages lead to the match.
  */
 export function PreparationLayout(): React.JSX.Element | null {
-  const { db } = useAppDependencies();
+  const { db, session: sessions } = useAppDependencies();
   const current = useCurrentSession(db);
+  const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
   const [preparation, setPreparation] = useState<MatchPreparation | null>(null);
+  const [isEnding, startTransition] = useTransition();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   if (current === undefined) {
     return null;
   }
-  if (current.status !== 'none') {
+  if (current.status === 'unsupported') {
     return <Navigate to="/partie" replace />;
   }
   const context: PreparationContext = { preparation, setPreparation };
-  return <Outlet context={context} />;
+  if (current.status === 'none') {
+    return <Outlet context={context} />;
+  }
+  // The question stands over the game choice. The later pages lead to the match, as right after
+  // "Generierung starten" (the match is stored before the flow opens).
+  if (pathname !== '/partie/neu') {
+    return <Navigate to="/partie" replace />;
+  }
+  const toMatch = (): void => {
+    void navigate('/partie', { replace: true, state: { from: 'start' } });
+  };
+  return (
+    <>
+      <Outlet context={context} />
+      {group !== undefined && group !== null && !isEnding && (
+        <MatchDialog
+          title={t('partie.spieltGerade', { tisch: group.name })}
+          lines={[t('partie.neuBeendetSie')]}
+          cancelLabel={t('partie.neuBeginnen')}
+          isCancelDanger
+          onCancel={() => {
+            startTransition(async () => {
+              await sessions.endWithoutResult();
+            });
+          }}
+          onDismiss={toMatch}
+          confirmLabel={t('partie.zurPartie')}
+          onConfirm={toMatch}
+        />
+      )}
+    </>
+  );
 }
 
 /**

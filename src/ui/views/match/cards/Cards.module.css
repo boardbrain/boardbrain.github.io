@@ -1,0 +1,177 @@
+/* Design I2-D: cards on the card table of pages 5, 6 and 8. */
+.table {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  perspective: 1100px;
+}
+
+.card {
+  position: absolute;
+}
+
+.inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.front,
+.back {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px var(--color-shadow);
+  backface-visibility: hidden;
+}
+
+.back {
+  background: var(--color-card-back-bottom);
+  transform: rotateY(180deg);
+}
+
+/* The front fills the card; its content brings its own look. */
+.front > * {
+  width: 100%;
+  height: 100%;
+}
+
+.person {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  align-content: center;
+  padding: 4px 4px 10px;
+  background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.personName {
+  max-width: 94%;
+  overflow: hidden;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stripe {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 7px;
+}
+
+.place {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: var(--color-accent-text);
+  border: 1.5px dashed var(--color-accent-text);
+  border-radius: 10px;
+  opacity: 0.55;
+}
+
+.placeFilled {
+  color: transparent;
+  border-color: transparent;
+}
+
+/* Resource cards: the S4 card of the flow as front, the back with the same rounded corners. */
+.resource .front,
+.resource .back {
+  border-radius: 5px;
+}
+
+.resource .front {
+  overflow: visible;
+  box-shadow: none;
+}
+
+/* The development card of the flow at its own width, scaled as a whole (design unchanged). */
+.task {
+  position: absolute;
+  display: block;
+  width: 240px;
+  transform-origin: 0 0;
+}
+
+.taskCard {
+  width: 100%;
+}
+
+/* "?" instead of the coin of a person before drawing (design I2-D, page 5). */
+.unknownCoin {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-family: var(--font-family-base);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-accent-text);
+  background: var(--color-surface-overlay);
+  border: 1.5px dashed var(--color-accent-text);
+  border-radius: 50%;
+}
+
+/* A group of cards that fades in together; it covers the table but lets taps through. */
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.layer > * {
+  pointer-events: auto;
+}
+
+/* Order cards: the card Q3 of the flow as front; without a place it has no band yet. */
+.orderFace {
+  aspect-ratio: auto;
+}
+
+.noBand {
+  padding-top: 14px;
+}
+
+.lifted {
+  transform: translateY(-10px);
+}
+
+.bareFront {
+  overflow: visible;
+  box-shadow: none;
+}
+
+/* Page 8: the band between the places and the cards. */
+.band {
+  position: absolute;
+  right: 0;
+  left: 0;
+}
+
+.cardSpot {
+  position: absolute;
+  padding: 0;
+  background: none;
+  border: none;
+  z-index: 20;
+  min-height: 0;
+  border-radius: 5px;
+}
+
+.cardName {
+  position: absolute;
+  text-align: center;
+}
+
+.cardNameMuted {
+  color: var(--color-text-muted);
+}

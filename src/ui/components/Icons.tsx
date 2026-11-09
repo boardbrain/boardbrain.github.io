@@ -234,3 +234,26 @@ export function ExitDoorIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Check mark, e.g. for "Platzierung fertig" (design I2-D). Decorative: the text beside it says it.
+ */
+export function CheckIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M5 12.5l4.5 4.5L19 7" />
+    </Outline>
+  );
+}
+
+/**
+ * Padlock for something locked during a match (design I2-D, S1). Decorative: the text beside it
+ * says why.
+ */
+export function LockIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z" />
+    </Outline>
+  );
+}

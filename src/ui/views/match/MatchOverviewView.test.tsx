@@ -25,6 +25,7 @@ const TABLE = aGroup({
 const ROUTES: RouteObject[] = [
   { path: '/', element: <h1>start page</h1> },
   { path: '/partie/uebersicht', element: <MatchOverviewView /> },
+  { path: '/partie', element: <h1>flow page</h1> },
 ];
 
 // Starts a match and taps "Losen" until it runs, then opens the overview.
@@ -146,5 +147,45 @@ describe('US-AB-04 Overview of the running match', () => {
 
     expect(await screen.findByRole('heading', { name: 'start page' })).toBeInTheDocument();
     expect(await db.session.count()).toBe(0);
+  });
+});
+
+describe('US-AB-03 AK-6 Repeat a step from the overview (design I2-D)', () => {
+  it('AK-2: a row asks first and names what is discarded; afterwards the flow shows the step', async () => {
+    const user = userEvent.setup();
+    const db = await runMatch();
+    await user.click(await screen.findByRole('tab', { name: 'Ergebnisse' }));
+
+    const order = screen.getByRole('region', { name: 'Reihenfolge' });
+    const rows = within(order).getAllByRole('button');
+    // Two spins for three persons; the last place has no step of its own.
+    expect(rows).toHaveLength(2);
+    await user.click(rows[0] ?? order);
+
+    const dialog = screen.getByRole('alertdialog');
+    expect(within(dialog).getByText('Reihenfolge, Platz 1 wiederholen?')).toBeInTheDocument();
+    expect(within(dialog).getByText('Ganze Reihenfolge wird neu gelost')).toBeInTheDocument();
+    await user.click(within(dialog).getByRole('button', { name: 'Wiederholen' }));
+
+    expect(await screen.findByRole('heading', { name: 'flow page' })).toBeInTheDocument();
+    const [stored] = await db.session.toArray();
+    expect(stored?.generation.state).toBe('generation');
+    expect(stored?.generation.steps.some(({ step }) => step.kind === 'order-spin')).toBe(false);
+  });
+
+  it('a piece asks before repeating it and can be cancelled', async () => {
+    const user = userEvent.setup();
+    const db = await runMatch();
+    await user.click(await screen.findByRole('tab', { name: 'Ergebnisse' }));
+
+    const pieces = screen.getAllByRole('button', { name: /wiederholen$/ });
+    expect(pieces).toHaveLength(12);
+    await user.click(pieces[0] ?? document.body);
+    expect(within(screen.getByRole('alertdialog')).getByText(/wiederholen\?$/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Abbrechen' }));
+
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    const [stored] = await db.session.toArray();
+    expect(stored?.generation.state).toBe('running');
   });
 });

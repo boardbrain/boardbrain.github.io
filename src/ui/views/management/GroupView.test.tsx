@@ -5,7 +5,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { toGroupId, toPersonId } from '@/core/model';
-import { CATAN_GAME_ID } from '@/games/catan';
+import { CATAN_DEFAULT_OPTIONS, CATAN_GAME_ID } from '@/games/catan';
 import type { BoardBrainDb } from '@/infra/db/database';
 
 const ANNA = toPersonId('00000000-0000-4000-8000-0000000000a1');
@@ -189,6 +189,44 @@ describe('US-VW-02 Edit a table (table page)', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Freitagsrunde', level: 1 })).toBeInTheDocument();
+  });
+});
+
+describe('US-VW-02 AK-5 The game of a table in a match (design I2-D, S1)', () => {
+  it('is locked with a note; "Partie beenden" ends the match and frees the choice', async () => {
+    const user = userEvent.setup();
+    const { db, session } = renderWithApp(<OverviewRoutes />, { path: PATH });
+    await addAnnaAndBen(db);
+    await db.groups.add(aGroup({ id: FRIDAY, name: 'Freitagsrunde' }));
+    const prepared = await session.prepare(FRIDAY);
+    if (!prepared.ok) throw new Error(prepared.error);
+    await session.start({
+      groupId: FRIDAY,
+      options: CATAN_DEFAULT_OPTIONS,
+      colors: prepared.value.colors,
+    });
+    await user.click(await screen.findByRole('link', { name: 'Bearbeiten' }));
+    const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });
+
+    expect(
+      await within(editor).findByText('Partie läuft · Spiel bis zum Ende fest'),
+    ).toBeInTheDocument();
+    const allGames = within(editor).getByRole('button', { name: 'Alle Spiele' });
+    expect(allGames).toBeDisabled();
+    expect(within(editor).getByRole('switch', { name: /Catan ausschließen/ })).toBeDisabled();
+    // Name and colours stay changeable during the match.
+    expect(within(editor).getByLabelText('Gruppenname')).toBeEnabled();
+
+    await user.click(within(editor).getByRole('button', { name: 'Partie beenden' }));
+    await user.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Beenden' }),
+    );
+
+    await waitFor(() => {
+      expect(within(editor).getByRole('button', { name: 'Alle Spiele' })).toBeEnabled();
+    });
+    expect(within(editor).queryByText('Partie läuft · Spiel bis zum Ende fest')).toBeNull();
+    expect(await db.session.count()).toBe(0);
   });
 });
 

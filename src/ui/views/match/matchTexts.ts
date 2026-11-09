@@ -6,6 +6,7 @@ import {
   type CatanEdition,
   type CatanPersonDraw,
   type CatanResource,
+  type CatanSlot,
   type CatanStep,
 } from '@/games/catan';
 import { t, type TextKey } from '@/i18n/t';
@@ -41,7 +42,7 @@ export function editionName(edition: CatanEdition): string {
 /**
  * Name of a piece in a band or title: settlement, city or road.
  */
-export function pieceName(step: CatanStep): string {
+export function pieceName(step: CatanSlot): string {
   if (step.kind === 'road') {
     return t('partie.strasse');
   }
