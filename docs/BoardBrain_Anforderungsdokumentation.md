@@ -33,7 +33,7 @@
 | 0.17 | 26.10.2026 | Abnahme von I1-F: Personen- und Gruppennamen app-weit eindeutig, auch gegenüber archivierten (FA-PG-09, FA-VW-01, FA-VW-02, E-31) |
 | 0.18 | 29.10.2026 | Zuschnitt von I2: Umsetzung in fachlichen Blöcken einschließlich ihrer Should- und Could-Anteile (E-32); Design der Inszenierung (OP-06) innerhalb von I2 (13) |
 | 0.19 | 02.11.2026 | Design I2-C (Entscheidungen des Product Owners): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung spielen (5.4, FA-AB-02, neu FA-LS-07, FA-PL-09, FA-SR-04, E-33); Vorwärts-Knopf nennt, was er tut, und Rückblick auf frühere Schritte (FA-AB-03, neu FA-AB-10, E-34) |
-| 0.20 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (FA-AB-03, E-35); Personen werden mit Karten gelost statt mit einem Glücksrad (Begriff „Schritt“, FA-AB-03, FA-LS-02, FA-IN-02, E-36, OP-06); Startrohstoffe liegen verdeckt und werden von Hand aufgedeckt (neu FA-SR-05, E-37) |
+| 0.20 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (FA-AB-03, E-35); Personen werden mit Karten gelost statt mit einem Glücksrad (Begriff „Schritt“, FA-AB-03, FA-LS-02, FA-IN-02, E-36, OP-06); Startrohstoffe liegen verdeckt und werden von Hand aufgedeckt (neu FA-SR-05, E-37); nach einem Neustart läuft nur eine unterbrochene Animation erneut ab (FA-AB-07) |
 
 ## Inhaltsverzeichnis
 
@@ -177,7 +177,7 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | FA-AB-04 | Jeder Schritt kann wiederholt werden, solange die Partie läuft. Vor der Wiederholung erscheint eine Warnung. Verworfen werden nur die vom wiederholten Schritt abhängigen Folgeschritte: bei einem Gebäude die zugehörige Straße und alle späteren Gebäude und Straßen, bei der Platzierungsreihenfolge die Platzierung; bei LS-01, LS-03, LS-04, einer Straße oder Startrohstoffen keine. Wiederholungen werden nicht protokolliert. *(präzisiert in 0.4)* |
 | FA-AB-05 | Nach Abschluss der Generierung bleibt das Ergebnis während der laufenden Partie einsehbar. |
 | FA-AB-06 | Nach der Generierung bietet die App das Eintragen eines Ergebnisses an. Dies ist optional und kein Pflichtschritt. |
-| FA-AB-07 | Es gibt höchstens eine laufende Partie. Sie übersteht das Schließen und Neustarten der App unverändert. Das Ergebnis eines Schritts steht fest, bevor seine Animation beginnt; wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt. *(neu in 0.4, ergänzt in 0.7)* |
+| FA-AB-07 | Es gibt höchstens eine laufende Partie. Sie übersteht das Schließen und Neustarten der App unverändert. Das Ergebnis eines Schritts steht fest, bevor seine Animation beginnt; wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; eine schon abgeschlossene Animation läuft nicht noch einmal ab. *(neu in 0.4, ergänzt in 0.7 und 0.20)* |
 | FA-AB-08 | Eine laufende Partie endet mit dem Speichern eines Ergebnisses oder mit „Beenden ohne Ergebnis“. Danach wird die Generierung verworfen; gespeichert bleibt nur ein ggf. erfasstes Ergebnis. *(neu in 0.4)* |
 | FA-AB-09 | Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. *(neu in 0.7)* |
 | FA-AB-10 | Während der Generierung lassen sich frühere Schritte mit ihrem gespeicherten Ergebnis ansehen (Rückblick), ohne dass etwas gelost wird. *(neu in 0.19)* |
@@ -218,7 +218,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | FA-SR-02 | Jede Person erhält eine einstellbare Anzahl von 1 bis 5 Startrohstoffen (Standard: 2), die zufällig aus den fünf Rohstoffarten gezogen werden (Holz, Lehm, Wolle, Getreide, Erz). |
 | FA-SR-03 | Einstellbar ist, ob mit oder ohne Zurücklegen gezogen wird. Standard ist mit Zurücklegen, wobei doppelte Rohstoffe möglich sind. Ohne Zurücklegen erhält jede Person nur unterschiedliche Rohstoffe. |
 | FA-SR-04 | Die Startrohstoffe werden nach der Platzierung gezogen, je Person ein Schritt in Platzierungsreihenfolge; ohne Reihenfolge in der Sitzreihenfolge der Gruppe. *(neu in 0.4, ergänzt in 0.19)* |
-| FA-SR-05 | Die gezogenen Startrohstoffe einer Person liegen zunächst verdeckt; die bedienende Person deckt sie selbst auf, einzeln durch Antippen oder alle auf einmal. *(neu in 0.20, E-37)* |
+| FA-SR-05 | Die gezogenen Startrohstoffe einer Person liegen zunächst verdeckt; die bedienende Person deckt sie selbst auf, einzeln durch Antippen oder alle auf einmal. Aufgedeckte Karten bleiben aufgedeckt, auch nach einem Neustart. *(neu in 0.20, E-37)* |
 
 ### 5.7 Inszenierung
 

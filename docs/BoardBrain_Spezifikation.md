@@ -27,7 +27,7 @@
 | 0.11 | 26.10.2026 | Abnahme von I1-F (Anforderungsdokumentation 0.17, E-31): Personen- und Gruppennamen app-weit eindeutig, geprüft schon bei der Eingabe (3.4, US-PG-01 AK-3, neu US-PG-02 AK-8, US-VW-02 AK-1, US-VW-06 AK-2, A-02); „Neu anlegen“ beim Import mit vergebenem Namen nur mit anderem Namen (3.9) |
 | 0.12 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation 0.18, E-32): Umsetzung in fachlichen Blöcken (2.2); Inkremente neu nach Blöcken geschnitten, I5 wird „Verwaltung und Archiv“, I6 „Einstellungen und Feinschliff“ (2.3); US-PG-04, US-SR-01, US-IN-01 bis US-IN-04 und US-PL-05 nach I2, US-ER-02, US-ER-03, US-ST-03 und US-ST-04 nach I3, US-EI-02, US-EI-07, US-DS-03, US-DS-04 und US-IS-02 nach I4 (2.5); Summe in 2.5 berichtigt (61 statt 59 Stories) |
 | 0.13 | 02.11.2026 | Design I2-C (Anforderungsdokumentation 0.19, E-33, E-34): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung (3.1, US-AB-01 AK-3, US-LS-03 AK-1 und AK-3, US-PL-05 AK-1, neu AK-3, US-SR-01 AK-1); Vorwärts-Knopf „Losen“, „Blättern“, „Zur Übersicht“ (US-AB-02 AK-1); Rückblick auf frühere Schritte (neu US-AB-04 AK-3 und AK-4); Rückverfolgbarkeit (6) |
-| 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6) |
+| 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); nach einem Neustart nur eine unterbrochene Animation erneut (3.5, US-AB-05 AK-3); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6) |
 
 ## Inhaltsverzeichnis
 
@@ -261,7 +261,7 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 
 - Es gibt höchstens eine Partie in den Zuständen Vorbereitung, Generierung oder Laufend.
 - Generierung und Laufend überstehen das Schließen und Neustarten der App. Die Vorbereitung wird nicht gespeichert.
-- Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung.
+- Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung. Eine schon abgeschlossene Animation läuft nicht noch einmal ab, aufgedeckte Startrohstoffe bleiben aufgedeckt. *(ergänzt in 0.14)*
 - „Beenden ohne Ergebnis“ ist ab Beginn der Generierung jederzeit möglich.
 - **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. Im Tisch-Editor steht der Hinweis direkt bei der Spielbindung, die Auswahl ist gesperrt und nach dem Beenden sofort frei. *(ergänzt in 0.14)*
 
@@ -582,7 +582,7 @@ Bezug: FA-AB-07 → 3.5
 
 - **AK-1:** Gegeben eine Partie in Generierung oder laufend, wenn die App geschlossen und neu gestartet wird, dann öffnet sie exakt denselben Stand einschließlich des aktuellen Schritts.
 - **AK-2:** Gegeben eine laufende Partie, wenn ich eine neue Partie starten will, dann fragt die App, ob die laufende ohne Ergebnis beendet werden soll („Neu beginnen“), oder kehrt auf Wunsch zu ihr zurück („Zur Partie“, Standard). *(präzisiert in 0.14)*
-- **AK-3:** Gegeben die App wird während der Animation eines Schritts beendet, wenn sie neu startet, dann wird die Animation mit demselben Ergebnis erneut abgespielt, und der Schritt wartet auf Bestätigung.
+- **AK-3:** Gegeben die App wird während der Animation eines Schritts beendet, wenn sie neu startet, dann wird die Animation mit demselben Ergebnis erneut abgespielt, und der Schritt wartet auf Bestätigung; eine schon abgeschlossene Animation läuft nicht noch einmal ab. *(ergänzt in 0.14)*
 
 #### US-AB-06 Partie beenden · M
 Als bedienende Person möchte ich eine Partie mit oder ohne Ergebnis beenden, damit die App für die nächste Partie bereit ist.
@@ -673,7 +673,7 @@ Bezug: FA-SR-01 bis FA-SR-05
 - **AK-3:** Gegeben „mit Zurücklegen“, dann ist jede Ziehung gleichverteilt über alle fünf Rohstoffe und Doppelungen sind möglich.
 - **AK-4:** Gegeben „ohne Zurücklegen“, dann erhält jede Person nur unterschiedliche Rohstoffe, und jede Ziehung ist gleichverteilt über die für diese Person noch verbleibenden.
 - **AK-5:** Gegeben ein Ergebnis, dann werden die Rohstoffe mit eigenem Symbol und Namen angezeigt.
-- **AK-6:** Gegeben die Rohstoffe einer Person sind gezogen, dann liegen sie verdeckt; ich decke sie einzeln durch Antippen oder alle mit „Alle umdrehen“ auf, erst danach führt der Knopf mit „Weiter“ fort. *(neu in 0.14, FA-SR-05)*
+- **AK-6:** Gegeben die Rohstoffe einer Person sind gezogen, dann liegen sie verdeckt; ich decke sie einzeln durch Antippen oder alle mit „Alle umdrehen“ auf, erst danach führt der Knopf mit „Weiter“ fort. Aufgedeckte Karten bleiben aufgedeckt, auch nach einem Neustart. *(neu in 0.14, FA-SR-05)*
 
 ### 4.8 Inszenierung (IN)
 
