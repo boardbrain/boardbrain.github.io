@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.24 |
+| Version | 0.25 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 05.11.2026 |
+| Stand | 09.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -38,6 +38,7 @@
 | 0.22 | 03.11.2026 | Bündel I2-C: kein Paket Zustand; laufende Partie über den Lesehook `useCurrentSession`, Vorbereitung im Zustand der Layout-Route `#/partie/neu` mit Outlet-Kontext (neu ADR-029; 3.1, 10.3, 13.2, 15); `start` lost den ersten Schritt in derselben Transaktion, `advance(shownStep)` mit `step-changed` statt `drawNextStep` und `confirmStep`, `skipPlacement` lost den nächsten Schritt (10.3); Reihenfolge abschaltbar und Fortschritt in Phasen im Catan-Modul (5.5, FA-LS-07); Adressen der Partie, Laden bei Bedarf, Startstapel, Gedrückt halten, niedrige Tablets im Querformat (13.1); Tokens für Landschaften, Rohstoffe, Karten und Illustrationen (13.4); Gebäude und Straßen auf dem Brett (13.5); schlichtes Einblenden (13.6); fester Startwert des Zufalls in Ende-zu-Ende-Tests (14.5); Design-Referenz `docs/design/i2-match-final-preview.html`; Rohstoffkarten und Landschaft der Catan-Karte als erzeugte Bilder aus SVG-Quellen (`npm run art`, neu ADR-030; 13.4, 15, 16) |
 | 0.23 | 03.11.2026 | Lokal höchstens vier Ende-zu-Ende-Tests gleichzeitig, weil WebKit unter Windows bei mehr parallelen Browsern gelegentlich einfror (14.5) |
 | 0.24 | 05.11.2026 | Auch auf GitHub vier Ende-zu-Ende-Tests gleichzeitig statt der Voreinstellung zwei, der Rechner hat vier Kerne (14.5) |
+| 0.25 | 09.11.2026 | Bündel I2-D: Personen werden mit Karten gelost statt mit einem Glücksrad (Anforderungsdokumentation E-36; 3, 4.5, 13.6, 15, 18, 19) |
 
 ## Inhaltsverzeichnis
 
@@ -148,7 +149,7 @@ Es gibt genau zwei Wege, auf denen Daten das Gerät berühren: App-Dateien komme
 | Auslieferungsform | Progressive Web App ohne nativen Wrapper | Eine Codebasis, installierbar, offline, kostenlos | ADR-001 |
 | Sprache | TypeScript im strikten Modus, Version 6 (Version 7 erst, wenn typescript-eslint sie unterstützt) | Typen machen Code überprüfbar und lesbar | ADR-002 |
 | UI-Framework | React 19 mit React Compiler | Darstellung und Interaktion | ADR-003 |
-| Animationen | Motion (`motion/react`), Version 14, installiert seit K-3 | Glücksrad, Aufblinken, Übergänge, Mikroanimationen | ADR-004 |
+| Animationen | Motion (`motion/react`), Version 14, installiert seit K-3 | Karten ziehen, Aufblinken, Übergänge, Mikroanimationen | ADR-004 |
 | Build-Werkzeug | Vite mit `@vitejs/plugin-react`; React Compiler über `@rolldown/plugin-babel` mit `babel-plugin-react-compiler` | Entwicklungsserver, Bündeln, Plugins | ADR-005 |
 | PWA | `vite-plugin-pwa` mit eigenem Service Worker (`injectManifest`) | Manifest, Precache-Liste, kontrollierte Updates | ADR-015 |
 | Speicher | IndexedDB mit Dexie, `dexie-react-hooks` | Lokale Datenbank mit Transaktionen und Migrationen | ADR-007 |
@@ -277,7 +278,7 @@ Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberflä
 | Startrohstoffe | `startingResources` |
 | Holz, Lehm, Wolle, Getreide, Erz | `'lumber'`, `'brick'`, `'wool'`, `'grain'`, `'ore'` (`CatanResource`) |
 | Mit / ohne Zurücklegen | `replacement: 'with'` / `'without'` |
-| Glücksrad, Aufblinken | `Wheel`, `Flash` |
+| Karten ziehen, Aufblinken | `CardDraw`, `Flash` |
 | Kennung | `id` |
 | Sicherungspunkt, Vollsicherung | `Snapshot`, `FullBackup` |
 | Zuordnung (beim Import) | `Mapping` |
@@ -1061,9 +1062,9 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: oben eine Kopfzeile mit Logo und
 
 ### 13.6 Animationen (ADR-004)
 
-- Glücksrad, Aufblinken, Schrittübergänge und Mikroanimationen nutzen Motion.
+- Karten ziehen, Aufblinken, Schrittübergänge und Mikroanimationen nutzen Motion. *(Karten statt Glücksrad seit 0.25, Anforderungsdokumentation E-36)*
 - **Regel:** Animationen laufen über Motion-Werte, nie über React-Zustand, der pro Bild geändert wird. So bleibt die Darstellung auch auf älteren Geräten flüssig.
-- Jede Animation erhält ihr Ergebnis fertig aus der Fachlogik. Der Zielwinkel des Glücksrads wird aus dem gelosten Segment berechnet; welche Kreuzungen vorher aufblinken, lost die Oberfläche über dieselbe `RandomSource` (dekorativ, NFA-ZF-01).
+- Jede Animation erhält ihr Ergebnis fertig aus der Fachlogik. Beim Ziehen der Karten steht die geloste Karte vorher fest, das Mischen führt nur zu ihr hin; welche Karte beim Mischen herausgezogen wird und welche Kreuzungen vorher aufblinken, lost die Oberfläche über dieselbe `RandomSource` (dekorativ, NFA-ZF-01).
 - „Animation überspringen“ springt zum Endzustand; andere Berührungen beeinflussen die Animation nicht (US-IN-04).
 - Dauern und Kurven stehen als Tokens bereit; eine Einstellung für das Tempo gibt es nicht.
 - **Einblenden (I2-C):** Bis zur Inszenierung in I2-D erscheint jedes Ergebnis schlicht: `Reveal` blendet es in 0,42 s mit kurzem Anheben ein, das neue Stück auf dem Brett in 0,52 s. Ein neuer Schlüssel je Ergebnis startet das Einblenden, auch nach einem Neustart (US-AB-05 AK-3). Markieren und Abdunkeln legt D-2 fest. Einstellungen, die ein Schalter in den Optionen aufklappt, öffnen sich in 0,2 s (`Unfold`), danach scrollt die Seite gerade so weit, dass sie ganz über der Kartenhand stehen (Wunsch des Product Owners). *(neu in 0.22)*
@@ -1265,7 +1266,7 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  │  ├─ art/                         Illustrationen der Partie aus der Referenz I2
 │  │  ├─ components/                  Wiederverwendbare Bausteine, ErrorBoundary
 │  │  ├─ board/                       Brett-SVG
-│  │  ├─ wheel/                       Glücksrad
+│  │  ├─ match/cards/                 Karten ziehen (Personen-, Rohstoffkarten, Rückseite)
 │  │  ├─ charts/                      Diagramme
 │  │  └─ styles/                      tokens.css, globale Stile
 │  ├─ i18n/                           de.ts, t()
@@ -1915,7 +1916,7 @@ In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betri
 |---|---|---|
 | OP-12 | Dauerhafte Adresse der App | Setup – geklärt: ADR-022 |
 | OP-13 | Vorabversionen der echten App vor 1.0 | Umsetzung, nach I2 |
-| OP-06 | Visuelle Gestaltung von Glücksrad, Aufblinken und Klängen | Design |
+| OP-06 | Visuelle Gestaltung von Glücksrad, Aufblinken und Klängen | Design – teilweise geklärt: Karten ziehen statt Glücksrad (`docs/design/i2d-running-match-final-preview.html`); Aufblinken und Klänge mit D-2 |
 | OP-11 | Konkrete Farbwerte der Paletten | Design – geklärt: 13.4, Anforderungsdokumentation E-26 |
 
 ---
@@ -1924,5 +1925,5 @@ In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betri
 
 1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0. *Abgeschlossen am 07.10.2026.*
 2. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10) nach `docs/Umsetzungsplan.md`: zuerst `core/random` mit dem Losbaustein, weil dort die strengsten Prüfkriterien gelten; `core/board` in I1, `core/placement` als erstes Bündel von I2; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
-3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 innerhalb von I2, bevor Glücksrad und Aufblinken gebaut werden (Anforderungsdokumentation E-32). *OP-11 erledigt am 07.10.2026 (13.4).*
+3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 innerhalb von I2, bevor Aufblinken und Klänge gebaut werden (Anforderungsdokumentation E-32); das Ziehen der Karten legt seit 0.25 die Referenz aus I2-D fest. *OP-11 erledigt am 07.10.2026 (13.4).*
 4. **Nach I2:** Entscheidung über Vorabversionen (OP-13).
