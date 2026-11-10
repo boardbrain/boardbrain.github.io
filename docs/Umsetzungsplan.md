@@ -36,7 +36,7 @@
 | 0.21 | 02.11.2026 | Einstieg ab I3 neu (Entscheidung des Product Owners): „Partie“ führt zu einer gemeinsamen Spielliste, eigene Spiele direkt zum Ergebnis, Catan fragt „Neue Partie“ oder „Ergebnis eintragen“; im Formular erst Spiel, dann Gruppe; ersetzt Variante K2; offener Punkt Sortierung der Spielliste (7, 8) |
 | 0.22 | 03.11.2026 | I2-C umgesetzt (#31): Vorbereitung über Spiel, Tisch, Optionen und Farben, Ablauf mit „Losen“ und „Wiederholen“, Übersicht zum Ansehen, Startstapel „Partie“; Reihenfolge abschaltbar (FA-LS-07, Anforderungsdokumentation 0.19, Spezifikation 0.13); kein Paket `zustand` (Architektur ADR-029); Wiederholen aus der Übersicht und Rückblick („Blättern“, US-AB-04 AK-3, AK-4) gehören zu I2-D (Entscheidung des Product Owners) (8) |
 | 0.23 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners, Anforderungsdokumentation 0.20, Spezifikation 0.14): Schritt zuerst ohne Ergebnis, Knopf „Weiter“, Personen mit Karten losen statt mit einem Glücksrad, Startrohstoffe von Hand aufdecken; Referenz `docs/design/i2d-running-match-final-preview.html` mit allen Bewegungen; I2-D baut die ruhenden Zustände, I2-E wird „Karten ziehen und Überspringen“ und baut die Bewegungen, D-2 gestaltet nur noch Aufblinken, Tempo und Klänge (2, 8); neue Bündel I2-G „Mehr Platz: ohne Titelleiste, ganze Breite“ als Nächstes nach I2-D und danach I2-H „Steine auf dem Brett antippen“ (Entscheidungen des Product Owners 10.11.2026) |
-| 0.24 | 10.11.2026 | I2-G umgesetzt: ohne Titelleiste, Logo L5 nur auf dem Start, alle Seiten außer dem Start gleich breit (U2, bis 1280 px) mit gleich hohem Kopf, Entwicklungskarte G4 bis 280 px; Referenz `docs/design/i2g-more-room-final-preview.html`; Prüfpunkt Schärfe der skalierten Entwicklungskarte in I2-E (8) |
+| 0.24 | 10.11.2026 | I2-G umgesetzt (#35): ohne Titelleiste, Logo L5 nur auf dem Start, alle Seiten außer dem Start gleich breit (U2, bis 1280 px) mit gleich hohem Kopf, Entwicklungskarte G4 bis 280 px; Referenz `docs/design/i2g-more-room-final-preview.html`; Prüfpunkt Schärfe der skalierten Entwicklungskarte in I2-E (8) |
 
 ## 1. Zweck
 
@@ -265,7 +265,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 | I2-B Generierung und gespeicherte Partie | US-AB-03, US-AB-05, US-AB-06, US-LS-02, US-PG-04, US-PL-05 (Fachlogik und Dienst), US-VW-02 AK-5 | Opus, high | `feat/us-ab-03-generation-session` | umgesetzt (#28) |
 | I2-C Neue Partie vorbereiten und durchlaufen | US-SP-01, US-SP-04, US-AB-01, US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PG-04, US-SR-01, US-PL-05 (Oberfläche) | Sonnet, medium | `feat/us-ab-01-new-match` | umgesetzt (#31) |
 | I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-02, US-AB-03, US-AB-04, US-AB-05, US-AB-06, US-SR-01 AK-6, US-VW-02 AK-5 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | umgesetzt (#34) |
-| I2-G Mehr Platz: ohne Titelleiste, ganze Breite *(neu in 0.23)* | NFA-PL-04 (alle Ansichten) | Opus, medium | `feat/more-room-layout` | umgesetzt (#PR) |
+| I2-G Mehr Platz: ohne Titelleiste, ganze Breite *(neu in 0.23)* | NFA-PL-04 (alle Ansichten) | Opus, medium | `feat/more-room-layout` | umgesetzt (#35) |
 | I2-H Steine auf dem Brett antippen *(neu in 0.23)* | US-AB-03 (Oberfläche) | Opus, high | `feat/us-ab-03-tap-pieces` | offen, nach I2-G |
 | D-2 Design der Inszenierung (OP-06) | Aufblinken, Tempo, Klänge | Opus, medium | `chore/op-06-staging-design` | offen |
 | I2-E Karten ziehen und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-card-draw` | offen |
