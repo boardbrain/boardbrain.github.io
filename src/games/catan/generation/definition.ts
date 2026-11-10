@@ -267,6 +267,19 @@ export function createCatanGeneration(
       };
     },
 
+    // US-SR-01 AK-1, PO 10.11.2026: the starting resources follow the placement order, also when
+    // the order is drawn again while they are drawn already. Only once every step has its slot,
+    // so while spins are missing nothing moves.
+    arrangeSteps(setup, generation) {
+      const rank = new Map(slotsOf(setup, generation).map((slot, index) => [slotKey(slot), index]));
+      const rankOf = (record: { readonly step: CatanStep }): number =>
+        rank.get(slotKey(record.step)) ?? -1;
+      if (generation.steps.some((record) => rankOf(record) === -1)) {
+        return generation.steps;
+      }
+      return [...generation.steps].sort((a, b) => rankOf(a) - rankOf(b));
+    },
+
     isComplete(setup, generation) {
       const present = new Set(generation.steps.map((record) => slotKey(record.step)));
       return slotsOf(setup, generation).every((slot) => present.has(slotKey(slot)));

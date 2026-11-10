@@ -132,6 +132,30 @@ describe('Architecture 5.5 flow control of a generation', () => {
   });
 });
 
+describe('Architecture 10.2 steps in the order of the flow', () => {
+  it('puts the steps in order after drawing, where the game module asks for it', () => {
+    const reversed: GenerationDefinition<Setup, Step, number> = {
+      ...definition,
+      arrangeSteps: (_setup, generation) =>
+        [...generation.steps].sort((a, b) => b.step.slot - a.step.slot),
+    };
+    const start = startGeneration<Step, number>(0);
+    const first = drawNextStep(reversed, { slots: 3 }, start, new ScriptedRandomSource([1]));
+    if (!first.ok) throw new Error(first.error);
+    const confirmedFirst = confirmStep(reversed, { slots: 3 }, first.value);
+    if (!confirmedFirst.ok) throw new Error(confirmedFirst.error);
+    const second = drawNextStep(
+      reversed,
+      { slots: 3 },
+      confirmedFirst.value,
+      new ScriptedRandomSource([2]),
+    );
+    if (!second.ok) throw new Error(second.error);
+
+    expect(second.value.steps.map((record) => record.step.slot)).toEqual([1, 0]);
+  });
+});
+
 describe('US-AB-03 Repeat a step (flow control)', () => {
   it('AK-1, AK-3: discards the step, keeps all other steps, and draws it again in place', () => {
     const generation = runConfirmed([1, 2, 3]);

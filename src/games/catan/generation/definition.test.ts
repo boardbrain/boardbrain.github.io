@@ -275,6 +275,47 @@ describe('US-SR-01 Draw starting resources', () => {
     ).toEqual(firstBuildings);
   });
 
+  it('AK-1, PO 10.11.: after the order is drawn again, the resources follow the new order', () => {
+    const setup = aCatanSetup(3, { startingResources: { count: 2, replacement: 'with' } });
+    let moved = 0;
+    for (let seed = 1; seed <= 12; seed++) {
+      const before = complete(setup, seed);
+      const resourcesOf = (generation: CatanGeneration): Map<string, unknown> =>
+        new Map(
+          stepsOf(generation).flatMap((step) =>
+            step.kind === 'starting-resources' ? [[step.personId, step.result]] : [],
+          ),
+        );
+      let generation = repeat(
+        setup,
+        before,
+        indexOf(before, (step) => step.kind === 'order-spin'),
+        seed + 100,
+      );
+      while (catanPlacementOrder(setup, stepsOf(generation)) === undefined) {
+        const drawn = drawNextStep(
+          CATAN_GENERATION,
+          setup,
+          confirmed(generation, setup),
+          new SeededRandomSource(seed + 200),
+        );
+        if (!drawn.ok) throw new Error(drawn.error);
+        generation = drawn.value;
+      }
+      const order = defined(catanPlacementOrder(setup, stepsOf(generation)), 'order');
+      const resources = stepsOf(generation).flatMap((step) =>
+        step.kind === 'starting-resources' ? [step.personId] : [],
+      );
+      expect(resources).toEqual(order);
+      // The results stay with their persons (US-AB-03 AK-3).
+      expect(resourcesOf(generation)).toEqual(resourcesOf(before));
+      if (order.join() !== defined(catanPlacementOrder(setup, stepsOf(before)), 'old').join()) {
+        moved++;
+      }
+    }
+    expect(moved).toBeGreaterThan(0);
+  });
+
   it('AK-2: every person receives exactly k resources', () => {
     const setup = aCatanSetup(2, { startingResources: { count: 5, replacement: 'without' } });
     const resources = stepsOf(complete(setup, 23)).flatMap((step) =>
@@ -535,7 +576,12 @@ describe('Specification 3.1 table of dependencies (US-AB-03)', () => {
     );
 
     expect(kinds(finished)).toEqual(kinds(generation));
-    expect(stepsOf(finished).slice(-4)).toEqual(stepsOf(generation).slice(-4));
+    // The kept resources, now in the new order (US-SR-01 AK-1, PO 10.11.2026).
+    const kept = stepsOf(finished).slice(-4);
+    expect(kept).toEqual(expect.arrayContaining(stepsOf(generation).slice(-4)));
+    expect(kept.map((step) => step.kind === 'starting-resources' && step.personId)).toEqual(
+      catanPlacementOrder(setup, stepsOf(finished)),
+    );
   });
 
   it('AK-4: repeating building k discards road k and all later buildings and roads', () => {

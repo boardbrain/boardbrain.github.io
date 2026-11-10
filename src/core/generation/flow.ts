@@ -70,7 +70,12 @@ export function drawNextStep<C, S, G>(
   const record: StepRecord<S> = { step: drawn.step, status: 'revealed' };
   const steps = [...generation.steps];
   steps.splice(drawn.at, 0, record);
-  return ok({ state: 'generation', steps, gameState: drawn.gameState });
+  const next: Generation<S, G> = { state: 'generation', steps, gameState: drawn.gameState };
+  return ok(
+    definition.arrangeSteps === undefined
+      ? next
+      : { ...next, steps: definition.arrangeSteps(setup, next) },
+  );
 }
 
 /**

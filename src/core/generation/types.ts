@@ -67,4 +67,10 @@ export type GenerationDefinition<C, S, G> = {
   readonly invalidatedBy: (setup: C, steps: readonly S[], index: number) => readonly number[];
   /** State of the game module after step `index` and its dependent steps were discarded. */
   readonly gameStateAfterRepeat: (setup: C, generation: Generation<S, G>, index: number) => G;
+  /**
+   * Puts the steps into the order of the flow after a step was drawn, where that order depends
+   * on a result: e.g. the starting resources follow a placement order drawn again (US-SR-01
+   * AK-1). Optional; without it the steps keep their places.
+   */
+  readonly arrangeSteps?: (setup: C, generation: Generation<S, G>) => readonly StepRecord<S>[];
 };
