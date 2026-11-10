@@ -92,7 +92,12 @@ export function repeatLines(session: StoredSession, index: number): string[] {
   const buildings = discarded.filter((other) => other.kind === 'building').length;
   const roads = discarded.filter((other) => other.kind === 'road');
   if (step.kind === 'order-spin') {
-    const lines = [t('partie.ganzeReihenfolge')];
+    // US-AB-03 AK-5: from this place on; the last place follows by itself.
+    const lines = [
+      step.position === 0
+        ? t('partie.ganzeReihenfolge')
+        : t('partie.plaetzeNeu', { von: step.position + 1, bis: setup.participants.length }),
+    ];
     if (buildings > 0) {
       lines.push(
         t('partie.platzierungVerworfen', {

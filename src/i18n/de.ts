@@ -330,6 +330,7 @@ export const de = {
     stueckWiederholen: '{stueck} wiederholen',
     nurDieserSchritt: 'Nur dieser Schritt wird neu gelost',
     ganzeReihenfolge: 'Ganze Reihenfolge wird neu gelost',
+    plaetzeNeu: 'Plätze {von} bis {bis} werden neu gelost',
     platzierungVerworfen: 'Platzierung wird verworfen: {gebaeude} Gebäude, {strassen}',
     eineStrasse: '1 Straße',
     strassen: '{anzahl} Straßen',

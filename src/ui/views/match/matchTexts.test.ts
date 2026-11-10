@@ -67,9 +67,10 @@ describe('US-AB-03 warning before repeating a step', () => {
     expect(repeatLines(COMPLETE, 0)).toEqual([]);
   });
 
-  it('AK-2: a spin of the order draws it again and discards the placement', () => {
+  it('AK-2, AK-5: a spin of the order draws it again from its place, discards the placement', () => {
+    expect(repeatLines(COMPLETE, 3)[0]).toBe('Ganze Reihenfolge wird neu gelost');
     expect(repeatLines(COMPLETE, 5)).toEqual([
-      'Ganze Reihenfolge wird neu gelost',
+      'Plätze 3 bis 4 werden neu gelost',
       'Platzierung wird verworfen: 8 Gebäude, 8 Straßen',
     ]);
   });

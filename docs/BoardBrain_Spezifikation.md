@@ -27,7 +27,7 @@
 | 0.11 | 26.10.2026 | Abnahme von I1-F (Anforderungsdokumentation 0.17, E-31): Personen- und Gruppennamen app-weit eindeutig, geprüft schon bei der Eingabe (3.4, US-PG-01 AK-3, neu US-PG-02 AK-8, US-VW-02 AK-1, US-VW-06 AK-2, A-02); „Neu anlegen“ beim Import mit vergebenem Namen nur mit anderem Namen (3.9) |
 | 0.12 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation 0.18, E-32): Umsetzung in fachlichen Blöcken (2.2); Inkremente neu nach Blöcken geschnitten, I5 wird „Verwaltung und Archiv“, I6 „Einstellungen und Feinschliff“ (2.3); US-PG-04, US-SR-01, US-IN-01 bis US-IN-04 und US-PL-05 nach I2, US-ER-02, US-ER-03, US-ST-03 und US-ST-04 nach I3, US-EI-02, US-EI-07, US-DS-03, US-DS-04 und US-IS-02 nach I4 (2.5); Summe in 2.5 berichtigt (61 statt 59 Stories) |
 | 0.13 | 02.11.2026 | Design I2-C (Anforderungsdokumentation 0.19, E-33, E-34): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung (3.1, US-AB-01 AK-3, US-LS-03 AK-1 und AK-3, US-PL-05 AK-1, neu AK-3, US-SR-01 AK-1); Vorwärts-Knopf „Losen“, „Blättern“, „Zur Übersicht“ (US-AB-02 AK-1); Rückblick auf frühere Schritte (neu US-AB-04 AK-3 und AK-4); Rückverfolgbarkeit (6) |
-| 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); nach einem Neustart nur eine unterbrochene Animation erneut (3.5, US-AB-05 AK-3); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6) |
+| 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); nach einem Neustart nur eine unterbrochene Animation erneut (3.5, US-AB-05 AK-3); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6); Wiederholen der Reihenfolge ab Platz k statt immer ganz (3.1, US-AB-03 AK-5, Entscheidung des Product Owners 10.11.2026) |
 
 ## Inhaltsverzeichnis
 
@@ -203,7 +203,7 @@ Beispiel: 4 Personen, Städte & Ritter, alle Optionen aktiv: 3 Losschritte + 3 D
 | Wiederholter Schritt | Verworfene Folgeschritte |
 |---|---|
 | LS-01, LS-03 oder LS-04 | keine |
-| ein Dreh von LS-02 | die gesamte Reihenfolge wird neu gelost; die gesamte Platzierung wird verworfen |
+| ein Dreh von LS-02 (Platz k) | Platz k und alle späteren Plätze werden neu gelost, die früheren bleiben; die gesamte Platzierung wird verworfen *(geändert in 0.14)* |
 | Gebäude k | Straße k sowie alle später platzierten Gebäude und Straßen |
 | Straße k | keine |
 | Startrohstoffe einer Person | keine |
@@ -563,7 +563,7 @@ Bezug: FA-AB-04 → 3.1
 - **AK-2:** Gegeben der Schritt hat abhängige Folgeschritte gemäß 3.1, dann nennt die Warnung, welche Schritte verworfen werden.
 - **AK-3:** Gegeben ich wiederhole LS-01, LS-03, LS-04, eine Straße oder die Startrohstoffe einer Person, dann bleiben alle anderen Schritte unverändert.
 - **AK-4:** Gegeben ich wiederhole Gebäude k, dann werden Straße k und alle späteren Gebäude und Straßen verworfen und anschließend Schritt für Schritt neu durchlaufen.
-- **AK-5:** Gegeben ich wiederhole einen Dreh von LS-02, dann wird die gesamte Reihenfolge neu gelost und eine bereits begonnene Platzierung verworfen.
+- **AK-5:** Gegeben ich wiederhole den Dreh von LS-02 für Platz k, dann bleiben die Plätze vor k, Platz k und alle späteren Plätze werden aus den übrigen Personen neu gelost, und eine bereits begonnene Platzierung wird verworfen. Bei Platz 1 ist das die ganze Reihenfolge. *(geändert in 0.14)*
 - **AK-6:** Gegeben die Generierung ist abgeschlossen, dann kann ich in der Übersicht der laufenden Partie jeden Schritt auswählen und wiederholen.
 - **AK-7:** Gegeben eine Wiederholung, dann wird sie nirgends protokolliert.
 

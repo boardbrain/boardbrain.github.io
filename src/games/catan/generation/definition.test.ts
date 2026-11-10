@@ -545,12 +545,11 @@ describe('Specification 3.1 table of dependencies (US-AB-03)', () => {
     },
   );
 
-  it('AK-5: repeating a spin draws the whole order again and discards the whole placement', () => {
+  it('AK-5: repeating the spin of place k keeps the earlier places, discards the placement', () => {
     const index = indexOf(generation, (step) => step.kind === 'order-spin' && step.position === 1);
     const discarded = stepsDiscardedBy(CATAN_GENERATION, setup, generation, index);
 
     expect(discarded.map((other) => generation.steps[other]?.step.kind)).toEqual([
-      'order-spin',
       'order-spin',
       ...Array.from({ length: 8 }, () => ['building', 'road']).flat(),
     ]);
@@ -560,11 +559,31 @@ describe('Specification 3.1 table of dependencies (US-AB-03)', () => {
       'person-draw:harbors',
       'person-draw:numbers',
       'order-spin',
+      'order-spin',
       ...Array<string>(4).fill('starting-resources'),
     ]);
-    expect(repeated.steps[3]).toMatchObject({ step: { position: 0 }, status: 'revealed' });
+    // Place 1 stays; place 2 is drawn again from the persons left.
+    expect(repeated.steps[3]).toEqual(generation.steps[3]);
+    expect(repeated.steps[4]).toMatchObject({ step: { position: 1 }, status: 'revealed' });
+    const kept = defined(stepsOf(generation)[3], 'place 1');
+    expect(repeated.steps[4]?.step).toMatchObject({
+      candidates: setup.participants.filter(
+        (person) => kept.kind === 'order-spin' && person !== kept.result,
+      ),
+    });
     unchangedExcept(generation, repeated, [index, ...discarded]);
     expect(repeated.gameState.hiddenPlan).toBeNull();
+  });
+
+  it('AK-5: repeating the spin of place 1 draws the whole order again', () => {
+    const index = indexOf(generation, (step) => step.kind === 'order-spin' && step.position === 0);
+    const discarded = stepsDiscardedBy(CATAN_GENERATION, setup, generation, index);
+
+    expect(discarded.map((other) => generation.steps[other]?.step.kind)).toEqual([
+      'order-spin',
+      'order-spin',
+      ...Array.from({ length: 8 }, () => ['building', 'road']).flat(),
+    ]);
   });
 
   it('AK-5: after a new order the placement is run through again before the kept resources', () => {

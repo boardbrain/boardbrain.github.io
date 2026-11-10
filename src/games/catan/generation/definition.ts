@@ -293,10 +293,13 @@ export function createCatanGeneration(
         steps.flatMap((step, other) => (matches(step) ? [other] : []));
       switch (repeated.kind) {
         case 'order-spin':
-          // The whole order is drawn again, and the whole placement is discarded.
+          // US-AB-03 AK-5 (PO 10.11.2026): place k and all later places are drawn again, the
+          // earlier ones stay; the whole placement is discarded.
           return indices(
             (step) =>
-              step.kind === 'order-spin' || step.kind === 'building' || step.kind === 'road',
+              (step.kind === 'order-spin' && step.position >= repeated.position) ||
+              step.kind === 'building' ||
+              step.kind === 'road',
           );
         case 'building':
           // Road k and all later buildings and roads.
