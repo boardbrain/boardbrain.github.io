@@ -15,6 +15,7 @@ import { useAppDependencies } from '@/ui/AppDependencies';
 import { cx } from '@/ui/components/classNames';
 import { AgainIcon, BackIcon, ChevronIcon, ExitDoorIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
+import { pieceMarking } from './boardPieces';
 import { DrawScene } from './cards/DrawScene';
 import { OrderScene } from './cards/OrderScene';
 import { ResourcesScene } from './cards/ResourcesScene';
@@ -38,6 +39,7 @@ import {
   type ForwardAction,
 } from './matchFlow';
 import { editionName, repeatLines, stepTitle } from './matchTexts';
+import { PieceSpot } from './PieceSpot';
 import { PlacementStep } from './PlacementStep';
 import { UnsupportedSession } from './UnsupportedSession';
 import shared from './Match.module.css';
@@ -113,6 +115,9 @@ export function MatchView(): React.JSX.Element | null {
   const [search] = useSearchParams();
   const location = useLocation();
   const [dialog, setDialog] = useState<Dialog>(null);
+  // The step a question about repeating is about (US-AB-03 AK-1, AK-8).
+  const [repeatAt, setRepeatAt] = useState<number | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const noteRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -202,14 +207,29 @@ export function MatchView(): React.JSX.Element | null {
     });
   };
 
+  const askRepeat = (index: number): void => {
+    if (!isPending) {
+      setRepeatAt(index);
+      setDialog('repeat');
+    }
+  };
+  const repeatStep = repeatAt === null ? undefined : session.generation.steps[repeatAt]?.step;
   const isPlacement = slot.kind === 'building' || slot.kind === 'road';
+  // US-AB-03 AK-8: while the question is open, the piece and those discarded with it are marked.
+  const marked =
+    dialog === 'repeat' && repeatAt !== null && isPlacement
+      ? pieceMarking(session, repeatAt)
+      : null;
   const actions = (
     <StepActions
       forward={forward}
       isPending={isPending}
-      canRepeat={page.kind === 'step' && !(isKept && shownEnd !== page.index)}
+      canRepeat={page.kind === 'step'}
       onRepeat={() => {
-        setDialog('repeat');
+        // A kept view after a repetition repeats its last piece (decision A of the PO, I2-H).
+        if (page.kind === 'step') {
+          askRepeat(isKept && shownEnd !== null ? shownEnd : page.index);
+        }
       }}
       onForward={onForward}
     />
@@ -323,6 +343,9 @@ export function MatchView(): React.JSX.Element | null {
             nameOf={nameOf}
             skip={skip}
             actions={actions}
+            onRepeatPiece={askRepeat}
+            marked={marked}
+            boardRef={boardRef}
           />
         )}
         {slot.kind === 'starting-resources' && (
@@ -351,10 +374,10 @@ export function MatchView(): React.JSX.Element | null {
       </div>
       {!isPlacement && !isResources && actions}
 
-      {dialog === 'repeat' && step !== undefined && page.kind === 'step' && (
+      {dialog === 'repeat' && repeatAt !== null && repeatStep !== undefined && (
         <MatchDialog
-          title={t('partie.wiederholenFrage', { schritt: stepTitle(step, nameOf) })}
-          lines={repeatLinesOrOnly(session, page.index)}
+          title={t('partie.wiederholenFrage', { schritt: stepTitle(repeatStep, nameOf) })}
+          lines={repeatLinesOrOnly(session, repeatAt)}
           cancelLabel={t('allgemein.abbrechen')}
           confirmLabel={t('partie.wiederholen')}
           onCancel={() => {
@@ -362,10 +385,18 @@ export function MatchView(): React.JSX.Element | null {
           }}
           onConfirm={() => {
             act(async () => {
-              await sessions.repeatStep(page.index);
+              await sessions.repeatStep(repeatAt);
               return false;
             });
           }}
+          focus={
+            marked === null
+              ? null
+              : {
+                  target: boardRef,
+                  spot: <PieceSpot session={shown} nameOf={nameOf} marked={marked} />,
+                }
+          }
         />
       )}
       {dialog === 'skip' && (

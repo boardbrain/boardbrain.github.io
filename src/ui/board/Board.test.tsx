@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { CATAN_BOARD, type EdgeId, type VertexId } from '@/games/catan';
-import { Board } from './Board';
+import { Board, BoardSpotlight, type BoardBuilding, type BoardRoad } from './Board';
 
 describe('US-PL-01 board', () => {
   it('AK-1: shows the board with its 19 hexes', () => {
@@ -69,5 +69,69 @@ describe('US-PL-04 pieces on the board', () => {
     expect(screen.getAllByTestId('board-settlement')).toHaveLength(1);
     expect(screen.getAllByTestId('board-city')).toHaveLength(1);
     expect(screen.getAllByTestId('board-road')).toHaveLength(1);
+  });
+});
+
+describe('US-AB-03 AK-8 tapping pieces (design I2-H)', () => {
+  const { edge, from: vertex } = anEdge();
+  const buildings: BoardBuilding[] = [
+    {
+      key: 'building-0',
+      vertex,
+      type: 'settlement',
+      color: 'red',
+      label: 'Siedlung von Anna wiederholen',
+    },
+  ];
+  const roads: BoardRoad[] = [
+    { key: 'road-0', edge, from: vertex, color: 'red', label: 'Straße von Anna wiederholen' },
+  ];
+
+  it('without a handler the pieces are no buttons', () => {
+    render(<Board board={CATAN_BOARD} buildings={buildings} roads={roads} />);
+
+    expect(screen.queryAllByRole('button')).toEqual([]);
+  });
+
+  it('every piece is a button with its name; without a pointer it means its own piece', () => {
+    const onPieceTap = vi.fn<(key: string) => void>();
+    render(
+      <Board board={CATAN_BOARD} buildings={buildings} roads={roads} onPieceTap={onPieceTap} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Straße von Anna wiederholen' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Siedlung von Anna wiederholen' }));
+
+    expect(onPieceTap.mock.calls).toEqual([['road-0'], ['building-0']]);
+  });
+
+  it('marks the asked piece and the pieces discarded with it (M1)', () => {
+    render(
+      <Board
+        board={CATAN_BOARD}
+        buildings={buildings}
+        roads={roads}
+        marked={{ main: 'building-0', others: ['road-0'] }}
+      />,
+    );
+
+    expect(screen.getAllByTestId('piece-mark')).toHaveLength(1);
+    expect(screen.getAllByTestId('piece-mark-other')).toHaveLength(1);
+  });
+
+  it('the spotlight shows only the marked pieces (R7)', () => {
+    render(
+      <BoardSpotlight
+        board={CATAN_BOARD}
+        buildings={buildings}
+        roads={roads}
+        marked={{ main: 'road-0', others: [] }}
+      />,
+    );
+
+    const spot = screen.getByTestId('board-spotlight');
+    expect(spot.querySelectorAll('[data-piece]')).toHaveLength(1);
+    expect(screen.getAllByTestId('board-road')).toHaveLength(1);
+    expect(screen.queryAllByTestId('board-hex')).toEqual([]);
   });
 });

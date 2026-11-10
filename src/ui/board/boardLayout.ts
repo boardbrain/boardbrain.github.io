@@ -32,6 +32,13 @@ export type TileShape = { readonly key: string; readonly points: string };
  */
 export type BoardLayout = {
   readonly viewBox: string;
+  /** The same area as numbers, e.g. to place the tap areas of the pieces over the board. */
+  readonly bounds: {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  };
   /** Flat-topped hexagon of the sea around the land. */
   readonly sea: string;
   /** One closed path per coastline, for shallow water and sand. */
@@ -122,6 +129,7 @@ export function layoutBoard(board: Board): BoardLayout {
 
   return {
     viewBox: `${String(-halfWidth)} ${String(-halfHeight)} ${String(2 * halfWidth)} ${String(2 * halfHeight)}`,
+    bounds: { x: -halfWidth, y: -halfHeight, width: 2 * halfWidth, height: 2 * halfHeight },
     sea: pointList(sea),
     coastlines: coastPoints.map((points) => `M${points.map(formatPoint).join('L')}Z`),
     tiles: board.hexes.map((hex) => ({

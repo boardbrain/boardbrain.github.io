@@ -44,3 +44,26 @@
 .buttons > * {
   flex: 1 1 8rem;
 }
+
+/* A question about pieces (design I2-H, R7): the window gives way to the marked pieces, which lie
+   bright over the dark, exactly over the board (positioned by the component). */
+.backdrop[data-place='bottom'] {
+  place-items: end center;
+}
+
+.backdrop[data-place='top'] {
+  place-items: start center;
+}
+
+.backdrop[data-place='left'] {
+  place-items: center start;
+}
+
+.backdrop[data-place='right'] {
+  place-items: center end;
+}
+
+.spot {
+  position: absolute;
+  pointer-events: none;
+}

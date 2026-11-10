@@ -412,6 +412,121 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
   });
 });
 
+// Taps a piece on the board where its tap area is centred, as a finger does (design I2-H): the
+// tap areas overlap, the app decides from the point which piece is meant.
+async function tapPiece(page: Page, piece: Locator): Promise<void> {
+  const box = await piece.boundingBox();
+  if (box === null) {
+    throw new Error('The piece has no tap area on the screen');
+  }
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+}
+
+function spotlight(page: Page): Locator {
+  return page.getByTestId('board-spotlight');
+}
+
+test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
+  test('AK-3: a road tapped in the overview is drawn again alone, marked while asked', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+    await expect(page.getByText('Stein antippen zum Wiederholen')).toBeVisible();
+
+    const roads = page.getByRole('button', { name: /^Straße von .* wiederholen$/ });
+    await expect(roads).toHaveCount(4);
+    const name = (await roads.nth(1).getAttribute('aria-label')) ?? '';
+    await tapPiece(page, roads.nth(1));
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText(`${name.replace(/ wiederholen$/, '')} wiederholen?`);
+    await expect(dialog).toContainText('Nur dieser Schritt wird neu gelost');
+    await expect(spotlight(page).getByTestId('board-road')).toHaveCount(1);
+    await expect(spotlight(page).getByTestId('board-settlement')).toHaveCount(0);
+
+    await dialog.getByRole('button', { name: 'Wiederholen' }).click();
+    await expect(page.getByTestId('board-road')).toHaveCount(3);
+    await tapForward(page, 'Losen');
+    await expect(page.getByTestId('board-road')).toHaveCount(4);
+    await expect(page.getByTestId('board-settlement')).toHaveCount(4);
+  });
+
+  test('AK-4: a building tapped in the overview marks its road and all later pieces', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+
+    const buildings = page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ });
+    await expect(buildings).toHaveCount(4);
+    // The third building of the placement: its road and the fourth building with its road go.
+    await tapPiece(page, buildings.nth(2));
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('Verworfen und neu gelost');
+    await expect(spotlight(page).getByTestId('board-settlement')).toHaveCount(2);
+    await expect(spotlight(page).getByTestId('board-road')).toHaveCount(2);
+
+    await dialog.getByRole('button', { name: 'Abbrechen' }).click();
+    await expect(spotlight(page)).toHaveCount(0);
+    await tapPiece(page, buildings.nth(2));
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+    await expect(page.getByTestId('board-settlement')).toHaveCount(2);
+    await expect(page.getByTestId('board-road')).toHaveCount(2);
+  });
+
+  test('decision A: "Wiederholen" on a kept placement repeats its last piece', async ({ page }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+    await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
+    await tap(page.getByRole('button', { name: /^Häfen/ }));
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+
+    await tapForward(page, 'Losen');
+    while (!(await page.getByRole('heading', { name: 'Platzierung' }).isVisible())) {
+      await tapForward(page, 'Blättern');
+    }
+    await expect(page.getByTestId('board-road')).toHaveCount(4);
+    await tap(page.getByRole('button', { name: 'Wiederholen', exact: true }));
+
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText(/^Straße von .* wiederholen\?/);
+    await expect(spotlight(page).getByTestId('board-road')).toHaveCount(1);
+  });
+
+  test('a piece tapped in the flow is repeated there', async ({ page }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    for (const draw of ['Landschaftsfelder', 'Häfen', 'Zahlenchips']) {
+      await tap(page.getByRole('switch', { name: draw }));
+    }
+    await startGeneration(page);
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Weiter');
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Losen');
+    await expect(page.getByTestId('board-settlement')).toHaveCount(2);
+
+    await tapPiece(
+      page,
+      page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ }).first(),
+    );
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('Verworfen und neu gelost');
+    await dialog.getByRole('button', { name: 'Wiederholen' }).click();
+
+    await expect(page.getByTestId('board-settlement')).toHaveCount(0);
+    await expect(forward(page)).toHaveText('Losen');
+  });
+});
+
 test.describe('Architecture ADR-030 pictures of a match', () => {
   test('the Catan card and all resource cards are pictures that load', async ({ page }) => {
     await page.goto('/#/partie/neu');

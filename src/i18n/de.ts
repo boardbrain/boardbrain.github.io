@@ -328,6 +328,7 @@ export const de = {
     rohstoffeVon: 'Startrohstoffe von {name}',
     wiederholenFrage: '{schritt} wiederholen?',
     stueckWiederholen: '{stueck} wiederholen',
+    steinAntippen: 'Stein antippen zum Wiederholen',
     nurDieserSchritt: 'Nur dieser Schritt wird neu gelost',
     ganzeReihenfolge: 'Ganze Reihenfolge wird neu gelost',
     plaetzeNeu: 'Plätze {von} bis {bis} werden neu gelost',

@@ -189,3 +189,24 @@ describe('US-AB-03 AK-6 Repeat a step from the overview (design I2-D)', () => {
     expect(stored?.generation.state).toBe('running');
   });
 });
+
+describe('US-AB-03 AK-8 Tapping pieces on the board of the overview (design I2-H)', () => {
+  it('names the hint, asks about the tapped piece and lays it bright over the dark', async () => {
+    const user = userEvent.setup();
+    await runMatch();
+
+    expect(await screen.findByText('Stein antippen zum Wiederholen')).toBeInTheDocument();
+    const roads = screen.getAllByRole('button', { name: /^Straße von .* wiederholen$/ });
+    expect(roads).toHaveLength(6);
+    await user.click(roads[0] ?? document.body);
+
+    const dialog = screen.getByRole('alertdialog');
+    expect(within(dialog).getByText('Nur dieser Schritt wird neu gelost')).toBeInTheDocument();
+    const spot = screen.getByTestId('board-spotlight');
+    expect(within(spot).getAllByTestId('board-road')).toHaveLength(1);
+    expect(within(spot).queryAllByTestId('board-settlement')).toEqual([]);
+
+    await user.click(within(dialog).getByRole('button', { name: 'Abbrechen' }));
+    expect(screen.queryByTestId('board-spotlight')).not.toBeInTheDocument();
+  });
+});

@@ -36,9 +36,13 @@
   --color-board-wood-bottom: #93683c;
   --color-board-wood-edge: #d0a877;
   --color-board-highlight: #ffffff2e;
+  --color-board-hint: #123241d9;
 
   /* Pieces on the board and in symbols (US-PL-04 AK-3, design I2-C, G1, R1): dark outline */
   --color-piece-outline: #231d18;
+
+  /* Marked pieces while repeating one is asked (US-AB-03 AK-8, design I2-H, M1): the gold of the app */
+  --color-piece-mark: #f5be5b;
 
   /* Ink on Catan colours: coins, swatches and the band of the person at turn (design I2-C) */
   --color-on-catan: #231d18;

@@ -1,12 +1,13 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
 import { CATAN_BOARD, catanPlacementRounds, catanSummary, type CatanSlot } from '@/games/catan';
 import { t } from '@/i18n/t';
-import { Board } from '@/ui/board/Board';
+import { Board, type PieceMarking } from '@/ui/board/Board';
 import { PieceMark } from '@/ui/board/PieceMark';
 import type { PieceKind } from '@/ui/board/pieces';
 import { CheckIcon } from '@/ui/components/Icons';
+import { matchBoardPieces } from './boardPieces';
 import { Coin } from './Coin';
 import { colorOf } from './matchColors';
 import { orderOrSeats } from './matchFlow';
@@ -30,6 +31,12 @@ type PlacementStepProps = {
   readonly skip?: ReactNode;
   /** "Wiederholen" and the forward button, placed with the layout of the board. */
   readonly actions: ReactNode;
+  /** Tapping a piece asks before repeating its step (US-AB-03 AK-8). */
+  readonly onRepeatPiece?: ((stepIndex: number) => void) | undefined;
+  /** The pieces marked while a question about one is open (design I2-H). */
+  readonly marked?: PieceMarking | null | undefined;
+  /** The area of the board, for the question about a piece. */
+  readonly boardRef?: Ref<HTMLDivElement> | undefined;
 };
 
 function pieceKind(slot: CatanSlot): PieceKind {
@@ -52,9 +59,12 @@ export function PlacementStep({
   nameOf,
   skip,
   actions,
+  onRepeatPiece,
+  marked,
+  boardRef,
 }: PlacementStepProps): React.JSX.Element {
   const summary = catanSummary(session.setup, session.generation);
-  const vertexOf = new Map(summary.buildings.map((building) => [building.index, building.vertex]));
+  const pieces = matchBoardPieces(session, nameOf);
   const order = orderOrSeats(session);
   const rounds = catanPlacementRounds(session.setup.options.edition);
   const coins = order.map((personId) => ({
@@ -76,26 +86,21 @@ export function PlacementStep({
             gebaeude: summary.buildings.length,
             strassen: summary.roads.length,
           })}
-          buildings={summary.buildings.map((building) => ({
-            key: `building-${String(building.index)}`,
-            vertex: building.vertex,
-            type: building.type,
-            color: building.catanColor,
-          }))}
-          roads={summary.roads.flatMap((road) => {
-            const from = vertexOf.get(road.index);
-            return from === undefined
-              ? []
-              : [
-                  {
-                    key: `road-${String(road.index)}`,
-                    edge: road.edge,
-                    from,
-                    color: road.catanColor,
-                  },
-                ];
-          })}
+          buildings={pieces.buildings}
+          roads={pieces.roads}
           newestKey={newest === null ? undefined : `${newest.kind}-${String(newest.index)}`}
+          ref={boardRef}
+          marked={marked}
+          onPieceTap={
+            onRepeatPiece === undefined
+              ? undefined
+              : (key) => {
+                  const index = pieces.stepOf.get(key);
+                  if (index !== undefined) {
+                    onRepeatPiece(index);
+                  }
+                }
+          }
         />
         {skip !== undefined && skip !== false && <div className={styles.skipOver}>{skip}</div>}
       </div>

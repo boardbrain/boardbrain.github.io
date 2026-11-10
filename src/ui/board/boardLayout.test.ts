@@ -27,6 +27,7 @@ describe('US-PL-01 board layout (Architecture 13.5, design I1-D)', () => {
 
   it('AK-3: uses the fixed viewBox of the design reference', () => {
     expect(layout.viewBox).toBe('-60 -53 120 106');
+    expect(layout.bounds).toEqual({ x: -60, y: -53, width: 120, height: 106 });
   });
 
   it('AK-1: draws 19 tiles with six corners each, the first corner is the top tip', () => {
