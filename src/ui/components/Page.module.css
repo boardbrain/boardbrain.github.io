@@ -1,14 +1,10 @@
-.page,
-.wide {
+.page {
   display: grid;
   gap: var(--space-6);
-  max-width: 40rem;
-  padding: var(--space-6) var(--space-4);
+  width: 100%;
+  max-width: var(--page-max-width);
+  padding: var(--page-padding-top) var(--page-padding-side) var(--space-6);
   margin: 0 auto;
-}
-
-.wide {
-  max-width: 64rem;
 }
 
 /* Header, introduction and content fill the visible area, e.g. the board (design I1-D). */
@@ -20,6 +16,7 @@
 .header {
   display: flex;
   gap: var(--space-3);
+  min-height: var(--page-head-height);
   align-items: center;
   justify-content: space-between;
 }
@@ -28,6 +25,7 @@
   flex: 1;
   margin: 0;
   font-size: var(--font-size-title);
+  line-height: 1.25;
 }
 
 .intro {

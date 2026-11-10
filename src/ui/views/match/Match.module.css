@@ -4,9 +4,9 @@
   flex-direction: column;
   gap: 20px;
   width: 100%;
-  max-width: 40rem;
+  max-width: var(--page-max-width);
   min-height: 100%;
-  padding: 20px 16px 24px;
+  padding: var(--page-padding-top) var(--page-padding-side) 24px;
   margin: 0 auto;
 }
 
@@ -14,13 +14,10 @@
   height: 100%;
 }
 
-.wideMain {
-  max-width: 64rem;
-}
-
 .pageHead {
   display: flex;
   flex: none;
+  min-height: var(--page-head-height);
   gap: 12px;
   align-items: center;
 }

@@ -5,12 +5,10 @@ import { t } from '@/i18n/t';
 import { HandNavigation, type HandArea } from './HandNavigation';
 import { isHandFolded } from './cardHand';
 import { FolderIcon, HomeIcon, RotateIcon } from './Icons';
-import { Logo } from './Logo';
 import { useIsPhone } from './mediaQueries';
 import { suppressTouchContextMenu } from './touchMenu';
 import styles from './AppLayout.module.css';
 
-const LOGO_SIZE = 28;
 const HINT_ICON_SIZE = 56;
 
 // Architecture 13.1: only areas that already exist. Later areas (statistics I3, data I4,
@@ -21,9 +19,10 @@ const AREAS: readonly HandArea[] = [
 ];
 
 /**
- * Frame of the app (Architecture 13.1, designs D-3 and K-3): header with logo, the view and the
- * main navigation as a hand of cards at the bottom; on a phone it is folded on every page but the
- * start view. The
+ * Frame of the app (Architecture 13.1, designs D-3, K-3 and I2-G): the view and the main
+ * navigation as a hand of cards at the bottom; on a phone it is folded on every page but the
+ * start view. There is no header: every view starts with its own heading, the start view shows
+ * the logo (I2-G). The
  * diagnostics view is deliberately missing from the navigation; it is reached via `#/diagnose`
  * only. Phones in landscape only see a hint to turn the phone (NFA-PL-04, E-29). Animations
  * follow the system setting to reduce motion. A long press with a finger opens no browser menu
@@ -39,12 +38,6 @@ export function AppLayout(): React.JSX.Element {
       <MotionConfig reducedMotion="user">
         <div className={styles.layout}>
           <div className={isHandFolded(pathname, isPhone) ? styles.foldedApp : styles.app}>
-            <header className={styles.header}>
-              <span className={styles.appName}>
-                <Logo size={LOGO_SIZE} />
-                {t('app.name')}
-              </span>
-            </header>
             <div className={styles.content}>
               <Outlet />
             </div>

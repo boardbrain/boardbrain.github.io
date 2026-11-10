@@ -48,10 +48,19 @@ describe('Design I2-D page 6: order', () => {
 });
 
 describe('Design I2-D page 5: draw of a person', () => {
-  it('the development card keeps its width of 240 px where there is room', () => {
-    const layout = drawLayout(TABLET.width, TABLET.height);
+  it('the development card keeps its width of 240 px on a phone', () => {
+    const layout = drawLayout(PHONE.width, 560);
     expect(layout.task.width).toBe(TASK_CARD_WIDTH);
     expect(layout.slot.x).toBeCloseTo(layout.task.x + TASK_CARD_WIDTH + 20);
+    expect(layout.slot.w).toBeCloseTo((PHONE.width - 30) / 4.4);
+  });
+
+  it('design I2-G, G4: on a tablet card and person cards grow by 280 / 240', () => {
+    const layout = drawLayout(TABLET.width, TABLET.height);
+    expect(layout.task.width).toBe(280);
+    expect(layout.slot.w).toBeCloseTo((76 * 280) / 240);
+    expect(defined(layout.row(4)[0]).w).toBeCloseTo((76 * 280) / 240);
+    expect(layout.slot.x).toBeCloseTo(layout.task.x + 280 + 20);
   });
 
   it('is scaled down as a whole on low rooms', () => {

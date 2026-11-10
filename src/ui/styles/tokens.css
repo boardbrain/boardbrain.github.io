@@ -347,6 +347,13 @@
   --radius-4: 1rem;
   --touch-target-min: 44px;
 
+  /* Page layout (design I2-G): every view but the start has the same width, padding and head
+     height, so the back button sits in the same place on every page. */
+  --page-max-width: 80rem;
+  --page-padding-top: 20px;
+  --page-padding-side: 16px;
+  --page-head-height: 52px;
+
   /* Durations and easings for Motion (Architecture 13.6) */
   --duration-fast: 150ms;
   --duration-base: 250ms;

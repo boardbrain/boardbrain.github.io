@@ -274,14 +274,6 @@
   min-height: 0;
 }
 
-/* Page 8 in portrait as wide as the placement before it (Match.module.css, .wideMain), so the
-   band keeps its place; in landscape the placement has its own layout. */
-@media (orientation: portrait) {
-  .resourcesMain {
-    max-width: 64rem;
-  }
-}
-
 /* "Platzierung überspringen" right above the band: it appears and goes without moving the board
    (PO 09.11.2026). The board always keeps a strip free for it, so they do not overlap (PO
    10.11.2026); the link reaches into the gap above the band. */
@@ -450,20 +442,20 @@
   }
 }
 
-/* Tablet landscape and PC: the board on the left over the whole height; title, progress, band,
-   order and buttons on the right. Only in landscape: a portrait tablet stacks like a phone. */
+/* Tablet landscape and PC: the head over both columns, so the back button keeps its place on every
+   page (design I2-G); below it the board on the left, progress, band, order and buttons on the
+   right. Only in landscape: a portrait tablet stacks like a phone. */
 @container (width >= 720px) and (orientation: landscape) {
   .placeMain {
     display: grid;
     grid-template:
-      'board head' auto
+      'head head' auto
       'board prog' auto
       'board band' auto
       'board list' auto
       'board .' minmax(0, 1fr)
       'board act' auto / minmax(0, 1.7fr) minmax(17rem, 1fr);
     gap: 16px 32px;
-    max-width: 80rem;
   }
 
   .placeMain > .stepBody,

@@ -7,8 +7,6 @@ type PageProps = {
   readonly intro?: string;
   /** Controls to the right of the heading, e.g. a search button. */
   readonly actions?: ReactNode;
-  /** Wider content area for grids. */
-  readonly isWide?: boolean;
   /** Fills the visible height instead of scrolling; the content gets the remaining space. */
   readonly isFullHeight?: boolean;
   /** Shows a back button; the address is used when there is no previous page (design D-3). */
@@ -17,20 +15,20 @@ type PageProps = {
 };
 
 /**
- * Main area of a view with heading and optional introduction.
+ * Main area of a view with heading and optional introduction. Every view but the start has the
+ * same width, padding and head height (design I2-G), so the back button keeps its place.
  */
 export function Page({
   title,
   intro,
   actions,
-  isWide,
   isFullHeight,
   backFallback,
   children,
 }: PageProps): React.JSX.Element {
   return (
     <main
-      className={[isWide === true ? styles.wide : styles.page, isFullHeight === true && styles.fill]
+      className={[styles.page, isFullHeight === true && styles.fill]
         .filter((name) => typeof name === 'string')
         .join(' ')}
     >
