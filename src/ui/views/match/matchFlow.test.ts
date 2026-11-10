@@ -78,6 +78,24 @@ describe('US-AB-02 AK-3 pages of the flow', () => {
 describe('US-AB-04 AK-3, AK-4 look back', () => {
   const session = aSessionAfter(BASE, 6, true);
 
+  it('PO 10.11.: the order and the placement are looked back at as a whole', () => {
+    // The third building waits for confirmation; the first two pieces belong to its page.
+    const placing = aSessionAfter(BASE, 10, true);
+    expect(shownRange(placing, 4)).toEqual({ start: 3, end: 5 });
+    expect(pageAt(placing, 4)).toEqual(step(3));
+    expect(pageAt(placing, 7)).toEqual(step(10));
+    expect(previousPage(placing, step(10))).toEqual(step(3));
+    expect(nextPage(placing, step(3))).toEqual(step(10));
+    expect(progressIndex(placing, step(3))).toBe(5);
+    // Before drawing the next piece, the pieces drawn so far belong to that page too.
+    const waiting = aSessionAfter(BASE, 9);
+    const next = currentPage(waiting);
+    expect(next?.kind).toBe('pending');
+    expect(next && previousPage(waiting, next)).toEqual(step(3));
+    expect(pageAt(waiting, 7)).toEqual(next);
+    expect(nextPage(waiting, step(3))).toEqual(next);
+  });
+
   it('AK-3: an earlier step is shown with the note "Rückblick"', () => {
     expect(pageAt(session, 2)).toEqual(step(2));
     expect(isLookBack(session, step(2))).toBe(true);
@@ -90,8 +108,10 @@ describe('US-AB-04 AK-3, AK-4 look back', () => {
     }
   });
 
-  it('AK-3: "Zurück" goes one step back; the first step has none', () => {
-    expect(previousPage(session, step(6))).toEqual(step(5));
+  it('AK-3: "Zurück" goes one view back; the first view has none', () => {
+    // From the first piece back to the whole order (steps 3 to 5), shown at its first spin.
+    expect(previousPage(session, step(6))).toEqual(step(3));
+    expect(previousPage(session, step(3))).toEqual(step(2));
     expect(previousPage(session, step(0))).toBeNull();
     const third = aSessionAfter(BASE, 3);
     const pending = currentPage(third);
@@ -101,10 +121,10 @@ describe('US-AB-04 AK-3, AK-4 look back', () => {
     expect(first && previousPage(empty, first)).toBeNull();
   });
 
-  it('AK-4: "Blättern" goes one step forward, at the end to the current page', () => {
+  it('AK-4: "Blättern" goes one view forward, at the end to the current page', () => {
     expect(forwardAction(session, step(2))).toBe('browse');
     expect(nextPage(session, step(2))).toEqual(step(3));
-    expect(nextPage(session, step(5))).toEqual(step(6));
+    expect(nextPage(session, step(3))).toEqual(step(6));
     const pending = aSessionAfter(BASE, 3);
     const page = currentPage(pending);
     expect(forwardAction(pending, step(2))).toBe('browse');
@@ -163,7 +183,7 @@ describe('US-AB-04 AK-3, AK-4 look back', () => {
     const drawn = { ...again, generation: { ...again.generation, steps } };
 
     // Road 0 drawn again: the whole board is shown, the kept pieces are not browsed one by one.
-    expect(shownRange(drawn, 7)).toEqual({ start: 7, end: ALL_STEPS - 1 });
+    expect(shownRange(drawn, 7)).toEqual({ start: 6, end: ALL_STEPS - 1 });
     expect(forwardAction(drawn, step(7))).toBe('overview');
     expect(lookBackTarget(drawn, step(5))).toBe('current');
     const harbours = aSessionAfter(BASE, ALL_STEPS);
@@ -190,9 +210,9 @@ describe('US-AB-04 AK-3, AK-4 look back', () => {
     const drawn = { ...again, generation: { ...again.generation, steps } };
 
     // "Zurück" from a later page does not show the same board a second time.
-    expect(shownRange(drawn, 12)).toEqual({ start: 7, end: ALL_STEPS - 1 });
+    expect(shownRange(drawn, 12)).toEqual({ start: 6, end: ALL_STEPS - 1 });
     expect(pageAt(drawn, 12)).toEqual(step(7));
-    expect(previousPage(drawn, step(7))).toEqual(step(6));
+    expect(previousPage(drawn, step(7))).toEqual(step(3));
   });
 
   it('PO 10.11.: the progress counts every step a page shows', () => {

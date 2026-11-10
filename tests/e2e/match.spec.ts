@@ -227,22 +227,30 @@ test.describe('US-AB-03, US-AB-04, US-PL-05, US-AB-06 repeat, look back, skip an
     await expect(page.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
   });
 
-  test('US-AB-04 AK-3, AK-4: the look back shows an earlier step without drawing', async ({
+  test('US-AB-04 AK-3, AK-4: the look back shows an earlier view without drawing', async ({
     page,
   }) => {
+    const back = page.getByRole('button', { name: 'Zurück' });
+    await tapForward(page, 'Losen');
+    // The spins of the order make one view: it is the first, there is nothing before it.
+    await expect(back).toBeDisabled();
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Weiter');
     await tapForward(page, 'Losen');
     await tapForward(page, 'Losen');
-    await expect(progress(page)).toContainText('Reihenfolge 2/2');
+    await expect(progress(page)).toContainText('Platzierung 2/12');
 
-    await tap(page.getByRole('button', { name: 'Zurück' }));
-
+    // PO 10.11.2026: back from the placement to the whole order, not piece by piece.
+    await tap(back);
     await expect(page.getByText('Rückblick')).toBeVisible();
     await expect(page).toHaveURL(/#\/partie\?schritt=0$/);
-    await expect(progress(page)).toContainText('Reihenfolge 1/2');
+    await expect(page.getByRole('heading', { name: 'Reihenfolge' })).toBeVisible();
+    await expect(progress(page)).toContainText('Reihenfolge 2/2');
     await tapForward(page, 'Blättern');
     await expect(page.getByText('Rückblick')).toHaveCount(0);
-    await expect(progress(page)).toContainText('Reihenfolge 2/2');
-    await expect(forward(page)).toHaveText('Weiter');
+    await expect(progress(page)).toContainText('Platzierung 2/12');
+    await expect(page.getByTestId('board-road')).toHaveCount(1);
+    await expect(forward(page)).toHaveText('Losen');
   });
 
   test('US-PL-05 AK-1, AK-2: the placement can be skipped on the empty board', async ({ page }) => {
@@ -539,8 +547,9 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
     const back = page.getByRole('button', { name: 'Zurück' });
     const overview = page.getByRole('heading', { name: 'Laufende Partie' });
     await tap(back);
-    await tap(back);
     await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+    await tap(back);
+    await expect(page.getByRole('heading', { name: 'Reihenfolge' })).toBeVisible();
     // The note of the look back leads to the overview once the match is running.
     await tap(page.getByRole('button', { name: 'Zum aktuellen Schritt' }));
     await expect(overview).toBeVisible();
@@ -582,16 +591,14 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
     await openOptions(page, /^Zu zweit:/);
     await startGeneration(page);
     await drawAll(page);
-    const back = page.getByRole('button', { name: 'Zurück' });
-    await tap(back);
-    await tap(back);
-    await tap(back);
+    await tap(page.getByRole('button', { name: 'Zurück' }));
+    // The whole placement in the look back (PO 10.11.2026).
     await expect(page.getByText('Rückblick')).toBeVisible();
-    await expect(page.getByTestId('board-settlement')).toHaveCount(3);
+    await expect(page.getByTestId('board-settlement')).toHaveCount(4);
 
     await tapPiece(
       page,
-      page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ }).last(),
+      page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ }).nth(2),
     );
     await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
 

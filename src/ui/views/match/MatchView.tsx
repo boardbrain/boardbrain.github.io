@@ -32,7 +32,6 @@ import {
   pageAt,
   previousPage,
   progressIndex,
-  isKeptView,
   lookBackTarget,
   shownRange,
   sessionUpTo,
@@ -169,7 +168,8 @@ export function MatchView(): React.JSX.Element | null {
   // shows all its steps (shownRange).
   const shownEnd = page.kind === 'step' ? shownRange(session, page.index).end : null;
   const shown = shownEnd === null ? session : sessionUpTo(session, shownEnd);
-  const isKept = isKeptView(session, page);
+  // Only the step just drawn is new; a look back or a kept view shows its whole view as it is.
+  const isDrawnNow = page.kind === 'step' && page.index === revealed;
 
   // The overview reached from here leads back into the flow (PO 10.11.2026: after "Blättern" to
   // the overview, its back button led to the start).
@@ -232,9 +232,10 @@ export function MatchView(): React.JSX.Element | null {
       isPending={isPending}
       canRepeat={page.kind === 'step'}
       onRepeat={() => {
-        // A kept view after a repetition repeats its last piece (decision A of the PO, I2-H).
+        // A whole view repeats its last step, the step just drawn itself (decision A of the PO,
+        // I2-H); every other piece can be tapped on the board.
         if (page.kind === 'step') {
-          askRepeat(isKept && shownEnd !== null ? shownEnd : page.index);
+          askRepeat(isDrawnNow || shownEnd === null ? page.index : shownEnd);
         }
       }}
       onForward={onForward}
@@ -338,7 +339,9 @@ export function MatchView(): React.JSX.Element | null {
         {isPlacement && (
           <PlacementStep
             session={shown}
-            newest={!isKept && (step?.kind === 'building' || step?.kind === 'road') ? step : null}
+            newest={
+              isDrawnNow && (step?.kind === 'building' || step?.kind === 'road') ? step : null
+            }
             announced={
               page.kind === 'pending'
                 ? page.slot
