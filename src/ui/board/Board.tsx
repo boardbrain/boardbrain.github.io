@@ -69,6 +69,11 @@ const OPAQUE = { opacity: 1 } as const;
 const TAP_AREA = 44;
 // Design I2-H, M1: the ring around a marked building, in SVG units.
 const MARK_RADIUS = { main: 5.8, other: 5.2 } as const;
+// The dashed ring has 12 dashes of equal length (4 parts dash, 3 parts gap), so it has no seam
+// where the circle starts (PO 10.11.2026).
+const MARK_DASHES = 12;
+const MARK_PERIOD = (2 * Math.PI * MARK_RADIUS.other) / MARK_DASHES;
+const MARK_DASH_ARRAY = `${(MARK_PERIOD * (4 / 7)).toFixed(3)} ${(MARK_PERIOD * (3 / 7)).toFixed(3)}`;
 
 function fadeIn(isNewest: boolean): {
   initial: { opacity: number } | false;
@@ -246,6 +251,7 @@ function Pieces({ board, buildings, roads, newestKey, marked }: PiecesProps): Re
               cy={at.y}
               r={isMain(building.key) ? MARK_RADIUS.main : MARK_RADIUS.other}
               className={isMain(building.key) ? pieceStyles.mark : pieceStyles.markOther}
+              strokeDasharray={isMain(building.key) ? undefined : MARK_DASH_ARRAY}
               data-testid={isMain(building.key) ? 'piece-mark' : 'piece-mark-other'}
             />
           );

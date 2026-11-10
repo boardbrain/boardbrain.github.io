@@ -32,7 +32,6 @@
   fill: var(--color-piece-mark);
   fill-opacity: 0.12;
   stroke: var(--color-piece-mark);
-  stroke-dasharray: 1.6 1.2;
   stroke-width: 0.8;
 }
 

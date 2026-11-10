@@ -4075,7 +4075,7 @@
             }
             return main
               ? `<circle${cls} cx="${x.p[0]}" cy="${x.p[1]}" r="5.8" fill="${gold}" fill-opacity=".25" stroke="${gold}" stroke-width="1.1"/>`
-              : `<circle cx="${x.p[0]}" cy="${x.p[1]}" r="5.2" fill="${gold}" fill-opacity=".12" stroke="${gold}" stroke-width=".8" stroke-dasharray="1.6 1.2"/>`;
+              : `<circle cx="${x.p[0]}" cy="${x.p[1]}" r="5.2" fill="${gold}" fill-opacity=".12" stroke="${gold}" stroke-width=".8" stroke-dasharray="1.556 1.167"/>`;
           }).join('');
         }
         const roads = pieces.filter((x) => x.road).map((x) => `<g${x === newest ? ' id="newest"' : ''}${dim(x)}${dimAsked(x)}${lift(x)}>${roadSvg(x.p, x.to, x.color)}</g>`).join('');
@@ -5566,7 +5566,7 @@
           }
           return main
             ? `<circle cx="${x.p[0]}" cy="${x.p[1]}" r="5.8" fill="${gold}" fill-opacity=".25" stroke="${gold}" stroke-width="1.1"/>`
-            : `<circle cx="${x.p[0]}" cy="${x.p[1]}" r="5.2" fill="${gold}" fill-opacity=".12" stroke="${gold}" stroke-width=".8" stroke-dasharray="1.6 1.2"/>`;
+            : `<circle cx="${x.p[0]}" cy="${x.p[1]}" r="5.2" fill="${gold}" fill-opacity=".12" stroke="${gold}" stroke-width=".8" stroke-dasharray="1.556 1.167"/>`;
         }).join('');
         return rings + mine.filter((x) => x.road).map((x) => roadSvg(x.p, x.to, x.color)).join('') + mine.filter((x) => !x.road).map((x) => buildingSvg(x.p, x.color, x.city)).join('');
       }
