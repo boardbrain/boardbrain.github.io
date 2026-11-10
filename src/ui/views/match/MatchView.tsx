@@ -245,21 +245,21 @@ export function MatchView(): React.JSX.Element | null {
       data-page={`${page.kind === 'step' ? `step-${String(page.index)}` : `next-${String(page.at)}`}:${forward}`}
     >
       <div className={shared.pageHead}>
-        {back === null ? (
-          // Keeps the title in its place on the first step (PO 09.11.2026).
-          <span className={shared.iconSpace} aria-hidden="true" />
-        ) : (
-          <PressableButton
-            type="button"
-            className={shared.iconBtn}
-            aria-label={t('allgemein.zurueck')}
-            onClick={() => {
+        {/* On the first step greyed out like "Wiederholen", so the title keeps its place
+            (PO 10.11.2026). */}
+        <PressableButton
+          type="button"
+          className={shared.iconBtn}
+          aria-label={t('allgemein.zurueck')}
+          disabled={back === null}
+          onClick={() => {
+            if (back !== null) {
               go(back);
-            }}
-          >
-            <BackIcon />
-          </PressableButton>
-        )}
+            }
+          }}
+        >
+          <BackIcon />
+        </PressableButton>
         <div className={shared.titles}>
           <h1 className={shared.title}>{t(STEP_TITLES[slot.kind])}</h1>
           <div className={shared.sub}>

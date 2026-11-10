@@ -44,13 +44,6 @@
   white-space: nowrap;
 }
 
-/* Room of a missing icon button, so the title keeps its place. */
-.iconSpace {
-  flex: none;
-  width: 44px;
-  height: 44px;
-}
-
 .iconBtn {
   display: grid;
   flex: none;

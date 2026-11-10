@@ -35,7 +35,7 @@
 | 0.20 | 29.10.2026 | Bündel I2-B umgesetzt: Ablaufsteuerung, Catan-Ablauf, gespeicherte Partie, `SessionService` und Sperre der Spielbindung; nach Wiederholung eines Drehs der Reihenfolge beginnt eine übersprungene Platzierung wieder (Entscheidung des Product Owners) (2, 8) (#28) |
 | 0.21 | 02.11.2026 | Einstieg ab I3 neu (Entscheidung des Product Owners): „Partie“ führt zu einer gemeinsamen Spielliste, eigene Spiele direkt zum Ergebnis, Catan fragt „Neue Partie“ oder „Ergebnis eintragen“; im Formular erst Spiel, dann Gruppe; ersetzt Variante K2; offener Punkt Sortierung der Spielliste (7, 8) |
 | 0.22 | 03.11.2026 | I2-C umgesetzt (#31): Vorbereitung über Spiel, Tisch, Optionen und Farben, Ablauf mit „Losen“ und „Wiederholen“, Übersicht zum Ansehen, Startstapel „Partie“; Reihenfolge abschaltbar (FA-LS-07, Anforderungsdokumentation 0.19, Spezifikation 0.13); kein Paket `zustand` (Architektur ADR-029); Wiederholen aus der Übersicht und Rückblick („Blättern“, US-AB-04 AK-3, AK-4) gehören zu I2-D (Entscheidung des Product Owners) (8) |
-| 0.23 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners, Anforderungsdokumentation 0.20, Spezifikation 0.14): Schritt zuerst ohne Ergebnis, Knopf „Weiter“, Personen mit Karten losen statt mit einem Glücksrad, Startrohstoffe von Hand aufdecken; Referenz `docs/design/i2d-running-match-final-preview.html` mit allen Bewegungen; I2-D baut die ruhenden Zustände, I2-E wird „Karten ziehen und Überspringen“ und baut die Bewegungen, D-2 gestaltet nur noch Aufblinken, Tempo und Klänge (2, 8) |
+| 0.23 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners, Anforderungsdokumentation 0.20, Spezifikation 0.14): Schritt zuerst ohne Ergebnis, Knopf „Weiter“, Personen mit Karten losen statt mit einem Glücksrad, Startrohstoffe von Hand aufdecken; Referenz `docs/design/i2d-running-match-final-preview.html` mit allen Bewegungen; I2-D baut die ruhenden Zustände, I2-E wird „Karten ziehen und Überspringen“ und baut die Bewegungen, D-2 gestaltet nur noch Aufblinken, Tempo und Klänge (2, 8); neues Bündel I2-G „Steine auf dem Brett antippen“ als Nächstes nach I2-D (Entscheidung des Product Owners 10.11.2026) |
 
 ## 1. Zweck
 
@@ -264,6 +264,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 | I2-B Generierung und gespeicherte Partie | US-AB-03, US-AB-05, US-AB-06, US-LS-02, US-PG-04, US-PL-05 (Fachlogik und Dienst), US-VW-02 AK-5 | Opus, high | `feat/us-ab-03-generation-session` | umgesetzt (#28) |
 | I2-C Neue Partie vorbereiten und durchlaufen | US-SP-01, US-SP-04, US-AB-01, US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PG-04, US-SR-01, US-PL-05 (Oberfläche) | Sonnet, medium | `feat/us-ab-01-new-match` | umgesetzt (#31) |
 | I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-02, US-AB-03, US-AB-04, US-AB-05, US-AB-06, US-SR-01 AK-6, US-VW-02 AK-5 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | in Arbeit |
+| I2-G Steine auf dem Brett antippen *(neu in 0.23)* | US-AB-03 (Oberfläche) | Opus, high | `feat/us-ab-03-tap-pieces` | offen, als Nächstes nach I2-D |
 | D-2 Design der Inszenierung (OP-06) | Aufblinken, Tempo, Klänge | Opus, medium | `chore/op-06-staging-design` | offen |
 | I2-E Karten ziehen und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-card-draw` | offen |
 | I2-F Aufblinken und Klänge | US-IN-02, US-IN-03 | Sonnet, medium | `feat/us-in-02-highlight-and-sound` | offen |
@@ -305,6 +306,15 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 - **Nachweis:** Ende-zu-Ende-Tests mit Wiederholungen und mit Neuladen während und nach einem Schritt (Architektur 14.5).
 - **Pakete:** keine.
 - **Abnahme durch den Product Owner:** Losschritt, Dreh der Reihenfolge, Gebäude und Straße wiederholen; App während eines Schritts schließen und wieder öffnen; Punkte K-7 und K-8.
+
+### I2-G Steine auf dem Brett antippen *(neu in 0.23)*
+
+- **Anlass:** In der Übersicht nennt die Liste „Siedlung von Anna“, auf dem Brett hat Anna aber zwei Siedlungen; welcher Stein gemeint ist, sieht man nur am Brett (Product Owner bei der Abnahme von I2-D, 10.11.2026).
+- **Inhalt:** Jeder Stein auf einem Brett mit Steinen lässt sich antippen: im Ablauf, im Rückblick, auf ganzen Ansichten nach einem Wiederholen und auf dem Brett der Übersicht. Danach folgt dieselbe Rückfrage wie aus der Übersicht: eine Straße allein, ein Gebäude mit seiner Straße und allen späteren Steinen (US-AB-03 AK-3, AK-4). Die Tippflächen sind unsichtbar, etwa 44 px groß und echte Knöpfe mit Namen („Siedlung von Anna wiederholen“); auf dem Brett kommt nichts hinzu und nichts wird verdeckt. Nahe einer Ecke gewinnt das Gebäude, weiter außen die Straße. Solange die Rückfrage offen ist, ist der Stein markiert, bei einem Gebäude auch die Steine, die mit verworfen werden. Ein kurzer Hinweis „Stein antippen zum Wiederholen“ steht in der Übersicht zwischen den Namen und dem Brett, im vorhandenen freien Raum, ohne dass sich etwas verschiebt. Damit entfällt das ausgegraute „Wiederholen“ auf ganzen Ansichten nach einem Wiederholen.
+- **Design zuerst:** Vorschau für die Markierung in der Rückfrage und den Hinweis; die Markierung passt zum Aufblinken aus D-2.
+- **Nachweis:** Unit-Tests für die Zuordnung eines Tipps zu Gebäude oder Straße; Ende-zu-Ende-Test: Straße und Gebäude über das Brett wiederholen, im Ablauf und in der Übersicht.
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** auf S26, iPad und PC einzelne Siedlungen, Städte und Straßen antippen und wiederholen.
 
 ### D-2 Design der Inszenierung (OP-06)
 

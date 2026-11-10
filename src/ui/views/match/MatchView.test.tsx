@@ -93,7 +93,7 @@ describe('US-AB-02 Go through the generation', () => {
     expect(progress()).toEqual(['Losen 0/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
     // PO 09.11.2026: the button stays in its place, but there is nothing to repeat yet.
     expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
-    expect(screen.queryByRole('button', { name: 'Zurück' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled();
     const [stored] = await db.session.toArray();
     expect(stored?.generation.steps).toHaveLength(0);
   });
@@ -180,7 +180,7 @@ describe('US-AB-04 AK-3, AK-4 Look back', () => {
     expect(await screen.findByText('Rückblick')).toBeInTheDocument();
     expect(screen.getByText('Landschaftsfelder')).toBeInTheDocument();
     expect(forwardName()).toBe('Blättern');
-    expect(screen.queryByRole('button', { name: 'Zurück' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled();
     await tapForward(user, 'Blättern');
     expect(await screen.findByText('Häfen')).toBeInTheDocument();
     expect(screen.queryByText('Rückblick')).not.toBeInTheDocument();
