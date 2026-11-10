@@ -221,6 +221,17 @@
       .main.fill {
         height: 100%;
       }
+      /* PO 10.11.2026: disabled buttons stay in their place, greyed out (as in the app). */
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+      /* Page 8 in portrait as wide as the placement before it, so its band keeps its place (PO 10.11.2026). */
+      @media (orientation: portrait) {
+        .main.resMain {
+          max-width: 64rem;
+        }
+      }
       .main.wideMain {
         max-width: 64rem;
       }
@@ -2040,6 +2051,30 @@
         min-height: 0;
         display: grid;
         place-items: center;
+        /* Room for „Platzierung überspringen“ on every page of the placement (PO 10.11.2026). */
+        padding-bottom: 22px;
+      }
+      /* „Platzierung überspringen“ right above the band, without moving the board (PO 10.11.2026). */
+      .skipOver {
+        position: absolute;
+        right: 0;
+        bottom: -12px;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+      }
+      .skipOver > * {
+        min-height: 34px;
+        pointer-events: auto;
+      }
+      /* Page 8: table, band and buttons as on the placement (PO 10.11.2026). */
+      .withBand {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 0;
       }
       .boardArea svg {
         display: block;
@@ -2115,6 +2150,8 @@
       }
       .turnBand.small {
         gap: 10px;
+        /* As high as with „Als Nächstes“, so nothing moves when the line appears (PO 10.11.2026). */
+        min-height: 50px;
         padding: 5px 10px 5px 5px;
         border-radius: 999px;
         box-shadow: 0 4px 10px var(--shadow);
@@ -3392,7 +3429,7 @@
       .drawTable {
         position: relative;
         flex: 1;
-        min-height: 320px;
+        min-height: 0;
         perspective: 1100px;
       }
       .pc {
@@ -3920,6 +3957,28 @@
         return s.resources[st.pid] !== undefined;
       }
       const same = (a, b) => a && b && a.kind === b.kind && a.d === b.d && a.i === b.i && a.pid === b.pid;
+      // PO 10.11.2026: after a repetition the later steps are kept, not drawn again. A view with several steps
+      // (order, placement) then shows all its kept steps at once, and „Blättern“ goes from view to view.
+      // Returns the indices (in doneSteps) of the first and last step the page of `st` shows.
+      function keptRange(st) {
+        const s = app.session;
+        const done = doneSteps(s);
+        const steps = flow(s);
+        const at = done.findIndex((x) => same(x, st));
+        const r = s.revealed ? done.findIndex((x) => same(x, s.revealed)) : -1;
+        if (r < 0 || at < r) return [at, at];
+        let end = at;
+        const pos = (x) => steps.findIndex((y) => same(y, x));
+        while (end + 1 < done.length && sameView(done[end + 1], st) && pos(done[end + 1]) === pos(done[end]) + 1) end++;
+        return [at, end];
+      }
+      // A kept view after the repeated step: no piece is new, and „Wiederholen“ does not know which one is meant.
+      function isKeptWhole(st) {
+        const s = app.session;
+        if (!s.revealed || !app.view || !sameView(st, st)) return false;
+        const done = doneSteps(s);
+        return done.findIndex((x) => same(x, st)) > done.findIndex((x) => same(x, s.revealed));
+      }
       const stepNumber = (s, st) => flow(s).findIndex((x) => same(x, st)) + 1;
       // Hidden plan of all remaining buildings, drawn again on a dead end (ADR-010).
       function planBuildings(s) {
@@ -3977,7 +4036,7 @@
       // Specification 3.1: what repeating a step discards.
       function discarded(s, st) {
         if (st.kind === 'spin') {
-          const lines = ['Ganze Reihenfolge wird neu gelost'];
+          const lines = [st.i === 0 ? 'Ganze Reihenfolge wird neu gelost' : `Plätze ${st.i + 1} bis ${s.persons.length} werden neu gelost`];
           const nb = s.buildings.filter(Boolean).length, nr = s.roads.filter(Boolean).length;
           if (nb) lines.push(`Platzierung wird verworfen: ${nb} Gebäude, ${nr} ${nr === 1 ? 'Straße' : 'Straßen'}`);
           if (s.skipped) lines.push('Übersprungene Platzierung beginnt wieder');
@@ -3995,7 +4054,8 @@
       }
       function repeat(s, st) {
         if (st.kind === 'draw') delete s.results[st.d];
-        if (st.kind === 'spin') { s.spins = []; s.buildings = []; s.roads = []; s.plan = null; s.skipped = false; }
+        // US-AB-03 AK-5 (PO 10.11.2026): place k and all later places are drawn again, the earlier ones stay.
+        if (st.kind === 'spin') { s.spins.length = st.i; s.buildings = []; s.roads = []; s.plan = null; s.skipped = false; }
         if (st.kind === 'building') { s.buildings.length = st.i; s.roads.length = st.i; s.plan = null; }
         if (st.kind === 'road') delete s.roads[st.i];
         if (st.kind === 'res') delete s.resources[st.pid];
@@ -4014,7 +4074,7 @@
       function go(screen) { app.screen = screen; app.dialog = null; render(); }
       function pageHead(title, opts = {}) {
         return h('div', { class: 'pageHead' },
-          opts.back && h('button', { class: 'iconBtn', 'aria-label': 'Zurück', onclick: opts.back }, icon('back')),
+          (opts.back || opts.backOff) && h('button', { class: 'iconBtn', 'aria-label': 'Zurück', disabled: !opts.back, onclick: opts.back || null }, icon('back')),
           h('div', { class: 'titles' }, h('h1', {}, title), opts.sub && h('div', { class: 'sub' }, opts.sub)),
           opts.actions,
         );
@@ -4391,7 +4451,7 @@
         const t = tableOf(prep.tableId);
         const changed = Object.keys(prep.colors).length > 0;
         return h('section', { class: 'section' },
-          h('h2', {}, h('span', {}, 'Farben der Partie'), changed && h('button', { class: 'pill', onclick: () => { prep.colors = {}; render(); } }, icon('again', 14), 'Wie am Tisch')),
+          h('h2', { style: { minHeight: '34px', alignItems: 'center' } }, h('span', {}, 'Farben der Partie'), changed && h('button', { class: 'pill', onclick: () => { prep.colors = {}; render(); } }, icon('again', 14), 'Wie am Tisch')),
           h('div', { class: 'group' },
             colors.map(([pid, color]) => h('div', { class: 'colorRow' },
               h('span', { class: 'who' }, h('strong', {}, nameOf(pid)), prep.colors[pid] && h('span', { class: 'changed' }, ' · einmalig')),
@@ -4741,7 +4801,7 @@
           h('div', { class: 'wizardDots' }, h('span', { class: 'on' }), h('span', { class: 'on' }), h('span', { class: 'on' })),
           recap(prep),
           h('section', { class: 'section' },
-            h('h2', {}, h('span', {}, 'Farben der Partie'), changed && h('button', { class: 'pill', onclick: () => { prep.colors = {}; render(); } }, icon('again', 14), 'Wie am Tisch')),
+            h('h2', { style: { minHeight: '34px', alignItems: 'center' } }, h('span', {}, 'Farben der Partie'), changed && h('button', { class: 'pill', onclick: () => { prep.colors = {}; render(); } }, icon('again', 14), 'Wie am Tisch')),
             body(prep, colors, byColor)),
           h('div', { class: 'footer inFlow' }, h('button', { class: 'primary', onclick: () => { app.session = startSession(prep); app.taps = 0; beginNext(app.session); go(app.session.state === 'running' ? 'overview' : 'match'); } }, icon('play', 18), 'Generierung starten')));
       }
@@ -4785,15 +4845,15 @@
         }));
       }
       // Extra links (such as „Platzierung überspringen“) sit above the buttons, so the buttons never move (PO).
-      // I2-D: without a result there is nothing to repeat, „Losen“ stands alone.
+      // I2-D: without a result there is nothing to repeat; „Wiederholen“ stays greyed out in its place, so
+      // „Losen“ keeps its width (PO 10.11.2026). The buttons stay from page to page, without fading in again.
       function actions(s, st, extra, pend) {
         const kind = forward(app.session);
         const labels = { browse: 'Blättern', draw: 'Losen', end: 'Zur Übersicht', next: 'Weiter' };
         const closed = st.kind === 'res' && !pend && !app.view && rs.got.length > 0 && !rs.open.every(Boolean);
-        return h('div', { class: 'actionsCol', 'data-reveal': pend ? null : '' },
-          extra,
+        return h('div', { class: 'actionsCol' },
           h('div', { class: 'actions' },
-            !pend && h('button', { class: 'secondary', 'aria-label': 'Wiederholen', onclick: () => askRepeat(st) }, icon('again', 18), 'Wiederholen'),
+            h('button', { class: 'secondary', 'aria-label': 'Wiederholen', disabled: pend || isKeptWhole(st), onclick: () => askRepeat(st) }, icon('again', 18), 'Wiederholen'),
             h('button', { class: 'primary', onclick: () => (closed ? turnAllRes() : next()) }, closed ? 'Alle umdrehen' : labels[kind], icon('next', 18))));
       }
       // Z1 (PO): „Zurück“ in the flow shows the previous step with its saved result; „Weiter“ steps forward
@@ -4808,7 +4868,13 @@
         const done = doneSteps(s);
         const cur = app.view || s.revealed;
         if (!cur) return 'draw'; // page without result: „Losen“ draws this step
-        const at = done.findIndex((x) => same(x, cur));
+        const at = keptRange(cur)[1];
+        // PO 10.11.2026: a step missing right after the shown one comes first, before steps drawn already
+        // are browsed (e.g. the placement after a new order, before the kept starting resources).
+        const steps = flow(s);
+        const nm0 = nextMissing(s);
+        if (nm0 && at >= 0 && steps.findIndex((x) => same(x, nm0)) === steps.findIndex((x) => same(x, done[at])) + 1)
+          return ui.flow === 'now' || (ui.flow === 'V2' && sameView(cur, nm0)) ? 'draw' : 'next';
         if (at >= 0 && at < done.length - 1) return 'browse';
         if (s.pending && app.view) return 'browse'; // back to the page without result
         const nm = nextMissing(s);
@@ -4843,11 +4909,11 @@
           return;
         }
         if (kind === 'browse') {
-          const at = done.findIndex((x) => same(x, cur));
+          const at = keptRange(cur)[1];
           if (at === done.length - 1) app.view = null; // back to the page without result
           else {
             const after = done[at + 1];
-            if (at + 1 === done.length - 1 && !s.pending) {
+            if (keptRange(after)[1] === done.length - 1 && !s.pending) {
               app.view = null;
               s.revealed = after;
             } else app.view = after;
@@ -4868,9 +4934,16 @@
       }
       // An earlier step looks different from the current one (PO, R1): a note with a way back to the current
       // step; the forward button says „Blättern“ there, since nothing is drawn (see forward()).
+      // PO 10.11.2026: after a repetition with nothing left to draw (from the overview), browsing onwards never
+      // leads back: the note leads „Zur Übersicht“ instead.
       function lookBack(s) {
+        const done = doneSteps(s);
+        const ahead = s.revealed && app.view && done.findIndex((x) => same(x, app.view)) > done.findIndex((x) => same(x, s.revealed));
+        if (ahead && !nextMissing(s))
+          return h('div', { class: 'lookBack' }, icon('again', 14), h('strong', {}, 'Rückblick'),
+            h('button', { class: 'pill', onclick: () => { app.view = null; s.revealed = null; s.state = 'running'; go('overview'); } }, 'Zur Übersicht', icon('next', 14)));
         return h('div', { class: 'lookBack' }, icon('again', 14), h('strong', {}, 'Rückblick'),
-          h('button', { class: 'pill', onclick: () => { app.view = null; const done = doneSteps(s); if (s.state !== 'running' && !s.pending) s.revealed = done[done.length - 1]; go(s.state === 'running' ? 'overview' : 'match'); } }, 'Zum aktuellen Schritt', icon('next', 14)));
+          h('button', { class: 'pill', onclick: () => { app.view = null; if (s.state !== 'running' && !s.pending) s.revealed = done[done.length - 1]; go(s.state === 'running' ? 'overview' : 'match'); } }, 'Zum aktuellen Schritt', icon('next', 14)));
       }
       // The session as it was right after a step, for looking back.
       function snapshot(s, st) {
@@ -4923,6 +4996,8 @@
       function matchHead(s, title, back) {
         return pageHead(title, {
           back,
+          // PO 10.11.2026: on the first step greyed out like „Wiederholen“, so the title keeps its place.
+          backOff: !back,
           sub: `${s.table.name} · ${editionName(s.edition)}`,
           actions: h('button', { class: 'iconBtn' + (ui.endIcon === 'dots' ? ' dotsBtn' : ''), 'aria-label': ui.endIcon === 'dots' ? 'Mehr' : 'Partie beenden ohne Ergebnis', title: 'Partie beenden ohne Ergebnis', onclick: ui.endIcon === 'dots' ? toggleMenu : askEnd }, icon(ui.endIcon, 20),
             ui.endIcon === 'dots' && app.menuOpen && h('span', { class: 'headMenu', onclick: (e) => e.stopPropagation() }, h('button', { onclick: () => { app.menuOpen = false; askEnd(); } }, icon('exitDoor', 18), 'Partie beenden'))),
@@ -5579,6 +5654,8 @@
       // Placement P9 / W2. The band names the step it shows: before drawing (pend) the piece to come;
       // in V2 after a result already the next piece on this board, or „Platzierung fertig“.
       function placeView(s, st, pend, extra) {
+        // After a repetition the kept pieces are shown as a whole, not one by one (PO 10.11.2026).
+        const keptWhole = isKeptWhole(st);
         const pieces = piecesOf(s);
         const newest = pend ? null : pieces.find((x) => x.key === (st.kind === 'road' ? 'r' : 'b') + st.i);
         let ann = st;
@@ -5596,15 +5673,15 @@
           const color = s.colors[info.pid];
           const ink = color === 'white' ? '#231d18' : '#fff';
           const pieceIcon = (size) => (info.road ? roadIcon(color, size) : pieceMark(color, info.city, size));
-          band = h('div', { class: 'turnBand small', 'data-reveal': pend ? null : '', style: { '--pc': C[color], '--pc-ink': ink } },
+          band = h('div', { class: 'turnBand small', style: { '--pc': C[color], '--pc-ink': ink } },
             h('span', { class: 'tbPiece small' }, pieceIcon(20)),
             h('span', { class: 'tbLine' }, ui.bandNext === 'N1' && ahead && !pend && h('small', { class: 'tbNext' }, 'Als Nächstes'), h('strong', {}, nameOf(info.pid)), ' · ' + (info.road ? 'Straße' : info.city ? 'Stadt' : 'Siedlung')),
             h('span', { class: 'tbOrder' }, o.map((pid) => coinMini(pid, pid === info.pid ? 'cur' : ''))));
         } else
-          band = h('div', { class: 'turnBand small doneBand', 'data-reveal': '' },
+          band = h('div', { class: 'turnBand small doneBand' },
             h('span', { class: 'tbPiece small' }, icon('check', 20)), h('span', { class: 'tbLine' }, h('strong', {}, 'Platzierung fertig')),
             h('span', { class: 'tbOrder' }, o.map((pid) => coinMini(pid, ''))));
-        const board = h('div', { class: 'boardArea' }, boardSvg(pieces, newest));
+        const board = h('div', { class: 'boardArea' }, boardSvg(pieces, keptWhole ? null : newest), extra && h('div', { class: 'skipOver' }, extra));
         // Landscape W2: the order as a list with each person's pieces; pieces still to come are faded.
         const mineOf = (pid) => s.buildings.map((x, k) => [x, k]).filter(([x]) => x && x.pid === pid);
         const listMark = (pid, kind, faded) => fitMark(s.colors[pid], kind, 20, 'wMark' + (faded ? ' faded' : ''));
@@ -5783,6 +5860,13 @@
       async function dealDraw(first) {
         const s = cd.s;
         const n = s.persons.length;
+        // After repeating from place k the kept places lie open and the others face down; the face-down card
+        // on place k is the one drawn (the backs are alike). I2-E designs collecting and mixing the rest.
+        if (cd.dealt && first && cd.dealt[cd.placed.length] !== first) {
+          const rest = cd.dealt.filter((p) => !cd.placed.includes(p) && p !== first);
+          cd.dealt = [...cd.placed, first, ...rest];
+          await Promise.all(cd.dealt.map((p, i) => (i >= cd.placed.length ? move(cd.el[p], { ...slotOf(i), r: 0, z: 20 + i }, 1) : null)));
+        }
         if (!cd.dealt) {
           const pool = s.persons.filter((p) => p !== first);
           const perm = [first];
@@ -5925,9 +6009,14 @@
           const taskW = Math.min(TASK_W, aw - W - 30, (ah - H - 40) / 1.48);
           const taskH = taskW * 1.48;
           const x0 = (aw - (taskW + 20 + W)) / 2;
-          G.task = { x: x0, y: 6, w: taskW, h: taskH };
-          G.slot = { x: x0 + taskW + 20, y: 6 + (taskH - H) / 2 };
-          G.zoneTop = 6 + taskH + 16;
+          // PO 10.11.2026: both together in the middle of the table, with a gap of 16 to 40 px.
+          const rest = ah - taskH - H;
+          const gapY = Math.min(40, Math.max(16, rest / 3));
+          const top = Math.max(6, (rest - gapY) / 2);
+          G.task = { x: x0, y: top, w: taskW, h: taskH };
+          G.slot = { x: x0 + taskW + 20, y: top + (taskH - H) / 2 };
+          G.zoneTop = top + taskH + gapY;
+          G.rowAt = G.zoneTop;
         } else {
           // Same place and size as the order row of the flow (I2-C reference, PO): full width, gap 8 px,
           // centred vertically in the step body. Outside the row the cards are the same, only scaled down.
@@ -5951,7 +6040,7 @@
           G.k = 1;
         }
         G.zoneH = ah - G.zoneTop;
-        G.rowY = G.zoneTop + Math.max(0, (G.zoneH - H) / 2 - 8);
+        G.rowY = G.rowAt ?? G.zoneTop + Math.max(0, (G.zoneH - H) / 2 - 8);
         cd.G = G;
         area.replaceChildren();
         if (cd.scene === 'A') {
@@ -6158,27 +6247,32 @@
       function initRes(area) {
         const s = cd.s;
         const aw = area.clientWidth, ah = area.clientHeight;
-        const RW = Math.min(64, (aw - 4 * 8) / 5), RH = RW * 1.5;
+        // PO 10.11.: the band lies below the table as on the placement; on tablets the cards grow (up to 96 px,
+        // the places up to 180 px).
+        const TOP = 8, BETWEEN = 26, BOTTOM = 6;
+        const free = ah - (TOP + BETWEEN + BOTTOM);
+        const RW = Math.min(96, (aw - 4 * 8) / 5, (free * 0.4) / 1.5), RH = RW * 1.5;
         const c = rs.count;
-        const BAND = 44, NAME = 20, GAP = 12, LINE = 8;
+        const NAME = 20, GAP = 12, LINE = 8;
         // PO 09.11.: the places keep one size, at most as wide as in a row of three; many starting resources
         // go into two lines instead of shrinking into one. Two lines only where the cards come out larger.
-        const fixed = 8 + 14 + BAND + 18 + RH + 8;
-        const most = Math.min(120, (aw - 2 * GAP) / 3);
+        const room = ah - (TOP + BETWEEN + RH + BOTTOM);
+        const most = Math.min(180, (aw - 2 * GAP) / 3);
         const perRow = (rows) => Math.ceil(c / rows);
-        const sizeFor = (rows) => Math.min(most, (aw - (perRow(rows) - 1) * GAP) / perRow(rows), ((ah - fixed + LINE) / rows - NAME - LINE) / 1.5);
+        const sizeFor = (rows) => Math.min(most, (aw - (perRow(rows) - 1) * GAP) / perRow(rows), ((room + LINE) / rows - NAME - LINE) / 1.5);
         const rows = c > 3 && sizeFor(2) > sizeFor(1) ? 2 : 1;
         const SW = sizeFor(rows);
         const SH = SW * 1.5;
         const per = perRow(rows);
+        const block = rows * (SH + NAME) + (rows - 1) * LINE;
+        const first = TOP + Math.max(0, (room - block) / 2);
         const slots = Array.from({ length: c }, (_, k) => {
           const line = Math.floor(k / per);
           const inLine = Math.min(per, c - line * per);
           const tw = inLine * SW + (inLine - 1) * GAP;
-          return { x: (aw - tw) / 2 + (k - line * per) * (SW + GAP), y: 8 + line * (SH + NAME + LINE) };
+          return { x: (aw - tw) / 2 + (k - line * per) * (SW + GAP), y: first + line * (SH + NAME + LINE) };
         });
-        const bandY = 8 + rows * (SH + NAME) + (rows - 1) * LINE + 14;
-        const rowY = bandY + BAND + Math.max(18, (ah - bandY - BAND - RH) / 2);
+        const rowY = ah - BOTTOM - RH;
         const gap = (aw - 5 * RW) / 6;
         const rowXs = RES_KEYS.map((_, i) => gap + i * (RW + gap));
         cd.G = { aw, ah, RW, RH, SW, SH, slots, rowY, rowXs };
@@ -6190,10 +6284,6 @@
           area.append(slot);
           if (rs.got[k]) area.append(h('span', { class: 'rc4Name slotName' + (rs.open[k] ? '' : ' muted'), style: { left: p.x + 'px', top: p.y + SH + 4 + 'px', width: SW + 'px' } }, rs.open[k] ? RES[rs.got[k]].name : 'Antippen'));
         });
-        const band = resBand(s, rs.pid, c, false);
-        band.classList.add('bandAbs');
-        band.style.top = bandY + 'px';
-        area.append(band);
         // the cards of this person: face down until turned over by tapping
         rs.got.forEach((r, k) => {
           const el = resCardFace(r);
@@ -6396,8 +6486,8 @@
         // I2-D: a page without result shows the step that „Losen“ will draw.
         const pend = !app.view && !real.revealed && !!real.pending;
         const st = app.view || real.revealed || real.pending;
-        const s = app.view ? snapshot(real, app.view) : real;
         const done = doneSteps(real);
+        const s = app.view ? snapshot(real, done[keptRange(app.view)[1]] || app.view) : real;
         const isFirst = pend ? done.length === 0 : done.findIndex((x) => same(x, st)) === 0;
         const isPlace = st.kind === 'building' || st.kind === 'road';
         const titles = { draw: 'Losen', spin: 'Reihenfolge', building: 'Platzierung', road: 'Platzierung', res: 'Startrohstoffe' };
@@ -6408,13 +6498,14 @@
         const extra = skipHere && [h('button', { class: 'linkBtn', onclick: askSkip }, 'Platzierung überspringen')];
         let body;
         if (isPlace) body = placeView(s, st, pend, extra);
+        else if (st.kind === 'res') body = h('div', { class: 'withBand' }, cardsBody(s, st, pend), resBand(s, st.pid, s.res.count, false), actions(s, st, null, pend));
         else body = cardsBody(s, st, pend);
         const browsing = forward(real) === 'browse';
-        return h('main', { class: 'main fill' + (isPlace ? ' wideMain placeMain pw' + ui.placeWide : '') + (browsing ? ' past' : '') },
+        return h('main', { class: 'main fill' + (isPlace ? ' wideMain placeMain pw' + ui.placeWide : '') + (st.kind === 'res' ? ' resMain' : '') + (browsing ? ' past' : '') },
           matchHead(s, titles[st.kind], isFirst ? null : stepBack),
-          h('div', { class: 'progWrap' }, progress(s, st, pend), browsing && lookBack(real)),
+          h('div', { class: 'progWrap' }, progress(s, st, pend), browsing && app.view && lookBack(real)),
           h('div', { class: 'stepBody' }, body),
-          !isPlace && actions(s, st, extra, pend),
+          !isPlace && st.kind !== 'res' && actions(s, st, extra, pend),
         );
       }
 
@@ -6730,8 +6821,10 @@
       function notes() {
         const spec = (title, rows) => h('div', { class: 'card' }, h('h2', {}, title), h('ul', {}, rows.map((r) => h('li', { class: 'small' }, r))));
         return h('div', { class: 'notes' },
-          spec('Für alle Seiten (Entscheidungen des Product Owners, 05. bis 09.11.2026)', [
-            'Vor dem Losen (V2): Ein Schritt zeigt sich erst ohne Ergebnis, wenn die Ansicht wechselt: jeder Losschritt, Beginn der Reihenfolge, leeres Brett, Startrohstoffe je Person. In Reihenfolge und Platzierung geht es danach in derselben Ansicht direkt mit „Losen“ weiter. Auch der erste Schritt nach „Generierung starten“ und ein wiederholter Schritt beginnen ohne Ergebnis. Ohne Ergebnis gibt es kein „Wiederholen“.',
+          spec('Für alle Seiten (Entscheidungen des Product Owners, 05. bis 10.11.2026)', [
+            'Vor dem Losen (V2): Ein Schritt zeigt sich erst ohne Ergebnis, wenn die Ansicht wechselt: jeder Losschritt, Beginn der Reihenfolge, leeres Brett, Startrohstoffe je Person. In Reihenfolge und Platzierung geht es danach in derselben Ansicht direkt mit „Losen“ weiter. Auch der erste Schritt nach „Generierung starten“ und ein wiederholter Schritt beginnen ohne Ergebnis. Ohne Ergebnis ist „Wiederholen“ ausgegraut, auf dem ersten Schritt auch „Zurück“; beide bleiben an ihrem Platz (10.11.).',
+            'Nichts verschiebt sich, wenn etwas erscheint (PO 10.11.): Knöpfe stehen immer an derselben Stelle und blenden nicht bei jeder Seite neu ein; das Band hat immer die Höhe mit „Als Nächstes“ und wechselt nur seinen Inhalt; die Überschrift der Farben hat die Höhe von „Wie am Tisch“. Neu einblenden nur Ergebnisse.',
+            'Nach einem Wiederholen bleiben die späteren Schritte erhalten (PO 10.11.): Reihenfolge und Brett erscheinen dann als Ganzes, nur der neu geloste Schritt blendet ein; „Blättern“ geht von Ansicht zu Ansicht, und ist nichts mehr zu losen, führt der Hinweis „Rückblick“ „Zur Übersicht“. Fehlt nach dem wiederholten Schritt noch etwas (etwa nach einer neuen Reihenfolge die Platzierung), kommt das zuerst. Schon geloste Startrohstoffe folgen einer neuen Reihenfolge und behalten ihre Karten.',
             'Vorwärts-Knopf: „Losen“ lost den angezeigten bzw. nächsten Schritt derselben Ansicht, „Weiter“ führt ohne zu losen zur nächsten Ansicht, „Blättern“ geht durch schon geloste Schritte, „Zur Übersicht“ nach dem letzten Schritt.',
             'Personen werden mit Karten gelost statt mit einem Glücksrad (K1 Stapel): Vor dem Losen liegen alle Karten offen, jeder sieht, wer drin ist. Kartenrücken R1: dunkles Holz, Rautenmuster, goldener Doppelrahmen, Medaillon mit Logo. Rück- und Vorderseite gleich groß und an derselben Stelle.',
             'Erst speichern, dann zeigen (ADR-014): „Losen“ lost und speichert das Ergebnis, dann bewegen sich die Karten dorthin. Nach einem Neustart steht derselbe Zustand da: Eine unterbrochene Bewegung läuft mit demselben Ergebnis noch einmal ab (FA-AB-07), eine abgeschlossene nicht; aufgedeckte Startrohstoffe bleiben aufgedeckt (PO 09.11.).',
@@ -6739,24 +6832,24 @@
             'Gestrichelte Plätze: Sobald eine Karte darauf liegt, auch verdeckt, entfällt die gestrichelte Linie, damit sie nicht am Rand durchscheint. Rückblick-Band wie in I2-C: Es schwebt im freien Raum und nimmt nur Platz ein, wenn es etwas verdecken würde; dann ordnen sich die Karten in der kleineren Fläche neu an, nichts ragt in die Knöpfe.',
           ]),
           spec('Seite 5 Losschritt', [
-            'Oben die Entwicklungskarte des Losschritts, unverändert wie im Ablauf (240 px breit, bei wenig Platz als Ganzes verkleinert), vor dem Losen mit „? Wer?“ und „legt sie aus“; rechts daneben ein gestrichelter Platz „?“. Darunter die Personenkarten offen (Münze, Name, Farbstreifen).',
+            'Oben die Entwicklungskarte des Losschritts, unverändert wie im Ablauf (240 px breit, bei wenig Platz als Ganzes verkleinert), vor dem Losen mit „? Wer?“ und „legt sie aus“; rechts daneben ein gestrichelter Platz „?“. Darunter die Personenkarten offen (Münze, Name, Farbstreifen). Entwicklungskarte und Personenkarten liegen zusammen in der Mitte des Kartentischs, 16 bis 40 px auseinander (PO 10.11.).',
             'Nach dem Losen liegt die gezogene Personenkarte auf dem Platz, die Entwicklungskarte nennt die Person. Mit Zurücklegen (FA-LS-06): Auf der nächsten Losschritt-Seite liegen wieder alle Karten offen.',
           ]),
           spec('Seite 6 Reihenfolge', [
             'Die Plätze liegen wie die Plätze-Reihe der Referenz aus I2-C (bei 4 Personen volle Breite, 8 px Abstand, senkrecht mittig); vor dem Losen gestrichelt mit Nummer, darunter die Personenkarten offen und gleich groß.',
             'Das erste „Losen“ mischt einmal, legt alle Karten verdeckt auf die Plätze und dreht den Start um; jedes weitere „Losen“ dreht den nächsten Platz um; der letzte Platz dreht sich von selbst um (FA-LS-02). Aufgedeckt ist jede Karte die Karte Q3 des Ablaufs mit Band „Start“ / „Platz n“; die neueste ist 10 px angehoben. Eine Kartengröße für die ganze Seite, gleich bei 2, 3 und 4 Personen: so breit wie in einer Reihe aus vier (schmaler nur bei mehr Personen) und so niedrig, dass Plätze und noch nicht gezogene Karten gleich groß übereinander passen; die Karten liegen genau unter den Plätzen. Die Reihe der Plätze steht mittig, wo der Platz reicht (wie I2-C), sonst stehen beide Reihen zusammen mittig. Dreht sich der letzte Platz von selbst um, sinkt die zuvor angehobene Karte danach ab; die fertige Reihenfolge liegt ebenbündig.',
-            'In der App wird weiter Platz für Platz gelost und gespeichert; die verdeckten Karten auf den Plätzen sind nur Bild. „Wiederholen“ eines Drehs lost die ganze Reihenfolge neu (US-AB-03 AK-5), die Seite beginnt wieder mit offenen Karten.',
+            'In der App wird weiter Platz für Platz gelost und gespeichert; die verdeckten Karten auf den Plätzen sind nur Bild. „Wiederholen“ von Platz k lost ab diesem Platz neu (US-AB-03 AK-5, PO 10.11.): Die früheren Plätze bleiben offen liegen, die übrigen verdeckt, „Losen“ deckt Platz k auf; bei Platz 1 beginnt die Seite wieder mit offenen Karten. Das Einsammeln und Mischen der übrigen Karten gestaltet I2-E.',
           ]),
           spec('Seite 7 Platzierung', [
-            'Vor dem ersten Gebäude das leere Brett mit dem Band des ersten Stücks; „Platzierung überspringen“ steht dort über den Knöpfen statt nach dem letzten Dreh. Danach in derselben Ansicht je Stück „Losen“; das Band zeigt „Als Nächstes“ und das nächste Stück, nach dem letzten „Platzierung fertig“. Aufblinken auf dem Brett gestaltet D-2.',
+            'Vor dem ersten Gebäude das leere Brett mit dem Band des ersten Stücks; „Platzierung überspringen“ steht dort am unteren Rand des Bretts direkt über dem Band; das Brett lässt dafür auf allen Seiten der Platzierung einen schmalen Streifen frei, damit es nicht springt, wenn der Link geht (PO 10.11.). Danach in derselben Ansicht je Stück „Losen“; das Band zeigt „Als Nächstes“ und das nächste Stück, nach dem letzten „Platzierung fertig“. Aufblinken auf dem Brett gestaltet D-2.',
           ]),
           spec('Seite 8 Startrohstoffe', [
-            'Oben so viele gestrichelte Plätze wie Rohstoffe, darunter das Band „Name · n Rohstoffe“, ganz unten die Karten. Die Plätze haben eine feste Größe, höchstens so breit wie in einer Reihe aus drei (bis 120 px); bei vielen Rohstoffen in zwei Zeilen statt kleiner in einer, sofern die Karten so größer werden (sonst, etwa auf kleinen Handys, eine Zeile). Knopftexte bleiben einzeilig, damit sich die Größe beim Umdrehen nicht ändert. Vor dem ersten Losen liegen die fünf Rohstoffkarten (S4, unverändert) offen; danach bleibt der Stapel verdeckt.',
+            'Das Band „Name · n Rohstoffe“ liegt unter dem Kartentisch direkt über den Knöpfen, an derselben Stelle wie in der Platzierung (hochkant auch gleich breit); der Stapel bzw. die fünf Sorten liegen direkt darüber, die gestrichelten Plätze mittig im Raum darüber (PO 10.11.). Die Plätze haben eine feste Größe, höchstens so breit wie in einer Reihe aus drei (bis 180 px, Karten unten bis 96 px; auf dem Handy wie bisher); bei vielen Rohstoffen in zwei Zeilen statt kleiner in einer, sofern die Karten so größer werden (sonst, etwa auf kleinen Handys, eine Zeile). Knopftexte bleiben einzeilig, damit sich die Größe beim Umdrehen nicht ändert. Vor dem ersten Losen liegen die fünf Rohstoffkarten (S4, unverändert) offen; danach bleibt der Stapel verdeckt.',
             '„Losen“ legt alle Karten der Person verdeckt auf die Plätze, unter jeder steht „Antippen“. Umgedreht wird von Hand: Karte antippen oder der Vorwärts-Knopf „Alle umdrehen“; erst dann heißt er „Weiter“. Darunter der Name des Rohstoffs.',
             'Mit Zurücklegen fliegt nach jeder ausgeteilten Karte sichtbar eine verdeckte Karte auf den Stapel, eine Sorte kann doppelt kommen. Ohne Zurücklegen wird der Stapel kleiner; das „Losen“ der nächsten Person steckt die fehlenden Karten zuerst zurück.',
           ]),
           spec('Seite 9 Übersicht', [
-            'Wie in der Referenz aus I2-C. Antippen einer Zeile oder eines Stücks fragt nach; die Warnung nennt, was verworfen wird. Danach zeigt der Ablauf den wiederholten Schritt ohne Ergebnis, „Losen“ lost ihn neu; spätere Schritte werden mit „Blättern“ durchgesehen.',
+            'Wie in der Referenz aus I2-C. Antippen einer Zeile oder eines Stücks fragt nach; die Warnung nennt, was verworfen wird. Danach zeigt der Ablauf den wiederholten Schritt ohne Ergebnis, „Losen“ lost ihn neu; spätere Schritte werden mit „Blättern“ Ansicht für Ansicht durchgesehen, ganze Ansichten ohne „Wiederholen“ (das gezielte Antippen eines Steins kommt mit I2-H).',
           ]),
           spec('Neue Partie, während eine läuft (US-AB-05 AK-2)', [
             'Die Rückfrage kommt, wenn „Neue Partie“ während einer Partie geöffnet wird (Zurück-Geste, alter Verweis; ab I3 auch die Spielliste). Dialog über der Spielwahl: „‹Tisch› spielt gerade“, „Neue Partie beendet sie ohne Ergebnis“; Hauptknopf „Zur Partie“, daneben in Rot „Neu beginnen“ (Q1).',
