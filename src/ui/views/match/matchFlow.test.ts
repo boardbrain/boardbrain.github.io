@@ -10,13 +10,16 @@ import {
   currentPage,
   followingSlot,
   forwardAction,
+  isKeptView,
   isLookBack,
   isSameView,
+  lookBackTarget,
   nextPage,
   orderOrSeats,
   pageAt,
   previousPage,
   sessionUpTo,
+  shownRange,
   type FlowPage,
 } from './matchFlow';
 
@@ -87,12 +90,14 @@ describe('US-AB-04 AK-3, AK-4 look back', () => {
   });
 
   it('AK-3: "Zurück" goes one step back; the first step has none', () => {
-    expect(previousPage(step(6))).toEqual(step(5));
-    expect(previousPage(step(0))).toBeNull();
-    const pending = currentPage(aSessionAfter(BASE, 3));
-    expect(pending && previousPage(pending)).toEqual(step(2));
-    const first = currentPage(aSessionAfter(BASE, 0));
-    expect(first && previousPage(first)).toBeNull();
+    expect(previousPage(session, step(6))).toEqual(step(5));
+    expect(previousPage(session, step(0))).toBeNull();
+    const third = aSessionAfter(BASE, 3);
+    const pending = currentPage(third);
+    expect(pending && previousPage(third, pending)).toEqual(step(2));
+    const empty = aSessionAfter(BASE, 0);
+    const first = currentPage(empty);
+    expect(first && previousPage(empty, first)).toBeNull();
   });
 
   it('AK-4: "Blättern" goes one step forward, at the end to the current page', () => {
@@ -124,9 +129,54 @@ describe('US-AB-04 AK-3, AK-4 look back', () => {
     expect(isLookBack(drawn, step(4))).toBe(true);
     expect(isLookBack(drawn, step(7))).toBe(false);
     expect(nextPage(drawn, step(1))).toEqual(step(2));
-    expect(nextPage(drawn, step(6))).toEqual(step(7));
     expect(nextPage(drawn, step(0))).toEqual(currentPage(drawn));
     expect(forwardAction(drawn, step(7))).toBe('draw');
+  });
+
+  it('PO 10.11.: kept views after a repetition are shown and passed as a whole', () => {
+    // Steps 3 to 5 are the order, 6 and 7 the first pieces; step 1 was drawn again.
+    const drawn = aSessionAfterRepeat();
+    expect(shownRange(drawn, 4)).toEqual({ start: 3, end: 5 });
+    expect(shownRange(drawn, 6)).toEqual({ start: 6, end: 7 });
+    expect(shownRange(drawn, 2)).toEqual({ start: 2, end: 2 });
+    expect(nextPage(drawn, step(2))).toEqual(step(3));
+    expect(nextPage(drawn, step(3))).toEqual(step(6));
+    expect(previousPage(drawn, step(6))).toEqual(step(3));
+    expect(previousPage(drawn, step(3))).toEqual(step(2));
+    expect(pageAt(drawn, 7)).toEqual(step(6));
+    expect(isKeptView(drawn, step(6))).toBe(true);
+    expect(isKeptView(drawn, step(1))).toBe(false);
+    // The rest of the placement is missing: the board goes on with "Losen".
+    expect(forwardAction(drawn, step(6))).toBe('draw');
+    // Before the repeated step a look back works step by step as before.
+    expect(shownRange(drawn, 0)).toEqual({ start: 0, end: 0 });
+  });
+
+  it('PO 10.11.: a repetition from the overview leads on to the overview, not back', () => {
+    const before = aSessionAfter(BASE, ALL_STEPS);
+    const again = repeated(before, 7);
+    const record = before.generation.steps[7];
+    if (record === undefined) throw new Error('step 7');
+    const steps = [...again.generation.steps];
+    steps.splice(7, 0, { ...record, status: 'revealed' });
+    const drawn = { ...again, generation: { ...again.generation, steps } };
+
+    // Road 0 drawn again: the whole board is shown, the kept pieces are not browsed one by one.
+    expect(shownRange(drawn, 7)).toEqual({ start: 7, end: ALL_STEPS - 1 });
+    expect(forwardAction(drawn, step(7))).toBe('overview');
+    expect(lookBackTarget(drawn, step(5))).toBe('current');
+    const harbours = aSessionAfter(BASE, ALL_STEPS);
+    const harboursAgain = repeated(harbours, 1);
+    const harboursSteps = [...harboursAgain.generation.steps];
+    const harboursRecord = harbours.generation.steps[1];
+    if (harboursRecord === undefined) throw new Error('step 1');
+    harboursSteps.splice(1, 0, { ...harboursRecord, status: 'revealed' });
+    const harboursDrawn = {
+      ...harboursAgain,
+      generation: { ...harboursAgain.generation, steps: harboursSteps },
+    };
+    expect(lookBackTarget(harboursDrawn, step(3))).toBe('overview');
+    expect(lookBackTarget(aSessionAfterRepeat(), step(6))).toBe('current');
   });
 });
 

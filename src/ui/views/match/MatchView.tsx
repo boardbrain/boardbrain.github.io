@@ -30,6 +30,9 @@ import {
   nextPage,
   pageAt,
   previousPage,
+  isKeptView,
+  lookBackTarget,
+  shownRange,
   sessionUpTo,
   type FlowPage,
   type ForwardAction,
@@ -152,9 +155,12 @@ export function MatchView(): React.JSX.Element | null {
     persons.find((person) => person.id === personId)?.name ?? '';
   const revealed = revealedStepIndex(session.generation);
   const forward = forwardAction(session, page);
-  const back = previousPage(page);
-  // A look back shows the match as it was right after its step.
-  const shown = page.kind === 'step' ? sessionUpTo(session, page.index) : session;
+  const back = previousPage(session, page);
+  // A look back shows the match as it was right after its step; a kept view after a repetition
+  // shows all its steps (shownRange).
+  const shownEnd = page.kind === 'step' ? shownRange(session, page.index).end : null;
+  const shown = shownEnd === null ? session : sessionUpTo(session, shownEnd);
+  const isKept = isKeptView(session, page);
 
   const go = (target: FlowPage | null): void => {
     void navigate(pathOf(target, session), { replace: true });
@@ -201,7 +207,7 @@ export function MatchView(): React.JSX.Element | null {
     <StepActions
       forward={forward}
       isPending={isPending}
-      canRepeat={page.kind === 'step'}
+      canRepeat={page.kind === 'step' && !(isKept && shownEnd !== page.index)}
       onRepeat={() => {
         setDialog('repeat');
       }}
@@ -223,7 +229,7 @@ export function MatchView(): React.JSX.Element | null {
   );
   // Placement and starting resources bring the buttons below their band.
   const isResources = slot.kind === 'starting-resources';
-  const following = page.kind === 'step' ? followingSlot(session, page.index) : null;
+  const following = shownEnd === null ? null : followingSlot(session, shownEnd);
 
   return (
     <main
@@ -281,8 +287,21 @@ export function MatchView(): React.JSX.Element | null {
           <LookBackNote
             ref={noteRef}
             isInFlow={!isNoteFloating}
+            label={
+              lookBackTarget(session, page) === 'overview'
+                ? t('partie.zurUebersicht')
+                : t('partie.zumAktuellenSchritt')
+            }
             onCurrent={() => {
-              go(pageAt(session, null));
+              if (lookBackTarget(session, page) === 'current' || revealed === undefined) {
+                go(pageAt(session, null));
+                return;
+              }
+              // Nothing left to draw: confirming the repeated step ends the generation again.
+              act(async () => {
+                const confirmed = await sessions.confirm(revealed);
+                return confirmed.ok && confirmed.value.generation.state === 'running';
+              });
             }}
           />
         )}
@@ -300,7 +319,7 @@ export function MatchView(): React.JSX.Element | null {
         {isPlacement && (
           <PlacementStep
             session={shown}
-            newest={step?.kind === 'building' || step?.kind === 'road' ? step : null}
+            newest={!isKept && (step?.kind === 'building' || step?.kind === 'road') ? step : null}
             announced={
               page.kind === 'pending'
                 ? page.slot

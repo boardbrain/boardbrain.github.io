@@ -53,7 +53,49 @@ export function pageAt(session: StoredSession, lookBack: number | null): FlowPag
   ) {
     return current;
   }
-  return { kind: 'step', index: lookBack };
+  return { kind: 'step', index: shownRange(session, lookBack).start };
+}
+
+/**
+ * The steps a page of step `index` shows (PO 10.11.2026). Normally just this step: a look back
+ * shows the match as it was right after it. After a repetition, though, the later steps are
+ * kept, not drawn again: a view with several steps (the order, the placement) then shows all
+ * its kept steps at once, so they neither vanish nor seem to be drawn again one by one.
+ */
+export function shownRange(
+  session: StoredSession,
+  index: number,
+): { readonly start: number; readonly end: number } {
+  const revealed = revealedStepIndex(session.generation);
+  const steps = session.generation.steps;
+  const kind = steps[index]?.step.kind;
+  if (revealed === undefined || index < revealed || kind === undefined) {
+    return { start: index, end: index };
+  }
+  // A missing step lies between two kept ones where it would be inserted.
+  const missingAt = catanNextSlot(session.setup, session.generation)?.at;
+  const sameView = (other: number): boolean => {
+    const otherKind = steps[other]?.step.kind;
+    return otherKind !== undefined && isSameView(kind, otherKind);
+  };
+  let start = index;
+  while (start - 1 > revealed && start !== missingAt && sameView(start - 1)) {
+    start--;
+  }
+  let end = index;
+  while (end + 1 !== missingAt && sameView(end + 1)) {
+    end++;
+  }
+  return { start, end };
+}
+
+/**
+ * Whether the page shows a step kept from before a repetition, together with the rest of its
+ * view: it marks no piece as new and offers no "Wiederholen" (the overview does).
+ */
+export function isKeptView(session: StoredSession, page: FlowPage): boolean {
+  const revealed = revealedStepIndex(session.generation);
+  return page.kind === 'step' && revealed !== undefined && page.index > revealed;
 }
 
 // Steps up to this index can be looked at; with a step waiting without a result, only those
@@ -80,12 +122,23 @@ export function isLookBack(session: StoredSession, page: FlowPage): boolean {
 }
 
 /**
- * The page "Zurück" leads to (US-AB-04 AK-3), or `null` on the first step: there is no back
- * button there.
+ * Where the note "Rückblick" leads (PO 10.11.2026): back to the current step, or, on a kept view
+ * after a repetition with nothing left to draw (a repetition from the overview), on to the
+ * overview, so browsing never leads backwards.
  */
-export function previousPage(page: FlowPage): FlowPage | null {
-  const index = page.kind === 'pending' ? page.at - 1 : page.index - 1;
-  return index >= 0 ? { kind: 'step', index } : null;
+export function lookBackTarget(session: StoredSession, page: FlowPage): 'current' | 'overview' {
+  return isKeptView(session, page) && catanNextSlot(session.setup, session.generation) === null
+    ? 'overview'
+    : 'current';
+}
+
+/**
+ * The page "Zurück" leads to (US-AB-04 AK-3), or `null` on the first step: there is no back
+ * button there. Kept views after a repetition are passed as a whole (`shownRange`).
+ */
+export function previousPage(session: StoredSession, page: FlowPage): FlowPage | null {
+  const index = page.kind === 'pending' ? page.at - 1 : shownRange(session, page.index).start - 1;
+  return index >= 0 ? { kind: 'step', index: shownRange(session, index).start } : null;
 }
 
 /**
@@ -95,7 +148,7 @@ export function nextPage(session: StoredSession, page: FlowPage): FlowPage | nul
   if (page.kind === 'pending') {
     return null;
   }
-  const target = page.index + 1;
+  const target = shownRange(session, page.index).end + 1;
   const revealed = revealedStepIndex(session.generation);
   return target >= lastReachable(session) || target === revealed
     ? currentPage(session)
@@ -149,13 +202,14 @@ export function forwardAction(session: StoredSession, page: FlowPage): ForwardAc
     return 'turn-all';
   }
   const next = catanNextSlot(session.setup, session.generation);
-  // The step just drawn goes on with the missing steps first, before the later steps drawn
-  // already are browsed (PO 10.11.2026: after repeating the order, "Blättern" led into the
-  // starting resources and back).
-  if (page.index === revealed && next?.at === page.index + 1) {
+  const end = shownRange(session, page.index).end;
+  // The step just drawn, or the kept view after it, goes on with the missing steps first,
+  // before the later steps drawn already are browsed (PO 10.11.2026: after repeating the order,
+  // "Blättern" led into the starting resources and back).
+  if (revealed !== undefined && end >= revealed && next?.at === end + 1) {
     return step !== undefined && isSameView(step.kind, next.slot.kind) ? 'draw' : 'next';
   }
-  if (revealed === undefined || page.index < session.generation.steps.length - 1) {
+  if (revealed === undefined || end < session.generation.steps.length - 1) {
     return 'browse';
   }
   if (next === null) {

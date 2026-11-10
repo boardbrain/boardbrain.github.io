@@ -85,6 +85,8 @@ type LookBackNoteProps = {
   readonly ref?: Ref<HTMLDivElement>;
   /** The note takes its own room instead of floating. */
   readonly isInFlow: boolean;
+  /** "Zum aktuellen Schritt", or "Zur Übersicht" after a repetition from the overview. */
+  readonly label: string;
   readonly onCurrent: () => void;
 };
 
@@ -92,7 +94,12 @@ type LookBackNoteProps = {
  * The note "Rückblick" on an earlier step (US-AB-04 AK-3, design I2-C R1): it floats over the
  * free room below the progress and leads back to the current step.
  */
-export function LookBackNote({ ref, isInFlow, onCurrent }: LookBackNoteProps): React.JSX.Element {
+export function LookBackNote({
+  ref,
+  isInFlow,
+  label,
+  onCurrent,
+}: LookBackNoteProps): React.JSX.Element {
   return (
     <div ref={ref} className={cx(styles.lookBack, isInFlow && styles.lookBackInFlow)}>
       <AgainIcon size={14} />
@@ -102,7 +109,7 @@ export function LookBackNote({ ref, isInFlow, onCurrent }: LookBackNoteProps): R
         className={cx(shared.pill, styles.lookBackPill)}
         onClick={onCurrent}
       >
-        {t('partie.zumAktuellenSchritt')}
+        {label}
         <ChevronIcon size={14} />
       </PressableButton>
     </div>

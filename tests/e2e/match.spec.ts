@@ -47,7 +47,8 @@ function progress(page: Page): Locator {
 }
 
 function forward(page: Page): Locator {
-  return page.getByRole('main').getByRole('button', { name: FORWARD });
+  // The last button of the view; the note "Rückblick" may lead "Zur Übersicht" as well.
+  return page.getByRole('main').getByRole('button', { name: FORWARD }).last();
 }
 
 // The page of the flow and what its forward button does (attribute of the view).
@@ -315,6 +316,30 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await tapForward(page, 'Losen');
     await expect(page.getByText('Als Nächstes')).toBeVisible();
     await expect(forward(page)).toHaveText('Losen');
+  });
+
+  test('US-AB-03 AK-3: a road of the overview is drawn again, the other pieces stay', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+
+    await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
+    await tap(page.getByRole('button', { name: /Straße.*wiederholen/ }).first());
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('Nur dieser Schritt wird neu gelost');
+    await dialog.getByRole('button', { name: 'Wiederholen' }).click();
+
+    // PO 10.11.2026: the kept pieces neither vanish nor are browsed one by one.
+    await expect(page.getByTestId('board-road')).toHaveCount(3);
+    await tapForward(page, 'Losen');
+    await expect(page.getByTestId('board-road')).toHaveCount(4);
+    await expect(page.getByTestId('board-settlement')).toHaveCount(4);
+    await expect(page.getByText('Platzierung fertig')).toBeVisible();
+    await tapForward(page, 'Zur Übersicht');
+    await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
   });
 
   test('AK-2: the start leads back; a new match asks first (Q1)', async ({ page }) => {
