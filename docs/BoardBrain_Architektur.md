@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.26 |
+| Version | 0.27 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 10.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -40,6 +40,7 @@
 | 0.24 | 05.11.2026 | Auch auf GitHub vier Ende-zu-Ende-Tests gleichzeitig statt der Voreinstellung zwei, der Rechner hat vier Kerne (14.5) |
 | 0.25 | 09.11.2026 | Bündel I2-D: Personen werden mit Karten gelost statt mit einem Glücksrad (Anforderungsdokumentation E-36; 3, 4.5, 13.6, 15, 18, 19); Losen und Bestätigen getrennt, Wiederholen ohne sofortiges Losen, Seite ohne Ergebnis abgeleitet statt gespeichert, aufgedeckte Startrohstoffe im Zustand des Catan-Moduls, Sitzung Version 2 (10.2, 10.3); Rückblick über `#/partie?schritt=N`, Band auf dem Start, Rückfrage bei neuer Partie, Sperre im Tisch-Editor, `#/brett` entfällt (13.1); Kartentisch in Pixeln aus der Referenz (13.6) |
 | 0.26 | 10.11.2026 | Bündel I2-G: Rahmen ohne Kopfzeile, Logo und App-Name nur auf dem Start; alle Ansichten außer dem Start mit gemeinsamer Breite, Polsterung und Kopfhöhe aus Tokens, Kopf der Platzierung im Querformat über beiden Spalten; Entwicklungskarte auf Tablets bis 280 px (13.1); Design-Referenz `docs/design/i2g-more-room-final-preview.html` |
+| 0.27 | 10.11.2026 | Bündel I2-H: Steine auf dem Brett antippen; unsichtbare Knöpfe über den Steinen, Zuordnung eines Tipps in `ui/board/pieceHit.ts`, Markierung und Scheinwerfer in der Rückfrage, Fenster weicht den Steinen aus (13.5); Design-Referenz `docs/design/i2h-tap-pieces-final-preview.html` |
 
 ## Inhaltsverzeichnis
 
@@ -1062,6 +1063,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: die Ansicht (nur sie scrollt) un
 - Siedlung und Stadt unterscheiden sich durch ihre Form (US-PL-04 AK-2); alle Gebäude und Straßen haben eine Kontur, damit Weiß auf dunklem Grund erkennbar bleibt (AK-3).
 - Aussehen nach `docs/design/i1d-board-final-preview.html` (Variante H1): sechseckiges Meer mit Wellenmuster und Schatten, flaches Wasser und Sandküste entlang der Küstenlinie, Holzfelder auf 92 % mit weichem Schatten und heller Oberkante, `viewBox` `-60 -53 120 106`. `ui/board/boardLayout.ts` berechnet die Formen aus dem Brettmodell, `Board.tsx` zeichnet sie; Farben nur über Tokens (13.4). Für I2 legt die Referenz Gebäude G1 (Haus, Stadt mit Turm) und Straßen R1 (abgerundeter Balken) mit dunkler Kontur fest, auch für Gebäude am Ufer (PP-01). Meer, Küste, Felder, Gebäude und Straßen bleiben getrennte Bausteine, damit weitere Stile später ein Eintrag mehr sind. *(neu in 0.15)*
 - **Gebäude und Straßen (I2-C):** `Board` erhält `buildings` (Kreuzung, Art, Catan-Farbe) und `roads` (Kante, Kreuzung des Gebäudes, Farbe) und zeichnet erst die Straßen, dann die Gebäude darüber. `ui/board/pieces.ts` berechnet die Formen: Haus und Stadt mit Turm um die Kreuzung (G1), die Straße von 34 % bis 86 % der Kante, vom Gebäude weg (R1); `vertexInSvg` und `edgeInSvg` in `boardLayout.ts` liefern die Punkte. `PieceMark` zeigt dieselben Formen klein in Listen und Bändern. *(neu in 0.22)*
+- **Steine antippen (I2-H, US-AB-03 AK-8):** `Board` zeichnet das SVG in einer Fläche in der Form des Bretts, so groß wie sie passt (`aspect-ratio`, Container-Einheiten); darüber liegen mit `onPieceTap` unsichtbare `PressableButton` von 44 px, je Stein einer mit Namen aus der Sprachdatei („Siedlung von Anna wiederholen“), in Prozent des `viewBox` platziert. Auf dem Bild kommt nichts hinzu. Die Knöpfe überlappen sich auf dem Handy; welcher Stein gemeint ist, entscheidet `pieceAt` in `ui/board/pieceHit.ts` aus der Stelle des Fingers: bis 4,5 Einheiten um eine Kreuzung das Gebäude, weiter außen der nächste Stein, eine Straße gemessen an ihrem gezeichneten Teil. Ein Klick ohne Zeiger (Tastatur, Bildschirmleser) meint den Stein des Knopfs. Während der Rückfrage markiert `Board` den Stein mit einem goldenen Ring (Token `--color-piece-mark`) und die mit verworfenen Steine schwächer (M1); welche das sind, liefert `stepsDiscardedBy` aus `core/generation` (`ui/views/match/boardPieces.ts`). `MatchDialog` legt mit `focus` die markierten Steine allein (`BoardSpotlight`) hell über das Dunkel, genau über das Brett, und stellt das Fenster dorthin, wo es die wenigsten verdeckt (`dialogPlace`: unten oder oben, ab 700 px Breite im Querformat links oder rechts); gemessen wird vor dem Zeichnen und bei jeder Größenänderung (ResizeObserver). Aussehen nach `docs/design/i2h-tap-pieces-final-preview.html` (R7, H1). *(neu in 0.27)*
 
 ### 13.6 Animationen (ADR-004)
 

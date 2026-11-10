@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.24 |
+| Version | 0.25 |
 | Stand | 10.11.2026 |
-| Grundlage | BoardBrain_Spezifikation.md v0.14 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.11 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.20 (9.3, 13, E-32), BoardBrain_Architektur.md v0.26 (19) |
+| Grundlage | BoardBrain_Spezifikation.md v0.15 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.11 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.20 (9.3, 13, E-32), BoardBrain_Architektur.md v0.27 (19) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -37,6 +37,7 @@
 | 0.22 | 03.11.2026 | I2-C umgesetzt (#31): Vorbereitung über Spiel, Tisch, Optionen und Farben, Ablauf mit „Losen“ und „Wiederholen“, Übersicht zum Ansehen, Startstapel „Partie“; Reihenfolge abschaltbar (FA-LS-07, Anforderungsdokumentation 0.19, Spezifikation 0.13); kein Paket `zustand` (Architektur ADR-029); Wiederholen aus der Übersicht und Rückblick („Blättern“, US-AB-04 AK-3, AK-4) gehören zu I2-D (Entscheidung des Product Owners) (8) |
 | 0.23 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners, Anforderungsdokumentation 0.20, Spezifikation 0.14): Schritt zuerst ohne Ergebnis, Knopf „Weiter“, Personen mit Karten losen statt mit einem Glücksrad, Startrohstoffe von Hand aufdecken; Referenz `docs/design/i2d-running-match-final-preview.html` mit allen Bewegungen; I2-D baut die ruhenden Zustände, I2-E wird „Karten ziehen und Überspringen“ und baut die Bewegungen, D-2 gestaltet nur noch Aufblinken, Tempo und Klänge (2, 8); neue Bündel I2-G „Mehr Platz: ohne Titelleiste, ganze Breite“ als Nächstes nach I2-D und danach I2-H „Steine auf dem Brett antippen“ (Entscheidungen des Product Owners 10.11.2026) |
 | 0.24 | 10.11.2026 | I2-G umgesetzt (#35): ohne Titelleiste, Logo L5 nur auf dem Start, alle Seiten außer dem Start gleich breit (U2, bis 1280 px) mit gleich hohem Kopf, Entwicklungskarte G4 bis 280 px; Referenz `docs/design/i2g-more-room-final-preview.html`; Prüfpunkt Schärfe der skalierten Entwicklungskarte in I2-E (8) |
+| 0.25 | 10.11.2026 | I2-H umgesetzt: Steine auf dem Brett antippen und wiederholen, Markierung M1, Rückfrage R7 weicht aus und lässt nur die markierten Steine hell, Hinweis H1 in der Übersicht, „Wiederholen“ auf ganzen Ansichten wiederholt den letzten Stein (Entscheidungen des Product Owners 10.11.2026, Spezifikation 0.15 US-AB-03 AK-8); Referenz `docs/design/i2h-tap-pieces-final-preview.html` (8) |
 
 ## 1. Zweck
 
@@ -54,7 +55,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 2b | Kleine Aufgabe K-3: Kartenhand einfahren | nach I1, vor I2 | umgesetzt (#23) |
 | 2c | Kleine Aufgabe K-4: Berührungsverhalten app-weit | direkt nach K-3, vor I2 | umgesetzt (#25) |
-| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31), I2-D (#34) |
+| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31), I2-D (#34), I2-G (#35), I2-H |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
@@ -266,7 +267,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 | I2-C Neue Partie vorbereiten und durchlaufen | US-SP-01, US-SP-04, US-AB-01, US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PG-04, US-SR-01, US-PL-05 (Oberfläche) | Sonnet, medium | `feat/us-ab-01-new-match` | umgesetzt (#31) |
 | I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-02, US-AB-03, US-AB-04, US-AB-05, US-AB-06, US-SR-01 AK-6, US-VW-02 AK-5 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | umgesetzt (#34) |
 | I2-G Mehr Platz: ohne Titelleiste, ganze Breite *(neu in 0.23)* | NFA-PL-04 (alle Ansichten) | Opus, medium | `feat/more-room-layout` | umgesetzt (#35) |
-| I2-H Steine auf dem Brett antippen *(neu in 0.23)* | US-AB-03 (Oberfläche) | Opus, high | `feat/us-ab-03-tap-pieces` | offen, nach I2-G |
+| I2-H Steine auf dem Brett antippen *(neu in 0.23)* | US-AB-03 (Oberfläche) | Opus, high | `feat/us-ab-03-tap-pieces` | umgesetzt |
 | D-2 Design der Inszenierung (OP-06) | Aufblinken, Tempo, Klänge | Opus, medium | `chore/op-06-staging-design` | offen |
 | I2-E Karten ziehen und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-card-draw` | offen |
 | I2-F Aufblinken und Klänge | US-IN-02, US-IN-03 | Sonnet, medium | `feat/us-in-02-highlight-and-sound` | offen |
@@ -327,6 +328,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 - **Design zuerst:** Vorschau für die Markierung in der Rückfrage und den Hinweis; die Markierung passt zum Aufblinken aus D-2.
 - **Nachweis:** Unit-Tests für die Zuordnung eines Tipps zu Gebäude oder Straße; Ende-zu-Ende-Test: Straße und Gebäude über das Brett wiederholen, im Ablauf und in der Übersicht.
 - **Pakete:** keine.
+- **Umgesetzt (0.25):** Entscheidungen des Product Owners nach einer Vorschau-Runde: Markierung M1 (goldener Ring um den Stein, gestrichelt um die mit verworfenen Steine), Rückfrage R7 (abgedunkelt wie jedes Fenster, nur die markierten Steine liegen hell darüber; das Fenster steht unten, oben, wenn es unten mehr markierte Steine verdeckt, quer links oder rechts), Hinweis H1 unter dem Brett der Übersicht; „Wiederholen“ auf ganzen Ansichten nach einem Wiederholen ist nicht mehr ausgegraut und wiederholt den letzten Stein der Ansicht (Entscheidung A). Neues Abnahmekriterium US-AB-03 AK-8 (Spezifikation 0.15). Referenz `docs/design/i2h-tap-pieces-final-preview.html` (Architektur 13.5).
 - **Abnahme durch den Product Owner:** auf S26, iPad und PC einzelne Siedlungen, Städte und Straßen antippen und wiederholen.
 
 ### D-2 Design der Inszenierung (OP-06)
