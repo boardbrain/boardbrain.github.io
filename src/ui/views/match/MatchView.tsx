@@ -36,7 +36,6 @@ import {
 } from './matchFlow';
 import { editionName, repeatLines, stepTitle } from './matchTexts';
 import { PlacementStep } from './PlacementStep';
-import { Reveal } from './Reveal';
 import { UnsupportedSession } from './UnsupportedSession';
 import shared from './Match.module.css';
 import styles from './MatchView.module.css';
@@ -200,9 +199,6 @@ export function MatchView(): React.JSX.Element | null {
   const isPlacement = slot.kind === 'building' || slot.kind === 'road';
   const actions = (
     <StepActions
-      // The buttons fade in with a new view; on the board they stay calm from piece to piece
-      // (PO 10.11.2026: band and buttons twitched with every "Losen").
-      key={isPlacement ? 'placement' : pageKey}
       forward={forward}
       isPending={isPending}
       canRepeat={page.kind === 'step'}
@@ -464,7 +460,9 @@ function StepActions({
   onForward,
 }: StepActionsProps): React.JSX.Element {
   return (
-    <Reveal className={styles.actionsCol}>
+    // The buttons stay in place from page to page, without fading in again (PO 10.11.2026: they
+    // twitched with every "Losen").
+    <div className={styles.actionsCol}>
       <div className={styles.actions}>
         <PressableButton
           type="button"
@@ -485,6 +483,6 @@ function StepActions({
           <ChevronIcon size={18} />
         </PressableButton>
       </div>
-    </Reveal>
+    </div>
   );
 }
