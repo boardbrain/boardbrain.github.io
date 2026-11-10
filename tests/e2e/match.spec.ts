@@ -294,6 +294,29 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
   });
 
+  test('US-AB-03 AK-6: a new order leads to the placement before the starting resources', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
+    await startGeneration(page);
+    await drawAll(page);
+
+    await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
+    await tap(page.getByRole('main').getByRole('button').filter({ hasText: /^1/ }).first());
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await expect(page.getByRole('heading', { name: 'Reihenfolge' })).toBeVisible();
+
+    // PO 10.11.2026: the drawn starting resources come after the new placement, not between.
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Weiter');
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+    await tapForward(page, 'Losen');
+    await expect(page.getByText('Als Nächstes')).toBeVisible();
+    await expect(forward(page)).toHaveText('Losen');
+  });
+
   test('AK-2: the start leads back; a new match asks first (Q1)', async ({ page }) => {
     await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
     await openOptions(page, /^Zu zweit:/);

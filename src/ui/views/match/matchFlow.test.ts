@@ -173,6 +173,43 @@ describe('US-AB-02 AK-1 forward button', () => {
   });
 });
 
+// Two persons with starting resources, all 14 steps confirmed; the order (step 3) repeated and
+// drawn again, then `drawn` more steps of the placement drawn again, the last one waiting.
+function aSessionAfterRepeatedOrder(drawn: number): StoredSession {
+  const before = aSessionAfter(WITH_RESOURCES, 14);
+  const again = repeated(before, 3);
+  const steps = [...again.generation.steps];
+  for (let index = 3; index <= 3 + drawn; index++) {
+    const record = before.generation.steps[index];
+    if (record === undefined) throw new Error(`step ${String(index)}`);
+    steps.splice(index, 0, { ...record, status: index === 3 + drawn ? 'revealed' : 'confirmed' });
+  }
+  return { ...again, generation: { ...again.generation, steps } };
+}
+
+describe('US-AB-03 AK-6 repeating the order before drawn starting resources', () => {
+  it('PO 10.11.: the new order leads to the placement, not into the starting resources', () => {
+    const session = aSessionAfterRepeatedOrder(0);
+    expect(session.generation.steps[4]?.step.kind).toBe('starting-resources');
+    expect(forwardAction(session, step(3))).toBe('next');
+    expect(followingSlot(session, 3)).toMatchObject({ kind: 'building', index: 0 });
+  });
+
+  it('PO 10.11.: each piece drawn again announces and draws the next piece', () => {
+    const session = aSessionAfterRepeatedOrder(1);
+    expect(session.generation.steps[5]?.step.kind).toBe('starting-resources');
+    expect(forwardAction(session, step(4))).toBe('draw');
+    expect(followingSlot(session, 4)).toMatchObject({ kind: 'road', index: 0 });
+  });
+
+  it('after the last piece the starting resources drawn already are browsed', () => {
+    const session = aSessionAfterRepeatedOrder(8);
+    expect(session.generation.steps[12]?.step.kind).toBe('starting-resources');
+    expect(forwardAction(session, step(11))).toBe('browse');
+    expect(nextPage(session, step(11))).toEqual(step(12));
+  });
+});
+
 describe('E-35 views of the flow', () => {
   it('shares a view between the spins and between the pieces only', () => {
     expect(isSameView('order-spin', 'order-spin')).toBe(true);

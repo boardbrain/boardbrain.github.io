@@ -119,11 +119,17 @@ export function isSameView(a: CatanStep['kind'], b: CatanStep['kind']): boolean 
  * (N1).
  */
 export function followingSlot(session: StoredSession, index: number): CatanSlot | null {
+  const next = catanNextSlot(session.setup, session.generation);
+  // A missing step right after it comes first, even if later steps are drawn already, e.g. the
+  // placement after repeating the order before the starting resources (PO 10.11.2026).
+  if (next !== null && next.at === index + 1) {
+    return next.slot;
+  }
   const after = session.generation.steps[index + 1]?.step;
   if (after !== undefined && index + 1 < lastReachable(session)) {
     return after;
   }
-  return catanNextSlot(session.setup, session.generation)?.slot ?? null;
+  return next?.slot ?? null;
 }
 
 /**
@@ -142,10 +148,16 @@ export function forwardAction(session: StoredSession, page: FlowPage): ForwardAc
   ) {
     return 'turn-all';
   }
+  const next = catanNextSlot(session.setup, session.generation);
+  // The step just drawn goes on with the missing steps first, before the later steps drawn
+  // already are browsed (PO 10.11.2026: after repeating the order, "Blättern" led into the
+  // starting resources and back).
+  if (page.index === revealed && next?.at === page.index + 1) {
+    return step !== undefined && isSameView(step.kind, next.slot.kind) ? 'draw' : 'next';
+  }
   if (revealed === undefined || page.index < session.generation.steps.length - 1) {
     return 'browse';
   }
-  const next = catanNextSlot(session.setup, session.generation);
   if (next === null) {
     return 'overview';
   }
