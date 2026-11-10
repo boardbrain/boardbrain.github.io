@@ -600,6 +600,44 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
     await expect(forward(page)).toHaveText('Losen');
   });
 
+  test('PO 10.11.: back from the overview the note "Rückblick" covers no card', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Freitagsrunde', 'Anna', 'Ben', 'Clara', 'David');
+    await openOptions(page, /^Freitagsrunde:/);
+    await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
+    await startGeneration(page);
+    await drawAll(page);
+
+    await tap(page.getByRole('button', { name: 'Zurück' }));
+    await expect(page.getByRole('heading', { name: 'Startrohstoffe' })).toBeVisible();
+    const note = page.getByText('Rückblick', { exact: true }).locator('..');
+    await expect(note).toBeVisible();
+    // The cards appear once their table is measured; the note must give way to them as well.
+    await expect
+      .poll(async () => {
+        const box = await note.boundingBox();
+        const parts = await page.locator('main [data-solid]').evaluateAll((elements) =>
+          elements.map((element) => {
+            const { top, bottom, left, right } = element.getBoundingClientRect();
+            return { top, bottom, left, right };
+          }),
+        );
+        return (
+          box !== null &&
+          parts.some(
+            (part) =>
+              part.bottom > part.top &&
+              part.top < box.y + box.height &&
+              part.bottom > box.y &&
+              part.left < box.x + box.width &&
+              part.right > box.x,
+          )
+        );
+      })
+      .toBe(false);
+  });
+
   test('a piece tapped in the flow is repeated there', async ({ page }) => {
     await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
     await openOptions(page, /^Zu zweit:/);

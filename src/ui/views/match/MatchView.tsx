@@ -125,7 +125,10 @@ export function MatchView(): React.JSX.Element | null {
 
   const session = current?.status === 'active' ? current.session : null;
   const page = session === null ? null : pageAt(session, lookBackOf(search.get('schritt')));
-  const pageKey = page === null ? '' : JSON.stringify(page);
+  // Only once the page is shown (its table is read as well), so the note measures what the page
+  // shows (PO 10.11.2026: back from the overview the note stayed over the starting resources).
+  const pageKey =
+    page === null || group === undefined || group === null ? '' : JSON.stringify(page);
   const isNoteFloating = useLookBackFits(noteRef, bodyRef, pageKey);
 
   if (current === undefined || persons === undefined) {
