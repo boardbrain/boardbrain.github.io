@@ -265,7 +265,6 @@ export function MatchOverviewView(): React.JSX.Element | null {
     <main
       className={cx(
         shared.main,
-        shared.wideMain,
         tab === 'board' && shared.fill,
         tab === 'board' && styles.boardTab,
       )}

@@ -1,6 +1,6 @@
 .view {
-  max-width: 40rem;
-  padding: var(--space-6) var(--space-4);
+  max-width: var(--page-max-width);
+  padding: var(--page-padding-top) var(--page-padding-side) var(--space-6);
   margin: 0 auto;
 }
 

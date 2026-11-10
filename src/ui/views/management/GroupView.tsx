@@ -76,7 +76,7 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
   const binding = bindingLongLabel(group, customGames ?? []);
   const count = group.members.length;
   return (
-    <Page title={group.name} isWide backFallback="/verwaltung/gruppen">
+    <Page title={group.name} backFallback="/verwaltung/gruppen">
       <div className={styles.layout}>
         <div className={styles.tableColumn}>
           <GroupTable

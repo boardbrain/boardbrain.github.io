@@ -233,14 +233,7 @@ export function MatchView(): React.JSX.Element | null {
 
   return (
     <main
-      className={cx(
-        shared.main,
-        shared.fill,
-        isPlacement && shared.wideMain,
-        // In portrait as wide as the placement, so its band does not move (PO 09.11.2026).
-        isResources && styles.resourcesMain,
-        isPlacement && styles.placeMain,
-      )}
+      className={cx(shared.main, shared.fill, isPlacement && styles.placeMain)}
       // The page and what the forward button does; end-to-end tests wait for it to change.
       data-page={`${page.kind === 'step' ? `step-${String(page.index)}` : `next-${String(page.at)}`}:${forward}`}
     >

@@ -1,6 +1,6 @@
 /* The frame fills the screen inside the safe areas (padding of body); only the view in between
    scrolls (design D-3). Clip instead of hidden: the folded cards reach below the frame, and the
-   browser would otherwise scroll the frame to show a focused card, moving the header away. */
+   browser would otherwise scroll the frame to show a focused card, moving the view away. */
 .layout {
   height: 100%;
   overflow: clip;
@@ -26,23 +26,6 @@
 /* Design K-3: off the start view the folded hand shows 30 px plus a 16 px fade. */
 .foldedApp {
   --hand-height: calc(46px + env(safe-area-inset-bottom));
-}
-
-.header {
-  display: flex;
-  flex: none;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 14px;
-}
-
-.appName {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  font-weight: 700;
-  letter-spacing: 0.01em;
 }
 
 /* Design N1 (I1-D): the view reaches down behind the hand, so there is no hard cut above it. The

@@ -5,8 +5,8 @@
   gap: 20px;
   align-content: start;
   width: 100%;
-  max-width: 900px;
-  padding: 20px 16px 28px;
+  max-width: var(--page-max-width);
+  padding: var(--page-padding-top) var(--page-padding-side) 28px;
   margin: 0 auto;
 }
 
@@ -22,6 +22,9 @@
 }
 
 .title {
+  display: flex;
+  align-items: center;
+  min-height: var(--page-head-height);
   margin: 0;
   font-size: var(--font-size-title);
   line-height: 1.25;

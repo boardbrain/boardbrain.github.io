@@ -14,6 +14,12 @@ export type CardBox = {
 /** Width of the development card in the flow (design I2-C), scaled as a whole where needed. */
 export const TASK_CARD_WIDTH = 240;
 
+// Design I2-G, G4: on a card table of a tablet the development card grows up to 280 px, the person
+// cards beside and below it by the same factor; phones keep the sizes of I2-D.
+const WIDE_TABLE = 560;
+const WIDE_TASK_CARD_WIDTH = 280;
+const PERSON_CARD_WIDTH = 76;
+
 /** Cards are 1.48 times as high as wide; resource cards 1.5 times. */
 const CARD_RATIO = 1.48;
 const RESOURCE_RATIO = 1.5;
@@ -51,12 +57,20 @@ export type DrawLayout = {
 /**
  * Layout of page 5 for a card table of `width` × `height`. Development card and person cards
  * lie together in the middle of the table (PO 09.11.2026: on tall tablets they sat far up), with
- * a gap between them of 16 to 40 px.
+ * a gap between them of 16 to 40 px. On tablets both are larger (design I2-G, G4).
  */
 export function drawLayout(width: number, height: number): DrawLayout {
-  const w = Math.min(76, (width - 30) / 4.4);
+  const isWide = width >= WIDE_TABLE;
+  const most = isWide ? WIDE_TASK_CARD_WIDTH : TASK_CARD_WIDTH;
+  const w = isWide
+    ? Math.min(
+        (PERSON_CARD_WIDTH * most) / TASK_CARD_WIDTH,
+        (width - 30) / 4.4,
+        (height - 60) / CARD_RATIO / 3.2,
+      )
+    : Math.min(PERSON_CARD_WIDTH, (width - 30) / 4.4);
   const h = w * CARD_RATIO;
-  const taskWidth = Math.min(TASK_CARD_WIDTH, width - w - 30, (height - h - 40) / CARD_RATIO);
+  const taskWidth = Math.min(most, width - w - 30, (height - h - 40) / CARD_RATIO);
   const taskHeight = taskWidth * CARD_RATIO;
   const x0 = (width - (taskWidth + 20 + w)) / 2;
   const rest = height - taskHeight - h;

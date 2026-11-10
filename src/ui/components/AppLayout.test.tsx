@@ -28,10 +28,11 @@ function navigation(): HTMLElement {
 }
 
 describe('Architecture 13.1 app frame and navigation', () => {
-  it('shows the app name and the main navigation without the diagnostics view', () => {
+  it('shows the main navigation without the diagnostics view and no header (design I2-G)', () => {
     renderAt('/');
 
-    expect(screen.getByText('BoardBrain')).toBeInTheDocument();
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument();
+    expect(screen.queryByText('BoardBrain')).not.toBeInTheDocument();
     const links = within(navigation()).getAllByRole('link');
     expect(links.map((link) => link.textContent)).toEqual(['Start', 'Verwaltung']);
   });

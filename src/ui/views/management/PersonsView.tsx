@@ -83,7 +83,6 @@ export function PersonsView(): React.JSX.Element {
   return (
     <Page
       title={t('personen.titel')}
-      isWide
       backFallback="/verwaltung"
       actions={
         <div className={styles.actions}>

@@ -11,10 +11,12 @@ function cards(): HTMLElement {
 }
 
 describe('Architecture 13.1 start view (design D-3)', () => {
-  it('has a heading for screen readers and the cards persons, tables and games', async () => {
+  it('has a heading for screen readers, the app name and the cards persons, tables and games', async () => {
     renderWithApp(<StartView />);
 
     expect(screen.getByRole('heading', { level: 1, name: 'Start' })).toBeInTheDocument();
+    // Design I2-G: the only place of the app name, as the frame has no header.
+    expect(screen.getByText('BoardBrain')).toBeInTheDocument();
     const links = await within(cards()).findAllByRole('link');
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       '/verwaltung/personen',
