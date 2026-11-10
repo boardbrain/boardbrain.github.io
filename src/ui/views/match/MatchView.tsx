@@ -31,6 +31,7 @@ import {
   nextPage,
   pageAt,
   previousPage,
+  progressIndex,
   isKeptView,
   lookBackTarget,
   shownRange,
@@ -451,11 +452,11 @@ type PhaseProgressProps = {
 // F2: four phases; each is as wide as its longest possible label, fixed for the whole match. On a
 // page without a result, its phase is the current one with the steps before it.
 function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element {
-  const stepIndex = page.kind === 'step' ? page.index : page.at - 1;
-  const phases = catanProgress(session.setup, session.generation, stepIndex).map((phase) =>
-    page.kind === 'pending'
-      ? { ...phase, isCurrent: phase.phase === PHASE_OF[page.slot.kind] }
-      : phase,
+  const phases = catanProgress(session.setup, session.generation, progressIndex(session, page)).map(
+    (phase) =>
+      page.kind === 'pending'
+        ? { ...phase, isCurrent: phase.phase === PHASE_OF[page.slot.kind] }
+        : phase,
   );
   return (
     <div className={styles.phases} role="list" aria-label={t('partie.fortschritt')}>

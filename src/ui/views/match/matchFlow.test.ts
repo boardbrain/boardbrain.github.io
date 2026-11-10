@@ -18,6 +18,7 @@ import {
   orderOrSeats,
   pageAt,
   previousPage,
+  progressIndex,
   sessionUpTo,
   shownRange,
   type FlowPage,
@@ -177,6 +178,43 @@ describe('US-AB-04 AK-3, AK-4 look back', () => {
     };
     expect(lookBackTarget(harboursDrawn, step(3))).toBe('overview');
     expect(lookBackTarget(aSessionAfterRepeat(), step(6))).toBe('current');
+  });
+
+  it('PO 10.11.: the kept pieces after a road drawn again belong to its page', () => {
+    const before = aSessionAfter(BASE, ALL_STEPS);
+    const again = repeated(before, 7);
+    const record = before.generation.steps[7];
+    if (record === undefined) throw new Error('step 7');
+    const steps = [...again.generation.steps];
+    steps.splice(7, 0, { ...record, status: 'revealed' });
+    const drawn = { ...again, generation: { ...again.generation, steps } };
+
+    // "Zurück" from a later page does not show the same board a second time.
+    expect(shownRange(drawn, 12)).toEqual({ start: 7, end: ALL_STEPS - 1 });
+    expect(pageAt(drawn, 12)).toEqual(step(7));
+    expect(previousPage(drawn, step(7))).toEqual(step(6));
+  });
+
+  it('PO 10.11.: the progress counts every step a page shows', () => {
+    const drawn = aSessionAfterRepeat();
+    // The whole order after drawing again a draw of a person: 3/3, not 1/3.
+    expect(progressIndex(drawn, step(3))).toBe(5);
+    expect(progressIndex(drawn, step(6))).toBe(7);
+    expect(progressIndex(drawn, step(0))).toBe(0);
+
+    // A road drawn again from the overview: before "Losen" the board shows the kept pieces too.
+    const before = aSessionAfter(BASE, ALL_STEPS);
+    const again = repeated(before, 7);
+    const pending = currentPage(again);
+    expect(pending?.kind).toBe('pending');
+    expect(pending && progressIndex(again, pending)).toBe(ALL_STEPS - 2);
+    expect(
+      progressIndex(aSessionAfter(BASE, 3), {
+        kind: 'pending',
+        slot: { kind: 'order-spin', position: 0 },
+        at: 3,
+      }),
+    ).toBe(2);
   });
 });
 

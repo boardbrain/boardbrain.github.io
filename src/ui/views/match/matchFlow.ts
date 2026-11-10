@@ -78,8 +78,10 @@ export function shownRange(
     const otherKind = steps[other]?.step.kind;
     return otherKind !== undefined && isSameView(kind, otherKind);
   };
+  // The kept steps right after the step drawn again belong to its page (PO 10.11.2026: "Zurück"
+  // showed the same board twice).
   let start = index;
-  while (start - 1 > revealed && start !== missingAt && sameView(start - 1)) {
+  while (start - 1 >= revealed && start !== missingAt && sameView(start - 1)) {
     start--;
   }
   let end = index;
@@ -87,6 +89,26 @@ export function shownRange(
     end++;
   }
   return { start, end };
+}
+
+/**
+ * The last step the progress counts on a page (design I2-C, F2): the last step the page shows.
+ * A whole view after a repetition counts all its kept steps (PO 10.11.2026: "1/3" for an order
+ * shown complete); a page without a result counts the kept steps of its view after it as well.
+ */
+export function progressIndex(session: StoredSession, page: FlowPage): number {
+  if (page.kind === 'step') {
+    return shownRange(session, page.index).end;
+  }
+  const steps = session.generation.steps;
+  let end = page.at - 1;
+  for (;;) {
+    const next = steps[end + 1]?.step.kind;
+    if (next === undefined || !isSameView(page.slot.kind, next)) {
+      return end;
+    }
+    end++;
+  }
 }
 
 /**

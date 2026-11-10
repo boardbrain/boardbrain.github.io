@@ -493,11 +493,39 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
       await tapForward(page, 'Blättern');
     }
     await expect(page.getByTestId('board-road')).toHaveCount(4);
+    // PO 10.11.2026: the progress counts every piece the whole view shows.
+    await expect(progress(page)).toContainText('Platzierung 8/8');
     await tap(page.getByRole('button', { name: 'Wiederholen', exact: true }));
 
     const dialog = page.getByRole('alertdialog');
     await expect(dialog).toContainText(/^Straße von .* wiederholen\?/);
     await expect(spotlight(page).getByTestId('board-road')).toHaveCount(1);
+  });
+
+  test('PO 10.11.: a road drawn again shows the whole board once, also going back', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
+    await startGeneration(page);
+    await drawAll(page);
+
+    await tapPiece(page, page.getByRole('button', { name: /^Straße von .* wiederholen$/ }).first());
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await tapForward(page, 'Losen');
+    await expect(progress(page)).toContainText('Platzierung 8/8');
+    await tapForward(page, 'Blättern');
+    await expect(page.getByRole('heading', { name: 'Startrohstoffe' })).toBeVisible();
+
+    const back = page.getByRole('button', { name: 'Zurück' });
+    await tap(back);
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+    await expect(progress(page)).toContainText('Platzierung 8/8');
+    await expect(page.getByTestId('board-road')).toHaveCount(4);
+    // One more step back is the look back before the road, not the same board again.
+    await tap(back);
+    await expect(page.getByTestId('board-road')).toHaveCount(0);
   });
 
   test('a piece tapped in the flow is repeated there', async ({ page }) => {
