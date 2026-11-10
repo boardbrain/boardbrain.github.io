@@ -54,16 +54,21 @@ async function startMatch(
   return { db, session };
 }
 
-// Taps the forward button with this name and waits until it has done its work: the button of a
-// page is new for every page, "Alle umdrehen" turns into "Weiter".
+// Taps the forward button with this name and waits until it has done its work: the page
+// attribute of the view changes (on the board the buttons stay in place), and the buttons are
+// enabled again.
 async function tapForward(user: User, name: string): Promise<void> {
   const button = await screen.findByRole('button', { name });
   await waitFor(() => {
     expect(button).toBeEnabled();
   });
+  const page = screen.getByRole('main').getAttribute('data-page');
   await user.click(button);
   await waitFor(() => {
-    expect(button.isConnected && button.textContent === name).toBe(false);
+    const main = screen.queryByRole('main');
+    expect(main?.getAttribute('data-page')).not.toBe(page);
+    const forward = main === null ? null : within(main).queryByRole('button', { name: FORWARD });
+    expect(forward?.hasAttribute('disabled') ?? false).toBe(false);
   });
 }
 

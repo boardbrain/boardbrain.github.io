@@ -32,11 +32,6 @@ type PlacementStepProps = {
   readonly actions: ReactNode;
 };
 
-// A new piece in the band fades in.
-function pieceKey(slot: CatanSlot & { readonly kind: 'building' | 'road' }): string {
-  return `${slot.kind}-${String(slot.index)}`;
-}
-
 function pieceKind(slot: CatanSlot): PieceKind {
   if (slot.kind === 'road') {
     return 'road';
@@ -111,8 +106,8 @@ export function PlacementStep({
           order={coins}
         />
       ) : (
+        // The band stays in its place and changes its content only (PO 10.11.2026).
         <TurnBand
-          key={pieceKey(atTurn)}
           icon={
             <PieceMark
               kind={pieceKind(atTurn)}
@@ -126,7 +121,6 @@ export function PlacementStep({
           order={coins}
           currentId={atTurn.personId}
           note={newest === null ? undefined : t('partie.alsNaechstes')}
-          isReveal={newest !== null}
         />
       )}
       <div className={styles.wOrder}>

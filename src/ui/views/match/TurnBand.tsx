@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import type { CatanColorKey, PersonId } from '@/core/model';
 import { inkOn } from './matchColors';
-import { Reveal } from './Reveal';
 import styles from './MatchView.module.css';
 import { cx } from '@/ui/components/classNames';
 
@@ -21,8 +20,6 @@ type TurnBandProps = {
   readonly currentId: PersonId;
   /** Small line above the name, e.g. "Als Nächstes" (design I2-D, N1). */
   readonly note?: string | undefined;
-  /** Fades in with a new result; a page without a result shows it at rest (E-35). */
-  readonly isReveal?: boolean;
   readonly className?: string | undefined;
 };
 
@@ -38,7 +35,6 @@ export function TurnBand({
   order,
   currentId,
   note,
-  isReveal = true,
   className,
 }: TurnBandProps): React.JSX.Element {
   const content = (
@@ -67,11 +63,8 @@ export function TurnBand({
     color: inkOn(color),
     background: `linear-gradient(160deg, var(--color-catan-${color}-band-light), var(--color-catan-${color}-band-dark))`,
   };
-  return isReveal ? (
-    <Reveal data-solid="" className={cx(styles.turnBand, className)} style={look}>
-      {content}
-    </Reveal>
-  ) : (
+  // Changes its content in place, without moving (PO 10.11.2026).
+  return (
     <div data-solid="" className={cx(styles.turnBand, className)} style={look}>
       {content}
     </div>
@@ -90,7 +83,7 @@ type DoneBandProps = {
  */
 export function DoneBand({ text, icon, order }: DoneBandProps): React.JSX.Element {
   return (
-    <Reveal data-solid="" className={cx(styles.turnBand, styles.doneBand)}>
+    <div data-solid="" className={cx(styles.turnBand, styles.doneBand)}>
       <span className={styles.tbPiece}>{icon}</span>
       <span className={styles.tbLine}>
         <strong className={styles.tbName}>{text}</strong>
@@ -107,6 +100,6 @@ export function DoneBand({ text, icon, order }: DoneBandProps): React.JSX.Elemen
           </span>
         ))}
       </span>
-    </Reveal>
+    </div>
   );
 }

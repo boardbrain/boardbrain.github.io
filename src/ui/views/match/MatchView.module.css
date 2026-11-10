@@ -267,6 +267,9 @@
   position: relative;
   display: grid;
   flex: 1;
+
+  /* Room for "Platzierung überspringen", kept on every page of the placement (see .skipOver). */
+  padding-bottom: 22px;
   place-items: center;
   min-height: 0;
 }
@@ -279,12 +282,13 @@
   }
 }
 
-/* "Platzierung überspringen" over the lower edge of the board: it appears and goes without moving
-   the board (PO 09.11.2026). */
+/* "Platzierung überspringen" right above the band: it appears and goes without moving the board
+   (PO 09.11.2026). The board always keeps a strip free for it, so they do not overlap (PO
+   10.11.2026); the link reaches into the gap above the band. */
 .skipOver {
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: -12px;
   left: 0;
   display: flex;
   justify-content: center;
@@ -292,6 +296,7 @@
 }
 
 .skipOver > * {
+  min-height: 34px;
   pointer-events: auto;
 }
 

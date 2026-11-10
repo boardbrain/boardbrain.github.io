@@ -82,20 +82,21 @@ describe('Design I2-D page 5: draw of a person', () => {
 const BAND = 44 + 12;
 
 describe('Design I2-D page 8: starting resources', () => {
-  it('PO 09.11.: the places keep one size, at most as wide as in a row of three', () => {
+  it('PO 09.11., 10.11.: the places keep one size, at most as wide as in a row of three', () => {
     for (const count of [1, 2, 3]) {
       const { slots } = resourcesLayout(PHONE.width, PHONE.height, count);
       expect(slots.map((slot) => Math.round(slot.w))).toEqual(Array(count).fill(111));
     }
-    expect(Math.round(defined(resourcesLayout(TABLET.width, TABLET.height, 1).slots[0]).w)).toBe(
-      120,
-    );
+    // On tablets they grow up to 180 px, the cards below up to 96 px.
+    const tablet = resourcesLayout(TABLET.width, TABLET.height - BAND, 1);
+    expect(Math.round(defined(tablet.slots[0]).w)).toBe(180);
+    expect(Math.round(defined(tablet.kinds[0]).w)).toBe(96);
   });
 
   it('many resources go into two lines where the cards come out larger', () => {
     const phone = resourcesLayout(PHONE.width, PHONE.height - BAND, 5);
     expect(new Set(phone.slots.map((slot) => slot.y)).size).toBe(2);
-    expect(Math.round(defined(phone.slots[0]).w)).toBe(79);
+    expect(Math.round(defined(phone.slots[0]).w)).toBe(78);
     const small = resourcesLayout(SMALL_PHONE.width, SMALL_PHONE.height - BAND, 5);
     expect(new Set(small.slots.map((slot) => slot.y)).size).toBe(1);
     expect(Math.round(defined(small.slots[0]).w)).toBe(56);

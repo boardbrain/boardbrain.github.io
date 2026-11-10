@@ -197,9 +197,12 @@ export function MatchView(): React.JSX.Element | null {
     });
   };
 
+  const isPlacement = slot.kind === 'building' || slot.kind === 'road';
   const actions = (
     <StepActions
-      key={pageKey}
+      // The buttons fade in with a new view; on the board they stay calm from piece to piece
+      // (PO 10.11.2026: band and buttons twitched with every "Losen").
+      key={isPlacement ? 'placement' : pageKey}
       forward={forward}
       isPending={isPending}
       canRepeat={page.kind === 'step'}
@@ -209,7 +212,6 @@ export function MatchView(): React.JSX.Element | null {
       onForward={onForward}
     />
   );
-  const isPlacement = slot.kind === 'building' || slot.kind === 'road';
   // On the empty board; it lies over the board, so the board does not move when it goes.
   const skip = canOfferSkip(session, page) && (
     <PressableButton

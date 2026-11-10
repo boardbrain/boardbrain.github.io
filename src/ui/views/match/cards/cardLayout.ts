@@ -18,6 +18,8 @@ export const TASK_CARD_WIDTH = 240;
 const CARD_RATIO = 1.48;
 const RESOURCE_RATIO = 1.5;
 const RESOURCE_KINDS = 5;
+const MOST_KIND_WIDTH = 96;
+const MOST_PLACE_WIDTH = 180;
 
 // A row of `count` cards of width `width`, centred; the gap is at most `maxGap`.
 function rowXs(roomWidth: number, width: number, count: number, maxGap: number): number[] {
@@ -131,12 +133,17 @@ export function resourcesLayout(width: number, height: number, count: number): R
   const between = 26;
   const bottom = 6;
   // On low tablets in landscape the cards below take at most 40 % of the free height, so the
-  // places keep a usable size; on phones and portrait tablets they keep their size.
+  // places keep a usable size. On phones they are as wide as the five kinds allow; on tablets
+  // they grow up to 96 px and the places up to 180 px (PO 10.11.2026: it looked small).
   const free = height - (top + between + bottom);
-  const rw = Math.min(64, (width - 4 * 8) / RESOURCE_KINDS, (free * 0.4) / RESOURCE_RATIO);
+  const rw = Math.min(
+    MOST_KIND_WIDTH,
+    (width - 4 * 8) / RESOURCE_KINDS,
+    (free * 0.4) / RESOURCE_RATIO,
+  );
   const rh = rw * RESOURCE_RATIO;
   const room = height - (top + between + rh + bottom);
-  const most = Math.min(120, (width - 2 * gap) / 3);
+  const most = Math.min(MOST_PLACE_WIDTH, (width - 2 * gap) / 3);
   const perRow = (rows: number): number => Math.ceil(count / rows);
   const sizeFor = (rows: number): number =>
     Math.min(

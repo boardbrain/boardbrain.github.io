@@ -142,7 +142,6 @@ export function ResourcesScene({
           color: colorOf(session, other),
         }))}
         currentId={personId}
-        isReveal={false}
       />
       {actions}
     </div>
