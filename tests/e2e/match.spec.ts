@@ -528,6 +528,26 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
     await expect(page.getByTestId('board-road')).toHaveCount(0);
   });
 
+  test('PO 10.11.: the overview reached from the look back leads back into the flow', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+
+    const back = page.getByRole('button', { name: 'Zurück' });
+    const overview = page.getByRole('heading', { name: 'Laufende Partie' });
+    await tap(back);
+    await tap(back);
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+    // The note of the look back leads to the overview once the match is running.
+    await tap(page.getByRole('button', { name: 'Zum aktuellen Schritt' }));
+    await expect(overview).toBeVisible();
+    await tap(back);
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+  });
+
   test('a piece tapped in the flow is repeated there', async ({ page }) => {
     await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
     await openOptions(page, /^Zu zweit:/);

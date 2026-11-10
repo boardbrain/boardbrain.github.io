@@ -168,8 +168,10 @@ export function MatchView(): React.JSX.Element | null {
   const shown = shownEnd === null ? session : sessionUpTo(session, shownEnd);
   const isKept = isKeptView(session, page);
 
+  // The overview reached from here leads back into the flow (PO 10.11.2026: after "Blättern" to
+  // the overview, its back button led to the start).
   const go = (target: FlowPage | null): void => {
-    void navigate(pathOf(target, session), { replace: true });
+    void navigate(pathOf(target, session), { replace: true, state: { from: 'flow' } });
   };
   const act = (work: () => Promise<boolean>): void => {
     setDialog(null);
