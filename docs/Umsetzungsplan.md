@@ -53,7 +53,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 2b | Kleine Aufgabe K-3: Kartenhand einfahren | nach I1, vor I2 | umgesetzt (#23) |
 | 2c | Kleine Aufgabe K-4: Berührungsverhalten app-weit | direkt nach K-3, vor I2 | umgesetzt (#25) |
-| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31) |
+| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31), I2-D (#34) |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
@@ -263,7 +263,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 | I2-A Platzierung, Reihenfolge, Startrohstoffe | US-PL-02, US-PL-03, US-LS-03, US-SR-01 (Fachlogik) | Opus, high | `feat/us-pl-02-placement-and-dead-ends` | umgesetzt (#27) |
 | I2-B Generierung und gespeicherte Partie | US-AB-03, US-AB-05, US-AB-06, US-LS-02, US-PG-04, US-PL-05 (Fachlogik und Dienst), US-VW-02 AK-5 | Opus, high | `feat/us-ab-03-generation-session` | umgesetzt (#28) |
 | I2-C Neue Partie vorbereiten und durchlaufen | US-SP-01, US-SP-04, US-AB-01, US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PG-04, US-SR-01, US-PL-05 (Oberfläche) | Sonnet, medium | `feat/us-ab-01-new-match` | umgesetzt (#31) |
-| I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-02, US-AB-03, US-AB-04, US-AB-05, US-AB-06, US-SR-01 AK-6, US-VW-02 AK-5 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | in Arbeit |
+| I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-02, US-AB-03, US-AB-04, US-AB-05, US-AB-06, US-SR-01 AK-6, US-VW-02 AK-5 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | umgesetzt (#34) |
 | I2-G Mehr Platz: ohne Titelleiste, ganze Breite *(neu in 0.23)* | NFA-PL-04 (alle Ansichten) | Opus, medium | `feat/more-room-layout` | offen, als Nächstes nach I2-D |
 | I2-H Steine auf dem Brett antippen *(neu in 0.23)* | US-AB-03 (Oberfläche) | Opus, high | `feat/us-ab-03-tap-pieces` | offen, nach I2-G |
 | D-2 Design der Inszenierung (OP-06) | Aufblinken, Tempo, Klänge | Opus, medium | `chore/op-06-staging-design` | offen |
