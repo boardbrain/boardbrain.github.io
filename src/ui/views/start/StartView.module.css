@@ -143,3 +143,39 @@
   margin-left: auto;
   color: var(--color-text-muted);
 }
+
+/* A running match (US-AB-04 AK-2, design I2-D): a banner at the top leads back with one tap. */
+.banner {
+  display: flex;
+  flex: none;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-accent-text);
+  border-radius: 12px;
+}
+
+.bannerText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill {
+  display: inline-flex;
+  flex: none;
+  gap: 4px;
+  align-items: center;
+  min-height: 34px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  color: var(--color-accent-text);
+  text-decoration: none;
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}

@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.13 |
+| Version | 0.14 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 02.11.2026 |
+| Stand | 09.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -27,6 +27,7 @@
 | 0.11 | 26.10.2026 | Abnahme von I1-F (Anforderungsdokumentation 0.17, E-31): Personen- und Gruppennamen app-weit eindeutig, geprüft schon bei der Eingabe (3.4, US-PG-01 AK-3, neu US-PG-02 AK-8, US-VW-02 AK-1, US-VW-06 AK-2, A-02); „Neu anlegen“ beim Import mit vergebenem Namen nur mit anderem Namen (3.9) |
 | 0.12 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation 0.18, E-32): Umsetzung in fachlichen Blöcken (2.2); Inkremente neu nach Blöcken geschnitten, I5 wird „Verwaltung und Archiv“, I6 „Einstellungen und Feinschliff“ (2.3); US-PG-04, US-SR-01, US-IN-01 bis US-IN-04 und US-PL-05 nach I2, US-ER-02, US-ER-03, US-ST-03 und US-ST-04 nach I3, US-EI-02, US-EI-07, US-DS-03, US-DS-04 und US-IS-02 nach I4 (2.5); Summe in 2.5 berichtigt (61 statt 59 Stories) |
 | 0.13 | 02.11.2026 | Design I2-C (Anforderungsdokumentation 0.19, E-33, E-34): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung (3.1, US-AB-01 AK-3, US-LS-03 AK-1 und AK-3, US-PL-05 AK-1, neu AK-3, US-SR-01 AK-1); Vorwärts-Knopf „Losen“, „Blättern“, „Zur Übersicht“ (US-AB-02 AK-1); Rückblick auf frühere Schritte (neu US-AB-04 AK-3 und AK-4); Rückverfolgbarkeit (6) |
+| 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); nach einem Neustart nur eine unterbrochene Animation erneut (3.5, US-AB-05 AK-3); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6); Wiederholen der Reihenfolge ab Platz k statt immer ganz (3.1, US-AB-03 AK-5, Entscheidung des Product Owners 10.11.2026) |
 
 ## Inhaltsverzeichnis
 
@@ -85,7 +86,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 | Inkrement | Inhalt | Ergebnis |
 |---|---|---|
 | I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Umbenennen und Gruppen bearbeiten, Brettdarstellung, Losbaustein *(ergänzt in 0.8)* | Stammdaten anlegbar und korrigierbar, Brett sichtbar |
-| I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Glücksrad, Aufblinken, Klängen und Überspringen der Animation *(geändert in 0.12)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
+| I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Karten, Aufblinken, Klängen und Überspringen der Animation *(geändert in 0.12 und 0.14)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
 | I3 Ergebnisse und Statistik | Ergebniserfassung mit Siegpunkten und Catan-Farben, Ergebnisliste, Kennzahlen, Rangliste, Filter, Diagramme *(geändert in 0.12)* | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung, Teilexport und Export-Erinnerung, Import mit Konflikten und Zuordnung, automatische und manuelle Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS und Hinweis unter Android und Windows, Speicherschutz und Hinweis zum Schutz vor Datenverlust *(geändert in 0.12)* | Daten sicher und teilbar |
 | I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen; unterstützte und eigene Spiele getrennt *(geändert in 0.12)* | Stammdaten vollständig pflegbar |
@@ -132,7 +133,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-PL-04 | Gebäude und Straßen erkennbar darstellen | M | I2 |
 | US-PL-05 | Platzierung überspringen | C | I2 |
 | US-SR-01 | Startrohstoffe ziehen | S | I2 |
-| US-IN-01 | Glücksrad | S | I2 |
+| US-IN-01 | Karten ziehen | S | I2 |
 | US-IN-02 | Aufblinken bei der Platzierung | S | I2 |
 | US-IN-03 | Soundeffekte und Tonschalter | S | I2 |
 | US-IN-04 | Animation überspringen | S | I2 |
@@ -190,7 +191,7 @@ Dieses Kapitel bündelt die in der Spezifikationsphase geklärten fachlichen Reg
 
 **Ein Schritt** ist die kleinste Einheit, die einzeln animiert, bestätigt und wiederholt wird:
 
-- ein Dreh des Glücksrads (LS-01, LS-03 und LS-04 je ein Dreh; LS-02 besteht aus n−1 Drehs, wenn die Reihenfolge gelost wird, der letzte Platz ergibt sich automatisch),
+- das Losen einer Person (LS-01, LS-03 und LS-04 je eine Ziehung; LS-02 besteht aus n−1 Ziehungen, „Drehs“ genannt, wenn die Reihenfolge gelost wird, der letzte Platz ergibt sich automatisch) *(geändert in 0.14)*,
 - ein Gebäude (Siedlung oder Stadt),
 - eine Straße,
 - die Startrohstoffe einer Person.
@@ -202,7 +203,7 @@ Beispiel: 4 Personen, Städte & Ritter, alle Optionen aktiv: 3 Losschritte + 3 D
 | Wiederholter Schritt | Verworfene Folgeschritte |
 |---|---|
 | LS-01, LS-03 oder LS-04 | keine |
-| ein Dreh von LS-02 | die gesamte Reihenfolge wird neu gelost; die gesamte Platzierung wird verworfen |
+| ein Dreh von LS-02 (Platz k) | Platz k und alle späteren Plätze werden neu gelost, die früheren bleiben; die gesamte Platzierung wird verworfen *(geändert in 0.14)* |
 | Gebäude k | Straße k sowie alle später platzierten Gebäude und Straßen |
 | Straße k | keine |
 | Startrohstoffe einer Person | keine |
@@ -234,7 +235,7 @@ Regeln:
 5. Beim Anlegen einer Gruppe werden die Farben automatisch der Reihe nach mit freien Farben der Palette belegt und sind änderbar. Farben aus anderen Gruppen werden nicht übernommen oder vorgeschlagen.
 6. Wählt man für eine Person eine Farbe, die in der Gruppe bzw. Partie bereits belegt ist, tauschen die beiden Personen ihre Farben.
 7. Die Catan-Farbe kann für eine einzelne Partie abweichend gewählt werden; die Standardfarbe bleibt unverändert.
-8. Verwendung: Catan-Farben auf dem Brett, im Glücksrad der Catan-Generierung und im Catan-Ergebnis; Gruppenfarben in Ergebnislisten, Rangliste und Diagrammen.
+8. Verwendung: Catan-Farben auf dem Brett, auf den Personenkarten der Catan-Generierung und im Catan-Ergebnis; Gruppenfarben in Ergebnislisten, Rangliste und Diagrammen.
 9. Die konkreten Farbwerte stehen in Architektur 13.4 (Anforderungsdokumentation E-26, E-28). *(geändert in 0.8)*
 
 ### 3.4 Gruppen und Spiele: Verträglichkeit
@@ -260,9 +261,9 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 
 - Es gibt höchstens eine Partie in den Zuständen Vorbereitung, Generierung oder Laufend.
 - Generierung und Laufend überstehen das Schließen und Neustarten der App. Die Vorbereitung wird nicht gespeichert.
-- Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung.
+- Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung. Eine schon abgeschlossene Animation läuft nicht noch einmal ab, aufgedeckte Startrohstoffe bleiben aufgedeckt. *(ergänzt in 0.14)*
 - „Beenden ohne Ergebnis“ ist ab Beginn der Generierung jederzeit möglich.
-- **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden.
+- **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. Im Tisch-Editor steht der Hinweis direkt bei der Spielbindung, die Auswahl ist gesperrt und nach dem Beenden sofort frei. *(ergänzt in 0.14)*
 
 ### 3.6 Ergebnis
 
@@ -484,7 +485,7 @@ Bezug: FA-VW-02 → 3.3, 3.4
 - **AK-2:** Gegeben eine Gruppe, dann bietet die App keine Möglichkeit, Mitglieder hinzuzufügen oder zu entfernen.
 - **AK-3:** Gegeben ich ändere die Spielbindung, wenn alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen, dann wird die Änderung übernommen; andernfalls verhindert die App sie und nennt den Grund.
 - **AK-4:** Gegeben die neue Bindung erfordert zusätzliche Farben, dann werden diese gemäß 3.3 automatisch belegt und sind änderbar.
-- **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann ist die Änderung der Spielbindung gesperrt (→ 3.5).
+- **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann ist die Änderung der Spielbindung gesperrt (→ 3.5); der Editor nennt den Grund bei der Spielbindung und bietet „Partie beenden“ an. *(ergänzt in 0.14)*
 - **AK-6:** Gegeben eine globale Gruppe, wenn ich Catan ausschließe oder wieder zulasse, dann entfallen die Catan-Farben bzw. werden gemäß 3.3 automatisch belegt; für das Zulassen gilt AK-3. *(neu in 0.8)*
 - **AK-7:** Gegeben die Einstellung „Ich hasse Catan!“ ist an, dann kann ich Catan nicht wieder zulassen und keine Bindung „Nur Catan“ wählen (→ US-SP-05). *(neu in 0.10)*
 
@@ -550,18 +551,19 @@ Bezug: FA-AB-01, FA-AB-02, FA-PG-10 → 3.1, 3.4
 Als bedienende Person möchte ich jeden Schritt selbst bestätigen, damit alle am Tisch jedes Ergebnis sehen und umsetzen können.
 Bezug: FA-AB-03 → 3.1
 
-- **AK-1:** Gegeben ein Schritt ist abgeschlossen, dann bleibt sein Ergebnis sichtbar, bis ich den Vorwärts-Knopf wähle; es gibt keinen automatischen Übergang. Der Knopf heißt „Losen“ auf dem neuesten Schritt (bestätigt ihn und lost den nächsten), „Blättern“, solange spätere Schritte schon gelost sind (geht einen Schritt vor, ohne zu losen), und „Zur Übersicht“ auf dem letzten Schritt. *(geändert in 0.13)*
+- **AK-1:** Gegeben ein Schritt ist abgeschlossen, dann bleibt sein Ergebnis sichtbar, bis ich den Vorwärts-Knopf wähle; es gibt keinen automatischen Übergang. Der Knopf heißt „Losen“, wenn er lost (den angezeigten Schritt ohne Ergebnis oder den nächsten Schritt derselben Ansicht), „Weiter“, wenn er den neuesten Schritt bestätigt und ohne zu losen zur nächsten Ansicht führt, „Blättern“, solange spätere Schritte schon gelost sind (geht einen Schritt vor, ohne zu losen), und „Zur Übersicht“ auf dem letzten Schritt. *(geändert in 0.13 und 0.14)*
 - **AK-2:** Gegeben die Platzierung, dann ist jedes Gebäude und jede Straße ein eigener Schritt mit eigener Animation und eigener Bestätigung.
+- **AK-3:** Gegeben die Ansicht wechselt (jeder Losschritt, Beginn der Reihenfolge, Beginn der Platzierung mit leerem Brett, Startrohstoffe jeder Person), auch nach „Generierung starten“ und nach einer Wiederholung, dann zeigt die App den Schritt zuerst ohne Ergebnis, mit dem, was gelost wird; ohne Ergebnis ist „Wiederholen“ ausgegraut, steht aber an seinem Platz, damit sich nichts verschiebt. In Reihenfolge und Platzierung geht es danach in derselben Ansicht direkt mit „Losen“ weiter; das Band unter dem Brett nennt „Als Nächstes“ das nächste Stück. *(neu in 0.14, E-35)*
 
 #### US-AB-03 Schritt wiederholen · M
 Als bedienende Person möchte ich einen Schritt wiederholen können, damit Fehler oder Missverständnisse am Tisch korrigierbar sind.
 Bezug: FA-AB-04 → 3.1
 
-- **AK-1:** Gegeben ein abgeschlossener Schritt, wenn ich „Wiederholen“ wähle, dann erscheint eine Warnung; nach Bestätigung wird der Schritt neu gelost und neu dargestellt.
+- **AK-1:** Gegeben ein abgeschlossener Schritt, wenn ich „Wiederholen“ wähle, dann erscheint eine Warnung; nach Bestätigung zeigt die App den Schritt ohne Ergebnis, und „Losen“ lost ihn neu. *(geändert in 0.14)*
 - **AK-2:** Gegeben der Schritt hat abhängige Folgeschritte gemäß 3.1, dann nennt die Warnung, welche Schritte verworfen werden.
 - **AK-3:** Gegeben ich wiederhole LS-01, LS-03, LS-04, eine Straße oder die Startrohstoffe einer Person, dann bleiben alle anderen Schritte unverändert.
 - **AK-4:** Gegeben ich wiederhole Gebäude k, dann werden Straße k und alle späteren Gebäude und Straßen verworfen und anschließend Schritt für Schritt neu durchlaufen.
-- **AK-5:** Gegeben ich wiederhole einen Dreh von LS-02, dann wird die gesamte Reihenfolge neu gelost und eine bereits begonnene Platzierung verworfen.
+- **AK-5:** Gegeben ich wiederhole den Dreh von LS-02 für Platz k, dann bleiben die Plätze vor k, Platz k und alle späteren Plätze werden aus den übrigen Personen neu gelost, und eine bereits begonnene Platzierung wird verworfen. Bei Platz 1 ist das die ganze Reihenfolge. *(geändert in 0.14)*
 - **AK-6:** Gegeben die Generierung ist abgeschlossen, dann kann ich in der Übersicht der laufenden Partie jeden Schritt auswählen und wiederholen.
 - **AK-7:** Gegeben eine Wiederholung, dann wird sie nirgends protokolliert.
 
@@ -570,17 +572,17 @@ Als bedienende Person möchte ich das Ergebnis der Generierung während der Part
 Bezug: FA-AB-05
 
 - **AK-1:** Gegeben die Generierung ist abgeschlossen, dann zeigt eine Übersicht das Brett mit allen Gebäuden und Straßen, die Ergebnisse von LS-01, LS-03 und LS-04, die Platzierungsreihenfolge mit Kennzeichnung der Startperson und ggf. die Startrohstoffe.
-- **AK-2:** Gegeben eine laufende Partie, wenn ich die Startansicht öffne, dann gelange ich mit einem Tipp zurück zur Übersicht.
+- **AK-2:** Gegeben eine Partie in Generierung oder laufend, wenn ich die Startansicht öffne, dann nennt ein Hinweis „‹Gruppe› spielt gerade“, und ich gelange mit einem Tipp zurück zum aktuellen Schritt bzw. zur Übersicht. *(präzisiert in 0.14)*
 - **AK-3:** Gegeben die Generierung läuft und ich bin nicht auf dem ersten Schritt, wenn ich „Zurück“ wähle, dann zeigt die App den vorherigen Schritt mit seinem gespeicherten Ergebnis und dem Hinweis „Rückblick“ mit „Zum aktuellen Schritt“; es wird nichts gelost. *(neu in 0.13, FA-AB-10)*
-- **AK-4:** Gegeben der Rückblick oder die Wiederholung eines früheren Schritts, dann führt „Blättern“ genau einen Schritt weiter bis zum neuesten; erst dort lost der Knopf wieder. *(neu in 0.13)*
+- **AK-4:** Gegeben der Rückblick oder die Wiederholung eines früheren Schritts, dann führt „Blättern“ genau einen Schritt weiter bis zum neuesten; erst dort lost der Knopf wieder bzw. führt mit „Weiter“ zur nächsten Ansicht. *(neu in 0.13, ergänzt in 0.14)*
 
 #### US-AB-05 Laufende Partie übersteht einen Neustart · M
 Als bedienende Person möchte ich, dass die laufende Partie erhalten bleibt, auch wenn die App geschlossen wird, damit nichts verloren geht.
 Bezug: FA-AB-07 → 3.5
 
 - **AK-1:** Gegeben eine Partie in Generierung oder laufend, wenn die App geschlossen und neu gestartet wird, dann öffnet sie exakt denselben Stand einschließlich des aktuellen Schritts.
-- **AK-2:** Gegeben eine laufende Partie, wenn ich eine neue Partie starten will, dann fragt die App, ob die laufende ohne Ergebnis beendet werden soll, oder kehrt auf Wunsch zu ihr zurück.
-- **AK-3:** Gegeben die App wird während der Animation eines Schritts beendet, wenn sie neu startet, dann wird die Animation mit demselben Ergebnis erneut abgespielt, und der Schritt wartet auf Bestätigung.
+- **AK-2:** Gegeben eine laufende Partie, wenn ich eine neue Partie starten will, dann fragt die App, ob die laufende ohne Ergebnis beendet werden soll („Neu beginnen“), oder kehrt auf Wunsch zu ihr zurück („Zur Partie“, Standard). *(präzisiert in 0.14)*
+- **AK-3:** Gegeben die App wird während der Animation eines Schritts beendet, wenn sie neu startet, dann wird die Animation mit demselben Ergebnis erneut abgespielt, und der Schritt wartet auf Bestätigung; eine schon abgeschlossene Animation läuft nicht noch einmal ab. *(ergänzt in 0.14)*
 
 #### US-AB-06 Partie beenden · M
 Als bedienende Person möchte ich eine Partie mit oder ohne Ergebnis beenden, damit die App für die nächste Partie bereit ist.
@@ -664,22 +666,24 @@ Bezug: FA-PL-09
 
 #### US-SR-01 Startrohstoffe ziehen · S
 Als Spielende möchten wir auf Wunsch zufällige Startrohstoffe erhalten, damit der Spielbeginn abwechslungsreicher wird.
-Bezug: FA-SR-01 bis FA-SR-04
+Bezug: FA-SR-01 bis FA-SR-05
 
 - **AK-1:** Gegeben die Option ist aktiv, dann werden die Startrohstoffe nach der Platzierung (bzw. nach LS-02, falls die Platzierung übersprungen wurde) gezogen, je Person ein Schritt in Platzierungsreihenfolge; ohne Reihenfolge („Ohne Platzierung“) in der Sitzreihenfolge der Gruppe. *(ergänzt in 0.13)*
 - **AK-2:** Gegeben die eingestellte Anzahl k, dann erhält jede Person genau k Rohstoffe aus Holz, Lehm, Wolle, Getreide und Erz.
 - **AK-3:** Gegeben „mit Zurücklegen“, dann ist jede Ziehung gleichverteilt über alle fünf Rohstoffe und Doppelungen sind möglich.
 - **AK-4:** Gegeben „ohne Zurücklegen“, dann erhält jede Person nur unterschiedliche Rohstoffe, und jede Ziehung ist gleichverteilt über die für diese Person noch verbleibenden.
 - **AK-5:** Gegeben ein Ergebnis, dann werden die Rohstoffe mit eigenem Symbol und Namen angezeigt.
+- **AK-6:** Gegeben die Rohstoffe einer Person sind gezogen, dann liegen sie verdeckt; ich decke sie einzeln durch Antippen oder alle mit „Alle umdrehen“ auf, erst danach führt der Knopf mit „Weiter“ fort. Aufgedeckte Karten bleiben aufgedeckt, auch nach einem Neustart. *(neu in 0.14, FA-SR-05)*
 
 ### 4.8 Inszenierung (IN)
 
-#### US-IN-01 Glücksrad · S
-Als Spielende möchten wir das Losen als Glücksrad erleben, damit der Aufbau spannend wird.
+#### US-IN-01 Karten ziehen · S *(bis 0.13 „Glücksrad“)*
+Als Spielende möchten wir das Losen als Ziehen von Karten erleben, damit der Aufbau spannend und nachvollziehbar wird.
 Bezug: FA-IN-02
 
-- **AK-1:** Gegeben ein Losschritt, dann zeigt das Rad für jede zur Wahl stehende Person ein gleich großes Segment mit Name und Farbe.
-- **AK-2:** Gegeben die Ziehung, dann hält das Rad sichtbar bei der gelosten Person an; die Animation bestimmt oder verändert das Ergebnis nicht.
+- **AK-1:** Gegeben ein Losschritt oder die Reihenfolge, dann liegen vor dem Losen die Karten aller zur Wahl stehenden Personen offen, mit Name und Farbe. *(geändert in 0.14)*
+- **AK-2:** Gegeben die Ziehung, dann werden die Karten gemischt, und die Karte der gelosten Person wird sichtbar aufgedeckt; die Animation bestimmt oder verändert das Ergebnis nicht. *(geändert in 0.14)*
+- **AK-3:** Gegeben die Reihenfolge, dann mischt das erste „Losen“ einmal, legt alle Karten verdeckt auf die Plätze und deckt Platz 1 auf; jedes weitere „Losen“ deckt den nächsten Platz auf, der letzte deckt sich von selbst auf. Gelost und gespeichert wird weiterhin Platz für Platz. *(neu in 0.14, E-36)*
 
 #### US-IN-02 Aufblinken bei der Platzierung · S
 Als Spielende möchten wir sehen, wie mögliche Positionen aufblinken, bevor eine festgelegt wird, damit die Platzierung spannend und nachvollziehbar wirkt.
@@ -692,7 +696,7 @@ Bezug: FA-IN-01
 Als bedienende Person möchte ich dezente Soundeffekte, die ich abschalten kann, damit die Stimmung passt, ohne zu stören.
 Bezug: FA-IN-03, FA-IN-04, FA-IN-05
 
-- **AK-1:** Gegeben der Ton ist an, dann begleiten dezente Soundeffekte Glücksrad, Aufblinken und Festlegung.
+- **AK-1:** Gegeben der Ton ist an, dann begleiten dezente Soundeffekte das Ziehen der Karten, Aufblinken und Festlegung.
 - **AK-2:** Gegeben die Einstellungen, dann gibt es einen Tonschalter (Standard: an); ist er aus, erklingt kein Ton. Die Einstellung bleibt gespeichert.
 - **AK-3:** Gegeben die gesamte App, dann wird keine Vibration ausgelöst.
 - **AK-4:** Gegeben das Gerät ist stummgeschaltet, dann erklingt kein Ton, soweit die Plattform das erlaubt; gegeben eine andere App spielt Musik, dann wird diese durch die Soundeffekte nicht unterbrochen.
@@ -1025,7 +1029,7 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-PL-05, FA-PL-06 | US-PL-04 |
 | FA-PL-07, FA-PL-08 | US-PL-01 |
 | FA-PL-09 | US-PL-05 |
-| FA-SR-01 bis FA-SR-04 | US-SR-01 |
+| FA-SR-01 bis FA-SR-05 | US-SR-01 |
 | FA-IN-01 | US-IN-02 |
 | FA-IN-02 | US-IN-01 |
 | FA-IN-03 bis FA-IN-05 | US-IN-03 |

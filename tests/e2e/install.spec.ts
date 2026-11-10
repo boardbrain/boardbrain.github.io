@@ -72,8 +72,9 @@ test.describe('NFA-PL-03 start without network (I1-D)', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Start' })).toBeAttached();
     await page.goto('/#/diagnose');
     await expect(page.getByText('Offline bereit (Service Worker aktiv)')).toBeVisible();
-    await page.getByRole('link', { name: 'Brett ansehen' }).click();
-    await expect(page.getByRole('img', { name: 'Spielbrett mit 19 Feldern' })).toBeVisible();
+    // A view loaded on demand (I2-C) comes from the service worker as well.
+    await page.goto('/#/partie/neu');
+    await expect(page.getByRole('heading', { level: 1, name: 'Neue Partie' })).toBeVisible();
     await context.setOffline(false);
   });
 });

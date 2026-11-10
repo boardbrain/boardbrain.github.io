@@ -70,7 +70,12 @@ export function drawNextStep<C, S, G>(
   const record: StepRecord<S> = { step: drawn.step, status: 'revealed' };
   const steps = [...generation.steps];
   steps.splice(drawn.at, 0, record);
-  return ok({ state: 'generation', steps, gameState: drawn.gameState });
+  const next: Generation<S, G> = { state: 'generation', steps, gameState: drawn.gameState };
+  return ok(
+    definition.arrangeSteps === undefined
+      ? next
+      : { ...next, steps: definition.arrangeSteps(setup, next) },
+  );
 }
 
 /**
@@ -112,9 +117,11 @@ export function stepsDiscardedBy<C, S, G>(
 
 /**
  * Repeats step `index` (US-AB-03): discards it and the steps that depend on it (Specification
- * 3.1) and draws the step again as `revealed`. All other steps stay unchanged (AK-3); nothing
- * of the repetition is recorded (AK-7). Possible while the match is in generation or running
- * (AK-6). While another step waits for confirmation, it must be confirmed first.
+ * 3.1). The repeated step is then the first missing one; it is shown without a result and drawn
+ * again with "Losen" (US-AB-03 AK-1, US-AB-02 AK-3, E-35). All other steps stay unchanged
+ * (AK-3); nothing of the repetition is recorded (AK-7). Possible while the match is in
+ * generation or running (AK-6). While another step waits for confirmation, it must be confirmed
+ * first.
  * @throws {InvariantError} if there is no step with this index.
  */
 export function repeatStep<C, S, G>(
@@ -122,7 +129,6 @@ export function repeatStep<C, S, G>(
   setup: C,
   generation: Generation<S, G>,
   index: number,
-  rng: RandomSource,
 ): Result<Generation<S, G>, StepPendingError> {
   assertStepIndex(generation, index);
   const revealed = revealedStepIndex(generation);
@@ -130,16 +136,19 @@ export function repeatStep<C, S, G>(
     return err('step-pending');
   }
   const discarded = new Set([index, ...stepsDiscardedBy(definition, setup, generation, index)]);
-  const gameState = definition.gameStateAfterRepeat(setup, generation, index);
   const remaining: Generation<S, G> = {
-    state: 'generation',
+    ...generation,
     steps: generation.steps.filter((_, recordIndex) => !discarded.has(recordIndex)),
-    gameState,
   };
-  const drawn = drawNextStep(definition, setup, remaining, rng);
-  // The repeated step itself is missing now, so there is always a step to draw.
-  assert(drawn.ok, 'a repeated step can be drawn again');
-  return drawn;
+  // The repeated step is missing now, so the generation is never complete afterwards.
+  return ok(
+    withGameState(
+      definition,
+      setup,
+      remaining,
+      definition.gameStateAfterRepeat(setup, generation, index),
+    ),
+  );
 }
 
 function assertStepIndex<S, G>(generation: Generation<S, G>, index: number): void {

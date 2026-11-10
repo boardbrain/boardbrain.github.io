@@ -132,37 +132,58 @@ describe('Architecture 5.5 flow control of a generation', () => {
   });
 });
 
+describe('Architecture 10.2 steps in the order of the flow', () => {
+  it('puts the steps in order after drawing, where the game module asks for it', () => {
+    const reversed: GenerationDefinition<Setup, Step, number> = {
+      ...definition,
+      arrangeSteps: (_setup, generation) =>
+        [...generation.steps].sort((a, b) => b.step.slot - a.step.slot),
+    };
+    const start = startGeneration<Step, number>(0);
+    const first = drawNextStep(reversed, { slots: 3 }, start, new ScriptedRandomSource([1]));
+    if (!first.ok) throw new Error(first.error);
+    const confirmedFirst = confirmStep(reversed, { slots: 3 }, first.value);
+    if (!confirmedFirst.ok) throw new Error(confirmedFirst.error);
+    const second = drawNextStep(
+      reversed,
+      { slots: 3 },
+      confirmedFirst.value,
+      new ScriptedRandomSource([2]),
+    );
+    if (!second.ok) throw new Error(second.error);
+
+    expect(second.value.steps.map((record) => record.step.slot)).toEqual([1, 0]);
+  });
+});
+
 describe('US-AB-03 Repeat a step (flow control)', () => {
-  it('AK-1, AK-3: draws the step again in place and keeps all other steps', () => {
+  it('AK-1, AK-3: discards the step, keeps all other steps, and draws it again in place', () => {
     const generation = runConfirmed([1, 2, 3]);
 
-    const repeated = repeatStep(definition, setup, generation, 1, new ScriptedRandomSource([9]));
+    const repeated = repeatStep(definition, setup, generation, 1);
+    if (!repeated.ok) throw new Error(repeated.error);
 
-    expect(repeated).toEqual({
-      ok: true,
-      value: {
-        state: 'generation',
-        steps: [
-          { step: { slot: 0, value: 1 }, status: 'confirmed' },
-          { step: { slot: 1, value: 9 }, status: 'revealed' },
-          { step: { slot: 2, value: 3 }, status: 'confirmed' },
-        ],
-        gameState: 0,
-      },
+    // E-35: the repeated step is shown without a result first, so nothing is drawn yet.
+    expect(repeated.value).toEqual({
+      state: 'generation',
+      steps: [
+        { step: { slot: 0, value: 1 }, status: 'confirmed' },
+        { step: { slot: 2, value: 3 }, status: 'confirmed' },
+      ],
+      gameState: 0,
     });
+    const drawn = drawNextStep(definition, setup, repeated.value, new ScriptedRandomSource([9]));
+    expect(drawn.ok && values(drawn.value)).toEqual([1, 9, 3]);
   });
 
   it('AK-6: a running generation can be repeated and is running again after confirming', () => {
-    const repeated = repeatStep(
-      definition,
-      setup,
-      runConfirmed([1, 2, 3]),
-      2,
-      new ScriptedRandomSource([0]),
-    );
+    const repeated = repeatStep(definition, setup, runConfirmed([1, 2, 3]), 2);
     if (!repeated.ok) throw new Error(repeated.error);
+    expect(repeated.value.state).toBe('generation');
 
-    const confirmed = confirmStep(definition, setup, repeated.value);
+    const drawn = drawNextStep(definition, setup, repeated.value, new ScriptedRandomSource([0]));
+    if (!drawn.ok) throw new Error(drawn.error);
+    const confirmed = confirmStep(definition, setup, drawn.value);
 
     expect(confirmed.ok && confirmed.value.state).toBe('running');
   });
@@ -171,13 +192,15 @@ describe('US-AB-03 Repeat a step (flow control)', () => {
     const generation = runConfirmed([1, 2, 3]);
     expect(stepsDiscardedBy(definition, setup, generation, 0)).toEqual([1, 2]);
 
-    const rng = new ScriptedRandomSource([7, 8]);
-    const repeated = repeatStep(definition, setup, generation, 0, rng);
+    const repeated = repeatStep(definition, setup, generation, 0);
     if (!repeated.ok) throw new Error(repeated.error);
 
-    expect(repeated.value.steps).toEqual([{ step: { slot: 0, value: 7 }, status: 'revealed' }]);
+    expect(repeated.value.steps).toEqual([]);
     expect(repeated.value.gameState).toBe(1);
-    const confirmed = confirmStep(definition, setup, repeated.value);
+    const rng = new ScriptedRandomSource([7, 8]);
+    const first = drawNextStep(definition, setup, repeated.value, rng);
+    if (!first.ok) throw new Error(first.error);
+    const confirmed = confirmStep(definition, setup, first.value);
     if (!confirmed.ok) throw new Error(confirmed.error);
     const next = drawNextStep(definition, setup, confirmed.value, rng);
     expect(next.ok && values(next.value)).toEqual([7, 8]);
@@ -193,16 +216,17 @@ describe('US-AB-03 Repeat a step (flow control)', () => {
     const drawn = drawNextStep(definition, setup, runConfirmed([1]), new ScriptedRandomSource([2]));
     if (!drawn.ok) throw new Error(drawn.error);
 
-    const repeated = repeatStep(definition, setup, drawn.value, 1, new ScriptedRandomSource([5]));
+    const repeated = repeatStep(definition, setup, drawn.value, 1);
 
-    expect(repeated.ok && values(repeated.value)).toEqual([1, 5]);
+    expect(repeated.ok && values(repeated.value)).toEqual([1]);
+    expect(repeated.ok && revealedStepIndex(repeated.value)).toBeUndefined();
   });
 
   it('rejects repeating another step while a step waits for confirmation', () => {
     const drawn = drawNextStep(definition, setup, runConfirmed([1]), new ScriptedRandomSource([2]));
     if (!drawn.ok) throw new Error(drawn.error);
 
-    expect(repeatStep(definition, setup, drawn.value, 0, new ScriptedRandomSource([5]))).toEqual({
+    expect(repeatStep(definition, setup, drawn.value, 0)).toEqual({
       ok: false,
       error: 'step-pending',
     });
@@ -211,9 +235,7 @@ describe('US-AB-03 Repeat a step (flow control)', () => {
   it('throws for a step that does not exist', () => {
     const generation = runConfirmed([1]);
 
-    expect(() =>
-      repeatStep(definition, setup, generation, 1, new ScriptedRandomSource([])),
-    ).toThrow(InvariantError);
+    expect(() => repeatStep(definition, setup, generation, 1)).toThrow(InvariantError);
     expect(() => stepsDiscardedBy(definition, setup, generation, -1)).toThrow(InvariantError);
   });
 });

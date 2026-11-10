@@ -2,7 +2,6 @@ import { use } from 'react';
 import { t, type TextKey } from '@/i18n/t';
 import type { Diagnostics } from '@/infra/platform/diagnostics';
 import styles from './DiagnosticsView.module.css';
-import { PressableLink } from '@/ui/components/Pressable';
 
 type DiagnosticsViewProps = {
   readonly diagnostics: Promise<Diagnostics>;
@@ -69,11 +68,6 @@ export function DiagnosticsView({ diagnostics, version }: DiagnosticsViewProps):
           ))}
         </dl>
       </section>
-
-      {/* I1-D: the board has no place in the navigation until the placement of I2. */}
-      <p>
-        <PressableLink to="/brett">{t('diagnose.brettAnsehen')}</PressableLink>
-      </p>
     </main>
   );
 }

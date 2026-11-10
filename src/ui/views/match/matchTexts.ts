@@ -6,6 +6,7 @@ import {
   type CatanEdition,
   type CatanPersonDraw,
   type CatanResource,
+  type CatanSlot,
   type CatanStep,
 } from '@/games/catan';
 import { t, type TextKey } from '@/i18n/t';
@@ -41,7 +42,7 @@ export function editionName(edition: CatanEdition): string {
 /**
  * Name of a piece in a band or title: settlement, city or road.
  */
-export function pieceName(step: CatanStep): string {
+export function pieceName(step: CatanSlot): string {
   if (step.kind === 'road') {
     return t('partie.strasse');
   }
@@ -91,7 +92,12 @@ export function repeatLines(session: StoredSession, index: number): string[] {
   const buildings = discarded.filter((other) => other.kind === 'building').length;
   const roads = discarded.filter((other) => other.kind === 'road');
   if (step.kind === 'order-spin') {
-    const lines = [t('partie.ganzeReihenfolge')];
+    // US-AB-03 AK-5: from this place on; the last place follows by itself.
+    const lines = [
+      step.position === 0
+        ? t('partie.ganzeReihenfolge')
+        : t('partie.plaetzeNeu', { von: step.position + 1, bis: setup.participants.length }),
+    ];
     if (buildings > 0) {
       lines.push(
         t('partie.platzierungVerworfen', {

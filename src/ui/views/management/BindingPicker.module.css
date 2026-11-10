@@ -92,3 +92,8 @@
   float: right;
   content: '✓' / '';
 }
+
+/* Locked during a match (design I2-D, S1): faded until the match has ended. */
+.locked {
+  opacity: 0.45;
+}

@@ -37,6 +37,7 @@ const ROUTES: RouteObject[] = [
     path: '/partie/neu',
     element: <PreparationLayout />,
     children: [
+      { index: true, element: <h1>game choice page</h1> },
       { path: 'tisch', element: <TableChoiceView /> },
       { path: 'optionen', element: <OptionsView /> },
       { path: 'farben', element: <ColorsView /> },
@@ -45,8 +46,13 @@ const ROUTES: RouteObject[] = [
   { path: '/partie', element: <h1>match page</h1> },
 ];
 
+// The router of the test, to open an address as a link or the back button would.
+let router: ReturnType<typeof renderWithApp>['router'] | undefined;
+
 async function setUp(path = '/partie/neu/tisch'): Promise<BoardBrainDb> {
-  const { db } = renderWithApp(null, { path, routes: ROUTES });
+  const view = renderWithApp(null, { path, routes: ROUTES });
+  router = view.router;
+  const { db } = view;
   await db.persons.bulkAdd(NAMES.map((name, index) => aPerson({ id: personId(index), name })));
   await db.groups.bulkAdd([
     aTable(1, 'Freitagsrunde', 4),
@@ -61,6 +67,12 @@ async function setUp(path = '/partie/neu/tisch'): Promise<BoardBrainDb> {
 async function chooseTable(user: User, name = 'Freitagsrunde'): Promise<void> {
   await user.click(await screen.findByRole('button', { name: new RegExp(`^${name}:`) }));
   await screen.findByRole('heading', { name: 'Wie spielt ihr?' });
+}
+
+async function toColors(user: User): Promise<void> {
+  await chooseTable(user);
+  await user.click(screen.getByRole('button', { name: 'Weiter zu den Farben' }));
+  await screen.findByRole('heading', { name: 'Welche Farben?' });
 }
 
 function switchOf(name: string): HTMLElement {
@@ -198,12 +210,6 @@ describe('US-AB-01 options of the match', () => {
 });
 
 describe('US-PG-04 colours of the match', () => {
-  async function toColors(user: User): Promise<void> {
-    await chooseTable(user);
-    await user.click(screen.getByRole('button', { name: 'Weiter zu den Farben' }));
-    await screen.findByRole('heading', { name: 'Welche Farben?' });
-  }
-
   function chosen(name: string): string | null | undefined {
     return within(screen.getByRole('group', { name: `Farbe von ${name}` }))
       .getAllByRole('button')
@@ -248,7 +254,7 @@ describe('US-PG-04 colours of the match', () => {
     expect([chosen('Anna'), chosen('Ben')]).toEqual(['Rot', 'Blau']);
   });
 
-  it('ADR-014: "Generierung starten" stores the match and its first step, then shows it', async () => {
+  it('Specification 3.5: "Generierung starten" stores the match, then shows its first step', async () => {
     const user = userEvent.setup();
     const db = await setUp();
     await toColors(user);
@@ -258,10 +264,11 @@ describe('US-PG-04 colours of the match', () => {
     expect(await screen.findByRole('heading', { name: 'match page' })).toBeInTheDocument();
     const stored = await db.session.toArray();
     expect(stored).toHaveLength(1);
-    expect(stored[0]?.generation.steps).toHaveLength(1);
+    // US-AB-02 AK-3: the first step is shown without a result, nothing is drawn yet.
+    expect(stored[0]?.generation.steps).toHaveLength(0);
   });
 
-  it('a running match leads away from the preparation', async () => {
+  it('a running match leads away from the later pages of the preparation', async () => {
     const user = userEvent.setup();
     await setUp();
     await toColors(user);
@@ -275,5 +282,43 @@ describe('US-PG-04 colours of the match', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'match page' })).toBeInTheDocument();
     });
+  });
+});
+
+describe('US-AB-05 AK-2 a new match while one runs (design I2-D, Q1)', () => {
+  async function runningMatch(): Promise<{ db: BoardBrainDb; user: User }> {
+    const user = userEvent.setup();
+    const db = await setUp();
+    await toColors(user);
+    await user.click(screen.getByRole('button', { name: 'Generierung starten' }));
+    await screen.findByRole('heading', { name: 'match page' });
+    return { db, user };
+  }
+
+  it('asks over the game choice; "Zur Partie" leads back to the match', async () => {
+    const { db, user } = await runningMatch();
+    await act(() => router?.navigate('/partie/neu'));
+
+    const dialog = await screen.findByRole('alertdialog');
+    expect(within(dialog).getByText('Freitagsrunde spielt gerade')).toBeInTheDocument();
+    expect(within(dialog).getByText('Neue Partie beendet sie ohne Ergebnis')).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Zur Partie' })).toHaveFocus();
+    await user.click(within(dialog).getByRole('button', { name: 'Zur Partie' }));
+
+    expect(await screen.findByRole('heading', { name: 'match page' })).toBeInTheDocument();
+    expect(await db.session.count()).toBe(1);
+  });
+
+  it('"Neu beginnen" ends the match without a result and stays on the game choice', async () => {
+    const { db, user } = await runningMatch();
+    await act(() => router?.navigate('/partie/neu'));
+
+    await user.click(await screen.findByRole('button', { name: 'Neu beginnen' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
+    expect(screen.getByRole('heading', { name: 'game choice page' })).toBeInTheDocument();
+    expect(await db.session.count()).toBe(0);
   });
 });

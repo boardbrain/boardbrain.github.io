@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.22 |
-| Stand | 03.11.2026 |
-| Grundlage | BoardBrain_Spezifikation.md v0.13 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.11 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.19 (9.3, 13, E-32), BoardBrain_Architektur.md v0.22 (19) |
+| Version | 0.23 |
+| Stand | 09.11.2026 |
+| Grundlage | BoardBrain_Spezifikation.md v0.14 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.11 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.20 (9.3, 13, E-32), BoardBrain_Architektur.md v0.25 (19) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -35,6 +35,7 @@
 | 0.20 | 29.10.2026 | Bündel I2-B umgesetzt: Ablaufsteuerung, Catan-Ablauf, gespeicherte Partie, `SessionService` und Sperre der Spielbindung; nach Wiederholung eines Drehs der Reihenfolge beginnt eine übersprungene Platzierung wieder (Entscheidung des Product Owners) (2, 8) (#28) |
 | 0.21 | 02.11.2026 | Einstieg ab I3 neu (Entscheidung des Product Owners): „Partie“ führt zu einer gemeinsamen Spielliste, eigene Spiele direkt zum Ergebnis, Catan fragt „Neue Partie“ oder „Ergebnis eintragen“; im Formular erst Spiel, dann Gruppe; ersetzt Variante K2; offener Punkt Sortierung der Spielliste (7, 8) |
 | 0.22 | 03.11.2026 | I2-C umgesetzt (#31): Vorbereitung über Spiel, Tisch, Optionen und Farben, Ablauf mit „Losen“ und „Wiederholen“, Übersicht zum Ansehen, Startstapel „Partie“; Reihenfolge abschaltbar (FA-LS-07, Anforderungsdokumentation 0.19, Spezifikation 0.13); kein Paket `zustand` (Architektur ADR-029); Wiederholen aus der Übersicht und Rückblick („Blättern“, US-AB-04 AK-3, AK-4) gehören zu I2-D (Entscheidung des Product Owners) (8) |
+| 0.23 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners, Anforderungsdokumentation 0.20, Spezifikation 0.14): Schritt zuerst ohne Ergebnis, Knopf „Weiter“, Personen mit Karten losen statt mit einem Glücksrad, Startrohstoffe von Hand aufdecken; Referenz `docs/design/i2d-running-match-final-preview.html` mit allen Bewegungen; I2-D baut die ruhenden Zustände, I2-E wird „Karten ziehen und Überspringen“ und baut die Bewegungen, D-2 gestaltet nur noch Aufblinken, Tempo und Klänge (2, 8); neue Bündel I2-G „Mehr Platz: ohne Titelleiste, ganze Breite“ als Nächstes nach I2-D und danach I2-H „Steine auf dem Brett antippen“ (Entscheidungen des Product Owners 10.11.2026) |
 
 ## 1. Zweck
 
@@ -52,7 +53,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 2b | Kleine Aufgabe K-3: Kartenhand einfahren | nach I1, vor I2 | umgesetzt (#23) |
 | 2c | Kleine Aufgabe K-4: Berührungsverhalten app-weit | direkt nach K-3, vor I2 | umgesetzt (#25) |
-| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31) |
+| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31), I2-D (#34) |
 | 4 | Entscheidung über Vorabversionen (OP-13) | nach I2 | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
@@ -62,7 +63,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 
 **Blöcke statt Stufen (E-32, seit 0.18):** Jedes Inkrement schließt einen fachlichen Block ganz ab, mit allen Must-, Should- und Could-Stories, die dazugehören (Spezifikation 2.2). Bis 0.17 kamen alle Should-Stories gesammelt in I5 und alle Could-Stories in I6; dann wäre zum Beispiel die Inszenierung erst nach Ergebnissen und Datensicherung gefolgt.
 
-**Warum das Design nicht ganz vorn steht:** Der Code arbeitet mit Farbkennungen (etwa „rot“), die Farbwerte stehen nur in `src/ui/styles/tokens.css` und lassen sich jederzeit austauschen. OP-11 blockiert daher nichts. Das Design der Inszenierung (D-2, OP-06) folgt in I2, sobald der Ablauf einer Partie in der App läuft, damit Glücksrad und Aufblinken am echten Ablauf beurteilt werden können.
+**Warum das Design nicht ganz vorn steht:** Der Code arbeitet mit Farbkennungen (etwa „rot“), die Farbwerte stehen nur in `src/ui/styles/tokens.css` und lassen sich jederzeit austauschen. OP-11 blockiert daher nichts. Das Design der Inszenierung (D-2, OP-06) folgt in I2, sobald der Ablauf einer Partie in der App läuft, damit Aufblinken und Klänge am echten Ablauf beurteilt werden können.
 
 Bis Release 1.0 bleibt `main` auf dem Platzhalter 0.1.0 (Spezifikation 2.3, EP-02); es gibt keine weiteren Releases, sofern OP-13 nichts anderes ergibt.
 
@@ -233,7 +234,7 @@ Die Stories je Inkrement stehen in Spezifikation 2.5. Die Inkremente sind nach f
 
 | Inkrement | Block | Stories | Kritische Teile (Opus, high) |
 |---|---|---|---|
-| I2 Generierung | gesamter Ablauf einer Partie mit Inszenierung | siehe Kapitel 8 | Platzierung und Sackgassen (Architektur 5.3, 5.4), Ablauf und Wiederaufnahme der laufenden Partie, Glücksrad mit Motion, Startrohstoffe (Zufall) |
+| I2 Generierung | gesamter Ablauf einer Partie mit Inszenierung | siehe Kapitel 8 | Platzierung und Sackgassen (Architektur 5.3, 5.4), Ablauf und Wiederaufnahme der laufenden Partie, Karten ziehen mit Motion, Startrohstoffe (Zufall) |
 | I3 Ergebnisse und Statistik | Ergebnisse erfassen und ansehen, Statistik | US-ER-01, -04, -05, US-ST-01, -02 (M); US-ER-02, US-ST-03, -04 (S); US-ER-03 (C) | keine; Kennzahlen mit Eigenschaftstests |
 | I4 Daten und Updates | Export, Import, Sicherungspunkte, Updates, Installation, Speicherschutz | US-EI-01, -03 bis -06, US-DS-01, -02, US-UP-01, -02, US-IS-01, -03 (M); US-EI-02, -07, US-DS-04, US-IS-02 (S); US-DS-03 (C) | Import mit Konflikten, Sicherungspunkte, Service Worker und Updates, Speicherschutz; Paket `valibot` (aus I1-B zurückgestellt) |
 | I5 Verwaltung und Archiv | Archivieren, Wiederbeleben, Löschen; Spieleliste getrennt | US-VW-01, -03, -04, US-SP-03 (S) | Löschen mit Sicherungspunkt „Vor Löschen“ (Datenbank) |
@@ -262,12 +263,14 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 | I2-A Platzierung, Reihenfolge, Startrohstoffe | US-PL-02, US-PL-03, US-LS-03, US-SR-01 (Fachlogik) | Opus, high | `feat/us-pl-02-placement-and-dead-ends` | umgesetzt (#27) |
 | I2-B Generierung und gespeicherte Partie | US-AB-03, US-AB-05, US-AB-06, US-LS-02, US-PG-04, US-PL-05 (Fachlogik und Dienst), US-VW-02 AK-5 | Opus, high | `feat/us-ab-03-generation-session` | umgesetzt (#28) |
 | I2-C Neue Partie vorbereiten und durchlaufen | US-SP-01, US-SP-04, US-AB-01, US-AB-02, US-LS-02, US-LS-03, US-PL-04, US-PG-04, US-SR-01, US-PL-05 (Oberfläche) | Sonnet, medium | `feat/us-ab-01-new-match` | umgesetzt (#31) |
-| I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-03, US-AB-04, US-AB-05, US-AB-06 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | offen |
-| D-2 Design der Inszenierung (OP-06) | Glücksrad, Aufblinken, Tempo, Klänge | Opus, medium | `chore/op-06-staging-design` | offen |
-| I2-E Glücksrad und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-wheel` | offen |
+| I2-D Laufende Partie: wiederholen, einsehen, fortsetzen | US-AB-02, US-AB-03, US-AB-04, US-AB-05, US-AB-06, US-SR-01 AK-6, US-VW-02 AK-5 (Oberfläche) | Opus, high | `feat/us-ab-04-running-match` | umgesetzt (#34) |
+| I2-G Mehr Platz: ohne Titelleiste, ganze Breite *(neu in 0.23)* | NFA-PL-04 (alle Ansichten) | Opus, medium | `feat/more-room-layout` | offen, als Nächstes nach I2-D |
+| I2-H Steine auf dem Brett antippen *(neu in 0.23)* | US-AB-03 (Oberfläche) | Opus, high | `feat/us-ab-03-tap-pieces` | offen, nach I2-G |
+| D-2 Design der Inszenierung (OP-06) | Aufblinken, Tempo, Klänge | Opus, medium | `chore/op-06-staging-design` | offen |
+| I2-E Karten ziehen und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-card-draw` | offen |
 | I2-F Aufblinken und Klänge | US-IN-02, US-IN-03 | Sonnet, medium | `feat/us-in-02-highlight-and-sound` | offen |
 
-**Warum diese Reihenfolge:** Erst die Fachlogik ohne Oberfläche (A, B), weil dort die strengsten Prüfkriterien gelten (Zufall, Sackgassen, erst speichern, dann zeigen). Dann der Ablauf in der App (C, D), sodass am Spieleabend schon gespielt werden kann. D-2 folgt, wenn der Ablauf läuft, damit Rad und Aufblinken am echten Ablauf beurteilt werden. Die Inszenierung (E, F) ersetzt dann nur Bausteine der Oberfläche; Fachlogik und Datenbank bleiben unverändert, weil jede Animation ihr Ergebnis fertig erhält (Architektur 13.6).
+**Warum diese Reihenfolge:** Erst die Fachlogik ohne Oberfläche (A, B), weil dort die strengsten Prüfkriterien gelten (Zufall, Sackgassen, erst speichern, dann zeigen). Dann der Ablauf in der App (C, D), sodass am Spieleabend schon gespielt werden kann. D-2 folgt, wenn der Ablauf läuft, damit Aufblinken und Klänge am echten Ablauf beurteilt werden. Die Inszenierung (E, F) ersetzt dann nur Bausteine der Oberfläche; Fachlogik und Datenbank bleiben unverändert, weil jede Animation ihr Ergebnis fertig erhält (Architektur 13.6).
 
 ### I2-A Platzierung, Reihenfolge, Startrohstoffe
 
@@ -296,23 +299,46 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 
 ### I2-D Laufende Partie: wiederholen, einsehen, fortsetzen
 
-- **Inhalt:** jeden früheren Schritt wiederholen, aus der Übersicht und im Rückblick, mit Warnung, die die verworfenen Schritte nennt (US-AB-03; den angezeigten Schritt wiederholt schon I2-C); Rückblick mit „Zurück“ im Ablauf und „Blättern“ bis zum neuesten Schritt (US-AB-04 AK-3, AK-4, FA-AB-10) *(neu in 0.22)*; Übersicht der laufenden Partie (US-AB-04); Hinweis „‹Gruppe› spielt gerade – Weiter“ auf dem Start und Rückkehr mit einem Tipp; Rückfrage, wenn trotz laufender Partie eine neue beginnen soll (US-AB-05 AK-2); nach einem Neustart während einer Animation wird sie erneut abgespielt (AK-3); Meldung bei gesperrter Spielbindung mit dem Angebot, die Partie zu beenden (Spezifikation 3.5). Die Prüfseite `#/brett` und ihr Verweis in der Diagnose entfallen.
+- **Design (0.23):** Eine Runde mit dem Product Owner ergab die verbindliche Referenz `docs/design/i2d-running-match-final-preview.html`, pixelgenau für I2-D (Zustände, Abläufe, Texte) und I2-E (Bewegungen): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt (E-35), Vorwärts-Knopf „Losen“, „Weiter“, „Blättern“, „Zur Übersicht“, „Als Nächstes“ im Band der Platzierung; Personen mit Karten losen statt mit einem Glücksrad (E-36, Rückseite R1, Mischen in drei Bewegungen); Startrohstoffe verdeckt, von Hand aufdecken (E-37); Rückfrage bei neuer Partie als Dialog (Q1), Sperre im Tisch-Editor als Hinweis bei der Spielbindung (S1).
+
+- **Inhalt:** jeden früheren Schritt wiederholen, aus der Übersicht und im Rückblick, mit Warnung, die die verworfenen Schritte nennt (US-AB-03; den angezeigten Schritt wiederholt schon I2-C); Rückblick mit „Zurück“ im Ablauf und „Blättern“ bis zum neuesten Schritt (US-AB-04 AK-3, AK-4, FA-AB-10) *(neu in 0.22)*; Übersicht der laufenden Partie (US-AB-04); Hinweis „‹Gruppe› spielt gerade – Weiter“ auf dem Start und Rückkehr mit einem Tipp; Rückfrage, wenn trotz laufender Partie eine neue beginnen soll (US-AB-05 AK-2); nach einem Neustart während einer Animation wird sie erneut abgespielt (AK-3); Meldung bei gesperrter Spielbindung mit dem Angebot, die Partie zu beenden (Spezifikation 3.5). Die Prüfseite `#/brett` und ihr Verweis in der Diagnose entfallen. Dazu nach der Referenz *(neu in 0.23)*: Seiten ohne Ergebnis und Knopf „Weiter“ (US-AB-02 AK-1, AK-3), die Karten im Ruhezustand (offen vor dem Losen, gezogene Karte auf ihrem Platz, verdeckte Plätze der Reihenfolge, Stapel der Rohstoffe) mit schlichtem Einblenden, Startrohstoffe von Hand aufdecken (US-SR-01 AK-6).
+- **Nicht enthalten:** die Bewegungen der Karten (Mischen, Austeilen, Zurücklegen, Umdrehen), sie baut I2-E.
+- **Umgesetzt (0.23):** Losen und Bestätigen getrennt (`draw`, `confirm`), „Generierung starten“ und Wiederholen losen nicht mehr selbst; die Seite ohne Ergebnis wird aus der Sitzung abgeleitet. Kartentisch mit Rückseite R1 für Losschritt, Reihenfolge (eine Kartengröße für 2 bis 4 Personen) und Startrohstoffe (feste Größe, viele in zwei Zeilen); aufgedeckte Startrohstoffe bleiben nach einem Neustart aufgedeckt (Sitzung Version 2). Rückblick unter `#/partie?schritt=N` mit „Blättern“ und schwebendem Hinweis, Wiederholen aus Zeilen und Stücken der Übersicht, Band auf dem Start, Rückfrage Q1 über der Spielwahl, Hinweis S1 im Tisch-Editor; `#/brett` entfällt, die Brett-Tests prüfen das leere Brett der Platzierung. Ein ganzer Ablauf mit 4 Personen und Startrohstoffen braucht 39 Tipps wie die Referenz (Architektur 10.3, 13.1, 13.6).
+- **Nach der Abnahme (10.11.2026):** Nichts verschiebt sich, wenn etwas erscheint („Zurück“ und „Wiederholen“ ausgegraut statt ausgeblendet, Band mit fester Höhe, Knöpfe ohne erneutes Einblenden); Startrohstoffe mit dem Band unten wie in der Platzierung; Losen mittig auf dem Kartentisch; Steine enden immer deckend; Reihenfolge ab dem gewählten Platz neu losen (US-AB-03 AK-5); nach einem Wiederholen behaltene Schritte als ganze Ansicht, fehlende Schritte zuerst, „Zur Übersicht“ im Rückblick; Startrohstoffe folgen einer neuen Reihenfolge. Die Referenz ist entsprechend angeglichen.
 - **Nachweis:** Ende-zu-Ende-Tests mit Wiederholungen und mit Neuladen während und nach einem Schritt (Architektur 14.5).
 - **Pakete:** keine.
 - **Abnahme durch den Product Owner:** Losschritt, Dreh der Reihenfolge, Gebäude und Straße wiederholen; App während eines Schritts schließen und wieder öffnen; Punkte K-7 und K-8.
 
+### I2-G Mehr Platz: ohne Titelleiste, ganze Breite *(neu in 0.23)*
+
+- **Anlass:** Wünsche des Product Owners bei der Abnahme von I2-D (10.11.2026): mehr Platz für die Inhalte, und auf dem iPad hochkant nutzen Platzierung und Startrohstoffe die ganze Breite, Losen und Reihenfolge nicht.
+- **Inhalt:** Die Titelleiste „BoardBrain“ entfällt in der ganzen App; Logo und Name bekommen einen neuen Platz, etwa groß auf dem Start, und jede Seite trägt ihre eigene Überschrift; oben bleibt genug Abstand zur Statusleiste, auch in der installierten App. Auf Tablets im Hochformat nutzen alle Seiten des Ablaufs die ganze Breite; offen ist, ob Vorbereitung und Übersicht schmal bleiben und ob die Entwicklungskarte beim Losen auf dem Tablet größer werden darf (Beratung mit dem Product Owner). Vor I2-H und I2-E, damit Tippflächen und Kartenbewegungen auf dem endgültigen Platz entstehen.
+- **Design zuerst:** Vorschau für die Seiten ohne Titelleiste und die Breiten; danach Architektur 13.1 und die betroffenen finalen Referenzen in `docs/design/` angleichen.
+- **Nachweis:** Ende-zu-Ende-Tests auf allen sechs Geräten bleiben grün; Bildschirmfotos gegen die neuen Referenzen.
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** alle Hauptseiten auf S26, iPad hoch und quer und PC, als installierte App.
+
+### I2-H Steine auf dem Brett antippen *(neu in 0.23)*
+
+- **Anlass:** In der Übersicht nennt die Liste „Siedlung von Anna“, auf dem Brett hat Anna aber zwei Siedlungen; welcher Stein gemeint ist, sieht man nur am Brett (Product Owner bei der Abnahme von I2-D, 10.11.2026).
+- **Inhalt:** Jeder Stein auf einem Brett mit Steinen lässt sich antippen: im Ablauf, im Rückblick, auf ganzen Ansichten nach einem Wiederholen und auf dem Brett der Übersicht. Danach folgt dieselbe Rückfrage wie aus der Übersicht: eine Straße allein, ein Gebäude mit seiner Straße und allen späteren Steinen (US-AB-03 AK-3, AK-4). Die Tippflächen sind unsichtbar, etwa 44 px groß und echte Knöpfe mit Namen („Siedlung von Anna wiederholen“); auf dem Brett kommt nichts hinzu und nichts wird verdeckt. Nahe einer Ecke gewinnt das Gebäude, weiter außen die Straße. Solange die Rückfrage offen ist, ist der Stein markiert, bei einem Gebäude auch die Steine, die mit verworfen werden. Ein kurzer Hinweis „Stein antippen zum Wiederholen“ steht in der Übersicht zwischen den Namen und dem Brett, im vorhandenen freien Raum (nach I2-G), ohne dass sich etwas verschiebt. Damit entfällt das ausgegraute „Wiederholen“ auf ganzen Ansichten nach einem Wiederholen.
+- **Design zuerst:** Vorschau für die Markierung in der Rückfrage und den Hinweis; die Markierung passt zum Aufblinken aus D-2.
+- **Nachweis:** Unit-Tests für die Zuordnung eines Tipps zu Gebäude oder Straße; Ende-zu-Ende-Test: Straße und Gebäude über das Brett wiederholen, im Ablauf und in der Übersicht.
+- **Pakete:** keine.
+- **Abnahme durch den Product Owner:** auf S26, iPad und PC einzelne Siedlungen, Städte und Straßen antippen und wiederholen.
+
 ### D-2 Design der Inszenierung (OP-06)
 
 - **Auftrag:** „Erledige Design D-2 aus docs/Umsetzungsplan.md.“ (Opus, medium)
-- **Inhalt:** Vorschläge für Glücksrad (Segmente mit Name und Catan-Farbe, Drehen und Anhalten), Aufblinken von Kreuzungen und Kanten, Tempo und Klänge als klickbare Vorschau im Stil der Referenz aus I2-C. Ergebnis ist die Referenz `docs/design/d2-staging-final-preview.html`; OP-06 wird in Anforderungsdokumentation und Architektur als geklärt vermerkt. Zu klären ist dabei, woher die Klänge kommen (im Browser über Web Audio erzeugt oder als Dateien); fremde Klangdateien oder eine Bibliothek wären ein Haltepunkt.
+- **Inhalt:** Vorschläge für Aufblinken von Kreuzungen und Kanten, Tempo und Klänge als klickbare Vorschau im Stil der Referenzen aus I2-C und I2-D. Das Glücksrad entfällt: Personen werden mit Karten gelost, Gestaltung und Bewegungen legt die Referenz aus I2-D fest (E-36). *(geändert in 0.23)* Ergebnis ist die Referenz `docs/design/d2-staging-final-preview.html`; OP-06 wird in Anforderungsdokumentation und Architektur als geklärt vermerkt. Zu klären ist dabei, woher die Klänge kommen (im Browser über Web Audio erzeugt oder als Dateien); fremde Klangdateien oder eine Bibliothek wären ein Haltepunkt.
 - **Pakete:** keine.
 
-### I2-E Glücksrad und Überspringen
+### I2-E Karten ziehen und Überspringen *(bis 0.22 „Glücksrad und Überspringen“)*
 
-- **Inhalt:** Glücksrad für LS-01, LS-03, LS-04 und jeden Dreh der Reihenfolge mit Motion (Architektur 13.6); der Zielwinkel ergibt sich aus dem gelosten und gespeicherten Ergebnis (US-IN-01 AK-2); Knopf „Animation überspringen“ (US-IN-04).
-- **Nachweis:** Unit-Tests für die Winkelberechnung; Ende-zu-Ende-Tests: Das Rad hält bei der gelosten Person, Überspringen zeigt sofort das Ergebnis, Tippen daneben ändert nichts.
+- **Inhalt:** die Bewegungen der Karten nach der Referenz aus I2-D mit Motion (Architektur 13.6): Mischen in drei Bewegungen, Flug der gelosten Karte auf ihren Platz, Austeilen der Reihenfolge und Umdrehen Platz für Platz, Austeilen der Startrohstoffe mit sichtbarem Zurücklegen; die geloste Karte steht vorher fest (US-IN-01 AK-2); Knopf „Animation überspringen“ (US-IN-04). Die ruhenden Zustände baut schon I2-D.
+- **Nachweis:** Unit-Tests für die Abfolge der Bewegungen; Ende-zu-Ende-Tests: Die gezogene Karte ist die geloste Person, Überspringen zeigt sofort das Ergebnis, Tippen daneben ändert nichts.
 - **Pakete:** keine.
-- **Abnahme durch den Product Owner:** Rad auf S26, iPad und PC; flüssig, auch beim Neustart während des Drehens.
+- **Abnahme durch den Product Owner:** Karten ziehen auf S26, iPad und PC; flüssig, auch beim Neustart während einer Bewegung.
 
 ### I2-F Aufblinken und Klänge
 
@@ -325,4 +351,4 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 
 - **„Ergebnis eintragen“** aus der Übersicht (US-AB-06 AK-1 und AK-2) wird mit US-ER-01 in I3 nachgewiesen, weil das Ergebnisformular zum Block „Ergebnisse“ gehört. In I2 endet eine Partie mit „Partie beenden ohne Ergebnis“, und der Stapel „Partie“ führt direkt zur neuen Partie; der Einstieg über die gemeinsame Spielliste (Kapitel 7) kommt mit I3.
 - **US-VW-02 AK-5** aus I1-F wird hier nachgewiesen: im Dienst mit I2-B, die Meldung in der Oberfläche mit I2-D.
-- **Animationen bis I2-E:** In I2-C und I2-D erscheinen Ergebnisse mit schlichtem Einblenden; damit sind US-AB-02 AK-2 (eigene Animation je Schritt) und US-AB-05 AK-3 (erneutes Abspielen) schon nachweisbar. I2-E und I2-F ersetzen das Einblenden durch Rad und Aufblinken.
+- **Animationen bis I2-E:** In I2-C und I2-D erscheinen Ergebnisse mit schlichtem Einblenden; damit sind US-AB-02 AK-2 (eigene Animation je Schritt) und US-AB-05 AK-3 (erneutes Abspielen) schon nachweisbar. I2-E und I2-F ersetzen das Einblenden durch die Bewegungen der Karten und das Aufblinken.

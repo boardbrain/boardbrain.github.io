@@ -12,6 +12,7 @@ import { chooseColor, isColorChanged, startInputOf } from './preparation';
 import { useChosenPreparation } from './PreparationLayout';
 import { WizardDots } from './WizardDots';
 import shared from './Match.module.css';
+import { cx } from '@/ui/components/classNames';
 import styles from './ColorsView.module.css';
 
 /**
@@ -72,7 +73,7 @@ export function ColorsView(): React.JSX.Element | null {
         </span>
       </div>
       <section className={shared.section}>
-        <h2 className={shared.sectionTitle}>
+        <h2 className={cx(shared.sectionTitle, styles.titleWithPill)}>
           <span>{t('partie.farbenDerPartie')}</span>
           {isChanged && (
             <PressableButton

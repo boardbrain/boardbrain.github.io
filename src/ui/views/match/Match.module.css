@@ -112,6 +112,10 @@
   border: 1px solid var(--color-border);
 }
 
+.dangerText {
+  color: var(--color-danger-text);
+}
+
 .danger {
   color: var(--color-on-accent);
   background: var(--color-danger);

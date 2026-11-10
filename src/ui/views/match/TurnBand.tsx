@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import type { CatanColorKey, PersonId } from '@/core/model';
 import { inkOn } from './matchColors';
-import { Reveal } from './Reveal';
 import styles from './MatchView.module.css';
 import { cx } from '@/ui/components/classNames';
 
@@ -19,6 +18,9 @@ type TurnBandProps = {
     readonly color: CatanColorKey;
   }[];
   readonly currentId: PersonId;
+  /** Small line above the name, e.g. "Als Nächstes" (design I2-D, N1). */
+  readonly note?: string | undefined;
+  readonly className?: string | undefined;
 };
 
 /**
@@ -32,17 +34,14 @@ export function TurnBand({
   color,
   order,
   currentId,
+  note,
+  className,
 }: TurnBandProps): React.JSX.Element {
-  return (
-    <Reveal
-      className={styles.turnBand}
-      style={{
-        color: inkOn(color),
-        background: `linear-gradient(160deg, var(--color-catan-${color}-band-light), var(--color-catan-${color}-band-dark))`,
-      }}
-    >
+  const content = (
+    <>
       <span className={styles.tbPiece}>{icon}</span>
       <span className={styles.tbLine}>
+        {note !== undefined && <small className={styles.tbNext}>{note}</small>}
         <strong className={styles.tbName}>{name}</strong>
         {what}
       </span>
@@ -58,6 +57,49 @@ export function TurnBand({
           </span>
         ))}
       </span>
-    </Reveal>
+    </>
+  );
+  const look = {
+    color: inkOn(color),
+    background: `linear-gradient(160deg, var(--color-catan-${color}-band-light), var(--color-catan-${color}-band-dark))`,
+  };
+  // Changes its content in place, without moving (PO 10.11.2026).
+  return (
+    <div data-solid="" className={cx(styles.turnBand, className)} style={look}>
+      {content}
+    </div>
+  );
+}
+
+type DoneBandProps = {
+  readonly text: string;
+  readonly icon: ReactNode;
+  readonly order: TurnBandProps['order'];
+};
+
+/**
+ * The band once the placement is finished (design I2-D, N1): "Platzierung fertig" in the
+ * colours of the app, with the order as mini coins.
+ */
+export function DoneBand({ text, icon, order }: DoneBandProps): React.JSX.Element {
+  return (
+    <div data-solid="" className={cx(styles.turnBand, styles.doneBand)}>
+      <span className={styles.tbPiece}>{icon}</span>
+      <span className={styles.tbLine}>
+        <strong className={styles.tbName}>{text}</strong>
+      </span>
+      <span className={styles.tbOrder}>
+        {order.map((person) => (
+          <span
+            key={person.personId}
+            className={styles.mCoin}
+            style={{ background: `var(--color-catan-${person.color})` }}
+            aria-hidden="true"
+          >
+            {person.name.slice(0, 1)}
+          </span>
+        ))}
+      </span>
+    </div>
   );
 }

@@ -30,6 +30,20 @@ export type CatanGameState = {
   readonly hiddenPlan: readonly VertexId[] | null;
   /** The placement was skipped (US-PL-05). */
   readonly placementSkipped: boolean;
+  /**
+   * FA-SR-05, US-SR-01 AK-6: the cards of the starting resources each person has turned over,
+   * as indices into the result, ascending. They stay turned over, also after a restart.
+   */
+  readonly openedResources: readonly CatanOpenedResources[];
+};
+
+/**
+ * The cards of the starting resources a person has turned over (FA-SR-05).
+ */
+export type CatanOpenedResources = {
+  readonly personId: PersonId;
+  /** Indices into the result of the step, ascending. */
+  readonly cards: readonly number[];
 };
 
 /**
@@ -38,6 +52,7 @@ export type CatanGameState = {
 export const CATAN_INITIAL_GAME_STATE: CatanGameState = {
   hiddenPlan: null,
   placementSkipped: false,
+  openedResources: [],
 };
 
 /**
@@ -55,8 +70,11 @@ export type CatanGenerationDefinition = GenerationDefinition<CatanSetup, CatanSt
  */
 export type PlacementNotSkippableError = 'placement-not-skippable';
 
-// A place in the flow that a step fills; a step carries the same fields plus its result.
-type Slot =
+/**
+ * A place in the flow that a step fills; a step carries the same fields plus its result. The
+ * flow shows the next missing slot without a result before it is drawn (US-AB-02 AK-3, E-35).
+ */
+export type CatanSlot =
   | { readonly kind: 'person-draw'; readonly draw: CatanPersonDraw }
   | { readonly kind: 'order-spin'; readonly position: number }
   | {
@@ -68,7 +86,7 @@ type Slot =
   | { readonly kind: 'road'; readonly index: number; readonly personId: PersonId }
   | { readonly kind: 'starting-resources'; readonly personId: PersonId };
 
-function slotKey(slot: Slot): string {
+function slotKey(slot: CatanSlot): string {
   switch (slot.kind) {
     case 'person-draw':
       return `person-draw:${slot.draw}`;
@@ -115,9 +133,9 @@ export function catanPlacementOrder(
 // FA-AB-02, Specification 3.1: the flow of the phases 4 to 9. The placement and the starting
 // resources follow the order, so they are known only once the order is complete. Without an
 // order there is no placement, and the starting resources follow the seats (FA-LS-07, FA-SR-04).
-function slotsOf(setup: CatanSetup, generation: CatanGeneration): Slot[] {
+function slotsOf(setup: CatanSetup, generation: CatanGeneration): CatanSlot[] {
   const steps = generation.steps.map((record) => record.step);
-  const slots: Slot[] = enabledPersonDraws(setup.options).map((draw) => ({
+  const slots: CatanSlot[] = enabledPersonDraws(setup.options).map((draw) => ({
     kind: 'person-draw',
     draw,
   }));
@@ -155,6 +173,19 @@ function slotsOf(setup: CatanSetup, generation: CatanGeneration): Slot[] {
   return slots;
 }
 
+// Number of steps before slot `position` of the flow. Steps that come later in the flow, or no
+// longer have a place in it, stay behind.
+function stepsBefore(
+  slots: readonly CatanSlot[],
+  generation: CatanGeneration,
+  position: number,
+): number {
+  const rank = new Map(slots.map((other, index) => [slotKey(other), index]));
+  return generation.steps.filter(
+    (record) => (rank.get(slotKey(record.step)) ?? Infinity) < position,
+  ).length;
+}
+
 function placementTotal(setup: CatanSetup): number {
   return setup.participants.length * catanPlacementRounds(setup.options.edition).length;
 }
@@ -167,7 +198,7 @@ export function createCatanGeneration(
 ): CatanGenerationDefinition {
   // Draws the result of a slot; only the building changes the module state.
   function drawSlot(
-    slot: Slot,
+    slot: CatanSlot,
     setup: CatanSetup,
     generation: CatanGeneration,
     rng: RandomSource,
@@ -230,12 +261,23 @@ export function createCatanGeneration(
       if (slot === undefined) {
         return null;
       }
-      // Steps that come later in the flow, or no longer have a place in it, stay behind.
-      const rank = new Map(slots.map((other, index) => [slotKey(other), index]));
-      const at = generation.steps.filter(
-        (record) => (rank.get(slotKey(record.step)) ?? Infinity) < position,
-      ).length;
-      return { ...drawSlot(slot, setup, generation, rng), at };
+      return {
+        ...drawSlot(slot, setup, generation, rng),
+        at: stepsBefore(slots, generation, position),
+      };
+    },
+
+    // US-SR-01 AK-1, PO 10.11.2026: the starting resources follow the placement order, also when
+    // the order is drawn again while they are drawn already. Only once every step has its slot,
+    // so while spins are missing nothing moves.
+    arrangeSteps(setup, generation) {
+      const rank = new Map(slotsOf(setup, generation).map((slot, index) => [slotKey(slot), index]));
+      const rankOf = (record: { readonly step: CatanStep }): number =>
+        rank.get(slotKey(record.step)) ?? -1;
+      if (generation.steps.some((record) => rankOf(record) === -1)) {
+        return generation.steps;
+      }
+      return [...generation.steps].sort((a, b) => rankOf(a) - rankOf(b));
     },
 
     isComplete(setup, generation) {
@@ -251,10 +293,13 @@ export function createCatanGeneration(
         steps.flatMap((step, other) => (matches(step) ? [other] : []));
       switch (repeated.kind) {
         case 'order-spin':
-          // The whole order is drawn again, and the whole placement is discarded.
+          // US-AB-03 AK-5 (PO 10.11.2026): place k and all later places are drawn again, the
+          // earlier ones stay; the whole placement is discarded.
           return indices(
             (step) =>
-              step.kind === 'order-spin' || step.kind === 'building' || step.kind === 'road',
+              (step.kind === 'order-spin' && step.position >= repeated.position) ||
+              step.kind === 'building' ||
+              step.kind === 'road',
           );
         case 'building':
           // Road k and all later buildings and roads.
@@ -279,10 +324,16 @@ export function createCatanGeneration(
         case 'order-spin':
           // Decision of the product owner (I2-B): a new order also resets a skipped placement,
           // so it starts again and can be skipped once more.
-          return { hiddenPlan: null, placementSkipped: false };
+          return { ...generation.gameState, hiddenPlan: null, placementSkipped: false };
+        case 'starting-resources': {
+          // The cards drawn again lie face down again (FA-SR-05).
+          const openedResources = generation.gameState.openedResources.filter(
+            (opened) => opened.personId !== repeated.personId,
+          );
+          return { ...generation.gameState, openedResources };
+        }
         case 'person-draw':
         case 'road':
-        case 'starting-resources':
           return generation.gameState;
       }
     },
@@ -324,6 +375,78 @@ export function skipCatanPlacement(
     return err('placement-not-skippable');
   }
   return ok(
-    withGameState(definition, setup, generation, { hiddenPlan: null, placementSkipped: true }),
+    withGameState(definition, setup, generation, {
+      ...generation.gameState,
+      hiddenPlan: null,
+      placementSkipped: true,
+    }),
+  );
+}
+
+/**
+ * The first missing slot of the flow without drawing it, and `at`, the number of steps before it
+ * in the flow; `null` once no step is missing. The flow shows it without a result until "Losen"
+ * draws it (US-AB-02 AK-3, E-35).
+ */
+export function catanNextSlot(
+  setup: CatanSetup,
+  generation: CatanGeneration,
+): { readonly slot: CatanSlot; readonly at: number } | null {
+  const slots = slotsOf(setup, generation);
+  const present = new Set(generation.steps.map((record) => slotKey(record.step)));
+  const position = slots.findIndex((slot) => !present.has(slotKey(slot)));
+  const slot = slots[position];
+  if (slot === undefined) {
+    return null;
+  }
+  return { slot, at: stepsBefore(slots, generation, position) };
+}
+
+/**
+ * Turns over cards of the starting resources of a person (FA-SR-05, US-SR-01 AK-6): adds
+ * `cards`, indices into the result of the step, to the cards already turned over. Nothing is
+ * drawn. Turning over a card twice changes nothing.
+ * @throws {InvariantError} if the person has no starting resources drawn or a card does not
+ * exist.
+ */
+export function openCatanResources(
+  generation: CatanGeneration,
+  personId: PersonId,
+  cards: readonly number[],
+): CatanGeneration {
+  const step = generation.steps
+    .map((record) => record.step)
+    .find(
+      (candidate) => candidate.kind === 'starting-resources' && candidate.personId === personId,
+    );
+  assert(step !== undefined, `starting resources of ${personId} are drawn`);
+  const count = step.result.length;
+  assert(
+    cards.every((card) => Number.isInteger(card) && card >= 0 && card < count),
+    'the cards exist',
+  );
+  const others = generation.gameState.openedResources.filter(
+    (opened) => opened.personId !== personId,
+  );
+  const before = catanOpenedResources(generation, personId);
+  const opened = [...new Set([...before, ...cards])].sort((a, b) => a - b);
+  return {
+    ...generation,
+    gameState: {
+      ...generation.gameState,
+      openedResources: [...others, { personId, cards: opened }],
+    },
+  };
+}
+
+/**
+ * The cards of the starting resources of a person that are turned over (FA-SR-05), ascending.
+ */
+export function catanOpenedResources(
+  generation: CatanGeneration,
+  personId: PersonId,
+): readonly number[] {
+  return (
+    generation.gameState.openedResources.find((opened) => opened.personId === personId)?.cards ?? []
   );
 }

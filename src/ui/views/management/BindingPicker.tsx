@@ -4,6 +4,7 @@ import { t } from '@/i18n/t';
 import { useHasFinePointer } from '@/ui/components/mediaQueries';
 import styles from './BindingPicker.module.css';
 import { PressableButton } from '@/ui/components/Pressable';
+import { cx } from '@/ui/components/classNames';
 
 /** One game a group can be bound to. */
 export type BindingOption = {
@@ -21,6 +22,8 @@ type BindingPickerProps = {
   readonly choice: GameId | null;
   readonly memberCount: number;
   readonly onChoose: (choice: GameId | null) => void;
+  /** Locked while the group plays a match (Specification 3.5, US-VW-02 AK-5): faded, no choice. */
+  readonly isLocked?: boolean;
 };
 
 // From this many own games the list gets a search field.
@@ -43,6 +46,7 @@ export function BindingPicker({
   choice,
   memberCount,
   onChoose,
+  isLocked = false,
 }: BindingPickerProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -65,11 +69,12 @@ export function BindingPicker({
 
   return (
     <div className={styles.picker}>
-      <div className={styles.segment}>
+      <div className={cx(styles.segment, isLocked && styles.locked)}>
         <PressableButton
           type="button"
           className={choice === null ? styles.on : styles.off}
           aria-pressed={choice === null}
+          disabled={isLocked}
           onClick={() => {
             choose(null);
           }}
@@ -82,7 +87,7 @@ export function BindingPicker({
             type="button"
             className={choice === option.gameId ? styles.on : styles.off}
             aria-pressed={choice === option.gameId}
-            disabled={memberCount > option.maxMembers}
+            disabled={isLocked || memberCount > option.maxMembers}
             onClick={() => {
               choose(option.gameId);
             }}
@@ -96,6 +101,7 @@ export function BindingPicker({
             className={chosenCustom === undefined ? styles.more : styles.on}
             aria-pressed={chosenCustom !== undefined}
             aria-expanded={isOpen}
+            disabled={isLocked}
             onClick={() => {
               setIsOpen(!isOpen);
               setQuery('');

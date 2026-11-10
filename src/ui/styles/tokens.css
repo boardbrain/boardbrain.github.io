@@ -72,8 +72,18 @@
   --color-card-art-shadow: #00000070;
   --color-card-glow: #fff2;
 
+  /* Card back R1 (design I2-D): dark wood, lozenge pattern, golden frame, medallion with the logo */
+  --color-card-back-gold: #e0b25a;
+  --color-card-back-top: #4a3d31;
+  --color-card-back-bottom: #28211b;
+  --color-card-back-medal-light: #3d3229;
+  --color-card-back-medal-dark: #1d1713;
+
   /* Destructive action, e.g. "Beenden" (design I2-C) */
   --color-danger: #b42f36;
+
+  /* Destructive action as text on a dark surface, e.g. "Neu beginnen" (design I2-D, Q1) */
+  --color-danger-text: #f08a8f;
 
   /* Translucent tag in front of a picture, e.g. "nur Catan" on a table (design I2-C, L2) */
   --color-tag-glass: color-mix(in srgb, var(--color-surface-raised) 45%, transparent);

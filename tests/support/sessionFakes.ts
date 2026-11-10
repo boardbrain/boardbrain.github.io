@@ -1,5 +1,5 @@
 import type { SessionRepositories, SessionStore, StoredSession } from '@/app/ports';
-import { drawNextStep } from '@/core/generation';
+import { drawNextStep, SESSION_SCHEMA_VERSION } from '@/core/generation';
 import type { Group } from '@/core/model';
 import { CATAN_GAME_ID, CATAN_GENERATION, type CatanSetup } from '@/games/catan';
 import { aCatanSetup, runCatanGeneration } from './catanGeneration';
@@ -62,7 +62,7 @@ export function aStoredSession(fields: Partial<StoredSession> = {}): StoredSessi
   }
   return {
     id: 'current',
-    schemaVersion: 1,
+    schemaVersion: SESSION_SCHEMA_VERSION,
     gameId: CATAN_GAME_ID,
     groupId: aGroup().id,
     setup,

@@ -29,7 +29,7 @@ describe('Design K-3 folded card hand', () => {
   it('is fanned out on a phone only on the start view', () => {
     expect(isHandFolded('/', true)).toBe(false);
     expect(
-      ['/verwaltung', '/verwaltung/personen/abc', '/brett', '/diagnose'].map((path) =>
+      ['/verwaltung', '/verwaltung/personen/abc', '/partie', '/diagnose'].map((path) =>
         isHandFolded(path, true),
       ),
     ).toEqual([true, true, true, true]);

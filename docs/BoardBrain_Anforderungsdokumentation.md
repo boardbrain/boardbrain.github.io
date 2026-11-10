@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.19 |
+| Version | 0.20 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 02.11.2026 |
+| Stand | 09.11.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -33,6 +33,7 @@
 | 0.17 | 26.10.2026 | Abnahme von I1-F: Personen- und Gruppennamen app-weit eindeutig, auch gegenüber archivierten (FA-PG-09, FA-VW-01, FA-VW-02, E-31) |
 | 0.18 | 29.10.2026 | Zuschnitt von I2: Umsetzung in fachlichen Blöcken einschließlich ihrer Should- und Could-Anteile (E-32); Design der Inszenierung (OP-06) innerhalb von I2 (13) |
 | 0.19 | 02.11.2026 | Design I2-C (Entscheidungen des Product Owners): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung spielen (5.4, FA-AB-02, neu FA-LS-07, FA-PL-09, FA-SR-04, E-33); Vorwärts-Knopf nennt, was er tut, und Rückblick auf frühere Schritte (FA-AB-03, neu FA-AB-10, E-34) |
+| 0.20 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (FA-AB-03, E-35); Personen werden mit Karten gelost statt mit einem Glücksrad (Begriff „Schritt“, FA-AB-03, FA-LS-02, FA-IN-02, E-36, OP-06); Startrohstoffe liegen verdeckt und werden von Hand aufgedeckt (neu FA-SR-05, E-37); nach einem Neustart läuft nur eine unterbrochene Animation erneut ab (FA-AB-07) |
 
 ## Inhaltsverzeichnis
 
@@ -108,7 +109,7 @@ BoardBrain ist eine plattformunabhängige, vollständig offline nutzbare App, di
 | Ergebnis | Die zu einer Partie erfassten Daten: Datum, optional Uhrzeit, Sieger bzw. Unentschieden, optional Siegpunkte aller Beteiligten und Notizen; bei Catan zusätzlich Spielversion, Modus und Catan-Farben. |
 | Generierung | Der von der App gesteuerte, schrittweise Ablauf aller Zufallsentscheidungen beim Aufbau einer Partie. |
 | Losschritt | Ein einzelner Zufallsentscheid innerhalb der Generierung, z. B. „Wer legt die Häfen?“. |
-| Schritt | Kleinste Einheit der Generierung, die einzeln dargestellt, bestätigt und wiederholt wird: ein Dreh des Glücksrads, ein Gebäude, eine Straße oder die Startrohstoffe einer Person. |
+| Schritt | Kleinste Einheit der Generierung, die einzeln dargestellt, bestätigt und wiederholt wird: das Losen einer Person (Losschritt oder ein Platz der Reihenfolge), ein Gebäude, eine Straße oder die Startrohstoffe einer Person. |
 | Kreuzung | Eckpunkt zwischen Feldern, an dem Siedlungen und Städte stehen. |
 | Kante | Verbindung zwischen zwei Kreuzungen, auf der Straßen liegen. |
 | Inlandkreuzung | Kreuzung, die an drei Landfelder grenzt, also nicht an Wasser. |
@@ -172,11 +173,11 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 |---|---|
 | FA-AB-01 | Der Ablauf beginnt mit der Auswahl von Spiel und Gruppe. Alle Mitglieder der Gruppe gelten als beteiligt. |
 | FA-AB-02 | Vor der Generierung werden Spielversion, Modus und Optionen festgelegt, insbesondere welche Losschritte aktiv sind, ob die Platzierungsreihenfolge gelost, selbst festgelegt oder ohne Platzierung gespielt wird und ob Startrohstoffe gezogen werden. *(ergänzt in 0.19)* |
-| FA-AB-03 | Jeder Schritt der Generierung muss vom Nutzer ausdrücklich bestätigt werden, bevor der nächste beginnt. Es gibt keinen automatischen Durchlauf. Ein Schritt ist ein Dreh des Glücksrads, ein Gebäude, eine Straße oder die Startrohstoffe einer Person; jedes Gebäude und jede Straße hat eine eigene Animation. Der Knopf zum Bestätigen nennt, was er tut: „Losen“, wenn er den nächsten Schritt lost, „Zur Übersicht“ nach dem letzten Schritt. *(präzisiert in 0.4, ergänzt in 0.19)* |
+| FA-AB-03 | Jeder Schritt der Generierung muss vom Nutzer ausdrücklich bestätigt werden, bevor der nächste beginnt. Es gibt keinen automatischen Durchlauf. Ein Schritt ist das Losen einer Person (Losschritt oder ein Platz der Reihenfolge), ein Gebäude, eine Straße oder die Startrohstoffe einer Person; jedes Gebäude und jede Straße hat eine eigene Animation. Wechselt die Ansicht (jeder Losschritt, Beginn der Reihenfolge, Beginn der Platzierung, Startrohstoffe jeder Person), zeigt die App den Schritt zuerst ohne Ergebnis; gelost wird erst auf Wunsch. Der Knopf zum Bestätigen nennt, was er tut: „Losen“, wenn er lost, „Weiter“, wenn er ohne zu losen zur nächsten Ansicht führt, „Zur Übersicht“ nach dem letzten Schritt. *(präzisiert in 0.4, ergänzt in 0.19 und 0.20)* |
 | FA-AB-04 | Jeder Schritt kann wiederholt werden, solange die Partie läuft. Vor der Wiederholung erscheint eine Warnung. Verworfen werden nur die vom wiederholten Schritt abhängigen Folgeschritte: bei einem Gebäude die zugehörige Straße und alle späteren Gebäude und Straßen, bei der Platzierungsreihenfolge die Platzierung; bei LS-01, LS-03, LS-04, einer Straße oder Startrohstoffen keine. Wiederholungen werden nicht protokolliert. *(präzisiert in 0.4)* |
 | FA-AB-05 | Nach Abschluss der Generierung bleibt das Ergebnis während der laufenden Partie einsehbar. |
 | FA-AB-06 | Nach der Generierung bietet die App das Eintragen eines Ergebnisses an. Dies ist optional und kein Pflichtschritt. |
-| FA-AB-07 | Es gibt höchstens eine laufende Partie. Sie übersteht das Schließen und Neustarten der App unverändert. Das Ergebnis eines Schritts steht fest, bevor seine Animation beginnt; wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt. *(neu in 0.4, ergänzt in 0.7)* |
+| FA-AB-07 | Es gibt höchstens eine laufende Partie. Sie übersteht das Schließen und Neustarten der App unverändert. Das Ergebnis eines Schritts steht fest, bevor seine Animation beginnt; wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; eine schon abgeschlossene Animation läuft nicht noch einmal ab. *(neu in 0.4, ergänzt in 0.7 und 0.20)* |
 | FA-AB-08 | Eine laufende Partie endet mit dem Speichern eines Ergebnisses oder mit „Beenden ohne Ergebnis“. Danach wird die Generierung verworfen; gespeichert bleibt nur ein ggf. erfasstes Ergebnis. *(neu in 0.4)* |
 | FA-AB-09 | Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. *(neu in 0.7)* |
 | FA-AB-10 | Während der Generierung lassen sich frühere Schritte mit ihrem gespeicherten Ergebnis ansehen (Rückblick), ohne dass etwas gelost wird. *(neu in 0.19)* |
@@ -188,7 +189,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | ID | Anforderung |
 |---|---|
 | FA-LS-01 | Losen, welche Person die gemischten Landschaftsfelder auslegt. |
-| FA-LS-02 | Losen der Platzierungsreihenfolge aller beteiligten Personen in aufeinanderfolgenden Drehs des Glücksrads; der letzte Platz ergibt sich automatisch. Die Person auf Platz 1 beginnt anschließend auch das Spiel. *(präzisiert in 0.4)* |
+| FA-LS-02 | Losen der Platzierungsreihenfolge aller beteiligten Personen in aufeinanderfolgenden Ziehungen aus den jeweils verbleibenden Personen; der letzte Platz ergibt sich automatisch. Die Person auf Platz 1 beginnt anschließend auch das Spiel. *(präzisiert in 0.4, geändert in 0.20)* |
 | FA-LS-03 | Losen, welche Person die gemischten Häfen auslegt. |
 | FA-LS-04 | Losen, welche Person die Zahlenchips aus dem Beutel auf die Felder legt. |
 | FA-LS-05 | Das Losen einer Person (FA-LS-01, 03, 04) wird als wiederverwendbarer, spielunabhängiger Baustein umgesetzt. |
@@ -217,13 +218,14 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | FA-SR-02 | Jede Person erhält eine einstellbare Anzahl von 1 bis 5 Startrohstoffen (Standard: 2), die zufällig aus den fünf Rohstoffarten gezogen werden (Holz, Lehm, Wolle, Getreide, Erz). |
 | FA-SR-03 | Einstellbar ist, ob mit oder ohne Zurücklegen gezogen wird. Standard ist mit Zurücklegen, wobei doppelte Rohstoffe möglich sind. Ohne Zurücklegen erhält jede Person nur unterschiedliche Rohstoffe. |
 | FA-SR-04 | Die Startrohstoffe werden nach der Platzierung gezogen, je Person ein Schritt in Platzierungsreihenfolge; ohne Reihenfolge in der Sitzreihenfolge der Gruppe. *(neu in 0.4, ergänzt in 0.19)* |
+| FA-SR-05 | Die gezogenen Startrohstoffe einer Person liegen zunächst verdeckt; die bedienende Person deckt sie selbst auf, einzeln durch Antippen oder alle auf einmal. Aufgedeckte Karten bleiben aufgedeckt, auch nach einem Neustart. *(neu in 0.20, E-37)* |
 
 ### 5.7 Inszenierung
 
 | ID | Anforderung |
 |---|---|
 | FA-IN-01 | Die Platzierung wird schrittweise dargestellt, wobei Kreuzungen und Kanten vor der Festlegung aufblinken. |
-| FA-IN-02 | Das Losen von Personen wird als Glücksrad dargestellt. |
+| FA-IN-02 | Das Losen von Personen wird als Ziehen von Karten dargestellt: Vor dem Losen liegen die Personenkarten offen, sie werden gemischt, und die geloste Karte wird aufgedeckt. *(geändert in 0.20, E-36)* |
 | FA-IN-03 | Die Generierung wird von dezenten Soundeffekten begleitet. |
 | FA-IN-04 | Es wird keine Vibration verwendet. |
 | FA-IN-05 | Ein Tonschalter in den Einstellungen schaltet alle Soundeffekte ab. Standard ist eingeschaltet. *(neu in 0.4)* |
@@ -508,6 +510,9 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-32 | Umgesetzt wird in fachlichen Blöcken: Ein Inkrement schließt einen Block vollständig ab, mit allen zugehörigen Must-, Should- und Could-Stories. Die Generierung (I2) umfasst damit auch Inszenierung, Startrohstoffe, abweichende Farben einer Partie und das Überspringen der Platzierung. Präzisiert E-10; der Umfang von Version 1 bleibt unverändert *(neu in 0.18)* | Ein Bereich soll fertig sein, bevor ein anderer beginnt, statt über mehrere Inkremente verteilt zu bleiben. Animationen und Design gehören zum Kern der App. Entscheidung des Product Owners beim Zuschnitt von I2 |
 | E-33 | Die Platzierungsreihenfolge ist abschaltbar: Statt zu losen, wird sie selbst festgelegt (die Platzierung folgt ihr) oder es wird ohne Platzierung gespielt; Startrohstoffe folgen dann der festgelegten Reihenfolge bzw. der Sitzreihenfolge der Gruppe *(neu in 0.19)* | Manche Gruppen wollen Reihenfolge oder Startaufstellung selbst bestimmen und trotzdem Losschritte und Startrohstoffe der App nutzen. Entscheidung des Product Owners im Design von I2-C |
 | E-34 | Der Vorwärts-Knopf im Ablauf nennt, was er tut („Losen“, „Blättern“, „Zur Übersicht“); frühere Schritte lassen sich im Rückblick ansehen, ohne neu zu losen *(neu in 0.19)* | Am Tisch soll niemand versehentlich einen Schritt losen, der schon feststeht; bei Unklarheiten kann man nachschauen, ohne etwas zu verändern. Entscheidung des Product Owners im Design von I2-C |
+| E-35 | Ein Schritt erscheint zuerst ohne Ergebnis, wenn die Ansicht wechselt (jeder Losschritt, Beginn der Reihenfolge, Beginn der Platzierung, Startrohstoffe jeder Person); innerhalb von Reihenfolge und Platzierung geht es direkt mit „Losen“ weiter. Der Knopf „Weiter“ führt ohne zu losen zur nächsten Ansicht *(neu in 0.20)* | Am Tisch sollen alle sehen, was als Nächstes gelost wird, statt mit einem Ergebnis begrüßt zu werden; wo der nächste Schritt offensichtlich ist, kostet eine eigene Seite nur Tipps. Entscheidung des Product Owners im Design von I2-D |
+| E-36 | Personen werden mit Karten gelost statt mit einem Glücksrad: Die Karten liegen offen, werden gemischt, und die geloste Karte wird aufgedeckt; die Reihenfolge wird einmal gemischt, verdeckt ausgeteilt und Platz für Platz aufgedeckt *(neu in 0.20)* | Karten passen zum Stil der App (Spielkarten, Kartenhand) und zeigen vor dem Losen, wer im Spiel ist; das Mischen ist am Tisch vertraut und nachvollziehbar. Entscheidung des Product Owners im Design von I2-D |
+| E-37 | Startrohstoffe werden verdeckt ausgeteilt und von Hand aufgedeckt *(neu in 0.20)* | Eine kurze Bewegung statt einer langen Animation je Karte spart Zeit; das Aufdecken macht die bedienende Person selbst, so spannend, wie sie will. Entscheidung des Product Owners im Design von I2-D |
 
 ---
 
@@ -520,7 +525,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | OP-03 | Konkrete Konfliktfälle beim Import und deren Auflösungsoptionen | Spezifikation | geklärt: FA-EI-03, FA-EI-06 bis -08, Spezifikation 3.9 |
 | OP-04 | Häufigkeit und Anzahl der internen Sicherungspunkte | Spezifikation | geklärt: FA-DS-04 bis -06, Spezifikation 3.10 |
 | OP-05 | Intervall und Form der Export-Erinnerung | Spezifikation | geklärt: FA-EI-05, Spezifikation 3.11 |
-| OP-06 | Gestaltung von Glücksrad, Aufblinken, Tempo und Sounds im Detail | Design | teilweise geklärt: Funktion in FA-IN-05, FA-IN-06; visuelle Gestaltung offen |
+| OP-06 | Gestaltung von Glücksrad, Aufblinken, Tempo und Sounds im Detail | Design | teilweise geklärt: Funktion in FA-IN-05, FA-IN-06; Losen mit Karten statt Glücksrad samt Bewegungen festgelegt (E-36, Referenz `docs/design/i2d-running-match-final-preview.html`); Aufblinken, Tempo und Klänge offen |
 | OP-07 | Verwaltungsfunktionen: Bearbeiten, Löschen und ggf. Archivieren von Personen, Gruppen und Spielen sowie Auswirkungen auf bestehende Statistiken | Spezifikation | geklärt: FA-VW-01 bis -05 |
 | OP-08 | Verhalten der Standardfarben bei Personen in mehreren Gruppen und bei Farbkonflikten innerhalb einer Partie | Spezifikation | geklärt: FA-PG-05 bis -08, Spezifikation 3.3 |
 | OP-09 | Persistenz des Speichers unter iOS (Installation auf dem Home-Bildschirm erforderlich) | Architektur | geklärt: E-17, FA-IS-01 bis -03, Architektur ADR-016 |
@@ -563,5 +568,5 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 
 1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08) – *abgeschlossen am 07.10.2026 mit Release 0.1.0*
 2. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10); Reihenfolge, Zuschnitt und Ablauf in `docs/Umsetzungsplan.md`
-3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) innerhalb von Inkrement I2, sobald der Ablauf einer Partie steht und bevor Glücksrad und Aufblinken gebaut werden (E-32). Die Farbwerte blockieren nichts, weil sie nur in den Design-Tokens stehen – *OP-11 erledigt am 07.10.2026 (E-26); OP-06 verschoben in 0.18*
+3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) innerhalb von Inkrement I2, sobald der Ablauf einer Partie steht und bevor Aufblinken und Klänge gebaut werden (E-32; das Losen mit Karten ist seit 0.20 mit I2-D festgelegt, E-36). Die Farbwerte blockieren nichts, weil sie nur in den Design-Tokens stehen – *OP-11 erledigt am 07.10.2026 (E-26); OP-06 verschoben in 0.18*
 4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13)

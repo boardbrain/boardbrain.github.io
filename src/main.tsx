@@ -19,7 +19,6 @@ import { AppLayout } from '@/ui/components/AppLayout';
 import { ErrorBoundary } from '@/ui/components/ErrorBoundary';
 import { ErrorScreen } from '@/ui/components/ErrorScreen';
 import { installGlobalErrorHandlers } from '@/ui/globalErrorHandlers';
-import { BoardView } from '@/ui/views/board/BoardView';
 import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
 import { GamesView } from '@/ui/views/management/GamesView';
 import { GameView } from '@/ui/views/management/GameView';
@@ -90,8 +89,8 @@ function view(element: ReactNode): ReactNode {
   );
 }
 
-// ADR-019: hash routing. The diagnostics view is reachable via #/diagnose only, the board via
-// #/brett and the diagnostics view (Architecture 13.1).
+// ADR-019: hash routing. The diagnostics view is reachable via #/diagnose only (Architecture
+// 13.1); the board shows in the placement of a match.
 const router = createHashRouter([
   {
     element: <AppLayout />,
@@ -120,7 +119,6 @@ const router = createHashRouter([
         path: '/partie/uebersicht',
         lazy: matchRoute((match) => view(<match.MatchOverviewView />)),
       },
-      { path: '/brett', element: view(<BoardView />) },
       {
         path: '/diagnose',
         element: view(<DiagnosticsView diagnostics={diagnostics} version={__APP_VERSION__} />),

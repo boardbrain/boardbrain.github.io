@@ -51,6 +51,34 @@
   opacity: 0.45;
 }
 
+/* US-AB-04 AK-3 (design I2-C, R1): the note floats over the free room below the progress and
+   only takes room of its own when it would cover a part of the step. */
+.lookBack {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 4px 4px 12px;
+  font-size: 0.85rem;
+  color: var(--color-accent-text);
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-accent-text);
+  border-radius: 999px;
+}
+
+.lookBackInFlow {
+  position: static;
+}
+
+.lookBackPill {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
 .stepBody {
   display: flex;
   flex: 1;
@@ -76,6 +104,13 @@
 
 .forward {
   flex: 1;
+  min-width: 0;
+  padding-inline: 12px;
+}
+
+/* One line, so the buttons keep their height and the cards above do not change size (PO). */
+.actions button {
+  white-space: nowrap;
 }
 
 /* Page 5: the result of a draw as a development card D2. Its width follows the app as in the
@@ -232,14 +267,47 @@
   position: relative;
   display: grid;
   flex: 1;
+
+  /* Room for "Platzierung überspringen", kept on every page of the placement (see .skipOver). */
+  padding-bottom: 22px;
   place-items: center;
   min-height: 0;
+}
+
+/* Page 8 in portrait as wide as the placement before it (Match.module.css, .wideMain), so the
+   band keeps its place; in landscape the placement has its own layout. */
+@media (orientation: portrait) {
+  .resourcesMain {
+    max-width: 64rem;
+  }
+}
+
+/* "Platzierung überspringen" right above the band: it appears and goes without moving the board
+   (PO 09.11.2026). The board always keeps a strip free for it, so they do not overlap (PO
+   10.11.2026); the link reaches into the gap above the band. */
+.skipOver {
+  position: absolute;
+  right: 0;
+  bottom: -12px;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.skipOver > * {
+  min-height: 34px;
+  pointer-events: auto;
 }
 
 .turnBand {
   display: flex;
   gap: 10px;
   align-items: center;
+
+  /* As high as with "Als Nächstes" (N1), so the board does not move when the line appears
+     (PO 09.11.2026). */
+  min-height: 50px;
   padding: 5px 10px 5px 5px;
   font-size: 0.85rem;
   border-radius: 999px;
@@ -273,6 +341,21 @@
 
 .tbName {
   font-size: 1.15rem;
+}
+
+/* N1 (design I2-D): "Als Nächstes" above the name of the person at turn. */
+.tbNext {
+  display: block;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  opacity: 0.85;
+}
+
+/* The band once the placement is finished, in the colours of the app. */
+.doneBand {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
 }
 
 .tbOrder {

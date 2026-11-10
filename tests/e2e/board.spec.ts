@@ -1,5 +1,7 @@
-import type { Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './fixtures';
+import { seedDatabase } from './seedDatabase';
+import { useSeededRandom } from './seededRandom';
 
 type Box = { x: number; y: number; width: number; height: number };
 
@@ -24,11 +26,31 @@ function rowLengths(boxes: readonly Box[]): number[] {
   return rows.map((row) => row.length);
 }
 
+const EMPTY_BOARD = 'Brett mit 0 Gebäuden und 0 Straßen';
+
+// Since I2-D the board shows in the placement of a match (#/brett is gone): a match of two
+// persons without draws, the order drawn, then the empty board before the first building.
+async function openEmptyBoard(page: Page): Promise<void> {
+  await useSeededRandom(page, 7);
+  await seedDatabase(page, [{ name: 'Zu zweit', members: ['Anna', 'Ben'] }]);
+  await page.getByRole('link', { name: 'Partie' }).click();
+  await page.getByRole('link', { name: 'Catan' }).click();
+  await page.getByRole('button', { name: /^Zu zweit:/ }).click();
+  for (const draw of ['Landschaftsfelder', 'Häfen', 'Zahlenchips']) {
+    await page.getByRole('switch', { name: draw }).click();
+  }
+  await page.getByRole('button', { name: 'Weiter zu den Farben' }).click();
+  await page.getByRole('button', { name: 'Generierung starten' }).click();
+  await page.getByRole('button', { name: 'Losen' }).click();
+  await page.getByRole('button', { name: 'Weiter' }).click();
+  await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+}
+
 test.describe('US-PL-01 board (design I1-D)', () => {
   test('AK-1: shows 19 hexes pointing up in rows of 3, 4, 5, 4 and 3', async ({ page }) => {
-    await page.goto('/#/brett');
+    await openEmptyBoard(page);
 
-    await expect(page.getByRole('img', { name: 'Spielbrett mit 19 Feldern' })).toBeVisible();
+    await expect(page.getByRole('img', { name: EMPTY_BOARD })).toBeVisible();
     const hexes = page.getByTestId('board-hex');
     await expect(hexes).toHaveCount(19);
     const boxes = await boxesOf(hexes);
@@ -41,8 +63,8 @@ test.describe('US-PL-01 board (design I1-D)', () => {
   });
 
   test('AK-3: the whole board is visible without scrolling', async ({ page }) => {
-    await page.goto('/#/brett');
-    const board = page.getByRole('img', { name: 'Spielbrett mit 19 Feldern' });
+    await openEmptyBoard(page);
+    const board = page.getByRole('img', { name: EMPTY_BOARD });
     await expect(board).toBeVisible();
 
     const viewport = page.viewportSize();
@@ -58,17 +80,5 @@ test.describe('US-PL-01 board (design I1-D)', () => {
       () => document.documentElement.scrollHeight > document.documentElement.clientHeight,
     );
     expect(isScrollable).toBe(false);
-  });
-
-  test('is reached via management and diagnostics, as in the installed app', async ({ page }) => {
-    await page.goto('/#/verwaltung');
-
-    await page.getByRole('link', { name: 'Diagnose' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Diagnose' })).toBeVisible();
-    await page.getByRole('link', { name: 'Brett ansehen' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Brett' })).toBeVisible();
-    await page.getByRole('button', { name: 'Zurück' }).click();
-
-    await expect(page.getByRole('heading', { level: 1, name: 'Diagnose' })).toBeVisible();
   });
 });

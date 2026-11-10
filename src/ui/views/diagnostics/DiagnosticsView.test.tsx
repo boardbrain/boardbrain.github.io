@@ -67,10 +67,4 @@ describe('Architecture 13.1 diagnostics view', () => {
     expect(within(infos).getByText('Offline bereit (Service Worker aktiv)')).toBeInTheDocument();
     expect(within(infos).getByText('ja')).toBeInTheDocument();
   });
-
-  it('US-PL-01: links to the board view, which has no place in the navigation yet', async () => {
-    await renderView(ALL_AVAILABLE);
-
-    expect(screen.getByRole('link', { name: 'Brett ansehen' })).toHaveAttribute('href', '/brett');
-  });
 });

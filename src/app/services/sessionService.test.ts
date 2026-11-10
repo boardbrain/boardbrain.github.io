@@ -72,13 +72,22 @@ async function startFour(service: SessionService, options = ALL_ON): Promise<Sto
   return value(service.start({ groupId: FOUR.id, options, colors: preparation.colors }));
 }
 
-// Taps "Losen" `count` times: confirms `count` steps, the next one is revealed.
-async function advance(service: SessionService, count: number): Promise<StoredSession> {
+// Taps "Losen" `count` times: `count` steps are drawn, the last one waits for confirmation.
+// (Where the flow shows "Weiter", it confirms first; "Losen" does the same in one transaction.)
+async function draw(service: SessionService, count: number): Promise<StoredSession> {
   let session: StoredSession | undefined;
   for (let step = 0; step < count; step++) {
-    session = await value(service.advance(shown()));
+    session = await value(service.draw(shown()));
   }
   return defined(session, 'session');
+}
+
+// Draws all `count` steps and confirms the last one ("Zur Übersicht").
+async function finish(service: SessionService, count: number): Promise<StoredSession> {
+  await draw(service, count);
+  const revealed = shown();
+  if (revealed === null) throw new Error('no step revealed');
+  return value(service.confirm(revealed));
 }
 
 function stored(): StoredSession | undefined {
@@ -121,7 +130,7 @@ describe('US-AB-01 Prepare and start a match', () => {
     expect(await service.isSessionActive()).toBe(false);
   });
 
-  it('Specification 3.5, ADR-014: stores the generation with the first step revealed', async () => {
+  it('Specification 3.5, US-AB-02 AK-3: stores the generation; the first step is not drawn yet', async () => {
     const { service } = launch();
     const colors = FOUR.members.map(({ personId }, index) => ({
       personId,
@@ -132,20 +141,17 @@ describe('US-AB-01 Prepare and start a match', () => {
 
     expect(session).toEqual({
       id: 'current',
-      schemaVersion: 1,
+      schemaVersion: 2,
       gameId: CATAN_GAME_ID,
       groupId: FOUR.id,
       setup: { participants: CATAN_TEST_PERSONS, options: ALL_ON, colors },
       generation: {
         state: 'generation',
-        steps: session.generation.steps,
-        gameState: { hiddenPlan: null, placementSkipped: false },
+        steps: [],
+        gameState: { hiddenPlan: null, placementSkipped: false, openedResources: [] },
       },
       startedAt: TEST_NOW,
     });
-    expect(session.generation.steps).toMatchObject([
-      { step: { kind: 'person-draw', draw: 'landscapes' }, status: 'revealed' },
-    ]);
     expect(stored()).toEqual(session);
     expect(await service.isSessionActive()).toBe(true);
     // US-PG-04 AK-1: the colours of the group stay unchanged.
@@ -176,12 +182,12 @@ describe('US-AB-01 Prepare and start a match', () => {
     const { service } = launch();
     await startFour(service);
 
-    const session = await advance(service, 26);
+    const session = await finish(service, 26);
 
     expect(session.generation.state).toBe('running');
     expect(session.generation.steps).toHaveLength(26);
     expect(session.generation.steps.every((record) => record.status === 'confirmed')).toBe(true);
-    expect(await service.advance(shown())).toEqual({ ok: false, error: 'generation-complete' });
+    expect(await service.draw(shown())).toEqual({ ok: false, error: 'generation-complete' });
   });
 
   it('FA-LS-07: an order set by hand has no spins; the placement follows it', async () => {
@@ -189,7 +195,7 @@ describe('US-AB-01 Prepare and start a match', () => {
     const order = [...CATAN_TEST_PERSONS].reverse();
     await startFour(service, { ...ALL_ON, order: { mode: 'manual', order } });
 
-    const session = await advance(service, 23);
+    const session = await finish(service, 23);
     const summary = catanSummary(session.setup, session.generation);
 
     expect(session.generation.state).toBe('running');
@@ -236,7 +242,7 @@ describe('US-AB-05 The running match survives a restart', () => {
   it('ADR-014, AK-1, AK-3: a revealed step is stored before it is shown and stays after a restart', async () => {
     const first = launch(5);
     await startFour(first.service);
-    const revealed = await advance(first.service, 7);
+    const revealed = await draw(first.service, 8);
     expect(stored()).toEqual(revealed);
     expect(revealed.generation.steps.at(-1)?.status).toBe('revealed');
 
@@ -244,7 +250,7 @@ describe('US-AB-05 The running match survives a restart', () => {
 
     expect(await second.service.current()).toEqual({ ok: true, value: revealed });
     // The same result is shown again, nothing is drawn anew; "Losen" confirms it.
-    const next = await value(second.service.advance(shown()));
+    const next = await value(second.service.draw(shown()));
     expect(next.generation.steps.slice(0, 8).map((record) => record.step)).toEqual(
       revealed.generation.steps.map((record) => record.step),
     );
@@ -254,12 +260,12 @@ describe('US-AB-05 The running match survives a restart', () => {
   it('ADR-010: the hidden plan is part of the stored session', async () => {
     const first = launch(9);
     await startFour(first.service);
-    const afterFirstBuilding = await advance(first.service, 6);
+    const afterFirstBuilding = await draw(first.service, 7);
     const plan = afterFirstBuilding.generation.gameState.hiddenPlan ?? [];
     expect(plan).toHaveLength(7);
 
     const second = launch(10);
-    const next = await advance(second.service, 2);
+    const next = await draw(second.service, 2);
 
     expect(next.generation.steps[8]?.step).toMatchObject({ kind: 'building', result: plan[0] });
   });
@@ -270,7 +276,7 @@ describe('US-AB-05 The running match survives a restart', () => {
     store.session = { ...session, schemaVersion: 99 };
 
     expect(await service.current()).toEqual({ ok: false, error: 'session-unsupported' });
-    expect(await service.advance(shown())).toEqual({ ok: false, error: 'session-unsupported' });
+    expect(await service.draw(shown())).toEqual({ ok: false, error: 'session-unsupported' });
     expect(await service.isSessionActive()).toBe(true);
     await service.endWithoutResult();
     expect(await service.current()).toEqual({ ok: true, value: null });
@@ -278,32 +284,62 @@ describe('US-AB-05 The running match survives a restart', () => {
 });
 
 describe('US-AB-02 and US-AB-03 Confirm and repeat steps (service)', () => {
-  it('US-AB-02 AK-1: "Losen" confirms the revealed step and draws the next one at once', async () => {
+  it('US-AB-02 AK-1, AK-3: "Losen" draws the step shown without a result', async () => {
     const { service } = launch();
-    const started = await startFour(service);
+    await startFour(service);
 
-    const next = await value(service.advance(shown()));
+    const first = await value(service.draw(null));
+
+    expect(first.generation.steps).toMatchObject([
+      { step: { kind: 'person-draw', draw: 'landscapes' }, status: 'revealed' },
+    ]);
+    expect(stored()).toEqual(first);
+  });
+
+  it('US-AB-02 AK-1: "Losen" on a drawn step confirms it and draws the next one at once', async () => {
+    const { service } = launch();
+    await startFour(service);
+    const first = await value(service.draw(null));
+
+    const next = await value(service.draw(0));
 
     expect(next.generation.steps.map((record) => record.status)).toEqual(['confirmed', 'revealed']);
-    expect(next.generation.steps[0]?.step).toEqual(started.generation.steps[0]?.step);
+    expect(next.generation.steps[0]?.step).toEqual(first.generation.steps[0]?.step);
     expect(stored()).toEqual(next);
+  });
+
+  it('US-AB-02 AK-1, AK-3: "Weiter" confirms without drawing; the next step waits without a result', async () => {
+    const { service } = launch();
+    await startFour(service);
+    await value(service.draw(null));
+
+    const confirmed = await value(service.confirm(0));
+
+    expect(confirmed.generation.steps.map((record) => record.status)).toEqual(['confirmed']);
+    expect(revealedStepIndex(confirmed.generation)).toBeUndefined();
+    expect(await service.confirm(0)).toEqual({ ok: false, error: 'nothing-to-confirm' });
   });
 
   it('US-AB-02 AK-1: a second quick tap on the step already confirmed changes nothing', async () => {
     const { service } = launch();
     await startFour(service);
+    await value(service.draw(null));
 
-    const [first, second] = await Promise.all([service.advance(0), service.advance(0)]);
+    const [first, second] = await Promise.all([service.draw(0), service.draw(0)]);
+    const [third, fourth] = await Promise.all([service.confirm(1), service.confirm(0)]);
 
     expect(first.ok).toBe(true);
     expect(second).toEqual({ ok: false, error: 'step-changed' });
+    expect(third.ok).toBe(true);
+    expect(fourth).toEqual({ ok: false, error: 'nothing-to-confirm' });
     expect(stored()?.generation.steps).toHaveLength(2);
+    expect(await service.draw(1)).toEqual({ ok: false, error: 'step-changed' });
   });
 
-  it('AK-1, AK-4: stores the repeated step as revealed and discards the dependent steps', async () => {
+  it('AK-1, AK-4: discards the repeated step and the dependent steps; "Losen" draws it again', async () => {
     const { service } = launch(11);
     await startFour(service);
-    const before = await advance(service, 26);
+    const before = await finish(service, 26);
     const building = before.generation.steps.findIndex(
       ({ step }) => step.kind === 'building' && step.index === 6,
     );
@@ -312,22 +348,26 @@ describe('US-AB-02 and US-AB-03 Confirm and repeat steps (service)', () => {
     const repeated = await value(service.repeatStep(building));
 
     expect(discarded).toHaveLength(3);
-    expect(repeated.generation.steps).toHaveLength(26 - 3);
-    expect(repeated.generation.steps[building]).toMatchObject({
+    // E-35: the repeated step is shown without a result first.
+    expect(repeated.generation.steps).toHaveLength(26 - 4);
+    expect(revealedStepIndex(repeated.generation)).toBeUndefined();
+    expect(repeated.generation.state).toBe('generation');
+    expect(stored()).toEqual(repeated);
+    const drawn = await value(service.draw(null));
+    expect(drawn.generation.steps[building]).toMatchObject({
       step: { kind: 'building', index: 6 },
       status: 'revealed',
     });
-    expect(repeated.generation.state).toBe('generation');
-    expect(stored()).toEqual(repeated);
   });
 
   it('AK-6: a step of a running match can be repeated; afterwards it is running again', async () => {
     const { service } = launch(12);
     await startFour(service);
-    await advance(service, 26);
+    await finish(service, 26);
 
     await value(service.repeatStep(0));
-    const confirmed = await value(service.advance(shown()));
+    await value(service.draw(null));
+    const confirmed = await value(service.confirm(0));
 
     expect(confirmed.generation.state).toBe('running');
   });
@@ -335,41 +375,95 @@ describe('US-AB-02 and US-AB-03 Confirm and repeat steps (service)', () => {
   it('AK-7: a repetition is recorded nowhere', async () => {
     const { service } = launch(13);
     await startFour(service);
-    const before = await advance(service, 26);
+    const before = await finish(service, 26);
 
     await value(service.repeatStep(25));
-    const after = await value(service.advance(shown()));
+    await value(service.draw(null));
+    const after = await value(service.confirm(25));
 
     expect(Object.keys(after)).toEqual(Object.keys(before));
     expect(Object.keys(after.generation)).toEqual(Object.keys(before.generation));
     expect(after.generation.steps).toHaveLength(26);
   });
 
-  it('rejects repeating another step while one waits for confirmation', async () => {
+  it('US-AB-04 AK-4: repeating an earlier step confirms the step that waits for confirmation', async () => {
     const { service } = launch();
     await startFour(service);
-    await advance(service, 2);
+    await draw(service, 3);
 
-    expect(await service.repeatStep(0)).toEqual({ ok: false, error: 'step-pending' });
-    expect((await value(service.repeatStep(2))).generation.steps).toHaveLength(3);
+    const repeated = await value(service.repeatStep(0));
+
+    expect(repeated.generation.steps.map(({ step, status }) => `${step.kind} ${status}`)).toEqual([
+      'person-draw confirmed',
+      'person-draw confirmed',
+    ]);
+    expect((await value(service.draw(null))).generation.steps).toHaveLength(3);
+  });
+});
+
+describe('US-SR-01 AK-6 Turn over the starting resources (service)', () => {
+  it('FA-SR-05: stores the cards turned over; nothing is drawn and they stay after a restart', async () => {
+    const first = launch(15);
+    await startFour(first.service);
+    const drawn = await draw(first.service, 23);
+    const step = defined(drawn.generation.steps[22], 'resources').step;
+    if (step.kind !== 'starting-resources') throw new Error(step.kind);
+
+    await value(first.service.openResources(step.personId, [1]));
+    const opened = await value(first.service.openResources(step.personId, [0, 1]));
+
+    expect(opened.generation.steps).toEqual(drawn.generation.steps);
+    expect(opened.generation.gameState.openedResources).toEqual([
+      { personId: step.personId, cards: [0, 1] },
+    ]);
+    expect(await launch(16).service.current()).toEqual({ ok: true, value: opened });
+  });
+
+  it('US-AB-03: starting resources drawn again lie face down again', async () => {
+    const { service } = launch(15);
+    await startFour(service);
+    await draw(service, 23);
+    const index = 22;
+    const step = defined(stored()?.generation.steps[index], 'resources').step;
+    if (step.kind !== 'starting-resources') throw new Error(step.kind);
+    await value(service.openResources(step.personId, [0, 1]));
+
+    const repeated = await value(service.repeatStep(index));
+
+    expect(repeated.generation.gameState.openedResources).toEqual([]);
+  });
+
+  it('throws for a person without starting resources drawn and for a card that does not exist', async () => {
+    const { service } = launch(15);
+    await startFour(service);
+    await draw(service, 23);
+    const step = defined(stored()?.generation.steps[22], 'resources').step;
+    if (step.kind !== 'starting-resources') throw new Error(step.kind);
+    const other = defined(
+      CATAN_TEST_PERSONS.find((personId) => personId !== step.personId),
+      'other person',
+    );
+
+    await expect(service.openResources(other, [0])).rejects.toThrow(InvariantError);
+    await expect(service.openResources(step.personId, [2])).rejects.toThrow(InvariantError);
   });
 });
 
 describe('US-PL-05 Skip the placement (service)', () => {
-  it('AK-2: confirms the last spin, skips and continues with the starting resources', async () => {
+  it('AK-2: confirms the last spin and skips; the starting resources start without a result', async () => {
     const { service } = launch(14);
     const started = await startFour(service);
     expect(await service.skipPlacement()).toEqual({ ok: false, error: 'placement-not-skippable' });
     expect(stored()).toEqual(started);
-    await advance(service, 5);
+    await draw(service, 6);
 
     const skipped = await value(service.skipPlacement());
     expect(stored()).toEqual(skipped);
     expect(
       skipped.generation.steps.slice(5).map(({ step, status }) => `${step.kind} ${status}`),
-    ).toEqual(['order-spin confirmed', 'starting-resources revealed']);
+    ).toEqual(['order-spin confirmed']);
 
-    const finished = await advance(service, 4);
+    const finished = await finish(service, 4);
     const summary = catanSummary(finished.setup, finished.generation);
     expect(finished.generation.state).toBe('running');
     expect(summary.placementSkipped).toBe(true);
@@ -382,20 +476,24 @@ describe('US-AB-06 End a match', () => {
   it('AK-3, AK-4: ends without result; the generation is discarded and no longer available', async () => {
     const { service } = launch();
     await startFour(service);
-    await advance(service, 3);
+    await draw(service, 4);
 
     await service.endWithoutResult();
 
     expect(stored()).toBeUndefined();
     expect(await service.current()).toEqual({ ok: true, value: null });
     expect(await service.isSessionActive()).toBe(false);
-    expect(await service.advance(shown())).toEqual({ ok: false, error: 'no-session' });
+    expect(await service.draw(shown())).toEqual({ ok: false, error: 'no-session' });
+    expect(await service.openResources(defined(CATAN_TEST_PERSONS[0], 'person'), [0])).toEqual({
+      ok: false,
+      error: 'no-session',
+    });
   });
 
   it('AK-3: can end a match that is already running', async () => {
     const { service } = launch();
     await startFour(service);
-    await advance(service, 26);
+    await finish(service, 26);
 
     await service.endWithoutResult();
 
@@ -438,7 +536,7 @@ describe('US-VW-02 AK-5 The binding of a group in a match is locked', () => {
   it('keeps name and colours changeable during the match', async () => {
     const { service } = launch();
     await startFour(service);
-    await advance(service, 26);
+    await finish(service, 26);
 
     const result = await masterData().service.editGroup({
       groupId: FOUR.id,

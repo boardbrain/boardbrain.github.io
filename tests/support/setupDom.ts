@@ -17,6 +17,14 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 
+// jsdom has no layout and no ResizeObserver; measured elements keep the size 0 × 0.
+class NoResizeObserver {
+  observe = (): undefined => undefined;
+  unobserve = (): undefined => undefined;
+  disconnect = (): undefined => undefined;
+}
+Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: NoResizeObserver });
+
 afterEach(() => {
   cleanup();
 });

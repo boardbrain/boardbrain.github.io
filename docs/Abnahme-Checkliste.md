@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Manuelle Abnahme auf echten Geräten vor jedem Release |
-| Version | 0.4 |
+| Version | 0.5 |
 | Status | Angelegt mit Bündel I1-D; die Punkte späterer Inkremente gelten ab dem genannten Inkrement |
-| Stand | 29.10.2026 |
+| Stand | 09.11.2026 |
 | Grundlage | BoardBrain_Architektur.md v0.19 (12.1, 13.1, 13.6, 14.6), BoardBrain_Spezifikation.md v0.12 (2.5, Kapitel 5), Entwicklungsrichtlinien.md v0.6 (3.8) |
 | Sprache | Deutsch |
 
@@ -18,6 +18,7 @@
 | 0.2 | 28.10.2026 | K-15 mit K-3: eingefahrene Kartenhand auf dem Smartphone, Antippen und langes Drücken; auf Tablet und PC bleibt die Hand aufgefächert |
 | 0.3 | 28.10.2026 | K-16 mit K-4: Druckzustand, kein Browsermenü, keine Linkvorschau und kein Markieren beim langen Drücken; Grenze der automatischen Tests bei der Linkvorschau (5) |
 | 0.4 | 29.10.2026 | Zuschnitt von I2 (Spezifikation 0.12): K-13 (Ton) gilt ab I2, K-14 (Installationshinweis) ab I4 |
+| 0.5 | 09.11.2026 | I2-D: `#/brett` entfällt, K-4 und K-5 prüfen das Brett in der Platzierung; K-8 mit aufgedeckten Startrohstoffen |
 
 ## 1. Zweck
 
@@ -49,11 +50,11 @@ Ein Punkt gilt erst ab dem Inkrement in der Spalte „ab“. Ein Punkt, der sche
 | K-1 | I1 | Installieren: Android „Zum Startbildschirm hinzufügen“ bzw. „App installieren“, iOS „Teilen“ → „Zum Home-Bildschirm“, Windows Symbol „App installieren“ in der Adressleiste | Symbol D8 (zwei Karten) und Name „BoardBrain“ erscheinen; unter Android rund zugeschnitten ohne abgeschnittene Karten | ☐ | ☐ | ☐ | ☐ |
 | K-2 | I1 | Installierte App starten | Eigenes Fenster ohne Adressleiste; unter Android kurz das Startbild mit dem Symbol auf dunklem Grund; in der Diagnose „Als App installiert: ja“ | ☐ | ☐ | ☐ | ☐ |
 | K-3 | I1 | Statusleiste und Ränder (iOS, Android) | Dunkle Statusleiste, kein Inhalt unter Uhrzeit, Kamera oder Gestenleiste verdeckt | ☐ | ☐ | ☐ | – |
-| K-4 | I1 | App einmal öffnen, in der Diagnose „Offline bereit: ja“ abwarten (ggf. einmal neu laden), App schließen, Flugmodus an, App starten (NFA-PL-03) | Die App startet; Start, Verwaltung, Diagnose und Brett sind erreichbar, gespeicherte Daten sind da | ☐ | ☐ | ☐ | ☐ |
-| K-5 | I1 | Brett unter `#/brett` (Verweis „Brett ansehen“ in der Diagnose); Smartphone hochkant, Tablet hochkant und quer (US-PL-01, NFA-PL-04) | 19 Holzfelder mit Spitze oben in Reihen 3, 4, 5, 4, 3, vollständig sichtbar, ohne Scrollen, wie in `docs/design/i1d-board-final-preview.html` | ☐ | ☐ | ☐ | ☐ |
+| K-4 | I1 | App einmal öffnen, in der Diagnose „Offline bereit: ja“ abwarten (ggf. einmal neu laden), App schließen, Flugmodus an, App starten (NFA-PL-03) | Die App startet; Start, Verwaltung, Diagnose und „Neue Partie“ sind erreichbar, gespeicherte Daten sind da | ☐ | ☐ | ☐ | ☐ |
+| K-5 | I1 | Brett in der Platzierung einer Partie, leeres Brett vor dem ersten Gebäude (seit I2-D; bis dahin `#/brett`); Smartphone hochkant, Tablet hochkant und quer (US-PL-01, NFA-PL-04) | 19 Holzfelder mit Spitze oben in Reihen 3, 4, 5, 4, 3, vollständig sichtbar, ohne Scrollen, wie in `docs/design/i1d-board-final-preview.html` | ☐ | ☐ | ☐ | ☐ |
 | K-6 | I1 | Smartphone ins Querformat drehen (E-29) | Nur der Hinweis, das Gerät zu drehen | ☐ | – | ☐ | – |
 | K-7 | I2 | Vollständige Generierung mit 4 Personen in beiden Spielversionen | Alle Schritte laufen durch; Gebäude und Straßen in den Catan-Farben, Siedlung und Stadt an der Form unterscheidbar | ☐ | ☐ | ☐ | ☐ |
-| K-8 | I2 | Neustart mitten in der Generierung (App schließen, wieder öffnen; US-AB-05) | Die Partie läuft beim zuletzt gespeicherten Schritt weiter | ☐ | ☐ | ☐ | ☐ |
+| K-8 | I2 | Neustart mitten in der Generierung (App schließen, wieder öffnen; US-AB-05) | Die Partie läuft beim zuletzt gespeicherten Schritt weiter; ein noch nicht geloster Schritt erscheint ohne Ergebnis, aufgedeckte Startrohstoffe bleiben aufgedeckt (I2-D) | ☐ | ☐ | ☐ | ☐ |
 | K-9 | I4 | Vollsicherung über das Teilen-Menü (US-EI-01) und Import auf einem zweiten Gerät (US-EI-03) | Datei lässt sich teilen; nach dem Import sind die Daten auf dem zweiten Gerät vollständig | ☐ | ☐ | ☐ | ☐ |
 | K-10 | I4 | Update mit Sicherungsdialog (US-UP-01, US-UP-02) | Hinweis erscheint nicht während einer Partie; neue Version erst nach Bestätigung aktiv, auch nach Neustart; Sicherungspunkt „Vor Update“ vorhanden | ☐ | ☐ | ☐ | ☐ |
 | K-11 | I4 | Persistenter Speicher (US-IS-03) | Im Bereich „Sicherung“ als geschützt angezeigt; sonst die Warnung mit Ursachen | ☐ | ☐ | ☐ | ☐ |
