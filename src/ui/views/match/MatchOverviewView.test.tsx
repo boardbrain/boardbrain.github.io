@@ -124,6 +124,8 @@ describe('US-AB-04 Overview of the running match', () => {
     await act(() => router.navigate('/partie/uebersicht'));
 
     expect(await screen.findByText('Platzierung übersprungen')).toBeInTheDocument();
+    // Design I2-H: without pieces there is nothing to tap, so no hint either.
+    expect(screen.queryByText('Stein antippen zum Wiederholen')).not.toBeInTheDocument();
   });
 
   it('"Zurück" leads to the start, the match keeps running', async () => {
@@ -207,6 +209,19 @@ describe('US-AB-03 AK-8 Tapping pieces on the board of the overview (design I2-H
     expect(within(spot).queryAllByTestId('board-settlement')).toEqual([]);
 
     await user.click(within(dialog).getByRole('button', { name: 'Abbrechen' }));
+    expect(screen.queryByTestId('board-spotlight')).not.toBeInTheDocument();
+  });
+
+  it('a piece of the results asks without a spotlight, as no board is shown there', async () => {
+    const user = userEvent.setup();
+    await runMatch();
+    await user.click(await screen.findByRole('tab', { name: 'Ergebnisse' }));
+
+    await user.click(
+      screen.getAllByRole('button', { name: /^Straße von .* wiederholen$/ })[0] ?? document.body,
+    );
+
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
     expect(screen.queryByTestId('board-spotlight')).not.toBeInTheDocument();
   });
 });

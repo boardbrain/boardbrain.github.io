@@ -548,6 +548,58 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
     await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
   });
 
+  test('R7: the marked piece lies bright over the board, the question leaves it free', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+
+    await tapPiece(page, page.getByRole('button', { name: /^Straße von .* wiederholen$/ }).nth(2));
+    const board = await page.getByRole('img', { name: /^Brett mit/ }).boundingBox();
+    const spot = await spotlight(page).boundingBox();
+    const mark = await spotlight(page).getByTestId('board-road').boundingBox();
+    const dialog = await page.getByRole('alertdialog').boundingBox();
+    if (board === null || spot === null || mark === null || dialog === null) {
+      throw new Error('The question about the piece is not on the screen');
+    }
+    // Exactly over the board, so the bright piece covers the dark one.
+    for (const key of ['x', 'y', 'width', 'height'] as const) {
+      expect(Math.abs(spot[key] - board[key])).toBeLessThan(1);
+    }
+    const centre = { x: mark.x + mark.width / 2, y: mark.y + mark.height / 2 };
+    const isCovered =
+      centre.x > dialog.x &&
+      centre.x < dialog.x + dialog.width &&
+      centre.y > dialog.y &&
+      centre.y < dialog.y + dialog.height;
+    expect(isCovered).toBe(false);
+  });
+
+  test('a piece tapped in the look back is repeated', async ({ page }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+    const back = page.getByRole('button', { name: 'Zurück' });
+    await tap(back);
+    await tap(back);
+    await tap(back);
+    await expect(page.getByText('Rückblick')).toBeVisible();
+    await expect(page.getByTestId('board-settlement')).toHaveCount(3);
+
+    await tapPiece(
+      page,
+      page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ }).last(),
+    );
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+
+    await expect(page.getByTestId('board-settlement')).toHaveCount(2);
+    await expect(page.getByTestId('board-road')).toHaveCount(2);
+    await expect(forward(page)).toHaveText('Losen');
+  });
+
   test('a piece tapped in the flow is repeated there', async ({ page }) => {
     await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
     await openOptions(page, /^Zu zweit:/);
