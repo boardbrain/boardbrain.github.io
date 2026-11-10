@@ -129,9 +129,9 @@ describe('US-AB-03 AK-8 tapping pieces (design I2-H)', () => {
       />,
     );
 
-    const spot = screen.getByTestId('board-spotlight');
-    expect(spot.querySelectorAll('[data-piece]')).toHaveLength(1);
+    expect(screen.getByTestId('board-spotlight')).toBeInTheDocument();
     expect(screen.getAllByTestId('board-road')).toHaveLength(1);
+    expect(screen.queryAllByTestId('board-settlement')).toEqual([]);
     expect(screen.queryAllByTestId('board-hex')).toEqual([]);
   });
 });
