@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.14 |
+| Version | 0.15 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 09.11.2026 |
+| Stand | 10.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -28,6 +28,7 @@
 | 0.12 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation 0.18, E-32): Umsetzung in fachlichen Blöcken (2.2); Inkremente neu nach Blöcken geschnitten, I5 wird „Verwaltung und Archiv“, I6 „Einstellungen und Feinschliff“ (2.3); US-PG-04, US-SR-01, US-IN-01 bis US-IN-04 und US-PL-05 nach I2, US-ER-02, US-ER-03, US-ST-03 und US-ST-04 nach I3, US-EI-02, US-EI-07, US-DS-03, US-DS-04 und US-IS-02 nach I4 (2.5); Summe in 2.5 berichtigt (61 statt 59 Stories) |
 | 0.13 | 02.11.2026 | Design I2-C (Anforderungsdokumentation 0.19, E-33, E-34): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung (3.1, US-AB-01 AK-3, US-LS-03 AK-1 und AK-3, US-PL-05 AK-1, neu AK-3, US-SR-01 AK-1); Vorwärts-Knopf „Losen“, „Blättern“, „Zur Übersicht“ (US-AB-02 AK-1); Rückblick auf frühere Schritte (neu US-AB-04 AK-3 und AK-4); Rückverfolgbarkeit (6) |
 | 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); nach einem Neustart nur eine unterbrochene Animation erneut (3.5, US-AB-05 AK-3); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6); Wiederholen der Reihenfolge ab Platz k statt immer ganz (3.1, US-AB-03 AK-5, Entscheidung des Product Owners 10.11.2026) |
+| 0.15 | 10.11.2026 | Bündel I2-H: Steine auf dem Brett antippen und wiederholen, der Stein und die mit verworfenen Steine sind markiert, solange die Rückfrage offen ist (neu US-AB-03 AK-8, Entscheidung des Product Owners 10.11.2026) |
 
 ## Inhaltsverzeichnis
 
@@ -566,6 +567,7 @@ Bezug: FA-AB-04 → 3.1
 - **AK-5:** Gegeben ich wiederhole den Dreh von LS-02 für Platz k, dann bleiben die Plätze vor k, Platz k und alle späteren Plätze werden aus den übrigen Personen neu gelost, und eine bereits begonnene Platzierung wird verworfen. Bei Platz 1 ist das die ganze Reihenfolge. *(geändert in 0.14)*
 - **AK-6:** Gegeben die Generierung ist abgeschlossen, dann kann ich in der Übersicht der laufenden Partie jeden Schritt auswählen und wiederholen.
 - **AK-7:** Gegeben eine Wiederholung, dann wird sie nirgends protokolliert.
+- **AK-8:** Gegeben ein Brett mit Gebäuden und Straßen (im Ablauf, im Rückblick oder in der Übersicht), wenn ich einen Stein antippe, dann folgt die Rückfrage zu genau diesem Stein, und er ist markiert, solange sie offen ist; bei einem Gebäude auch die Steine, die mit verworfen werden. *(neu in 0.15)*
 
 #### US-AB-04 Laufende Partie einsehen · M
 Als bedienende Person möchte ich das Ergebnis der Generierung während der Partie jederzeit einsehen, damit wir bei Unklarheiten nachschauen können.
