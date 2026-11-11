@@ -25,6 +25,8 @@ type StagedCardsProps = {
   /** Draws the front with key `front`, e.g. a person card. */
   readonly front: (front: string) => ReactNode;
   readonly className?: string | undefined;
+  /** The fronts bring their own frame and shadow, e.g. order cards (as `TableCard`). */
+  readonly isBareFront?: boolean;
   /** Elements of the scene the plan fades, e.g. the dashed places; they move with the cards. */
   readonly children?: ReactNode;
   readonly handle: StageHandle;
@@ -40,6 +42,7 @@ export function StagedCards({
   plan,
   front,
   className,
+  isBareFront = false,
   children,
   handle,
 }: StagedCardsProps): React.JSX.Element {
@@ -99,7 +102,11 @@ export function StagedCards({
         >
           <div data-stage-inner="" className={styles.inner}>
             {card.fronts.map((key) => (
-              <div key={key} data-stage-face={key} className={styles.front}>
+              <div
+                key={key}
+                data-stage-face={key}
+                className={cx(styles.front, isBareFront && styles.bareFront)}
+              >
                 <FittedFront w={card.w} h={card.h}>
                   {front(key)}
                 </FittedFront>

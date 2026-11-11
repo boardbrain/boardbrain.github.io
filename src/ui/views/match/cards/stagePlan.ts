@@ -32,6 +32,8 @@ export type StageCard = {
   readonly start: Pose;
   readonly isFaceDown: boolean;
   readonly z: number;
+  /** An order card lifted as the newest at the start (design I2-D, Q3). */
+  readonly isRaised?: boolean;
 };
 
 /** One movement of a card or of another element of the scene. */
@@ -106,6 +108,18 @@ export const STAGE_MS = {
   whoOut: 140,
   whoIn: 300,
   whoRise: 6,
+  beforeDeal: 150,
+  deal: 420,
+  dealGap: 170,
+  dealLift: -24,
+  afterDeal: 250,
+  raise: 260,
+  lastDelay: 350,
+  settleDelay: 250,
+  collect: 380,
+  collectGap: 60,
+  collectLift: -16,
+  placeIn: 200,
 } as const;
 
 /** How far a mixed card is pulled out beside the stack, in card widths, and turned. */
@@ -148,6 +162,18 @@ class Planner {
   move(card: string, at: number, ms: number, to: Partial<Pose>, lift = 0, z?: number): number {
     const from = this.pose(card);
     const target = { ...from, ...to };
+    const isStill =
+      target.x === from.x &&
+      target.y === from.y &&
+      target.rotate === from.rotate &&
+      target.scale === from.scale;
+    if (isStill) {
+      // A card already where it should be only changes its height in the stack, at once.
+      if (z !== undefined) {
+        this.steps.push({ kind: 'move', card, at, ms: 0, from, to: from, lift: 0, z });
+      }
+      return at;
+    }
     this.poses.set(card, target);
     this.steps.push({
       kind: 'move',
@@ -196,6 +222,11 @@ class Planner {
       ...(rise === undefined ? {} : { rise }),
     });
     return at + ms;
+  }
+
+  raise(card: string, at: number, isUp: boolean): number {
+    this.steps.push({ kind: 'raise', card, at, ms: STAGE_MS.raise, isUp });
+    return at + STAGE_MS.raise;
   }
 
   plan(cards: readonly StageCard[]): StagePlan {
@@ -365,4 +396,156 @@ function centreX(row: readonly CardBox[], w: number): number {
   const first = row[0];
   const last = row[row.length - 1];
   return first === undefined || last === undefined ? 0 : (first.x + last.x + last.w) / 2 - w / 2;
+}
+
+/** Key of the front of an order card lying on place `place`, with its band (design I2-C, Q3). */
+export const orderKey = (person: string, place: number): string => `${person}@${String(place)}`;
+
+/** What a spin of the order needs to plan its movement (design I2-D, page 6). */
+export type OrderStageInput = {
+  /** The participants in the order of the row below before the first deal. */
+  readonly persons: readonly string[];
+  /** The places drawn before, from place 1 on. */
+  readonly placed: readonly string[];
+  /** The person drawn for the next place. */
+  readonly result: string;
+  /** The person on the last place, which follows by itself (FA-LS-02); `null` otherwise. */
+  readonly last: string | null;
+  readonly slots: readonly CardBox[];
+  /** The row of all persons below the places. */
+  readonly row: readonly CardBox[];
+  /**
+   * `deal` for the first place: mix and deal all cards; `turn` turns the next place over;
+   * `regather` collects the face-down cards first, after a repetition (E1, PO 11.11.2026).
+   */
+  readonly mode: 'deal' | 'turn' | 'regather';
+  readonly rng: RandomSource;
+};
+
+/**
+ * US-IN-01 AK-3, design I2-D/I2-E: a spin of the order. The first "Losen" mixes once, deals all
+ * cards face down onto the places and turns place 1 over; every further one turns the next place
+ * over, the last place follows by itself, and the card lifted before sinks. After repeating from
+ * place k, the face-down cards are collected, mixed and dealt again first. The cards face down
+ * show nobody: who lies on a place is decided when it turns over.
+ */
+export function planOrder({
+  persons,
+  placed,
+  result,
+  last,
+  slots,
+  row,
+  mode,
+  rng,
+}: OrderStageInput): StagePlan {
+  const first = slots[0];
+  if (first === undefined) {
+    return { cards: [], steps: [], duration: 0 };
+  }
+  const { w, h } = first;
+  const k = placed.length;
+  const slotPose = (place: number): Pose => poseOn(slots[place] ?? first, w, h);
+  const cards: StageCard[] =
+    mode === 'deal'
+      ? persons.map((person, index) => ({
+          id: `card-${String(index)}`,
+          w,
+          h,
+          fronts: [person],
+          start: poseOn(row[index] ?? first, w, h),
+          isFaceDown: false,
+          z: 10 + index,
+        }))
+      : slots.map((_, place) => ({
+          id: `card-${String(place)}`,
+          w,
+          h,
+          fronts: place < k ? [orderKey(placed[place] ?? '', place)] : [],
+          start: slotPose(place),
+          isFaceDown: place >= k,
+          z: 5,
+          isRaised: place === k - 1,
+        }));
+  const planner = new Planner(cards);
+  const below = row[0] ?? first;
+  const stackX = centreX(row, w);
+  const stack = (level: number): CardBox => ({ x: stackX, y: below.y - level * STACK_STEP, w, h });
+  let at = 0;
+  // Which card lies on which place after dealing.
+  const onPlace = new Map<number, string>(
+    mode === 'deal' ? [] : cards.map((card, place): [number, string] => [place, card.id]),
+  );
+  if (mode !== 'turn') {
+    let gathered: string[];
+    if (mode === 'deal') {
+      cards.forEach((card, index) => {
+        at = Math.max(
+          at,
+          planner.flip(card.id, index * STAGE_MS.flipDownGap, STAGE_MS.flipDown, true),
+        );
+      });
+      gathered = cards.map((card) => card.id);
+    } else {
+      // E1: the face-down cards from place k on go onto a stack below; their places show again.
+      gathered = cards.slice(k).map((card) => card.id);
+      gathered.forEach((id, index) => {
+        const start = index * STAGE_MS.collectGap;
+        planner.fade(placeTarget(k + index), start, STAGE_MS.placeIn, 0, PLACE_OPACITY);
+        at = Math.max(
+          at,
+          planner.move(
+            id,
+            start,
+            STAGE_MS.collect,
+            poseOn(stack(index), w, h),
+            STAGE_MS.collectLift,
+            10 + index,
+          ),
+        );
+      });
+    }
+    const mixed = gatherAndMix(planner, gathered, stack, { w, h }, at, rng, 0);
+    // The stack is dealt top first, place by place.
+    const dealt = [...mixed.order].reverse();
+    const dealAt = mixed.end + STAGE_MS.beforeDeal;
+    dealt.forEach((id, index) => {
+      const place = mode === 'deal' ? index : k + index;
+      onPlace.set(place, id);
+      const landed = planner.move(
+        id,
+        dealAt + index * STAGE_MS.dealGap,
+        STAGE_MS.deal,
+        slotPose(place),
+        STAGE_MS.dealLift,
+        20 + place,
+      );
+      planner.fade(placeTarget(place), landed, 0, PLACE_OPACITY, 0);
+      at = Math.max(at, landed);
+    });
+    at += STAGE_MS.afterDeal;
+  }
+  // The place drawn turns over and becomes the newest; the one before sinks.
+  const turned = onPlace.get(k) ?? '';
+  const before = onPlace.get(k - 1);
+  if (before !== undefined) {
+    planner.raise(before, at, false);
+  }
+  planner.raise(turned, at, true);
+  let end = planner.flip(turned, at, STAGE_MS.flipUp, false, orderKey(result, k));
+  const fronts = new Map<string, string>([[turned, orderKey(result, k)]]);
+  if (last !== null) {
+    // FA-LS-02: the last place follows by itself, without being lifted; then the order lies level.
+    const lastCard = onPlace.get(k + 1) ?? '';
+    fronts.set(lastCard, orderKey(last, k + 1));
+    end = planner.flip(
+      lastCard,
+      end + STAGE_MS.lastDelay,
+      STAGE_MS.flipUp,
+      false,
+      orderKey(last, k + 1),
+    );
+    planner.raise(turned, end + STAGE_MS.settleDelay, false);
+  }
+  return planner.reveal(cards, fronts);
 }

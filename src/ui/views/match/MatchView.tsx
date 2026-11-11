@@ -83,7 +83,7 @@ type Dialog = 'repeat' | 'skip' | 'end' | null;
 
 // The steps shown with a movement of cards (design I2-E).
 function hasMovement(step: CatanSlot): boolean {
-  return step.kind === 'person-draw';
+  return step.kind === 'person-draw' || step.kind === 'order-spin';
 }
 
 // The address of a page: the current page has none, a look back names its step (US-AB-04 AK-3).
@@ -131,6 +131,9 @@ export function MatchView(): React.JSX.Element | null {
   const bodyRef = useRef<HTMLDivElement>(null);
   // The movement playing, so "Animation überspringen" can complete it (US-IN-04).
   const runRef = useRef<StageRun | null>(null);
+  // "Losen" was tapped on a page without a result: after a repetition of the order its face-down
+  // cards are collected first (design I2-E, E1).
+  const [isDrawnFromPending, setDrawnFromPending] = useState(false);
 
   const session = current?.status === 'active' ? current.session : null;
   const page = session === null ? null : pageAt(session, lookBackOf(search.get('schritt')));
@@ -244,6 +247,7 @@ export function MatchView(): React.JSX.Element | null {
         return false;
       }
       if (forward === 'draw') {
+        setDrawnFromPending(page.kind === 'pending');
         const drawn = await sessions.draw(revealed ?? null);
         if (!drawn.ok) {
           return false;
@@ -388,7 +392,14 @@ export function MatchView(): React.JSX.Element | null {
             stage={stage}
           />
         )}
-        {slot.kind === 'order-spin' && <OrderScene session={shown} nameOf={nameOf} />}
+        {slot.kind === 'order-spin' && (
+          <OrderScene
+            session={shown}
+            nameOf={nameOf}
+            stage={stage}
+            isAfterRepeat={isDrawnFromPending}
+          />
+        )}
         {isPlacement && (
           <PlacementStep
             session={shown}

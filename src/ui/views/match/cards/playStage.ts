@@ -63,9 +63,11 @@ function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): Anima
       if (card === null) {
         return [];
       }
-      const segments: AnimationSequence = [
-        [card, moveKeyframes(step), { at, duration: seconds(step.ms), ease: [...MOVE_EASE] }],
-      ];
+      // A card that only changes its height in the stack does not move.
+      const segments: AnimationSequence =
+        step.ms === 0
+          ? []
+          : [[card, moveKeyframes(step), { at, duration: seconds(step.ms), ease: [...MOVE_EASE] }]];
       const z = tracked.z.get(step.card);
       if (step.z !== undefined && z !== step.z) {
         segments.push([card, { zIndex: [z ?? step.z, step.z] }, { at, duration: SWITCH }]);
@@ -121,13 +123,15 @@ function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): Anima
       if (face === null) {
         return [];
       }
-      return [
-        [
-          face,
-          { y: step.isUp ? [0, RAISE_PX] : [RAISE_PX, 0] },
-          { at, duration: seconds(step.ms), ease: 'easeOut' },
-        ],
+      const options = { at, duration: seconds(step.ms), ease: 'easeOut' } as const;
+      const ring = find(face, '[data-stage-now]');
+      const segments: AnimationSequence = [
+        [face, { y: step.isUp ? [0, RAISE_PX] : [RAISE_PX, 0] }, options],
       ];
+      if (ring !== null) {
+        segments.push([ring, { opacity: step.isUp ? [0, 1] : [1, 0] }, options]);
+      }
+      return segments;
     }
   }
 }
@@ -146,6 +150,14 @@ export function playStage(root: HTMLElement, plan: StagePlan): StageRun {
     }
     animate(element, { ...poseValues(card.start), zIndex: card.z }, { duration: 0 });
     animate(inner, { rotateY: card.isFaceDown ? 180 : 0 }, { duration: 0 });
+    // The newest order card lies lifted with its golden frame (design I2-D, Q3).
+    for (const face of element.querySelectorAll<HTMLElement>('[data-stage-raise]')) {
+      animate(face, { y: card.isRaised === true ? RAISE_PX : 0 }, { duration: 0 });
+      const ring = find(face, '[data-stage-now]');
+      if (ring !== null) {
+        animate(ring, { opacity: card.isRaised === true ? 1 : 0 }, { duration: 0 });
+      }
+    }
     for (const face of element.querySelectorAll<HTMLElement>('[data-stage-face]')) {
       const name = face.dataset.stageFace;
       const isShown = card.isFaceDown ? name === 'back' : name === card.fronts[0];

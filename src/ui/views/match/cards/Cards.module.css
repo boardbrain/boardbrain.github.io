@@ -206,3 +206,15 @@
   grid-area: 1 / 1;
   justify-content: center;
 }
+
+/* The golden frame of the newest order card in a movement; the plan fades it (design I2-E). */
+.nowFrame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px var(--color-accent-text),
+    0 0 0 1px var(--color-accent-text),
+    0 10px 22px var(--color-shadow);
+}

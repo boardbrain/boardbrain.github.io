@@ -1,9 +1,11 @@
 import { SeededRandomSource } from '@tests/support/seededRandomSource';
 import { describe, expect, it } from 'vitest';
-import { drawLayout } from './cardLayout';
+import { drawLayout, orderLayout } from './cardLayout';
 import {
+  orderKey,
   placeTarget,
   planDraw,
+  planOrder,
   poseOn,
   STAGE_MS,
   WHO_AFTER,
@@ -120,5 +122,89 @@ describe('US-IN-01 AK-2 Draw a person with cards (design I2-E)', () => {
     expect(Math.min(...othersUp.map((step) => step.at))).toBeGreaterThanOrEqual(
       (whoIn?.at ?? 0) + (whoIn?.ms ?? 0),
     );
+  });
+});
+
+function orderPlan(
+  mode: 'deal' | 'turn' | 'regather',
+  placed: string[],
+  result: string,
+  last: string | null = null,
+): StagePlan {
+  const layout = orderLayout(PHONE.width, PHONE.height, PERSONS.length);
+  return planOrder({
+    persons: PERSONS,
+    placed,
+    result,
+    last,
+    slots: layout.slots,
+    row: layout.row(PERSONS.length),
+    mode,
+    rng: new SeededRandomSource(5),
+  });
+}
+
+const moves = (plan: StagePlan): Extract<StageStep, { kind: 'move' }>[] =>
+  plan.steps.filter((step): step is Extract<StageStep, { kind: 'move' }> => step.kind === 'move');
+
+describe('US-IN-01 AK-3 Order with cards (design I2-E)', () => {
+  it('the first "Losen" deals every card face down onto the places and turns place 1 over', () => {
+    const plan = orderPlan('deal', [], 'clara');
+    const layout = orderLayout(PHONE.width, PHONE.height, PERSONS.length);
+    const deals = moves(plan).filter((step) => step.ms === STAGE_MS.deal);
+
+    expect(deals.map((step) => Math.round(step.to.x))).toEqual(
+      layout.slots.map((slot) => Math.round(slot.x)),
+    );
+    const ups = plan.steps.filter((step) => step.kind === 'flip' && !step.toFaceDown);
+    expect(ups).toMatchObject([{ front: orderKey('clara', 0) }]);
+    expect(plan.steps.filter((step) => step.kind === 'raise')).toMatchObject([{ isUp: true }]);
+  });
+
+  it('a further "Losen" only turns the next place over; the card before sinks', () => {
+    const plan = orderPlan('turn', ['clara'], 'ben');
+
+    expect(moves(plan)).toEqual([]);
+    expect(plan.steps.filter((step) => step.kind === 'raise')).toMatchObject([
+      { card: 'card-0', isUp: false },
+      { card: 'card-1', isUp: true },
+    ]);
+    expect(plan.steps.filter((step) => step.kind === 'flip')).toMatchObject([
+      { card: 'card-1', toFaceDown: false, front: orderKey('ben', 1) },
+    ]);
+  });
+
+  it('FA-LS-02: the last place follows by itself, then the order lies level', () => {
+    const plan = orderPlan('turn', ['clara', 'ben'], 'anna', 'david');
+    const flips = plan.steps.filter((step) => step.kind === 'flip');
+
+    expect(flips).toMatchObject([
+      { card: 'card-2', front: orderKey('anna', 2) },
+      { card: 'card-3', front: orderKey('david', 3) },
+    ]);
+    expect((flips[1]?.at ?? 0) - ((flips[0]?.at ?? 0) + STAGE_MS.flipUp)).toBe(STAGE_MS.lastDelay);
+    expect(plan.steps.filter((step) => step.kind === 'raise').at(-1)).toMatchObject({
+      card: 'card-2',
+      isUp: false,
+    });
+  });
+
+  it('E1: after repeating from place 2 the face-down cards are collected, mixed and dealt again', () => {
+    const plan = orderPlan('regather', ['clara'], 'david');
+    const collected = moves(plan).filter((step) => step.ms === STAGE_MS.collect);
+    const dealt = moves(plan).filter((step) => step.ms === STAGE_MS.deal);
+
+    expect(collected.map((step) => step.card)).toEqual(['card-1', 'card-2', 'card-3']);
+    expect(dealt).toHaveLength(3);
+    expect(moves(plan).some((step) => step.card === 'card-0')).toBe(false);
+  });
+
+  it('PO: the movement of the order is the same for every person drawn', () => {
+    const movements = (result: string): StageStep[] =>
+      orderPlan('deal', [], result).steps.map((step) =>
+        step.kind === 'flip' ? { ...step, front: '' } : step,
+      );
+
+    expect(movements('ben')).toEqual(movements('anna'));
   });
 });
