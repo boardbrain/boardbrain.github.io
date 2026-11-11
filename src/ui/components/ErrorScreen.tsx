@@ -1,3 +1,4 @@
+import { domAnimation, LazyMotion, MotionConfig } from 'motion/react';
 import { useState } from 'react';
 import { t } from '@/i18n/t';
 import { CheckIcon, ChevronIcon, CopyIcon, HomeIcon, ReloadIcon, WarningIcon } from './Icons';
@@ -60,7 +61,8 @@ function describeError(error: unknown, location: ReloadableLocation): string {
  * Understandable message for an unexpected error (Development Guidelines 7.2, design K-5:
  * docs/design/k5-error-screen-final-preview.html). It fills the whole screen without the card
  * hand, because the frame itself may be broken. "Zum Start" reloads the app on the start view, so
- * no broken state remains. Technical details can be copied into an issue; they are never
+ * no broken state remains. It brings its own Motion features, because it also shows outside the
+ * frame (AppLayout), where the pressed state (K-4) would otherwise stay still. Technical details can be copied into an issue; they are never
  * transmitted (NFA-DH-01).
  */
 export function ErrorScreen({
@@ -99,52 +101,60 @@ export function ErrorScreen({
   }
 
   return (
-    <main className={styles.screen} role="alert">
-      <div className={styles.card}>
-        <span className={styles.mark}>
-          <WarningIcon size={MARK_ICON_SIZE} />
-        </span>
-        <h1 className={styles.title} aria-label={t('fehler.titelVorgelesen')}>
-          {t('fehler.titel')}
-        </h1>
-        <p className={styles.text}>{t('fehler.text')}</p>
-        <div className={styles.buttons}>
-          <PressableButton type="button" onClick={handleReload}>
-            <ReloadIcon size={BUTTON_ICON_SIZE} />
-            {t('fehler.neuLaden')}
-          </PressableButton>
-          <PressableButton type="button" className={styles.secondary} onClick={handleHome}>
-            <HomeIcon size={BUTTON_ICON_SIZE} />
-            {t('fehler.zumStart')}
-          </PressableButton>
-        </div>
-        <div className={styles.details}>
-          <div className={styles.detailsHead}>
-            <PressableButton
-              type="button"
-              className={styles.toggle}
-              aria-expanded={isOpen}
-              onClick={() => {
-                setIsOpen(!isOpen);
-              }}
-            >
-              <span className={isOpen ? styles.chevronOpen : styles.chevron}>
-                <ChevronIcon size={PILL_ICON_SIZE} />
-              </span>
-              {t('fehler.details')}
-            </PressableButton>
-            <PressableButton
-              type="button"
-              className={isCopied ? styles.copied : styles.copy}
-              onClick={handleCopy}
-            >
-              {isCopied ? <CheckIcon size={PILL_ICON_SIZE} /> : <CopyIcon size={PILL_ICON_SIZE} />}
-              {isCopied ? t('fehler.kopiert') : t('fehler.kopieren')}
-            </PressableButton>
+    <LazyMotion features={domAnimation} strict>
+      <MotionConfig reducedMotion="user">
+        <main className={styles.screen} role="alert">
+          <div className={styles.card}>
+            <span className={styles.mark}>
+              <WarningIcon size={MARK_ICON_SIZE} />
+            </span>
+            <h1 className={styles.title} aria-label={t('fehler.titelVorgelesen')}>
+              {t('fehler.titel')}
+            </h1>
+            <p className={styles.text}>{t('fehler.text')}</p>
+            <div className={styles.buttons}>
+              <PressableButton type="button" onClick={handleReload}>
+                <ReloadIcon size={BUTTON_ICON_SIZE} />
+                {t('fehler.neuLaden')}
+              </PressableButton>
+              <PressableButton type="button" className={styles.secondary} onClick={handleHome}>
+                <HomeIcon size={BUTTON_ICON_SIZE} />
+                {t('fehler.zumStart')}
+              </PressableButton>
+            </div>
+            <div className={styles.details}>
+              <div className={styles.detailsHead}>
+                <PressableButton
+                  type="button"
+                  className={styles.toggle}
+                  aria-expanded={isOpen}
+                  onClick={() => {
+                    setIsOpen(!isOpen);
+                  }}
+                >
+                  <span className={isOpen ? styles.chevronOpen : styles.chevron}>
+                    <ChevronIcon size={PILL_ICON_SIZE} />
+                  </span>
+                  {t('fehler.details')}
+                </PressableButton>
+                <PressableButton
+                  type="button"
+                  className={isCopied ? styles.copied : styles.copy}
+                  onClick={handleCopy}
+                >
+                  {isCopied ? (
+                    <CheckIcon size={PILL_ICON_SIZE} />
+                  ) : (
+                    <CopyIcon size={PILL_ICON_SIZE} />
+                  )}
+                  {isCopied ? t('fehler.kopiert') : t('fehler.kopieren')}
+                </PressableButton>
+              </div>
+              {isOpen && <pre className={styles.trace}>{details}</pre>}
+            </div>
           </div>
-          {isOpen && <pre className={styles.trace}>{details}</pre>}
-        </div>
-      </div>
-    </main>
+        </main>
+      </MotionConfig>
+    </LazyMotion>
   );
 }
