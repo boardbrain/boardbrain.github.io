@@ -19,6 +19,7 @@ import { AppLayout } from '@/ui/components/AppLayout';
 import { ErrorScreen } from '@/ui/components/ErrorScreen';
 import { RouteErrorScreen } from '@/ui/components/RouteErrorScreen';
 import { installGlobalErrorHandlers } from '@/ui/globalErrorHandlers';
+import { CrashTestView } from '@/ui/views/diagnostics/CrashTestView';
 import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
 import { GamesView } from '@/ui/views/management/GamesView';
 import { GameView } from '@/ui/views/management/GameView';
@@ -121,6 +122,8 @@ const router = createHashRouter([
         path: '/diagnose',
         element: view(<DiagnosticsView diagnostics={diagnostics} version={__APP_VERSION__} />),
       },
+      // K-5: only on the dev server, to see the error screen on every device.
+      ...(import.meta.env.DEV ? [{ path: '/fehlertest', element: <CrashTestView /> }] : []),
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
