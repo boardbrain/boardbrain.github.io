@@ -13,6 +13,12 @@ export type StepStatus = 'revealed' | 'confirmed';
 export type StepRecord<S> = {
   readonly step: S;
   readonly status: StepStatus;
+  /**
+   * Whether the animation of the step has played or was skipped (FA-AB-07, US-IN-04). A step
+   * drawn anew is not staged yet; after a restart its animation plays again, a staged one
+   * never does.
+   */
+  readonly isStaged: boolean;
 };
 
 /**

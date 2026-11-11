@@ -159,7 +159,8 @@ function withResourcesOpened(generation: CatanGeneration): CatanGeneration {
  * Guidelines 8.3, K-6), so a test of what comes after the draws does not first tap through the
  * whole match; drawing in the user interface is tested by the tests of US-AB-02 and US-AB-05.
  * The match is drawn with the game logic of the app and a fixed seed, so it is always valid and
- * a change of the data model shows up here when type checking. Every step drawn is confirmed.
+ * a change of the data model shows up here when type checking. Every step drawn is confirmed,
+ * and its animation counts as played (FA-AB-07), so nothing moves when the page opens.
  * Afterwards the page shows the match: the overview once it is running, leading back into the
  * flow, as after its last step.
  */
@@ -186,7 +187,10 @@ export async function seedMatch(page: Page, match: SeedMatch): Promise<void> {
     gameId: CATAN_GAME_ID,
     groupId: group.id,
     setup,
-    generation: withResourcesOpened(generation),
+    generation: withResourcesOpened({
+      ...generation,
+      steps: generation.steps.map((record) => ({ ...record, isStaged: true })),
+    }),
     startedAt: NOW,
   };
   await writeRecords(page, { persons, groups, session });

@@ -8,13 +8,16 @@
 export {
   confirmStep,
   drawNextStep,
+  markStaged,
   repeatStep,
   revealedStepIndex,
   startGeneration,
   stepsDiscardedBy,
+  unstagedStepIndex,
   withGameState,
   type GenerationCompleteError,
   type NoStepRevealedError,
+  type NoSuchStepError,
   type StepPendingError,
 } from './flow';
 export { CURRENT_SESSION_ID, SESSION_SCHEMA_VERSION, type Session } from './session';

@@ -2,12 +2,14 @@ import {
   confirmStep,
   CURRENT_SESSION_ID,
   drawNextStep,
+  markStaged,
   repeatStep,
   revealedStepIndex,
   SESSION_SCHEMA_VERSION,
   startGeneration,
   withGameState,
   type GenerationCompleteError,
+  type NoSuchStepError,
 } from '@/core/generation';
 import {
   areMatchColorsValid,
@@ -169,6 +171,12 @@ export type SessionService = {
     personId: PersonId,
     cards: readonly number[],
   ): Promise<Result<StoredSession, SessionAccessError>>;
+  /**
+   * Notes that the animation of step `index` has played or was skipped (FA-AB-07, US-IN-04):
+   * after a restart it does not play again. Nothing is drawn. `no-such-step` if the step no
+   * longer exists, e.g. because it was repeated meanwhile.
+   */
+  markStaged(index: number): Promise<Result<StoredSession, SessionAccessError | NoSuchStepError>>;
   /**
    * Ends the match without a result: the generation is discarded and nothing is stored
    * (US-AB-06 AK-3, AK-4). Also possible for a session of unknown version.
@@ -353,6 +361,10 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
 
     openResources(personId, cards) {
       return change((session) => ok(openCatanResources(session.generation, personId, cards)));
+    },
+
+    markStaged(index) {
+      return change((session) => markStaged(session.generation, index));
     },
 
     endWithoutResult() {
