@@ -1,3 +1,4 @@
+import { m } from 'motion/react';
 import { useRef, useState } from 'react';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
@@ -16,6 +17,9 @@ import { PersonFront, Place, TableCard } from './TableCard';
 import { tableSize } from './tableSize';
 import shared from '../MatchView.module.css';
 import styles from './Cards.module.css';
+
+// After a repetition "Wer?" comes back in 0.2 s (design I2-E).
+const WHO_SWAP = { duration: 0.2, ease: 'easeOut' } as const;
 
 function DrawArt({ draw }: { readonly draw: CatanPersonDraw }): React.JSX.Element {
   switch (draw) {
@@ -58,6 +62,11 @@ export function DrawScene({
   const measured = useElementSize(ref);
   const { width, height } = tableSize(measured);
   const isStaging = stage !== null && result !== null;
+  // After "Wiederholen" the name gives way to "Wer?" softly; it is kept while it fades out.
+  const [lastResult, setLastResult] = useState(result);
+  if (result !== null && result !== lastResult) {
+    setLastResult(result);
+  }
   const layout = drawLayout(width, height);
   // FA-LS-06: with replacement everyone is in again; the drawn card lies on its place.
   const below = session.setup.participants.filter((personId) => personId !== result);
@@ -105,7 +114,26 @@ export function DrawScene({
               <span data-stage={WHO_AFTER}>{who(result)}</span>
             </span>
           ) : (
-            who(result)
+            <span className={styles.whoStack}>
+              <m.span
+                initial={false}
+                animate={{ opacity: result === null ? 1 : 0 }}
+                transition={WHO_SWAP}
+                aria-hidden={result === null ? undefined : true}
+              >
+                {who(null)}
+              </m.span>
+              {lastResult !== null && (
+                <m.span
+                  initial={false}
+                  animate={{ opacity: result === null ? 0 : 1 }}
+                  transition={WHO_SWAP}
+                  aria-hidden={result === null ? true : undefined}
+                >
+                  {who(lastResult)}
+                </m.span>
+              )}
+            </span>
           )}
           <span className={shared.task}>{t('partie.legtSieAus')}</span>
         </DevCard>
@@ -115,6 +143,7 @@ export function DrawScene({
         label={t('partie.fragezeichen')}
         isFilled={result !== null && !isStaging}
         stageName={placeTarget(0)}
+        flipKey="place:0"
       />
       {isStaging && measured !== null && (
         <DrawStage
@@ -131,6 +160,7 @@ export function DrawScene({
         <TableCard
           box={layout.slot}
           z={5}
+          flipKey={`person:${result}`}
           front={<PersonFront name={resultName} color={colorOf(session, result)} />}
         />
       )}
@@ -143,6 +173,7 @@ export function DrawScene({
                 key={personId}
                 box={box}
                 z={10 + index}
+                flipKey={`person:${personId}`}
                 front={<PersonFront name={nameOf(personId)} color={colorOf(session, personId)} />}
               />
             )

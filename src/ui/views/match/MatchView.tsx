@@ -1,5 +1,5 @@
-import { m } from 'motion/react';
-import { useRef, useState, useTransition } from 'react';
+import { animate, m, useReducedMotion } from 'motion/react';
+import { useLayoutEffect, useRef, useState, useTransition } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router';
 import type { StoredSession } from '@/app/ports';
 import { revealedStepIndex, unstagedStepIndex } from '@/core/generation';
@@ -18,6 +18,7 @@ import { AgainIcon, BackIcon, ChevronIcon, ExitDoorIcon, SkipIcon } from '@/ui/c
 import { PressableButton } from '@/ui/components/Pressable';
 import { pieceMarking } from './boardPieces';
 import { DrawScene } from './cards/DrawScene';
+import { playGlide, snapshotGlide, type GlideSnapshot } from './cards/glide';
 import type { StageRun } from './cards/playStage';
 import type { StageHandle } from './cards/StagedCards';
 import { OrderScene } from './cards/OrderScene';
@@ -80,6 +81,10 @@ const FORWARD_LABELS: Readonly<Record<ForwardAction, TextKey>> = {
 };
 
 type Dialog = 'repeat' | 'skip' | 'end' | null;
+
+// Pieces discarded by a repetition rise by 9 px and fade (design I2-E).
+const PIECE_RISE = -9;
+const PIECE_LEAVE_SECONDS = 0.3;
 
 // The steps shown with a movement of cards (design I2-E).
 function hasMovement(step: CatanSlot): boolean {
@@ -148,6 +153,17 @@ export function MatchView(): React.JSX.Element | null {
   const pageKey =
     page === null || group === undefined || group === null ? '' : JSON.stringify(page);
   const isNoteFloating = useLookBackFits(noteRef, bodyRef, pageKey);
+  // Design I2-E: after "Wiederholen" in the flow the cards glide from where they lay before. The
+  // snapshot is taken before storing; the glide plays once the stored match is shown.
+  const glideRef = useRef<{ readonly before: GlideSnapshot; readonly from: unknown } | null>(null);
+  const isReduced = useReducedMotion() === true;
+  useLayoutEffect(() => {
+    const glide = glideRef.current;
+    if (glide !== null && glide.from !== session && bodyRef.current !== null) {
+      glideRef.current = null;
+      playGlide(bodyRef.current, glide.before);
+    }
+  }, [session]);
 
   if (current === undefined || persons === undefined) {
     return null;
@@ -276,6 +292,34 @@ export function MatchView(): React.JSX.Element | null {
       const confirmed = await sessions.confirm(revealed);
       return confirmed.ok && confirmed.value.generation.state === 'running';
     });
+  };
+
+  // Design I2-E: before a repetition is stored, the cards of starting resources turn face down and
+  // the pieces discarded on the board rise and fade (0.3 s); then the page glides into the state
+  // before drawing. From the overview a new page opens instead, without movement.
+  const repeatSoftly = async (index: number): Promise<void> => {
+    const body = bodyRef.current;
+    if (body === null || isReduced) {
+      return;
+    }
+    const marking = pieceMarking(session, index);
+    if (marking !== null) {
+      await Promise.all(
+        [marking.main, ...marking.others].map((key) =>
+          body.querySelector<SVGElement>(`[data-piece="${key}"]`) === null
+            ? Promise.resolve()
+            : animate(
+                `[data-piece="${key}"]`,
+                { opacity: [1, 0], y: [0, PIECE_RISE] },
+                { duration: PIECE_LEAVE_SECONDS, ease: 'easeIn' },
+              ).finished,
+        ),
+      );
+    }
+    if (session.generation.steps[index]?.step.kind === 'starting-resources') {
+      await leaveRef.current?.turnBack();
+    }
+    glideRef.current = { before: snapshotGlide(body), from: session };
   };
 
   const askRepeat = (index: number): void => {
@@ -473,6 +517,7 @@ export function MatchView(): React.JSX.Element | null {
           }}
           onConfirm={() => {
             act(async () => {
+              await repeatSoftly(repeatAt);
               await sessions.repeatStep(repeatAt);
               return false;
             });

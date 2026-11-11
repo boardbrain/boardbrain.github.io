@@ -45,10 +45,16 @@ type ResourcesSceneProps = {
   readonly leaveRef?: Ref<ResourcesLeave> | undefined;
 };
 
-/** The cards of a person leaving the table after "Weiter" (design I2-E, W3). */
+/** The cards of a person leaving the table (design I2-E). */
 export type ResourcesLeave = {
+  /** After "Weiter": into the coin of the person in the band (W3). */
   readonly leave: () => Promise<void>;
+  /** Before "Wiederholen" is stored: the cards turn face down, then glide onto the stack. */
+  readonly turnBack: () => Promise<void>;
 };
+
+// Turning back face down takes as long as turning over by hand (0.34 s).
+const TURN_BACK_MS = 340;
 
 // W3 (PO 11.11.2026): the cards fly into the coin of the person in the band, shrinking to its
 // size, and fade during the last 15 %; 0.06 s apart. Meanwhile the dashed places fade in where
@@ -120,6 +126,7 @@ export function ResourcesScene({
 }: ResourcesSceneProps): React.JSX.Element | null {
   const ref = useRef<HTMLDivElement>(null);
   const [isLeaving, setLeaving] = useState(false);
+  const [isTurningBack, setTurningBack] = useState(false);
   const isReduced = useReducedMotion() === true;
   useImperativeHandle(leaveRef, () => ({
     leave: async () => {
@@ -132,6 +139,21 @@ export function ResourcesScene({
         setLeaving(true);
       });
       await playLeave(table, personId);
+    },
+    turnBack: async () => {
+      const table = ref.current;
+      if (table === null || isReduced) {
+        return;
+      }
+      flushSync(() => {
+        setTurningBack(true);
+      });
+      for (const name of table.querySelectorAll<HTMLElement>('[data-leave-label]')) {
+        void animate(name, { opacity: [1, 0] }, { duration: NAMES_OUT });
+      }
+      await new Promise((resolve) => {
+        setTimeout(resolve, TURN_BACK_MS);
+      });
     },
   }));
   const measured = useElementSize(ref);
@@ -189,6 +211,7 @@ export function ResourcesScene({
               isFilled={result !== null && !isLeaving}
               stageName={isLeaving ? placeTarget(place) : undefined}
               isHidden={isLeaving}
+              flipKey={`place:${String(place)}`}
             />
           ))}
         {isStaging
@@ -202,6 +225,7 @@ export function ResourcesScene({
                       key={resource}
                       box={box}
                       z={10}
+                      flipKey={index < count ? `res:${String(index)}` : undefined}
                       className={styles.resource}
                       front={<ResourceFront resource={resource} />}
                     />
@@ -213,6 +237,12 @@ export function ResourcesScene({
                   key={`stack-${String(level)}`}
                   box={layout.stack(level)}
                   z={10 + level}
+                  // The cards of a person drawn again glide onto the top of the stack.
+                  flipKey={
+                    level >= stackCount - count
+                      ? `res:${String(stackCount - 1 - level)}`
+                      : undefined
+                  }
                   className={styles.resource}
                   isFaceDown
                 />
@@ -228,7 +258,8 @@ export function ResourcesScene({
                     box={box}
                     number={place + 1}
                     resource={resource}
-                    isOpen={opened.includes(place)}
+                    isOpen={opened.includes(place) && !isTurningBack}
+                    flipKey={`res:${String(place)}`}
                     turnDelay={isTurningAll ? place * TURN_ALL_GAP : 0}
                     onTurn={
                       onTurn === undefined
@@ -278,6 +309,7 @@ type DrawnResourceProps = {
   readonly isOpen: boolean;
   /** Seconds before the card turns over, when all turn over at once. */
   readonly turnDelay: number;
+  readonly flipKey: string;
   readonly onTurn: (() => void) | undefined;
 };
 
@@ -289,6 +321,7 @@ function DrawnResource({
   resource,
   isOpen,
   turnDelay,
+  flipKey,
   onTurn,
 }: DrawnResourceProps): React.JSX.Element {
   const card = (
@@ -311,7 +344,7 @@ function DrawnResource({
   return (
     <>
       {isOpen || onTurn === undefined ? (
-        <div data-leave-card="" className={styles.cardSpot} style={placeStyle}>
+        <div data-leave-card="" data-flip={flipKey} className={styles.cardSpot} style={placeStyle}>
           {card}
         </div>
       ) : (
@@ -319,6 +352,7 @@ function DrawnResource({
           type="button"
           look="card"
           data-leave-card=""
+          data-flip={flipKey}
           className={styles.cardSpot}
           style={placeStyle}
           aria-label={t('partie.karteUmdrehen', { nummer: number })}

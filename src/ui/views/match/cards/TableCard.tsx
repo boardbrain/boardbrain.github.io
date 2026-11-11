@@ -1,5 +1,5 @@
 import { m } from 'motion/react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { CatanColorKey } from '@/core/model';
 import { cx } from '@/ui/components/classNames';
 import { Coin } from '../Coin';
@@ -29,6 +29,11 @@ type TableCardProps = {
   /** Seconds before turning over, e.g. one after another with "Alle umdrehen". */
   readonly delay?: number;
   readonly className?: string | undefined;
+  /**
+   * Who the card is across pages, e.g. a person: after a repetition or in a look back the card
+   * glides from where it lay before (design I2-E, `useGlide`).
+   */
+  readonly flipKey?: string | undefined;
 };
 
 /**
@@ -44,10 +49,19 @@ export function TableCard({
   z,
   delay = 0,
   className,
+  flipKey,
 }: TableCardProps): React.JSX.Element {
+  // A card turned face down keeps showing its front behind it while it turns, also where the
+  // page no longer knows who lies on it, e.g. a place of the order drawn again.
+  const [shownFront, setShownFront] = useState(front);
+  if (front !== undefined && front !== shownFront) {
+    setShownFront(front);
+  }
+  const face = front ?? (isFaceDown ? shownFront : undefined);
   return (
     <div
       data-solid=""
+      data-flip={flipKey}
       className={cx(styles.card, className)}
       style={{ left: box.x, top: box.y, width: box.w, height: box.h, zIndex: z }}
     >
@@ -57,7 +71,7 @@ export function TableCard({
         animate={{ rotateY: isFaceDown ? 180 : 0 }}
         transition={{ ...FLIP, delay }}
       >
-        {front !== undefined && (
+        {face !== undefined && (
           <m.div
             className={cx(styles.front, isBareFront && styles.bareFront)}
             initial={false}
@@ -65,7 +79,7 @@ export function TableCard({
             transition={{ ...FACE_SWITCH, delay: FACE_SWITCH.delay + delay }}
           >
             <FittedFront w={box.w} h={box.h}>
-              {front}
+              {face}
             </FittedFront>
           </m.div>
         )}
@@ -136,6 +150,8 @@ type PlaceProps = {
   readonly stageName?: string | undefined;
   /** Drawn invisible at first, to fade in (design I2-E, W3). */
   readonly isHidden?: boolean;
+  /** Which place it is across pages (`useGlide`). */
+  readonly flipKey?: string | undefined;
 };
 
 /**
@@ -148,11 +164,14 @@ export function Place({
   isFilled,
   stageName,
   isHidden = false,
+  flipKey,
 }: PlaceProps): React.JSX.Element {
   return (
     <div
       data-solid=""
       data-stage={stageName}
+      data-flip={flipKey}
+      data-filled={isFilled ? '' : undefined}
       className={cx(styles.place, isFilled && styles.placeFilled)}
       style={{
         left: box.x,

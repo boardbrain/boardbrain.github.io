@@ -1,3 +1,4 @@
+import { m } from 'motion/react';
 import { useRef, useState } from 'react';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
@@ -39,17 +40,14 @@ function OrderFront({
   isNewest = false,
   isStaged = false,
 }: OrderFrontProps): React.JSX.Element {
-  return (
-    <span
-      data-stage-raise={isStaged && place !== null ? '' : undefined}
-      className={cx(
-        shared.qCard,
-        styles.orderFace,
-        place === null && styles.noBand,
-        isNewest && shared.qNow,
-        isNewest && styles.lifted,
-      )}
-    >
+  const className = cx(
+    shared.qCard,
+    styles.orderFace,
+    place === null && styles.noBand,
+    isNewest && shared.qNow,
+  );
+  const content = (
+    <>
       {place !== null && (
         <span className={shared.qBand}>
           {place === 0 ? t('partie.start') : t('partie.platz', { platz: place + 1 })}
@@ -59,9 +57,28 @@ function OrderFront({
       <strong className={shared.qName}>{name}</strong>
       <span className={shared.stripe} style={{ background: `var(--color-catan-${color})` }} />
       {isStaged && place !== null && <span data-stage-now="" className={styles.nowFrame} />}
+    </>
+  );
+  // In a movement the plan lifts the card; at rest it rises and sinks softly (0.26 s).
+  return isStaged ? (
+    <span data-stage-raise={place === null ? undefined : ''} className={className}>
+      {content}
     </span>
+  ) : (
+    <m.span
+      className={className}
+      initial={false}
+      animate={{ y: isNewest ? LIFT : 0 }}
+      transition={LIFT_MOVE}
+    >
+      {content}
+    </m.span>
   );
 }
+
+// The newest order card lies 10 px higher (design I2-D, Q3).
+const LIFT = -10;
+const LIFT_MOVE = { duration: 0.26, ease: 'easeOut' } as const;
 
 type OrderSceneProps = {
   readonly session: StoredSession;
@@ -101,6 +118,7 @@ export function OrderScene({
   const isDealt = placed.length > 0;
   const isComplete = placed.length === persons.length;
   const row = layout.row(persons.length);
+  const unplaced = persons.filter((personId) => !placed.includes(personId));
   // The spin just drawn: the places before it, the person drawn and, if it is the last spin, the
   // last place that follows by itself.
   const newest = spins[spins.length - 1];
@@ -153,19 +171,36 @@ export function OrderScene({
           box={box}
           label={String(place + 1)}
           isFilled={isDealt}
+          flipKey={`place:${String(place)}`}
         />
       ))}
       {layout.slots.map((box, place) => {
         const personId = placed[place];
+        // Cards keep their place across "Wiederholen": a card drawn again turns face down where
+        // it lies. A face-down card stands for one of the persons still to be drawn, so after
+        // repeating the whole order it glides back into the row (design I2-E).
         if (personId === undefined) {
-          return isDealt && <TableCard key={`down-${String(place)}`} box={box} z={5} isFaceDown />;
+          return (
+            isDealt && (
+              <TableCard
+                key={`place-${String(place)}`}
+                box={box}
+                z={5}
+                isBareFront
+                isFaceDown
+                flipKey={`person:${unplaced[place - placed.length] ?? ''}`}
+              />
+            )
+          );
         }
         const isNewest = !isComplete && place === placed.length - 1;
-        const card = (
+        return (
           <TableCard
+            key={`place-${String(place)}`}
             box={box}
             z={5}
             isBareFront
+            flipKey={`person:${personId}`}
             front={
               <OrderFront
                 name={nameOf(personId)}
@@ -176,7 +211,6 @@ export function OrderScene({
             }
           />
         );
-        return <div key={personId}>{card}</div>;
       })}
       {!isDealt &&
         persons.map((personId, index) => {
@@ -188,6 +222,7 @@ export function OrderScene({
                 box={box}
                 z={10 + index}
                 isBareFront
+                flipKey={`person:${personId}`}
                 front={
                   <OrderFront
                     name={nameOf(personId)}
