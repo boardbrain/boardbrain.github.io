@@ -1,4 +1,5 @@
-import { useRef, type ReactNode } from 'react';
+import { m } from 'motion/react';
+import { useRef, useState, type ReactNode } from 'react';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
 import { CATAN_RESOURCES, type CatanResource } from '@/games/catan';
@@ -11,9 +12,10 @@ import { useElementSize } from '@/ui/components/useElementSize';
 import { colorOf } from '../matchColors';
 import { orderOrSeats } from '../matchFlow';
 import { RESOURCE_NAMES } from '../matchTexts';
-import { Reveal } from '../Reveal';
 import { TurnBand } from '../TurnBand';
-import { resourcesLayout, type CardBox } from './cardLayout';
+import { resourcesLayout, type CardBox, type ResourcesLayout } from './cardLayout';
+import { StagedCards, type StageHandle } from './StagedCards';
+import { labelTarget, placeTarget, planResources } from './stagePlan';
 import { Place, TableCard } from './TableCard';
 import { tableSize } from './tableSize';
 import shared from '../MatchView.module.css';
@@ -31,6 +33,13 @@ type ResourcesSceneProps = {
   readonly nameOf: (personId: PersonId) => string;
   /** "Wiederholen" and the forward button, right below the band as on the placement. */
   readonly actions: ReactNode;
+  /**
+   * Set while the cards just drawn are still to be dealt with their movement (design I2-E,
+   * FA-AB-07); `null` shows them at rest.
+   */
+  readonly stage?: StageHandle | null;
+  /** "Alle umdrehen": the cards turn over one after another, 0.09 s apart (design I2-D). */
+  readonly isTurningAll?: boolean;
 };
 
 function ResourceFront({ resource }: { readonly resource: CatanResource }): React.JSX.Element {
@@ -53,9 +62,12 @@ export function ResourcesScene({
   onTurn,
   nameOf,
   actions,
+  stage = null,
+  isTurningAll = false,
 }: ResourcesSceneProps): React.JSX.Element | null {
   const ref = useRef<HTMLDivElement>(null);
-  const { width, height } = tableSize(useElementSize(ref));
+  const measured = useElementSize(ref);
+  const { width, height } = tableSize(measured);
   const options = session.setup.options.startingResources;
   if (options === null) {
     return null;
@@ -66,43 +78,77 @@ export function ResourcesScene({
   const isFirst = order[0] === personId;
   const stackCount =
     options.replacement === 'with' ? CATAN_RESOURCES.length : CATAN_RESOURCES.length - count;
+  const isStaging = stage !== null && result !== null && measured !== null;
   return (
     <div className={styles.withBand}>
-      <div ref={ref} className={styles.table}>
-        {layout.slots.map((box, place) => (
-          <Place
-            key={`place-${String(place)}`}
-            box={box}
-            label={t('partie.fragezeichen')}
-            isFilled={result !== null}
-          />
-        ))}
-        {result === null && isFirst
-          ? CATAN_RESOURCES.map((resource, index) => {
-              const box = layout.kinds[index];
-              return (
-                box !== undefined && (
-                  <TableCard
-                    key={resource}
-                    box={box}
-                    z={10}
-                    className={styles.resource}
-                    front={<ResourceFront resource={resource} />}
-                  />
-                )
-              );
-            })
-          : Array.from({ length: stackCount }, (_, level) => (
-              <TableCard
-                key={`stack-${String(level)}`}
-                box={layout.stack(level)}
-                z={10 + level}
-                className={styles.resource}
-                isFaceDown
+      <div ref={ref} className={styles.table} data-stage-root="">
+        {isStaging && (
+          <>
+            {layout.slots.map((box, place) => (
+              <Place
+                key={`place-${String(place)}`}
+                box={box}
+                label={t('partie.fragezeichen')}
+                isFilled={false}
+                stageName={placeTarget(place)}
               />
             ))}
-        {result !== null && (
-          <Reveal className={styles.layer}>
+            {layout.slots.map((box, place) => (
+              <span
+                key={`label-${String(place)}`}
+                data-stage={labelTarget(place)}
+                className={cx(shared.resName, styles.cardName, styles.cardNameMuted)}
+                style={{ left: box.x, top: box.y + box.h + 4, width: box.w }}
+              >
+                {t('partie.antippen')}
+              </span>
+            ))}
+            <ResourcesStage
+              layout={layout}
+              isFirst={isFirst}
+              stackBefore={stackCount}
+              isWithReplacement={options.replacement === 'with'}
+              handle={stage}
+            />
+          </>
+        )}
+        {!isStaging &&
+          layout.slots.map((box, place) => (
+            <Place
+              key={`place-${String(place)}`}
+              box={box}
+              label={t('partie.fragezeichen')}
+              isFilled={result !== null}
+            />
+          ))}
+        {isStaging
+          ? null
+          : result === null && isFirst
+            ? CATAN_RESOURCES.map((resource, index) => {
+                const box = layout.kinds[index];
+                return (
+                  box !== undefined && (
+                    <TableCard
+                      key={resource}
+                      box={box}
+                      z={10}
+                      className={styles.resource}
+                      front={<ResourceFront resource={resource} />}
+                    />
+                  )
+                );
+              })
+            : Array.from({ length: stackCount }, (_, level) => (
+                <TableCard
+                  key={`stack-${String(level)}`}
+                  box={layout.stack(level)}
+                  z={10 + level}
+                  className={styles.resource}
+                  isFaceDown
+                />
+              ))}
+        {result !== null && !isStaging && (
+          <div className={styles.layer}>
             {result.map((resource, place) => {
               const box = layout.slots[place];
               return (
@@ -113,6 +159,7 @@ export function ResourcesScene({
                     number={place + 1}
                     resource={resource}
                     isOpen={opened.includes(place)}
+                    turnDelay={isTurningAll ? place * TURN_ALL_GAP : 0}
                     onTurn={
                       onTurn === undefined
                         ? undefined
@@ -124,7 +171,7 @@ export function ResourcesScene({
                 )
               );
             })}
-          </Reveal>
+          </div>
         )}
       </div>
       <TurnBand
@@ -148,11 +195,19 @@ export function ResourcesScene({
   );
 }
 
+// "Alle umdrehen": the cards turn over one after another (reference I2-D: 0.09 s apart).
+const TURN_ALL_GAP = 0.09;
+// Design I2-E: "Antippen" fades out during the first half of the turn, then the name fades in.
+const LABEL_OUT_SECONDS = 0.17;
+const LABEL_IN_SECONDS = 0.2;
+
 type DrawnResourceProps = {
   readonly box: CardBox;
   readonly number: number;
   readonly resource: CatanResource;
   readonly isOpen: boolean;
+  /** Seconds before the card turns over, when all turn over at once. */
+  readonly turnDelay: number;
   readonly onTurn: (() => void) | undefined;
 };
 
@@ -163,6 +218,7 @@ function DrawnResource({
   number,
   resource,
   isOpen,
+  turnDelay,
   onTurn,
 }: DrawnResourceProps): React.JSX.Element {
   const card = (
@@ -170,9 +226,17 @@ function DrawnResource({
       box={{ x: 0, y: 0, w: box.w, h: box.h }}
       className={styles.resource}
       isFaceDown={!isOpen}
+      delay={turnDelay}
       front={<ResourceFront resource={resource} />}
     />
   );
+  // Turned back face down (a repetition) the labels change at once.
+  const labelOut = isOpen
+    ? { duration: LABEL_OUT_SECONDS, ease: 'easeIn' as const, delay: turnDelay }
+    : { duration: 0 };
+  const labelIn = isOpen
+    ? { duration: LABEL_IN_SECONDS, ease: 'easeOut' as const, delay: turnDelay + LABEL_OUT_SECONDS }
+    : { duration: 0 };
   const placeStyle = { left: box.x, top: box.y, width: box.w, height: box.h };
   return (
     <>
@@ -193,11 +257,67 @@ function DrawnResource({
         </PressableButton>
       )}
       <span
-        className={cx(shared.resName, styles.cardName, !isOpen && styles.cardNameMuted)}
+        className={cx(shared.resName, styles.cardName, styles.labelStack)}
         style={{ left: box.x, top: box.y + box.h + 4, width: box.w }}
       >
-        {isOpen ? t(RESOURCE_NAMES[resource]) : t('partie.antippen')}
+        <m.span
+          className={styles.cardNameMuted}
+          aria-hidden={isOpen ? true : undefined}
+          initial={false}
+          animate={{ opacity: isOpen ? 0 : 1 }}
+          transition={labelOut}
+        >
+          {t('partie.antippen')}
+        </m.span>
+        <m.span
+          aria-hidden={isOpen ? undefined : true}
+          initial={false}
+          animate={{ opacity: isOpen ? 1 : 0 }}
+          transition={labelIn}
+        >
+          {t(RESOURCE_NAMES[resource])}
+        </m.span>
       </span>
     </>
+  );
+}
+
+type ResourcesStageProps = {
+  readonly layout: ResourcesLayout;
+  readonly isFirst: boolean;
+  readonly stackBefore: number;
+  readonly isWithReplacement: boolean;
+  readonly handle: StageHandle;
+};
+
+// The movement of "Losen" on the starting resources (design I2-E), planned once when it starts.
+function ResourcesStage({
+  layout,
+  isFirst,
+  stackBefore,
+  isWithReplacement,
+  handle,
+}: ResourcesStageProps): React.JSX.Element {
+  const [plan] = useState(() =>
+    planResources({
+      kinds: isFirst ? CATAN_RESOURCES : null,
+      kindBoxes: layout.kinds,
+      stack: layout.stack,
+      stackBefore,
+      slots: layout.slots,
+      isWithReplacement,
+      rng: handle.rng,
+    }),
+  );
+  return (
+    <StagedCards
+      plan={plan}
+      className={styles.resource}
+      front={(key) => {
+        const resource = CATAN_RESOURCES.find((kind) => kind === key);
+        return resource === undefined ? null : <ResourceFront resource={resource} />;
+      }}
+      handle={handle}
+    />
   );
 }

@@ -128,15 +128,17 @@ describe('US-AB-02 Go through the generation', () => {
     expect(progress()).toEqual(['Platzierung', 'Rohstoffe 0/4']);
 
     await tapForward(user, 'Losen');
-    expect(await screen.findAllByText('Antippen')).toHaveLength(2);
+    await waitFor(() => {
+      expect(shownTexts('Antippen')).toHaveLength(2);
+    });
     await user.click(screen.getByRole('button', { name: 'Karte 1 umdrehen' }));
     await waitFor(() => {
-      expect(screen.getAllByText('Antippen')).toHaveLength(1);
+      expect(shownTexts('Antippen')).toHaveLength(1);
     });
     expect(forwardName()).toBe('Alle umdrehen');
     await tapForward(user, 'Alle umdrehen');
 
-    expect(screen.queryByText('Antippen')).not.toBeInTheDocument();
+    expect(shownTexts('Antippen')).toHaveLength(0);
     expect(forwardName()).toBe('Weiter');
     const [stored] = await db.session.toArray();
     expect(stored?.generation.gameState.openedResources).toEqual([
@@ -325,3 +327,10 @@ describe('Architecture 13.2 match from the database', () => {
     expect(await db.session.count()).toBe(0);
   });
 });
+
+// Texts as shown: "Antippen" and the name of a resource lie on top of each other, one hidden.
+function shownTexts(text: string): HTMLElement[] {
+  return screen
+    .queryAllByText(text)
+    .filter((element) => element.getAttribute('aria-hidden') !== 'true');
+}

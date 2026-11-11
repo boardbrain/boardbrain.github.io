@@ -83,7 +83,9 @@ type Dialog = 'repeat' | 'skip' | 'end' | null;
 
 // The steps shown with a movement of cards (design I2-E).
 function hasMovement(step: CatanSlot): boolean {
-  return step.kind === 'person-draw' || step.kind === 'order-spin';
+  return (
+    step.kind === 'person-draw' || step.kind === 'order-spin' || step.kind === 'starting-resources'
+  );
 }
 
 // The address of a page: the current page has none, a look back names its step (US-AB-04 AK-3).
@@ -134,6 +136,8 @@ export function MatchView(): React.JSX.Element | null {
   // "Losen" was tapped on a page without a result: after a repetition of the order its face-down
   // cards are collected first (design I2-E, E1).
   const [isDrawnFromPending, setDrawnFromPending] = useState(false);
+  // "Alle umdrehen" turns the cards over one after another (design I2-D).
+  const [isTurningAll, setTurningAll] = useState(false);
 
   const session = current?.status === 'active' ? current.session : null;
   const page = session === null ? null : pageAt(session, lookBackOf(search.get('schritt')));
@@ -237,6 +241,7 @@ export function MatchView(): React.JSX.Element | null {
       return;
     }
     act(async () => {
+      setTurningAll(forward === 'turn-all');
       if (forward === 'turn-all') {
         if (step?.kind === 'starting-resources') {
           await sessions.openResources(
@@ -442,6 +447,8 @@ export function MatchView(): React.JSX.Element | null {
             }
             nameOf={nameOf}
             actions={actions}
+            stage={stage}
+            isTurningAll={isTurningAll}
           />
         )}
       </div>

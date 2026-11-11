@@ -218,3 +218,12 @@
     0 0 0 1px var(--color-accent-text),
     0 10px 22px var(--color-shadow);
 }
+
+/* "Antippen" and the name of the resource on top of each other below a card (design I2-E). */
+.labelStack {
+  display: grid;
+}
+
+.labelStack > * {
+  grid-area: 1 / 1;
+}

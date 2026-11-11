@@ -97,6 +97,7 @@ export function StagedCards({
           key={card.id}
           data-solid=""
           data-stage-card={card.id}
+          data-stage={card.id}
           className={cx(styles.card, styles.stageCard, className)}
           style={{ width: card.w, height: card.h }}
         >

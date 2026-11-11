@@ -120,6 +120,13 @@ export const STAGE_MS = {
   collectGap: 60,
   collectLift: -16,
   placeIn: 200,
+  kindsDown: 240,
+  kindsToStack: 300,
+  kindsGap: 35,
+  putBack: 460,
+  dealResource: 380,
+  dealResourceLift: -18,
+  labelIn: 200,
 } as const;
 
 /** How far a mixed card is pulled out beside the stack, in card widths, and turned. */
@@ -548,4 +555,128 @@ export function planOrder({
     planner.raise(turned, end + STAGE_MS.settleDelay, false);
   }
   return planner.reveal(cards, fronts);
+}
+
+/** Name of the label below a place of the starting resources ("Antippen"), by its index. */
+export const labelTarget = (index: number): string => `label-${String(index)}`;
+
+/** What the starting resources of a person need to plan their movement (design I2-D, page 8). */
+export type ResourcesStageInput = {
+  /** Before the first person draws, the five kinds lie face up in a row (keys of `fronts`). */
+  readonly kinds: readonly string[] | null;
+  readonly kindBoxes: readonly CardBox[];
+  /** Card `level` of the face-down stack, from the bottom. */
+  readonly stack: (level: number) => CardBox;
+  /** Cards in the face-down stack before drawing, where the kinds do not lie open. */
+  readonly stackBefore: number;
+  readonly slots: readonly CardBox[];
+  /** FA-SR-02: with replacement a card goes back onto the stack after each card dealt. */
+  readonly isWithReplacement: boolean;
+  readonly rng: RandomSource;
+};
+
+/** The five kinds of resources; the stack is complete with five cards. */
+const KINDS = 5;
+const PUT_BACK_EASE_OFFSET = 2.2;
+const PUT_BACK_TURN = 16;
+const PUT_BACK_RISE = -12;
+
+/**
+ * US-SR-01, design I2-D/I2-E: "Losen" on the starting resources of a person. Before the first
+ * person the five kinds turn face down and gather into a stack; missing cards fly back onto it
+ * from the side; the stack is mixed three times and all cards of the person go face down onto
+ * the places, one after another. With replacement a card flies onto the stack after each one.
+ * The person turns the cards over by hand (FA-SR-05), so nothing is revealed here.
+ */
+export function planResources({
+  kinds,
+  kindBoxes,
+  stack,
+  stackBefore,
+  slots,
+  isWithReplacement,
+  rng,
+}: ResourcesStageInput): StagePlan {
+  const base = stack(0);
+  const { w, h } = base;
+  const initial = kinds === null ? stackBefore : kinds.length;
+  const extra = KINDS - initial + (isWithReplacement ? slots.length : 0);
+  const side = (level: number): Pose => ({
+    ...poseOn(stack(level), w, h),
+    x: base.x + w * PUT_BACK_EASE_OFFSET,
+    y: stack(level).y + PUT_BACK_RISE,
+    rotate: PUT_BACK_TURN,
+  });
+  const cards: StageCard[] = [
+    ...Array.from({ length: initial }, (_, index): StageCard => ({
+      id: `card-${String(index)}`,
+      w,
+      h,
+      fronts: kinds === null ? [] : [kinds[index] ?? ''],
+      start: poseOn(kinds === null ? stack(index) : (kindBoxes[index] ?? base), w, h),
+      isFaceDown: kinds === null,
+      z: 10 + index,
+    })),
+    ...Array.from({ length: extra }, (_, index): StageCard => ({
+      id: `card-${String(initial + index)}`,
+      w,
+      h,
+      fronts: [],
+      start: side(0),
+      isFaceDown: true,
+      z: 10,
+    })),
+  ];
+  const planner = new Planner(cards);
+  let at = 0;
+  let pile = cards.slice(0, initial).map((card) => card.id);
+  if (kinds !== null) {
+    pile.forEach((id, level) => {
+      const start = level * STAGE_MS.kindsGap;
+      planner.flip(id, start, STAGE_MS.kindsDown, true);
+      at = Math.max(
+        at,
+        planner.move(id, start, STAGE_MS.kindsToStack, poseOn(stack(level), w, h), 0, 10 + level),
+      );
+    });
+  }
+  let spare = cards.slice(initial).map((card) => card.id);
+  // A face-down card flies in from the side and lands on top of the stack, clearly visible (PO).
+  const putBack = (start: number): number => {
+    const [id, ...rest] = spare;
+    if (id === undefined) {
+      return start;
+    }
+    spare = rest;
+    const level = pile.length;
+    planner.move(id, start, 0, side(level), 0, 10 + level);
+    planner.fade(id, start, 0, 0, 1);
+    pile = [...pile, id];
+    return planner.move(id, start, STAGE_MS.putBack, poseOn(stack(level), w, h));
+  };
+  while (pile.length < KINDS && spare.length > 0) {
+    at = putBack(at);
+  }
+  const mixed = gatherAndMix(planner, pile, stack, { w, h }, at, rng);
+  pile = mixed.order;
+  at = mixed.end;
+  slots.forEach((slot, index) => {
+    const top = pile[pile.length - 1];
+    if (top === undefined) {
+      return;
+    }
+    pile = pile.slice(0, -1);
+    const landed = planner.move(
+      top,
+      at,
+      STAGE_MS.dealResource,
+      poseOn(slot, w, h),
+      STAGE_MS.dealResourceLift,
+      40 + index,
+    );
+    planner.fade(placeTarget(index), landed, 0, PLACE_OPACITY, 0);
+    planner.fade(labelTarget(index), landed, STAGE_MS.labelIn, 0, 1);
+    at = isWithReplacement ? putBack(landed) : landed;
+  });
+  return planner.plan(cards);
 }

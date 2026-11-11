@@ -26,6 +26,8 @@ type TableCardProps = {
   readonly isBareFront?: boolean;
   /** Stacking order; later cards lie on top. */
   readonly z?: number;
+  /** Seconds before turning over, e.g. one after another with "Alle umdrehen". */
+  readonly delay?: number;
   readonly className?: string | undefined;
 };
 
@@ -40,6 +42,7 @@ export function TableCard({
   isFaceDown = false,
   isBareFront = false,
   z,
+  delay = 0,
   className,
 }: TableCardProps): React.JSX.Element {
   return (
@@ -52,14 +55,14 @@ export function TableCard({
         className={styles.inner}
         initial={false}
         animate={{ rotateY: isFaceDown ? 180 : 0 }}
-        transition={FLIP}
+        transition={{ ...FLIP, delay }}
       >
         {front !== undefined && (
           <m.div
             className={cx(styles.front, isBareFront && styles.bareFront)}
             initial={false}
             animate={{ opacity: isFaceDown ? 0 : 1 }}
-            transition={FACE_SWITCH}
+            transition={{ ...FACE_SWITCH, delay: FACE_SWITCH.delay + delay }}
           >
             <FittedFront w={box.w} h={box.h}>
               {front}
@@ -70,7 +73,7 @@ export function TableCard({
           className={styles.back}
           initial={false}
           animate={{ opacity: isFaceDown ? 1 : 0 }}
-          transition={FACE_SWITCH}
+          transition={{ ...FACE_SWITCH, delay: FACE_SWITCH.delay + delay }}
         >
           <CardBack />
         </m.div>

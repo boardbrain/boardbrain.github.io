@@ -1,11 +1,13 @@
 import { SeededRandomSource } from '@tests/support/seededRandomSource';
 import { describe, expect, it } from 'vitest';
-import { drawLayout, orderLayout } from './cardLayout';
+import { drawLayout, orderLayout, resourcesLayout } from './cardLayout';
 import {
+  labelTarget,
   orderKey,
   placeTarget,
   planDraw,
   planOrder,
+  planResources,
   poseOn,
   STAGE_MS,
   WHO_AFTER,
@@ -206,5 +208,60 @@ describe('US-IN-01 AK-3 Order with cards (design I2-E)', () => {
       );
 
     expect(movements('ben')).toEqual(movements('anna'));
+  });
+});
+
+function resourcesPlan(isFirst: boolean, isWithReplacement: boolean, stackBefore = 5): StagePlan {
+  const layout = resourcesLayout(PHONE.width, PHONE.height, 3);
+  return planResources({
+    kinds: isFirst ? ['wood', 'brick', 'wool', 'grain', 'ore'] : null,
+    kindBoxes: layout.kinds,
+    stack: layout.stack,
+    stackBefore,
+    slots: layout.slots,
+    isWithReplacement,
+    rng: new SeededRandomSource(9),
+  });
+}
+
+describe('US-SR-01 Starting resources with cards (design I2-E)', () => {
+  it('before the first person the five kinds turn face down and gather into the stack', () => {
+    const plan = resourcesPlan(true, false);
+
+    expect(plan.steps.filter((step) => step.kind === 'flip' && step.toFaceDown)).toHaveLength(5);
+    expect(plan.cards).toHaveLength(5);
+  });
+
+  it('deals one card onto each place, face down, and shows "Antippen" below it', () => {
+    const layout = resourcesLayout(PHONE.width, PHONE.height, 3);
+    const plan = resourcesPlan(true, false);
+    const deals = moves(plan).filter((step) => step.ms === STAGE_MS.dealResource);
+
+    expect(deals).toHaveLength(3);
+    expect(deals.map((step) => step.to.scale)).toEqual(
+      layout.slots.map((slot) => slot.w / (layout.kinds[0]?.w ?? 1)),
+    );
+    expect(plan.steps.filter((step) => step.kind === 'flip' && !step.toFaceDown)).toEqual([]);
+    expect(
+      plan.steps.filter((step) => step.kind === 'fade' && step.target === labelTarget(2)),
+    ).toHaveLength(1);
+  });
+
+  it('FA-SR-02: with replacement a card flies back onto the stack after each card dealt', () => {
+    const plan = resourcesPlan(false, true);
+
+    expect(plan.cards).toHaveLength(5 + 3);
+    expect(moves(plan).filter((step) => step.ms === STAGE_MS.putBack)).toHaveLength(3);
+  });
+
+  it('FA-SR-03: without replacement the cards of the person before go back onto the stack first', () => {
+    const plan = resourcesPlan(false, false, 2);
+    const putBacks = moves(plan).filter((step) => step.ms === STAGE_MS.putBack);
+    const firstDeal = moves(plan).find((step) => step.ms === STAGE_MS.dealResource);
+
+    expect(putBacks).toHaveLength(3);
+    expect(Math.max(...putBacks.map((step) => step.at + step.ms))).toBeLessThanOrEqual(
+      firstDeal?.at ?? 0,
+    );
   });
 });

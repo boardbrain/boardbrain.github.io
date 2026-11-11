@@ -63,11 +63,22 @@ function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): Anima
       if (card === null) {
         return [];
       }
-      // A card that only changes its height in the stack does not move.
-      const segments: AnimationSequence =
-        step.ms === 0
-          ? []
-          : [[card, moveKeyframes(step), { at, duration: seconds(step.ms), ease: [...MOVE_EASE] }]];
+      // A card that only changes its height in the stack does not move; a move without time is a
+      // jump, e.g. a card put back that appears beside the stack.
+      const isStill =
+        step.from.x === step.to.x &&
+        step.from.y === step.to.y &&
+        step.from.rotate === step.to.rotate &&
+        step.from.scale === step.to.scale;
+      const segments: AnimationSequence = isStill
+        ? []
+        : [
+            [
+              card,
+              moveKeyframes(step),
+              { at, duration: Math.max(SWITCH, seconds(step.ms)), ease: [...MOVE_EASE] },
+            ],
+          ];
       const z = tracked.z.get(step.card);
       if (step.z !== undefined && z !== step.z) {
         segments.push([card, { zIndex: [z ?? step.z, step.z] }, { at, duration: SWITCH }]);
