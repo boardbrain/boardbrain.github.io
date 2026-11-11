@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.27 |
+| Version | 0.28 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 10.11.2026 |
+| Stand | 11.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -41,6 +41,7 @@
 | 0.25 | 09.11.2026 | Bündel I2-D: Personen werden mit Karten gelost statt mit einem Glücksrad (Anforderungsdokumentation E-36; 3, 4.5, 13.6, 15, 18, 19); Losen und Bestätigen getrennt, Wiederholen ohne sofortiges Losen, Seite ohne Ergebnis abgeleitet statt gespeichert, aufgedeckte Startrohstoffe im Zustand des Catan-Moduls, Sitzung Version 2 (10.2, 10.3); Rückblick über `#/partie?schritt=N`, Band auf dem Start, Rückfrage bei neuer Partie, Sperre im Tisch-Editor, `#/brett` entfällt (13.1); Kartentisch in Pixeln aus der Referenz (13.6) |
 | 0.26 | 10.11.2026 | Bündel I2-G: Rahmen ohne Kopfzeile, Logo und App-Name nur auf dem Start; alle Ansichten außer dem Start mit gemeinsamer Breite, Polsterung und Kopfhöhe aus Tokens, Kopf der Platzierung im Querformat über beiden Spalten; Entwicklungskarte auf Tablets bis 280 px (13.1); Design-Referenz `docs/design/i2g-more-room-final-preview.html` |
 | 0.27 | 10.11.2026 | Bündel I2-H: Steine auf dem Brett antippen; unsichtbare Knöpfe über den Steinen, Zuordnung eines Tipps in `ui/board/pieceHit.ts`, Markierung und Scheinwerfer in der Rückfrage, Fenster weicht den Steinen aus (13.5); Rückblick in ganzen Ansichten, Messung vor dem Zeichnen (13.1); Design-Referenz `docs/design/i2h-tap-pieces-final-preview.html` |
+| 0.28 | 11.11.2026 | Kleine Aufgabe K-6: Tests nach dem Losen beginnen mit einer Partie aus `seedMatch`, lokal sechs Ende-zu-Ende-Tests gleichzeitig (14.5); `ci.yml` nur bei neuen Commits, Titelprüfung im eigenen Workflow `pr-title.yml` auch bei Bearbeitungen, Ende-zu-Ende-Tests in zwei gleichzeitigen Hälften mit Sammeljob `e2e` (15, 16.3) |
 
 ## Inhaltsverzeichnis
 
@@ -1173,11 +1174,11 @@ Playwright-Szenarien (Auswahl):
 - Netzwerkwächter: Jeder Test schlägt fehl, wenn eine Anfrage an eine fremde Adresse geht (NFA-DH-01).
 - Darstellung: Smartphones im Hochformat, Tablets im Hoch- und Querformat ohne abgeschnittene Inhalte; Smartphones im Querformat zeigen nur den Hinweis zum Drehen (NFA-PL-04, E-29).
 - Content-Security-Policy: Der Produktions-Build enthält das Meta-Tag aus 12.4.
-- Fester Zufall (seit I2-C): `useSeededRandom(page, seed)` aus `tests/e2e/seededRandom.ts` ersetzt vor dem Laden der App `crypto.getRandomValues` durch Mulberry32 mit festem Startwert, sodass jeder Lauf dieselben Schritte lost. Der Produktions-Build bleibt unverändert; `crypto.randomUUID` arbeitet wie zuvor. Nur diese Datei darf `crypto` dafür verwenden (ESLint, Entwicklungsrichtlinien 8.2). `match.spec.ts` geht ganze Partien durch: 2, 3 und 4 Personen, beide Spielversionen, Startrohstoffe mit und ohne Zurücklegen, Reihenfolge selbst festgelegt, „Ohne Platzierung“, Wiederholen, Überspringen und Beenden. *(neu in 0.22)*
+- Fester Zufall (seit I2-C): `useSeededRandom(page, seed)` aus `tests/e2e/seededRandom.ts` ersetzt vor dem Laden der App `crypto.getRandomValues` durch Mulberry32 mit festem Startwert, sodass jeder Lauf dieselben Schritte lost. Der Produktions-Build bleibt unverändert; `crypto.randomUUID` arbeitet wie zuvor. Nur diese Datei darf `crypto` dafür verwenden (ESLint, Entwicklungsrichtlinien 8.2). `match.spec.ts` geht ganze Partien durch: 2, 3 und 4 Personen, beide Spielversionen, Startrohstoffe mit und ohne Zurücklegen, Reihenfolge selbst festgelegt, „Ohne Platzierung“, Wiederholen, Überspringen und Beenden. *(neu in 0.22)* Tests dessen, was nach dem Losen kommt (Antippen, Rückblick, Übersicht, Wiederholen), beginnen dagegen mit einer Partie, die `seedMatch` aus `tests/e2e/seedDatabase.ts` mit der Spiellogik und `SeededRandomSource` ausrechnet und direkt in die Datenbank schreibt (Entwicklungsrichtlinien 8.3). *(neu in 0.28)*
 
 Die Ende-zu-Ende-Tests laufen gegen `npm run preview`; lokal baut `npm run test:e2e` vorher den aktuellen Stand. Lokal laufen sie mit dem mkcert-Zertifikat über HTTPS; weil Playwrights WebKit unter Windows dem Zertifikatsspeicher von Windows nicht vertraut, ignorieren die Tests Zertifikatsfehler (die Seite bleibt ein sicherer Kontext). Auf GitHub laufen sie über `http://localhost`, das Browser ebenfalls als sicheren Kontext behandeln. Eine Fixture lässt jeden Test zusätzlich bei Fehlern in der Browser-Konsole fehlschlagen, darunter Verstöße gegen die Content-Security-Policy.
 
-WebKit unter Windows nähert Safari an, ersetzt aber nicht den Test auf echten Apple-Geräten. Es zeichnet ohne Grafikkarte; mit sechs gleichzeitigen Läufen fror bei den langen Partie-Tests gelegentlich eine Seite ganz ein. Lokal laufen deshalb höchstens vier Tests gleichzeitig (`workers` in `playwright.config.ts`). *(neu in 0.23)* Auf GitHub ebenfalls vier: Der Rechner hat vier Kerne, die Voreinstellung nutzte nur zwei. *(geändert in 0.24)*
+WebKit unter Windows nähert Safari an, ersetzt aber nicht den Test auf echten Apple-Geräten. Es zeichnet ohne Grafikkarte; mit sechs gleichzeitigen Läufen fror bei den langen Partie-Tests gelegentlich eine Seite ganz ein. Lokal liefen deshalb höchstens vier Tests gleichzeitig (`workers` in `playwright.config.ts`). *(neu in 0.23)* Seit die meisten Partie-Tests mit einer Partie aus `seedMatch` beginnen, laufen lokal wieder sechs gleichzeitig: drei volle Läufe damit waren fehlerfrei und etwa 15 % schneller als mit vier. Friert eine Seite wieder ein, geht es zurück auf vier. *(geändert in 0.28)* Auf GitHub vier: Der Rechner hat vier Kerne, die Voreinstellung nutzte nur zwei. Die Tests verteilen sich dort auf zwei gleichzeitige Hälften (16.3). *(geändert in 0.28)*
 
 ### 14.6 Manuelle Abnahme vor jedem Release
 
@@ -1213,7 +1214,8 @@ Eine Checkliste in `docs/Abnahme-Checkliste.md` (angelegt mit I1-D) umfasst je P
 boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 ├─ .github/
 │  ├─ workflows/
-│  │  ├─ ci.yml                       Prüfungen bei jedem Pull Request (16.3)
+│  │  ├─ ci.yml                       Prüfungen bei neuen Commits eines Pull Requests (16.3)
+│  │  ├─ pr-title.yml                 Titelprüfung, auch bei jeder Bearbeitung (16.3)
 │  │  └─ deploy.yml                   Veröffentlichung bei Tags v* (16.3)
 │  ├─ dependabot.yml                  Abhängigkeits-Updates, Ziel develop
 │  └─ pull_request_template.md        PR-Vorlage mit Definition of Done
@@ -1356,17 +1358,20 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 
 **Schutzregeln (Rulesets).** Für `develop` und `main`: Änderungen nur per Pull Request, null erforderliche Freigaben (der Product Owner kann seinen eigenen Pull Request nicht freigeben; die Kontrolle liegt darin, dass nur er mergt), erforderliche Prüfungen, kein Force-Push, kein Löschen, keine Ausnahmen. Für Tags `v*`: kein Verschieben, kein Löschen.
 
-**Workflow `ci.yml`** (bei jedem Pull Request nach `develop` oder `main`, nur Leserechte):
+**Workflow `ci.yml`** (bei jedem Pull Request nach `develop` oder `main`, nur Leserechte; nur beim Öffnen und bei neuen Commits, nicht bei einer Bearbeitung von Titel oder Beschreibung):
 
 | Job | Inhalt | Erforderlich für |
 |---|---|---|
 | `check` | `npm ci`, `npm run check`, `npm audit --omit=dev --audit-level=high` | `develop`, `main` |
-| `e2e` | läuft im offiziellen Playwright-Container (`mcr.microsoft.com/playwright`, Browser vorinstalliert); `npm ci`, `npm run build`, `npm run test:e2e`. Der Tag des Containers wird im Vorjob `playwright-version` aus `package-lock.json` gelesen und passt so immer exakt zur installierten Playwright-Version | `develop`, `main` |
-| `pr-title` | commitlint prüft den Titel des Pull Requests | `develop`, `main` |
+| `e2e` | sammelt das Ergebnis der beiden Hälften `e2e shard 1/2` und `e2e shard 2/2` und besteht nur, wenn beide bestanden haben. Die Hälften laufen gleichzeitig im offiziellen Playwright-Container (`mcr.microsoft.com/playwright`, Browser vorinstalliert); je `npm ci`, `npm run build`, `npm run test:e2e -- --shard=n/2`. Jeder Test läuft weiterhin auf jedem Gerät, nur verteilt auf zwei Rechner. Der Tag des Containers wird im Vorjob `playwright-version` aus `package-lock.json` gelesen und passt so immer exakt zur installierten Playwright-Version *(geändert in 0.28)* | `develop`, `main` |
 | `stat` | `npm run test:stat` (nur bei Ziel `main`) | `main` |
 | `guard-main` | schlägt fehl, wenn ein Pull Request nach `main` nicht aus `develop` oder `hotfix/…` kommt (nur bei Ziel `main`) | `main` |
 
-Übersprungene Jobs gelten bei GitHub als bestanden; `stat` und `guard-main` blockieren Pull Requests nach `develop` daher nicht. Aus demselben Grund läuft `e2e` auch dann, wenn der Vorjob `playwright-version` scheitert, und schlägt in diesem Fall fehl, statt übersprungen zu werden.
+Übersprungene Jobs gelten bei GitHub als bestanden; `stat` und `guard-main` blockieren Pull Requests nach `develop` daher nicht. Aus demselben Grund laufen die Hälften von `e2e` auch dann, wenn der Vorjob `playwright-version` scheitert, und schlagen in diesem Fall fehl, statt übersprungen zu werden; `e2e` läuft auch nach einer gescheiterten oder übersprungenen Hälfte und schlägt dann fehl.
+
+**Workflow `pr-title.yml`** (bei jedem Pull Request nach `develop` oder `main`, nur Leserechte; beim Öffnen, bei neuen Commits und bei jeder Bearbeitung): Job `pr-title`, commitlint prüft den Titel des Pull Requests; erforderlich für `develop` und `main`. Er steht in einem eigenen Workflow, damit eine Bearbeitung des Pull Requests, etwa ein Haken in der Beschreibung, nur ihn neu startet und nicht alle Prüfungen. Bei neuen Commits läuft er trotzdem, weil GitHub erforderliche Prüfungen dem neuesten Commit zuordnet; ohne Ergebnis dort wartete der Merge auf ihn. Die Bedingung steht im Auslöser `on`, nicht in einem `if`, weil ein übersprungener erforderlicher Job als bestanden gälte. *(neu in 0.28)*
+
+Wird das Ziel eines offenen Pull Requests geändert (z. B. von `develop` auf `main`), startet `ci.yml` nicht neu; die Jobs für `main` fehlen dann und blockieren den Merge. Abhilfe: Pull Request schließen und wieder öffnen. *(neu in 0.28)*
 
 **Workflow `deploy.yml`** (bei Push eines Tags `v*`): `npm ci`, `npm run check`, `npm run build`, Hochladen und Veröffentlichen über die GitHub-eigenen Pages-Actions. Nur dieser Workflow erhält die Rechte `pages: write` und `id-token: write`. Die Umgebung `github-pages` erlaubt zusätzlich nur Tags `v*`, sodass GitHub die Regel „nur Releases werden veröffentlicht“ unabhängig vom Workflow durchsetzt (EP-03).
 
