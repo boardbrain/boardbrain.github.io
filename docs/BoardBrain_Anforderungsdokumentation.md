@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.20 |
+| Version | 0.21 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 09.11.2026 |
+| Stand | 11.11.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -34,6 +34,7 @@
 | 0.18 | 29.10.2026 | Zuschnitt von I2: Umsetzung in fachlichen Blöcken einschließlich ihrer Should- und Could-Anteile (E-32); Design der Inszenierung (OP-06) innerhalb von I2 (13) |
 | 0.19 | 02.11.2026 | Design I2-C (Entscheidungen des Product Owners): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung spielen (5.4, FA-AB-02, neu FA-LS-07, FA-PL-09, FA-SR-04, E-33); Vorwärts-Knopf nennt, was er tut, und Rückblick auf frühere Schritte (FA-AB-03, neu FA-AB-10, E-34) |
 | 0.20 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (FA-AB-03, E-35); Personen werden mit Karten gelost statt mit einem Glücksrad (Begriff „Schritt“, FA-AB-03, FA-LS-02, FA-IN-02, E-36, OP-06); Startrohstoffe liegen verdeckt und werden von Hand aufgedeckt (neu FA-SR-05, E-37); nach einem Neustart läuft nur eine unterbrochene Animation erneut ab (FA-AB-07) |
+| 0.21 | 11.11.2026 | Design D-2 (Entscheidungen des Product Owners): Klänge nach Version 1 verschoben (FA-IN-03, FA-IN-05, FA-IN-07, E-38, PP-20); Aufblinken verrät bis zur Festlegung nichts über das Ergebnis (FA-IN-01, E-39); neuer Spannungsmodus der Platzierung (neu FA-IN-08, FA-IN-06, E-39); OP-06 geklärt (13) |
 
 ## Inhaltsverzeichnis
 
@@ -224,13 +225,14 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 
 | ID | Anforderung |
 |---|---|
-| FA-IN-01 | Die Platzierung wird schrittweise dargestellt, wobei Kreuzungen und Kanten vor der Festlegung aufblinken. |
+| FA-IN-01 | Die Platzierung wird schrittweise dargestellt, wobei Kreuzungen und Kanten vor der Festlegung aufblinken. Bis zur Festlegung verrät die Darstellung nichts über das Ergebnis, auch nicht für jemanden, der ihre Regeln kennt. *(ergänzt in 0.21, E-39)* |
 | FA-IN-02 | Das Losen von Personen wird als Ziehen von Karten dargestellt: Vor dem Losen liegen die Personenkarten offen, sie werden gemischt, und die geloste Karte wird aufgedeckt. *(geändert in 0.20, E-36)* |
-| FA-IN-03 | Die Generierung wird von dezenten Soundeffekten begleitet. |
+| FA-IN-03 | Die Generierung wird von dezenten Soundeffekten begleitet. *(nach Version 1 verschoben in 0.21, E-38)* |
 | FA-IN-04 | Es wird keine Vibration verwendet. |
-| FA-IN-05 | Ein Tonschalter in den Einstellungen schaltet alle Soundeffekte ab. Standard ist eingeschaltet. *(neu in 0.4)* |
-| FA-IN-06 | Animationen lassen sich nur über einen klar beschrifteten Button überspringen; Antippen anderer Stellen beschleunigt oder überspringt nichts. Eine Einstellung für das Animationstempo gibt es nicht. *(neu in 0.4)* |
-| FA-IN-07 | Soundeffekte respektieren die Stummschaltung des Geräts, soweit die Plattform das erlaubt, und unterbrechen keine Musikwiedergabe anderer Apps. *(neu in 0.7)* |
+| FA-IN-05 | Ein Tonschalter in den Einstellungen schaltet alle Soundeffekte ab. Standard ist eingeschaltet. *(neu in 0.4; nach Version 1 verschoben in 0.21, E-38)* |
+| FA-IN-06 | Animationen lassen sich nur über einen klar beschrifteten Button überspringen; Antippen anderer Stellen beschleunigt oder überspringt nichts. Eine Einstellung für das Animationstempo gibt es nicht; der Spannungsmodus (FA-IN-08) ist keine solche Einstellung, sondern eine eigene Darstellung der Platzierung. *(neu in 0.4, ergänzt in 0.21)* |
+| FA-IN-07 | Soundeffekte respektieren die Stummschaltung des Geräts, soweit die Plattform das erlaubt, und unterbrechen keine Musikwiedergabe anderer Apps. *(neu in 0.7; nach Version 1 verschoben in 0.21, E-38)* |
+| FA-IN-08 | Ein Schalter auf der Platzierung schaltet einen Spannungsmodus ein. Er gilt ab dem nächsten Stein für alle folgenden, bis er wieder ausgeschaltet wird, und ist bei jeder neuen Partie und nach jedem Neustart der App aus. Bei einem Gebäude leuchten alle gültigen Kreuzungen und erlöschen nacheinander; bei zwei verbleibenden hält die Darstellung an, und erst auf Knopfdruck entscheidet ein Duell der beiden. Bei einer Straße erlöschen die freien Kanten nacheinander, ohne Duell. *(neu in 0.21, E-39)* |
 
 ### 5.8 Ergebnisse
 
@@ -513,6 +515,8 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-35 | Ein Schritt erscheint zuerst ohne Ergebnis, wenn die Ansicht wechselt (jeder Losschritt, Beginn der Reihenfolge, Beginn der Platzierung, Startrohstoffe jeder Person); innerhalb von Reihenfolge und Platzierung geht es direkt mit „Losen“ weiter. Der Knopf „Weiter“ führt ohne zu losen zur nächsten Ansicht *(neu in 0.20)* | Am Tisch sollen alle sehen, was als Nächstes gelost wird, statt mit einem Ergebnis begrüßt zu werden; wo der nächste Schritt offensichtlich ist, kostet eine eigene Seite nur Tipps. Entscheidung des Product Owners im Design von I2-D |
 | E-36 | Personen werden mit Karten gelost statt mit einem Glücksrad: Die Karten liegen offen, werden gemischt, und die geloste Karte wird aufgedeckt; die Reihenfolge wird einmal gemischt, verdeckt ausgeteilt und Platz für Platz aufgedeckt *(neu in 0.20)* | Karten passen zum Stil der App (Spielkarten, Kartenhand) und zeigen vor dem Losen, wer im Spiel ist; das Mischen ist am Tisch vertraut und nachvollziehbar. Entscheidung des Product Owners im Design von I2-D |
 | E-37 | Startrohstoffe werden verdeckt ausgeteilt und von Hand aufgedeckt *(neu in 0.20)* | Eine kurze Bewegung statt einer langen Animation je Karte spart Zeit; das Aufdecken macht die bedienende Person selbst, so spannend, wie sie will. Entscheidung des Product Owners im Design von I2-D |
+| E-38 | Klänge (FA-IN-03, FA-IN-05, FA-IN-07, US-IN-03) sind nicht Teil von Version 1; sie stehen als Idee nach dem ersten Release im Parkplatz (PP-20). Ausnahme zu E-10 *(neu in 0.21)* | Ton ist unter iOS und iPadOS der heikelste Teil der Inszenierung (Stummschalter, Musik anderer Apps, Freischaltung) und nur von Hand prüfbar; die Einstellungsseite für den Tonschalter gehört ohnehin zu I6; die Spannung entsteht schon durch Karten und Aufblinken. Entscheidung des Product Owners im Design D-2 (11.11.2026) |
+| E-39 | Aufblinken und Spannungsmodus der Platzierung nach `docs/design/d2-staging-final-preview.html`: Standard ist ein Lauflicht in der Farbe der Person, danach wird der Stein von oben gesetzt; der Spannungsmodus (FA-IN-08) zeigt bei Gebäuden Ausschluss, Halt bei zwei und ein Duell auf Knopfdruck mit rein zufälligem Gegner. Die Darstellung entsteht ohne Kenntnis des Ergebnisses (Start, Reihenfolge, Länge zufällig), erst die Landung zeigt es *(neu in 0.21)* | Am Tisch soll die Platzierung spannend sein, wenn man will, und schnell, wenn nicht. Fairness ist das Kernversprechen der App: Wer die Darstellung kennt und oft spielt, darf daraus nichts ablesen; eine Wahl des Gegners nach Abstand hätte das Ergebnis teilweise verraten und wurde deshalb verworfen. Entscheidung des Product Owners im Design D-2 (11.11.2026) |
 
 ---
 
@@ -525,7 +529,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | OP-03 | Konkrete Konfliktfälle beim Import und deren Auflösungsoptionen | Spezifikation | geklärt: FA-EI-03, FA-EI-06 bis -08, Spezifikation 3.9 |
 | OP-04 | Häufigkeit und Anzahl der internen Sicherungspunkte | Spezifikation | geklärt: FA-DS-04 bis -06, Spezifikation 3.10 |
 | OP-05 | Intervall und Form der Export-Erinnerung | Spezifikation | geklärt: FA-EI-05, Spezifikation 3.11 |
-| OP-06 | Gestaltung von Glücksrad, Aufblinken, Tempo und Sounds im Detail | Design | teilweise geklärt: Funktion in FA-IN-05, FA-IN-06; Losen mit Karten statt Glücksrad samt Bewegungen festgelegt (E-36, Referenz `docs/design/i2d-running-match-final-preview.html`); Aufblinken, Tempo und Klänge offen |
+| OP-06 | Gestaltung von Glücksrad, Aufblinken, Tempo und Sounds im Detail | Design | geklärt: Funktion in FA-IN-05, FA-IN-06; Losen mit Karten (E-36, Referenz `docs/design/i2d-running-match-final-preview.html`); Aufblinken, Spannungsmodus und Tempo (E-39, FA-IN-08, Referenz `docs/design/d2-staging-final-preview.html`); Klänge nach Version 1 (E-38) |
 | OP-07 | Verwaltungsfunktionen: Bearbeiten, Löschen und ggf. Archivieren von Personen, Gruppen und Spielen sowie Auswirkungen auf bestehende Statistiken | Spezifikation | geklärt: FA-VW-01 bis -05 |
 | OP-08 | Verhalten der Standardfarben bei Personen in mehreren Gruppen und bei Farbkonflikten innerhalb einer Partie | Spezifikation | geklärt: FA-PG-05 bis -08, Spezifikation 3.3 |
 | OP-09 | Persistenz des Speichers unter iOS (Installation auf dem Home-Bildschirm erforderlich) | Architektur | geklärt: E-17, FA-IS-01 bis -03, Architektur ADR-016 |
@@ -561,6 +565,7 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 | PP-17 | Eigene Spielfarben-Paletten für weitere Spiele |
 | PP-18 | Sammelentscheidung für gleichartige Konflikte beim Import |
 | PP-19 | Gruppenübergreifende Auswahl einzelner Partien beim Export |
+| PP-20 | Soundeffekte mit Tonschalter (FA-IN-03, FA-IN-05, FA-IN-07, US-IN-03), etwa ein Trommelwirbel im Spannungsmodus; nach dem ersten Release (E-38) *(neu in 0.21)* |
 
 ---
 
@@ -568,5 +573,5 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 
 1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08) – *abgeschlossen am 07.10.2026 mit Release 0.1.0*
 2. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10); Reihenfolge, Zuschnitt und Ablauf in `docs/Umsetzungsplan.md`
-3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) innerhalb von Inkrement I2, sobald der Ablauf einer Partie steht und bevor Aufblinken und Klänge gebaut werden (E-32; das Losen mit Karten ist seit 0.20 mit I2-D festgelegt, E-36). Die Farbwerte blockieren nichts, weil sie nur in den Design-Tokens stehen – *OP-11 erledigt am 07.10.2026 (E-26); OP-06 verschoben in 0.18*
+3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) innerhalb von Inkrement I2, sobald der Ablauf einer Partie steht und bevor Aufblinken und Klänge gebaut werden (E-32; das Losen mit Karten ist seit 0.20 mit I2-D festgelegt, E-36). Die Farbwerte blockieren nichts, weil sie nur in den Design-Tokens stehen – *OP-11 erledigt am 07.10.2026 (E-26); OP-06 verschoben in 0.18, erledigt am 11.11.2026 (E-38, E-39)*
 4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13)
