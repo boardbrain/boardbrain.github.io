@@ -227,3 +227,24 @@
   border: 1px solid var(--color-border);
   border-radius: 10px;
 }
+
+/* Hint H1 (design I2-H): below the board in the free room, over it on a small screen; it takes
+   no room of its own, so nothing moves. */
+.tapHint {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  font-size: 0.82rem;
+  pointer-events: none;
+}
+
+.tapHint > span {
+  padding: 3px 10px;
+  color: var(--color-text);
+  background: var(--color-board-hint);
+  border-radius: 999px;
+}

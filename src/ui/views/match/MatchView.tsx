@@ -15,6 +15,7 @@ import { useAppDependencies } from '@/ui/AppDependencies';
 import { cx } from '@/ui/components/classNames';
 import { AgainIcon, BackIcon, ChevronIcon, ExitDoorIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
+import { pieceMarking } from './boardPieces';
 import { DrawScene } from './cards/DrawScene';
 import { OrderScene } from './cards/OrderScene';
 import { ResourcesScene } from './cards/ResourcesScene';
@@ -30,7 +31,7 @@ import {
   nextPage,
   pageAt,
   previousPage,
-  isKeptView,
+  progressIndex,
   lookBackTarget,
   shownRange,
   sessionUpTo,
@@ -38,6 +39,7 @@ import {
   type ForwardAction,
 } from './matchFlow';
 import { editionName, repeatLines, stepTitle } from './matchTexts';
+import { PieceSpot } from './PieceSpot';
 import { PlacementStep } from './PlacementStep';
 import { UnsupportedSession } from './UnsupportedSession';
 import shared from './Match.module.css';
@@ -113,13 +115,19 @@ export function MatchView(): React.JSX.Element | null {
   const [search] = useSearchParams();
   const location = useLocation();
   const [dialog, setDialog] = useState<Dialog>(null);
+  // The step a question about repeating is about (US-AB-03 AK-1, AK-8).
+  const [repeatAt, setRepeatAt] = useState<number | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const noteRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
   const session = current?.status === 'active' ? current.session : null;
   const page = session === null ? null : pageAt(session, lookBackOf(search.get('schritt')));
-  const pageKey = page === null ? '' : JSON.stringify(page);
+  // Only once the page is shown (its table is read as well), so the note measures what the page
+  // shows (PO 10.11.2026: back from the overview the note stayed over the starting resources).
+  const pageKey =
+    page === null || group === undefined || group === null ? '' : JSON.stringify(page);
   const isNoteFloating = useLookBackFits(noteRef, bodyRef, pageKey);
 
   if (current === undefined || persons === undefined) {
@@ -160,10 +168,13 @@ export function MatchView(): React.JSX.Element | null {
   // shows all its steps (shownRange).
   const shownEnd = page.kind === 'step' ? shownRange(session, page.index).end : null;
   const shown = shownEnd === null ? session : sessionUpTo(session, shownEnd);
-  const isKept = isKeptView(session, page);
+  // Only the step just drawn is new; a look back or a kept view shows its whole view as it is.
+  const isDrawnNow = page.kind === 'step' && page.index === revealed;
 
+  // The overview reached from here leads back into the flow (PO 10.11.2026: after "Blättern" to
+  // the overview, its back button led to the start).
   const go = (target: FlowPage | null): void => {
-    void navigate(pathOf(target, session), { replace: true });
+    void navigate(pathOf(target, session), { replace: true, state: { from: 'flow' } });
   };
   const act = (work: () => Promise<boolean>): void => {
     setDialog(null);
@@ -202,14 +213,30 @@ export function MatchView(): React.JSX.Element | null {
     });
   };
 
+  const askRepeat = (index: number): void => {
+    if (!isPending) {
+      setRepeatAt(index);
+      setDialog('repeat');
+    }
+  };
+  const repeatStep = repeatAt === null ? undefined : session.generation.steps[repeatAt]?.step;
   const isPlacement = slot.kind === 'building' || slot.kind === 'road';
+  // US-AB-03 AK-8: while the question is open, the piece and those discarded with it are marked.
+  const marked =
+    dialog === 'repeat' && repeatAt !== null && isPlacement
+      ? pieceMarking(session, repeatAt)
+      : null;
   const actions = (
     <StepActions
       forward={forward}
       isPending={isPending}
-      canRepeat={page.kind === 'step' && !(isKept && shownEnd !== page.index)}
+      canRepeat={page.kind === 'step'}
       onRepeat={() => {
-        setDialog('repeat');
+        // A whole view repeats its last step, the step just drawn itself (decision A of the PO,
+        // I2-H); every other piece can be tapped on the board.
+        if (page.kind === 'step') {
+          askRepeat(isDrawnNow || shownEnd === null ? page.index : shownEnd);
+        }
       }}
       onForward={onForward}
     />
@@ -312,7 +339,9 @@ export function MatchView(): React.JSX.Element | null {
         {isPlacement && (
           <PlacementStep
             session={shown}
-            newest={!isKept && (step?.kind === 'building' || step?.kind === 'road') ? step : null}
+            newest={
+              isDrawnNow && (step?.kind === 'building' || step?.kind === 'road') ? step : null
+            }
             announced={
               page.kind === 'pending'
                 ? page.slot
@@ -323,6 +352,9 @@ export function MatchView(): React.JSX.Element | null {
             nameOf={nameOf}
             skip={skip}
             actions={actions}
+            onRepeatPiece={askRepeat}
+            marked={marked}
+            boardRef={boardRef}
           />
         )}
         {slot.kind === 'starting-resources' && (
@@ -351,10 +383,10 @@ export function MatchView(): React.JSX.Element | null {
       </div>
       {!isPlacement && !isResources && actions}
 
-      {dialog === 'repeat' && step !== undefined && page.kind === 'step' && (
+      {dialog === 'repeat' && repeatAt !== null && repeatStep !== undefined && (
         <MatchDialog
-          title={t('partie.wiederholenFrage', { schritt: stepTitle(step, nameOf) })}
-          lines={repeatLinesOrOnly(session, page.index)}
+          title={t('partie.wiederholenFrage', { schritt: stepTitle(repeatStep, nameOf) })}
+          lines={repeatLinesOrOnly(session, repeatAt)}
           cancelLabel={t('allgemein.abbrechen')}
           confirmLabel={t('partie.wiederholen')}
           onCancel={() => {
@@ -362,10 +394,18 @@ export function MatchView(): React.JSX.Element | null {
           }}
           onConfirm={() => {
             act(async () => {
-              await sessions.repeatStep(page.index);
+              await sessions.repeatStep(repeatAt);
               return false;
             });
           }}
+          focus={
+            marked === null
+              ? null
+              : {
+                  target: boardRef,
+                  spot: <PieceSpot session={shown} nameOf={nameOf} marked={marked} />,
+                }
+          }
         />
       )}
       {dialog === 'skip' && (
@@ -420,11 +460,11 @@ type PhaseProgressProps = {
 // F2: four phases; each is as wide as its longest possible label, fixed for the whole match. On a
 // page without a result, its phase is the current one with the steps before it.
 function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element {
-  const stepIndex = page.kind === 'step' ? page.index : page.at - 1;
-  const phases = catanProgress(session.setup, session.generation, stepIndex).map((phase) =>
-    page.kind === 'pending'
-      ? { ...phase, isCurrent: phase.phase === PHASE_OF[page.slot.kind] }
-      : phase,
+  const phases = catanProgress(session.setup, session.generation, progressIndex(session, page)).map(
+    (phase) =>
+      page.kind === 'pending'
+        ? { ...phase, isCurrent: phase.phase === PHASE_OF[page.slot.kind] }
+        : phase,
   );
   return (
     <div className={styles.phases} role="list" aria-label={t('partie.fortschritt')}>

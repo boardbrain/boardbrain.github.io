@@ -40,46 +40,44 @@ export function currentPage(session: StoredSession): FlowPage | null {
 }
 
 /**
- * The page for the address `#/partie?schritt=N` (US-AB-04 AK-3): step N in the look back, or the
- * current page without a valid N or once N is the current step.
+ * The page for the address `#/partie?schritt=N` (US-AB-04 AK-3): the view of step N in the look
+ * back, or the current page without a valid N or once N belongs to the current view.
  */
 export function pageAt(session: StoredSession, lookBack: number | null): FlowPage | null {
-  const current = currentPage(session);
   if (
     lookBack === null ||
     !Number.isInteger(lookBack) ||
     lookBack < 0 ||
     lookBack >= lastReachable(session)
   ) {
-    return current;
+    return currentPage(session);
   }
-  return { kind: 'step', index: shownRange(session, lookBack).start };
+  return pageOf(session, lookBack);
 }
 
 /**
- * The steps a page of step `index` shows (PO 10.11.2026). Normally just this step: a look back
- * shows the match as it was right after it. After a repetition, though, the later steps are
- * kept, not drawn again: a view with several steps (the order, the placement) then shows all
- * its kept steps at once, so they neither vanish nor seem to be drawn again one by one.
+ * The steps the page of step `index` shows: its whole view (US-AB-04 AK-3, PO 10.11.2026). A
+ * draw of a person and the starting resources of a person are views of their own; the spins of
+ * the order and the pieces of the placement each make one view, so a look back shows the whole
+ * order or the whole board, and after a repetition the kept steps neither vanish nor seem to be
+ * drawn again one by one. A missing step splits a view where it would be inserted.
  */
 export function shownRange(
   session: StoredSession,
   index: number,
 ): { readonly start: number; readonly end: number } {
-  const revealed = revealedStepIndex(session.generation);
   const steps = session.generation.steps;
   const kind = steps[index]?.step.kind;
-  if (revealed === undefined || index < revealed || kind === undefined) {
+  if (kind === undefined) {
     return { start: index, end: index };
   }
-  // A missing step lies between two kept ones where it would be inserted.
   const missingAt = catanNextSlot(session.setup, session.generation)?.at;
   const sameView = (other: number): boolean => {
     const otherKind = steps[other]?.step.kind;
     return otherKind !== undefined && isSameView(kind, otherKind);
   };
   let start = index;
-  while (start - 1 > revealed && start !== missingAt && sameView(start - 1)) {
+  while (start !== missingAt && sameView(start - 1)) {
     start--;
   }
   let end = index;
@@ -87,6 +85,47 @@ export function shownRange(
     end++;
   }
   return { start, end };
+}
+
+// The page that shows step `index`: the current page if the step belongs to its view (the step
+// waiting for confirmation, or the steps around a step waiting without a result), otherwise a
+// look back at the view, named by its first step.
+function pageOf(session: StoredSession, index: number): FlowPage | null {
+  const { start, end } = shownRange(session, index);
+  const current = currentPage(session);
+  const kind = session.generation.steps[index]?.step.kind;
+  if (current?.kind === 'step' && current.index >= start && current.index <= end) {
+    return current;
+  }
+  if (
+    current?.kind === 'pending' &&
+    kind !== undefined &&
+    isSameView(kind, current.slot.kind) &&
+    (end === current.at - 1 || start === current.at)
+  ) {
+    return current;
+  }
+  return { kind: 'step', index: start };
+}
+
+/**
+ * The last step the progress counts on a page (design I2-C, F2): the last step the page shows.
+ * A whole view after a repetition counts all its kept steps (PO 10.11.2026: "1/3" for an order
+ * shown complete); a page without a result counts the kept steps of its view after it as well.
+ */
+export function progressIndex(session: StoredSession, page: FlowPage): number {
+  if (page.kind === 'step') {
+    return shownRange(session, page.index).end;
+  }
+  const steps = session.generation.steps;
+  let end = page.at - 1;
+  for (;;) {
+    const next = steps[end + 1]?.step.kind;
+    if (next === undefined || !isSameView(page.slot.kind, next)) {
+      return end;
+    }
+    end++;
+  }
 }
 
 /**
@@ -118,7 +157,10 @@ export function isLookBack(session: StoredSession, page: FlowPage): boolean {
   if (revealed === undefined) {
     return true;
   }
-  return page.index !== revealed && page.index !== session.generation.steps.length - 1;
+  return (
+    page.index !== revealed &&
+    shownRange(session, page.index).end !== session.generation.steps.length - 1
+  );
 }
 
 /**
@@ -133,26 +175,34 @@ export function lookBackTarget(session: StoredSession, page: FlowPage): 'current
 }
 
 /**
- * The page "Zurück" leads to (US-AB-04 AK-3), or `null` on the first step: there is no back
- * button there. Kept views after a repetition are passed as a whole (`shownRange`).
+ * The page "Zurück" leads to (US-AB-04 AK-3): the view before, or `null` on the first view, where
+ * the back button is greyed out. Views are passed as a whole (`shownRange`).
  */
 export function previousPage(session: StoredSession, page: FlowPage): FlowPage | null {
-  const index = page.kind === 'pending' ? page.at - 1 : shownRange(session, page.index).start - 1;
-  return index >= 0 ? { kind: 'step', index: shownRange(session, index).start } : null;
+  const steps = session.generation.steps;
+  let start: number;
+  if (page.kind === 'pending') {
+    // The steps of its view drawn before it belong to the page without a result.
+    const before = steps[page.at - 1]?.step.kind;
+    start =
+      before !== undefined && isSameView(before, page.slot.kind)
+        ? shownRange(session, page.at - 1).start
+        : page.at;
+  } else {
+    start = shownRange(session, page.index).start;
+  }
+  return start > 0 ? pageOf(session, start - 1) : null;
 }
 
 /**
- * The page "Blättern" leads to (US-AB-04 AK-4): one step forward, at the end the current page.
+ * The page "Blättern" leads to (US-AB-04 AK-4): one view forward, at the end the current page.
  */
 export function nextPage(session: StoredSession, page: FlowPage): FlowPage | null {
   if (page.kind === 'pending') {
     return null;
   }
   const target = shownRange(session, page.index).end + 1;
-  const revealed = revealedStepIndex(session.generation);
-  return target >= lastReachable(session) || target === revealed
-    ? currentPage(session)
-    : { kind: 'step', index: target };
+  return target >= lastReachable(session) ? currentPage(session) : pageOf(session, target);
 }
 
 /**

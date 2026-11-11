@@ -61,3 +61,44 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* The board is as large as fits, in its own shape (design I2-H): the tap areas of the pieces lie
+   over it in per cent. The width comes from the component, as it depends on the board. */
+.frame {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+}
+
+.fit {
+  position: relative;
+}
+
+/* Tap areas (US-AB-03 AK-8, design I2-H): invisible buttons of 44 px over the pieces. */
+.tapLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tapLayer > .tap {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border-radius: 50%;
+  box-shadow: none;
+  translate: -50% -50%;
+  pointer-events: auto;
+}
+
+.tapLayer > .tap:focus-visible {
+  outline: 2px solid var(--color-piece-mark);
+  outline-offset: -8px;
+}

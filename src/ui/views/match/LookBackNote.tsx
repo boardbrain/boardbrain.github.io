@@ -1,4 +1,4 @@
-import { useEffect, useState, type Ref, type RefObject } from 'react';
+import { useLayoutEffect, useState, type Ref, type RefObject } from 'react';
 import { t } from '@/i18n/t';
 import { cx } from '@/ui/components/classNames';
 import { AgainIcon, ChevronIcon } from '@/ui/components/Icons';
@@ -35,7 +35,9 @@ function drawnArea(svg: SVGSVGElement): Rect {
  * Whether the note "Rückblick" may float over the free room below the progress (design I2-C,
  * R1): `false` once it would cover a part of the step, then it takes its own room and the cards
  * are laid out again in the smaller table (decision of the product owner 09.11.2026). Measured
- * per page (`pageKey`), so it does not flip back and forth.
+ * per page (`pageKey`), so it does not flip back and forth: before the page is painted, and again
+ * whenever parts appear later, e.g. the cards once their table is measured (PO 10.11.2026: coming
+ * back from the overview, the note covered the starting resources).
  */
 export function useLookBackFits(
   noteRef: RefObject<HTMLElement | null>,
@@ -44,7 +46,7 @@ export function useLookBackFits(
 ): boolean {
   const [inFlowFor, setInFlowFor] = useState<string | null>(null);
   const isInFlow = inFlowFor === pageKey;
-  useEffect(() => {
+  useLayoutEffect(() => {
     const body = bodyRef.current;
     if (isInFlow || body === null) {
       return undefined;
@@ -72,10 +74,14 @@ export function useLookBackFits(
       }
     };
     measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(body);
+    const resized = new ResizeObserver(measure);
+    resized.observe(body);
+    const changed = new MutationObserver(measure);
+    // Only parts that appear, not every change of style: moving cards must not measure each frame.
+    changed.observe(body, { childList: true, subtree: true });
     return () => {
-      observer.disconnect();
+      resized.disconnect();
+      changed.disconnect();
     };
   }, [noteRef, bodyRef, pageKey, isInFlow]);
   return !isInFlow;

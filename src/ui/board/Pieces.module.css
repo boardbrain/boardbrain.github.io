@@ -18,3 +18,35 @@
 .road {
   stroke-width: 2;
 }
+
+/* Marks while repeating a piece is asked (US-AB-03 AK-8, design I2-H, M1): a golden ring around
+   the piece, a weaker dashed one around the pieces discarded with it. */
+.mark {
+  fill: var(--color-piece-mark);
+  fill-opacity: 0.25;
+  stroke: var(--color-piece-mark);
+  stroke-width: 1.1;
+}
+
+.markOther {
+  fill: var(--color-piece-mark);
+  fill-opacity: 0.12;
+  stroke: var(--color-piece-mark);
+  stroke-width: 0.8;
+}
+
+.markRoad,
+.markRoadOther {
+  stroke: var(--color-piece-mark);
+  stroke-linecap: round;
+}
+
+.markRoad {
+  stroke-opacity: 0.6;
+  stroke-width: 7.5;
+}
+
+.markRoadOther {
+  stroke-opacity: 0.28;
+  stroke-width: 6;
+}

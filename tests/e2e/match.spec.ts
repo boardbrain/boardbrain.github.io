@@ -227,22 +227,30 @@ test.describe('US-AB-03, US-AB-04, US-PL-05, US-AB-06 repeat, look back, skip an
     await expect(page.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
   });
 
-  test('US-AB-04 AK-3, AK-4: the look back shows an earlier step without drawing', async ({
+  test('US-AB-04 AK-3, AK-4: the look back shows an earlier view without drawing', async ({
     page,
   }) => {
+    const back = page.getByRole('button', { name: 'Zurück' });
+    await tapForward(page, 'Losen');
+    // The spins of the order make one view: it is the first, there is nothing before it.
+    await expect(back).toBeDisabled();
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Weiter');
     await tapForward(page, 'Losen');
     await tapForward(page, 'Losen');
-    await expect(progress(page)).toContainText('Reihenfolge 2/2');
+    await expect(progress(page)).toContainText('Platzierung 2/12');
 
-    await tap(page.getByRole('button', { name: 'Zurück' }));
-
+    // PO 10.11.2026: back from the placement to the whole order, not piece by piece.
+    await tap(back);
     await expect(page.getByText('Rückblick')).toBeVisible();
     await expect(page).toHaveURL(/#\/partie\?schritt=0$/);
-    await expect(progress(page)).toContainText('Reihenfolge 1/2');
+    await expect(page.getByRole('heading', { name: 'Reihenfolge' })).toBeVisible();
+    await expect(progress(page)).toContainText('Reihenfolge 2/2');
     await tapForward(page, 'Blättern');
     await expect(page.getByText('Rückblick')).toHaveCount(0);
-    await expect(progress(page)).toContainText('Reihenfolge 2/2');
-    await expect(forward(page)).toHaveText('Weiter');
+    await expect(progress(page)).toContainText('Platzierung 2/12');
+    await expect(page.getByTestId('board-road')).toHaveCount(1);
+    await expect(forward(page)).toHaveText('Losen');
   });
 
   test('US-PL-05 AK-1, AK-2: the placement can be skipped on the empty board', async ({ page }) => {
@@ -409,6 +417,258 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await page.getByRole('alertdialog').getByRole('button', { name: 'Beenden' }).click();
 
     await expect(editor.getByRole('button', { name: 'Alle Spiele' })).toBeEnabled();
+  });
+});
+
+// Taps a piece on the board where its tap area is centred, as a finger does (design I2-H): the
+// tap areas overlap, the app decides from the point which piece is meant.
+async function tapPiece(page: Page, piece: Locator): Promise<void> {
+  const box = await piece.boundingBox();
+  if (box === null) {
+    throw new Error('The piece has no tap area on the screen');
+  }
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+}
+
+function spotlight(page: Page): Locator {
+  return page.getByTestId('board-spotlight');
+}
+
+test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
+  test('AK-3: a road tapped in the overview is drawn again alone, marked while asked', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+    await expect(page.getByText('Stein antippen zum Wiederholen')).toBeVisible();
+
+    const roads = page.getByRole('button', { name: /^Straße von .* wiederholen$/ });
+    await expect(roads).toHaveCount(4);
+    const name = (await roads.nth(1).getAttribute('aria-label')) ?? '';
+    await tapPiece(page, roads.nth(1));
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText(`${name.replace(/ wiederholen$/, '')} wiederholen?`);
+    await expect(dialog).toContainText('Nur dieser Schritt wird neu gelost');
+    await expect(spotlight(page).getByTestId('board-road')).toHaveCount(1);
+    await expect(spotlight(page).getByTestId('board-settlement')).toHaveCount(0);
+
+    await dialog.getByRole('button', { name: 'Wiederholen' }).click();
+    await expect(page.getByTestId('board-road')).toHaveCount(3);
+    await tapForward(page, 'Losen');
+    await expect(page.getByTestId('board-road')).toHaveCount(4);
+    await expect(page.getByTestId('board-settlement')).toHaveCount(4);
+  });
+
+  test('AK-4: a building tapped in the overview marks its road and all later pieces', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+
+    const buildings = page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ });
+    await expect(buildings).toHaveCount(4);
+    // The third building of the placement: its road and the fourth building with its road go.
+    await tapPiece(page, buildings.nth(2));
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('Verworfen und neu gelost');
+    await expect(spotlight(page).getByTestId('board-settlement')).toHaveCount(2);
+    await expect(spotlight(page).getByTestId('board-road')).toHaveCount(2);
+
+    await dialog.getByRole('button', { name: 'Abbrechen' }).click();
+    await expect(spotlight(page)).toHaveCount(0);
+    await tapPiece(page, buildings.nth(2));
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+    await expect(page.getByTestId('board-settlement')).toHaveCount(2);
+    await expect(page.getByTestId('board-road')).toHaveCount(2);
+  });
+
+  test('decision A: "Wiederholen" on a kept placement repeats its last piece', async ({ page }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+    await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
+    await tap(page.getByRole('button', { name: /^Häfen/ }));
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+
+    await tapForward(page, 'Losen');
+    while (!(await page.getByRole('heading', { name: 'Platzierung' }).isVisible())) {
+      await tapForward(page, 'Blättern');
+    }
+    await expect(page.getByTestId('board-road')).toHaveCount(4);
+    // PO 10.11.2026: the progress counts every piece the whole view shows.
+    await expect(progress(page)).toContainText('Platzierung 8/8');
+    await tap(page.getByRole('button', { name: 'Wiederholen', exact: true }));
+
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText(/^Straße von .* wiederholen\?/);
+    await expect(spotlight(page).getByTestId('board-road')).toHaveCount(1);
+  });
+
+  test('PO 10.11.: a road drawn again shows the whole board once, also going back', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
+    await startGeneration(page);
+    await drawAll(page);
+
+    await tapPiece(page, page.getByRole('button', { name: /^Straße von .* wiederholen$/ }).first());
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await tapForward(page, 'Losen');
+    await expect(progress(page)).toContainText('Platzierung 8/8');
+    await tapForward(page, 'Blättern');
+    await expect(page.getByRole('heading', { name: 'Startrohstoffe' })).toBeVisible();
+
+    const back = page.getByRole('button', { name: 'Zurück' });
+    await tap(back);
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+    await expect(progress(page)).toContainText('Platzierung 8/8');
+    await expect(page.getByTestId('board-road')).toHaveCount(4);
+    // One more step back is the look back before the road, not the same board again.
+    await tap(back);
+    await expect(page.getByTestId('board-road')).toHaveCount(0);
+  });
+
+  test('PO 10.11.: the overview reached from the look back leads back into the flow', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+
+    const back = page.getByRole('button', { name: 'Zurück' });
+    const overview = page.getByRole('heading', { name: 'Laufende Partie' });
+    await tap(back);
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+    await tap(back);
+    await expect(page.getByRole('heading', { name: 'Reihenfolge' })).toBeVisible();
+    // The note of the look back leads to the overview once the match is running.
+    await tap(page.getByRole('button', { name: 'Zum aktuellen Schritt' }));
+    await expect(overview).toBeVisible();
+    await tap(back);
+    await expect(page.getByRole('heading', { name: 'Platzierung' })).toBeVisible();
+  });
+
+  test('R7: the marked piece lies bright over the board, the question leaves it free', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+
+    await tapPiece(page, page.getByRole('button', { name: /^Straße von .* wiederholen$/ }).nth(2));
+    const board = await page.getByRole('img', { name: /^Brett mit/ }).boundingBox();
+    const spot = await spotlight(page).boundingBox();
+    const mark = await spotlight(page).getByTestId('board-road').boundingBox();
+    const dialog = await page.getByRole('alertdialog').boundingBox();
+    if (board === null || spot === null || mark === null || dialog === null) {
+      throw new Error('The question about the piece is not on the screen');
+    }
+    // Exactly over the board, so the bright piece covers the dark one.
+    for (const key of ['x', 'y', 'width', 'height'] as const) {
+      expect(Math.abs(spot[key] - board[key])).toBeLessThan(1);
+    }
+    const centre = { x: mark.x + mark.width / 2, y: mark.y + mark.height / 2 };
+    const isCovered =
+      centre.x > dialog.x &&
+      centre.x < dialog.x + dialog.width &&
+      centre.y > dialog.y &&
+      centre.y < dialog.y + dialog.height;
+    expect(isCovered).toBe(false);
+  });
+
+  test('a piece tapped in the look back is repeated', async ({ page }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    await startGeneration(page);
+    await drawAll(page);
+    await tap(page.getByRole('button', { name: 'Zurück' }));
+    // The whole placement in the look back (PO 10.11.2026).
+    await expect(page.getByText('Rückblick')).toBeVisible();
+    await expect(page.getByTestId('board-settlement')).toHaveCount(4);
+
+    await tapPiece(
+      page,
+      page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ }).nth(2),
+    );
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+
+    await expect(page.getByTestId('board-settlement')).toHaveCount(2);
+    await expect(page.getByTestId('board-road')).toHaveCount(2);
+    await expect(forward(page)).toHaveText('Losen');
+  });
+
+  test('PO 10.11.: back from the overview the note "Rückblick" covers no card', async ({
+    page,
+  }) => {
+    await seedTable(page, 'Freitagsrunde', 'Anna', 'Ben', 'Clara', 'David');
+    await openOptions(page, /^Freitagsrunde:/);
+    await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
+    await startGeneration(page);
+    await drawAll(page);
+
+    await tap(page.getByRole('button', { name: 'Zurück' }));
+    await expect(page.getByRole('heading', { name: 'Startrohstoffe' })).toBeVisible();
+    const note = page.getByText('Rückblick', { exact: true }).locator('..');
+    await expect(note).toBeVisible();
+    // The cards appear once their table is measured; the note must give way to them as well.
+    await expect
+      .poll(async () => {
+        const box = await note.boundingBox();
+        const parts = await page.locator('main [data-solid]').evaluateAll((elements) =>
+          elements.map((element) => {
+            const { top, bottom, left, right } = element.getBoundingClientRect();
+            return { top, bottom, left, right };
+          }),
+        );
+        return (
+          box !== null &&
+          parts.some(
+            (part) =>
+              part.bottom > part.top &&
+              part.top < box.y + box.height &&
+              part.bottom > box.y &&
+              part.left < box.x + box.width &&
+              part.right > box.x,
+          )
+        );
+      })
+      .toBe(false);
+  });
+
+  test('a piece tapped in the flow is repeated there', async ({ page }) => {
+    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
+    await openOptions(page, /^Zu zweit:/);
+    for (const draw of ['Landschaftsfelder', 'Häfen', 'Zahlenchips']) {
+      await tap(page.getByRole('switch', { name: draw }));
+    }
+    await startGeneration(page);
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Weiter');
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Losen');
+    await tapForward(page, 'Losen');
+    await expect(page.getByTestId('board-settlement')).toHaveCount(2);
+
+    await tapPiece(
+      page,
+      page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ }).first(),
+    );
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('Verworfen und neu gelost');
+    await dialog.getByRole('button', { name: 'Wiederholen' }).click();
+
+    await expect(page.getByTestId('board-settlement')).toHaveCount(0);
+    await expect(forward(page)).toHaveText('Losen');
   });
 });
 

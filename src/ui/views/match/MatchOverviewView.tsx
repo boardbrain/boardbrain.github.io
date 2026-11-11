@@ -1,4 +1,4 @@
-import { useId, useState, useTransition, type ReactNode } from 'react';
+import { useId, useRef, useState, useTransition, type ReactNode } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import type { PersonId } from '@/core/model';
 import { CATAN_BOARD, catanSummary, type CatanStep } from '@/games/catan';
@@ -9,10 +9,12 @@ import { Board } from '@/ui/board/Board';
 import { PieceMark } from '@/ui/board/PieceMark';
 import { AgainIcon, BackIcon, ExitDoorIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
+import { matchBoardPieces, pieceMarking } from './boardPieces';
 import { Coin } from './Coin';
 import { DrawSymbol } from './DrawSymbol';
 import { EndMatchDialog } from './EndMatchDialog';
 import { MatchDialog } from './MatchDialog';
+import { PieceSpot } from './PieceSpot';
 import { colorOf } from './matchColors';
 import { orderOrSeats, stepIndexWhere } from './matchFlow';
 import { DRAW_NAMES, editionName, repeatLines, stepTitle } from './matchTexts';
@@ -47,6 +49,7 @@ export function MatchOverviewView(): React.JSX.Element | null {
   const [repeating, setRepeating] = useState<number | null>(null);
   const [, startTransition] = useTransition();
   const location = useLocation();
+  const boardRef = useRef<HTMLDivElement>(null);
 
   if (current === undefined || persons === undefined) {
     return null;
@@ -71,7 +74,9 @@ export function MatchOverviewView(): React.JSX.Element | null {
   const summary = catanSummary(session.setup, session.generation);
   const order = orderOrSeats(session);
   const hasOrder = summary.order !== null;
-  const vertexOf = new Map(summary.buildings.map((building) => [building.index, building.vertex]));
+  const pieces = matchBoardPieces(session, nameOf);
+  // US-AB-03 AK-8: while the question about a piece on the board is open, it is marked.
+  const marked = repeating !== null && tab === 'board' ? pieceMarking(session, repeating) : null;
   const indexOf = (matches: (step: CatanStep) => boolean): number | null =>
     stepIndexWhere(session, matches);
   const repeatStep = repeating === null ? undefined : session.generation.steps[repeating]?.step;
@@ -95,26 +100,20 @@ export function MatchOverviewView(): React.JSX.Element | null {
           gebaeude: summary.buildings.length,
           strassen: summary.roads.length,
         })}
-        buildings={summary.buildings.map((building) => ({
-          key: `building-${String(building.index)}`,
-          vertex: building.vertex,
-          type: building.type,
-          color: building.catanColor,
-        }))}
-        roads={summary.roads.flatMap((road) => {
-          const from = vertexOf.get(road.index);
-          return from === undefined
-            ? []
-            : [
-                {
-                  key: `road-${String(road.index)}`,
-                  edge: road.edge,
-                  from,
-                  color: road.catanColor,
-                },
-              ];
-        })}
+        buildings={pieces.buildings}
+        roads={pieces.roads}
+        ref={boardRef}
+        marked={marked}
+        onPieceTap={(key) => {
+          setRepeating(pieces.stepOf.get(key) ?? null);
+        }}
       />
+      {/* H1: in the free room below the board, nothing moves (design I2-H). */}
+      {pieces.buildings.length > 0 && (
+        <div className={styles.tapHint}>
+          <span>{t('partie.steinAntippen')}</span>
+        </div>
+      )}
     </div>
   );
 
@@ -366,6 +365,14 @@ export function MatchOverviewView(): React.JSX.Element | null {
               await navigate('/partie', { replace: true });
             });
           }}
+          focus={
+            marked === null
+              ? null
+              : {
+                  target: boardRef,
+                  spot: <PieceSpot session={session} nameOf={nameOf} marked={marked} />,
+                }
+          }
         />
       )}
       {isAskingEnd && (
