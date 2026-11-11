@@ -134,19 +134,33 @@ type PlaceProps = {
   readonly isFilled: boolean;
   /** Its name in a movement, which fades its dashed line (design I2-E). */
   readonly stageName?: string | undefined;
+  /** Drawn invisible at first, to fade in (design I2-E, W3). */
+  readonly isHidden?: boolean;
 };
 
 /**
  * A dashed place where a drawn card is laid (design I2-D). Once a card lies on it, the dashed
  * line goes, so it does not show at the edge (decision of the product owner 09.11.2026).
  */
-export function Place({ box, label, isFilled, stageName }: PlaceProps): React.JSX.Element {
+export function Place({
+  box,
+  label,
+  isFilled,
+  stageName,
+  isHidden = false,
+}: PlaceProps): React.JSX.Element {
   return (
     <div
       data-solid=""
       data-stage={stageName}
       className={cx(styles.place, isFilled && styles.placeFilled)}
-      style={{ left: box.x, top: box.y, width: box.w, height: box.h }}
+      style={{
+        left: box.x,
+        top: box.y,
+        width: box.w,
+        height: box.h,
+        ...(isHidden ? { opacity: 0 } : {}),
+      }}
       aria-hidden="true"
     >
       {label}

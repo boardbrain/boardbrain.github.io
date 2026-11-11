@@ -21,7 +21,7 @@ import { DrawScene } from './cards/DrawScene';
 import type { StageRun } from './cards/playStage';
 import type { StageHandle } from './cards/StagedCards';
 import { OrderScene } from './cards/OrderScene';
-import { ResourcesScene } from './cards/ResourcesScene';
+import { ResourcesScene, type ResourcesLeave } from './cards/ResourcesScene';
 import { EndMatchDialog } from './EndMatchDialog';
 import { LookBackNote, useLookBackFits } from './LookBackNote';
 import { MatchDialog } from './MatchDialog';
@@ -133,6 +133,8 @@ export function MatchView(): React.JSX.Element | null {
   const bodyRef = useRef<HTMLDivElement>(null);
   // The movement playing, so "Animation überspringen" can complete it (US-IN-04).
   const runRef = useRef<StageRun | null>(null);
+  // The cards of the starting resources leave before the next person's page (design I2-E, W3).
+  const leaveRef = useRef<ResourcesLeave>(null);
   // "Losen" was tapped on a page without a result: after a repetition of the order its face-down
   // cards are collected first (design I2-E, E1).
   const [isDrawnFromPending, setDrawnFromPending] = useState(false);
@@ -267,6 +269,9 @@ export function MatchView(): React.JSX.Element | null {
       }
       if (revealed === undefined) {
         return false;
+      }
+      if (forward === 'next' && step?.kind === 'starting-resources' && isDrawnNow) {
+        await leaveRef.current?.leave();
       }
       const confirmed = await sessions.confirm(revealed);
       return confirmed.ok && confirmed.value.generation.state === 'running';
@@ -428,6 +433,8 @@ export function MatchView(): React.JSX.Element | null {
         )}
         {slot.kind === 'starting-resources' && (
           <ResourcesScene
+            // Each person's page starts afresh, also after the cards of the one before left.
+            key={slot.personId}
             session={shown}
             personId={slot.personId}
             result={step?.kind === 'starting-resources' ? step.result : null}
@@ -449,6 +456,7 @@ export function MatchView(): React.JSX.Element | null {
             actions={actions}
             stage={stage}
             isTurningAll={isTurningAll}
+            leaveRef={leaveRef}
           />
         )}
       </div>

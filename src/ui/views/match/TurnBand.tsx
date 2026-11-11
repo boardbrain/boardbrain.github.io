@@ -49,6 +49,7 @@ export function TurnBand({
         {order.map((person) => (
           <span
             key={person.personId}
+            data-band-coin={person.personId}
             className={cx(styles.mCoin, person.personId === currentId && styles.mCoinNow)}
             style={{ background: `var(--color-catan-${person.color})` }}
             aria-hidden="true"

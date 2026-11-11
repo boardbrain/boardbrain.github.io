@@ -1,5 +1,6 @@
-import { m } from 'motion/react';
-import { useRef, useState, type ReactNode } from 'react';
+import { animate, m, useReducedMotion } from 'motion/react';
+import { useImperativeHandle, useRef, useState, type ReactNode, type Ref } from 'react';
+import { flushSync } from 'react-dom';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
 import { CATAN_RESOURCES, type CatanResource } from '@/games/catan';
@@ -40,7 +41,58 @@ type ResourcesSceneProps = {
   readonly stage?: StageHandle | null;
   /** "Alle umdrehen": the cards turn over one after another, 0.09 s apart (design I2-D). */
   readonly isTurningAll?: boolean;
+  /** Lets "Weiter" play the leaving of the cards before the next person's page (W3). */
+  readonly leaveRef?: Ref<ResourcesLeave> | undefined;
 };
+
+/** The cards of a person leaving the table after "Weiter" (design I2-E, W3). */
+export type ResourcesLeave = {
+  readonly leave: () => Promise<void>;
+};
+
+// W3 (PO 11.11.2026): the cards fly into the coin of the person in the band, shrinking to its
+// size, and fade during the last 15 %; 0.06 s apart. Meanwhile the dashed places fade in where
+// they lay and the names below them fade out, so the next person's page looks the same.
+const LEAVE = { duration: 0.42, gap: 0.06, ease: [0.4, 0, 0.2, 1] } as const;
+const PLACE_IN = 0.2;
+const NAMES_OUT = 0.22;
+const PLACE_OPACITY = 0.55;
+
+async function playLeave(table: HTMLElement, personId: PersonId): Promise<void> {
+  const coin = table.parentElement?.querySelector<HTMLElement>(`[data-band-coin="${personId}"]`);
+  const target = coin?.getBoundingClientRect();
+  const cards = [...table.querySelectorAll<HTMLElement>('[data-leave-card]')];
+  const runs = cards.map((card, index) => {
+    const box = card.getBoundingClientRect();
+    const scale = target === undefined ? 0.2 : target.width / box.width;
+    const x =
+      target === undefined ? 0 : target.left + target.width / 2 - (box.left + box.width / 2);
+    const y =
+      target === undefined ? 80 : target.top + target.height / 2 - (box.top + box.height / 2);
+    return animate(
+      card,
+      { x: [0, x, x], y: [0, y, y], scale: [1, scale, scale], opacity: [1, 1, 0] },
+      {
+        duration: LEAVE.duration,
+        delay: index * LEAVE.gap,
+        ease: [...LEAVE.ease],
+        times: [0, 0.85, 1],
+      },
+    );
+  });
+  const names = [...table.querySelectorAll<HTMLElement>('[data-leave-label]')].map((name) =>
+    animate(name, { opacity: [1, 0] }, { duration: NAMES_OUT }),
+  );
+  const places = [...table.querySelectorAll<HTMLElement>('[data-stage^="place-"]')].map(
+    (place, index) =>
+      animate(
+        place,
+        { opacity: [0, PLACE_OPACITY] },
+        { duration: PLACE_IN, delay: index * LEAVE.gap + LEAVE.gap * 2 },
+      ),
+  );
+  await Promise.all([...runs, ...names, ...places].map((run) => run.finished));
+}
 
 function ResourceFront({ resource }: { readonly resource: CatanResource }): React.JSX.Element {
   return <ResourceCardPicture resource={resource} className={shared.resCardArt} />;
@@ -64,8 +116,24 @@ export function ResourcesScene({
   actions,
   stage = null,
   isTurningAll = false,
+  leaveRef,
 }: ResourcesSceneProps): React.JSX.Element | null {
   const ref = useRef<HTMLDivElement>(null);
+  const [isLeaving, setLeaving] = useState(false);
+  const isReduced = useReducedMotion() === true;
+  useImperativeHandle(leaveRef, () => ({
+    leave: async () => {
+      const table = ref.current;
+      if (table === null || isReduced) {
+        return;
+      }
+      // The places are drawn once more, now empty but still invisible, so they can fade in.
+      flushSync(() => {
+        setLeaving(true);
+      });
+      await playLeave(table, personId);
+    },
+  }));
   const measured = useElementSize(ref);
   const { width, height } = tableSize(measured);
   const options = session.setup.options.startingResources;
@@ -118,7 +186,9 @@ export function ResourcesScene({
               key={`place-${String(place)}`}
               box={box}
               label={t('partie.fragezeichen')}
-              isFilled={result !== null}
+              isFilled={result !== null && !isLeaving}
+              stageName={isLeaving ? placeTarget(place) : undefined}
+              isHidden={isLeaving}
             />
           ))}
         {isStaging
@@ -241,13 +311,14 @@ function DrawnResource({
   return (
     <>
       {isOpen || onTurn === undefined ? (
-        <div className={styles.cardSpot} style={placeStyle}>
+        <div data-leave-card="" className={styles.cardSpot} style={placeStyle}>
           {card}
         </div>
       ) : (
         <PressableButton
           type="button"
           look="card"
+          data-leave-card=""
           className={styles.cardSpot}
           style={placeStyle}
           aria-label={t('partie.karteUmdrehen', { nummer: number })}
@@ -257,6 +328,7 @@ function DrawnResource({
         </PressableButton>
       )}
       <span
+        data-leave-label=""
         className={cx(shared.resName, styles.cardName, styles.labelStack)}
         style={{ left: box.x, top: box.y + box.h + 4, width: box.w }}
       >
