@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.15 |
+| Version | 0.16 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 10.11.2026 |
+| Stand | 11.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -29,6 +29,7 @@
 | 0.13 | 02.11.2026 | Design I2-C (Anforderungsdokumentation 0.19, E-33, E-34): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung (3.1, US-AB-01 AK-3, US-LS-03 AK-1 und AK-3, US-PL-05 AK-1, neu AK-3, US-SR-01 AK-1); Vorwärts-Knopf „Losen“, „Blättern“, „Zur Übersicht“ (US-AB-02 AK-1); Rückblick auf frühere Schritte (neu US-AB-04 AK-3 und AK-4); Rückverfolgbarkeit (6) |
 | 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); nach einem Neustart nur eine unterbrochene Animation erneut (3.5, US-AB-05 AK-3); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6); Wiederholen der Reihenfolge ab Platz k statt immer ganz (3.1, US-AB-03 AK-5, Entscheidung des Product Owners 10.11.2026) |
 | 0.15 | 10.11.2026 | Bündel I2-H: Steine auf dem Brett antippen und wiederholen, der Stein und die mit verworfenen Steine sind markiert, solange die Rückfrage offen ist (neu US-AB-03 AK-8, Entscheidung des Product Owners 10.11.2026); Rückblick und „Blättern“ gehen ganze Ansichten statt einzelner Schritte, Reihenfolge und Platzierung erscheinen als Ganzes (US-AB-04 AK-3, AK-4, Entscheidung des Product Owners 10.11.2026) |
+| 0.16 | 11.11.2026 | Design D-2 (Anforderungsdokumentation 0.21, E-38, E-39): Klänge nach Version 1 (US-IN-03, 2.1, 2.3, 3.9, Rückverfolgung); Aufblinken nach der Referenz `docs/design/d2-staging-final-preview.html`, verrät nichts über das Ergebnis, mit Spannungsmodus (US-IN-02 neu AK-3 bis AK-7, FA-IN-08) |
 
 ## Inhaltsverzeichnis
 
@@ -87,7 +88,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 | Inkrement | Inhalt | Ergebnis |
 |---|---|---|
 | I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Umbenennen und Gruppen bearbeiten, Brettdarstellung, Losbaustein *(ergänzt in 0.8)* | Stammdaten anlegbar und korrigierbar, Brett sichtbar |
-| I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Karten, Aufblinken, Klängen und Überspringen der Animation *(geändert in 0.12 und 0.14)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
+| I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Karten, Aufblinken, Spannungsmodus und Überspringen der Animation *(geändert in 0.12, 0.14 und 0.16; Klänge nach Version 1)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
 | I3 Ergebnisse und Statistik | Ergebniserfassung mit Siegpunkten und Catan-Farben, Ergebnisliste, Kennzahlen, Rangliste, Filter, Diagramme *(geändert in 0.12)* | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung, Teilexport und Export-Erinnerung, Import mit Konflikten und Zuordnung, automatische und manuelle Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS und Hinweis unter Android und Windows, Speicherschutz und Hinweis zum Schutz vor Datenverlust *(geändert in 0.12)* | Daten sicher und teilbar |
 | I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen; unterstützte und eigene Spiele getrennt *(geändert in 0.12)* | Stammdaten vollständig pflegbar |
@@ -136,7 +137,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-SR-01 | Startrohstoffe ziehen | S | I2 |
 | US-IN-01 | Karten ziehen | S | I2 |
 | US-IN-02 | Aufblinken bei der Platzierung | S | I2 |
-| US-IN-03 | Soundeffekte und Tonschalter | S | I2 |
+| US-IN-03 | Soundeffekte und Tonschalter *(nach Version 1, E-38)* | S | – |
 | US-IN-04 | Animation überspringen | S | I2 |
 | US-ER-01 | Ergebnis erfassen | M | I3 |
 | US-ER-02 | Siegpunkte erfassen | S | I3 |
@@ -311,7 +312,7 @@ Niederlagen und Unentschieden beenden eine Siegesserie.
 
 **Exportumfang:** Vollsicherung; eine oder mehrere Gruppen (mit allen ihren Partien); ein oder mehrere Spiele (mit allen Partien dieser Spiele über alle Gruppen); frei ausgewählte einzelne Partien einer Gruppe (z. B. fünf bestimmte Partien), über eine nach Spiel filterbare Liste der Partien dieser Gruppe. Benötigte Personen, Gruppen und Spiele werden automatisch mit exportiert.
 
-**Vollsicherung:** Enthält alle Personen, Gruppen, eigenen Spiele, Partien und Ergebnisse sowie die Einstellungen (Ton, Design, Akzentfarbe) und den Stand von Hinweisen und Erinnerungen. Nicht enthalten sind Sicherungspunkte und eine laufende Partie. Teilexporte enthalten keine Einstellungen.
+**Vollsicherung:** Enthält alle Personen, Gruppen, eigenen Spiele, Partien und Ergebnisse sowie die Einstellungen (Design, Akzentfarbe; Ton erst nach Version 1, E-38) und den Stand von Hinweisen und Erinnerungen. Nicht enthalten sind Sicherungspunkte und eine laufende Partie. Teilexporte enthalten keine Einstellungen.
 
 **Austausch:** Das Format ist JSON. Exportdateien werden über das Teilen-Menü des Systems weitergegeben oder, wo dieses fehlt, heruntergeladen; der Dateiname nennt Datum und Umfang. Importiert wird über die Dateiauswahl. Einen Austausch per QR-Code gibt es nicht.
 
@@ -689,14 +690,21 @@ Bezug: FA-IN-02
 
 #### US-IN-02 Aufblinken bei der Platzierung · S
 Als Spielende möchten wir sehen, wie mögliche Positionen aufblinken, bevor eine festgelegt wird, damit die Platzierung spannend und nachvollziehbar wirkt.
-Bezug: FA-IN-01
+Bezug: FA-IN-01, FA-IN-08 *(ergänzt in 0.16)*
 
 - **AK-1:** Gegeben die Platzierung eines Gebäudes, dann blinken vor der Festlegung mehrere gültige Kreuzungen auf, bevor die geloste hervorgehoben wird.
 - **AK-2:** Gegeben die Animation, dann blinken nur gültige Kreuzungen bzw. die an das Gebäude angrenzenden Kanten auf.
+- **AK-3:** Gegeben die Animation, dann entsteht sie ohne Kenntnis des Ergebnisses: Start, Reihenfolge und Länge sind zufällig, jeder noch leuchtende Platz ist bis zur Landung gleich wahrscheinlich das Ergebnis, erst die Landung zeigt es. *(neu in 0.16, E-39)*
+- **AK-4:** Gegeben ein Stein ist gelost, dann springt ein Licht in der Farbe der Person über die gültigen Plätze, wird langsamer und landet auf dem Ergebnis; danach wird der Stein von oben gesetzt, und ein Lichtring läuft nach außen (Referenz `docs/design/d2-staging-final-preview.html`). *(neu in 0.16)*
+- **AK-5:** Gegeben die Platzierung, dann gibt es oben rechts einen Schalter „Spannungsmodus“; eingeschaltet gilt er ab dem nächsten Stein für alle folgenden, bis ich ihn ausschalte. Bei jeder neuen Partie und nach einem Neustart der App ist er aus. *(neu in 0.16, FA-IN-08)*
+- **AK-6:** Gegeben der Spannungsmodus und ein Gebäude, dann wird das Brett dunkler, alle gültigen Kreuzungen leuchten und erlöschen in zufälliger Reihenfolge, bis zwei bleiben; der Gegner ist rein zufällig. Dann hält die Darstellung mit „Zwei übrig“ an, und erst der Knopf „Duell“ startet das Duell, in dem der Stein zwischen beiden springt und auf dem Ergebnis landet. *(neu in 0.16, FA-IN-08)*
+- **AK-7:** Gegeben der Spannungsmodus und eine Straße, dann wird das Brett dunkler, die freien Kanten leuchten und erlöschen nacheinander, ohne Duell und ohne Halt; das Haus an der Straße bleibt hell darüber. *(neu in 0.16, FA-IN-08)*
 
-#### US-IN-03 Soundeffekte und Tonschalter · S
+#### US-IN-03 Soundeffekte und Tonschalter · S *(nach Version 1 verschoben in 0.16, E-38)*
 Als bedienende Person möchte ich dezente Soundeffekte, die ich abschalten kann, damit die Stimmung passt, ohne zu stören.
 Bezug: FA-IN-03, FA-IN-04, FA-IN-05
+
+Nicht Teil von Version 1 (Anforderungsdokumentation E-38, PP-20). AK-3 (keine Vibration, FA-IN-04) gilt in Version 1 weiter.
 
 - **AK-1:** Gegeben der Ton ist an, dann begleiten dezente Soundeffekte das Ziehen der Karten, Aufblinken und Festlegung.
 - **AK-2:** Gegeben die Einstellungen, dann gibt es einen Tonschalter (Standard: an); ist er aus, erklingt kein Ton. Die Einstellung bleibt gespeichert.
@@ -1032,11 +1040,11 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-PL-07, FA-PL-08 | US-PL-01 |
 | FA-PL-09 | US-PL-05 |
 | FA-SR-01 bis FA-SR-05 | US-SR-01 |
-| FA-IN-01 | US-IN-02 |
+| FA-IN-01, FA-IN-08 | US-IN-02 |
 | FA-IN-02 | US-IN-01 |
-| FA-IN-03 bis FA-IN-05 | US-IN-03 |
+| FA-IN-03 bis FA-IN-05 | US-IN-03 (nach Version 1) |
 | FA-IN-06 | US-IN-04 |
-| FA-IN-07 | US-IN-03 |
+| FA-IN-07 | US-IN-03 (nach Version 1) |
 | FA-ER-01, FA-ER-02, FA-ER-07 | US-ER-01 |
 | FA-ER-03 | US-ER-01, US-ER-02 |
 | FA-ER-04 | US-ER-05 |
@@ -1108,7 +1116,7 @@ Die in Version 0.3 an die Architekturphase übergebenen Punkte sind gelöst. Die
 | Persistenz der laufenden Partie | Schrittergebnis wird vor der Animation gespeichert; unterbrochene Animation wird wiederholt | ADR-014, 3.5, US-AB-05 |
 | Kennungen und Zuordnungen | UUID Version 4; Zuordnungen nur im Speicher während eines Imports | ADR-011, 3.9 |
 | Sicherungspunkte | Im Exportformat in derselben Datenbank; Wiederherstellung in einer Transaktion | ADR-013, 3.10 |
-| Ton | Web Audio mit Audio-Session „ambient“ | ADR-017, US-IN-03 |
+| Ton | Web Audio mit Audio-Session „ambient“; nach Version 1 (E-38) | ADR-017, US-IN-03 |
 | Update-Mechanismus | Kontrollierte Umschaltung über versionierte Caches; Sicherungsdialog | ADR-015, 3.12, US-UP-01, US-UP-02 |
 
 Ergebnisse der Setup-Planung *(ergänzt in 0.5)*:

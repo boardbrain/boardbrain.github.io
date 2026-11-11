@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.30 |
+| Version | 0.31 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 11.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -44,6 +44,7 @@
 | 0.28 | 11.11.2026 | Kleine Aufgabe K-6: Tests nach dem Losen beginnen mit einer Partie aus `seedMatch`, lokal sechs Ende-zu-Ende-Tests gleichzeitig (14.5); `ci.yml` nur bei neuen Commits, Titelprüfung im eigenen Workflow `pr-title.yml` auch bei Bearbeitungen, Ende-zu-Ende-Tests in zwei gleichzeitigen Hälften mit Sammeljob `e2e` (15, 16.3) |
 | 0.29 | 11.11.2026 | Kleine Aufgabe K-5: unerwartete Fehler einer Ansicht fängt die Fehleransicht der Routen (`RouteErrorScreen` als `errorElement` des Rahmens) statt einer Error Boundary je Ansicht, auch beim Nachladen der Partie-Ansichten; der Fehlerbildschirm füllt den ganzen Bildschirm (4.6, 13.1, 13.2, 19); Design-Referenz `docs/design/k5-error-screen-final-preview.html` |
 | 0.30 | 11.11.2026 | Kleine Aufgabe K-7: Ende-zu-Ende-Tests auf GitHub in drei gleichzeitigen Läufen je Geräteart (Handy, Tablet hochkant, Tablet quer) mit Chromium und WebKit statt zwei Hälften nach `--shard`, die alle Chromium-Geräte in die eine und alle langsameren WebKit-Geräte in die andere Hälfte legten (14.5, 16.3) |
+| 0.31 | 11.11.2026 | Design D-2 (Anforderungsdokumentation 0.21, E-38, E-39): Aufblinken, Spannungsmodus und Tempo nach `docs/design/d2-staging-final-preview.html` (13.6); Klänge nach Version 1, 12.3 und ADR-017 zurückgestellt (4.4, 12.3, ADR-017); OP-06 geklärt (18, 19) |
 
 ## Inhaltsverzeichnis
 
@@ -256,7 +257,7 @@ Anwendungsdienste setzen Fachlogik und Speicher zu vollständigen Abläufen zusa
 | `BackupService` | Sicherungspunkte anlegen, aufbewahren, wiederherstellen; tägliche Prüfung |
 | `UpdateService` | Update-Status abfragen, Sicherungsdialog, Umschaltung auslösen |
 | `PlatformService` | Installationsstatus, persistenter Speicher, Plattformerkennung |
-| `SettingsService` | Ton, Design, Akzentfarbe, „Ich hasse Catan!“ (US-SP-05), Hinweisstand |
+| `SettingsService` | Design, Akzentfarbe, „Ich hasse Catan!“ (US-SP-05), Hinweisstand; Ton erst nach Version 1 (Anforderungsdokumentation E-38) |
 
 ### 4.5 Bezeichner im Code
 
@@ -979,6 +980,8 @@ Beim Start ruft die App `navigator.storage.persisted()` und, falls nötig, `navi
 
 ### 12.3 Ton (ADR-017)
 
+*Zurückgestellt in 0.31: Klänge sind nicht Teil von Version 1 (Anforderungsdokumentation E-38, PP-20). Der folgende Plan gilt, wenn sie nach dem ersten Release kommen.*
+
 - Web Audio API; Klänge als kurze MP3-Dateien im App-Paket, beim Start in `AudioBuffer` dekodiert.
 - Der `AudioContext` wird mit dem Tipp auf „Generierung starten“ freigeschaltet (iOS verlangt eine Nutzeraktion).
 - Wo verfügbar, wird `navigator.audioSession.type = 'ambient'` gesetzt: Der Stummschalter wird respektiert, und laufende Musik anderer Apps wird nicht unterbrochen (FA-IN-07).
@@ -1080,6 +1083,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: die Ansicht (nur sie scrollt) un
 - **Einblenden (I2-C):** Bis zu den Bewegungen der Karten in I2-E erscheint jedes Ergebnis schlicht: `Reveal` blendet es in 0,42 s mit kurzem Anheben ein, das neue Stück auf dem Brett in 0,52 s. Ein neuer Schlüssel je Ergebnis startet das Einblenden, auch nach einem Neustart (US-AB-05 AK-3). Markieren und Abdunkeln legt D-2 fest. Einstellungen, die ein Schalter in den Optionen aufklappt, öffnen sich in 0,2 s (`Unfold`), danach scrollt die Seite gerade so weit, dass sie ganz über der Kartenhand stehen (Wunsch des Product Owners). *(neu in 0.22)*
 - **Karten (I2-D):** Losschritt, Reihenfolge und Startrohstoffe liegen als Karten auf einem Kartentisch (`ui/views/match/cards`). Seine Größe misst `useElementSize` (ResizeObserver), die Lagen und Größen rechnet `cardLayout.ts` in Pixeln wie die Referenz, weil Karten über, neben und auf Plätzen liegen und später (I2-E) zwischen ihnen fliegen. Eine Karte hat Vorder- und Rückseite gleicher Größe (`TableCard`, Rückseite R1 als SVG `CardBack` mit Tokens `--color-card-back-*`); Umdrehen dreht sie mit Motion um die y-Achse (0,34 s), eine Karte, die schon offen oder verdeckt erscheint, zeigt sich ohne Bewegung. Die abgewandte Seite wird zur Hälfte der Drehung zusätzlich ausgeblendet, weil WebKit sie mit `backface-visibility` allein über die Vorderseite zeichnete. Vorderseiten sind für Karten ab 83 px Breite gestaltet; kleinere Karten, etwa auf niedrigen Tablets im Querformat, zeigen sie als Ganzes verkleinert. Der Kartentisch hat keine Mindesthöhe, die Rohstoffkarten unten nehmen höchstens 40 % der freien Höhe. Die gezogene Karte und die neue Reihenfolge erscheinen mit dem schlichten Einblenden. *(neu in 0.25)*
 - **Mehr Platz (I2-G):** Der Rahmen hat keine Kopfzeile mehr; jede Ansicht beginnt mit ihrer eigenen Überschrift, der Abstand zur Statusleiste kommt aus der sicheren Zone (`padding` von `body`). Logo und App-Name stehen nur auf dem Start, mittelgroß oben mittig über dem Band einer laufenden Partie (L5); der freie Raum darunter fängt sie ab, Stapel und Kartenfächer bleiben an ihrer Stelle. Alle anderen Ansichten (Verwaltung mit Unterseiten, Vorbereitung, Ablauf, Übersicht, Diagnose) teilen Breite, Polsterung und Kopfhöhe über die Tokens `--page-max-width` (80rem), `--page-padding-top` (20 px), `--page-padding-side` (16 px) und `--page-head-height` (52 px, so hoch wie ein Kopf mit Unterzeile); Knöpfe und Titel stehen darin mittig auf einer Ebene. So sitzt „Zurück“ auf jeder Seite an derselben Stelle (Ende-zu-Ende-Test `layout.spec.ts`). Die Platzierung im Querformat stellt den Kopf deshalb über beide Spalten. Die Unterscheidung schmal/breit (`Page` mit `isWide`, `.wideMain`) entfällt. Auf einem Kartentisch ab 560 px Breite ist die Entwicklungskarte bis 280 px breit (G4), die Personenkarten wachsen im gleichen Maß; sie bleibt dieselbe Karte, als Ganzes skaliert. Aussehen und Maße legt `docs/design/i2g-more-room-final-preview.html` fest; für Rahmen, Breiten und Kopf ersetzt sie die älteren Referenzen D-3, I1-E, I1-F, I2-C und I2-D. *(neu in 0.26)*
+- **Aufblinken und Spannungsmodus (D-2, für I2-F):** Aussehen, Maße und Zeiten legt `docs/design/d2-staging-final-preview.html` fest. Nach „Losen“ eines Steins ist das Ergebnis gespeichert (ADR-014); die Seite zeigt währenddessen den Schritt ohne Ergebnis, Knöpfe und Tippflächen sind gesperrt, dann wird der Stein gesetzt (Fallen von oben mit Lichtring). Standard ist ein Lauflicht in der Catan-Farbe der Person (Form der Markierung M1 aus I2-H). Der Spannungsmodus (FA-IN-08) ist reiner Zustand der Oberfläche im Ablauf, wird nicht gespeichert und ist nach jedem Start und bei jeder neuen Partie aus; sein Schalter (Trommel) steht im Kopf jeder Seite der Platzierung neben „Partie beenden“. Bei Gebäuden: Brett dunkel, alle gültigen Kreuzungen leuchten und erlöschen, bei zwei hält die Darstellung an und der Vorwärts-Knopf „Duell“ startet das Duell; bei Straßen erlöschen die Kanten nacheinander, das Haus bleibt hell darüber. Den Ablauf plant eine reine Funktion aus der Menge der gültigen Plätze und dem Ergebnis mit der `RandomSource` (dekorativ, NFA-ZF-01): Lauflicht und Duell entstehen ohne Kenntnis des Ergebnisses, erst die Landung zeigt es; Erlöschen und Gegner sind gleichverteilt (Anforderungsdokumentation E-39, US-IN-02 AK-3). Unit-Tests weisen das statistisch nach (Anteil des Ergebnisses je Station 1/n). Ein Neustart während des Aufblinkens oder in der Pause spielt es von vorn ab (FA-AB-07); „Animation überspringen“ (I2-E) springt zum Ergebnis. Die Zeiten stehen als Tokens bereit; das Tempo aller übrigen Bewegungen bleibt das der Referenz aus I2-D. *(neu in 0.31)*
 - CSS-Animationen (`animation`, `transition`, `@keyframes`) verbietet Stylelint, damit es genau einen Weg für Animationen gibt; Mikroanimationen bei Hover und Berührung (NFA-GB-04) nutzen `whileHover` und `whileTap` von Motion.
 - **Druckzustand (seit K-4, NFA-GB-04):** Alle Knöpfe und Links sind `PressableButton` bzw. `PressableLink` (`ui/components/Pressable.tsx`); ESLint verbietet nackte `button`, `a`, `Link` und `NavLink` außer in diesen Bausteinen, der Kartenhand (eigenes Anheben aus K-3) und dem Fehlerbildschirm. `whileTap` animiert nur die CSS-Variable `--press` von 0 auf 1; das Aussehen steht in `Pressable.module.css`, die Stärken als Tokens (`--press-lift`, `--press-darken`, `--press-shimmer`). Knöpfe, Pillen und Zeilen schimmern schnell (90 ms hin, 220 ms zurück) in ihrer eigenen Textfarbe, gefüllte Knöpfe also weiß; Karten und Plätze am Tisch (`look="card"`) heben sich weich um 3 px mit zusätzlichem Schatten und werden dunkler (180 ms hin, 300 ms zurück). Eigene CSS-Eigenschaften (`translate`, `filter`, `box-shadow` nur bei Knöpfen) kollidieren nicht mit `transform` und Schatten der Komponenten. Bei „Bewegung reduzieren“ werden Karten nur dunkler. Der Druckzustand beginnt sofort, der Seitenwechsel beim Loslassen ebenfalls. Links sind nicht ziehbar (`draggable={false}`), sonst schluckt Safari das Loslassen nach einer Bewegung. Global gilt: keine Tipp-Markierung (`-webkit-tap-highlight-color`), keine Linkvorschau (`-webkit-touch-callout`) und kein Markieren (`user-select`) außer in Textfeldern; das Browsermenü bei langem Drücken mit Finger oder Stift unterdrückt `suppressTouchContextMenu` (`ui/components/touchMenu.ts`) einmal für das ganze Dokument, der Rechtsklick mit der Maus und das Menü in Textfeldern bleiben. Referenz `docs/design/k4-touch-final-preview.html`. *(neu in 0.18)*
 - **Einbindung (seit K-3):** `AppLayout` lädt Motion über `LazyMotion` mit `domAnimation` im strikten Modus; animierte Elemente sind deshalb `m.div` usw., nicht `motion.div`. Braucht eine spätere Animation Ziehen oder Layout-Animationen, wechselt die App auf `domMax`. `MotionConfig reducedMotion="user"` folgt der Systemeinstellung „Bewegung reduzieren“: Bewegungen springen dann ans Ziel, Ein- und Ausblenden bleibt. Motion vergrößert das Bündel um rund 32 kB (gzip). Eine Abfolge von Transformationen, die von der Reihenfolge von Motion abweicht, legt `transformTemplate` fest (Kartenhand: erst drehen, dann entlang der Karte verschieben wie in D-3). *(neu in 0.16)*
@@ -1686,6 +1690,8 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 
 **Konsequenzen:** Auf Plattformen ohne Audio-Session-Steuerung entscheidet der Browser über das Verhalten bei Stummschaltung; der Tonschalter der App greift immer.
 
+**Status (0.31):** zurückgestellt bis nach Version 1 (Anforderungsdokumentation E-38); die Entscheidung gilt, sobald Klänge kommen.
+
 ---
 
 ### ADR-018: Eigene Textlösung und Design-Tokens als CSS-Variablen
@@ -1932,7 +1938,7 @@ In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betri
 |---|---|---|
 | OP-12 | Dauerhafte Adresse der App | Setup – geklärt: ADR-022 |
 | OP-13 | Vorabversionen der echten App vor 1.0 | Umsetzung, nach I2 |
-| OP-06 | Visuelle Gestaltung von Glücksrad, Aufblinken und Klängen | Design – teilweise geklärt: Karten ziehen statt Glücksrad (`docs/design/i2d-running-match-final-preview.html`); Aufblinken und Klänge mit D-2 |
+| OP-06 | Visuelle Gestaltung von Glücksrad, Aufblinken und Klängen | Design – geklärt: Karten ziehen statt Glücksrad (`docs/design/i2d-running-match-final-preview.html`); Aufblinken, Spannungsmodus und Tempo mit D-2 (`docs/design/d2-staging-final-preview.html`, 13.6); Klänge nach Version 1 (Anforderungsdokumentation E-38) |
 | OP-11 | Konkrete Farbwerte der Paletten | Design – geklärt: 13.4, Anforderungsdokumentation E-26 |
 
 ---
@@ -1941,5 +1947,5 @@ In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betri
 
 1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0. *Abgeschlossen am 07.10.2026.*
 2. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10) nach `docs/Umsetzungsplan.md`: zuerst `core/random` mit dem Losbaustein, weil dort die strengsten Prüfkriterien gelten; `core/board` in I1, `core/placement` als erstes Bündel von I2; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
-3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 innerhalb von I2, bevor Aufblinken und Klänge gebaut werden (Anforderungsdokumentation E-32); das Ziehen der Karten legt seit 0.25 die Referenz aus I2-D fest. *OP-11 erledigt am 07.10.2026 (13.4).*
+3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 innerhalb von I2, bevor Aufblinken und Klänge gebaut werden (Anforderungsdokumentation E-32); das Ziehen der Karten legt seit 0.25 die Referenz aus I2-D fest. *OP-11 erledigt am 07.10.2026 (13.4).* *OP-06 erledigt am 11.11.2026 mit D-2.*
 4. **Nach I2:** Entscheidung über Vorabversionen (OP-13).
