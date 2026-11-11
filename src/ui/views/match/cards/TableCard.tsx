@@ -61,20 +61,9 @@ export function TableCard({
             animate={{ opacity: isFaceDown ? 0 : 1 }}
             transition={FACE_SWITCH}
           >
-            {box.w < FRONT_WIDTH ? (
-              <div
-                className={styles.scaledFront}
-                style={{
-                  width: FRONT_WIDTH,
-                  height: (FRONT_WIDTH * box.h) / box.w,
-                  transform: `scale(${String(box.w / FRONT_WIDTH)})`,
-                }}
-              >
-                {front}
-              </div>
-            ) : (
-              front
-            )}
+            <FittedFront w={box.w} h={box.h}>
+              {front}
+            </FittedFront>
           </m.div>
         )}
         <m.div
@@ -87,6 +76,33 @@ export function TableCard({
         </m.div>
       </m.div>
     </div>
+  );
+}
+
+type FittedFrontProps = {
+  readonly w: number;
+  readonly h: number;
+  readonly children: ReactNode;
+};
+
+/**
+ * A front as laid out for cards of at least 83 px; a smaller card shows it scaled down as a
+ * whole (design I2-D).
+ */
+export function FittedFront({ w, h, children }: FittedFrontProps): React.JSX.Element {
+  return w < FRONT_WIDTH ? (
+    <div
+      className={styles.scaledFront}
+      style={{
+        width: FRONT_WIDTH,
+        height: (FRONT_WIDTH * h) / w,
+        transform: `scale(${String(w / FRONT_WIDTH)})`,
+      }}
+    >
+      {children}
+    </div>
+  ) : (
+    <>{children}</>
   );
 }
 
@@ -113,16 +129,19 @@ type PlaceProps = {
   /** The number of the place or "?"; hidden once a card lies on it. */
   readonly label: string;
   readonly isFilled: boolean;
+  /** Its name in a movement, which fades its dashed line (design I2-E). */
+  readonly stageName?: string | undefined;
 };
 
 /**
  * A dashed place where a drawn card is laid (design I2-D). Once a card lies on it, the dashed
  * line goes, so it does not show at the edge (decision of the product owner 09.11.2026).
  */
-export function Place({ box, label, isFilled }: PlaceProps): React.JSX.Element {
+export function Place({ box, label, isFilled, stageName }: PlaceProps): React.JSX.Element {
   return (
     <div
       data-solid=""
+      data-stage={stageName}
       className={cx(styles.place, isFilled && styles.placeFilled)}
       style={{ left: box.x, top: box.y, width: box.w, height: box.h }}
       aria-hidden="true"

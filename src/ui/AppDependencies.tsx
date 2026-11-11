@@ -1,6 +1,7 @@
 import { createContext, use, type ReactNode } from 'react';
 import type { MasterDataService } from '@/app/services/masterDataService';
 import type { SessionService } from '@/app/services/sessionService';
+import type { RandomSource } from '@/core/random';
 import type { BoardBrainDb } from '@/infra/db/database';
 
 /**
@@ -11,6 +12,11 @@ export type AppDependencies = {
   readonly db: BoardBrainDb;
   readonly masterData: MasterDataService;
   readonly session: SessionService;
+  /**
+   * Decorative chance of the views, e.g. which card is pulled out when mixing (Architecture
+   * 13.6, NFA-ZF-01); the same source as for drawing. It never decides a result.
+   */
+  readonly rng: RandomSource;
 };
 
 const AppDependenciesContext = createContext<AppDependencies | null>(null);

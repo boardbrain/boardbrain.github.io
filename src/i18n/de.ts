@@ -314,6 +314,7 @@ export const de = {
     ueberspringenFertig:
       'Ihr setzt Gebäude und Straßen selbst. Die Reihenfolge bleibt; danach ist die Generierung fertig.',
     ueberspringen: 'Überspringen',
+    animationUeberspringen: 'Animation überspringen',
     siedlung: 'Siedlung',
     stadt: 'Stadt',
     strasse: 'Straße',

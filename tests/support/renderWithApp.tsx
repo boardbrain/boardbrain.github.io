@@ -58,7 +58,9 @@ export function renderWithApp(
     initialEntries: [path],
   });
   render(
-    <AppDependenciesProvider dependencies={{ db, masterData, session }}>
+    <AppDependenciesProvider
+      dependencies={{ db, masterData, session, rng: new SeededRandomSource(seed + 1) }}
+    >
       <RouterProvider router={router} />
     </AppDependenciesProvider>,
   );

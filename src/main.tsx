@@ -65,6 +65,8 @@ if (import.meta.env.PROD) {
 const diagnostics = readDiagnostics();
 
 const db = new BoardBrainDb();
+// NFA-ZF-03: one source of randomness for drawing and for the decorative chance of the views.
+const rng = new CryptoRandomSource();
 const dependencies: AppDependencies = {
   db,
   masterData: createMasterDataService({
@@ -76,8 +78,9 @@ const dependencies: AppDependencies = {
   session: createSessionService({
     store: createDexieSessionStore(db),
     clock: systemClock,
-    rng: new CryptoRandomSource(),
+    rng,
   }),
+  rng,
 };
 
 // A view may wait with use(), e.g. the diagnostics. Errors are caught by the frame route below.

@@ -554,3 +554,17 @@
   font-size: 0.85rem;
   font-weight: 700;
 }
+
+/* Design I2-E U1: "Wiederholen" and "Überspringen" lie in the same room of one button, so it
+   keeps its size when the label changes. */
+.swapBtn {
+  display: inline-grid;
+}
+
+.swapLabel {
+  display: inline-flex;
+  grid-area: 1 / 1;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
