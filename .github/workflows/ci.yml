@@ -54,10 +54,12 @@ jobs:
 
   # Runs in the official Playwright image: browsers and their system packages are preinstalled,
   # so no download and no apt-get (which has hung on the runners before).
-  # The tests are split across two runners that work at the same time (sharding); every test
-  # still runs on every device, the wait halves.
-  e2e-shard:
-    name: e2e shard ${{ matrix.shard }}/2
+  # K-7: the tests are split across three runners that work at the same time, one per device form,
+  # each with Chromium and WebKit. Playwright's --shard splits by test count in project order, which
+  # put all Chromium projects in one half and all slower WebKit projects in the other (3.7 vs 7.9
+  # minutes). Every test still runs on every device.
+  e2e-form:
+    name: e2e ${{ matrix.form }}
     needs: playwright-version
     # Run even if playwright-version failed: the job e2e below then fails as well, because a
     # missing version yields an invalid image.
@@ -65,10 +67,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
-      # Both halves always finish, so a failure shows all failing tests at once.
+      # All runners always finish, so a failure shows all failing tests at once.
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        # Each form must match the project names chromium-<form> and webkit-<form> in
+        # playwright.config.ts; a project missing here would not run on GitHub.
+        form: [phone, tablet, tablet-landscape]
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.playwright-version.outputs.version }}-noble
       # Run as the runner user, as recommended by Playwright for GitHub Actions
@@ -82,26 +86,26 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npm run test:e2e -- --shard=${{ matrix.shard }}/2
+      - run: npm run test:e2e -- --project=chromium-${{ matrix.form }} --project=webkit-${{ matrix.form }}
       - name: Keep report on failure
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report-${{ matrix.shard }}
+          name: playwright-report-${{ matrix.form }}
           path: playwright-report/
           retention-days: 7
 
-  # The required check e2e: passes only if both halves passed. A skipped or failed half fails it,
+  # The required check e2e: passes only if all runners passed. A skipped or failed runner fails it,
   # because a skipped required check would count as passed.
   e2e:
-    needs: e2e-shard
+    needs: e2e-form
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Both halves of the end-to-end tests passed
+      - name: End-to-end tests passed on all device forms
         env:
-          RESULT: ${{ needs.e2e-shard.result }}
+          RESULT: ${{ needs.e2e-form.result }}
         run: |
           if [ "$RESULT" != "success" ]; then
             echo "::error::End-to-end tests: $RESULT"
