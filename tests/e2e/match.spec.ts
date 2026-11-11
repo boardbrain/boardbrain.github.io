@@ -639,7 +639,13 @@ test.describe('Architecture ADR-030 pictures of a match', () => {
     await page.goto('/#/partie/neu');
     const landscape = page.getByRole('link', { name: 'Catan' }).locator('img');
     await expect(landscape).toBeVisible();
-    expect(await landscape.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1200);
+    // Visible does not mean loaded: under load the picture may still be on its way (K-5 run,
+    // 11.11.2026), so the test waits until it is complete.
+    await expect
+      .poll(() =>
+        landscape.evaluate((image: HTMLImageElement) => (image.complete ? image.naturalWidth : -1)),
+      )
+      .toBe(1200);
 
     for (const card of ['wood', 'brick', 'wool', 'grain', 'ore']) {
       const response = await page.request.get(`/art/card-${card}.webp`);
