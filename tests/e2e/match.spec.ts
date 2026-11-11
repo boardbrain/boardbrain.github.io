@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './fixtures';
-import { seedDatabase } from './seedDatabase';
+import { CATAN_DEFAULT_STARTING_RESOURCES } from '@/games/catan';
+import { seedDatabase, seedMatch, type SeedTable } from './seedDatabase';
 import { useSeededRandom } from './seededRandom';
 
 // I2-C: every run draws the same steps (variant A); real randomness is checked in
@@ -100,6 +101,12 @@ async function drawAll(page: Page): Promise<{ phases: string[]; taps: number }> 
 function count(phases: readonly string[], phase: string): number {
   return phases.filter((shown) => shown.startsWith(`${phase} `)).length;
 }
+
+// K-6: tests of what comes after the draws start with a match drawn so far, written straight into
+// the database; tapping through a whole match is tested by the first describe block.
+const TWO: SeedTable = { name: 'Zu zweit', members: ['Anna', 'Ben'] };
+const NO_PERSON_DRAWS = { personDraws: { landscapes: false, harbors: false, numbers: false } };
+const WITH_RESOURCES = { startingResources: CATAN_DEFAULT_STARTING_RESOURCES };
 
 test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview', () => {
   test('AK-1 to AK-4: four persons, base game, all steps drawn and kept after a reload', async ({
@@ -204,12 +211,11 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
 
 test.describe('US-AB-03, US-AB-04, US-PL-05, US-AB-06 repeat, look back, skip and end', () => {
   test.beforeEach(async ({ page }) => {
-    await seedTable(page, 'Dreier', 'Anna', 'Ben', 'Clara');
-    await openOptions(page, /^Dreier:/);
-    for (const draw of ['Landschaftsfelder', 'Häfen', 'Zahlenchips']) {
-      await tap(page.getByRole('switch', { name: draw }));
-    }
-    await startGeneration(page);
+    await seedMatch(page, {
+      table: { name: 'Dreier', members: ['Anna', 'Ben', 'Clara'] },
+      options: NO_PERSON_DRAWS,
+      steps: 0,
+    });
     await expect(page.getByRole('heading', { name: 'Reihenfolge' })).toBeVisible();
   });
 
@@ -282,12 +288,7 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
   test('US-AB-03 AK-6: a step of the overview is repeated in the flow, the rest is browsed', async ({
     page,
   }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await tap(page.getByRole('switch', { name: 'Reihenfolge losen' }));
-    await tap(page.getByRole('button', { name: 'Ohne Platzierung' }));
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO, options: { order: { mode: 'none' } } });
 
     await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
     await tap(page.getByRole('button', { name: /^Häfen/ }));
@@ -306,11 +307,7 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
   test('US-AB-03 AK-6: a new order leads to the placement before the starting resources', async ({
     page,
   }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO, options: WITH_RESOURCES });
 
     await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
     await tap(page.getByRole('main').getByRole('button').filter({ hasText: /^1/ }).first());
@@ -329,10 +326,7 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
   test('US-AB-03 AK-3: a road of the overview is drawn again, the other pieces stay', async ({
     page,
   }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO });
 
     await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
     await tap(page.getByRole('button', { name: /Straße.*wiederholen/ }).first());
@@ -438,10 +432,7 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   test('AK-3: a road tapped in the overview is drawn again alone, marked while asked', async ({
     page,
   }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO });
     await expect(page.getByText('Stein antippen zum Wiederholen')).toBeVisible();
 
     const roads = page.getByRole('button', { name: /^Straße von .* wiederholen$/ });
@@ -464,10 +455,7 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   test('AK-4: a building tapped in the overview marks its road and all later pieces', async ({
     page,
   }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO });
 
     const buildings = page.getByRole('button', { name: /^Siedlung von .* wiederholen$/ });
     await expect(buildings).toHaveCount(4);
@@ -488,10 +476,7 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   });
 
   test('decision A: "Wiederholen" on a kept placement repeats its last piece', async ({ page }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO });
     await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
     await tap(page.getByRole('button', { name: /^Häfen/ }));
     await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
@@ -513,11 +498,7 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   test('PO 10.11.: a road drawn again shows the whole board once, also going back', async ({
     page,
   }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO, options: WITH_RESOURCES });
 
     await tapPiece(page, page.getByRole('button', { name: /^Straße von .* wiederholen$/ }).first());
     await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
@@ -539,10 +520,7 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   test('PO 10.11.: the overview reached from the look back leads back into the flow', async ({
     page,
   }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO });
 
     const back = page.getByRole('button', { name: 'Zurück' });
     const overview = page.getByRole('heading', { name: 'Laufende Partie' });
@@ -560,10 +538,7 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   test('R7: the marked piece lies bright over the board, the question leaves it free', async ({
     page,
   }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO });
 
     await tapPiece(page, page.getByRole('button', { name: /^Straße von .* wiederholen$/ }).nth(2));
     const board = await page.getByRole('img', { name: /^Brett mit/ }).boundingBox();
@@ -587,10 +562,7 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   });
 
   test('a piece tapped in the look back is repeated', async ({ page }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, { table: TWO });
     await tap(page.getByRole('button', { name: 'Zurück' }));
     // The whole placement in the look back (PO 10.11.2026).
     await expect(page.getByText('Rückblick')).toBeVisible();
@@ -610,11 +582,10 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   test('PO 10.11.: back from the overview the note "Rückblick" covers no card', async ({
     page,
   }) => {
-    await seedTable(page, 'Freitagsrunde', 'Anna', 'Ben', 'Clara', 'David');
-    await openOptions(page, /^Freitagsrunde:/);
-    await tap(page.getByRole('switch', { name: 'Startrohstoffe ziehen' }));
-    await startGeneration(page);
-    await drawAll(page);
+    await seedMatch(page, {
+      table: { name: 'Freitagsrunde', members: ['Anna', 'Ben', 'Clara', 'David'] },
+      options: WITH_RESOURCES,
+    });
 
     await tap(page.getByRole('button', { name: 'Zurück' }));
     await expect(page.getByRole('heading', { name: 'Startrohstoffe' })).toBeVisible();
@@ -646,17 +617,8 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
   });
 
   test('a piece tapped in the flow is repeated there', async ({ page }) => {
-    await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
-    await openOptions(page, /^Zu zweit:/);
-    for (const draw of ['Landschaftsfelder', 'Häfen', 'Zahlenchips']) {
-      await tap(page.getByRole('switch', { name: draw }));
-    }
-    await startGeneration(page);
-    await tapForward(page, 'Losen');
-    await tapForward(page, 'Weiter');
-    await tapForward(page, 'Losen');
-    await tapForward(page, 'Losen');
-    await tapForward(page, 'Losen');
+    // The spin of the order and two buildings with the road between them.
+    await seedMatch(page, { table: TWO, options: NO_PERSON_DRAWS, steps: 4 });
     await expect(page.getByTestId('board-settlement')).toHaveCount(2);
 
     await tapPiece(

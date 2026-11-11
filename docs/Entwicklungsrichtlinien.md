@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.12 |
+| Version | 0.13 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 03.11.2026 |
+| Stand | 11.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -27,6 +27,7 @@
 | 0.10 | 29.10.2026 | Beispiel für Ordnernamen an die neue Struktur angepasst (`core/placement` entfällt, Architektur ADR-028) (4.4) (PR #27) |
 | 0.11 | 03.11.2026 | I2-C: fester Startwert für den Zufall in Ende-zu-Ende-Tests über `tests/e2e/seededRandom.ts`, die einzige Ausnahme von der `crypto`-Regel außerhalb von `infra` und `tests/statistical` (8.2) |
 | 0.12 | 03.11.2026 | Vorschauen im Ordner `previews/` (2.5); während der Arbeit nur betroffene Tests, volle Suiten vor dem Push (8.2); Ende-zu-Ende-Tests dürfen Personen und Tische direkt in die Datenbank schreiben (8.3); Entscheidungen des Product Owners |
+| 0.13 | 11.11.2026 | Kleine Aufgabe K-6: Ende-zu-Ende-Tests nach dem Losen beginnen mit einer Partie aus `seedMatch` (8.3) |
 
 ## Inhaltsverzeichnis
 
@@ -448,6 +449,7 @@ Die Teststrategie steht in Architektur Kapitel 14. Übersicht:
 - Der Netzwerkwächter lässt jeden Test fehlschlagen, der eine fremde Adresse anfragt (NFA-DH-01).
 - Formate: Smartphones im Hochformat, Tablets im Hoch- und Querformat; der Hinweis zum Drehen auf Smartphones im Querformat hat einen eigenen Test (NFA-PL-04, E-29). *(geändert in 0.6)*
 - Jeder Test beginnt mit leerer Datenbank oder einem definierten Datenstand aus `tests/fixtures`. Braucht ein Test nur Personen und Tische als Ausgangslage, schreibt er sie direkt in die Datenbank (`seedDatabase` aus `tests/e2e/seedDatabase.ts`); wie man sie über die Oberfläche anlegt, prüfen die eigenen Tests der Verwaltung. *(neu in 0.12)*
+- Prüft ein Test, was nach dem Losen kommt (Antippen, Rückblick, Übersicht, Wiederholen), beginnt er mit einer ganz oder teilweise gelosten Partie, die `seedMatch` aus `tests/e2e/seedDatabase.ts` direkt in die Datenbank schreibt. Der Helfer rechnet die Partie mit der Spiellogik der App und festem Startwert aus, sodass sie immer gültig ist und eine Änderung des Datenmodells bei der Typprüfung auffällt. Ganze Partien über die Oberfläche durchgespielt werden nur in den Tests, die genau das prüfen (US-AB-01, US-AB-02, US-AB-05; Architektur 14.5). *(neu in 0.13)*
 
 ---
 
