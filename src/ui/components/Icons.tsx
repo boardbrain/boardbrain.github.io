@@ -257,3 +257,37 @@ export function LockIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Warning triangle of the error screen (design K-5, S1). Decorative: the heading says it.
+ */
+export function WarningIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M12 3L2 20h20zM12 10v4M12 17v.5" />
+    </Outline>
+  );
+}
+
+/**
+ * Circular arrow for "Neu laden" (design K-5). Decorative: the button around it carries the label.
+ */
+export function ReloadIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" />
+    </Outline>
+  );
+}
+
+/**
+ * Two sheets for "Details kopieren" (design K-5). Decorative: the button around it carries the
+ * label.
+ */
+export function CopyIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M11 9h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2zM5 15V5a2 2 0 0 1 2-2h8" />
+    </Outline>
+  );
+}

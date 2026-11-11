@@ -130,12 +130,13 @@ const JSX_SYNTAX = [
   {
     selector: String.raw`ClassDeclaration[superClass.name=/^(?:Component|PureComponent)$/], ClassDeclaration[superClass.property.name=/^(?:Component|PureComponent)$/]`,
     message:
-      'Function components only; the single exception is ErrorBoundary (Development Guidelines 6).',
+      'Function components only; errors are caught by the error view of the routes (Development Guidelines 6, K-5).',
   },
 ];
 
 // K-4: every button and link shows the app's own pressed state (Pressable.tsx). Exceptions are the
-// building blocks themselves, the card hand with its own lift and the error screen after a crash.
+// building blocks themselves and the card hand with its own lift; since K-5 the error screen too
+// uses the building blocks.
 const CONTROL_SYNTAX = [
   {
     selector: String.raw`JSXOpeningElement[name.name=/^(?:button|a|Link|NavLink)$/]`,
@@ -145,7 +146,6 @@ const CONTROL_SYNTAX = [
 const CONTROL_EXCEPTIONS = [
   'src/ui/components/Pressable.tsx',
   'src/ui/components/HandNavigation.tsx',
-  'src/ui/components/ErrorScreen.tsx',
 ];
 
 /**
@@ -336,17 +336,6 @@ export default defineConfig([
     files: CONTROL_EXCEPTIONS,
     rules: {
       'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...JSX_SYNTAX],
-    },
-  },
-  {
-    files: ['src/ui/components/ErrorBoundary.tsx'],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        ...BASE_SYNTAX,
-        ...JSX_SYNTAX.slice(0, -1),
-        ...CONTROL_SYNTAX,
-      ],
     },
   },
 

@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>BoardBrain – K-5 final: Fehlerbildschirm</title>
+    <style>
+      :root {
+        --bg: #231d18;
+        --raised: #2d2620;
+        --overlay: #383028;
+        --border: #4b4036;
+        --text: #f4ece1;
+        --muted: #b8ab9b;
+        --accent: #b45309;
+        --accent-text: #f5be5b;
+        --on-accent: #fff;
+        --shadow: #0000008c;
+        --error: #fc8585;
+        --bg-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg-image) fixed, var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+        line-height: 1.5;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        background: none;
+        border: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+
+      /* ---------- picker (not sticky) ---------- */
+      .picker {
+        display: grid;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+      .picker .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .picker .label {
+        min-width: 96px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .chip {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .chip[aria-pressed='true'] {
+        font-weight: 600;
+        color: var(--accent-text);
+        background: var(--overlay);
+        border-color: var(--accent-text);
+      }
+      .intro {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 12px 16px 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .intro b {
+        color: var(--text);
+      }
+      .stage {
+        padding: 16px;
+      }
+      .notes {
+        max-width: 640px;
+        margin: 16px auto 0;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .notes li + li {
+        margin-top: 4px;
+      }
+
+      /* ---------- device frames ---------- */
+      .frame {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto;
+        overflow: hidden;
+        background: var(--bg-image), var(--bg);
+        border: 1px dashed var(--border);
+        border-radius: 24px;
+      }
+      .frame.phoneS {
+        width: min(100%, 360px);
+        height: 680px;
+      }
+      .frame.phoneP {
+        width: min(100%, 390px);
+        height: 800px;
+      }
+      .frame.tabletP {
+        width: min(100%, 780px);
+        height: 1020px;
+      }
+      .frame.wide {
+        width: min(100%, 1180px);
+        height: 760px;
+      }
+      .frame.device {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        width: auto;
+        height: auto;
+        border: 0;
+        border-radius: 0;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+          env(safe-area-inset-left);
+      }
+      .exit {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        z-index: 60;
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 56px;
+        color: var(--muted);
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-left: 0;
+        border-radius: 0 12px 12px 0;
+        opacity: 0.8;
+      }
+
+      /* ---------- app frame (D-3, K-3, I2-G) ---------- */
+      .app {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .scroll {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+      }
+      .main {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        width: 100%;
+        max-width: 80rem;
+        min-height: 100%;
+        margin: 0 auto;
+        padding: 20px 16px 24px;
+      }
+      .pageHead {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        min-height: 52px;
+      }
+      .hand {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 3;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        overflow: hidden;
+        background: linear-gradient(180deg, transparent, var(--bg) 48px);
+        pointer-events: none;
+      }
+      .hand.folded {
+        background: linear-gradient(180deg, transparent, var(--bg) 32px);
+      }
+      .navCard {
+        position: relative;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 2px;
+        width: 86px;
+        height: 104px;
+        margin: 0 -8px;
+        font-size: 0.7rem;
+        text-align: center;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 -4px 12px var(--shadow);
+        transform-origin: 50% 140%;
+        pointer-events: auto;
+      }
+      .hand.folded .navCard {
+        place-items: start center;
+        align-content: start;
+        padding-top: 5px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 0.85rem;
+      }
+
+      /* ---------- buttons as in the app ---------- */
+      .primary,
+      .secondary {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 8px 16px;
+        border-radius: 8px;
+      }
+      .primary {
+        color: var(--on-accent);
+        background: var(--accent);
+      }
+      .secondary {
+        color: var(--text);
+        background: var(--raised);
+        border: 1px solid var(--border);
+      }
+      .pill {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        min-height: 34px;
+        padding: 4px 12px;
+        font-size: 0.9rem;
+        color: var(--text);
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .pill.done {
+        color: var(--accent-text);
+        border-color: var(--accent-text);
+      }
+
+      /* ---------- error screen ---------- */
+      .errA {
+        display: grid;
+        gap: 20px;
+        width: 100%;
+        max-width: 32rem;
+      }
+      .errA .buttons {
+        display: grid;
+        gap: 8px;
+      }
+      .errB {
+        display: grid;
+        flex: 1;
+        place-items: center;
+      }
+      .errB .card {
+        display: grid;
+        gap: 14px;
+        justify-items: center;
+        width: min(100%, 26rem);
+        padding: 24px 20px;
+        text-align: center;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px var(--shadow);
+      }
+      .errB .mark {
+        display: grid;
+        place-items: center;
+        width: 64px;
+        height: 64px;
+        color: var(--accent-text);
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+      }
+      .errB .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        width: 100%;
+      }
+      .errB .buttons > * {
+        flex: 1 1 8rem;
+      }
+      .kaomoji {
+        font-size: 1.6rem;
+        line-height: 1.2;
+        color: var(--accent-text);
+        white-space: nowrap;
+      }
+      /* ---------- round 3: styles G1–G6 ---------- */
+      .errB h1,
+      .errB .buttons > * {
+        white-space: nowrap;
+      }
+      .g2 h1,
+      .g3 h1,
+      .g4 h1,
+      .g5 h1 {
+        color: var(--accent-text);
+      }
+      .g3 .card {
+        border: 2px solid var(--accent-text);
+        box-shadow: 0 0 0 4px #f5be5b1f, 0 10px 30px var(--shadow);
+      }
+      .g3 .mark {
+        color: var(--bg);
+        background: var(--accent-text);
+        border-color: var(--accent-text);
+      }
+      .g4 .card {
+        background: none;
+        border: 0;
+        box-shadow: none;
+      }
+      .g4 .mark {
+        width: 88px;
+        height: 88px;
+        background: radial-gradient(circle, #f5be5b33, transparent 70%);
+        border: 0;
+      }
+      .g4 .mark svg {
+        width: 48px;
+        height: 48px;
+      }
+      .g4 h1 {
+        font-size: 2rem;
+        text-shadow: 0 0 24px #f5be5b55;
+      }
+      .g5 .card {
+        position: relative;
+        background: linear-gradient(180deg, #4a3d31, #28211b);
+        border: 1px solid #0006;
+        border-radius: 18px;
+      }
+      .g5 .card::before {
+        content: '';
+        position: absolute;
+        inset: 8px;
+        border: 1.5px solid #e0b25a;
+        border-radius: 12px;
+        pointer-events: none;
+      }
+      .g5 .mark {
+        color: #e0b25a;
+        background: radial-gradient(circle at 40% 35%, #3d3229, #1d1713);
+        border: 1.5px solid #e0b25a;
+      }
+      .g6 .card {
+        padding-top: 0;
+        overflow: hidden;
+      }
+      .ribbon {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        width: calc(100% + 40px);
+        margin: 0 -20px 4px;
+        padding: 14px 16px;
+        color: #fff6e2;
+        background: linear-gradient(180deg, #d08c2c, #9a5a12);
+        box-shadow: 0 3px 8px #00000070;
+      }
+      .ribbon h1 {
+        font-size: 1.4rem;
+      }
+      .details {
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
+        text-align: left;
+        width: 100%;
+      }
+      .detailsHead {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .toggle {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        min-height: 44px;
+        color: var(--muted);
+      }
+      .trace {
+        max-height: 14rem;
+        margin: 0;
+        padding: 12px;
+        overflow: auto;
+        font-family: ui-monospace, 'Cascadia Mono', consolas, monospace;
+        font-size: 0.8rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: var(--raised);
+        border-radius: 8px;
+      }
+      .today {
+        height: 100%;
+        max-width: 40rem;
+        overflow-y: auto;
+        padding: 24px 16px;
+        margin: 0 auto;
+      }
+      .today h1 {
+        margin: 0.67em 0;
+        font-size: 2em;
+      }
+      .today p {
+        margin: 1em 0;
+      }
+      .today button {
+        min-height: 44px;
+        padding: 8px 16px;
+        color: #fff;
+        background: var(--accent);
+        border-radius: 8px;
+      }
+      .today details {
+        margin-top: 24px;
+        color: var(--muted);
+      }
+      .rr {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        color: #000;
+        background: #fff;
+        height: 100%;
+        overflow: auto;
+      }
+      .rr pre {
+        padding: 8px;
+        background: rgba(200, 200, 200, 0.5);
+        white-space: pre-wrap;
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="picker" id="picker"></div>
+    <p class="intro" id="intro"></p>
+    <div class="stage" id="stage"></div>
+
+    <script>
+      // K-5: the app's own error screen instead of React Router's developer page.
+      const ERROR_TEXT =
+        "TypeError: Cannot read properties of undefined (reading 'seat')\n" +
+        '    at PlacementBand (assets/matchViews-3f9a1c.js:1:48213)\n' +
+        '    at renderWithHooks (assets/index-a81e22.js:8:51022)\n' +
+        '    at updateFunctionComponent (assets/index-a81e22.js:8:72310)\n' +
+        '    at beginWork (assets/index-a81e22.js:8:89941)\n' +
+        '    at performUnitOfWork (assets/index-a81e22.js:8:131704)\n\n' +
+        'Adresse: #/partie\nVersion: 0.1.0\nGerät: Mozilla/5.0 (Linux; Android 16; SM-S941B)';
+
+      const FRAMES = { phoneS: 'Handy klein', phoneP: 'Handy', tabletP: 'Tablet hoch', wide: 'Tablet quer / PC', device: 'Vollbild auf diesem Gerät' };
+      const ui = {
+        case: 'view',
+        place: 'O2',
+        look: 'B',
+        details: 'D1',
+        title: 'U12',
+        text: 'T1',
+        mark: 'S1',
+        style: 'G1',
+        frame: 'phoneP',
+        lastFrame: 'phoneP',
+      };
+      const state = { open: false, copied: false, home: false };
+
+      const TEXTS = {
+        T0: { title: 'Etwas ist schiefgelaufen', body: 'BoardBrain hat einen unerwarteten Fehler festgestellt. Lade die Seite neu. Bleibt der Fehler, kopiere die technischen Details in ein Issue.' },
+        T1: { body: 'Unerwarteter Fehler · gespeicherte Daten bleiben erhalten' },
+        T2: { body: 'Neu laden oder zurück zum Start · gespeicherte Daten bleiben erhalten' },
+        T3: { body: 'Kurz neu laden, dann geht’s weiter · nichts geht verloren' },
+        T4: { body: 'Halb so wild · deine Partie und alle Daten sind gespeichert' },
+        T5: { body: 'Einmal neu mischen, dann weiter · alles gespeichert' },
+        T6: { body: 'Tisch wieder aufstellen und weiter · alles gespeichert' },
+        T7: { body: 'Figuren aufsammeln, neu laden · nichts geht verloren' },
+      };
+      // Headings to combine freely with the texts (PO 11.11.2026: more casual options).
+      const TITLES = {
+        U0: 'Etwas ist schiefgelaufen',
+        U1: 'Hoppla, ein Fehler',
+        U2: 'Hoppla!',
+        U3: 'Ups, da hakt was',
+        U4: 'Huch, das ging schief',
+        U5: 'Oha, ein Fehler',
+        U6: 'Mist, das ging daneben',
+        U7: 'Würfelpech',
+        U8: 'Da ist was umgefallen',
+        U9: 'Das lief nicht nach Plan',
+        U10: 'Tableflip!',
+        U11: 'Tisch umgeworfen',
+        U12: '(╯°□°)╯︵ ┻━┻',
+      };
+
+      function h(tag, attrs, ...children) {
+        const el = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          if (v === false || v === null || v === undefined) continue;
+          if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+          else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+          else el.setAttribute(k, v);
+        }
+        for (const c of children.flat(Infinity)) {
+          if (c === false || c === null || c === undefined) continue;
+          el.append(c instanceof Node ? c : document.createTextNode(String(c)));
+        }
+        return el;
+      }
+      const ICONS = {
+        reload: '<path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/>',
+        home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+        folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+        copy: '<path d="M11 9h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2zM5 15V5a2 2 0 0 1 2-2h8"/>',
+        check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
+        chevron: '<path d="M9 5l7 7-7 7"/>',
+        warn: '<path d="M12 3L2 20h20zM12 10v4M12 17v.5"/>',
+        // Tipped-over table: top tilted, legs up, two motion lines.
+        flip: '<path d="M4 18.5 20 14.5" stroke-width="3"/><path d="M7.5 17.6 5.8 10.8M16.5 15.4 14.8 8.6"/><path d="M19 4.5a5 5 0 0 1 2.5 3.5"/><path d="M17.5 6.5a3 3 0 0 1 1.5 2"/><path d="M3 5.5h2M4 4.5v2"/>',
+        close: '<path d="M6 6l12 12M18 6 6 18"/>',
+      };
+      function icon(name, size, rotate) {
+        const span = document.createElement('span');
+        span.style.display = 'inline-grid';
+        if (rotate) span.style.transform = 'rotate(' + rotate + 'deg)';
+        span.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
+        return span;
+      }
+
+      function isWideFrame() {
+        return ui.frame === 'tabletP' || ui.frame === 'wide' || (ui.frame === 'device' && window.innerWidth >= 600);
+      }
+      function hand() {
+        const folded = !isWideFrame();
+        const cards = [['home', 'Start'], ['folder', 'Verwaltung']];
+        return h('nav', { class: 'hand' + (folded ? ' folded' : ''), style: { height: folded ? '46px' : '104px' } },
+          cards.map(([ic, l], i) =>
+            h('button', {
+              class: 'navCard',
+              style: { transform: folded ? `rotate(${(i - 0.5) * 3}deg) translateY(79px)` : `rotate(${(i - 0.5) * 9}deg) translateY(16px)` },
+              onclick: () => { if (i === 0) { state.home = true; render(); } },
+            }, icon(ic, folded ? 18 : 22), !folded && l)));
+      }
+
+      function copyButton() {
+        return h('button', {
+          class: 'pill' + (state.copied ? ' done' : ''),
+          onclick: () => { state.copied = true; render(); setTimeout(() => { state.copied = false; render(); }, 2000); },
+        }, icon(state.copied ? 'check' : 'copy', 16), state.copied ? 'Kopiert' : 'Details kopieren');
+      }
+      function details() {
+        if (ui.details === 'D2') return h('div', { class: 'details' }, h('div', {}, copyButton()));
+        return h('div', { class: 'details' },
+          h('div', { class: 'detailsHead' },
+            h('button', { class: 'toggle', 'aria-expanded': String(state.open), onclick: () => { state.open = !state.open; render(); } },
+              icon('chevron', 16, state.open ? 90 : 0), 'Technische Details'),
+            copyButton()),
+          state.open && h('pre', { class: 'trace' }, ERROR_TEXT));
+      }
+      function buttons() {
+        const reload = h('button', { class: 'primary', onclick: () => { state.open = false; render(); } }, icon('reload', 18), 'Neu laden');
+        const home = h('button', { class: 'secondary', onclick: () => { state.home = true; render(); } }, icon('home', 18), 'Zum Start');
+        return h('div', { class: 'buttons' }, reload, home);
+      }
+      function errorScreen() {
+        const text = { title: TITLES[ui.title], body: TEXTS[ui.text].body };
+        if (ui.look === 'B') {
+          const mark = ui.mark === 'S2'
+            ? h('span', { class: 'kaomoji', 'aria-hidden': 'true' }, '(╯°□°)╯︵ ┻━┻')
+            : h('span', { class: 'mark' }, icon(ui.mark === 'S3' ? 'flip' : 'warn', ui.mark === 'S3' ? 38 : 32));
+          const g = ui.style;
+          // G6: the heading sits in a ribbon like the development card (I2-C), the symbol in it.
+          const top = g === 'G6'
+            ? h('div', { class: 'ribbon' }, icon('warn', 22), h('h1', {}, text.title))
+            : [mark, h('h1', {}, text.title)];
+          return h('main', { class: 'main', role: 'alert' },
+            h('div', { class: 'errB ' + g.toLowerCase() },
+              h('div', { class: 'card' }, top,
+                h('p', { class: 'muted' }, text.body),
+                buttons(),
+                details())));
+        }
+        return h('main', { class: 'main', role: 'alert' },
+          h('div', { class: 'pageHead' }, h('h1', {}, text.title)),
+          h('div', { class: 'errA' }, h('p', { class: 'muted' }, text.body), buttons(), details()));
+      }
+      function startStub() {
+        return h('main', { class: 'main' },
+          h('div', { class: 'pageHead', style: { justifyContent: 'center' } }, h('strong', { style: { color: 'var(--accent-text)', fontSize: '1.2rem' } }, 'BoardBrain')),
+          h('p', { class: 'muted', style: { textAlign: 'center' } }, 'Start (nur angedeutet) – der Fehler ist weg, die App läuft normal weiter'),
+          h('div', { style: { textAlign: 'center' } }, h('button', { class: 'pill', onclick: () => { state.home = false; render(); } }, 'Fehler noch einmal zeigen')));
+      }
+      function appView() {
+        if (ui.case === 'rr') {
+          return h('div', { class: 'rr' },
+            h('h2', {}, 'Unexpected Application Error!'),
+            h('h3', { style: { fontStyle: 'italic' } }, "Cannot read properties of undefined (reading 'seat')"),
+            h('pre', {}, ERROR_TEXT.split('\n\n')[0]),
+            h('p', {}, '💿 Hey developer 👋'),
+            h('p', {}, 'You can provide a way better UX than this when your app throws errors by providing your own ErrorBoundary or errorElement prop on your route.'));
+        }
+        if (ui.case === 'today') {
+          return h('main', { class: 'today', role: 'alert' },
+            h('h1', {}, TEXTS.T0.title), h('p', {}, TEXTS.T0.body), h('button', {}, 'Neu laden'),
+            h('details', {}, h('summary', {}, 'Technische Details'), h('pre', { class: 'trace' }, ERROR_TEXT)));
+        }
+        // A broken frame cannot show the hand; a broken page keeps it in O1.
+        const withHand = !state.home ? ui.case === 'view' && ui.place === 'O1' : true;
+        const handEl = withHand ? hand() : null;
+        const handH = !withHand ? 0 : isWideFrame() ? 104 : 46;
+        return h('div', { class: 'app' },
+          h('div', { class: 'scroll', style: { paddingBottom: handH + 'px' } }, state.home ? startStub() : errorScreen()),
+          handEl);
+      }
+
+      function chips(label, entries, current, onPick) {
+        return h('div', { class: 'row' }, h('span', { class: 'label' }, label),
+          entries.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': String(k === current), onclick: () => { onPick(k); state.home = false; render(); } }, l)));
+      }
+      function notes() {
+        return h('ul', { class: 'notes' }, [
+          'Gilt für jeden unerwarteten Fehler: beim Zeichnen einer Seite, im Rahmen (Kartenhand) und beim Nachladen der Partie-Seiten nach einem Update. Immer ganzer Bildschirm ohne Kartenhand (O2).',
+          'Karte in der Mitte (B, Stil G1): Warnzeichen S1, Überschrift (╯°□°)╯︵ ┻━┻ (U12) in Textfarbe, Text T1 in gedämpfter Farbe.',
+          '„Neu laden“ lädt die aktuelle Adresse neu. „Zum Start“ lädt die App auf dem Start neu (#/), damit kein kaputter Zustand bleibt.',
+          'Technische Details aufklappbar, „Details kopieren“ legt Fehlertext, Adresse, Version und Gerät in die Zwischenablage, danach 2 s „Kopiert“ (D1). Nichts wird übertragen (NFA-DH-01).',
+          'Alle Knöpfe mit Druckzustand K-4 (PressableButton). Laufende Partie: jeder Schritt ist gespeichert, bevor er gezeigt wird (ADR-014).',
+        ].map((t) => h('li', {}, t)));
+      }
+      function render() {
+        ui.case = 'frame';
+        document.getElementById('picker').replaceChildren(
+          chips('Gerät', Object.entries(FRAMES), ui.frame, (k) => { if (k !== 'device') ui.lastFrame = k; ui.frame = k; }),
+        );
+        document.getElementById('intro').replaceChildren(h('span', {}, h('b', {}, 'K-5 final: Fehlerbildschirm. '),
+          'Verbindlich und pixelgenau für K-5 (Entscheidungen des Product Owners 11.11.2026: O2, B, D1, S1, U12, T1, G1); Symbole wie in der App (Icons.tsx). Knöpfe und Details sind klickbar; „Zum Start“ zeigt, wohin es geht.'));
+        const frame = h('div', { class: 'frame ' + ui.frame }, appView());
+        if (ui.frame === 'device') frame.append(h('button', { class: 'exit', 'aria-label': 'Vollbild verlassen', onclick: () => { ui.frame = ui.lastFrame; render(); } }, icon('close', 16)));
+        document.getElementById('stage').replaceChildren(frame, notes());
+      }
+      render();
+    </script>
+  </body>
+</html>

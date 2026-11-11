@@ -16,8 +16,8 @@ import { uuidGenerator } from '@/infra/random/uuidGenerator';
 import { registerServiceWorker } from '@/infra/update/serviceWorker';
 import { AppDependenciesProvider, type AppDependencies } from '@/ui/AppDependencies';
 import { AppLayout } from '@/ui/components/AppLayout';
-import { ErrorBoundary } from '@/ui/components/ErrorBoundary';
 import { ErrorScreen } from '@/ui/components/ErrorScreen';
+import { RouteErrorScreen } from '@/ui/components/RouteErrorScreen';
 import { installGlobalErrorHandlers } from '@/ui/globalErrorHandlers';
 import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
 import { GamesView } from '@/ui/views/management/GamesView';
@@ -80,20 +80,18 @@ const dependencies: AppDependencies = {
   }),
 };
 
-// Development Guidelines 6: every view has its own error boundary.
+// A view may wait with use(), e.g. the diagnostics. Errors are caught by the frame route below.
 function view(element: ReactNode): ReactNode {
-  return (
-    <ErrorBoundary>
-      <Suspense fallback={null}>{element}</Suspense>
-    </ErrorBoundary>
-  );
+  return <Suspense fallback={null}>{element}</Suspense>;
 }
 
 // ADR-019: hash routing. The diagnostics view is reachable via #/diagnose only (Architecture
-// 13.1); the board shows in the placement of a match.
+// 13.1); the board shows in the placement of a match. K-5: the frame route shows the app's own
+// error screen for every error while drawing or loading a view, on the whole screen (design O2).
 const router = createHashRouter([
   {
     element: <AppLayout />,
+    errorElement: <RouteErrorScreen />,
     children: [
       { path: '/', element: view(<StartView />) },
       { path: '/verwaltung', element: view(<ManagementView />) },

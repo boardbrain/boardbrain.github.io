@@ -389,9 +389,17 @@ export const de = {
     unbekannt: 'unbekannt',
   },
   fehler: {
-    titel: 'Etwas ist schiefgelaufen',
-    text: 'BoardBrain hat einen unerwarteten Fehler festgestellt. Lade die Seite neu. Bleibt der Fehler, kopiere die technischen Details in ein Issue.',
+    // K-5 (U12): the heading shows a table flip, screen readers read the words instead.
+    titel: '(╯°□°)╯︵ ┻━┻',
+    titelVorgelesen: 'Etwas ist schiefgelaufen',
+    text: 'Unerwarteter Fehler · gespeicherte Daten bleiben erhalten',
     neuLaden: 'Neu laden',
+    zumStart: 'Zum Start',
     details: 'Technische Details',
+    kopieren: 'Details kopieren',
+    kopiert: 'Kopiert',
+    adresse: 'Adresse',
+    version: 'Version',
+    geraet: 'Gerät',
   },
 } as const satisfies TextTree;

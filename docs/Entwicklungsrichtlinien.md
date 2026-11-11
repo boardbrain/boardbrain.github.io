@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.13 |
+| Version | 0.14 |
 | Status | Verbindlich ab der Setup-Phase |
 | Stand | 11.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
@@ -28,6 +28,7 @@
 | 0.11 | 03.11.2026 | I2-C: fester Startwert für den Zufall in Ende-zu-Ende-Tests über `tests/e2e/seededRandom.ts`, die einzige Ausnahme von der `crypto`-Regel außerhalb von `infra` und `tests/statistical` (8.2) |
 | 0.12 | 03.11.2026 | Vorschauen im Ordner `previews/` (2.5); während der Arbeit nur betroffene Tests, volle Suiten vor dem Push (8.2); Ende-zu-Ende-Tests dürfen Personen und Tische direkt in die Datenbank schreiben (8.3); Entscheidungen des Product Owners |
 | 0.13 | 11.11.2026 | Kleine Aufgabe K-6: Ende-zu-Ende-Tests nach dem Losen beginnen mit einer Partie aus `seedMatch` (8.3) |
+| 0.14 | 11.11.2026 | Kleine Aufgabe K-5: unerwartete Fehler einer Ansicht fängt die Fehleransicht der Routen statt einer eigenen Error Boundary je Ansicht; der Fehlerbildschirm nutzt `PressableButton` und bietet „Zum Start“ und „Details kopieren“ (6, 7.2) |
 
 ## Inhaltsverzeichnis
 
@@ -370,8 +371,8 @@ Kurzfassung der Architektur; Details in BoardBrain_Architektur.md.
 | Stile über CSS Modules; Inline-Stile nur für Motion-Werte und dynamische CSS-Variablen | nein (Review) |
 | Listen-Keys sind stabile Kennungen, nie der Index | teilweise, ESLint |
 | Echte Bedienelemente (`button`, `a`, `input` mit `label`) statt klickbarer `div`; jedes Bedienelement hat eine sichtbare oder hinterlegte Beschriftung aus der Sprachdatei. Grund ist sauberer Code und robuste Tests, nicht Barrierefreiheit, die kein Ziel ist (E-24) | nein (Review); Tests finden Elemente über Rolle und Name (8.3) |
-| Knöpfe und Links nur über `PressableButton` und `PressableLink` (`ui/components/Pressable.tsx`), damit jedes Bedienelement denselben Druckzustand zeigt (K-4, Architektur 13.6); kartenartige Elemente mit `look="card"` | ja, ESLint (Ausnahmen: die Bausteine selbst, Kartenhand, Fehlerbildschirm) |
-| Jede Ansicht ist von einer Error Boundary umschlossen (7.2) | nein (Review) |
+| Knöpfe und Links nur über `PressableButton` und `PressableLink` (`ui/components/Pressable.tsx`), damit jedes Bedienelement denselben Druckzustand zeigt (K-4, Architektur 13.6); kartenartige Elemente mit `look="card"` | ja, ESLint (Ausnahmen: die Bausteine selbst, Kartenhand) |
+| Jede Route liegt unter der Fehleransicht des Rahmens (`errorElement` in `src/main.tsx`, 7.2); keine Klassenkomponenten | teilweise, ESLint (Klassenkomponenten); sonst Review |
 | Berührungsflächen sind auf Smartphones bequem treffbar (Richtwert 44 × 44 Pixel) | nein (Review, manuelle Abnahme) |
 
 ---
@@ -396,7 +397,7 @@ TypeScript zwingt den Aufrufer, beide Fälle zu behandeln. Die Oberfläche über
 Programmierfehler, verletzte Invarianten und technische Störungen werden **geworfen** und aufgefangen
 
 1. in den Anwendungsdiensten, damit die Datenbanktransaktion vollständig zurückgerollt wird,
-2. in einer Error Boundary je Ansicht, die eine verständliche Meldung mit „Neu laden“ zeigt,
+2. in der Fehleransicht der Routen (`RouteErrorScreen` als `errorElement` des Rahmens, seit K-5): Sie fängt Fehler beim Zeichnen einer Ansicht, im Rahmen und beim Nachladen einer Ansicht und zeigt den Fehlerbildschirm über den ganzen Bildschirm mit „Neu laden“, „Zum Start“ und den Fehlerdetails (Referenz `docs/design/k5-error-screen-final-preview.html`),
 3. global über `error` und `unhandledrejection` für alles Übrige.
 
 Fehlerdetails werden nie übertragen (NFA-DH-01). Der Fehlerbildschirm bietet sie zum Kopieren an, damit sie in ein Issue übernommen werden können. Invarianten in `core` werden mit `assert(bedingung, 'beschreibung')` aus `core/shared` geprüft.
