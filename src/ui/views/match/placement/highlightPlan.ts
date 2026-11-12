@@ -18,9 +18,12 @@ import { uniformInt, type RandomSource } from '@/core/random';
  * (Architecture 13.6).
  */
 export const HIGHLIGHT_MS = {
-  /** Running light A2: all hops of a building, of a road. */
-  runBuilding: 2000,
-  runRoad: 1200,
+  /**
+   * Running light A2: all hops of a building, of a road. Longer than the 2.0 s and 1.2 s of the
+   * reference, which felt too short (PO 12.11.2026).
+   */
+  runBuilding: 3500,
+  runRoad: 2000,
   /** The ring left behind fades. */
   hopOut: 140,
   /** Rest on the result before the piece is set. */

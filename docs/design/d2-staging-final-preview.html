@@ -7361,7 +7361,7 @@
         flow: { all: '4 Personen, Städte & Ritter, Startrohstoffe' },
       };
       const MARK_GOLD = '#f5be5b';
-      const BASE_MS = { building: 2000, road: 1200, hold: 320 };
+      const BASE_MS = { building: 3500, road: 2000, hold: 320 }; // PO 12.11.2026 (I2-F): before 2000 and 1200
       const SETTLE_MS = { F1: 520, F2: 560, F3: 420, F4: 760, F5: 1600, F24: 760 };
       const NS = 'http://www.w3.org/2000/svg';
       function flEl(tag, attrs = {}, parent) {
@@ -8019,11 +8019,11 @@
           spec('Standard: Lauflicht (A2)', [
             'Farbe: Catan-Farbe der Person, die setzt. Form wie die Markierung M1 aus I2-H: Kreuzung Kreis r 5,6 mit 25 % Füllung und Rand 1,1; Kante Linie von 30 % bis 90 % der Kante, 7,5 breit, 60 % deckend, runde Enden (Brett-Einheiten, viewBox -60 -53 120 106).',
             'Ein Ring springt über alle gültigen Plätze: zufälliger Start, jeder Sprung zu einem zufälligen anderen Platz, zufällig 8 bis 13 Sprünge bei Gebäuden, 3 bis 5 bei Straßen, ohne Kenntnis des Ergebnisses. Dann landet er auf dem Ergebnis; steht er schon dort, bleibt er stehen.',
-            'Rhythmus langsamer werdend: Abstand k wächst mit 1,3^k; Summe Gebäude 2,0 s, Straße 1,2 s. Der vorige Ring blendet in 0,14 s aus. Danach 0,32 s Halt auf dem Ergebnis.',
+            'Rhythmus langsamer werdend: Abstand k wächst mit 1,3^k; Summe Gebäude 3,5 s, Straße 2,0 s (PO 12.11.2026 in I2-F, vorher 2,0 s und 1,2 s). Der vorige Ring blendet in 0,14 s aus. Danach 0,32 s Halt auf dem Ergebnis.',
           ]),
           spec('Festlegung: Aufsetzen mit Lichtring (F2 + F4)', [
             'Der Stein fällt auf seinen Platz: von 9 Einheiten oben und 125 % Größe, unsichtbar, bei 55 % der Zeit am Boden in voller Größe, bei 75 % noch einmal 1,3 Einheiten hoch, dann ruhig; 0,56 s, Kurve cubic-bezier(.4, 0, .6, 1).',
-            'Gleichzeitig läuft ein Ring vom Platz nach außen: Kreis r 6, Rand 1,4 in der Personenfarbe, von 40 % auf 260 % Größe, von deckend zu unsichtbar, 0,76 s. Die Markierung des Ergebnisses blendet in 0,52 s aus.',
+            'Gleichzeitig läuft ein Ring vom Platz nach außen: Kreis in der Personenfarbe, Radius von 2,4 auf 15,6 (40 % bis 260 % von r 6), Rand bleibt 1,4 breit, von deckend zu unsichtbar, 0,76 s (PO 12.11.2026 in I2-F: mitwachsender Rand wirkte als dunkles Band). Die Markierung des Ergebnisses blendet in 0,52 s aus.',
             'Das Brett bleibt die ganze Zeit hell.',
           ]),
           spec('Spannungsmodus: Gebäude (D2, E4, L2)', [

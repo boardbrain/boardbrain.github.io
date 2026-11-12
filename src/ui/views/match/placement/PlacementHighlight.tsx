@@ -283,6 +283,8 @@ const FALL = {
 const FALL_EASE = cubicBezier(0.4, 0, 0.6, 1);
 const FALL_STEPS = 24;
 const RING_EASE = [0.2, 0.6, 0.3, 1] as const;
+const ringEase = cubicBezier(...RING_EASE);
+const RING_RADIUS = 6;
 
 // The value of keyframes `values` at `times` for the progress `at`.
 function valueAt(values: readonly number[], at: number): number {
@@ -376,12 +378,18 @@ export function SettleTop({ place, color, pieceKeys }: SettleTopProps): React.JS
     const sequence: AnimationSequence = [
       [
         ring,
-        { opacity: [1, 0], scale: [0.4, 2.6] },
-        {
-          duration: HIGHLIGHT_MS.settleRing / 1000,
-          ease: [...RING_EASE],
-          at: 0,
+        { opacity: [1, 0] },
+        { duration: HIGHLIGHT_MS.settleRing / 1000, ease: [...RING_EASE], at: 0 },
+      ],
+      // The ring grows by its radius, not by scaling: its line stays thin (PO 12.11.2026: scaled,
+      // it became a wide band that darkened the board). WebKit does not animate the radius as a
+      // style, so it is set as the attribute on every frame.
+      [
+        (progress: number) => {
+          const radius = RING_RADIUS * (0.4 + 2.2 * ringEase(progress));
+          ring.setAttribute('r', radius.toFixed(3));
         },
+        { duration: HIGHLIGHT_MS.settleRing / 1000, ease: 'linear', at: 0 },
       ],
     ];
     for (const piece of pieces) {
@@ -412,7 +420,7 @@ export function SettleTop({ place, color, pieceKeys }: SettleTopProps): React.JS
       ref={ref}
       cx={centre.x}
       cy={centre.y}
-      r={6}
+      r={RING_RADIUS}
       className={styles.settleRing}
       stroke={fillOf(color)}
       data-testid="settle-ring"

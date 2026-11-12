@@ -42,11 +42,10 @@
   fill-opacity: 0.55;
 }
 
-/* F4: the ring that runs outwards when a piece is set */
+/* F4: the ring that runs outwards when a piece is set; it grows by its radius, so its line stays
+   1.4 wide */
 .settleRing {
   fill: none;
   stroke-width: 1.4;
   opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
 }
