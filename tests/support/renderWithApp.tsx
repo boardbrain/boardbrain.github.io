@@ -7,9 +7,11 @@ import {
   type RouteObject,
 } from 'react-router';
 import { onTestFinished } from 'vitest';
+import { createErrorLogService } from '@/app/services/errorLogService';
 import { createMasterDataService, type MasterDataService } from '@/app/services/masterDataService';
 import { createSessionService, type SessionService } from '@/app/services/sessionService';
 import type { BoardBrainDb } from '@/infra/db/database';
+import { createDexieErrorLogStore } from '@/infra/db/errorLogStore';
 import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
 import { createDexieSessionStore } from '@/infra/db/sessionStore';
 import { AppDependenciesProvider } from '@/ui/AppDependencies';
@@ -59,7 +61,17 @@ export function renderWithApp(
   });
   render(
     <AppDependenciesProvider
-      dependencies={{ db, masterData, session, rng: new SeededRandomSource(seed + 1) }}
+      dependencies={{
+        db,
+        masterData,
+        session,
+        rng: new SeededRandomSource(seed + 1),
+        errorLog: createErrorLogService({
+          store: createDexieErrorLogStore(db),
+          clock: fixedClock(),
+          version: '0.1.0',
+        }),
+      }}
     >
       <RouterProvider router={router} />
     </AppDependenciesProvider>,

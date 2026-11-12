@@ -1,4 +1,5 @@
 import { createContext, use, type ReactNode } from 'react';
+import type { ErrorLogService } from '@/app/services/errorLogService';
 import type { MasterDataService } from '@/app/services/masterDataService';
 import type { SessionService } from '@/app/services/sessionService';
 import type { RandomSource } from '@/core/random';
@@ -17,6 +18,8 @@ export type AppDependencies = {
    * 13.6, NFA-ZF-01); the same source as for drawing. It never decides a result.
    */
   readonly rng: RandomSource;
+  /** The recent unexpected errors of the diagnostics (K-9). */
+  readonly errorLog: ErrorLogService;
 };
 
 const AppDependenciesContext = createContext<AppDependencies | null>(null);

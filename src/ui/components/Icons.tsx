@@ -326,3 +326,15 @@ export function CopyIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Box with an arrow out of it for "Bericht teilen" (K-9). Decorative: the button around it
+ * carries the label.
+ */
+export function ShareIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+    </Outline>
+  );
+}

@@ -2,11 +2,13 @@ import { StrictMode, Suspense, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createHashRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
+import { createErrorLogService } from '@/app/services/errorLogService';
 import { createMasterDataService } from '@/app/services/masterDataService';
 import { createSessionService } from '@/app/services/sessionService';
 import { SUPPORTED_GAMES } from '@/games/registry';
 import { t } from '@/i18n/t';
 import { BoardBrainDb } from '@/infra/db/database';
+import { createDexieErrorLogStore } from '@/infra/db/errorLogStore';
 import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
 import { createDexieSessionStore } from '@/infra/db/sessionStore';
 import { readDiagnostics } from '@/infra/platform/diagnostics';
@@ -51,8 +53,20 @@ if (container === null) {
 }
 const root = createRoot(container);
 
+const db = new BoardBrainDb();
+// K-9: unexpected errors are kept for the diagnostics, from the views and from outside them.
+const errorLog = createErrorLogService({
+  store: createDexieErrorLogStore(db),
+  clock: systemClock,
+  version: __APP_VERSION__,
+});
+function recordError(error: unknown): void {
+  void errorLog.record(error, window.location.hash);
+}
+
 installGlobalErrorHandlers(window, (error) => {
   console.error('Unexpected error outside a view', error);
+  recordError(error);
   root.render(<ErrorScreen error={error} />);
 });
 
@@ -61,10 +75,6 @@ if (import.meta.env.PROD) {
   void registerServiceWorker();
 }
 
-// The diagnostics only read; they are determined once at startup.
-const diagnostics = readDiagnostics();
-
-const db = new BoardBrainDb();
 // NFA-ZF-03: one source of randomness for drawing and for the decorative chance of the views.
 const rng = new CryptoRandomSource();
 const dependencies: AppDependencies = {
@@ -81,9 +91,10 @@ const dependencies: AppDependencies = {
     rng,
   }),
   rng,
+  errorLog,
 };
 
-// A view may wait with use(), e.g. the diagnostics. Errors are caught by the frame route below.
+// A view may wait with use(). Errors are caught by the frame route below.
 function view(element: ReactNode): ReactNode {
   return <Suspense fallback={null}>{element}</Suspense>;
 }
@@ -94,7 +105,7 @@ function view(element: ReactNode): ReactNode {
 const router = createHashRouter([
   {
     element: <AppLayout />,
-    errorElement: <RouteErrorScreen />,
+    errorElement: <RouteErrorScreen onError={recordError} />,
     children: [
       { path: '/', element: view(<StartView />) },
       { path: '/verwaltung', element: view(<ManagementView />) },
@@ -122,7 +133,17 @@ const router = createHashRouter([
       },
       {
         path: '/diagnose',
-        element: view(<DiagnosticsView diagnostics={diagnostics} version={__APP_VERSION__} />),
+        element: view(
+          <DiagnosticsView
+            readDiagnostics={readDiagnostics}
+            build={{
+              version: __APP_VERSION__,
+              commit: __BUILD_COMMIT__,
+              builtAt: __BUILD_TIME__,
+              isDevelopment: import.meta.env.DEV,
+            }}
+          />,
+        ),
       },
     ],
   },
