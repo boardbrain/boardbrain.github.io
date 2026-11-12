@@ -382,6 +382,7 @@ export function MatchView(): React.JSX.Element | null {
           className={shared.iconBtn}
           aria-label={t('allgemein.zurueck')}
           disabled={back === null || isStaging}
+          {...greyedOut(back === null || isStaging, GREY)}
           onClick={() => {
             if (back !== null) {
               go(back);
@@ -641,6 +642,7 @@ function StepActions({
   onRepeat,
   onForward,
 }: StepActionsProps): React.JSX.Element {
+  const isRepeatOff = onSkip === null && (isPending || !canRepeat);
   return (
     // The buttons stay in place from page to page, without fading in again (PO 10.11.2026: they
     // twitched with every "Losen").
@@ -650,7 +652,8 @@ function StepActions({
         <PressableButton
           type="button"
           className={cx(shared.secondary, styles.swapBtn)}
-          disabled={onSkip === null && (isPending || !canRepeat)}
+          disabled={isRepeatOff}
+          {...greyedOut(isRepeatOff, GREY)}
           aria-label={onSkip === null ? undefined : t('partie.animationUeberspringen')}
           onClick={onSkip ?? onRepeat}
         >
@@ -667,9 +670,10 @@ function StepActions({
           type="button"
           className={cx(shared.primary, styles.forward)}
           disabled={isPending}
+          {...greyedOut(isPending, GREY_PRIMARY)}
           onClick={onForward}
         >
-          {t(FORWARD_LABELS[forward])}
+          <ForwardLabel text={t(FORWARD_LABELS[forward])} />
           <ChevronIcon size={18} />
         </PressableButton>
       </div>
@@ -681,6 +685,57 @@ function StepActions({
 // comes a little sooner, so the button never looks empty (PO 11.11.2026).
 const LABEL_IN = { duration: 0.18, ease: [0.1, 0.5, 0.5, 1] } as const;
 const LABEL_OUT = { duration: 0.18, ease: [0.5, 0, 0.9, 0.5] } as const;
+
+// Design I2-E: a button turns grey and back softly, in the 0.22 s of its release (PO 11.11.2026);
+// the opacities are those of the style sheets.
+const GREY = 0.5;
+const GREY_PRIMARY = 0.45;
+
+function greyedOut(isOff: boolean, grey: number): { initial: false; animate: { opacity: number } } {
+  return { initial: false, animate: { opacity: isOff ? grey : 1 } };
+}
+
+type ForwardLabelProps = {
+  readonly text: string;
+};
+
+// The label of the forward button: a new one crossfades with the old one (A2).
+function ForwardLabel({ text }: ForwardLabelProps): React.JSX.Element {
+  const [shown, setShown] = useState(text);
+  const [old, setOld] = useState<string | null>(null);
+  if (text !== shown) {
+    setShown(text);
+    setOld(shown);
+  }
+  return (
+    <span className={styles.swapBtn}>
+      <m.span
+        key={text}
+        className={styles.swapLabel}
+        initial={old === null ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={LABEL_IN}
+      >
+        {text}
+      </m.span>
+      {old !== null && (
+        <m.span
+          key={`old-${old}`}
+          className={styles.swapLabel}
+          aria-hidden="true"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={LABEL_OUT}
+          onAnimationComplete={() => {
+            setOld(null);
+          }}
+        >
+          {old}
+        </m.span>
+      )}
+    </span>
+  );
+}
 
 type SwapLabelProps = {
   readonly isShown: boolean;

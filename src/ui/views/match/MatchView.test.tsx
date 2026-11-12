@@ -72,8 +72,16 @@ async function tapForward(user: User, name: string): Promise<void> {
   });
 }
 
+// The label as shown: the old one may still be fading out, hidden (design I2-E, A2).
 function forwardName(): string {
-  return screen.getByRole('button', { name: FORWARD }).textContent;
+  const label = screen.getByRole('button', { name: FORWARD }).cloneNode(true);
+  if (!(label instanceof HTMLElement)) {
+    return '';
+  }
+  for (const hidden of label.querySelectorAll('[aria-hidden="true"]')) {
+    hidden.remove();
+  }
+  return label.textContent;
 }
 
 function progress(): string[] {
