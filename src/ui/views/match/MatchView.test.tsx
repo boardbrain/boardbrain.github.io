@@ -98,7 +98,8 @@ describe('US-AB-02 Go through the generation', () => {
     expect(screen.getByText('Landschaftsfelder')).toBeInTheDocument();
     expect(screen.getByText('Wer?')).toBeInTheDocument();
     expect(screen.getByText('Freitagsrunde · Basisspiel')).toBeInTheDocument();
-    expect(progress()).toEqual(['Losen 0/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
+    // PO 12.11.2026: the label counts the step at hand.
+    expect(progress()).toEqual(['Losen 1/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
     // PO 09.11.2026: the button stays in its place, but there is nothing to repeat yet.
     expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled();
@@ -133,7 +134,7 @@ describe('US-AB-02 Go through the generation', () => {
       startingResources: { count: 2, replacement: 'with' },
     });
     expect(await screen.findByRole('heading', { name: 'Startrohstoffe' })).toBeInTheDocument();
-    expect(progress()).toEqual(['Platzierung', 'Rohstoffe 0/4']);
+    expect(progress()).toEqual(['Platzierung', 'Rohstoffe 1/4']);
 
     await tapForward(user, 'Losen');
     await waitFor(() => {
@@ -290,7 +291,7 @@ describe('US-PL-04 Buildings and roads on the board', () => {
     await tapForward(user, 'Weiter');
 
     expect(await screen.findByRole('heading', { name: 'Platzierung' })).toBeInTheDocument();
-    expect(progress()).toContain('Platzierung 0/16');
+    expect(progress()).toContain('Platzierung 1/16');
     expect(screen.queryAllByTestId('board-settlement')).toHaveLength(0);
     expect(screen.getByText('· Siedlung')).toBeInTheDocument();
     expect(screen.queryByText('Als Nächstes')).not.toBeInTheDocument();

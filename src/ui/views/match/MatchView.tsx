@@ -514,8 +514,6 @@ export function MatchView(): React.JSX.Element | null {
         )}
         {slot.kind === 'starting-resources' && (
           <ResourcesScene
-            // Each person's page starts afresh, also after the cards of the one before left.
-            key={slot.personId}
             session={shown}
             personId={slot.personId}
             result={step?.kind === 'starting-resources' ? step.result : null}
@@ -619,7 +617,8 @@ type PhaseProgressProps = {
 };
 
 // F2: four phases; each is as wide as its longest possible label, fixed for the whole match. On a
-// page without a result, its phase is the current one with the steps before it.
+// page without a result, its phase is the current one; the bar shows the steps before it, the
+// label already counts the step at hand (PO 12.11.2026: "Losen 1/3" before the first draw).
 function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element {
   const phases = catanProgress(session.setup, session.generation, progressIndex(session, page)).map(
     (phase) =>
@@ -644,7 +643,11 @@ function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element
             </div>
             <span>
               {isCurrent
-                ? t('partie.phaseStand', { phase: name, erledigt: done, gesamt: total })
+                ? t('partie.phaseStand', {
+                    phase: name,
+                    erledigt: page.kind === 'pending' ? Math.min(total, done + 1) : done,
+                    gesamt: total,
+                  })
                 : name}
             </span>
           </div>

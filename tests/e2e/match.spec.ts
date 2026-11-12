@@ -130,7 +130,7 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
 
     // US-AB-02 AK-3: the first step without a result.
     await expect(page.getByRole('heading', { name: 'Losen' })).toBeVisible();
-    await expect(progress(page)).toContainText('Losen 0/3');
+    await expect(progress(page)).toContainText('Losen 1/3');
     await expect(page.getByText('Wer?')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
     const { phases, taps } = await drawAll(page);
@@ -241,7 +241,7 @@ test.describe('US-AB-03, US-AB-04, US-PL-05, US-AB-06 repeat, look back, skip an
     await dialog.getByRole('button', { name: 'Wiederholen' }).click();
 
     await expect(dialog).toHaveCount(0);
-    await expect(progress(page)).toContainText('Reihenfolge 0/2');
+    await expect(progress(page)).toContainText('Reihenfolge 1/2');
     await expect(page.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
   });
 
@@ -309,7 +309,7 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await dialog.getByRole('button', { name: 'Wiederholen' }).click();
 
     await expect(page.getByText('Wer?')).toBeVisible();
-    await expect(progress(page)).toContainText('Losen 1/3');
+    await expect(progress(page)).toContainText('Losen 2/3');
     await tapForward(page, 'Losen');
     await tapForward(page, 'Blättern');
     await tapForward(page, 'Zur Übersicht');
