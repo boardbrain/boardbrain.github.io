@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.17 |
+| Version | 0.18 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
@@ -31,6 +31,7 @@
 | 0.15 | 10.11.2026 | Bündel I2-H: Steine auf dem Brett antippen und wiederholen, der Stein und die mit verworfenen Steine sind markiert, solange die Rückfrage offen ist (neu US-AB-03 AK-8, Entscheidung des Product Owners 10.11.2026); Rückblick und „Blättern“ gehen ganze Ansichten statt einzelner Schritte, Reihenfolge und Platzierung erscheinen als Ganzes (US-AB-04 AK-3, AK-4, Entscheidung des Product Owners 10.11.2026) |
 | 0.16 | 11.11.2026 | Design D-2 (Anforderungsdokumentation 0.21, E-38, E-39): Klänge nach Version 1 (US-IN-03, 2.1, 2.3, 3.9, Rückverfolgung); Aufblinken nach der Referenz `docs/design/d2-staging-final-preview.html`, verrät nichts über das Ergebnis, mit Spannungsmodus (US-IN-02 neu AK-3 bis AK-7, FA-IN-08) |
 | 0.17 | 12.11.2026 | Bündel I2-E: „Animation überspringen“ steht als gleich großer Knopf „Überspringen“ an der Stelle von „Wiederholen“, solange eine Bewegung läuft (US-IN-04 AK-1, Entscheidung des Product Owners 11.11.2026) |
+| 0.18 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation 0.22, E-40): Vorabversionen 0.x nach abgeschlossenen Inkrementen unter der echten Adresse, erste ist 0.2.0 nach I2 (2.3, 8) |
 
 ## Inhaltsverzeichnis
 
@@ -95,7 +96,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 | I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen; unterstützte und eigene Spiele getrennt *(geändert in 0.12)* | Stammdaten vollständig pflegbar |
 | I6 Einstellungen und Feinschliff | US-SP-05 „Ich hasse Catan!“, Design und Akzentfarbe *(geändert in 0.12)* | Kandidat für Release 1.0 |
 
-Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwickelt, die jeweils ein Bündel zusammengehöriger User Stories enthalten (etwa zwei bis vier Bündel je Inkrement, bei einem großen Block wie I2 mehr; der Zuschnitt wird zu Beginn eines Inkrements festgelegt), und vom Product Owner im Pull Request abgenommen (EP-11). Nach `main` gelangt vor Release 1.0 nur der Platzhalter aus der Setup-Phase (Release 0.1.0, EP-02); danach erst der abgenommene Stand von Release 1.0. Über Vorabversionen wird nach I2 entschieden (OP-13). *(präzisiert in 0.5)*
+Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwickelt, die jeweils ein Bündel zusammengehöriger User Stories enthalten (etwa zwei bis vier Bündel je Inkrement, bei einem großen Block wie I2 mehr; der Zuschnitt wird zu Beginn eines Inkrements festgelegt), und vom Product Owner im Pull Request abgenommen (EP-11). Nach `main` gelangte zuerst der Platzhalter aus der Setup-Phase (Release 0.1.0, EP-02). Vor Release 1.0 folgen Vorabversionen (0.x) nach abgeschlossenen Inkrementen, nur nach Freigabe durch den Product Owner und ohne Versprechen für ihre Daten, beginnend mit 0.2.0 nach I2 (E-40); I6 ist Kandidat für Release 1.0. *(präzisiert in 0.5 und 0.18)*
 
 ### 2.4 Abgrenzung: nicht in Version 1
 
@@ -1126,7 +1127,8 @@ Ergebnisse der Setup-Planung *(ergänzt in 0.5)*:
 |---|---|---|
 | Dauerhafte Adresse | `https://boardbrain.github.io/` über die Organisation `boardbrain` | OP-12, E-21, ADR-022 |
 | Arbeitsweise | Story-Bündel in Arbeitsbranches; Claude Code eröffnet Pull Requests, der Product Owner nimmt ab und mergt; Haltepunkte | EP-10 bis EP-12, E-22, ADR-023 |
-| Erste Veröffentlichung | Platzhalter-Release 0.1.0 ohne Service Worker; Vorabversionen offen | EP-02, E-25, OP-13 |
+| Erste Veröffentlichung | Platzhalter-Release 0.1.0 ohne Service Worker | EP-02, E-25 |
+| Vorabversionen | 0.x nach abgeschlossenen Inkrementen unter der echten Adresse, Daten ohne Versprechen, erste 0.2.0 nach I2 | EP-02, E-40, OP-13 geklärt |
 | Arbeitsregeln | Entwicklungsrichtlinien und `CLAUDE.md` im Repository | EP-12 |
 
-Offen ist OP-13 (Vorabversionen), zu entscheiden nach Inkrement I2.
+OP-13 (Vorabversionen) ist seit 0.18 geklärt (E-40).

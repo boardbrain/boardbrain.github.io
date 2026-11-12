@@ -5,6 +5,7 @@ docs/
 
 # Generated files
 dist/
+dist-acceptance/
 coverage/
 playwright-report/
 test-results/

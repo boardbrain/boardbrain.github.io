@@ -10,6 +10,8 @@ export type TextTree = { readonly [key: string]: string | TextTree };
 export const de = {
   app: {
     name: 'BoardBrain',
+    // E-40: name of the local acceptance app (build mode "acceptance"), next to the published one
+    nameAbnahme: 'BoardBrain Dev',
     beschreibung: 'Faire Zufallsentscheidungen und Statistik für den Spieleabend',
   },
   allgemein: {

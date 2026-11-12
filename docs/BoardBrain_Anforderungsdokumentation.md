@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.21 |
+| Version | 0.22 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 11.11.2026 |
+| Stand | 12.11.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -35,6 +35,7 @@
 | 0.19 | 02.11.2026 | Design I2-C (Entscheidungen des Product Owners): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung spielen (5.4, FA-AB-02, neu FA-LS-07, FA-PL-09, FA-SR-04, E-33); Vorwärts-Knopf nennt, was er tut, und Rückblick auf frühere Schritte (FA-AB-03, neu FA-AB-10, E-34) |
 | 0.20 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (FA-AB-03, E-35); Personen werden mit Karten gelost statt mit einem Glücksrad (Begriff „Schritt“, FA-AB-03, FA-LS-02, FA-IN-02, E-36, OP-06); Startrohstoffe liegen verdeckt und werden von Hand aufgedeckt (neu FA-SR-05, E-37); nach einem Neustart läuft nur eine unterbrochene Animation erneut ab (FA-AB-07) |
 | 0.21 | 11.11.2026 | Design D-2 (Entscheidungen des Product Owners): Klänge nach Version 1 verschoben (FA-IN-03, FA-IN-05, FA-IN-07, E-38, PP-20); Aufblinken verrät bis zur Festlegung nichts über das Ergebnis (FA-IN-01, E-39); neuer Spannungsmodus der Platzierung (neu FA-IN-08, FA-IN-06, E-39); OP-06 geklärt (13) |
+| 0.22 | 12.11.2026 | OP-13 geklärt: Vorabversionen 0.x der echten App unter der echten Adresse nach abgeschlossenen Inkrementen, Daten ohne Versprechen, Update durch Schließen und Neuöffnen bis I4, kein Hinweis „Testversion“ (E-40, EP-02, 13) |
 
 ## Inhaltsverzeichnis
 
@@ -443,7 +444,7 @@ Das Projekt folgt einem strukturierten, sequenziellen Vorgehen:
 | ID | Festlegung |
 |---|---|
 | EP-01 | Die Versionsverwaltung erfolgt mit Git auf GitHub. |
-| EP-02 | Es wird mit Branches gearbeitet. Der Branch `main` enthält ausschließlich freigegebene, veröffentlichungsreife Stände. Vor Release 1.0 enthält `main` nur den Platzhalter aus der Setup-Phase (Release 0.1.0): eine Seite ohne Service Worker und ohne Datenspeicherung, mit der die Veröffentlichungskette nachgewiesen wird (E-25). *(präzisiert in 0.8)* |
+| EP-02 | Es wird mit Branches gearbeitet. Der Branch `main` enthält ausschließlich freigegebene, veröffentlichungsreife Stände. Vor Release 1.0 enthält `main` Vorabversionen (0.x) nach abgeschlossenen Inkrementen, veröffentlicht nur nach Freigabe durch den Product Owner (E-40). Der erste Stand war der Platzhalter aus der Setup-Phase (Release 0.1.0): eine Seite ohne Service Worker und ohne Datenspeicherung, mit der die Veröffentlichungskette nachgewiesen wurde (E-25). *(präzisiert in 0.8 und 0.22)* |
 | EP-03 | Die Entwicklung findet in separaten Branches statt: `develop` als Integrationsstand sowie kurzlebige Arbeitsbranches, die von `develop` abzweigen und jeweils ein Bündel zusammengehöriger User Stories oder eine Aufgabe enthalten. Pushes in diese Branches haben keine Auswirkung auf die veröffentlichte App. *(präzisiert in 0.8)* |
 | EP-04 | Änderungen gelangen ausschließlich per Pull Request und Merge nach `develop` und `main`, nachdem sie getestet wurden. Nach `main` gelangen nur Pull Requests aus `develop` (Release) oder aus einem Hotfix-Branch. GitHub erzwingt dies über Schutzregeln. *(präzisiert in 0.8)* |
 | EP-05 | Jede Veröffentlichung wird als Release mit Versionsnummer nach Semantic Versioning (z. B. 1.0.0) und einer kurzen Änderungsbeschreibung markiert. |
@@ -517,6 +518,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-37 | Startrohstoffe werden verdeckt ausgeteilt und von Hand aufgedeckt *(neu in 0.20)* | Eine kurze Bewegung statt einer langen Animation je Karte spart Zeit; das Aufdecken macht die bedienende Person selbst, so spannend, wie sie will. Entscheidung des Product Owners im Design von I2-D |
 | E-38 | Klänge (FA-IN-03, FA-IN-05, FA-IN-07, US-IN-03) sind nicht Teil von Version 1; sie stehen als Idee nach dem ersten Release im Parkplatz (PP-20). Ausnahme zu E-10 *(neu in 0.21)* | Ton ist unter iOS und iPadOS der heikelste Teil der Inszenierung (Stummschalter, Musik anderer Apps, Freischaltung) und nur von Hand prüfbar; die Einstellungsseite für den Tonschalter gehört ohnehin zu I6; die Spannung entsteht schon durch Karten und Aufblinken. Entscheidung des Product Owners im Design D-2 (11.11.2026) |
 | E-39 | Aufblinken und Spannungsmodus der Platzierung nach `docs/design/d2-staging-final-preview.html`: Standard ist ein Lauflicht in der Farbe der Person, danach wird der Stein von oben gesetzt; der Spannungsmodus (FA-IN-08) zeigt bei Gebäuden Ausschluss, Halt bei zwei und ein Duell auf Knopfdruck mit rein zufälligem Gegner. Die Darstellung entsteht ohne Kenntnis des Ergebnisses (Start, Reihenfolge, Länge zufällig), erst die Landung zeigt es *(neu in 0.21)* | Am Tisch soll die Platzierung spannend sein, wenn man will, und schnell, wenn nicht. Fairness ist das Kernversprechen der App: Wer die Darstellung kennt und oft spielt, darf daraus nichts ablesen; eine Wahl des Gegners nach Abstand hätte das Ergebnis teilweise verraten und wurde deshalb verworfen. Entscheidung des Product Owners im Design D-2 (11.11.2026) |
+| E-40 | Vorabversionen der echten App erscheinen vor Release 1.0 unter der echten Adresse `https://boardbrain.github.io/`, jeweils nach einem abgeschlossenen Inkrement und nur nach Freigabe durch den Product Owner; die erste ist 0.2.0 nach I2. Die Versionsnummer folgt Semantic Versioning wie bisher (EP-05, je Inkrement eine neue MINOR-Version); das GitHub-Release ist als Vorabversion (Pre-release) markiert. Für Daten aus Vorabversionen gilt kein Versprechen: Sie dürfen bei einer Änderung des Datenbankschemas verloren gehen; ob Release 1.0 mit leerer Datenbank beginnt oder die Daten übernimmt, wird vor 1.0 entschieden. Bis zum Update-Weg aus I4 (US-UP-01) wird eine neue Version erst aktiv, wenn die App ganz geschlossen und neu geöffnet wurde. Die App zeigt keinen Hinweis „Testversion“; die Versionsnummer steht in der Diagnose *(neu in 0.22)* | Freunde sollen den bisherigen Stand am Spieleabend ausprobieren können, auch auf dem iPhone und ohne lokales Zertifikat (OP-13, NFA-PL-01). Eine getrennte Testadresse hätte eine zweite GitHub-Organisation erfordert, weil ein Unterordner dieselbe Herkunft und damit dieselbe Datenbank hat. Datenverlust ist vor 1.0 hinnehmbar; Übergangsregeln für Testdaten wären Aufwand ohne Nutzen. Entscheidung des Product Owners (12.11.2026) |
 
 ---
 
@@ -536,7 +538,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | OP-10 | Priorisierung aller Anforderungen nach MoSCoW und Festlegung des Umfangs von Version 1 | Spezifikation | geklärt: E-10, Spezifikation Kapitel 2 |
 | OP-11 | Konkrete Farbwerte der Catan-Farben, der Gruppenfarben-Palette und der Akzentfarben unter Berücksichtigung der Lesbarkeit im Dunkelmodus | Design | geklärt: E-26, NFA-GB-03, Architektur 13.4 |
 | OP-12 | Dauerhafte Adresse (Herkunft) der App: eigene GitHub-Organisation mit eigener Herkunft (Empfehlung) oder Projektseite unter dem persönlichen Konto. Ein späterer Wechsel trennt die Nutzer von ihren Daten. | Setup | geklärt: E-21, Architektur ADR-022 |
-| OP-13 | Veröffentlichung von Vorabversionen der echten App (0.x) vor Release 1.0, etwa für Test-Spieleabende außerhalb des Heimnetzes. Erfordert eine Festlegung zum Umgang mit Daten aus Vorabversionen und einen funktionierenden Update-Mechanismus. Zusätzlich gilt: Der Product Owner besitzt kein eigenes iPhone; die Abnahme auf dem iPhone (NFA-PL-01) ist nur über Geräte von Freunden möglich. Vorabversionen unter der echten Adresse würden das erleichtern, weil dafür kein lokales Zertifikat auf fremden Geräten nötig ist. *(neu in 0.8, präzisiert in 0.10)* | Umsetzung (nach I2) | offen |
+| OP-13 | Veröffentlichung von Vorabversionen der echten App (0.x) vor Release 1.0, etwa für Test-Spieleabende außerhalb des Heimnetzes. Erfordert eine Festlegung zum Umgang mit Daten aus Vorabversionen und einen funktionierenden Update-Mechanismus. Zusätzlich gilt: Der Product Owner besitzt kein eigenes iPhone; die Abnahme auf dem iPhone (NFA-PL-01) ist nur über Geräte von Freunden möglich. Vorabversionen unter der echten Adresse würden das erleichtern, weil dafür kein lokales Zertifikat auf fremden Geräten nötig ist. *(neu in 0.8, präzisiert in 0.10)* | Umsetzung (nach I2) | geklärt: E-40, EP-02 |
 
 ---
 
@@ -574,4 +576,4 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08) – *abgeschlossen am 07.10.2026 mit Release 0.1.0*
 2. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10); Reihenfolge, Zuschnitt und Ablauf in `docs/Umsetzungsplan.md`
 3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) innerhalb von Inkrement I2, sobald der Ablauf einer Partie steht und bevor Aufblinken und Klänge gebaut werden (E-32; das Losen mit Karten ist seit 0.20 mit I2-D festgelegt, E-36). Die Farbwerte blockieren nichts, weil sie nur in den Design-Tokens stehen – *OP-11 erledigt am 07.10.2026 (E-26); OP-06 verschoben in 0.18, erledigt am 11.11.2026 (E-38, E-39)*
-4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13)
+4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13) – *erledigt am 12.11.2026 (E-40); erste Vorabversion 0.2.0*

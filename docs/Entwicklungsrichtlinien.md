@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.14 |
+| Version | 0.15 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 11.11.2026 |
+| Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -29,6 +29,7 @@
 | 0.12 | 03.11.2026 | Vorschauen im Ordner `previews/` (2.5); während der Arbeit nur betroffene Tests, volle Suiten vor dem Push (8.2); Ende-zu-Ende-Tests dürfen Personen und Tische direkt in die Datenbank schreiben (8.3); Entscheidungen des Product Owners |
 | 0.13 | 11.11.2026 | Kleine Aufgabe K-6: Ende-zu-Ende-Tests nach dem Losen beginnen mit einer Partie aus `seedMatch` (8.3) |
 | 0.14 | 11.11.2026 | Kleine Aufgabe K-5: unerwartete Fehler einer Ansicht fängt die Fehleransicht der Routen statt einer eigenen Error Boundary je Ansicht; der Fehlerbildschirm nutzt `PressableButton` und bietet „Zum Start“ und „Details kopieren“ (6, 7.2) |
+| 0.15 | 12.11.2026 | OP-13 (Anforderungsdokumentation E-40): Vorabversionen 0.x je Inkrement (3.7); das Release erzeugt der Product Owner selbst auf GitHub oder Claude Code nach Zustimmung, vor 1.0 als Pre-release markiert (3.8) |
 
 ## Inhaltsverzeichnis
 
@@ -236,7 +237,7 @@ Semantic Versioning (EP-05), übertragen auf eine App:
 | MINOR | Neue Funktionen, auch mit automatischer Datenmigration | Hellmodus, weiteres Spiel |
 | PATCH | Nur Fehlerbehebungen | Absturz beim Import behoben |
 
-Bis zum Release 1.0 steht in `package.json` eine Version `0.x.y`. Die App-Version ist unabhängig von der Schemaversion der Datenbank und der Version des Exportformats (Architektur 7.5).
+Bis zum Release 1.0 steht in `package.json` eine Version `0.x.y`. Vorabversionen erscheinen nach abgeschlossenen Inkrementen, je Inkrement mit neuer MINOR-Version (0.2.0 nach I2, 0.3.0 nach I3 …; E-40) *(ergänzt in 0.15)*. Die App-Version ist unabhängig von der Schemaversion der Datenbank und der Version des Exportformats (Architektur 7.5).
 
 ### 3.8 Release-Ablauf
 
@@ -244,7 +245,7 @@ Bis zum Release 1.0 steht in `package.json` eine Version `0.x.y`. Die App-Versio
 2. Nach dem Merge eröffnet Claude Code den Pull Request `develop` → `main` mit Titel `release: x.y.z`.
 3. Alle Prüfungen einschließlich der statistischen Suite laufen; der Product Owner führt die manuelle Abnahme nach `docs/Abnahme-Checkliste.md` durch (ab 1.0; beim Platzhalter 0.1.0 entfällt sie).
 4. Der Product Owner mergt.
-5. Nach Zustimmung des Product Owners erzeugt Claude Code das Release: `gh release create vx.y.z --target main --title "x.y.z" --notes-file ‹Auszug aus CHANGELOG›`. Der Tag löst die Veröffentlichung aus.
+5. Das Release mit Tag `vx.y.z` erzeugt der Product Owner selbst auf GitHub (Releases → „Draft a new release“, Tag neu anlegen, Ziel `main`, Titel `x.y.z`, Text aus `CHANGELOG.md`), wobei Claude Code ihn anleitet, oder Claude Code nach seiner Zustimmung mit `gh release create vx.y.z --target main --title "x.y.z" --notes-file ‹Auszug aus CHANGELOG›`. Vor 1.0 ist jedes Release als Vorabversion markiert (Häkchen „Set as a pre-release“ bzw. `--prerelease`, Anforderungsdokumentation E-40). Der Tag löst die Veröffentlichung aus. *(geändert in 0.15)*
 6. Der Product Owner prüft die veröffentlichte App unter `https://boardbrain.github.io/`.
 
 `CHANGELOG.md` ist deutsch und folgt dem Aufbau von „Keep a Changelog“: je Version ein Abschnitt mit Datum und den Unterabschnitten *Neu*, *Geändert*, *Behoben*, *Entfernt*, *Sicherheit*. Claude Code erstellt die Einträge aus den Titeln der Pull Requests seit dem letzten Release und formuliert sie für Nutzer verständlich.

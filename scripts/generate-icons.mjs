@@ -1,5 +1,7 @@
 // Generates the app icons in public/icons (design I1-D, icon D8 "two cards"): two fanned cards,
 // the front one styled like the app's cards with amber edge, corner hexagons and the logo.
+// A second set in violet goes to public-acceptance/icons for the local acceptance app (build mode
+// "acceptance", E-40, Architecture 16.6); only that build ships it.
 // Run with `npm run icons` after changing the logo or the colours; the PNGs are committed.
 // Colours come from src/ui/styles/tokens.css (NFA-GB-05); Playwright renders the SVG.
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -7,7 +9,6 @@ import path from 'node:path';
 import { chromium } from '@playwright/test';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const OUT_DIR = path.join(ROOT, 'public', 'icons');
 
 const tokens = readFileSync(path.join(ROOT, 'src', 'ui', 'styles', 'tokens.css'), 'utf8');
 
@@ -36,6 +37,15 @@ const COLORS = {
   shadow: token('--color-shadow'),
   // The warm glow at the top of the background of the design "Holz".
   glow: firstColorIn(token('--background-image')),
+};
+
+const ACCEPTANCE_COLORS = {
+  surface: token('--color-acceptance-icon-surface'),
+  raised: token('--color-acceptance-icon-raised'),
+  overlay: token('--color-acceptance-icon-overlay'),
+  accent: token('--color-acceptance-icon-accent'),
+  shadow: COLORS.shadow,
+  glow: token('--color-acceptance-icon-glow'),
 };
 
 // Logo "Eine Kontur" (design D-3), the same paths as src/ui/components/Logo.tsx.
@@ -71,32 +81,32 @@ function hexagon(cx, cy, radius) {
   }).join(' ');
 }
 
-function card(x, y, width, height, fill, strokeWidth) {
-  return `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${width * 0.13}" fill="${fill}" stroke="${COLORS.accent}" stroke-width="${strokeWidth}" filter="url(#shadow)"/>`;
+function card(colors, x, y, width, height, fill, strokeWidth) {
+  return `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${width * 0.13}" fill="${fill}" stroke="${colors.accent}" stroke-width="${strokeWidth}" filter="url(#shadow)"/>`;
 }
 
 // The front card: gradient face, amber edge, hexagons in two corners, logo in the middle.
-function frontCard(x, y, width, height) {
+function frontCard(colors, x, y, width, height) {
   const pip = width * 0.07;
-  return `${card(x, y, width, height, 'url(#face)', 1.9)}
-    <polygon points="${hexagon(x + width * 0.19, y + height * 0.13, pip)}" fill="${COLORS.accent}"/>
-    <polygon points="${hexagon(x + width * 0.81, y + height * 0.87, pip)}" fill="${COLORS.accent}"/>
-    ${logo(24, x + width / 2, y + height / 2, COLORS.accent)}`;
+  return `${card(colors, x, y, width, height, 'url(#face)', 1.9)}
+    <polygon points="${hexagon(x + width * 0.19, y + height * 0.13, pip)}" fill="${colors.accent}"/>
+    <polygon points="${hexagon(x + width * 0.81, y + height * 0.87, pip)}" fill="${colors.accent}"/>
+    ${logo(24, x + width / 2, y + height / 2, colors.accent)}`;
 }
 
 // purpose "maskable": Android cuts the icon round; the cards move into the safe zone (80 %).
-function iconSvg(size, purpose) {
-  const cards = `<g transform="rotate(-8 24 42)">${card(9.5, 3.5, 28, 39, COLORS.raised, 1.1)}</g>
-    <g transform="rotate(4 24 42)">${frontCard(11, 4, 28, 40)}</g>`;
+function iconSvg(colors, size, purpose) {
+  const cards = `<g transform="rotate(-8 24 42)">${card(colors, 9.5, 3.5, 28, 39, colors.raised, 1.1)}</g>
+    <g transform="rotate(4 24 42)">${frontCard(colors, 11, 4, 28, 40)}</g>`;
   const content =
     purpose === 'maskable'
       ? `<g transform="translate(24 24) scale(0.8) translate(-24 -24)">${cards}</g>`
       : cards;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 48 48">
     <defs>
-      <radialGradient id="background" cx="0.5" cy="0.05" r="0.9"><stop offset="0" stop-color="${COLORS.glow}"/><stop offset="1" stop-color="${COLORS.surface}"/></radialGradient>
-      <linearGradient id="face" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="${COLORS.overlay}"/><stop offset="1" stop-color="${COLORS.raised}"/></linearGradient>
-      <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="${COLORS.shadow}"/></filter>
+      <radialGradient id="background" cx="0.5" cy="0.05" r="0.9"><stop offset="0" stop-color="${colors.glow}"/><stop offset="1" stop-color="${colors.surface}"/></radialGradient>
+      <linearGradient id="face" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="${colors.overlay}"/><stop offset="1" stop-color="${colors.raised}"/></linearGradient>
+      <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="${colors.shadow}"/></filter>
     </defs>
     <rect width="48" height="48" fill="url(#background)"/>
     ${content}
@@ -111,18 +121,28 @@ const ICONS = [
   { file: 'apple-touch-icon.png', size: 180, purpose: 'any' },
 ];
 
-mkdirSync(OUT_DIR, { recursive: true });
+// The same file names in both folders, so vite.config.ts only swaps the folder.
+const SETS = [
+  { dir: path.join('public', 'icons'), colors: COLORS },
+  { dir: path.join('public-acceptance', 'icons'), colors: ACCEPTANCE_COLORS },
+];
+
 const browser = await chromium.launch();
 try {
-  for (const { file, size, purpose } of ICONS) {
-    const page = await browser.newPage({ viewport: { width: size, height: size } });
-    await page.setContent(`<html><body style="margin:0">${iconSvg(size, purpose)}</body></html>`);
-    await page.screenshot({
-      path: path.join(OUT_DIR, file),
-      clip: { x: 0, y: 0, width: size, height: size },
-    });
-    await page.close();
-    process.stdout.write(`public/icons/${file}\n`);
+  for (const { dir, colors } of SETS) {
+    mkdirSync(path.join(ROOT, dir), { recursive: true });
+    for (const { file, size, purpose } of ICONS) {
+      const page = await browser.newPage({ viewport: { width: size, height: size } });
+      await page.setContent(
+        `<html><body style="margin:0">${iconSvg(colors, size, purpose)}</body></html>`,
+      );
+      await page.screenshot({
+        path: path.join(ROOT, dir, file),
+        clip: { x: 0, y: 0, width: size, height: size },
+      });
+      await page.close();
+      process.stdout.write(`${dir.replaceAll(path.sep, '/')}/${file}\n`);
+    }
   }
 } finally {
   await browser.close();

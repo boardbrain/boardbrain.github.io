@@ -7,7 +7,13 @@ const ANIMATION_MESSAGE = 'No CSS animations; animations only via Motion (Archit
 /** @type {import('stylelint').Config} */
 export default {
   extends: ['stylelint-config-standard'],
-  ignoreFiles: ['dist/**', 'coverage/**', 'playwright-report/**', 'test-results/**'],
+  ignoreFiles: [
+    'dist/**',
+    'dist-acceptance/**',
+    'coverage/**',
+    'playwright-report/**',
+    'test-results/**',
+  ],
   rules: {
     'color-no-hex': [true, { message: COLOR_MESSAGE }],
     'color-named': ['never', { message: COLOR_MESSAGE }],
