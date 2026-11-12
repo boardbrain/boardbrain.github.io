@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.34 |
-| Stand | 12.11.2026 |
+| Version | 0.35 |
+| Stand | 13.11.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
 
@@ -47,6 +47,7 @@
 | 0.32 | 12.11.2026 | I2-F umgesetzt (#43): Aufblinken und Spannungsmodus nach der Referenz aus D-2; bei „Bewegung reduzieren“ auch im Spannungsmodus sofort das Ergebnis, Zeiten als Konstanten wie in I2-E, Lauflicht länger (3,5 s statt 2,0 s, Straße 2,5 s statt 1,2 s mit 4 bis 7 Sprüngen), Spannungsmodus beim Gebäude 7,0 s statt 5,1 s, Lichtring mit dünnem Rand (Referenz angepasst) (Entscheidungen des Product Owners 12.11.2026) (2, 8) |
 | 0.33 | 12.11.2026 | Inkrement I2 abgeschlossen (2); K-8 an den Anfang von I3 verschoben; neue kleine Aufgabe K-9 „Diagnose überarbeiten“ und umgesetzt: Zusammenfassung mit Hinweisen, App, Gerät, Daten, Würfeltest, Voraussetzungen, letzte Fehler, Bericht teilen oder kopieren; ohne Vorschau-Runde (Entscheidungen des Product Owners 12.11.2026) (2, 6) |
 | 0.34 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation E-40): Vorabversionen 0.x je Inkrement, erste 0.2.0 nach I2 (neue Zeile 4b); lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol auf Port 4174 (`npm run build:acceptance`, `npm run preview:acceptance`) |
+| 0.35 | 13.11.2026 | Release 0.2.0 vorbereitet (#46): Version und `CHANGELOG.md` (4b) |
 
 ## 1. Zweck
 
@@ -70,7 +71,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 3c | Kleine Aufgabe K-7: Ende-zu-Ende-Hälften auf GitHub gleichmäßig verteilen | nach K-5, vor D-2 | umgesetzt (#40) |
 | 3d | Kleine Aufgabe K-9: Diagnose überarbeiten | nach I2, vor der Vorabversion (OP-13) | umgesetzt (#44) |
 | 4 | Entscheidung über Vorabversionen (OP-13) und lokale Abnahme-App mit lila Symbol | nach I2 | umgesetzt (#45) |
-| 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | offen |
+| 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | vorbereitet (#46); veröffentlicht mit Release-PR nach `main` und Tag `v0.2.0` |
 | 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | offen |
 | 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
