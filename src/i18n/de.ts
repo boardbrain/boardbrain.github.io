@@ -296,6 +296,8 @@ export const de = {
     fragezeichen: '?',
     wer: 'Wer?',
     alsNaechstes: 'Als Nächstes',
+    jetzt: 'Jetzt',
+    alleGesetzt: 'Alle gesetzt',
     platzierungFertig: 'Platzierung fertig',
     rueckblick: 'Rückblick',
     zumAktuellenSchritt: 'Zum aktuellen Schritt',

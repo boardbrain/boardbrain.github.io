@@ -293,6 +293,7 @@
 }
 
 .turnBand {
+  position: relative;
   display: flex;
   gap: 10px;
   align-items: center;
@@ -350,6 +351,19 @@
   border: 1px solid var(--color-border);
 }
 
+/* Design I2-E: the old content lies over the band while it fades out (0.26 s). */
+.bandFade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.doneBand > .bandFade {
+  inset: -1px;
+}
+
 .tbOrder {
   display: inline-flex;
   flex: none;
@@ -374,8 +388,18 @@
 }
 
 .mCoinNow {
-  box-shadow: 0 0 0 2px var(--color-text);
+  position: relative;
   opacity: 1;
+}
+
+/* The ring of the coin at turn; it glides to the next coin (design I2-E, 0.32 s). */
+.mRing {
+  position: absolute;
+  inset: -1.5px;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--color-text);
 }
 
 /* W2: the order as a list beside the board, only in landscape. */
