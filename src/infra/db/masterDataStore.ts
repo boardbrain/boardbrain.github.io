@@ -10,7 +10,7 @@ import type { BoardBrainDb } from './database';
  */
 async function recordUserDataChange(db: BoardBrainDb, at: IsoTimestamp): Promise<void> {
   const entry = await db.meta.get('state');
-  const state = entry?.value ?? {};
+  const state = entry?.key === 'state' ? entry.value : {};
   await db.meta.put({
     key: 'state',
     value: { ...state, lastUserDataChangeAt: at, firstDataAt: state.firstDataAt ?? at },

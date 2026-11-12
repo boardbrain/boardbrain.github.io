@@ -1,5 +1,5 @@
 import { Dexie, type DexieOptions, type Table, type Transaction } from 'dexie';
-import type { StoredSession } from '@/app/ports';
+import type { ErrorLogEntry, StoredSession } from '@/app/ports';
 import type {
   CustomGame,
   GameId,
@@ -21,9 +21,12 @@ export type MetaState = {
 };
 
 /**
- * Entry of the `meta` store. Settings follow with their increment.
+ * Entry of the `meta` store: the state data and, since K-9, the recent unexpected errors for
+ * the diagnostics. Settings follow with their increment.
  */
-export type MetaEntry = { readonly key: 'state'; readonly value: MetaState };
+export type MetaEntry =
+  | { readonly key: 'state'; readonly value: MetaState }
+  | { readonly key: 'errors'; readonly value: readonly ErrorLogEntry[] };
 
 /**
  * One version of the database schema (Architecture 7.5). A schema change appends a new

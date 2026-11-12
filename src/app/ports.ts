@@ -114,3 +114,30 @@ export type IdGenerator = {
 export type Clock = {
   now(): IsoTimestamp;
 };
+
+/**
+ * An unexpected error as the diagnostics list it (K-9). Stays on the device (NFA-DH-01) and
+ * holds no user data: only the error text, where it happened and the app version.
+ */
+export type ErrorLogEntry = {
+  readonly at: IsoTimestamp;
+  /** Address of the view, e.g. `#/partie`. */
+  readonly address: string;
+  /** Name and message of the error, e.g. `TypeError: x is undefined`. */
+  readonly message: string;
+  /** First line of the stack below the message, if there is one. */
+  readonly origin?: string;
+  readonly version: string;
+};
+
+/**
+ * Storage of the recent unexpected errors (K-9). It is no user data in the sense of
+ * Architecture 7.4, so writing it records no change.
+ */
+export type ErrorLogStore = {
+  /**
+   * Replaces the stored entries with the result of `change` in one read-write transaction.
+   * The entries are ordered newest first.
+   */
+  update(change: (entries: readonly ErrorLogEntry[]) => readonly ErrorLogEntry[]): Promise<void>;
+};

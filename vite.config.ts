@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import path from 'node:path';
@@ -134,6 +135,17 @@ function localServerOptions(): Pick<ServerOptions, 'https' | 'host'> {
 
 const serverOptions = localServerOptions();
 
+// K-9: the diagnostics name the build, because test versions share one version number. Without
+// Git (e.g. a copy of the sources) the build has no commit; the diagnostics then show "unknown".
+function buildCommit(): string {
+  try {
+    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim();
+  } catch (error: unknown) {
+    console.warn('Reading the Git commit for the diagnostics failed', error);
+    return '';
+  }
+}
+
 export default defineConfig({
   base: '/',
   plugins: [
@@ -148,6 +160,8 @@ export default defineConfig({
   },
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
+    __BUILD_COMMIT__: JSON.stringify(buildCommit()),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   server: { ...serverOptions, port: 5173, strictPort: true },
   preview: { ...serverOptions, port: 4173, strictPort: true },
