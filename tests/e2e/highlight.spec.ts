@@ -121,7 +121,9 @@ test.describe('US-IN-02 after repeating the whole placement (design D-2)', () =>
     await main(page).getByRole('button', { name: 'Losen' }).click();
     await expect(main(page).getByTestId('settle-ring')).toHaveCount(1, { timeout: 10_000 });
     // The road is set completely before the placement is repeated.
-    await expect(main(page).getByRole('button', { name: 'Wiederholen', exact: true })).toBeEnabled();
+    await expect(
+      main(page).getByRole('button', { name: 'Wiederholen', exact: true }),
+    ).toBeEnabled();
 
     await main(page)
       .getByRole('button', { name: /^Siedlung von .* wiederholen$/ })
