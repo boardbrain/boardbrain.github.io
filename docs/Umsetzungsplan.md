@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.30 |
-| Stand | 11.11.2026 |
-| Grundlage | BoardBrain_Spezifikation.md v0.16 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.31 (13.6, 19) |
+| Version | 0.31 |
+| Stand | 12.11.2026 |
+| Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
 
 ## Änderungshistorie
@@ -43,6 +43,7 @@
 | 0.28 | 11.11.2026 | K-5 umgesetzt (#39): eigener Fehlerbildschirm statt der Entwicklerseite von React Router, als Fehleransicht des Rahmens über den ganzen Bildschirm; in drei Runden Designvorschlägen gewählt (O2, B, G1, D1, S1, U12, T1); Referenz `docs/design/k5-error-screen-final-preview.html` (2, 6) |
 | 0.29 | 11.11.2026 | Neue kleine Aufgabe K-7 „Ende-zu-Ende-Hälften auf GitHub gleichmäßig verteilen“ vor D-2 (Entscheidung des Product Owners 11.11.2026) und umgesetzt: drei gleichzeitige Läufe je Geräteart statt zwei Hälften (2, 6) |
 | 0.30 | 11.11.2026 | Design D-2 umgesetzt (Entscheidungen des Product Owners, Anforderungsdokumentation 0.21, E-38, E-39): Referenz `docs/design/d2-staging-final-preview.html`; Klänge nach Version 1; I2-F wird „Aufblinken und Spannungsmodus“ (Opus, high), die Karte „Einstellungen“ kommt erst mit I6 (2, 7, 8); neue kleine Aufgabe K-8 „Doku-PRs auf GitHub schnell grün“ (2, 6; Entscheidung des Product Owners 11.11.2026) |
+| 0.31 | 12.11.2026 | I2-E umgesetzt: Referenz `docs/design/i2e-card-moves-final-preview.html`; „Überspringen“ an der Stelle von „Wiederholen“ (Spezifikation 0.17, US-IN-04 AK-1), Einsammeln nach Wiederholen der Reihenfolge, Gleiten nach „Wiederholen“, weiche Wechsel von Band und Knöpfen (Entscheidungen des Product Owners 11.11.2026); Prüfpunkt Schärfe erledigt (2, 8) |
 
 ## 1. Zweck
 
@@ -60,7 +61,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 2b | Kleine Aufgabe K-3: Kartenhand einfahren | nach I1, vor I2 | umgesetzt (#23) |
 | 2c | Kleine Aufgabe K-4: Berührungsverhalten app-weit | direkt nach K-3, vor I2 | umgesetzt (#25) |
-| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31), I2-D (#34), I2-G (#35), I2-H (#36), D-2 (#41) |
+| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31), I2-D (#34), I2-G (#35), I2-H (#36), D-2 (#41), I2-E |
 | 3a | Kleine Aufgabe K-6: Ende-zu-Ende-Tests schneller, Prüfungen nicht bei jeder Bearbeitung eines PRs | nach I2-H, vor K-5 | umgesetzt (#38) |
 | 3b | Kleine Aufgabe K-5: Fehlerbildschirm auch bei Fehlern in einer Ansicht | nach K-6, vor D-2 | umgesetzt (#39) |
 | 3c | Kleine Aufgabe K-7: Ende-zu-Ende-Hälften auf GitHub gleichmäßig verteilen | nach K-5, vor D-2 | umgesetzt (#40) |
@@ -282,7 +283,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 | I2-G Mehr Platz: ohne Titelleiste, ganze Breite *(neu in 0.23)* | NFA-PL-04 (alle Ansichten) | Opus, medium | `feat/more-room-layout` | umgesetzt (#35) |
 | I2-H Steine auf dem Brett antippen *(neu in 0.23)* | US-AB-03 (Oberfläche) | Opus, high | `feat/us-ab-03-tap-pieces` | umgesetzt (#36) |
 | D-2 Design der Inszenierung (OP-06) | Aufblinken, Spannungsmodus, Tempo | Opus, medium | `chore/op-06-staging-design` | umgesetzt (#41) |
-| I2-E Karten ziehen und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-card-draw` | offen |
+| I2-E Karten ziehen und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-card-draw` | umgesetzt |
 | I2-F Aufblinken und Spannungsmodus *(bis 0.29 „Aufblinken und Klänge“)* | US-IN-02 | Opus, high | `feat/us-in-02-highlight-and-tension` | offen |
 
 **Warum diese Reihenfolge:** Erst die Fachlogik ohne Oberfläche (A, B), weil dort die strengsten Prüfkriterien gelten (Zufall, Sackgassen, erst speichern, dann zeigen). Dann der Ablauf in der App (C, D), sodass am Spieleabend schon gespielt werden kann. D-2 folgt, wenn der Ablauf läuft, damit Aufblinken und Klänge am echten Ablauf beurteilt werden. Die Inszenierung (E, F) ersetzt dann nur Bausteine der Oberfläche; Fachlogik und Datenbank bleiben unverändert, weil jede Animation ihr Ergebnis fertig erhält (Architektur 13.6).
@@ -356,8 +357,9 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 - **Inhalt:** die Bewegungen der Karten nach der Referenz aus I2-D mit Motion (Architektur 13.6): Mischen in drei Bewegungen, Flug der gelosten Karte auf ihren Platz, Austeilen der Reihenfolge und Umdrehen Platz für Platz, Austeilen der Startrohstoffe mit sichtbarem Zurücklegen; die geloste Karte steht vorher fest (US-IN-01 AK-2); Knopf „Animation überspringen“ (US-IN-04). Die ruhenden Zustände baut schon I2-D.
 - **Nachweis:** Unit-Tests für die Abfolge der Bewegungen; Ende-zu-Ende-Tests: Die gezogene Karte ist die geloste Person, Überspringen zeigt sofort das Ergebnis, Tippen daneben ändert nichts.
 - **Pakete:** keine.
-- **Prüfpunkt aus I2-G:** Die Entwicklungskarte wird auf Tablets per `scale` vergrößert (bis 280 statt 240 px). Ruhend ist sie in WebKit scharf; während einer Bewegung prüfen, ob Safari sie unscharf zeichnet. Falls ja, die Karte in der größten Größe bauen und nur verkleinern.
+- **Prüfpunkt aus I2-G:** Die Entwicklungskarte wird auf Tablets per `scale` vergrößert (bis 280 statt 240 px). Ruhend ist sie in WebKit scharf; während einer Bewegung prüfen, ob Safari sie unscharf zeichnet. Falls ja, die Karte in der größten Größe bauen und nur verkleinern. Ergebnis: In WebKit bleibt sie auch mitten in der Bewegung scharf, nichts zu ändern. *(ergänzt in 0.31)*
 - **Hinweis aus D-2:** „Animation überspringen“ gilt auch für das Aufblinken der Platzierung, im Spannungsmodus und in der Pause vor dem Duell (Referenz `docs/design/d2-staging-final-preview.html`); das Tempo der Kartenbewegungen bleibt das der Referenz aus I2-D. *(neu in 0.30)*
+- **Umsetzung (0.31):** Referenz `docs/design/i2e-card-moves-final-preview.html` aus fünf Vorschau-Runden. „Überspringen“ steht gleich groß an der Stelle von „Wiederholen“ (U1); während einer Bewegung ist „Zurück“ gesperrt, „Partie beenden“ bleibt bedienbar. Nach einem Wiederholen der Reihenfolge sammelt das nächste „Losen“ die verdeckten Karten ein und teilt neu aus (E1). Startrohstoffe fliegen bei „Weiter“ in die Münze der Person (W3). Nach „Wiederholen“ gleiten Karten an ihre neue Lage, auch im Rückblick; Band und Knöpfe wechseln weich, im Band der Platzierung steht „Jetzt“ bzw. „Alle gesetzt“ über dem Namen. Das Überspringen des Aufblinkens kommt mit I2-F.
 - **Abnahme durch den Product Owner:** Karten ziehen auf S26, iPad und PC; flüssig, auch beim Neustart während einer Bewegung.
 
 ### I2-F Aufblinken und Spannungsmodus *(bis 0.29 „Aufblinken und Klänge“)*

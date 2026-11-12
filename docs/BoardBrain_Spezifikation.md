@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.16 |
+| Version | 0.17 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 11.11.2026 |
+| Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -30,6 +30,7 @@
 | 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); nach einem Neustart nur eine unterbrochene Animation erneut (3.5, US-AB-05 AK-3); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6); Wiederholen der Reihenfolge ab Platz k statt immer ganz (3.1, US-AB-03 AK-5, Entscheidung des Product Owners 10.11.2026) |
 | 0.15 | 10.11.2026 | Bündel I2-H: Steine auf dem Brett antippen und wiederholen, der Stein und die mit verworfenen Steine sind markiert, solange die Rückfrage offen ist (neu US-AB-03 AK-8, Entscheidung des Product Owners 10.11.2026); Rückblick und „Blättern“ gehen ganze Ansichten statt einzelner Schritte, Reihenfolge und Platzierung erscheinen als Ganzes (US-AB-04 AK-3, AK-4, Entscheidung des Product Owners 10.11.2026) |
 | 0.16 | 11.11.2026 | Design D-2 (Anforderungsdokumentation 0.21, E-38, E-39): Klänge nach Version 1 (US-IN-03, 2.1, 2.3, 3.9, Rückverfolgung); Aufblinken nach der Referenz `docs/design/d2-staging-final-preview.html`, verrät nichts über das Ergebnis, mit Spannungsmodus (US-IN-02 neu AK-3 bis AK-7, FA-IN-08) |
+| 0.17 | 12.11.2026 | Bündel I2-E: „Animation überspringen“ steht als gleich großer Knopf „Überspringen“ an der Stelle von „Wiederholen“, solange eine Bewegung läuft (US-IN-04 AK-1, Entscheidung des Product Owners 11.11.2026) |
 
 ## Inhaltsverzeichnis
 
@@ -715,7 +716,7 @@ Nicht Teil von Version 1 (Anforderungsdokumentation E-38, PP-20). AK-3 (keine Vi
 Als bedienende Person möchte ich eine Animation gezielt überspringen können, damit es bei Bedarf schneller geht, ohne versehentlich etwas zu überspringen.
 Bezug: FA-IN-06
 
-- **AK-1:** Gegeben eine laufende Animation, dann gibt es einen klar beschrifteten Button „Animation überspringen“.
+- **AK-1:** Gegeben eine laufende Animation, dann steht an der Stelle von „Wiederholen“ ein gleich großer, klar beschrifteter Button „Überspringen“ mit eigenem Symbol, vorgelesen als „Animation überspringen“; er erscheint sofort mit der Animation, danach steht dort wieder „Wiederholen“. *(geändert in 0.17)*
 - **AK-2:** Gegeben ich nutze ihn, dann erscheint sofort das Ergebnis, und der Schritt muss weiterhin bestätigt werden.
 - **AK-3:** Gegeben ein Tippen außerhalb dieses Buttons, dann beeinflusst es die Animation nicht.
 - **AK-4:** Gegeben die Einstellungen, dann gibt es keine Einstellung für das Animationstempo.
