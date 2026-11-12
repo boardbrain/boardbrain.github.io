@@ -1,16 +1,22 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import type { StoredSession } from '@/app/ports';
-import { CURRENT_SESSION_ID, SESSION_SCHEMA_VERSION } from '@/core/generation';
+import type { ErrorLogEntry, StoredSession } from '@/app/ports';
+import {
+  CURRENT_SESSION_ID,
+  SESSION_SCHEMA_VERSION,
+  type GenerationState,
+} from '@/core/generation';
 import {
   sortByName,
   type CustomGame,
   type GameId,
+  type IsoTimestamp,
   type Group,
   type GroupId,
   type Person,
   type PersonId,
 } from '@/core/model';
 import type { BoardBrainDb } from './database';
+import { readErrorLog } from './errorLogStore';
 
 /**
  * All persons sorted by name; `undefined` while loading. The view updates itself on every
@@ -91,4 +97,81 @@ export function useCurrentSession(db: BoardBrainDb): CurrentSession | undefined 
       ? { status: 'active', session }
       : { status: 'unsupported' };
   }, [db]);
+}
+
+/**
+ * How many records of one kind are stored, archived ones included.
+ */
+export type RecordCount = { readonly total: number; readonly archived: number };
+
+/**
+ * What the diagnostics tell about the stored data (K-9): versions, counts and the state of a
+ * match, but no names, so the report can be shared without second thoughts (NFA-DH-02).
+ */
+export type DataSummary = {
+  /** Version of the database schema (Architecture 7.5). */
+  readonly schemaVersion: number;
+  readonly persons: RecordCount;
+  readonly groups: RecordCount;
+  readonly customGames: RecordCount;
+  readonly session:
+    | { readonly status: 'none' | 'unsupported' }
+    | {
+        readonly status: 'active';
+        readonly state: GenerationState;
+        readonly steps: number;
+        readonly startedAt: IsoTimestamp;
+      };
+  /** Last change of user data (Architecture 7.4); missing as long as nothing was stored. */
+  readonly lastUserDataChangeAt?: IsoTimestamp;
+};
+
+function countOf(records: readonly { readonly archived: boolean }[]): RecordCount {
+  return {
+    total: records.length,
+    archived: records.filter((record) => record.archived).length,
+  };
+}
+
+/**
+ * Summary of the stored data for the diagnostics (K-9); `undefined` while loading.
+ */
+export function useDataSummary(db: BoardBrainDb): DataSummary | undefined {
+  return useLiveQuery(async (): Promise<DataSummary> => {
+    const [persons, groups, customGames, session, meta] = await Promise.all([
+      db.persons.toArray(),
+      db.groups.toArray(),
+      db.games.toArray(),
+      db.session.get(CURRENT_SESSION_ID),
+      db.meta.get('state'),
+    ]);
+    const lastChange = meta?.key === 'state' ? meta.value.lastUserDataChangeAt : undefined;
+    let sessionSummary: DataSummary['session'] = { status: 'none' };
+    if (session !== undefined) {
+      sessionSummary =
+        session.schemaVersion === SESSION_SCHEMA_VERSION
+          ? {
+              status: 'active',
+              state: session.generation.state,
+              steps: session.generation.steps.length,
+              startedAt: session.startedAt,
+            }
+          : { status: 'unsupported' };
+    }
+    return {
+      schemaVersion: db.verno,
+      persons: countOf(persons),
+      groups: countOf(groups),
+      customGames: countOf(customGames),
+      session: sessionSummary,
+      ...(lastChange === undefined ? {} : { lastUserDataChangeAt: lastChange }),
+    };
+  }, [db]);
+}
+
+/**
+ * The recent unexpected errors, newest first (K-9); `undefined` while loading.
+ */
+export function useErrorLog(db: BoardBrainDb): readonly ErrorLogEntry[] | undefined {
+  return useLiveQuery(() => readErrorLog(db), [db]);
 }

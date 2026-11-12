@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.33 |
+| Version | 0.34 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -47,6 +47,7 @@
 | 0.31 | 11.11.2026 | Design D-2 (Anforderungsdokumentation 0.21, E-38, E-39): Aufblinken, Spannungsmodus und Tempo nach `docs/design/d2-staging-final-preview.html` (13.6); Klänge nach Version 1, 12.3 und ADR-017 zurückgestellt (4.4, 12.3, ADR-017); OP-06 geklärt (18, 19) |
 | 0.32 | 12.11.2026 | Bündel I2-E: Merker `isStaged` je Schritt für FA-AB-07, `markStaged` im Kern und im `SessionService`, Sitzung Version 3 (10.2, 10.3); Bewegungen der Karten als reiner Plan mit Abspieler, „Überspringen“ an der Stelle von „Wiederholen“, „Partie beenden“ auch während einer Bewegung, Gleiten nach „Wiederholen“, weiche Wechsel von Band und Knöpfen, Zeiten in `stagePlan.ts` (13.6); „Bewegung reduzieren“ in den übrigen Partie-Tests, Tempo in `cardDraw.spec.ts`, lokal wieder vier Tests gleichzeitig (14.5); Design-Referenz `docs/design/i2e-card-moves-final-preview.html`; nach der Abnahme: Vorderseiten skalieren auch nach oben, kleinere Karten unten auf der Reihenfolge, Band der Startrohstoffe bleibt stehen, Fortschritt zählt den anstehenden Schritt, „Tisch anlegen“ auf dem Handy nicht mehr angeheftet (13.1, 13.6) |
 | 0.33 | 12.11.2026 | Bündel I2-F: Aufblinken und Spannungsmodus umgesetzt; gültige Plätze aus `catanPlacementSpots`, Plan `planHighlight` mit Abspieler `playHighlight`, Ebenen des Bretts über den Steinen, Spannungsmodus als Zustand der Ansicht je Partie, „Bewegung reduzieren“ ohne Halt, Zeiten als Konstanten `HIGHLIGHT_MS` statt Tokens (13.6) |
+| 0.34 | 12.11.2026 | Kleine Aufgabe K-9: Diagnose überarbeitet (13.1): Werte bei jedem Öffnen frisch gelesen, Gerät und Darstellung, Daten als Anzahlen, Würfeltest `runDiceTest` in `core/random`, Build-Kennung `__BUILD_COMMIT__` und `__BUILD_TIME__` aus der Bauanleitung, Bericht teilen oder kopieren; die letzten fünf unerwarteten Fehler unter `errors` in `meta` (7.3), geschrieben über `ErrorLogService` aus der Fehleransicht der Routen und den globalen Fehlerhandlern |
 
 ## Inhaltsverzeichnis
 
@@ -608,7 +609,7 @@ Eine IndexedDB-Datenbank `boardbrain` mit folgenden Stores (ADR-007):
 | `matches` | `id` | `groupId`, `gameId`, `[groupId+date]` | Partien mit Ergebnis |
 | `snapshots` | `id` | `createdAt`, `reason` | Sicherungspunkte (Kapitel 9) |
 | `session` | `id` | – | Genau ein Eintrag `current` oder leer (Kapitel 10) |
-| `meta` | `key` | – | `settings` (Ton, Design, Akzentfarbe, „Ich hasse Catan!“) und `state` (Zeitstempel, Hinweise, Erinnerung) |
+| `meta` | `key` | – | `settings` (Ton, Design, Akzentfarbe, „Ich hasse Catan!“), `state` (Zeitstempel, Hinweise, Erinnerung) und `errors` (die letzten fünf unerwarteten Fehler für die Diagnose, keine Nutzerdaten im Sinne von 7.4; seit K-9) |
 
 ```ts
 // infra/db/database.ts (Skizze)
@@ -1035,7 +1036,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: die Ansicht (nur sie scrollt) un
 | Daten | Export, Import mit Entscheidungsdialogen, Sicherung mit Sicherungspunkten und Importliste |
 | Einstellungen | Ton, „Ich hasse Catan!“ mit Bestätigung, Design, Akzentfarbe, Version |
 | Installation | Anleitung (iOS ausschließlich diese Ansicht im Browser) |
-| Diagnose | Technische Prüfwerte für die Abnahme auf Geräten: Version, sicherer Kontext, Verfügbarkeit von `crypto.randomUUID`, Service Worker und persistentem Speicher, Installationsstatus, „Offline bereit“ (ein Service Worker steuert die Seite, ab I1-D). Über die direkte Adresse `#/diagnose` erreichbar, nicht in der Kartenhand; weil installierte Apps keine Adressleiste haben, führt seit I1-D ein unauffälliger Verweis „Diagnose“ unten rechts in der Verwaltung dorthin, der nichts verschiebt. Ab I6 öffnet zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen die Diagnose; dann entfällt der Verweis *(geändert in 0.15)*; entstand im Setup und war im Platzhalter-Release die Startansicht, seit I1-B ist `#/` die Startansicht |
+| Diagnose | Technische Werte für die Abnahme und für Berichte von Testenden (K-9, *geändert in 0.34*): oben eine Zusammenfassung mit Hinweisen (fehlende Voraussetzung, aufgezeichnete Fehler, Partie aus anderer Version, nicht installiert, Speicher nicht geschützt, nicht offline bereit; „offline“ nicht auf dem Entwicklungsserver) und „Bericht teilen“ (Web Share, wo vorhanden) und „Bericht kopieren“; darunter App (Version, Build-Kennung aus Commit und Bauzeit, installiert, „Offline bereit“), Gerät (Browser und System aus dem User-Agent, Bildschirm, Ausrichtung, sichere Zonen, Schriftgröße, „Bewegung reduzieren“, Bedienung, Sprache, User-Agent), Daten (Speicherschutz nur gelesen, `navigator.storage.estimate()`, Schemaversion, Anzahlen ohne Namen, laufende Partie, letzte Änderung), Würfeltest (60.000 Würfe mit der `RandomSource` der App, Chi-Quadrat gegen α = 0,1 % wie die statistische Suite), Voraussetzungen (HTTPS, `crypto.getRandomValues`, `crypto.randomUUID`, IndexedDB, Service Worker, persistenter Speicher) und die letzten Fehler mit „Liste leeren“. Die Werte des Geräts liest `infra/platform/diagnostics.ts` bei jedem Öffnen neu; Seite und Bericht entstehen aus demselben Modell (`diagnosticsModel.ts`). Ziehungen erscheinen nicht (E-02). Über die direkte Adresse `#/diagnose` erreichbar, nicht in der Kartenhand; weil installierte Apps keine Adressleiste haben, führt seit I1-D ein unauffälliger Verweis „Diagnose“ unten rechts in der Verwaltung dorthin, der nichts verschiebt. Ab I6 öffnet zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen die Diagnose; dann entfällt der Verweis *(geändert in 0.15)*; entstand im Setup und war im Platzhalter-Release die Startansicht, seit I1-B ist `#/` die Startansicht |
 
 ### 13.2 Zustand in der Oberfläche
 

@@ -47,7 +47,9 @@ describe('Architecture 7.3 master data repositories', () => {
 
     expect(await store.transaction(({ groups }) => groups.listAll())).toEqual([group]);
     expect(await db.groups.toArray()).toEqual([group]);
-    expect((await db.meta.get('state'))?.value.lastUserDataChangeAt).toBe(group.updatedAt);
+    expect(await db.meta.get('state')).toMatchObject({
+      value: { lastUserDataChangeAt: group.updatedAt },
+    });
   });
 
   it('rejects a second record with the same id', async () => {
@@ -104,7 +106,7 @@ describe('US-VW-02, US-VW-06, US-VW-07 updating master data', () => {
     await store.transaction(({ persons }) => persons.update(renamed));
 
     expect(await db.persons.toArray()).toEqual([renamed]);
-    expect((await db.meta.get('state'))?.value.lastUserDataChangeAt).toBe(LATER);
+    expect(await db.meta.get('state')).toMatchObject({ value: { lastUserDataChangeAt: LATER } });
   });
 
   it('replaces a stored group', async () => {

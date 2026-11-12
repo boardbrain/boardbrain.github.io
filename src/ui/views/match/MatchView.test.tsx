@@ -54,6 +54,8 @@ async function startMatch(
   return { db, session };
 }
 
+const FORWARD_TIMEOUT_MS = 5000;
+
 // Taps the forward button with this name and waits until it has done its work: the page
 // attribute of the view changes (on the board the buttons stay in place), and the buttons are
 // enabled again.
@@ -64,12 +66,17 @@ async function tapForward(user: User, name: string): Promise<void> {
   });
   const page = screen.getByRole('main').getAttribute('data-page');
   await user.click(button);
-  await waitFor(() => {
-    const main = screen.queryByRole('main');
-    expect(main?.getAttribute('data-page')).not.toBe(page);
-    const forward = main === null ? null : within(main).queryByRole('button', { name: FORWARD });
-    expect(forward?.hasAttribute('disabled') ?? false).toBe(false);
-  });
+  await waitFor(
+    () => {
+      const main = screen.queryByRole('main');
+      expect(main?.getAttribute('data-page')).not.toBe(page);
+      const forward = main === null ? null : within(main).queryByRole('button', { name: FORWARD });
+      expect(forward?.hasAttribute('disabled') ?? false).toBe(false);
+      // Saving the step and the database's live query take longer under the load of the full
+      // suite with coverage; one second was too tight there (K-9, check run 12.11.2026).
+    },
+    { timeout: FORWARD_TIMEOUT_MS },
+  );
 }
 
 // The label as shown: the old one may still be fading out, hidden (design I2-E, A2).

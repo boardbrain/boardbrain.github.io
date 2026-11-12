@@ -9,7 +9,7 @@ function BrokenView(): React.JSX.Element {
 }
 
 // The same shape as in main.tsx: the error view sits on the frame route.
-function renderAt(path: string): void {
+function renderAt(path: string, onError?: (error: unknown) => void): void {
   const router = createMemoryRouter(
     [
       {
@@ -19,7 +19,7 @@ function renderAt(path: string): void {
             <Outlet />
           </div>
         ),
-        errorElement: <RouteErrorScreen />,
+        errorElement: <RouteErrorScreen onError={onError} />,
         children: [
           { path: '/', element: <p>start</p> },
           { path: '/kaputt', element: <BrokenView /> },
@@ -61,6 +61,15 @@ describe('K-5 error view of the routes', () => {
     expect(screen.queryByText('Unexpected Application Error!')).not.toBeInTheDocument();
     expect(screen.queryByText('frame')).not.toBeInTheDocument();
     expect(console.error).toHaveBeenCalledWith('Unexpected error in a view', expect.any(Error));
+  });
+
+  it('K-9: passes the error on for the diagnostics', async () => {
+    const onError = vi.fn();
+    renderAt('/kaputt', onError);
+
+    await screen.findByRole('heading', { name: 'Etwas ist schiefgelaufen' });
+
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'broken view' }));
   });
 
   it('shows the own error screen when a view cannot be loaded', async () => {

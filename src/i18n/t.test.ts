@@ -7,10 +7,10 @@ describe('NFA-I18N-01 texts from the language file', () => {
   });
 
   it('fills in placeholders', () => {
-    expect(t('diagnose.version', { version: '0.1.0' })).toBe('Version 0.1.0');
+    expect(t('diagnose.datenbankWert', { version: '0.1.0' })).toBe('Version 0.1.0');
   });
 
   it('leaves a placeholder without a value visible', () => {
-    expect(t('diagnose.version')).toBe('Version {version}');
+    expect(t('diagnose.datenbankWert')).toBe('Version {version}');
   });
 });

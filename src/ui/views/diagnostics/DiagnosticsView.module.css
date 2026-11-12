@@ -1,50 +1,238 @@
-.view {
-  max-width: var(--page-max-width);
-  padding: var(--page-padding-top) var(--page-padding-side) var(--space-6);
-  margin: 0 auto;
-}
+/* K-9: summary on top, then sections of label and value rows (Architecture 13.1). */
 
 .muted {
+  margin: 0;
   color: var(--color-text-muted);
 }
 
-.list {
+.small {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.section {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
+}
+
+.sectionTitle {
   margin: 0;
 }
 
-.row {
-  display: flex;
-  gap: var(--space-4);
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface-raised);
+/* ---------- summary ---------- */
+
+.summary {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface-overlay);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-2);
+  border-radius: var(--radius-4);
 }
 
-/* Long names wrap, also inside a word, so that a larger system font does not push the page
-   sideways. */
-.row dt {
+.statusOk,
+.statusHint {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin: 0;
+  font-weight: 600;
+}
+
+.statusOk {
+  color: var(--color-status-ok);
+}
+
+.statusHint {
+  color: var(--color-status-warning);
+}
+
+.hints {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-6);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.actions > * {
+  display: inline-flex;
+  flex: 1 1 10rem;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.secondary {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+/* ---------- rows ---------- */
+
+.list {
+  display: grid;
+  margin: 0;
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4);
+}
+
+.row,
+.longRow {
+  display: flex;
+  gap: var(--space-4);
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+}
+
+/* A long value such as the user agent stands below its label. */
+.longRow {
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.row + .row,
+.row + .longRow,
+.longRow + .row {
+  border-top: 1px solid var(--color-border);
+}
+
+/* Long names and values wrap, also inside a word, so that a larger system font does not push
+   the page sideways. */
+.row dt,
+.row dd,
+.longRow dt,
+.longRow dd {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.row dt {
+  color: var(--color-text-muted);
 }
 
 .row dd {
   margin: 0;
   font-weight: 600;
+  text-align: right;
+}
+
+.longRow dt {
+  color: var(--color-text-muted);
+}
+
+.longRow dd {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-small);
 }
 
 .ok {
+  margin: 0;
   color: var(--color-status-ok);
 }
 
 .error {
+  margin: 0;
   color: var(--color-status-error);
 }
 
 .info {
   color: var(--color-status-info);
+}
+
+/* ---------- dice test ---------- */
+
+.card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4);
+}
+
+.bars {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 1.5ch minmax(0, 1fr) 7ch;
+  gap: var(--space-3);
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.barSide {
+  font-weight: 600;
+  text-align: center;
+}
+
+/* The bars start at zero: a fair die shows six bars of almost the same length. */
+.barTrack {
+  display: block;
+  height: 10px;
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  background: var(--color-accent-text);
+  border-radius: 0 4px 4px 0;
+}
+
+.barCount {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+/* ---------- errors ---------- */
+
+.errors {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.errorEntry {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4);
+}
+
+.code,
+.codeMuted {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-small);
+  overflow-wrap: anywhere;
+}
+
+.code {
+  color: var(--color-status-error);
+}
+
+.codeMuted {
+  color: var(--color-text-muted);
 }
