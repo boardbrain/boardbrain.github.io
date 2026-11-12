@@ -31,7 +31,9 @@ async function namesOnTable(page: Page): Promise<string[]> {
 
 async function drawnName(page: Page): Promise<string> {
   const names = await namesOnTable(page);
-  const twice = TABLE.members.filter((name) => names.filter((other) => other === name).length === 2);
+  const twice = TABLE.members.filter(
+    (name) => names.filter((other) => other === name).length === 2,
+  );
   expect(twice).toHaveLength(1);
   return twice[0] ?? '';
 }
@@ -57,6 +59,63 @@ test.describe('US-IN-01 Draw with cards', () => {
     await expect(repeatButton(page)).toBeEnabled({ timeout: 10_000 });
     const name = await drawnName(page);
     expect(TABLE.members).toContain(name);
+  });
+});
+
+// How far the lowest card comes below the places while the next movement plays, in card heights:
+// collecting the face-down cards (E1) puts them on a stack below the places; turning one over
+// leaves every card on its place (about -1).
+async function drawSpinAndMeasureSinking(page: Page): Promise<number> {
+  await page.evaluate(() => {
+    const record = window as unknown as { sinking: number };
+    record.sinking = -Infinity;
+    const started = performance.now();
+    const tick = (): void => {
+      const places = [...document.querySelectorAll<HTMLElement>('[data-stage^="place-"]')];
+      const lowest = Math.max(...places.map((place) => place.getBoundingClientRect().bottom));
+      for (const card of document.querySelectorAll<HTMLElement>('[data-stage-card]')) {
+        const { top, height } = card.getBoundingClientRect();
+        record.sinking = Math.max(record.sinking, (top - lowest) / height);
+      }
+      if (performance.now() - started < 4_000) {
+        requestAnimationFrame(tick);
+      }
+    };
+    requestAnimationFrame(tick);
+  });
+  await main(page).getByRole('button', { name: 'Losen' }).click();
+  await expect(repeatButton(page)).toBeEnabled({ timeout: 10_000 });
+  return page.evaluate(() => (window as unknown as { sinking: number }).sinking);
+}
+
+async function drawFirstSpin(page: Page): Promise<void> {
+  await seedMatch(page, { table: TABLE, steps: 3 });
+  await main(page).getByRole('button', { name: 'Losen' }).click();
+  await skipButton(page).click();
+  await expect(repeatButton(page)).toBeEnabled();
+}
+
+test.describe('US-IN-01 AK-3 The order with cards', () => {
+  test('E1: after repeating a place, the face-down cards are collected before dealing again', async ({
+    page,
+  }) => {
+    await drawFirstSpin(page);
+    await main(page).getByRole('button', { name: 'Losen' }).click();
+    await skipButton(page).click();
+    await repeatButton(page).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await expect(main(page)).toHaveAttribute('data-page', /^next-/);
+
+    expect(await drawSpinAndMeasureSinking(page)).toBeGreaterThan(0);
+  });
+
+  test('E1: back and browsing forward again do not collect the cards', async ({ page }) => {
+    await drawFirstSpin(page);
+    await page.getByRole('button', { name: 'Zurück' }).click();
+    await main(page).getByRole('button', { name: 'Blättern' }).click();
+    await expect(main(page)).toHaveAttribute('data-page', /:draw$/);
+
+    expect(await drawSpinAndMeasureSinking(page)).toBeLessThan(-0.5);
   });
 });
 

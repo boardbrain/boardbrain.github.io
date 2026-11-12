@@ -3,6 +3,10 @@ import { expect, test } from './fixtures';
 import { seedDatabase } from './seedDatabase';
 import { useSeededRandom } from './seededRandom';
 
+// The card movements of design I2-E jump to their end, as with "Bewegung reduzieren"; their tempo
+// is tested in cardDraw.spec.ts.
+test.use({ reducedMotion: 'reduce' });
+
 // Design I2-G (docs/design/i2g-more-room-final-preview.html): no header, the logo only on the
 // start, every other view as wide as the screen allows (up to 1280 px) and the back button in
 // the same place on every page.

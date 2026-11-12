@@ -4,6 +4,10 @@ import { CATAN_DEFAULT_STARTING_RESOURCES } from '@/games/catan';
 import { seedDatabase, seedMatch, type SeedTable } from './seedDatabase';
 import { useSeededRandom } from './seededRandom';
 
+// The card movements of design I2-E jump to their end, as with "Bewegung reduzieren"; their tempo
+// is tested in cardDraw.spec.ts.
+test.use({ reducedMotion: 'reduce' });
+
 // I2-C: every run draws the same steps (variant A); real randomness is checked in
 // tests/statistical.
 // Whole matches with every reveal take longer than the default timeout, above all in WebKit.
