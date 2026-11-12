@@ -99,6 +99,26 @@ describe('US-IN-01 AK-2 Draw a person with cards (design I2-E)', () => {
     ]);
   });
 
+  it('pulls a card out at its own level and lays it on top only when putting it back', () => {
+    const plan = drawPlan('ben');
+    const mixesOut = plan.steps.filter(
+      (step): step is Extract<StageStep, { kind: 'move' }> =>
+        step.kind === 'move' && step.ms === STAGE_MS.mixOut && step.to.rotate !== 0,
+    );
+    expect(mixesOut).toHaveLength(3);
+    for (const out of mixesOut) {
+      expect(out.z).toBeUndefined();
+      const back = plan.steps.find(
+        (step) =>
+          step.kind === 'move' &&
+          step.card === out.card &&
+          step.ms === STAGE_MS.mixBack &&
+          step.at === out.at + STAGE_MS.mixOut,
+      );
+      expect(back).toMatchObject({ z: 10 + PERSONS.length - 1 });
+    }
+  });
+
   it('flies onto the place in an arc, then "Wer?" gives way to the name', () => {
     const plan = drawPlan('ben');
     const fly = plan.steps.find((step) => step.kind === 'move' && step.ms === STAGE_MS.fly);

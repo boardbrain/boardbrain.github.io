@@ -275,14 +275,12 @@ function gatherAndMix(
     const card = order[uniformInt(order.length, rng)] ?? '';
     const side = mix % 2 === 1 ? 1 : -1;
     const home = planner.pose(card);
-    const out = planner.move(
-      card,
-      end,
-      STAGE_MS.mixOut,
-      { x: home.x + side * size.w * MIX_OUT, rotate: side * MIX_TURN },
-      0,
-      10 + order.length,
-    );
+    // As in the reference, the card slides out at its own level, from within the stack; it only
+    // goes on top when it is put back (PO 12.11.2026).
+    const out = planner.move(card, end, STAGE_MS.mixOut, {
+      x: home.x + side * size.w * MIX_OUT,
+      rotate: side * MIX_TURN,
+    });
     order = [...order.filter((other) => other !== card), card];
     // The cards below the pulled one sink by one level each; the pulled card goes on top.
     order.forEach((other, level) => {
