@@ -113,17 +113,53 @@ function ResourceFront({ resource }: { readonly resource: CatanResource }): Reac
  * replacement the stack is complete again at once; without, it lacks this person's cards.
  */
 export function ResourcesScene({
+  actions,
+  ...props
+}: ResourcesSceneProps): React.JSX.Element | null {
+  const { session, personId, nameOf } = props;
+  const options = session.setup.options.startingResources;
+  if (options === null) {
+    return null;
+  }
+  const { count } = options;
+  const order = orderOrSeats(session);
+  // Each person's table starts afresh; the band stays, so it changes with the transitions of the
+  // placement: crossfade and the ring gliding to the next coin (PO 12.11.2026).
+  return (
+    <div className={styles.withBand}>
+      <ResourcesTable key={personId} {...props} />
+      <TurnBand
+        icon={
+          <span className={shared.tbResources}>
+            <ResourcesOptionIcon />
+          </span>
+        }
+        name={nameOf(personId)}
+        what={count === 1 ? t('partie.einRohstoff') : t('partie.rohstoffe', { anzahl: count })}
+        color={colorOf(session, personId)}
+        order={order.map((other) => ({
+          personId: other,
+          name: nameOf(other),
+          color: colorOf(session, other),
+        }))}
+        currentId={personId}
+      />
+      {actions}
+    </div>
+  );
+}
+
+// The card table of one person's page.
+function ResourcesTable({
   session,
   personId,
   result,
   opened,
   onTurn,
-  nameOf,
-  actions,
   stage = null,
   isTurningAll = false,
   leaveRef,
-}: ResourcesSceneProps): React.JSX.Element | null {
+}: Omit<ResourcesSceneProps, 'actions'>): React.JSX.Element | null {
   const ref = useRef<HTMLDivElement>(null);
   const [isLeaving, setLeaving] = useState(false);
   const [isTurningBack, setTurningBack] = useState(false);
@@ -170,128 +206,107 @@ export function ResourcesScene({
     options.replacement === 'with' ? CATAN_RESOURCES.length : CATAN_RESOURCES.length - count;
   const isStaging = stage !== null && result !== null && measured !== null;
   return (
-    <div className={styles.withBand}>
-      <div ref={ref} className={styles.table} data-stage-root="">
-        {isStaging && (
-          <>
-            {layout.slots.map((box, place) => (
-              <Place
-                key={`place-${String(place)}`}
-                box={box}
-                label={t('partie.fragezeichen')}
-                isFilled={false}
-                stageName={placeTarget(place)}
-              />
-            ))}
-            {layout.slots.map((box, place) => (
-              <span
-                key={`label-${String(place)}`}
-                data-stage={labelTarget(place)}
-                className={cx(shared.resName, styles.cardName, styles.cardNameMuted)}
-                style={{ left: box.x, top: box.y + box.h + 4, width: box.w }}
-              >
-                {t('partie.antippen')}
-              </span>
-            ))}
-            <ResourcesStage
-              layout={layout}
-              isFirst={isFirst}
-              stackBefore={stackCount}
-              isWithReplacement={options.replacement === 'with'}
-              handle={stage}
-            />
-          </>
-        )}
-        {!isStaging &&
-          layout.slots.map((box, place) => (
+    <div ref={ref} className={styles.table} data-stage-root="">
+      {isStaging && (
+        <>
+          {layout.slots.map((box, place) => (
             <Place
               key={`place-${String(place)}`}
               box={box}
               label={t('partie.fragezeichen')}
-              isFilled={result !== null && !isLeaving}
-              stageName={isLeaving ? placeTarget(place) : undefined}
-              isHidden={isLeaving}
-              flipKey={`place:${String(place)}`}
+              isFilled={false}
+              stageName={placeTarget(place)}
             />
           ))}
-        {isStaging
-          ? null
-          : result === null && isFirst
-            ? CATAN_RESOURCES.map((resource, index) => {
-                const box = layout.kinds[index];
-                return (
-                  box !== undefined && (
-                    <TableCard
-                      key={resource}
-                      box={box}
-                      z={10}
-                      flipKey={index < count ? `res:${String(index)}` : undefined}
-                      className={styles.resource}
-                      front={<ResourceFront resource={resource} />}
-                    />
-                  )
-                );
-              })
-            : Array.from({ length: stackCount }, (_, level) => (
-                <TableCard
-                  key={`stack-${String(level)}`}
-                  box={layout.stack(level)}
-                  z={10 + level}
-                  // The cards of a person drawn again glide onto the top of the stack.
-                  flipKey={
-                    level >= stackCount - count
-                      ? `res:${String(stackCount - 1 - level)}`
-                      : undefined
-                  }
-                  className={styles.resource}
-                  isFaceDown
-                />
-              ))}
-        {result !== null && !isStaging && (
-          <div className={styles.layer}>
-            {result.map((resource, place) => {
-              const box = layout.slots[place];
+          {layout.slots.map((box, place) => (
+            <span
+              key={`label-${String(place)}`}
+              data-stage={labelTarget(place)}
+              className={cx(shared.resName, styles.cardName, styles.cardNameMuted)}
+              style={{ left: box.x, top: box.y + box.h + 4, width: box.w }}
+            >
+              {t('partie.antippen')}
+            </span>
+          ))}
+          <ResourcesStage
+            layout={layout}
+            isFirst={isFirst}
+            stackBefore={stackCount}
+            isWithReplacement={options.replacement === 'with'}
+            handle={stage}
+          />
+        </>
+      )}
+      {!isStaging &&
+        layout.slots.map((box, place) => (
+          <Place
+            key={`place-${String(place)}`}
+            box={box}
+            label={t('partie.fragezeichen')}
+            isFilled={result !== null && !isLeaving}
+            stageName={isLeaving ? placeTarget(place) : undefined}
+            isHidden={isLeaving}
+            flipKey={`place:${String(place)}`}
+          />
+        ))}
+      {isStaging
+        ? null
+        : result === null && isFirst
+          ? CATAN_RESOURCES.map((resource, index) => {
+              const box = layout.kinds[index];
               return (
                 box !== undefined && (
-                  <DrawnResource
-                    key={`${resource}-${String(place)}`}
+                  <TableCard
+                    key={resource}
                     box={box}
-                    number={place + 1}
-                    resource={resource}
-                    isOpen={opened.includes(place) && !isTurningBack}
-                    flipKey={`res:${String(place)}`}
-                    turnDelay={isTurningAll ? place * TURN_ALL_GAP : 0}
-                    onTurn={
-                      onTurn === undefined
-                        ? undefined
-                        : () => {
-                            onTurn(place);
-                          }
-                    }
+                    z={10}
+                    flipKey={index < count ? `res:${String(index)}` : undefined}
+                    className={styles.resource}
+                    front={<ResourceFront resource={resource} />}
                   />
                 )
               );
-            })}
-          </div>
-        )}
-      </div>
-      <TurnBand
-        icon={
-          <span className={shared.tbResources}>
-            <ResourcesOptionIcon />
-          </span>
-        }
-        name={nameOf(personId)}
-        what={count === 1 ? t('partie.einRohstoff') : t('partie.rohstoffe', { anzahl: count })}
-        color={colorOf(session, personId)}
-        order={order.map((other) => ({
-          personId: other,
-          name: nameOf(other),
-          color: colorOf(session, other),
-        }))}
-        currentId={personId}
-      />
-      {actions}
+            })
+          : Array.from({ length: stackCount }, (_, level) => (
+              <TableCard
+                key={`stack-${String(level)}`}
+                box={layout.stack(level)}
+                z={10 + level}
+                // The cards of a person drawn again glide onto the top of the stack.
+                flipKey={
+                  level >= stackCount - count ? `res:${String(stackCount - 1 - level)}` : undefined
+                }
+                className={styles.resource}
+                isFaceDown
+              />
+            ))}
+      {result !== null && !isStaging && (
+        <div className={styles.layer}>
+          {result.map((resource, place) => {
+            const box = layout.slots[place];
+            return (
+              box !== undefined && (
+                <DrawnResource
+                  key={`${resource}-${String(place)}`}
+                  box={box}
+                  number={place + 1}
+                  resource={resource}
+                  isOpen={opened.includes(place) && !isTurningBack}
+                  flipKey={`res:${String(place)}`}
+                  turnDelay={isTurningAll ? place * TURN_ALL_GAP : 0}
+                  onTurn={
+                    onTurn === undefined
+                      ? undefined
+                      : () => {
+                          onTurn(place);
+                        }
+                  }
+                />
+              )
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
