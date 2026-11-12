@@ -114,19 +114,15 @@
   left: 1.5625rem;
 }
 
-/* Phones: the save button stays at the bottom edge while the editor scrolls. */
+/* The save button follows the options, also on phones: one scrolls down past all options to
+   reach it (PO 12.11.2026; it used to stay at the bottom edge on phones). */
 .saveBar {
-  position: sticky;
-  bottom: 0;
   padding: var(--space-3) 0 var(--space-1);
-  background: linear-gradient(to bottom, transparent, var(--color-surface) 35%);
 }
 
 @media (width >= 48rem) {
   .saveBar {
-    position: static;
     padding: 0;
-    background: none;
   }
 }
 
