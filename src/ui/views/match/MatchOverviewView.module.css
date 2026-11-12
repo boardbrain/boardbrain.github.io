@@ -1,0 +1,250 @@
+/* Design I2-C, page 9 (U2, T1, G2, N1). */
+.boardTab {
+  gap: 12px;
+}
+
+/* The tab bar keeps its place when switching tabs: 12 px below the title as on the board tab,
+   although the results tab keeps the usual gap of 20 px below the bar. */
+.tabs {
+  display: flex;
+  margin-top: -8px;
+  padding: 3px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.tabs > button {
+  flex: 1;
+  min-height: 40px;
+  padding: 0;
+  font-size: 0.92rem;
+  color: var(--color-text);
+  background: none;
+  border-radius: 9px;
+}
+
+.tabs > button[aria-selected='true'] {
+  font-weight: 600;
+  color: var(--color-accent-text);
+  background: var(--color-surface-overlay);
+  box-shadow: inset 0 0 0 1px var(--color-accent-text);
+}
+
+.ovBoard {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  height: min(62cqw, 46cqh, 420px);
+  min-height: 0;
+}
+
+/* Board tab: the board takes the room that is left, without scrolling, also on a small phone. */
+.boardTab > .tabs {
+  margin-top: 0;
+}
+
+.boardTab .ovBoard {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 9rem;
+}
+
+@container (width <= 719px) {
+  .boardTab .ovBoard {
+    margin: 0 -8px;
+  }
+}
+
+.skippedBox {
+  display: grid;
+  gap: 4px;
+  place-items: center;
+  padding: 18px;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+}
+
+.ovNames {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.ovName {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.place {
+  font-weight: 800;
+  color: var(--color-accent-text);
+}
+
+.smallCoin {
+  font-size: 0.75rem;
+}
+
+.nm {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ovEnd {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding-top: 6px;
+}
+
+.boardTab .ovEnd {
+  margin-top: auto;
+}
+
+.lines {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.lines > * + * {
+  border-top: 1px solid var(--color-border);
+}
+
+.line {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 14px;
+  color: var(--color-text);
+  text-align: left;
+  background: none;
+  border-radius: 0;
+}
+
+.again {
+  display: grid;
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.pbAgain {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  display: grid;
+  color: var(--color-text-muted);
+}
+
+.lbl {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line:has(.who) .lbl {
+  flex: 1 0 auto;
+}
+
+.who {
+  display: inline-flex;
+  flex: 0 1 auto;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  max-width: 55%;
+}
+
+.ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lead {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.lead .place {
+  width: 1.2rem;
+}
+
+.drawIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-accent-text);
+}
+
+.drawIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.resInline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pieceBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  max-width: 60%;
+}
+
+.pieceBtn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+/* Hint H1 (design I2-H): below the board in the free room, over it on a small screen; it takes
+   no room of its own, so nothing moves. */
+.tapHint {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  font-size: 0.82rem;
+  pointer-events: none;
+}
+
+.tapHint > span {
+  padding: 3px 10px;
+  color: var(--color-text);
+  background: var(--color-board-hint);
+  border-radius: 999px;
+}

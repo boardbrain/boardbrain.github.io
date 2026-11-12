@@ -1,0 +1,34 @@
+.page {
+  display: grid;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: var(--page-max-width);
+  padding: var(--page-padding-top) var(--page-padding-side) var(--space-6);
+  margin: 0 auto;
+}
+
+/* Header, introduction and content fill the visible area, e.g. the board (design I1-D). */
+.fill {
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  gap: var(--space-3);
+  min-height: var(--page-head-height);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-title);
+  line-height: 1.25;
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-text-muted);
+}

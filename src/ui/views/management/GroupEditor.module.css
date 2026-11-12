@@ -1,0 +1,180 @@
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.section {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.columns > * {
+  flex: 1 1 17.5rem;
+  min-width: 0;
+}
+
+.tableColumn {
+  display: grid;
+  justify-items: center;
+}
+
+.card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4);
+}
+
+.cardHint {
+  margin: var(--space-3) 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.label {
+  padding: 0;
+  font-weight: 700;
+}
+
+.muted {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.switchRow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.switchText {
+  display: grid;
+}
+
+.switchOn,
+.switchOff {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.25rem;
+  height: 1.875rem;
+  border-radius: 1rem;
+}
+
+.switchOff {
+  background: var(--color-border);
+}
+
+.switchOn {
+  background: var(--color-accent);
+}
+
+.switchOn::after,
+.switchOff::after {
+  position: absolute;
+  top: 0.1875rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  content: '';
+  background: var(--color-text);
+  border-radius: 50%;
+}
+
+.switchOff::after {
+  left: 0.1875rem;
+}
+
+.switchOn::after {
+  left: 1.5625rem;
+}
+
+/* The save button follows the options, also on phones: one scrolls down past all options to
+   reach it (PO 12.11.2026; it used to stay at the bottom edge on phones). */
+.saveBar {
+  padding: var(--space-3) 0 var(--space-1);
+}
+
+@media (width >= 48rem) {
+  .saveBar {
+    padding: 0;
+  }
+}
+
+.save {
+  width: 100%;
+  min-height: 3.25rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* Editing (design I1-F): instead of the bench a note that the members stay fixed. */
+.lockNote {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-2);
+}
+
+.lockNote > svg {
+  flex: none;
+}
+
+/* Specification 3.5 (design I2-D, S1): the game of a table in a match is fixed until it ends. */
+.matchLock {
+  color: var(--color-text);
+  border-style: solid;
+  border-color: var(--color-accent-text);
+}
+
+.lockText {
+  flex: 1;
+}
+
+.lockPill {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 34px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  color: var(--color-accent-text);
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.locked {
+  opacity: 0.45;
+}

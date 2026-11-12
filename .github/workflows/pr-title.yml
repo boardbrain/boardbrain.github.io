@@ -1,0 +1,35 @@
+# Checks the title of every pull request into develop or main (Architecture 16.3). Its own
+# workflow, so editing a pull request (title, description, a ticked box) runs only this check,
+# not the whole CI. It also runs on new commits: required checks belong to the newest commit, and
+# without a result there the merge would wait for it.
+# The rulesets refer to the job name pr-title.
+name: PR title
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Check pull request title with commitlint
+        # Title via an environment variable, never inline in the script (prevents injection)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$PR_TITLE" | npx commitlint --verbose

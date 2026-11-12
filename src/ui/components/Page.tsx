@@ -1,0 +1,44 @@
+import type { ReactNode } from 'react';
+import { BackButton } from './BackButton';
+import styles from './Page.module.css';
+
+type PageProps = {
+  readonly title: string;
+  readonly intro?: string;
+  /** Controls to the right of the heading, e.g. a search button. */
+  readonly actions?: ReactNode;
+  /** Fills the visible height instead of scrolling; the content gets the remaining space. */
+  readonly isFullHeight?: boolean;
+  /** Shows a back button; the address is used when there is no previous page (design D-3). */
+  readonly backFallback?: string;
+  readonly children?: ReactNode;
+};
+
+/**
+ * Main area of a view with heading and optional introduction. Every view but the start has the
+ * same width, padding and head height (design I2-G), so the back button keeps its place.
+ */
+export function Page({
+  title,
+  intro,
+  actions,
+  isFullHeight,
+  backFallback,
+  children,
+}: PageProps): React.JSX.Element {
+  return (
+    <main
+      className={[styles.page, isFullHeight === true && styles.fill]
+        .filter((name) => typeof name === 'string')
+        .join(' ')}
+    >
+      <div className={styles.header}>
+        {backFallback !== undefined && <BackButton fallback={backFallback} />}
+        <h1 className={styles.title}>{title}</h1>
+        {actions}
+      </div>
+      {intro !== undefined && <p className={styles.intro}>{intro}</p>}
+      {children}
+    </main>
+  );
+}

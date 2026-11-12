@@ -1,0 +1,127 @@
+import { GROUP_SIZE, type CatanColorKey, type GroupColorKey, type PersonId } from '@/core/model';
+import styles from './GroupTable.module.css';
+import { PressableButton, PressableLink } from '@/ui/components/Pressable';
+
+/**
+ * One seat at the table: a member with the colours they have in the group.
+ */
+export type TableSeat = {
+  readonly id: PersonId;
+  /** Spoken description, e.g. "Anna, Rot". */
+  readonly label: string;
+  readonly initial: string;
+  readonly groupColor: GroupColorKey;
+  /** Catan colour, shown as a square marker; only where Catan is possible. */
+  readonly catanColor?: CatanColorKey;
+};
+
+type GroupTableProps = {
+  readonly seats: readonly TableSeat[];
+  /**
+   * `small` for the overview cards (decoration), `large` for the editor (seats are buttons),
+   * `detail` for the table page (seats are links, US-VW-05 AK-4).
+   */
+  readonly size: 'small' | 'large' | 'detail';
+  readonly selectedId?: PersonId | undefined;
+  readonly onSelect?: (id: PersonId) => void;
+  /** Address a seat leads to (detail only). */
+  readonly seatHref?: (id: PersonId) => string;
+  /** Text in the middle of the table (large only). */
+  readonly title?: string | undefined;
+  readonly subtitle?: string | undefined;
+};
+
+// More than this many seats get smaller so they still fit around the table.
+const DENSE_FROM = 7;
+// From this many seats the suggested name gets long, so the title in the middle gets smaller.
+const LONG_TITLE_FROM = 3;
+const FULL_CIRCLE_DEGREES = 360;
+
+function seatPosition(index: number, count: number): { left: string; top: string } {
+  const angle = (index / count) * FULL_CIRCLE_DEGREES - 90;
+  const radians = (angle * Math.PI) / 180;
+  const radius = 41;
+  return {
+    left: `${String(50 + radius * Math.cos(radians))}%`,
+    top: `${String(50 + radius * Math.sin(radians))}%`,
+  };
+}
+
+/**
+ * Round table with the members of a group as coloured seats (US-PG-03, Specification 3.3). In
+ * the overview it only shows the colours; in the editor each seat selects a person.
+ */
+export function GroupTable({
+  seats,
+  size,
+  selectedId,
+  onSelect,
+  seatHref,
+  title,
+  subtitle,
+}: GroupTableProps): React.JSX.Element {
+  const isDense = seats.length >= DENSE_FROM;
+  const className = [styles.wrap, styles[size], isDense && styles.dense]
+    .filter((name) => typeof name === 'string')
+    .join(' ');
+  // Until two persons sit at the table, an empty seat invites to bring more (US-PG-02 AK-3).
+  const hasEmptySeat = size === 'large' && seats.length < GROUP_SIZE.min;
+  return (
+    <div className={className}>
+      <div className={styles.table}>
+        {title !== undefined && (
+          <strong className={seats.length > LONG_TITLE_FROM ? styles.titleSmall : styles.title}>
+            {title}
+          </strong>
+        )}
+        {subtitle !== undefined && <span className={styles.subtitle}>{subtitle}</span>}
+      </div>
+      {hasEmptySeat && <span className={styles.emptySeat} aria-hidden="true" />}
+      {seats.map((seat, index) => {
+        const position = seatPosition(index, seats.length);
+        const style = { ...position, background: `var(--color-group-${seat.groupColor})` };
+        const mark = seat.catanColor !== undefined && (
+          <span
+            className={styles.catan}
+            style={{ background: `var(--color-catan-${seat.catanColor})` }}
+          />
+        );
+        if (size === 'small') {
+          return <span key={seat.id} className={styles.seat} style={style} aria-hidden="true" />;
+        }
+        if (seatHref !== undefined) {
+          return (
+            <PressableLink
+              key={seat.id}
+              to={seatHref(seat.id)}
+              look="card"
+              className={styles.seat}
+              style={style}
+              aria-label={seat.label}
+            >
+              {seat.initial}
+              {mark}
+            </PressableLink>
+          );
+        }
+        return (
+          <PressableButton
+            key={seat.id}
+            type="button"
+            look="card"
+            className={seat.id === selectedId ? styles.seatSelected : styles.seat}
+            style={style}
+            aria-label={seat.label}
+            aria-pressed={seat.id === selectedId}
+            onClick={() => {
+              onSelect?.(seat.id);
+            }}
+          >
+            {seat.initial}
+            {mark}
+          </PressableButton>
+        );
+      })}
+    </div>
+  );
+}

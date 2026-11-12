@@ -1,0 +1,3048 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>I1-F Bearbeiten</title>
+    <style>
+      :root {
+        --bg: #231d18;
+        --raised: #2d2620;
+        --overlay: #383028;
+        --border: #4b4036;
+        --text: #f4ece1;
+        --muted: #b8ab9b;
+        --accent: #b45309;
+        --accent-text: #f5be5b;
+        --on-accent: #fff;
+        --shadow: #0000008c;
+        --backdrop: #000000b3;
+        --bg-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg-image) fixed, var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+        line-height: 1.5;
+      }
+      button,
+      input {
+        font: inherit;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+        background: none;
+        border: 0;
+        padding: 0;
+        text-align: inherit;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+      h2 {
+        font-size: 1rem;
+      }
+
+      /* ---------- picker ---------- */
+      .picker {
+        display: grid;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+      .picker .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .picker .label {
+        min-width: 80px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .chip {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .chip[aria-pressed='true'] {
+        font-weight: 600;
+        color: var(--accent-text);
+        background: var(--overlay);
+        border-color: var(--accent-text);
+      }
+      .intro {
+        display: grid;
+        gap: 4px;
+        max-width: 1220px;
+        margin: 0 auto;
+        padding: 12px 16px 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .intro b {
+        color: var(--text);
+      }
+      .stage {
+        padding: 16px;
+      }
+
+      /* ---------- device frames ---------- */
+      .frame {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        margin: 0 auto;
+        overflow: hidden;
+        background: var(--bg-image), var(--bg);
+        border: 1px dashed var(--border);
+        border-radius: 24px;
+      }
+      .frame.phoneP {
+        width: min(100%, 390px);
+        height: 780px;
+      }
+      .frame.tabletP {
+        width: min(100%, 780px);
+        height: 1020px;
+      }
+      .frame.wide {
+        width: min(100%, 1180px);
+        height: 760px;
+      }
+      .frame.device {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        width: auto;
+        height: auto;
+        border: 0;
+        border-radius: 0;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+          env(safe-area-inset-left);
+      }
+      .exit {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        z-index: 60;
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 56px;
+        color: var(--muted);
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-left: 0;
+        border-radius: 0 12px 12px 0;
+        opacity: 0.8;
+      }
+
+      /* ---------- app frame (D-3) ---------- */
+      .app {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .a-head {
+        display: flex;
+        justify-content: center;
+        padding: 10px 14px;
+      }
+      .logo {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      .logo svg {
+        color: var(--accent-text);
+      }
+      .scroll {
+        flex: 1;
+        min-height: 0;
+        min-width: 0;
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+      .scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .pad {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+        align-content: start;
+        padding: 20px 16px 28px;
+      }
+      .wideContent {
+        width: 100%;
+        max-width: 1040px;
+        margin: 0 auto;
+      }
+      .e-hand {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        flex: none;
+        justify-content: center;
+        height: 104px;
+        background: linear-gradient(180deg, transparent, var(--raised));
+      }
+      .e-navCard {
+        position: relative;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 2px;
+        width: 86px;
+        height: 104px;
+        margin: 0 -8px;
+        font-size: 0.7rem;
+        text-align: center;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 -4px 12px var(--shadow);
+        transform-origin: 50% 140%;
+      }
+      .e-navCard[aria-current='page'] {
+        z-index: 2;
+        color: var(--accent-text);
+        font-weight: 700;
+        border-color: var(--accent-text);
+      }
+      .e-card {
+        position: relative;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 6px;
+        aspect-ratio: 5 / 7;
+        padding: 18px 10px;
+        text-align: center;
+        background: linear-gradient(160deg, var(--overlay), var(--raised));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 6px 18px var(--shadow);
+      }
+      .corner {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--accent-text);
+      }
+      .corner.br {
+        top: auto;
+        right: 10px;
+        bottom: 8px;
+        left: auto;
+        transform: rotate(180deg);
+      }
+
+      /* ---------- shared pieces ---------- */
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 0.85rem;
+      }
+      .tiny {
+        font-size: 0.75rem;
+      }
+      .accentText {
+        color: var(--accent-text);
+      }
+      .ellipsis {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .iconBtn {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        color: var(--text);
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+      }
+      .primary {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 8px 16px;
+        font-weight: 600;
+        color: var(--on-accent);
+        background: var(--accent);
+        border-radius: 8px;
+      }
+      .card {
+        padding: 14px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .pageHead {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .pageHead h1 {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .fieldRow {
+        display: flex;
+        gap: 8px;
+      }
+      .field {
+        flex: 1;
+        min-width: 0;
+        min-height: 44px;
+        padding: 0 12px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .chev {
+        flex: none;
+        color: var(--muted);
+      }
+      .listCard {
+        overflow: hidden;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .listRow {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        width: 100%;
+        min-height: 56px;
+        padding: 8px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .listRow:last-child {
+        border-bottom: 0;
+      }
+      .rowText {
+        display: grid;
+        flex: 1;
+        min-width: 0;
+      }
+      .rowText > * {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .initial {
+        display: inline-grid;
+        flex: none;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        font-weight: 700;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 50%;
+      }
+      .dot {
+        display: inline-block;
+        flex: none;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .dots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+      }
+      .moreDots {
+        font-size: 0.68rem;
+        font-weight: 700;
+        line-height: 10px;
+        color: var(--muted);
+      }
+      .mt {
+        position: relative;
+        flex: none;
+      }
+      .mt-top {
+        position: absolute;
+        inset: 22%;
+        background: var(--overlay);
+        border: 2px solid var(--border);
+        border-radius: 50%;
+      }
+      .mt-seat {
+        position: absolute;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .mt-seat.hl {
+        z-index: 1;
+        outline: 2px solid var(--text);
+        outline-offset: 2px;
+      }
+      .mt-seat.dim {
+        opacity: 0.3;
+      }
+      .sectionHead {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+
+      /* ---------- L1 Spielkarten ---------- */
+      .cardGrid {
+        display: grid;
+        gap: 12px;
+      }
+      .pCard {
+        gap: 3px;
+        align-content: start;
+        padding: 14px 8px 24px;
+      }
+      .pCard .ini {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        margin-top: 6px;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--accent-text);
+        border: 2px solid var(--accent-text);
+        border-radius: 50%;
+      }
+      .pCard.none .ini {
+        color: var(--muted);
+        border-style: dashed;
+        border-color: var(--muted);
+      }
+      .pCard .nm {
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .newCard {
+        color: var(--accent-text);
+        background: none;
+        border: 1px dashed var(--accent-text);
+        box-shadow: none;
+      }
+
+      /* ---------- L2 Spielfiguren ---------- */
+      .board {
+        display: grid;
+        gap: 18px 6px;
+        padding: 18px 10px;
+        background:
+          repeating-linear-gradient(0deg, transparent 0 39px, #ffffff08 39px 40px),
+          repeating-linear-gradient(90deg, transparent 0 39px, #ffffff08 39px 40px),
+          var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .fig {
+        display: grid;
+        gap: 2px;
+        justify-items: center;
+        min-width: 0;
+      }
+      .fig .meeple {
+        color: var(--overlay);
+        filter: drop-shadow(0 4px 4px var(--shadow));
+      }
+      .fig .meeple path {
+        fill: var(--overlay);
+        stroke: var(--accent-text);
+        stroke-width: 1.2;
+      }
+      .fig.none .meeple path {
+        fill: none;
+        stroke: var(--muted);
+        stroke-dasharray: 2 2;
+      }
+      .fig .base {
+        display: flex;
+        align-items: center;
+        max-width: 100%;
+        gap: 2px;
+        min-height: 8px;
+        margin-top: -4px;
+      }
+      .fig .base .dot {
+        width: 8px;
+        height: 8px;
+      }
+      .fig .nm {
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .figIni {
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+      .figIni span {
+        position: absolute;
+        top: 46%;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--accent-text);
+        transform: translateY(-50%);
+      }
+      .fig.none .figIni span {
+        color: var(--muted);
+      }
+
+      /* ---------- L3 Karteikasten ---------- */
+      .register {
+        position: relative;
+        display: grid;
+        gap: 14px;
+        padding-right: 30px;
+      }
+      .letter {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 30px;
+        font-weight: 800;
+        color: var(--bg);
+        background: var(--accent-text);
+        border-radius: 8px 8px 0 0;
+      }
+      .regBox {
+        display: grid;
+      }
+      .regBox .listCard {
+        border-top-left-radius: 0;
+      }
+      .rail {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: grid;
+        gap: 0;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-align: center;
+      }
+      .rail button {
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 22px;
+        color: var(--accent-text);
+      }
+      .rail button[disabled] {
+        color: var(--border);
+        cursor: default;
+      }
+
+      /* ---------- L4 Spielsteine ---------- */
+      .tokens {
+        display: grid;
+        gap: 16px 8px;
+      }
+      .token {
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        min-width: 0;
+      }
+      .tokenDisc {
+        display: grid;
+        place-items: center;
+        width: 60px;
+        height: 60px;
+        padding: 5px;
+        border-radius: 50%;
+      }
+      .tokenDisc span {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 100%;
+        font-size: 1.2rem;
+        font-weight: 800;
+        background: radial-gradient(circle at 35% 30%, var(--overlay), var(--raised));
+        border-radius: 50%;
+        box-shadow: inset 0 -3px 6px var(--shadow);
+      }
+      .token.none .tokenDisc {
+        border: 2px dashed var(--border);
+      }
+      .token .nm {
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      /* ---------- L5 Spielblock ---------- */
+      .pad5 {
+        overflow: hidden;
+        color: #2b2219;
+        background: #f3e9d2;
+        border-radius: 6px;
+        box-shadow: 0 8px 20px var(--shadow);
+      }
+      .pad5Head {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-align: center;
+        text-transform: uppercase;
+        color: #f3e9d2;
+        background: #8a3b12;
+      }
+      .pad5Scroll {
+        overflow-x: auto;
+        scrollbar-width: none;
+        mask-image: linear-gradient(90deg, #000 88%, transparent);
+      }
+      .pad5Scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .pad5 table {
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      .pad5 th,
+      .pad5 td {
+        height: 40px;
+        padding: 0 6px;
+        text-align: center;
+        border-right: 1px solid #c9b48c;
+        border-bottom: 1px solid #c9b48c;
+      }
+      .pad5 th.nameCol,
+      .pad5 td.nameCol {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        min-width: 110px;
+        max-width: 130px;
+        padding: 0 10px;
+        overflow: hidden;
+        text-align: left;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        background: #f3e9d2;
+        border-right: 2px solid #8a3b12;
+      }
+      .pad5 td.nameCol button {
+        width: 100%;
+        min-height: 40px;
+        font-weight: 700;
+        text-align: left;
+      }
+      .pad5 th.tbl {
+        height: 112px;
+        min-width: 38px;
+        vertical-align: bottom;
+        padding-bottom: 6px;
+      }
+      .pad5 th.tbl span {
+        display: inline-block;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+      }
+      .pad5 .cellDot {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #2b2219;
+        border-radius: 50%;
+      }
+      .pad5 .sum {
+        font-weight: 800;
+        color: #8a3b12;
+      }
+
+      /* ---------- L6 Namenschips ---------- */
+      .chipCloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .nChip {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        min-height: 44px;
+        padding: 4px 14px 4px 6px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .nChip .initial {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+      }
+      .nChip.none {
+        padding-left: 14px;
+        background: none;
+        border-style: dashed;
+      }
+
+      /* ---------- D1 Spielerpass ---------- */
+      .pass {
+        position: relative;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: center;
+        width: min(100%, 420px);
+        aspect-ratio: 85.6 / 54;
+        margin: 0 auto;
+        padding: 18px;
+        overflow: hidden;
+        background:
+          repeating-linear-gradient(135deg, #ffffff06 0 8px, transparent 8px 16px),
+          linear-gradient(160deg, var(--overlay), var(--raised));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 10px 24px var(--shadow);
+      }
+      .passTop {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        left: 16px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent-text);
+      }
+      .passPhoto {
+        display: grid;
+        place-items: center;
+        width: 84px;
+        height: 104px;
+        margin-top: 14px;
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: var(--accent-text);
+        background: var(--bg);
+        border: 2px solid var(--border);
+        border-radius: 10px;
+      }
+      .passName {
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+      }
+      .stamps {
+        display: grid;
+        gap: 14px;
+      }
+      .stamp {
+        display: grid;
+        gap: 2px;
+        justify-items: center;
+        padding: 12px 6px;
+        text-align: center;
+        border: 2px dashed var(--accent-text);
+        border-radius: 14px;
+      }
+      .stamp strong {
+        color: var(--accent-text);
+      }
+
+      /* ---------- D2 Netz ---------- */
+      .net {
+        position: relative;
+        margin: 0 auto;
+      }
+      .net svg.lines {
+        position: absolute;
+        inset: 0;
+      }
+      .netHub {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: grid;
+        place-items: center;
+        width: 96px;
+        height: 96px;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--accent-text);
+        background: radial-gradient(circle at 35% 30%, var(--overlay), var(--raised));
+        border: 3px solid var(--accent-text);
+        border-radius: 50%;
+        box-shadow: 0 8px 20px var(--shadow);
+        transform: translate(-50%, -50%);
+      }
+      .netNode {
+        position: absolute;
+        display: grid;
+        gap: 2px;
+        justify-items: center;
+        width: 110px;
+        text-align: center;
+        transform: translate(-50%, -50%);
+      }
+      .netNode strong {
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 0.8rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* ---------- D3 Blatt ---------- */
+      .sheetBackdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        background: var(--backdrop);
+      }
+      .sheet {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 5;
+        display: grid;
+        gap: 16px;
+        align-content: start;
+        max-height: 78%;
+        padding: 10px 16px 24px;
+        overflow-y: auto;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-bottom: 0;
+        border-radius: 22px 22px 0 0;
+        box-shadow: 0 -10px 30px var(--shadow);
+        scrollbar-width: none;
+      }
+      .sheet.side {
+        top: 0;
+        bottom: 0;
+        left: auto;
+        width: 420px;
+        max-height: none;
+        padding-top: 20px;
+        border-bottom: 1px solid var(--border);
+        border-radius: 22px 0 0 22px;
+      }
+      .grip {
+        justify-self: center;
+        width: 44px;
+        height: 5px;
+        background: var(--border);
+        border-radius: 999px;
+      }
+
+      /* ---------- D4 Steckbrief ---------- */
+      .hero {
+        display: grid;
+        gap: 8px;
+        justify-items: center;
+        padding: 24px 16px 18px;
+        text-align: center;
+        background:
+          radial-gradient(circle at 50% 0%, #f5be5b22, transparent 70%),
+          var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+      }
+      .hero .big {
+        display: grid;
+        place-items: center;
+        width: 88px;
+        height: 88px;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--accent-text);
+        background: var(--bg);
+        border: 3px solid var(--accent-text);
+        border-radius: 50%;
+      }
+      .statRow {
+        display: grid;
+        grid-auto-columns: 1fr;
+        grid-auto-flow: column;
+        gap: 8px;
+        width: 100%;
+        max-width: 360px;
+      }
+      .stat {
+        display: grid;
+        padding: 8px 4px;
+        background: var(--bg);
+        border-radius: 12px;
+      }
+      .stat b {
+        font-size: 1.2rem;
+        color: var(--accent-text);
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+        padding: 4px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .tab {
+        flex: 1;
+        min-height: 40px;
+        font-size: 0.9rem;
+        text-align: center;
+        border-radius: 999px;
+      }
+      .tab[aria-selected='true'] {
+        font-weight: 700;
+        color: var(--on-accent);
+        background: var(--accent);
+      }
+      .tab.ghost {
+        color: var(--muted);
+        opacity: 0.6;
+      }
+
+      /* ---------- D5 Kartenrückseite ---------- */
+      .flipWrap {
+        width: min(78%, 300px);
+        margin: 0 auto;
+        perspective: 1200px;
+      }
+      .flipInner {
+        position: relative;
+        aspect-ratio: 5 / 7;
+        transition: transform 700ms cubic-bezier(0.2, 0, 0, 1);
+        transform-style: preserve-3d;
+      }
+      .flipInner.flipped {
+        transform: rotateY(180deg);
+      }
+      /* Both faces keep the size of the card; content never makes the card longer. */
+      .face {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+        min-height: 0;
+        aspect-ratio: auto;
+        overflow: hidden;
+        backface-visibility: hidden;
+      }
+      .backList {
+        display: grid;
+        gap: 6px;
+        align-content: start;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: none;
+        padding-bottom: 14px;
+      }
+      /* Only while more entries follow below: a soft edge and a hint; at the end both vanish. */
+      .backList.moreBelow {
+        mask-image: linear-gradient(180deg, #000 calc(100% - 40px), transparent);
+      }
+      .moreHint {
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        z-index: 2;
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+        min-height: 28px;
+        padding: 2px 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--accent-text);
+        white-space: nowrap;
+        background: var(--overlay);
+        border: 1px solid var(--accent-text);
+        border-radius: 999px;
+        transform: translateX(-50%);
+      }
+      .moreHint[hidden] {
+        display: none;
+      }
+      .backList::-webkit-scrollbar {
+        display: none;
+      }
+      .backChips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-content: start;
+      }
+      .backChip {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        max-width: 100%;
+        min-height: 36px;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--bg);
+        border-radius: 999px;
+      }
+      .face.backFace {
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        grid-template-rows: auto minmax(0, 1fr);
+        padding: 30px 16px 32px;
+        text-align: left;
+        place-items: stretch;
+        transform: rotateY(180deg);
+      }
+      .backRow {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        min-height: 48px;
+        padding: 4px 8px;
+        background: var(--bg);
+        border-radius: 10px;
+      }
+
+      /* ---------- D6 Mitspieler ---------- */
+      .withRow {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .withHead {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+      }
+      .mates {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .mate {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        min-height: 40px;
+        padding: 3px 12px 3px 3px;
+        font-size: 0.85rem;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .mate .c {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--bg);
+        border-radius: 50%;
+      }
+      .mate.me {
+        font-weight: 700;
+        border-color: var(--accent-text);
+      }
+
+      /* ---------- D7 Sammelkarte ---------- */
+      .tcg {
+        display: grid;
+        gap: 10px;
+        width: min(100%, 340px);
+        margin: 0 auto;
+        padding: 12px;
+        background: linear-gradient(160deg, var(--accent-text), var(--accent));
+        border-radius: 18px;
+        box-shadow: 0 10px 24px var(--shadow);
+      }
+      .tcg > * {
+        background: var(--raised);
+      }
+      .tcgHead {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 0;
+        padding: 6px 12px;
+        font-size: 1.2rem;
+        border-radius: 10px;
+      }
+      .tcgHp {
+        display: grid;
+        flex: none;
+        place-items: center;
+        align-content: center;
+        width: 52px;
+        height: 52px;
+        font-size: 1.15rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--accent-text);
+        border: 2px solid var(--accent-text);
+        border-radius: 50%;
+      }
+      .tcgHp small {
+        font-size: 0.55rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .tcgArt {
+        display: grid;
+        place-items: center;
+        aspect-ratio: 4 / 3;
+        background: repeating-conic-gradient(var(--overlay) 0 25%, var(--raised) 0 50%) 0 0 / 28px 28px;
+        border: 3px solid var(--border);
+        border-radius: 8px;
+      }
+      .tcgArt span {
+        display: grid;
+        place-items: center;
+        width: 110px;
+        height: 110px;
+        font-size: 3.4rem;
+        font-weight: 800;
+        color: var(--accent-text);
+        background: var(--bg);
+        border: 3px solid var(--accent-text);
+        border-radius: 50%;
+        box-shadow: 0 8px 18px var(--shadow);
+      }
+      .tcgType {
+        padding: 4px 12px;
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--muted);
+        border-radius: 6px;
+      }
+      .tcgStats {
+        display: grid;
+        grid-auto-columns: 1fr;
+        grid-auto-flow: column;
+        gap: 6px;
+        padding: 6px;
+        border-radius: 10px;
+      }
+      .tcgStat {
+        display: grid;
+        justify-items: center;
+        padding: 6px 2px;
+        font-size: 0.72rem;
+        color: var(--muted);
+        background: var(--bg);
+        border-radius: 8px;
+      }
+      .tcgStat b {
+        font-size: 1.2rem;
+        color: var(--accent-text);
+      }
+      .laterStat {
+        opacity: 0.55;
+        outline: 1px dashed var(--muted);
+      }
+      .tcgFlavor {
+        position: relative;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        font-style: italic;
+        border-radius: 8px;
+      }
+      .linkBtn {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--accent-text);
+      }
+
+      /* ---------- D8 Quartett ---------- */
+      .quartet {
+        width: min(100%, 340px);
+        margin: 0 auto;
+        overflow: hidden;
+        background: var(--raised);
+        border: 2px solid var(--accent-text);
+        border-radius: 16px;
+        box-shadow: 0 10px 24px var(--shadow);
+      }
+      .qTop {
+        position: relative;
+        display: grid;
+        gap: 6px;
+        justify-items: center;
+        padding: 18px 12px 12px;
+        background: radial-gradient(circle at 50% 30%, #f5be5b33, transparent 70%), var(--overlay);
+        border-bottom: 2px solid var(--accent-text);
+      }
+      .qCode {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        padding: 0 8px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--bg);
+        background: var(--accent-text);
+        border-radius: 6px;
+      }
+      .qBig {
+        display: grid;
+        place-items: center;
+        width: 84px;
+        height: 84px;
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: var(--accent-text);
+        background: var(--bg);
+        border-radius: 50%;
+      }
+      .qName {
+        font-size: 1.3rem;
+      }
+      .qRow {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 44px;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .qRow:nth-child(odd) {
+        background: #ffffff06;
+      }
+      .qRow:last-child {
+        border-bottom: 0;
+      }
+      .qRow strong {
+        color: var(--accent-text);
+      }
+      .qRow.later {
+        opacity: 0.55;
+      }
+
+      /* ---------- D9 Karte und Steckbrief ---------- */
+      .factGrid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .factLine {
+        display: inline-flex;
+        gap: 6px;
+        align-items: baseline;
+        padding: 4px 10px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .factLine b {
+        color: var(--accent-text);
+      }
+
+      /* ---------- D10 Kartenreihe ---------- */
+      .cardRow {
+        display: flex;
+        gap: 10px;
+        margin: 0 -16px;
+        padding: 4px 16px 12px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+      }
+      .cardRow::-webkit-scrollbar {
+        display: none;
+      }
+      .tCard {
+        flex: none;
+        width: 112px;
+        gap: 4px;
+        padding: 12px 6px;
+      }
+      .tCard strong {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+      }
+
+      /* ---------- D11 Spielerbogen ---------- */
+      .sheet5 {
+        overflow: hidden;
+        color: #2b2219;
+        background: #f3e9d2;
+        border-radius: 6px;
+        box-shadow: 0 8px 20px var(--shadow);
+      }
+      .sheet5Body {
+        display: grid;
+        gap: 4px;
+        padding: 12px 16px 16px;
+      }
+      .sheet5Label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8a3b12;
+      }
+      .sheet5Name {
+        display: grid;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #8a3b12;
+      }
+      .sheet5Name strong {
+        font-size: 1.6rem;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+      }
+      .sheet5Fields {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
+        gap: 8px;
+        padding: 6px 0;
+      }
+      .field5 {
+        display: grid;
+        min-width: 0;
+        padding: 6px;
+        border: 1.5px solid #8a3b12;
+        border-radius: 6px;
+      }
+      .field5 .sheet5Label {
+        font-size: 0.62rem;
+        letter-spacing: 0.03em;
+      }
+      .field5.later {
+        border-style: dashed;
+        opacity: 0.6;
+      }
+      .field5 strong {
+        font-size: 1rem;
+        white-space: nowrap;
+      }
+      .sheet5Row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        min-height: 44px;
+        color: #2b2219;
+        border-bottom: 1px solid #c9b48c;
+      }
+      .sheet5Row .cellDot {
+        display: inline-block;
+        flex: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #2b2219;
+        border-radius: 50%;
+      }
+      .sheet5Small {
+        flex: none;
+        font-size: 0.75rem;
+        color: #6b5640;
+      }
+      .sheet5More {
+        justify-self: center;
+        min-height: 44px;
+        font-weight: 700;
+        color: #8a3b12;
+      }
+
+      /* ---------- round 3: table pages ---------- */
+      .seatToken {
+        display: inline-grid;
+        flex: none;
+        place-items: center;
+        font-weight: 800;
+        color: var(--bg);
+        border-radius: 50%;
+      }
+      .bt {
+        position: relative;
+        flex: none;
+        margin: 0 auto;
+      }
+      .bt-top {
+        position: absolute;
+        inset: 17%;
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        padding: 8px;
+        text-align: center;
+        background: radial-gradient(circle at 40% 35%, var(--overlay), var(--raised));
+        border: 6px solid var(--border);
+        border-radius: 50%;
+        box-shadow: inset 0 0.75rem 2.5rem -0.75rem var(--shadow);
+      }
+      .bt-seat {
+        position: absolute;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        color: var(--bg);
+        border: 3px solid var(--bg);
+        border-radius: 50%;
+        box-shadow: 0 4px 12px var(--shadow);
+        transform: translate(-50%, -50%);
+      }
+      .bt-name {
+        position: absolute;
+        max-width: 76px;
+        padding: 0 6px;
+        overflow: hidden;
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1.6;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .twoCol {
+        display: grid;
+        gap: 24px;
+        align-items: start;
+      }
+      .roomGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+        gap: 12px;
+      }
+      .tableCard {
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        align-content: start;
+        padding: 16px 8px;
+        text-align: center;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .tableCard.new {
+        color: var(--accent-text);
+        border: 1px dashed var(--accent-text);
+      }
+      .plusTable {
+        display: grid;
+        place-items: center;
+        width: 96px;
+        height: 96px;
+        border: 2px dashed var(--accent-text);
+        border-radius: 50%;
+      }
+
+      .winRow {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 14px;
+      }
+      .winTrack {
+        flex: 1;
+        height: 10px;
+        overflow: hidden;
+        background: var(--bg);
+        border-radius: 999px;
+      }
+      .winBar {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+      }
+
+      .cardTables {
+        display: -webkit-box;
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 0.68rem;
+        line-height: 1.25;
+        color: var(--muted);
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        overflow-wrap: anywhere;
+      }
+
+      /* Very narrow phones: one line of table names, so the corner number stays free. */
+      @media (width < 370px) {
+        .frame.device .cardTables {
+          -webkit-line-clamp: 1;
+          line-clamp: 1;
+        }
+      }
+
+      /* later features */
+      .ph {
+        position: relative;
+        opacity: 0.55;
+        outline: 2px dashed var(--muted);
+        outline-offset: 3px;
+        border-radius: 14px;
+      }
+      .ph-tag {
+        position: absolute;
+        top: -10px;
+        right: 8px;
+        z-index: 2;
+        padding: 0 7px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        line-height: 18px;
+        color: var(--bg);
+        background: var(--muted);
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .ghostBtn {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        min-height: 44px;
+        padding: 6px 14px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .spec {
+        display: grid;
+        gap: 6px;
+        align-content: start;
+      }
+      .spec ul {
+        display: grid;
+        gap: 4px;
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      /* ================= I1-F additions ================= */
+      :root {
+        --status-error: #fc8585;
+        --status-warning: #fbbf24;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+      .primary.block,
+      .ghostBtn.block {
+        justify-content: center;
+        width: 100%;
+      }
+      .ghostBtn.danger {
+        color: var(--status-error);
+      }
+      .btnRow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .btnRow > * {
+        flex: 1 1 8rem;
+        justify-content: center;
+      }
+      .lbl {
+        font-weight: 700;
+      }
+      .notice {
+        display: grid;
+        gap: 8px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--status-error);
+        border-radius: 8px;
+      }
+      .notice.warn {
+        border-left-color: var(--status-warning);
+      }
+      .nameRow {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        min-width: 0;
+      }
+      .iconBtn.sm {
+        width: 36px;
+        height: 36px;
+        color: var(--accent-text);
+      }
+      .renCard {
+        display: grid;
+        gap: 10px;
+      }
+      .marked {
+        outline: 2px solid var(--accent-text);
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+      .modalWrap {
+        position: absolute;
+        inset: 0;
+        z-index: 8;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: var(--backdrop);
+      }
+      .modal {
+        display: grid;
+        gap: 14px;
+        width: min(100%, 400px);
+        padding: 20px;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px var(--shadow);
+      }
+      .sheet .sheetHead {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* ---------- group editor as in the app (GroupEditor, GroupsView dialog) ---------- */
+      .edBackdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 6;
+        display: flex;
+        justify-content: center;
+        overflow-y: auto;
+        background: var(--bg);
+        scrollbar-width: none;
+      }
+      .edDialog {
+        width: 100%;
+        max-width: 62rem;
+        padding: 16px;
+        background: var(--bg);
+      }
+      .edBackdrop.wideEd {
+        align-items: flex-start;
+        padding: 24px;
+        background: var(--backdrop);
+      }
+      .wideEd .edDialog {
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .edHead {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .wideEd .edHead {
+        justify-content: space-between;
+      }
+      .wideEd .edHead .squareBtn {
+        order: 2;
+      }
+      .edHead h2 {
+        font-size: 1.5rem;
+      }
+      .wideEd .edHead h2 {
+        font-size: 1.25rem;
+      }
+      .squareBtn {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .edForm {
+        display: grid;
+        gap: 16px;
+      }
+      .edSection {
+        display: grid;
+        gap: 12px;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+      .edHeadRow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+      .edColumns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      .edColumns > * {
+        flex: 1 1 17.5rem;
+        min-width: 0;
+      }
+      .edCard {
+        display: grid;
+        gap: 8px;
+        padding: 12px 16px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      .lockNote {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        background: var(--raised);
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+      }
+      .edTable {
+        position: relative;
+        width: 100%;
+        max-width: 18rem;
+        aspect-ratio: 1;
+        margin: 8px auto;
+      }
+      .wideEd .edTable {
+        max-width: 23.75rem;
+      }
+      .edTable .bt-top {
+        inset: 17%;
+      }
+      .edSeat {
+        position: absolute;
+        display: grid;
+        place-items: center;
+        min-width: 44px;
+        aspect-ratio: 1;
+        font-weight: 800;
+        color: var(--bg);
+        border: 3px solid var(--bg);
+        border-radius: 50%;
+        box-shadow: 0 4px 12px var(--shadow);
+        transform: translate(-50%, -50%);
+      }
+      .edSeat[aria-pressed='true'] {
+        outline: 3px solid var(--text);
+        outline-offset: 3px;
+      }
+      .edSeat .cMark {
+        position: absolute;
+        right: -6px;
+        bottom: -6px;
+        width: 42%;
+        height: 42%;
+        border: 3px solid var(--bg);
+        border-radius: 6px;
+      }
+      .swRow {
+        display: flex;
+        gap: 8px;
+        padding: 4px 2px 8px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .wideEd .swRow {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+        gap: 12px 8px;
+        padding: 0;
+      }
+      .swItem {
+        display: grid;
+        flex: none;
+        gap: 4px;
+        justify-items: center;
+      }
+      .sw {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: var(--bg);
+        border: 2px solid var(--border);
+        border-radius: 50%;
+      }
+      .sw.square {
+        border-radius: 10px;
+      }
+      .sw[aria-pressed='true'] {
+        outline: 3px solid var(--text);
+        outline-offset: 2px;
+      }
+      .segment {
+        display: grid;
+        grid-auto-columns: minmax(0, 1fr);
+        grid-auto-flow: column;
+        gap: 4px;
+        padding: 4px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .segment button {
+        min-height: 44px;
+        padding: 4px 8px;
+        text-align: center;
+        border-radius: 8px;
+      }
+      .segment .on {
+        font-weight: 600;
+        color: var(--on-accent);
+        background: var(--accent);
+      }
+      .segment .more {
+        font-weight: 600;
+        color: var(--accent-text);
+      }
+      .gameList {
+        display: grid;
+        max-height: calc(4.75 * 3rem);
+        overflow-y: auto;
+        scrollbar-width: none;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .gameList button {
+        min-height: 3rem;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .gameList button:last-child {
+        border-bottom: 0;
+      }
+      .gameList button[aria-pressed='true'] {
+        font-weight: 600;
+        color: var(--accent-text);
+        background: var(--overlay);
+      }
+      .switchRow {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 44px;
+        padding: 8px 16px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .switch {
+        position: relative;
+        flex: none;
+        width: 3.25rem;
+        height: 1.875rem;
+        background: var(--border);
+        border-radius: 1rem;
+      }
+      .switch.on {
+        background: var(--accent);
+      }
+      .switch::after {
+        position: absolute;
+        top: 0.1875rem;
+        left: 0.1875rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        content: '';
+        background: var(--text);
+        border-radius: 50%;
+      }
+      .switch.on::after {
+        left: 1.5625rem;
+      }
+      .saveBar {
+        position: sticky;
+        bottom: 0;
+        padding: 12px 0 4px;
+        background: linear-gradient(to bottom, transparent, var(--bg) 35%);
+      }
+      .wideEd .saveBar {
+        position: static;
+        padding: 0;
+        background: none;
+      }
+      .saveBar .primary {
+        width: 100%;
+        min-height: 3.25rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      /* ---------- games ---------- */
+      .gameIcon {
+        display: grid;
+        place-items: center;
+        width: 50px;
+        height: 50px;
+        color: var(--accent-text);
+        border: 2px solid var(--accent-text);
+        border-radius: 12px;
+      }
+      .builtIn {
+        flex: none;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      /* ---------- round 2 ---------- */
+      .btnRow.tight {
+        flex-wrap: nowrap;
+      }
+      .btnRow.tight > * {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 6px 8px;
+      }
+      .pillRow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .pillBtn,
+      .roundPill {
+        position: relative;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 4px 12px;
+        font-size: 0.85rem;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .roundPill {
+        width: 34px;
+        padding: 0;
+      }
+      .accentPill {
+        color: var(--accent-text);
+      }
+      /* Visible 34 px, touch area 44 px. */
+      .pillBtn::after,
+      .roundPill::after {
+        position: absolute;
+        inset: -5px;
+        content: '';
+      }
+      .menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        z-index: 5;
+        display: grid;
+        min-width: 11rem;
+        overflow: hidden;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px var(--shadow);
+      }
+      .menu button {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .menu button:last-child {
+        border-bottom: 0;
+      }
+      .dangerText {
+        color: var(--status-error);
+      }
+      .tablePen {
+        position: absolute;
+        top: 89%;
+        left: 89%;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        color: var(--accent-text);
+        background: var(--overlay);
+        border: 1px solid var(--accent-text);
+        border-radius: 50%;
+        box-shadow: 0 4px 12px var(--shadow);
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="picker">
+      <div class="row" id="list-row"></div>
+      <div class="row" id="detail-row"></div>
+      <div class="row" id="frame-row"></div>
+      <div class="row" id="option-row"></div>
+    </div>
+    <div class="intro" id="intro"></div>
+    <div class="stage" id="stage"></div>
+
+    <script>
+      // Mockups only, not app code. Colour values mirror src/ui/styles/tokens.css (design Holz).
+      const GROUP = {
+        red: '#ef5359', blue: '#4189f5', yellow: '#e6cb72', green: '#8fb35a', indigo: '#aeb0f2', orange: '#f5852b',
+        teal: '#5fbfb2', magenta: '#d46bc4', brown: '#94643f', pink: '#eba3bf', gray: '#9aa1ab', white: '#f1f1f4',
+      };
+      const ORDER = ['red', 'blue', 'yellow', 'green', 'indigo', 'orange', 'teal', 'magenta', 'brown', 'pink', 'gray', 'white'];
+      const CATAN_ORDER = ['red', 'blue', 'white', 'orange'];
+      const COLOR_NAME = {
+        red: 'Rot', blue: 'Blau', yellow: 'Gelb', green: 'Moosgrün', indigo: 'Indigo', orange: 'Orange',
+        teal: 'Petrol', magenta: 'Magenta', brown: 'Kaffee', pink: 'Rosé', gray: 'Steingrau', white: 'Weiß',
+      };
+      const FRAMES = { phoneP: 'Handy hoch', tabletP: 'Tablet hoch', wide: 'Tablet quer / PC', device: '⛶ Vollbild auf diesem Gerät' };
+
+      // ---------- data ----------
+      const NAMES = [
+        'Anna', 'Ben', 'Clara', 'David', 'Eva', 'Finn', 'Greta', 'Hanna', 'Ilias', 'Jonas', 'Katharina', 'Leo',
+        'Mia', 'Noah', 'Oskar', 'Paula', 'Mama', 'Papa', 'Oma Hildegard', 'Opa', 'Xenia', 'Yusuf', 'Zoe',
+      ];
+      const GROUP_DEFS = [
+        ['Freitagsrunde', { kind: 'game', game: 'Catan' }, ['Anna', 'Ben', 'Clara', 'David'], 0],
+        ['Familie', { kind: 'global' }, ['Mama', 'Papa', 'Anna', 'Eva', 'Finn', 'Greta'], 0],
+        ['Studienfreunde', { kind: 'global' }, ['Clara', 'Jonas', 'Katharina', 'Leo'], 2],
+        ['Uno-Abend', { kind: 'game', game: 'Uno' }, ['Ben', 'Hanna', 'Ilias'], 4],
+        ['Büro-Mittagspause', { kind: 'global', noCatan: true }, ['David', 'Mia', 'Noah'], 6],
+        ['Doppelkopf-Runde', { kind: 'game', game: 'Doppelkopf' }, ['Oskar', 'Paula', 'Jonas', 'Anna'], 1],
+        ['Kinder', { kind: 'game', game: 'Uno' }, ['Finn', 'Greta'], 3],
+        ['Großfamilie Weihnachten', { kind: 'global' }, ['Mama', 'Papa', 'Oma Hildegard', 'Opa', 'Anna', 'Ben', 'Eva', 'Finn', 'Greta', 'Hanna', 'Leo', 'Mia'], 0],
+      ];
+      const DATA_SETS = {
+        full: { names: NAMES, groups: GROUP_DEFS },
+        many: {
+          names: NAMES,
+          groups: [
+            ...GROUP_DEFS,
+            ['Spieletreff Mittwoch', { kind: 'global' }, ['Anna', 'Hanna', 'Ilias', 'Noah', 'Ben', 'Mia', 'Leo'], 3],
+            ['Pärchenabend', { kind: 'game', game: 'Catan' }, ['Anna', 'Jonas', 'Clara', 'Leo'], 1],
+            ['Urlaub Ostsee 2026', { kind: 'global' }, ['Anna', 'Ben', 'Clara', 'David', 'Eva', 'Finn', 'Jonas', 'Katharina'], 5],
+            ['Wizard-Runde', { kind: 'game', game: 'Wizard' }, ['Anna', 'Ben', 'Oskar', 'Paula', 'David'], 2],
+            ['Nachbarn', { kind: 'global', noCatan: true }, ['Anna', 'Eva', 'Mama', 'Papa'], 7],
+            // Ben plays everywhere: 14 more tables, so he sits at 20.
+            ...[
+              ['Skat-Treff', { kind: 'game', game: 'Skat' }, ['Ben', 'Oskar', 'Noah']],
+              ['Schach-Club', { kind: 'game', game: 'Schach' }, ['Ben', 'Leo']],
+              ['Kniffel-Abend', { kind: 'game', game: 'Kniffel' }, ['Ben', 'Mia', 'Paula', 'Eva']],
+              ['Catan-Liga', { kind: 'game', game: 'Catan' }, ['Ben', 'Jonas', 'Katharina', 'Hanna']],
+              ['Fußballverein Spieleabend', { kind: 'global' }, ['Ben', 'David', 'Ilias', 'Noah', 'Leo', 'Finn']],
+              ['Wichteln 2026', { kind: 'global' }, ['Ben', 'Clara', 'Greta']],
+              ['Sonntagsfrühstück', { kind: 'global', noCatan: true }, ['Ben', 'Mama', 'Papa']],
+              ['Azul-Runde', { kind: 'game', game: 'Azul' }, ['Ben', 'Clara', 'Hanna', 'Mia']],
+              ['Hüttenwochenende', { kind: 'global' }, ['Ben', 'Eva', 'Finn', 'Jonas', 'Katharina', 'Oskar', 'Paula']],
+              ['Mau-Mau mit Opa', { kind: 'game', game: 'Mau-Mau' }, ['Ben', 'Opa']],
+              ['Brettspielcafé', { kind: 'global' }, ['Ben', 'Ilias', 'Mia', 'Noah']],
+              ['Silvester', { kind: 'global' }, ['Ben', 'Greta', 'Clara', 'David', 'Eva']],
+              ['Werwolf-Nacht', { kind: 'global', noCatan: true }, ['Ben', 'Greta', 'Hanna', 'Leo', 'Paula', 'Oskar', 'Jonas', 'Mia']],
+              ['Rommé bei Oma', { kind: 'game', game: 'Rommé' }, ['Ben', 'Oma Hildegard', 'Opa']],
+            ].map(([n, b, m], i) => [n, b, m, i]),
+          ],
+        },
+        few: { names: ['Anna', 'Ben', 'Clara'], groups: [['Freitagsrunde', { kind: 'game', game: 'Catan' }, ['Anna', 'Ben'], 0]] },
+        empty: { names: [], groups: [] },
+      };
+      function hasCatanColors(b, n) {
+        return b.kind === 'game' ? b.game === 'Catan' : !b.noCatan && n <= 4;
+      }
+      function buildData(key) {
+        const set = DATA_SETS[key];
+        const persons = set.names.map((name, i) => ({ id: 'p' + i, name }));
+        const byName = Object.fromEntries(persons.map((p) => [p.name, p]));
+        const groups = set.groups.map(([name, binding, members, offset], gi) => {
+          const catan = hasCatanColors(binding, members.length);
+          const catanOnly = binding.kind === 'game' && binding.game === 'Catan';
+          return {
+            id: 'g' + gi, name, binding, catan,
+            members: members.map((m, i) => {
+              const cc = catan ? CATAN_ORDER[(i + offset) % 4] : null;
+              return { pid: byName[m].id, gc: catanOnly ? cc : ORDER[(i + offset) % 12], cc };
+            }),
+          };
+        });
+        return { persons, groups };
+      }
+      function bindingShort(g) {
+        if (g.binding.kind === 'game') return g.binding.game;
+        return g.binding.noCatan ? 'Alle Spiele ohne Catan' : 'Alle Spiele';
+      }
+      function colorText(g, m) {
+        return COLOR_NAME[m.gc];
+      }
+
+      // ---------- state ----------
+      const state = {
+        list: 'L1',
+        detail: 'D9',
+        table: 'T7',
+        tableTab: 'members',
+        frame: 'phoneP',
+        lastFrame: 'phoneP',
+        data: 'full',
+        later: false,
+        screen: 'personen',
+        stack: ['verwaltung'],
+        search: false,
+        q: '',
+        adding: false,
+        flipped: false,
+        expanded: null,
+      };
+      let DB = buildData('full');
+      const person = (id) => DB.persons.find((p) => p.id === id);
+      const group = (id) => DB.groups.find((g) => g.id === id);
+      const groupsOf = (pid) => DB.groups.filter((g) => g.members.some((m) => m.pid === pid));
+      const memberOf = (g, pid) => g.members.find((m) => m.pid === pid);
+      const countText = (n) => (n === 0 ? 'an keinem Tisch' : n === 1 ? 'an 1 Tisch' : 'an ' + n + ' Tischen');
+
+      function kind() {
+        if (state.frame !== 'device') return state.frame;
+        const w = window.innerWidth;
+        if (w < 600) return 'phoneP';
+        if (w < 1000 && window.innerHeight > w) return 'tabletP';
+        return 'wide';
+      }
+      const cols = (o) => o[kind()];
+
+      // ---------- helpers ----------
+      function h(tag, attrs, ...kids) {
+        const el = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          if (v == null || v === false) continue;
+          if (k === 'class') el.className = v;
+          else if (k === 'style') {
+            for (const [p, val] of Object.entries(v)) {
+              if (p.startsWith('--')) el.style.setProperty(p, val);
+              else el.style[p] = val;
+            }
+          } else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+          else el.setAttribute(k, v === true ? '' : v);
+        }
+        for (const c of kids.flat(Infinity)) {
+          if (c == null || c === false) continue;
+          el.append(c instanceof Node ? c : String(c));
+        }
+        return el;
+      }
+      const ICONS = {
+        home: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+        people: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M22 21v-1a6 6 0 0 0-4-5.6',
+        table: 'M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zM12 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM12 22.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM3 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
+        dice: 'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01',
+        folder: 'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+        back: 'M15 5l-7 7 7 7',
+        next: 'M9 5l7 7-7 7',
+        search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.5-4.5',
+        close: 'M6 6l12 12M18 6L6 18',
+        plus: 'M12 5v14M5 12h14',
+        pen: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
+        trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
+        more: 'M4.5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0M10.5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0M16.5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0',
+        box: 'M3 7h18v4H3zM5 11v9h14v-9M10 15h4',
+        flip: 'M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5',
+      };
+      function icon(name, size = 22) {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        for (const [k, v] of Object.entries({ width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }))
+          svg.setAttribute(k, v);
+        const p = document.createElementNS(ns, 'path');
+        p.setAttribute('d', ICONS[name]);
+        svg.append(p);
+        return svg;
+      }
+      const MEEPLE = 'M12 1.5a3.4 3.4 0 0 1 3.4 3.4c0 1-.4 1.9-1.1 2.6l5.7 2.3c1.8.7 2 3.1.4 4.1l-3.2 1.8 3.1 6.1c.5 1-.2 2.2-1.3 2.2h-4.6L12 18.3 9.6 24H5c-1.1 0-1.8-1.2-1.3-2.2l3.1-6.1-3.2-1.8c-1.6-1-1.4-3.4.4-4.1l5.7-2.3c-.7-.7-1.1-1.6-1.1-2.6A3.4 3.4 0 0 1 12 1.5z';
+      function meeple(size) {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('class', 'meeple');
+        svg.setAttribute('width', size);
+        svg.setAttribute('height', size);
+        svg.setAttribute('viewBox', '0 0 24 25');
+        svg.setAttribute('aria-hidden', 'true');
+        const p = document.createElementNS(ns, 'path');
+        p.setAttribute('d', MEEPLE);
+        svg.append(p);
+        return svg;
+      }
+      function logoMark(size) {
+        const ns = 'http://www.w3.org/2000/svg';
+        const OUTLINE =
+          'M24 8.5C21 5 14 5.5 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42.5 22 40.5 23 41 23.5 41 24 40.5 24.5 41 25 41 26 40.5 30 42.5 35 41 36 37 40 38 43 33 41 29 45 27 45 20 41 18 43 15 41 10 36 10 34 5.5 27 5 24 8.5Z';
+        let squares = '';
+        for (let c = 0; c < 5; c++)
+          for (let r = -5; r < 5; r++)
+            if ((((c + r) % 2) + 2) % 2 === 0)
+              squares += `<rect x="${(24 - 5.4 * (c + 1)).toFixed(2)}" y="${(24 + 5.4 * r).toFixed(2)}" width="5.4" height="5.4" fill="currentColor" opacity="0.85"/>`;
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('width', size);
+        svg.setAttribute('height', size);
+        svg.setAttribute('viewBox', '0 0 48 48');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.innerHTML = `<clipPath id="lgo"><path d="${OUTLINE}"/></clipPath><clipPath id="lgl"><rect x="0" y="0" width="24" height="48"/></clipPath><g clip-path="url(#lgo)"><g clip-path="url(#lgl)">${squares}</g></g><path d="M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="${OUTLINE}" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M24 8.5V40.5" fill="none" stroke="currentColor" stroke-width="2.6"/>`;
+        return svg;
+      }
+      function ph(el, tag) {
+        if (!state.later) return null;
+        return h('div', { class: 'ph' }, el, h('span', { class: 'ph-tag' }, 'später · ' + tag));
+      }
+      // At most `max` dots; the rest as "+n" so many tables never break the layout.
+      function myDots(pid, max = 8) {
+        const gs = groupsOf(pid);
+        const shown = gs.length > max ? gs.slice(0, max - 1) : gs;
+        return [
+          shown.map((g) => h('span', { class: 'dot', title: g.name, style: { background: GROUP[memberOf(g, pid).gc] } })),
+          gs.length > shown.length && h('span', { class: 'moreDots' }, '+' + (gs.length - shown.length)),
+        ];
+      }
+      // Ring around a token, split into the person's colours at her tables.
+      function ringOf(pid) {
+        const gs = groupsOf(pid);
+        if (gs.length === 0) return null;
+        const step = 360 / gs.length;
+        const parts = gs.map((g, i) => `${GROUP[memberOf(g, pid).gc]} ${i * step + 4}deg ${(i + 1) * step - 4}deg, transparent ${(i + 1) * step - 4}deg ${(i + 1) * step + 4}deg`);
+        return `conic-gradient(transparent 0deg 4deg, ${parts.join(', ')})`;
+      }
+      function miniTable(g, size = 64, hlPid = null) {
+        const wrap = h('div', { class: 'mt', style: { width: size + 'px', height: size + 'px' } }, h('div', { class: 'mt-top' }));
+        const n = g.members.length;
+        const seat = size * (n >= 7 ? 0.2 : 0.24);
+        g.members.forEach((m, i) => {
+          const a = (i / n) * 2 * Math.PI - Math.PI / 2;
+          wrap.append(h('span', { class: 'mt-seat' + (hlPid ? (m.pid === hlPid ? ' hl' : ' dim') : ''), style: { width: seat + 'px', height: seat + 'px', left: 50 + 40 * Math.cos(a) + '%', top: 50 + 40 * Math.sin(a) + '%', background: GROUP[m.gc] } }));
+        });
+        return wrap;
+      }
+      // Only the group colour; the Catan colour is not shown on the person pages (PO decision).
+      function colorMark(g, m, size = 12) {
+        return h('span', { class: 'dot', style: { width: size + 'px', height: size + 'px', background: GROUP[m.gc] } });
+      }
+
+      // ---------- navigation ----------
+      function go(screen) {
+        state.stack.push(state.screen);
+        state.screen = screen;
+        state.flipped = false;
+        state.expanded = null;
+        render();
+        document.querySelectorAll('.scroll').forEach((el) => (el.scrollTop = 0));
+        if (state.detail === 'D5' && screen.startsWith('p:')) setTimeout(() => { state.flipped = true; document.querySelector('.flipInner')?.classList.add('flipped'); }, 450);
+      }
+      function back() {
+        state.screen = state.stack.pop() || 'verwaltung';
+        render();
+      }
+      function goArea(s) {
+        state.stack = [];
+        state.screen = s;
+        render();
+      }
+      function hand() {
+        const all = [['start', 'home', 'Start'], ['verwaltung', 'folder', 'Verwaltung']];
+        return h(
+          'nav',
+          { class: 'e-hand', 'aria-label': 'Hauptnavigation' },
+          all.map(([s, ic, l], i) => {
+            const active = (state.screen === 'start' ? 'start' : 'verwaltung') === s;
+            return h('button', { class: 'e-navCard', 'aria-current': active ? 'page' : null, style: { transform: `rotate(${(i - 0.5) * 9}deg) translateY(${active ? 4 : 16}px)` }, onclick: () => goArea(s) }, icon(ic, 22), l);
+          }),
+        );
+      }
+      function pageHead(title, actions) {
+        return h('div', { class: 'pageHead' }, h('button', { class: 'iconBtn', 'aria-label': 'Zurück', onclick: back }, icon('back')), h('h1', {}, title), actions);
+      }
+      function headActions(withAdd) {
+        return h(
+          'div',
+          { style: { display: 'flex', gap: '8px' } },
+          h('button', { class: 'iconBtn', 'aria-label': 'Suchen', onclick: () => { state.search = !state.search; state.q = ''; render(); } }, icon('search')),
+          withAdd && h('button', { class: 'iconBtn', 'aria-label': 'Neue Person', style: { color: 'var(--accent-text)', borderColor: 'var(--accent-text)' }, onclick: () => { state.adding = !state.adding; render(); } }, icon('plus')),
+        );
+      }
+      function searchRow() {
+        if (!state.search) return null;
+        const input = h('input', {
+          class: 'field', type: 'search', placeholder: 'Person suchen', value: state.q,
+          oninput: (e) => {
+            state.q = e.target.value;
+            const pos = e.target.selectionStart;
+            render();
+            const again = document.querySelector('.field[type=search]');
+            again.focus();
+            again.setSelectionRange(pos, pos);
+          },
+        });
+        return h('div', { class: 'fieldRow' }, input, h('button', { class: 'iconBtn', 'aria-label': 'Suche schließen', onclick: () => { state.search = false; state.q = ''; render(); } }, icon('close')));
+      }
+      function addForm(always) {
+        if (!always && !state.adding) return null;
+        return h(
+          'div',
+          { style: { display: 'grid', gap: '6px' } },
+          h('h2', {}, 'Neue Person'),
+          h('div', { class: 'fieldRow' }, h('input', { class: 'field', placeholder: 'Name' }), h('button', { class: 'primary' }, 'Speichern')),
+        );
+      }
+      function persons() {
+        const q = state.q.trim().toLowerCase();
+        return q ? DB.persons.filter((p) => p.name.toLowerCase().includes(q)) : DB.persons;
+      }
+      function emptyHint() {
+        return h('p', { class: 'muted' }, 'Noch keine Personen angelegt.');
+      }
+      function listPage(content, opts = {}) {
+        return h(
+          'div',
+          { class: 'pad wideContent', style: { maxWidth: opts.max || '1040px' } },
+          pageHead('Personen', headActions(!opts.formAlways)),
+          searchRow(),
+          addForm(opts.formAlways),
+          DB.persons.length === 0 ? emptyHint() : content,
+        );
+      }
+
+      function laterActions() {
+        return ph(h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } }, h('span', { class: 'ghostBtn' }, icon('pen', 18), 'Umbenennen'), h('span', { class: 'ghostBtn' }, icon('box', 18), 'Archivieren')), 'I1-F Umbenennen · I5 Archivieren');
+      }
+      function noTables(p) {
+        return h('p', { class: 'muted' }, p.name + ' sitzt noch an keinem Tisch.');
+      }
+      function detailPage(p, content, max = '860px') {
+        return h('div', { class: 'pad wideContent', style: { maxWidth: max } }, pageHead(p.name), content, laterActions());
+      }
+
+      // ---------- helpers for the profile variants (D7–D11) ----------
+      function matesOf(p) {
+        return new Set(groupsOf(p.id).flatMap((g) => g.members.map((m) => m.pid)).filter((id) => id !== p.id));
+      }
+      function sinceText(p) {
+        const i = DB.persons.indexOf(p);
+        return String(((i * 3) % 27) + 1).padStart(2, '0') + '.0' + (7 + (i % 3)) + '.2026';
+      }
+      function favouriteColor(p) {
+        const count = {};
+        groupsOf(p.id).forEach((g) => {
+          const c = memberOf(g, p.id).gc;
+          count[c] = (count[c] || 0) + 1;
+        });
+        return Object.keys(count).sort((a, b) => count[b] - count[a])[0];
+      }
+      function statBox(v, l) {
+        return h('span', { class: 'tcgStat' }, h('b', {}, v), h('span', {}, l));
+      }
+      function laterStat(v, l, cls = 'tcgStat') {
+        if (!state.later) return null;
+        return h('span', { class: cls + ' laterStat' }, h('b', {}, v), h('span', { class: 'tiny muted' }, l + ' · I3'));
+      }
+      function factLine(v, l, later) {
+        return h('span', { class: 'factLine' + (later ? ' laterStat' : '') }, h('b', {}, v), h('span', { class: 'small muted' }, l));
+      }
+      function field5(l, v, later) {
+        return h('div', { class: 'field5' + (later ? ' later' : ''), title: later ? 'später · I3' : null }, h('span', { class: 'sheet5Label' }, l), h('strong', {}, v));
+      }
+      // Tables of a person; from 7 tables collapsed to 6 with "Alle anzeigen".
+      function tablesSection(p, style, noHead) {
+        const gs = groupsOf(p.id);
+        const all = state.expanded === p.id;
+        const shown = all || gs.length <= 6 ? gs : gs.slice(0, 6);
+        const toggle = gs.length > 6 && h('button', { class: 'linkBtn', style: { justifySelf: 'center' }, onclick: () => { state.expanded = all ? null : p.id; render(); } }, all ? 'Weniger ▴' : 'Alle ' + gs.length + ' anzeigen ▾');
+        let body;
+        if (gs.length === 0) body = noTables(p);
+        else if (style === 'chips')
+          body = h('div', { class: 'chipCloud' }, shown.map((g) => h('button', { class: 'nChip', onclick: () => go('t:' + g.id) }, colorMark(g, memberOf(g, p.id), 12), g.name)));
+        else
+          body = h('div', { class: 'listCard' }, shown.map((g) => {
+            const m = memberOf(g, p.id);
+            return h('button', { class: 'listRow', onclick: () => go('t:' + g.id) }, miniTable(g, 44, p.id), h('span', { class: 'rowText' }, h('strong', {}, g.name), h('span', { class: 'small muted' }, bindingShort(g) + ' · ' + colorText(g, m))), h('span', { class: 'chev' }, icon('next', 18)));
+          }));
+        return h('div', { style: { display: 'grid', gap: '10px' } }, !noHead && h('h2', {}, 'Tische · ' + gs.length), body, toggle);
+      }
+
+      function bindingLong(g) {
+        if (g.binding.kind === 'game') return 'Nur ' + g.binding.game;
+        return g.binding.noCatan ? 'Alle Spiele ohne Catan' : 'Alle Spiele';
+      }
+      function tableSince(g) {
+        const i = DB.groups.indexOf(g);
+        return String(((i * 5) % 27) + 1).padStart(2, '0') + '.0' + (8 + (i % 2)) + '.2026';
+      }
+      // Seat token: group colour with the initial, like the seats in the editor.
+      function seatToken(g, m, size = 36) {
+        const q = person(m.pid);
+        return h('span', { class: 'seatToken', style: { width: size + 'px', height: size + 'px', fontSize: size * 0.42 + 'px', background: GROUP[m.gc] } }, q.name[0]);
+      }
+      function memberRows(g) {
+        return h('div', { class: 'listCard' }, g.members.map((m) => {
+          const q = person(m.pid);
+          return h('button', { class: 'listRow', onclick: () => go('p:' + q.id) }, seatToken(g, m), h('span', { class: 'rowText' }, h('strong', {}, q.name), h('span', { class: 'small muted' }, COLOR_NAME[m.gc])), h('span', { class: 'chev' }, icon('next', 18)));
+        }));
+      }
+      // Big round table as in the editor; seats open the person.
+      function bigTable(g, size, withNames) {
+        const n = g.members.length;
+        const seat = Math.max(40, size * (withNames ? 0.13 : n >= 7 ? 0.14 : 0.17));
+        const radius = withNames ? 30 : 41;
+        const wrap = h('div', { class: 'bt', style: { width: size + 'px', height: size + 'px' } },
+          h('div', { class: 'bt-top', style: withNames ? { inset: '25%' } : {} }, h('strong', { style: { fontSize: n > 3 ? '0.85rem' : '1rem', lineHeight: '1.25', overflowWrap: 'anywhere' } }, withNames ? n + ' am Tisch' : g.name), h('span', { class: 'tiny muted' }, bindingLong(g))));
+        g.members.forEach((m, i) => {
+          const a = (i / n) * 2 * Math.PI - Math.PI / 2;
+          const q = person(m.pid);
+          wrap.append(h('button', { class: 'bt-seat', 'aria-label': q.name + ', ' + COLOR_NAME[m.gc], style: { width: seat + 'px', height: seat + 'px', left: 50 + radius * Math.cos(a) + '%', top: 50 + radius * Math.sin(a) + '%', background: GROUP[m.gc], fontSize: seat * 0.4 + 'px' }, onclick: () => go('p:' + q.id) }, q.name[0]));
+          if (withNames) {
+            const c = Math.cos(a);
+            const sn = Math.sin(a);
+            const r = radius + (seat / size) * 50 + 3;
+            const tx = c > 0.35 ? '0' : c < -0.35 ? '-100%' : '-50%';
+            const ty = Math.abs(c) > 0.35 ? '-50%' : sn < 0 ? '-100%' : '0';
+            wrap.append(h('button', { class: 'bt-name', style: { left: 50 + r * c + '%', top: 50 + r * sn + '%', transform: `translate(${tx}, ${ty})` }, onclick: () => go('p:' + q.id) }, q.name));
+          }
+        });
+        return wrap;
+      }
+
+      // Example results for the preview of I3 (US-ER-04): deterministic from the members.
+      const GAMES_FOR = (g) => (g.binding.kind === 'game' ? [g.binding.game] : g.binding.noCatan ? ['Uno', 'Skyjo', 'Wizard'] : ['Catan', 'Uno', 'Skyjo']);
+      function exampleResults(g) {
+        const games = GAMES_FOR(g);
+        return Array.from({ length: 8 }, (_, i) => {
+          const day = 25 - i * 3;
+          const draw = i === 5;
+          return { date: String(day).padStart(2, '0') + '.10.2026', game: games[i % games.length], winner: draw ? null : g.members[(i * 3 + 1) % g.members.length] };
+        });
+      }
+      function resultsMock(g) {
+        const rows = exampleResults(g);
+        return h('div', { style: { display: 'grid', gap: '8px' } },
+          h('div', { class: 'listCard' }, rows.slice(0, 6).map((r) => h('div', { class: 'listRow' },
+            r.winner ? seatToken(g, r.winner, 32) : h('span', { class: 'initial', style: { width: '32px', height: '32px', fontSize: '0.8rem' } }, '='),
+            h('span', { class: 'rowText' }, h('strong', {}, r.winner ? 'Sieg ' + person(r.winner.pid).name : 'Unentschieden'), h('span', { class: 'small muted' }, r.date + ' · ' + r.game)),
+            h('span', { class: 'chev' }, icon('next', 18))))),
+          h('button', { class: 'linkBtn', style: { justifySelf: 'center' } }, 'Alle 12 Ergebnisse ›'),
+          h('p', { class: 'tiny muted', style: { textAlign: 'center' } }, 'Beispieldaten – kommt mit I3 (US-ER-04).'));
+      }
+      function statsMock(g) {
+        const rows = exampleResults(g);
+        const wins = new Map(g.members.map((m) => [m.pid, 0]));
+        rows.forEach((r) => r.winner && wins.set(r.winner.pid, wins.get(r.winner.pid) + 1));
+        const sorted = [...g.members].sort((a, b) => wins.get(b.pid) - wins.get(a.pid));
+        const max = Math.max(1, ...wins.values());
+        return h('div', { style: { display: 'grid', gap: '10px' } },
+          h('div', { class: 'statRow', style: { maxWidth: 'none' } }, h('span', { class: 'stat' }, h('b', {}, '12'), h('span', { class: 'tiny muted' }, 'Partien')), h('span', { class: 'stat' }, h('b', {}, GAMES_FOR(g)[0]), h('span', { class: 'tiny muted' }, 'meist gespielt')), h('span', { class: 'stat' }, h('b', {}, '18.10.'), h('span', { class: 'tiny muted' }, 'zuletzt'))),
+          h('h2', {}, 'Siege'),
+          h('div', { class: 'listCard', style: { padding: '6px 0' } }, sorted.map((m) => h('div', { class: 'winRow' },
+            h('span', { class: 'ellipsis', style: { width: '92px', flex: 'none', fontSize: '0.85rem' } }, person(m.pid).name),
+            h('span', { class: 'winTrack' }, h('span', { class: 'winBar', style: { width: (wins.get(m.pid) / max) * 100 + '%', background: GROUP[m.gc] } })),
+            h('strong', { style: { width: '20px', textAlign: 'right', flex: 'none' } }, wins.get(m.pid))))),
+          h('p', { class: 'tiny muted', style: { textAlign: 'center' } }, 'Beispieldaten – kommt mit I3 (US-ST-01, US-ST-02).'));
+      }
+
+      function roomScreen() {
+        return h('div', { class: 'pad wideContent' },
+          pageHead('Tische', h('button', { class: 'iconBtn', 'aria-label': 'Suchen' }, icon('search'))),
+          h('div', { class: 'roomGrid' },
+            h('button', { class: 'tableCard new' }, h('span', { class: 'plusTable' }, icon('plus', 32)), h('strong', {}, 'Neuer Tisch')),
+            DB.groups.map((g) => h('button', { class: 'tableCard', onclick: () => go('t:' + g.id) }, miniTable(g, 96), h('strong', {}, g.name), h('span', { class: 'small muted' }, bindingShort(g) + ' · ' + g.members.length)))),
+          DB.groups.length === 0 && h('p', { class: 'muted' }, 'Noch keine Tische angelegt.'));
+      }
+
+      // ================= I1-F: editing (US-VW-06, US-VW-02, US-VW-07) =================
+      const EXTRA_GAMES = ['Skyjo', 'Kniffel'];
+      function buildAll(key) {
+        const d = buildData(key);
+        const names = [...new Set(d.groups.filter((g) => g.binding.kind === 'game' && g.binding.game !== 'Catan').map((g) => g.binding.game))];
+        if (key !== 'empty') EXTRA_GAMES.forEach((n) => !names.includes(n) && names.push(n));
+        d.games = names.map((name, i) => ({ id: 's' + i, name }));
+        return d;
+      }
+      DB = buildAll('full');
+      Object.assign(state, { ren: null, edit: null, confirm: null, caret: 0 });
+      const game = (id) => DB.games.find((x) => x.id === id);
+      const same = (a, b) => a.trim().toLocaleLowerCase('de-DE') === b.trim().toLocaleLowerCase('de-DE');
+      const quoteList = (names) => names.map((n) => '„' + n + '“').join(names.length === 2 ? ' und ' : ', ');
+
+      // ---------- leaving with unsaved changes (decision 4: ask) ----------
+      function editSignature(d) {
+        return JSON.stringify([d.name.trim(), d.choice, d.choice === null && d.noCatan, d.colors]);
+      }
+      function isDirty() {
+        if (state.ren && state.ren.value.trim() !== state.ren.original) return true;
+        if (state.edit && editSignature(state.edit) !== state.edit.orig) return true;
+        return false;
+      }
+      function guard(action) {
+        if (!isDirty()) {
+          state.ren = null;
+          state.edit = null;
+          action();
+          return;
+        }
+        state.confirm = { action };
+        render();
+      }
+      function confirmModal() {
+        const c = state.confirm;
+        const what = state.edit ? 'Deine Änderungen an „' + group(state.edit.gid).name + '“ sind noch nicht gespeichert.' : 'Der neue Name „' + state.ren.value.trim() + '“ ist noch nicht gespeichert.';
+        return h('div', { class: 'modalWrap' },
+          h('div', { class: 'modal', role: 'alertdialog', 'aria-modal': 'true', 'aria-labelledby': 'cfT' },
+            h('h2', { id: 'cfT', style: { fontSize: '1.15rem' } }, 'Änderungen verwerfen?'),
+            h('p', { class: 'muted' }, what),
+            h('div', { class: 'btnRow' },
+              h('button', { class: 'ghostBtn', onclick: () => { state.confirm = null; render(); } }, 'Weiter bearbeiten'),
+              h('button', { class: 'primary', onclick: () => { state.confirm = null; state.ren = null; state.edit = null; c.action(); } }, 'Verwerfen'))));
+      }
+
+      // ---------- navigation, guarded ----------
+      function go(screen) {
+        guard(() => {
+          state.stack.push(state.screen);
+          state.screen = screen;
+          state.expanded = null;
+          render();
+          document.querySelectorAll('.scroll').forEach((el) => (el.scrollTop = 0));
+        });
+      }
+      function back() {
+        guard(() => {
+          state.screen = state.stack.pop() || 'verwaltung';
+          render();
+        });
+      }
+      function goArea(s) {
+        guard(() => {
+          state.stack = [];
+          state.screen = s;
+          render();
+        });
+      }
+      function jump(stack, screen) {
+        guard(() => {
+          state.stack = stack;
+          state.screen = screen;
+          state.expanded = null;
+          render();
+        });
+      }
+
+      // ---------- renaming a person or a custom game ----------
+      function startRename(kind, id) {
+        const name = kind === 'person' ? person(id).name : game(id).name;
+        state.ren = { kind, id, value: name, original: name, submitted: null };
+        state.caret = name.length;
+        render();
+      }
+      function cancelRename() {
+        state.ren = null;
+        render();
+      }
+      // Everything is checked while typing (PO decisions rounds 4 and 5): an error blocks
+      // "Speichern". Person, table and game names are unique in the whole app (E-31).
+      function renameIssues() {
+        const r = state.ren;
+        const v = r.value.trim();
+        const blank = v === '';
+        // US-VW-06 AK-2: no other person may have the name.
+        const personTaken = r.kind === 'person' && !blank && DB.persons.some((p) => p.id !== r.id && same(p.name, v));
+        // US-VW-07 AK-1: unique among all games, Catan included.
+        const gameTaken = r.kind === 'game' && !blank && (same('Catan', v) || DB.games.some((x) => x.id !== r.id && same(x.name, v)));
+        return { blank, unchanged: v === r.original, personTaken, gameTaken };
+      }
+      function saveRename() {
+        const r = state.ren;
+        const v = r.value.trim();
+        if (r.kind === 'person') person(r.id).name = v;
+        else {
+          const old = game(r.id).name;
+          DB.groups.forEach((g) => { if (g.binding.kind === 'game' && g.binding.game === old) g.binding = { kind: 'game', game: v }; });
+          game(r.id).name = v;
+        }
+        state.ren = null;
+        render();
+      }
+      function renameParts() {
+        const r = state.ren;
+        const is = renameIssues();
+        const canSave = !is.blank && !is.unchanged && !is.personTaken && !is.gameTaken;
+        const v = r.value.trim();
+        const input = h('input', {
+          class: 'field', id: 'renField', value: r.value, autocomplete: 'off', 'aria-label': r.kind === 'person' ? 'Neuer Name' : 'Neuer Spielname',
+          oninput: (e) => { r.value = e.target.value; state.caret = e.target.selectionStart; render(); },
+          onkeydown: (e) => { if (e.key === 'Enter' && canSave) saveRename(); if (e.key === 'Escape') cancelRename(); },
+        });
+        const notices = [
+          is.blank && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Bitte gib einen Namen ein.')),
+          is.personTaken && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Es gibt bereits eine Person namens „' + v + '“. Bitte wähle einen anderen Namen.')),
+          is.gameTaken && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Es gibt bereits ein Spiel namens „' + v + '“. Bitte wähle einen anderen Namen.')),
+        ];
+        const buttons = h('div', { class: 'btnRow tight' },
+          h('button', { class: 'ghostBtn', onclick: cancelRename }, 'Abbrechen'),
+          h('button', { class: 'primary', disabled: !canSave, onclick: saveRename }, 'Speichern'));
+        return { input, notices, buttons };
+      }
+      // Renaming in place: while renaming, the field and the two buttons take the
+      // place of "dabei seit" and the pills, so nothing below moves (PO feedback round 2).
+      function nameBlock(kind, id, name) {
+        const r = state.ren && state.ren.kind === kind && state.ren.id === id ? state.ren : null;
+        const big = h('strong', { style: { fontSize: '1.3rem', lineHeight: '1.2', overflowWrap: 'anywhere', minWidth: '0' } }, name);
+        if (!r) return { editing: false, nameEl: big };
+        const f = renameParts();
+        return { editing: true, nameEl: h('div', { style: { display: 'grid', gap: '8px' } }, f.input, f.buttons), notices: f.notices.some(Boolean) && h('div', { style: { display: 'grid', gap: '8px' } }, f.notices) };
+      }
+
+      // ---------- actions on person, table and game pages: variants A and B, the same everywhere ----------
+      const ACTS = {
+        A: ['A Stift und ⋯ oben rechts', 'Auf Personen-, Tisch- und Spielseite gleich: runder Stift-Knopf rechts neben dem Titel (wie die Lupe in den Listen), kostet keinen Platz. Später daneben „⋯“ mit Archivieren und Löschen (I5).'],
+        B: ['B Kleine Pillen', 'Auf Personen-, Tisch- und Spielseite gleich: eine schmale Zeile mit kleinen Pillen im Stil der Angaben – „Umbenennen“ bzw. „Bearbeiten“, später „Archivieren“ und „Löschen“ daneben (I5).'],
+      };
+      Object.assign(state, { tableAct: 'B', menu: false });
+      function moreButton() {
+        return h('span', { style: { position: 'relative', display: 'inline-flex' } },
+          h('button', { class: 'iconBtn', 'aria-label': 'Weitere Aktionen', 'aria-expanded': String(state.menu), onclick: () => { state.menu = !state.menu; render(); } }, icon('more', 22)),
+          state.menu && h('div', { class: 'menu', role: 'menu' },
+            h('button', { role: 'menuitem', onclick: () => { state.menu = false; render(); } }, icon('box', 18), 'Archivieren'),
+            h('button', { role: 'menuitem', class: 'dangerText', onclick: () => { state.menu = false; render(); } }, icon('trash', 18), 'Löschen')));
+      }
+      function pill(label, ic, onclick, cls) {
+        return h('button', { class: 'pillBtn' + (cls ? ' ' + cls : ''), onclick }, ic && icon(ic, 15), label);
+      }
+      // `label`: "Umbenennen" (person, game) or "Bearbeiten" (table); `aria` names the thing for screen readers.
+      function actions(label, aria, onEdit, centered) {
+        if (state.tableAct === 'A')
+          return { head: h('div', { style: { display: 'flex', gap: '8px' } }, h('button', { class: 'iconBtn', 'aria-label': aria, style: { color: 'var(--accent-text)' }, onclick: onEdit }, icon('pen', 20)), state.later && ph(moreButton(), 'I5')) };
+        return { below: h('div', { class: 'pillRow', style: centered ? { justifyContent: 'center' } : {} }, pill(label, 'pen', onEdit, 'accentPill'), state.later && ph(h('div', { class: 'pillRow' }, pill('Archivieren', 'box'), pill('Löschen', 'trash', null, 'dangerText')), 'I5')) };
+      }
+
+      // ---------- person page (D9 from I1-E, with renaming) ----------
+      function personPage(p) {
+        const gs = groupsOf(p.id);
+        const nb = nameBlock('person', p.id, p.name);
+        const lb = actions('Umbenennen', p.name + ' umbenennen', () => startRename('person', p.id));
+        const mini = h('div', { class: 'e-card', style: { width: '112px', flex: 'none', gap: '6px', padding: '14px 6px' } },
+          h('span', { class: 'corner small' }, gs.length),
+          h('span', { style: { display: 'grid', placeItems: 'center', width: '50px', height: '50px', fontSize: '1.4rem', fontWeight: '800', color: 'var(--accent-text)', border: '2px solid var(--accent-text)', borderRadius: '50%' } }, p.name[0]),
+          h('strong', { class: 'small ellipsis' }, p.name),
+          h('span', { class: 'corner br small' }, gs.length));
+        const facts = h('div', { style: { display: 'grid', gap: '8px', alignContent: 'center', minWidth: '0', flex: '1' } },
+          nb.nameEl,
+          !nb.editing && h('span', { class: 'small muted' }, 'dabei seit ' + sinceText(p)),
+          !nb.editing && h('div', { class: 'factGrid' }, factLine(gs.length, 'Tische'), factLine(matesOf(p).size, 'Mitspieler'), state.later && factLine('17', 'Partien · I3', true), state.later && factLine('6', 'Siege · I3', true)));
+        return h('div', { class: 'pad wideContent', style: { maxWidth: '720px' } },
+          pageHead(p.name, lb.head),
+          h('div', { style: { display: 'flex', gap: '16px', alignItems: 'center' } }, mini, facts),
+          lb.below,
+          nb.notices,
+          state.later
+            ? h('div', { class: 'tabs', role: 'tablist' }, h('button', { class: 'tab', role: 'tab', 'aria-selected': 'true' }, 'Tische'), h('span', { class: 'tab ghost', style: { display: 'grid', placeItems: 'center' } }, 'Ergebnisse'), h('span', { class: 'tab ghost', style: { display: 'grid', placeItems: 'center' } }, 'Statistik'))
+            : h('h2', {}, 'Tische · ' + gs.length),
+          tablesSection(p, 'rows', true));
+      }
+
+      // ---------- table page (T7 from I1-E, with "Bearbeiten") ----------
+      function tableScreen(g) {
+        const k = kind();
+        const size = { phoneP: 300, tabletP: 360, wide: 380 }[k];
+        const tab = state.later ? state.tableTab : 'members';
+        const tabBtn = (key, label) => h('button', { class: 'tab', role: 'tab', 'aria-selected': String(tab === key), onclick: () => { state.tableTab = key; render(); } }, label);
+        const tabs = state.later ? h('div', { class: 'tabs', role: 'tablist' }, tabBtn('members', 'Am Tisch'), tabBtn('results', 'Ergebnisse'), tabBtn('stats', 'Statistik')) : h('h2', {}, 'Am Tisch · ' + g.members.length);
+        const body = tab === 'results' ? resultsMock(g) : tab === 'stats' ? statsMock(g) : memberRows(g);
+        const edit = () => openEditor(g);
+        const acts = actions('Bearbeiten', 'Tisch bearbeiten', edit, true);
+        const top = h('div', { style: { display: 'grid', gap: '12px' } },
+          bigTable(g, size, false),
+          h('div', { class: 'factGrid', style: { justifyContent: 'center' } }, h('span', { class: 'factLine' }, h('span', { class: 'small' }, bindingLong(g))), factLine(g.members.length, 'Personen'), h('span', { class: 'factLine' }, h('span', { class: 'small muted' }, 'angelegt am ' + tableSince(g)))),
+          acts.below);
+        const head = acts.head;
+        return h('div', { class: 'pad wideContent', style: { maxWidth: '980px' } },
+          pageHead(g.name, head),
+          h('div', { class: 'twoCol', style: k === 'wide' ? { gridTemplateColumns: size + 'px 1fr' } : {} }, top, h('div', { style: { display: 'grid', gap: '12px' } }, tabs, body)));
+      }
+
+      // ---------- group editor: like "Neuer Tisch", without the bench (US-VW-02) ----------
+      function scheme(d) {
+        const n = group(d.gid).members.length;
+        if (d.choice === 'Catan') return 'catan-only';
+        if (d.choice !== null) return 'group-only';
+        return d.noCatan || n > 4 ? 'group-only' : 'both';
+      }
+      // Same rules as normalizeColors in core: keep valid colours, fill gaps in palette order (AK-4).
+      function normalize(colors, sc) {
+        const usedC = new Set();
+        const usedG = new Set();
+        const kept = colors.map((m) => {
+          let cc = null;
+          if (sc !== 'group-only' && m.cc && !usedC.has(m.cc)) { cc = m.cc; usedC.add(cc); }
+          let gc = null;
+          if (sc === 'catan-only') gc = cc;
+          else if (m.gc && !usedG.has(m.gc)) gc = m.gc;
+          if (gc) usedG.add(gc);
+          return { gc, cc };
+        });
+        const free = (order, used) => order.find((c) => !used.has(c));
+        return kept.map((m) => {
+          if (sc === 'catan-only') { const cc = m.cc || free(CATAN_ORDER, usedC); usedC.add(cc); return { gc: cc, cc }; }
+          const gc = m.gc || free(ORDER, usedG);
+          usedG.add(gc);
+          if (sc === 'group-only') return { gc, cc: null };
+          const cc = m.cc || free(CATAN_ORDER, usedC);
+          usedC.add(cc);
+          return { gc, cc };
+        });
+      }
+      function openEditor(g) {
+        guard(() => {
+          const d = { gid: g.id, name: g.name, choice: g.binding.kind === 'game' ? g.binding.game : null, noCatan: !!g.binding.noCatan, colors: g.members.map((m) => ({ gc: m.gc, cc: m.cc })), active: 0, open: false };
+          d.orig = editSignature(d);
+          state.edit = d;
+          state.stack.push(state.screen);
+          state.screen = 'e:' + g.id;
+          render();
+        });
+      }
+      function changeBinding(choice, noCatan) {
+        const d = state.edit;
+        d.choice = choice;
+        d.noCatan = noCatan;
+        d.colors = normalize(d.colors, scheme(d));
+        d.open = false;
+        render();
+      }
+      // Choosing a colour someone else has swaps the two (US-PG-03 AK-5).
+      function setColor(kindOf, color) {
+        const d = state.edit;
+        const sc = scheme(d);
+        const i = d.active;
+        if (kindOf === 'catan' || sc === 'catan-only') {
+          const old = d.colors[i].cc;
+          const withC = (m, c) => (sc === 'catan-only' ? { gc: c, cc: c } : { ...m, cc: c });
+          d.colors = d.colors.map((m, j) => (j === i ? withC(m, color) : m.cc === color ? withC(m, old) : m));
+        } else {
+          const old = d.colors[i].gc;
+          d.colors = d.colors.map((m, j) => (j === i ? { ...m, gc: color } : m.gc === color ? { ...m, gc: old } : m));
+        }
+        render();
+      }
+      function saveEdit() {
+        const d = state.edit;
+        const g = group(d.gid);
+        const sc = scheme(d);
+        g.name = d.name.trim();
+        g.binding = d.choice !== null ? { kind: 'game', game: d.choice } : d.noCatan ? { kind: 'global', noCatan: true } : { kind: 'global' };
+        g.catan = sc !== 'group-only';
+        g.members = g.members.map((m, i) => ({ pid: m.pid, gc: d.colors[i].gc, cc: d.colors[i].cc }));
+        state.edit = null;
+        state.screen = state.stack.pop() || 'tische';
+        render();
+      }
+      function swatches(kindOf, options, selected, field) {
+        const d = state.edit;
+        const g = group(d.gid);
+        return h('div', { class: 'swRow', role: 'group', 'aria-label': (kindOf === 'catan' ? 'Catan-Farbe von ' : 'Gruppenfarbe von ') + person(g.members[d.active].pid).name },
+          options.map((c) => {
+            const j = d.colors.findIndex((m) => m[field] === c);
+            const holder = c !== selected && j !== -1 && j !== d.active ? person(g.members[j].pid).name : null;
+            return h('div', { class: 'swItem' },
+              h('button', { class: 'sw' + (kindOf === 'catan' ? ' square' : ''), 'aria-pressed': String(c === selected), 'aria-label': holder ? COLOR_NAME[c] + ', hat ' + holder : COLOR_NAME[c], style: { background: GROUP[c] }, onclick: () => setColor(kindOf, c) }, holder ? holder[0] : ''),
+              h('span', { class: 'tiny muted' }, COLOR_NAME[c]));
+          }));
+      }
+      function editorDialog() {
+        const d = state.edit;
+        const g = group(d.gid);
+        const n = g.members.length;
+        const sc = scheme(d);
+        const wideK = kind() !== 'phoneP';
+        const isSwitchOn = d.noCatan || n > 4;
+        const subtitle = d.choice === null ? (isSwitchOn ? 'Alle Spiele ohne Catan' : 'Alle Spiele') : d.choice;
+        const seatPct = n >= 7 ? 14 : wideK ? 16 : 18;
+        const table = h('div', { class: 'edTable' },
+          h('div', { class: 'bt-top' }, h('strong', { style: { fontSize: n > 3 ? '0.875rem' : '1rem', overflowWrap: 'anywhere' } }, d.name.trim() === '' ? 'Wer sitzt am Tisch?' : d.name), h('span', { class: 'small muted' }, subtitle)));
+        g.members.forEach((m, i) => {
+          const a = (i / n) * 2 * Math.PI - Math.PI / 2;
+          const c = d.colors[i];
+          const q = person(m.pid);
+          table.append(h('button', { class: 'edSeat', 'aria-pressed': String(i === d.active), 'aria-label': q.name + ', ' + COLOR_NAME[c.gc] + (sc === 'both' ? ', Catan ' + COLOR_NAME[c.cc] : ''), style: { width: seatPct + '%', left: 50 + 41 * Math.cos(a) + '%', top: 50 + 41 * Math.sin(a) + '%', background: GROUP[c.gc] }, onclick: () => { d.active = i; render(); } },
+            q.name[0], sc === 'both' && h('span', { class: 'cMark', style: { background: GROUP[c.cc] } })));
+        });
+        const active = person(g.members[d.active].pid);
+        const ac = d.colors[d.active];
+        const colorCard = h('section', { class: 'edCard' },
+          h('div', { class: 'edHeadRow' }, h('h2', {}, 'Farbe für ' + active.name), h('span', { class: 'small muted' }, 'antippen = tauschen')),
+          sc !== 'catan-only' && [h('span', { class: 'small muted' }, 'Gruppenfarbe (Liste, Statistik)'), swatches('group', ORDER, ac.gc, 'gc')],
+          ac.cc && [h('span', { class: 'small muted' }, sc === 'catan-only' ? 'Catan-Farbe (zugleich Gruppenfarbe)' : 'Catan-Farbe (Figuren auf dem Brett)'), swatches('catan', CATAN_ORDER, ac.cc, 'cc')]);
+        const chosenCustom = d.choice !== null && d.choice !== 'Catan' ? d.choice : null;
+        const moreText = chosenCustom ? 'Nur ' + chosenCustom : 'Anderes Spiel';
+        const binding = h('fieldset', { class: 'edSection' },
+          h('legend', { class: 'lbl', style: { padding: '0', marginBottom: '12px' } }, 'Was wird gespielt?'),
+          h('div', { class: 'segment' },
+            h('button', { class: d.choice === null ? 'on' : '', 'aria-pressed': String(d.choice === null), onclick: () => changeBinding(null, d.noCatan) }, 'Alle Spiele'),
+            h('button', { class: d.choice === 'Catan' ? 'on' : '', 'aria-pressed': String(d.choice === 'Catan'), disabled: n > 4, onclick: () => changeBinding('Catan', d.noCatan) }, 'Nur Catan'),
+            DB.games.length > 0 && h('button', { class: chosenCustom ? 'on' : 'more', 'aria-expanded': String(d.open), onclick: () => { d.open = !d.open; render(); } }, moreText + (d.open ? ' ▴' : ' ▾'))),
+          n > 4 && h('span', { class: 'small muted' }, 'Catan geht nur mit höchstens 4 Personen. Dieser Tisch hat ' + n + '.'),
+          d.open && h('div', { class: 'gameList', role: 'group', 'aria-label': 'Eigene Spiele' }, DB.games.map((x) => h('button', { 'aria-pressed': String(d.choice === x.name), onclick: () => changeBinding(x.name, d.noCatan) }, 'Nur ' + x.name))),
+          d.choice === null && h('button', { class: 'switchRow', role: 'switch', 'aria-checked': String(isSwitchOn), disabled: n > 4, onclick: () => changeBinding(null, !d.noCatan) },
+            h('span', { style: { display: 'grid' } }, h('strong', {}, 'Catan ausschließen'), h('span', { class: 'small muted' }, n > 4 ? 'Ab 5 Personen ist Catan ohnehin ausgeschlossen.' : 'Dann gibt es keine Catan-Farben.')),
+            h('span', { class: 'switch' + (isSwitchOn ? ' on' : ''), 'aria-hidden': 'true' })));
+        const nameInput = h('input', {
+          class: 'field', id: 'edName', value: d.name, autocomplete: 'off',
+          oninput: (e) => { d.name = e.target.value; state.caret = e.target.selectionStart; state.focusEd = true; render(); },
+        });
+        const dirty = editSignature(d) !== d.orig;
+        // US-VW-02 AK-1: the name of another table is taken (E-31).
+        const nameTaken = DB.groups.some((other) => other.id !== d.gid && same(other.name, d.name));
+        const canSave = dirty && d.name.trim() !== '' && !nameTaken;
+        return h('div', { class: 'edBackdrop' + (wideK ? ' wideEd' : '') },
+          h('div', { class: 'edDialog', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'edT' },
+            h('div', { class: 'edHead' }, h('button', { class: 'squareBtn', 'aria-label': 'Schließen', onclick: back }, icon(wideK ? 'close' : 'back')), h('h2', { id: 'edT' }, 'Tisch bearbeiten')),
+            h('div', { class: 'edForm' },
+              h('section', { class: 'edSection' },
+                h('div', { class: 'edHeadRow' }, h('h2', {}, 'Am Tisch'), h('span', { class: 'small muted' }, n + ' Personen')),
+                h('p', { class: 'lockNote' }, icon('people', 18), 'Wer am Tisch sitzt, bleibt fest. Für eine andere Runde legst du einen neuen Tisch an.')),
+              h('div', { class: 'edColumns' }, h('div', { style: { display: 'grid', justifyItems: 'center' } }, table), colorCard),
+              h('div', { class: 'edColumns' },
+                h('div', { class: 'edSection' }, h('label', { class: 'lbl', for: 'edName' }, 'Gruppenname'), nameInput, d.name.trim() === '' && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Bitte gib einen Namen ein.')), nameTaken && h('div', { class: 'notice', role: 'alert' }, h('p', {}, 'Es gibt bereits einen Tisch namens „' + d.name.trim() + '“. Bitte wähle einen anderen Namen.'))),
+                binding),
+              h('div', { class: 'saveBar' }, h('button', { class: 'primary', disabled: !canSave, onclick: saveEdit }, 'Änderungen speichern')))));
+      }
+
+      // ---------- games: list and the new page of a custom game (US-VW-07, decision 3b) ----------
+      function gamesScreen() {
+        return h('div', { class: 'pad wideContent', style: { maxWidth: '720px' } },
+          pageHead('Spiele'),
+          h('div', { style: { display: 'grid', gap: '6px' } }, h('h2', {}, 'Neues eigenes Spiel'), h('div', { class: 'fieldRow' }, h('input', { class: 'field', placeholder: 'Name' }), h('button', { class: 'primary' }, 'Speichern'))),
+          h('div', { style: { display: 'grid', gap: '10px' } }, h('h2', {}, 'Unterstützte Spiele'),
+            h('div', { class: 'listCard' }, h('div', { class: 'listRow' }, h('span', { class: 'rowText', style: { flex: '1' } }, h('strong', {}, 'Catan'), h('span', { class: 'small muted' }, 'mit Brett, Farben und Siegpunkten')), h('span', { class: 'builtIn' }, 'fest eingebaut')))),
+          h('div', { style: { display: 'grid', gap: '10px' } }, h('h2', {}, 'Eigene Spiele · ' + DB.games.length),
+            DB.games.length === 0
+              ? h('p', { class: 'muted' }, 'Noch keine eigenen Spiele angelegt.')
+              : h('div', { class: 'listCard' }, DB.games.map((x) => {
+                  const n = boundTo(x).length;
+                  return h('button', { class: 'listRow', onclick: () => go('s:' + x.id) }, h('span', { class: 'rowText', style: { flex: '1' } }, h('strong', {}, x.name), h('span', { class: 'small muted' }, n === 0 ? 'kein eigener Tisch' : n === 1 ? '1 Tisch nur dafür' : n + ' Tische nur dafür')), h('span', { class: 'chev' }, icon('next', 18)));
+                }))));
+      }
+      const boundTo = (x) => DB.groups.filter((g) => g.binding.kind === 'game' && g.binding.game === x.name);
+      function gameSince(x) {
+        const i = DB.games.indexOf(x);
+        return String(((i * 7) % 27) + 1).padStart(2, '0') + '.09.2026';
+      }
+      function gamePage(x) {
+        const tables = boundTo(x);
+        const nb = nameBlock('game', x.id, x.name);
+        const lb = actions('Umbenennen', x.name + ' umbenennen', () => startRename('game', x.id));
+        const mini = h('div', { class: 'e-card', style: { width: '112px', flex: 'none', gap: '6px', padding: '14px 6px' } },
+          h('span', { class: 'corner small' }, tables.length), h('span', { class: 'gameIcon' }, icon('dice', 28)), h('strong', { class: 'small ellipsis' }, x.name), h('span', { class: 'corner br small' }, tables.length));
+        const facts = h('div', { style: { display: 'grid', gap: '8px', alignContent: 'center', minWidth: '0', flex: '1' } },
+          nb.nameEl,
+          !nb.editing && h('span', { class: 'small muted' }, 'eigenes Spiel · angelegt am ' + gameSince(x)),
+          !nb.editing && h('div', { class: 'factGrid' }, factLine(tables.length, tables.length === 1 ? 'Tisch' : 'Tische'), state.later && factLine('9', 'Partien · I3', true)));
+        return h('div', { class: 'pad wideContent', style: { maxWidth: '720px' } },
+          pageHead(x.name, lb.head),
+          h('div', { style: { display: 'flex', gap: '16px', alignItems: 'center' } }, mini, facts),
+          lb.below,
+          nb.notices,
+          state.later
+            ? h('div', { class: 'tabs', role: 'tablist' }, h('button', { class: 'tab', role: 'tab', 'aria-selected': 'true' }, 'Tische'), h('span', { class: 'tab ghost', style: { display: 'grid', placeItems: 'center' } }, 'Ergebnisse'), h('span', { class: 'tab ghost', style: { display: 'grid', placeItems: 'center' } }, 'Statistik'))
+            : h('h2', {}, 'Tische nur für ' + x.name + ' · ' + tables.length),
+          tables.length === 0
+            ? h('p', { class: 'muted' }, 'Noch kein Tisch spielt nur ' + x.name + '. Gespielt werden kann es an jedem Tisch für alle Spiele.')
+            : h('div', { class: 'listCard' }, tables.map((g) => h('button', { class: 'listRow', onclick: () => go('t:' + g.id) }, miniTable(g, 44), h('span', { class: 'rowText', style: { flex: '1' } }, h('strong', {}, g.name), h('span', { class: 'small muted' }, g.members.length + ' Personen')), h('span', { class: 'chev' }, icon('next', 18))))));
+      }
+
+      function personsScreen() {
+        return listPage(
+          h('div', { class: 'cardGrid', style: { gridTemplateColumns: `repeat(${cols({ phoneP: 3, tabletP: 5, wide: 7 })}, minmax(0, 1fr))` } },
+            !state.q && h('button', { class: 'e-card pCard newCard', onclick: () => { state.adding = true; render(); } }, icon('plus', 28), h('span', { class: 'nm' }, 'Neue Person')),
+            persons().map((p) => {
+              const n = groupsOf(p.id).length;
+              return h('button', { class: 'e-card pCard' + (n ? '' : ' none'), onclick: () => go('p:' + p.id) },
+                h('span', { class: 'corner small' }, n), h('span', { class: 'ini' }, p.name[0]), h('span', { class: 'nm ellipsis' }, p.name),
+                h('span', { class: 'dots', style: { flexWrap: 'nowrap' } }, myDots(p.id, 5)), h('span', { class: 'cardTables' }, n ? groupsOf(p.id).map((g) => g.name).join(', ') : 'an keinem Tisch'), h('span', { class: 'corner br small' }, n));
+            })));
+      }
+      function mgmtScreen() {
+        const c = cols({ phoneP: 2, tabletP: 3, wide: 4 });
+        const card = (s, ic, title, n) => h('button', { class: 'e-card', onclick: () => go(s) }, h('span', { class: 'corner' }, n), h('span', { class: 'accentText' }, icon(ic, 34)), h('strong', {}, title), h('span', { class: 'corner br' }, n));
+        return h('div', { class: 'pad wideContent', style: { maxWidth: '900px' } }, h('h1', {}, 'Verwaltung'),
+          h('div', { style: { display: 'grid', gridTemplateColumns: `repeat(${c}, 1fr)`, gap: '14px' } }, card('personen', 'people', 'Personen', DB.persons.length), card('tische', 'table', 'Tische', DB.groups.length), card('spiele', 'dice', 'Spiele', DB.games.length + 1)));
+      }
+      function startScreen() {
+        return h('div', { style: { display: 'grid', placeItems: 'center', height: '100%' } }, h('button', { class: 'e-card', style: { width: '150px' }, onclick: () => go('verwaltung') }, h('span', { class: 'accentText' }, icon('folder', 34)), h('strong', {}, 'Verwaltung')));
+      }
+
+      function appView() {
+        const s = state.screen;
+        let main;
+        const overlay = [];
+        if (s === 'start') main = startScreen();
+        else if (s === 'verwaltung') main = mgmtScreen();
+        else if (s === 'personen') main = personsScreen();
+        else if (s === 'tische') main = roomScreen();
+        else if (s === 'spiele') main = gamesScreen();
+        else if (s.startsWith('t:')) main = tableScreen(group(s.slice(2)));
+        else if (s.startsWith('e:')) {
+          main = tableScreen(group(s.slice(2)));
+          overlay.push(editorDialog());
+        } else if (s.startsWith('p:')) main = personPage(person(s.slice(2)));
+        else if (s.startsWith('s:')) main = gamePage(game(s.slice(2)));
+        if (state.confirm) overlay.push(confirmModal());
+        return h('div', { class: 'app' }, h('header', { class: 'a-head' }, h('span', { class: 'logo' }, logoMark(28), 'BoardBrain')), h('main', { class: 'scroll' }, main), overlay, hand());
+      }
+
+      // ---------- picker and render ----------
+      function chips(label, entries, current, onPick) {
+        return [h('span', { class: 'label' }, label), ...entries.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': String(k === current), onclick: () => { onPick(k); render(); } }, l))];
+      }
+      function refocus() {
+        const id = state.ren ? 'renField' : state.focusEd ? 'edName' : null;
+        const el = id && document.getElementById(id);
+        if (!el) return;
+        el.focus({ preventScroll: true });
+        const pos = Math.min(state.caret, el.value.length);
+        el.setSelectionRange(pos, pos);
+      }
+      function render() {
+        document.getElementById('list-row').replaceChildren(h('span', { class: 'label' }, 'Final'), h('span', { class: 'small' }, 'Knöpfe B Kleine Pillen (Personen-, Tisch- und Spielseite gleich) · Umbenennen an Ort und Stelle · Tisch bearbeiten wie Neuer Tisch ohne Bank · Rückfrage bei ungespeicherten Änderungen · Design Holz'));
+        document.getElementById('detail-row').replaceChildren();
+        document.getElementById('frame-row').replaceChildren(...chips('Gerät', Object.entries(FRAMES), state.frame, (k) => { if (k !== 'device') state.lastFrame = k; state.frame = k; }));
+        const p = (n) => DB.persons.find((x) => x.name === n);
+        const g = (n) => DB.groups.find((x) => x.name === n);
+        const s = (n) => DB.games.find((x) => x.name === n);
+        document.getElementById('option-row').replaceChildren(
+          ...chips('Daten', [['full', 'Gefüllt'], ['few', 'Wenig (3 Personen, 1 Tisch)']], state.data, (k) => { state.data = k; DB = buildAll(k); state.ren = null; state.edit = null; state.confirm = null; state.screen = 'verwaltung'; state.stack = []; }),
+          ...chips('Umfang', [[false, 'Jetzt in I1-F'], [true, 'Mit späteren Funktionen']], state.later, (k) => (state.later = k)),
+          h('span', { class: 'label', style: { minWidth: '0', marginLeft: '8px' } }, 'Springen:'),
+          p('Anna') && h('button', { class: 'chip', onclick: () => jump(['verwaltung', 'personen'], 'p:' + p('Anna').id) }, 'Anna'),
+          p('Zoe') && h('button', { class: 'chip', onclick: () => jump(['verwaltung', 'personen'], 'p:' + p('Zoe').id) }, 'Zoe (ohne Tisch)'),
+          ...[['Freitagsrunde', 'Freitagsrunde (Catan, 4)'], ['Großfamilie Weihnachten', 'Großfamilie (12)'], ['Uno-Abend', 'Uno-Abend (3)']].map(([n, l]) => g(n) && h('button', { class: 'chip', onclick: () => jump(['verwaltung', 'tische'], 't:' + g(n).id) }, l)),
+          h('button', { class: 'chip', onclick: () => jump(['verwaltung'], 'spiele') }, 'Spiele'),
+          s('Uno') && h('button', { class: 'chip', onclick: () => jump(['verwaltung', 'spiele'], 's:' + s('Uno').id) }, 'Uno'),
+        );
+        document.getElementById('intro').replaceChildren(
+          h('span', {}, h('b', {}, 'Verbindliche Referenz für I1-F Bearbeiten (US-VW-06, US-VW-02, US-VW-07). '), 'So sollen Umbenennen von Personen und eigenen Spielen, die neue Spielseite und „Tisch bearbeiten“ aussehen. „Jetzt in I1-F“ zeigt genau den Umfang des Bündels; „Mit späteren Funktionen“ zeigt, wo Ergebnisse und Statistik (I3) sowie Archivieren und Löschen (I5) andocken. Für Personen- und Tischseite gilt im Übrigen die Referenz aus I1-E, für Start und Verwaltung die aus D-3.'),
+        );
+        const frame = h('div', { class: 'frame ' + state.frame }, appView());
+        if (state.frame === 'device') frame.append(h('button', { class: 'exit', 'aria-label': 'Vollbild verlassen', onclick: () => { state.frame = state.lastFrame; render(); } }, icon('close', 16)));
+        document.getElementById('stage').replaceChildren(frame, notes());
+        refocus();
+        state.focusEd = false;
+      }
+      function notes() {
+        const spec = (title, rows) => h('div', { class: 'card spec' }, h('h2', {}, title), h('ul', {}, rows.map((r) => h('li', { class: 'small' }, r))));
+        return h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(20rem, 1fr))', gap: '14px', maxWidth: '1180px', margin: '24px auto 0' } },
+          spec('Person umbenennen (US-VW-06)', [
+            'Kleine Pille „✎ Umbenennen“ unter der Karte (wie „Bearbeiten“ am Tisch). Beim Antippen ersetzen Eingabefeld und „Abbrechen | Speichern“ nebeneinander die Zeilen „dabei seit“ und die Pillen; die Höhe bleibt gleich, darunter verschiebt sich nichts. Nur ein Fehler oder Hinweis erscheint darunter.',
+            'Gespeichert wird erst mit „Speichern“ oder der Eingabetaste; „Abbrechen“ oder Esc verwirft ohne Rückfrage, weil das ausdrücklich gewählt ist.',
+            'Alles wird schon beim Tippen geprüft, auch bei Spielen und Tischen: Ein Fehler erscheint sofort unter der Karte, und „Speichern“ bleibt gesperrt – bei leerem oder unverändertem Namen ebenso.',
+            'Personennamen sind app-weit eindeutig (E-31): Heißt schon eine andere Person so, auch eine archivierte, erscheint sofort beim Tippen ein Fehler, und Speichern bleibt gesperrt (AK-2). Ebenso beim Anlegen (US-PG-01 AK-3).',
+            'Der neue Name erscheint danach überall: Liste, Tische, Spielraum (AK-1).',
+          ]),
+          spec('Tisch bearbeiten (US-VW-02)', [
+            'Kleine Pille „✎ Bearbeiten“ zentriert unter den Angaben; Adresse #/verwaltung/gruppen/‹id›/bearbeiten, damit die Android-Zurück-Taste ihn schließt.',
+            'Aussehen wie „Neuer Tisch“: auf dem Handy eine eigene Seite, auf Tablet und PC ein Fenster. Statt der Bank der Hinweis, dass die Personen fest sind (AK-2).',
+            'Farben tauschen wie beim Anlegen. Ändert sich die Bindung, bleiben vorhandene Farben; fehlende Catan-Farben werden automatisch vergeben, bei „Catan ausschließen“ fallen sie weg (AK-4, AK-6).',
+            '„Nur Catan“ und „Catan ausschließen“ ab 5 Personen gesperrt mit Grund (AK-3).',
+            '„Änderungen speichern“ erst aktiv, wenn sich etwas geändert hat.',
+            'Tischnamen sind app-weit eindeutig (E-31): ein vergebener Name zeigt beim Tippen einen Fehler, auch der Namensvorschlag beim Anlegen (US-PG-02 AK-8).',
+          ]),
+          spec('Eigenes Spiel (US-VW-07)', [
+            'Eigene Spiele in der Spieleliste sind jetzt Zeilen mit ›; sie öffnen die neue Spielseite #/verwaltung/spiele/‹id›.',
+            'Spielseite im Stil der Personenseite: Karte, Name, „angelegt am“, Tische nur für dieses Spiel. Später: Ergebnisse, Statistik (I3), Archivieren, Löschen (I5).',
+            'Umbenennen wie bei Personen: Pille „✎ Umbenennen“ unter der Karte. Ein Name, den schon ein anderes Spiel oder Catan trägt, zeigt beim Tippen einen Fehler und sperrt „Speichern“.',
+            'Catan ist fest eingebaut: keine Spielseite, kein Umbenennen (AK-2).',
+          ]),
+          spec('Rückfrage beim Verlassen', [
+            'Gilt für Zurück, die Android-Zurück-Taste, die Kartenhand und das Schließen von Blatt oder Fenster, wenn etwas geändert und nicht gespeichert ist.',
+            '„Änderungen verwerfen?“ mit „Weiter bearbeiten“ und „Verwerfen“.',
+          ]),
+          spec('Bitte ausprobieren', [
+            'Anna in „Ben“ umbenennen → Fehler (beide an Freitagsrunde). Anna in „Zoe“ → Hinweis mit „Trotzdem“.',
+            'Uno in „catan“ oder „Skyjo“ umbenennen → abgelehnt; in „UNO“ → erlaubt.',
+            'Freitagsrunde: von „Nur Catan“ auf „Alle Spiele“, Catan ausschließen und wieder zulassen.',
+            'Großfamilie (12): Catan gesperrt. Uno-Abend: auf „Alle Spiele“ → Catan-Farben kommen dazu.',
+            'Etwas ändern und Zurück tippen → Rückfrage.',
+          ]),
+        );
+      }
+      window.addEventListener('resize', () => { if (state.frame === 'device') render(); });
+      state.screen = 'verwaltung';
+      state.stack = [];
+      render();
+    </script>
+  </body>
+</html>

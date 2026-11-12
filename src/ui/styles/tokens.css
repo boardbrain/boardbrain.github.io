@@ -1,28 +1,358 @@
 /*
  * Design tokens (Architecture 13.4, ADR-018). The only file with colour values (NFA-GB-05).
- * Placeholder values in dark mode (NFA-GB-02); the design phase sets the final palettes (OP-11).
+ * Colour values from design D-1 (OP-11, E-26). Contrast on every surface of every design:
+ * text at least 4.5:1, Catan and group colours at least 3:1.
  */
 :root {
   color-scheme: dark;
 
-  /* Surfaces and text */
-  --color-surface: #15171c;
-  --color-surface-raised: #1f2229;
-  --color-border: #30343d;
-  --color-text: #e8eaed;
-  --color-text-muted: #a0a6b0;
+  /* Catan colours (Specification 3.3): the same in every design */
+  --color-catan-red: #ef5359;
+  --color-catan-blue: #4189f5;
+  --color-catan-white: #f1f1f4;
+  --color-catan-orange: #f5852b;
+
+  /* Group colours (Specification 3.3, E-28): 12 colours; red, orange, blue, white = Catan tones (FA-PG-07) */
+  --color-group-red: var(--color-catan-red);
+  --color-group-orange: var(--color-catan-orange);
+  --color-group-yellow: #e6cb72;
+  --color-group-green: #8fb35a;
+  --color-group-teal: #5fbfb2;
+  --color-group-blue: var(--color-catan-blue);
+  --color-group-indigo: #aeb0f2;
+  --color-group-pink: #eba3bf;
+  --color-group-magenta: #d46bc4;
+  --color-group-brown: #94643f;
+  --color-group-gray: #9aa1ab;
+  --color-group-white: var(--color-catan-white);
+
+  /* Board (US-PL-01, design I1-D, docs/design/i1d-board-final-preview.html): the same in every design */
+  --color-board-sea: #1c4a5c;
+  --color-board-sea-deep: #123241;
+  --color-board-shallow: #2f7480;
+  --color-board-wave: #e8f3ef33;
+  --color-board-sand: #d9b77e;
+  --color-board-wood-top: #b48a5a;
+  --color-board-wood-bottom: #93683c;
+  --color-board-wood-edge: #d0a877;
+  --color-board-highlight: #ffffff2e;
+  --color-board-hint: #123241d9;
+
+  /* Pieces on the board and in symbols (US-PL-04 AK-3, design I2-C, G1, R1): dark outline */
+  --color-piece-outline: #231d18;
+
+  /* Marked pieces while repeating one is asked (US-AB-03 AK-8, design I2-H, M1): the gold of the app */
+  --color-piece-mark: #f5be5b;
+
+  /* Highlighting and tension mode of the placement (design D-2): the dark laid over the board
+     (55 % in the style sheet), the bright centre of a dot, the golden switch with its glow */
+  --color-board-dark: #0d0a08;
+  --color-highlight-core: #fff;
+  --color-tension-on: #f5be5b;
+  --color-on-tension: #231d18;
+  --color-tension-glow-near: #f5be5b2e;
+  --color-tension-glow: #f5be5b73;
+
+  /* Ink on Catan colours: coins, swatches and the band of the person at turn (design I2-C) */
+  --color-on-catan: #231d18;
+  --color-on-catan-strong: #fff;
+  --color-band-shade: #231d18cc;
+  --color-catan-red-band-light: color-mix(in srgb, var(--color-catan-red) 92%, #fff);
+  --color-catan-red-band-dark: color-mix(in srgb, var(--color-catan-red) 75%, #000);
+  --color-catan-blue-band-light: color-mix(in srgb, var(--color-catan-blue) 92%, #fff);
+  --color-catan-blue-band-dark: color-mix(in srgb, var(--color-catan-blue) 75%, #000);
+  --color-catan-white-band-light: color-mix(in srgb, var(--color-catan-white) 92%, #fff);
+  --color-catan-white-band-dark: color-mix(in srgb, var(--color-catan-white) 75%, #000);
+  --color-catan-orange-band-light: color-mix(in srgb, var(--color-catan-orange) 92%, #fff);
+  --color-catan-orange-band-dark: color-mix(in srgb, var(--color-catan-orange) 75%, #000);
+
+  /* Resources (US-SR-01 AK-5, design I2-C): discs of the resource symbols */
+  --color-resource-lumber: #74a75a;
+  --color-resource-brick: #d0714a;
+  --color-resource-wool: #b9dc8a;
+  --color-resource-grain: #e6c454;
+  --color-resource-ore: #a3acb8;
+  --color-resource-card-shadow: #00000073;
+
+  /* Development card K2/D2 (design I2-C, pages 1 and 5), the same in every design */
+  --color-card-paper: #3d342b;
+  --color-card-paper-low: #2c251f;
+  --color-card-ribbon-top: #d08c2c;
+  --color-card-ribbon-bottom: #9a5a12;
+  --color-card-ribbon-ink: #fff6e2;
+  --color-card-ribbon-shadow: #00000070;
+  --color-card-frame: #b98a3e;
+  --color-card-art-shadow: #00000070;
+  --color-card-glow: #fff2;
+
+  /* Card back R1 (design I2-D): dark wood, lozenge pattern, golden frame, medallion with the logo */
+  --color-card-back-gold: #e0b25a;
+  --color-card-back-top: #4a3d31;
+  --color-card-back-bottom: #28211b;
+  --color-card-back-medal-light: #3d3229;
+  --color-card-back-medal-dark: #1d1713;
+
+  /* Destructive action, e.g. "Beenden" (design I2-C) */
+  --color-danger: #b42f36;
+
+  /* Destructive action as text on a dark surface, e.g. "Neu beginnen" (design I2-D, Q1) */
+  --color-danger-text: #f08a8f;
+
+  /* Translucent tag in front of a picture, e.g. "nur Catan" on a table (design I2-C, L2) */
+  --color-tag-glass: color-mix(in srgb, var(--color-surface-raised) 45%, transparent);
+
+  /*
+   * Illustrations (design I2-C, docs/design/i2-match-final-preview.html): landscape of the Catan
+   * card, pictures of the draws (hexes, harbours, number tokens), resource symbols and resource
+   * cards. One shared palette by hue, numbered from light to dark; the same in every design.
+   */
+  --color-art-red-1: #ef5359;
+  --color-art-red-2: #c98a78;
+  --color-art-red-3: #dc4224;
+  --color-art-red-4: #c4532f;
+  --color-art-red-5: #b8261f;
+  --color-art-red-6: #9e2a24;
+  --color-art-red-7: #9c3d22;
+  --color-art-red-8: #8e3e28;
+  --color-art-red-9: #7a3826;
+  --color-art-red-10: #7c151c;
+  --color-art-red-11: #7a2a12;
+  --color-art-red-12: #5a1f18;
+  --color-art-red-13: #5c2616;
+  --color-art-red-14: #4a2219;
+  --color-art-red-15: #2a110b;
+  --color-art-red-16: #140806;
+  --color-art-orange-1: #f7ecd8;
+  --color-art-orange-2: #e3d7c2;
+  --color-art-orange-3: #dcc9a8;
+  --color-art-orange-4: #ffcf7a;
+  --color-art-orange-5: #f0a882;
+  --color-art-orange-6: #ffc764;
+  --color-art-orange-7: #f0a070;
+  --color-art-orange-8: #e2b679;
+  --color-art-orange-9: #d9b77e;
+  --color-art-orange-10: #e8a06a;
+  --color-art-orange-11: #f0b45e;
+  --color-art-orange-12: #c6ad88;
+  --color-art-orange-13: #c4ad8a;
+  --color-art-orange-14: #e58a63;
+  --color-art-orange-15: #f0a858;
+  --color-art-orange-16: #d0a877;
+  --color-art-orange-17: #ff9d44;
+  --color-art-orange-18: #f39a50;
+  --color-art-orange-19: #f8a641;
+  --color-art-orange-20: #ef8a48;
+  --color-art-orange-21: #d6845a;
+  --color-art-orange-22: #ff7a30;
+  --color-art-orange-23: #eb693b;
+  --color-art-orange-24: #e9683b;
+  --color-art-orange-25: #f5852b;
+  --color-art-orange-26: #e07a40;
+  --color-art-orange-27: #ef7a2e;
+  --color-art-orange-28: #dba63f;
+  --color-art-orange-29: #d0714a;
+  --color-art-orange-30: #d0704a;
+  --color-art-orange-31: #d4a243;
+  --color-art-orange-32: #b48a5a;
+  --color-art-orange-33: #c97a42;
+  --color-art-orange-34: #c99a40;
+  --color-art-orange-35: #c75932;
+  --color-art-orange-36: #c48f34;
+  --color-art-orange-37: #b07a44;
+  --color-art-orange-38: #8f8064;
+  --color-art-orange-39: #c08a30;
+  --color-art-orange-40: #b25a3c;
+  --color-art-orange-41: #a57a45;
+  --color-art-orange-42: #bb532f;
+  --color-art-orange-43: #a8703d;
+  --color-art-orange-44: #b5532f;
+  --color-art-orange-45: #b8862a;
+  --color-art-orange-46: #b4602d;
+  --color-art-orange-47: #b4502d;
+  --color-art-orange-48: #b04f2c;
+  --color-art-orange-49: #b07a26;
+  --color-art-orange-50: #aa4c2b;
+  --color-art-orange-51: #a77a2c;
+  --color-art-orange-52: #a85a2a;
+  --color-art-brown-1: #a2532a;
+  --color-art-brown-2: #7d6a4e;
+  --color-art-brown-3: #a8731f;
+  --color-art-brown-4: #6e6156;
+  --color-art-brown-5: #9c4627;
+  --color-art-brown-6: #86693a;
+  --color-art-brown-7: #8a5a2e;
+  --color-art-brown-8: #8f6422;
+  --color-art-brown-9: #8f6420;
+  --color-art-brown-10: #8e6420;
+  --color-art-brown-11: #7d5a30;
+  --color-art-brown-12: #5d5248;
+  --color-art-brown-13: #6f5530;
+  --color-art-brown-14: #7d5420;
+  --color-art-brown-15: #6e4c26;
+  --color-art-brown-16: #5a4a38;
+  --color-art-brown-17: #6c4423;
+  --color-art-brown-18: #743619;
+  --color-art-brown-19: #6e4a1a;
+  --color-art-brown-20: #672e1a;
+  --color-art-brown-21: #6a4416;
+  --color-art-brown-22: #4a3e33;
+  --color-art-brown-23: #5e3f1e;
+  --color-art-brown-24: #5a3418;
+  --color-art-brown-25: #5e2a12;
+  --color-art-brown-26: #3a332c;
+  --color-art-brown-27: #3b2a18;
+  --color-art-brown-28: #3f2412;
+  --color-art-brown-29: #3a2210;
+  --color-art-brown-30: #2a231e;
+  --color-art-brown-31: #3a1a0c;
+  --color-art-brown-32: #3a1608;
+  --color-art-brown-33: #2a2018;
+  --color-art-brown-34: #231d18;
+  --color-art-brown-35: #2a160a;
+  --color-art-brown-36: #1e0f06;
+  --color-art-yellow-1: #faf5ea;
+  --color-art-yellow-2: #fffae0;
+  --color-art-yellow-3: #f4f1ea;
+  --color-art-yellow-4: #f5f1e6;
+  --color-art-yellow-5: #f3ecdc;
+  --color-art-yellow-6: #f7ecd0;
+  --color-art-yellow-7: #fff3c0;
+  --color-art-yellow-8: #ece3cf;
+  --color-art-yellow-9: #e8dec8;
+  --color-art-yellow-10: #fbe7a6;
+  --color-art-yellow-11: #e8d5a6;
+  --color-art-yellow-12: #ffe08a;
+  --color-art-yellow-13: #ffd987;
+  --color-art-yellow-14: #f6dc8c;
+  --color-art-yellow-15: #f4dc80;
+  --color-art-yellow-16: #d9c597;
+  --color-art-yellow-17: #c9ba98;
+  --color-art-yellow-18: #f1cd6a;
+  --color-art-yellow-19: #f3cf62;
+  --color-art-yellow-20: #f0c95a;
+  --color-art-yellow-21: #e8c35a;
+  --color-art-yellow-22: #e6c454;
+  --color-art-yellow-23: #b8a682;
+  --color-art-yellow-24: #a89f88;
+  --color-art-yellow-25: #e2b44c;
+  --color-art-yellow-26: #e2b542;
+  --color-art-yellow-27: #b9a06b;
+  --color-art-yellow-28: #e2b93b;
+  --color-art-yellow-29: #a3967a;
+  --color-art-yellow-30: #d9a63e;
+  --color-art-yellow-31: #a99a46;
+  --color-art-green-1: #cdeb85;
+  --color-art-green-2: #b9dc8a;
+  --color-art-green-3: #b3dc63;
+  --color-art-green-4: #8fbf5a;
+  --color-art-green-5: #86c443;
+  --color-art-green-6: #6fa95b;
+  --color-art-green-7: #74a75a;
+  --color-art-green-8: #93a246;
+  --color-art-green-9: #7d8b5a;
+  --color-art-green-10: #6c9b44;
+  --color-art-green-11: #5b9a33;
+  --color-art-green-12: #4f8f2c;
+  --color-art-green-13: #3f7a3a;
+  --color-art-green-14: #5d7c36;
+  --color-art-green-15: #64772f;
+  --color-art-green-16: #5d722d;
+  --color-art-green-17: #3f7a22;
+  --color-art-green-18: #3d6c2c;
+  --color-art-green-19: #55662a;
+  --color-art-green-20: #46612c;
+  --color-art-green-21: #46602a;
+  --color-art-green-22: #33602a;
+  --color-art-green-23: #3e5228;
+  --color-art-green-24: #4a5822;
+  --color-art-green-25: #2d5a18;
+  --color-art-green-26: #3f4c1f;
+  --color-art-green-27: #264a1d;
+  --color-art-green-28: #1f3a14;
+  --color-art-green-29: #24301a;
+  --color-art-green-30: #22301a;
+  --color-art-green-31: #1f2f17;
+  --color-art-green-32: #152a10;
+  --color-art-teal-1: #a9cbc8;
+  --color-art-teal-2: #5c8a8c;
+  --color-art-blue-1: #dfe4ea;
+  --color-art-blue-2: #d9dee5;
+  --color-art-blue-3: #c7ccd4;
+  --color-art-blue-4: #c3c8d0;
+  --color-art-blue-5: #a3acb8;
+  --color-art-blue-6: #4189f5;
+  --color-art-blue-7: #6f688a;
+  --color-art-blue-8: #57506c;
+  --color-art-blue-9: #3b3646;
+  --color-art-violet-1: #e9e5ef;
+  --color-art-violet-2: #dcd8e3;
+  --color-art-violet-3: #c6bfd1;
+  --color-art-violet-4: #bdb6c8;
+  --color-art-violet-5: #aaa3b8;
+  --color-art-pink-1: #7e5a6a;
+  --color-art-pink-2: #4d3646;
+  --color-art-pink-3: #3a2834;
+  --color-art-gray-1: #fff;
+  --color-art-gray-2: #f1f1f4;
+  --color-art-gray-3: #aba5b8;
+  --color-art-gray-4: #9d97ab;
+  --color-art-gray-5: #9a93a8;
+  --color-art-gray-6: #948da4;
+  --color-art-gray-7: #8f949c;
+  --color-art-gray-8: #8c949c;
+  --color-art-gray-9: #8d929b;
+  --color-art-gray-10: #9c9a8a;
+  --color-art-gray-11: #857f93;
+  --color-art-gray-12: #847d92;
+  --color-art-gray-13: #8d8b7c;
+  --color-art-gray-14: #7a7488;
+  --color-art-gray-15: #666a72;
+  --color-art-gray-16: #62666e;
+  --color-art-gray-17: #5f5d50;
+  --color-art-gray-18: #4f5258;
+  --color-art-gray-19: #4c4f56;
+  --color-art-gray-20: #3a3d42;
+  --color-art-gray-21: #383b40;
+  --color-art-gray-22: #2c2e33;
+  --color-art-gray-23: #2a2c30;
+  --color-art-gray-24: #24262a;
+  --color-art-gray-25: #000;
+
+  /* Accent palette (NFA-GB-03): fill carries --color-on-accent text, text variant sits on surfaces */
+  --color-accent-indigo: #4f46e5;
+  --color-accent-indigo-text: #a5a8ff;
+  --color-accent-blue: #2563eb;
+  --color-accent-blue-text: #86b4ff;
+  --color-accent-teal: #0f766e;
+  --color-accent-teal-text: #5fd4c4;
+  --color-accent-green: #15803d;
+  --color-accent-green-text: #6fd99a;
+  --color-accent-amber: #b45309;
+  --color-accent-amber-text: #f5be5b;
+  --color-accent-berry: #a8336a;
+  --color-accent-berry-text: #e79ac0;
+  --color-on-accent: #fff;
+  --color-backdrop: #000000b3;
+  --color-shadow: #0000008c;
+
+  /* Home screen icon of the local acceptance app (build mode "acceptance", E-40): violet instead of
+     wood and amber, so it can be told apart from the published app; only read by npm run icons */
+  --color-acceptance-icon-surface: #211a2e;
+  --color-acceptance-icon-raised: #2c2340;
+  --color-acceptance-icon-overlay: #3a2e52;
+  --color-acceptance-icon-glow: #5a3a8c;
+  --color-acceptance-icon-accent: #c4a0ff;
 
   /* States */
-  --color-status-ok: #3fcf73;
-  --color-status-error: #ff6b6b;
-  --color-status-info: #8ab4f8;
-
-  /* Accent (later 6 to 8 variants via data-accent, US-GB-01) */
-  --color-accent: #f2a541;
+  --color-status-ok: #4ade80;
+  --color-status-error: #fc8585;
+  --color-status-warning: #fbbf24;
+  --color-status-info: #60a5fa;
 
   /* Typography */
   --font-family-base: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
   --font-family-mono: ui-monospace, 'Cascadia Mono', consolas, monospace;
+  --font-size-tiny: 0.75rem;
   --font-size-small: 0.875rem;
   --font-size-base: 1rem;
   --font-size-title: 1.5rem;
@@ -35,10 +365,111 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --radius-2: 0.5rem;
+  --radius-4: 1rem;
   --touch-target-min: 44px;
+
+  /* Page layout (design I2-G): every view but the start has the same width, padding and head
+     height, so the back button sits in the same place on every page. */
+  --page-max-width: 80rem;
+  --page-padding-top: 20px;
+  --page-padding-side: 16px;
+  --page-head-height: 52px;
 
   /* Durations and easings for Motion (Architecture 13.6) */
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Pressed state (K-4, NFA-GB-04): cards rise and darken, controls shimmer in their text colour */
+  --press-lift: -3px;
+  --press-darken: 0.15;
+  --press-shimmer: 16%;
+}
+
+/*
+ * Designs (NFA-GB-02, NFA-GB-03): surfaces, text, background and default accent.
+ * "Holz" is the default; switching via data-theme follows with US-GB-01.
+ */
+:root,
+:root[data-theme='wood'] {
+  --color-surface: #231d18;
+  --color-surface-raised: #2d2620;
+  --color-surface-overlay: #383028;
+  --color-border: #4b4036;
+  --color-text: #f4ece1;
+  --color-text-muted: #b8ab9b;
+  --background-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+  --color-accent: var(--color-accent-amber);
+  --color-accent-text: var(--color-accent-amber-text);
+}
+
+:root[data-theme='ocean'] {
+  --color-surface: #10232c;
+  --color-surface-raised: #17303b;
+  --color-surface-overlay: #1f3c49;
+  --color-border: #2d5262;
+  --color-text: #e6f4f7;
+  --color-text-muted: #98b8c2;
+  --background-image: linear-gradient(180deg, #17404e 0%, #10232c 45%);
+  --color-accent: var(--color-accent-teal);
+  --color-accent-text: var(--color-accent-teal-text);
+}
+
+:root[data-theme='forest'] {
+  --color-surface: #1b221e;
+  --color-surface-raised: #232c27;
+  --color-surface-overlay: #2c3731;
+  --color-border: #3b4941;
+  --color-text: #e9f0ea;
+  --color-text-muted: #a5b4aa;
+  --background-image: none;
+  --color-accent: var(--color-accent-green);
+  --color-accent-text: var(--color-accent-green-text);
+}
+
+/* Glass: frosted surfaces over a colour gradient; the blur costs performance on older devices. */
+:root[data-theme='glass'] {
+  --color-surface: #161a2e;
+  --color-surface-raised: #232845;
+  --color-surface-overlay: #2b3152;
+  --color-border: #ffffff26;
+  --color-text: #f1f2fa;
+  --color-text-muted: #aeb3cf;
+  --background-image:
+    radial-gradient(circle at 15% 5%, #4338ca80 0%, transparent 40%),
+    radial-gradient(circle at 90% 35%, #0e749080 0%, transparent 40%),
+    radial-gradient(circle at 40% 100%, #9d174d66 0%, transparent 45%);
+  --color-accent: var(--color-accent-indigo);
+  --color-accent-text: var(--color-accent-indigo-text);
+}
+
+/* Chosen accent overrides the default accent of the design (US-GB-01). */
+:root[data-accent='indigo'] {
+  --color-accent: var(--color-accent-indigo);
+  --color-accent-text: var(--color-accent-indigo-text);
+}
+
+:root[data-accent='blue'] {
+  --color-accent: var(--color-accent-blue);
+  --color-accent-text: var(--color-accent-blue-text);
+}
+
+:root[data-accent='teal'] {
+  --color-accent: var(--color-accent-teal);
+  --color-accent-text: var(--color-accent-teal-text);
+}
+
+:root[data-accent='green'] {
+  --color-accent: var(--color-accent-green);
+  --color-accent-text: var(--color-accent-green-text);
+}
+
+:root[data-accent='amber'] {
+  --color-accent: var(--color-accent-amber);
+  --color-accent-text: var(--color-accent-amber-text);
+}
+
+:root[data-accent='berry'] {
+  --color-accent: var(--color-accent-berry);
+  --color-accent-text: var(--color-accent-berry-text);
 }

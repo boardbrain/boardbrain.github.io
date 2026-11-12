@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.2 |
+| Version | 0.15 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 06.10.2026 |
+| Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -17,6 +17,19 @@
 |---|---|---|
 | 0.1 | 06.10.2026 | Erstfassung aus der Setup-Planung |
 | 0.2 | 07.10.2026 | Ergebnisse des Setups: keine Hinweise auf Claude in Commits und Pull Requests (3.3); Markdown von Prettier ausgenommen (4.2); ESLint-Regeln ohne `eslint-plugin-react` (5, 13; Architektur ADR-026); Node.js 26 vor LTS-Einstufung (10.3); Code durchgehend englisch, auch Kommentare und Testnamen (4.3, 4.6, 8.2; Architektur ADR-027) (PR #2) |
+| 0.3 | 07.10.2026 | Aufträge an Claude Code verweisen auf `docs/Umsetzungsplan.md` (14) |
+| 0.4 | 07.10.2026 | Namensregel für React-Kontexte (4.3) (PR #12) |
+| 0.5 | 08.10.2026 | Designvorschläge vor dem Bau neuer oder geänderter Oberflächen (2.2, 2.5); Lehre aus I1-C, wo der Product Owner nach der Umsetzung einen anderen Aufbau wollte |
+| 0.6 | 08.10.2026 | Design D-3: Vorschauen heißen `…-preview….html` und stehen in `.gitignore`; frühere Runden werden archiviert, nie gelöscht; die finale Referenz eines Bündels kommt als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (2.5); E2E-Formate nach E-29: Smartphones im Hochformat, Tablets in beiden Ausrichtungen (8.3) |
+| 0.7 | 28.10.2026 | README auf Kurzbeschreibung, Adresse, Stand und Lizenz beschränkt, ohne Verweise auf `docs/` (11.2) |
+| 0.8 | 28.10.2026 | Aufgabe K-4: Knöpfe und Links nur über `PressableButton` und `PressableLink`, Karten mit `look="card"` (6) |
+| 0.9 | 29.10.2026 | Reine Doku-Änderungen ohne lokale Prüfungen; auf GitHub laufen sie unverändert (2.2, 3.6, 12.1; Entscheidung des Product Owners) |
+| 0.10 | 29.10.2026 | Beispiel für Ordnernamen an die neue Struktur angepasst (`core/placement` entfällt, Architektur ADR-028) (4.4) (PR #27) |
+| 0.11 | 03.11.2026 | I2-C: fester Startwert für den Zufall in Ende-zu-Ende-Tests über `tests/e2e/seededRandom.ts`, die einzige Ausnahme von der `crypto`-Regel außerhalb von `infra` und `tests/statistical` (8.2) |
+| 0.12 | 03.11.2026 | Vorschauen im Ordner `previews/` (2.5); während der Arbeit nur betroffene Tests, volle Suiten vor dem Push (8.2); Ende-zu-Ende-Tests dürfen Personen und Tische direkt in die Datenbank schreiben (8.3); Entscheidungen des Product Owners |
+| 0.13 | 11.11.2026 | Kleine Aufgabe K-6: Ende-zu-Ende-Tests nach dem Losen beginnen mit einer Partie aus `seedMatch` (8.3) |
+| 0.14 | 11.11.2026 | Kleine Aufgabe K-5: unerwartete Fehler einer Ansicht fängt die Fehleransicht der Routen statt einer eigenen Error Boundary je Ansicht; der Fehlerbildschirm nutzt `PressableButton` und bietet „Zum Start“ und „Details kopieren“ (6, 7.2) |
+| 0.15 | 12.11.2026 | OP-13 (Anforderungsdokumentation E-40): Vorabversionen 0.x je Inkrement (3.7); das Release erzeugt der Product Owner selbst auf GitHub oder Claude Code nach Zustimmung, vor 1.0 als Pre-release markiert (3.8) |
 
 ## Inhaltsverzeichnis
 
@@ -63,12 +76,13 @@ Leitlinie: **Schnelle Umsetzung hat Vorrang vor feingranularer Steuerung** (E-22
 Ein **Story-Bündel** ist eine Gruppe zusammengehöriger User Stories, die gemeinsam umgesetzt und abgenommen wird, etwa „Personen und Gruppen“ (US-PG-01 bis US-PG-04). Je Inkrement gibt es etwa zwei bis vier Bündel; Fachlogik mit strengen Prüfkriterien wird kleiner geschnitten als Oberflächen. Der Zuschnitt wird zu Beginn eines Inkrements festgelegt.
 
 1. **Auftrag:** Der Product Owner nennt das Bündel.
-2. **Umsetzung:** Claude Code legt den Arbeitsbranch von `develop` an, programmiert, schreibt Tests, aktualisiert betroffene Dokumente und committet in sinnvollen Zwischenschritten.
-3. **Lokale Prüfung:** Claude Code führt `npm run check` und `npm run test:e2e` aus und behebt alle Fehler.
-4. **Pull Request:** Claude Code pusht und eröffnet den Pull Request nach `develop` mit einer Beschreibung nach Vorlage (3.4), einschließlich Testanleitung für den Product Owner.
-5. **Abnahme:** Claude Code startet den Entwicklungsserver mit diesem Stand; der Product Owner testet am PC und bei Bedarf auf Mobilgeräten. Gleichzeitig laufen die Prüfungen auf GitHub.
-6. **Nachbesserung:** Rückmeldungen behebt Claude Code im selben Branch; der Pull Request aktualisiert sich.
-7. **Merge:** Der Product Owner mergt (Squash).
+2. **Designvorschläge:** Enthält das Bündel eine neue oder sichtbar geänderte Oberfläche, zeigt Claude Code zuerst Designvorschläge (2.5) und baut erst nach der Wahl des Product Owners. *(neu in 0.5)*
+3. **Umsetzung:** Claude Code legt den Arbeitsbranch von `develop` an, programmiert, schreibt Tests, aktualisiert betroffene Dokumente und committet in sinnvollen Zwischenschritten.
+4. **Lokale Prüfung:** Claude Code führt `npm run check` und `npm run test:e2e` aus und behebt alle Fehler; bei reinen Doku-Änderungen entfällt das (3.6).
+5. **Pull Request:** Claude Code pusht und eröffnet den Pull Request nach `develop` mit einer Beschreibung nach Vorlage (3.4), einschließlich Testanleitung für den Product Owner.
+6. **Abnahme:** Claude Code startet den Entwicklungsserver mit diesem Stand; der Product Owner testet am PC und bei Bedarf auf Mobilgeräten. Gleichzeitig laufen die Prüfungen auf GitHub.
+7. **Nachbesserung:** Rückmeldungen behebt Claude Code im selben Branch; der Pull Request aktualisiert sich.
+8. **Merge:** Der Product Owner mergt (Squash).
 
 ### 2.3 Haltepunkte
 
@@ -91,6 +105,16 @@ Fehlerbehebungen, Dokumentationsänderungen und Abhängigkeits-Updates folgen de
 | Fachlogik ohne Oberfläche | Liste der Testfälle in Klartext und deren Ergebnis prüfen |
 | Dokumentation | Änderungen lesen |
 | Abhängigkeits-Updates | Kurzer Rundgang durch die App |
+
+### 2.5 Designvorschläge *(neu in 0.5)*
+
+Vor dem Bau einer neuen oder sichtbar geänderten Oberfläche (Ansicht, Ablauf, Farben) zeigt Claude Code mehrere Vorschläge. Das spart Rückschritte: Ein Aufbau lässt sich in einer Vorschau in Minuten ändern, in fertigem Code mit Tests erst nach Stunden.
+
+- **Form:** eine lokale, klickbare HTML-Datei im Ordner `previews/` (z. B. `previews/groups-preview.html`). Der Name enthält immer `-preview`; `.gitignore` hält den Ordner `/previews/` und zur Sicherheit jede Datei `/*-preview*.html` im Wurzelordner aus dem Repository. *(geändert in 0.12)* Der Entwicklungsserver liefert sie mit aus, sodass der Product Owner sie auf allen Abnahmegeräten öffnen kann (`https://192.168.178.20:5173/previews/‹datei›`).
+- **Inhalt:** mindestens zwei, besser drei bis fünf deutlich verschiedene Ansätze, umschaltbar; Handy hochkant und Tablet quer; die echten Farbwerte aus `tokens.css` und realistische Datenmengen (auch eine volle Liste); bei Farben die Kontraste und Farbabstände als Zahl.
+- **Ablauf:** Der Product Owner wählt, kombiniert oder wünscht weitere Varianten; jede Runde bleibt als eigene Datei zum Vergleich erhalten (`…-preview-v1.html`) und wird nie gelöscht. Die gewählte Variante hält Claude Code im Pull Request fest.
+- **Finale Referenz:** Nach der Wahl erstellt Claude Code eine finale Vorschau nur mit der gewählten Variante: umschaltbar nach Gerät, Datenstand und Umfang („jetzt gebaut“ / „mit späteren Funktionen“), darunter Bauangaben mit Maßen, Abständen und Verhalten. Nach Abnahme durch den Product Owner kommt sie als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (z. B. `d3-start-navigation-final-preview.html`) und ist die verbindliche Vorlage für dieses und spätere Bündel, die dort andocken. Nach dem Bau vergleicht Claude Code Vorlage und App per Screenshot in denselben Zuständen und behebt Abweichungen, bevor es „fertig“ meldet. *(neu in 0.6)*
+- **Ausnahme:** reine Fehlerbehebungen und Änderungen, die einem bereits gewählten Entwurf folgen.
 
 ---
 
@@ -199,6 +223,8 @@ Automatisch geprüft: ja, die Schutzregeln (Rulesets) erlauben je Branch nur die
 | `develop` | `npm run check`, `npm run test:e2e` | `check`, `e2e`, `pr-title` |
 | `main` | zusätzlich `npm run test:stat` | zusätzlich `stat` und `guard-main` (nur aus `develop` oder `hotfix/…`) |
 
+**Reine Doku-Änderungen** *(neu in 0.9)*: Ändert ein Pull Request nur Dateien unter `docs/` sowie `README.md` oder `CLAUDE.md`, entfallen die lokalen Prüfungen. Keine von ihnen prüft diese Dateien (Prettier lässt Markdown aus, 4.2), und der Code ist derselbe, der auf `develop` schon bestanden hat. Claude Code belegt das vor dem Push mit `git diff --name-only origin/develop` und nennt es in der Beschreibung des Pull Requests. Ist auch nur eine andere Datei geändert, gelten die lokalen Prüfungen wie oben. Auf GitHub laufen alle Prüfungen unverändert.
+
 Details der Jobs: Architektur 16.3.
 
 ### 3.7 Versionierung
@@ -211,7 +237,7 @@ Semantic Versioning (EP-05), übertragen auf eine App:
 | MINOR | Neue Funktionen, auch mit automatischer Datenmigration | Hellmodus, weiteres Spiel |
 | PATCH | Nur Fehlerbehebungen | Absturz beim Import behoben |
 
-Bis zum Release 1.0 steht in `package.json` eine Version `0.x.y`. Die App-Version ist unabhängig von der Schemaversion der Datenbank und der Version des Exportformats (Architektur 7.5).
+Bis zum Release 1.0 steht in `package.json` eine Version `0.x.y`. Vorabversionen erscheinen nach abgeschlossenen Inkrementen, je Inkrement mit neuer MINOR-Version (0.2.0 nach I2, 0.3.0 nach I3 …; E-40) *(ergänzt in 0.15)*. Die App-Version ist unabhängig von der Schemaversion der Datenbank und der Version des Exportformats (Architektur 7.5).
 
 ### 3.8 Release-Ablauf
 
@@ -219,7 +245,7 @@ Bis zum Release 1.0 steht in `package.json` eine Version `0.x.y`. Die App-Versio
 2. Nach dem Merge eröffnet Claude Code den Pull Request `develop` → `main` mit Titel `release: x.y.z`.
 3. Alle Prüfungen einschließlich der statistischen Suite laufen; der Product Owner führt die manuelle Abnahme nach `docs/Abnahme-Checkliste.md` durch (ab 1.0; beim Platzhalter 0.1.0 entfällt sie).
 4. Der Product Owner mergt.
-5. Nach Zustimmung des Product Owners erzeugt Claude Code das Release: `gh release create vx.y.z --target main --title "x.y.z" --notes-file ‹Auszug aus CHANGELOG›`. Der Tag löst die Veröffentlichung aus.
+5. Das Release mit Tag `vx.y.z` erzeugt der Product Owner selbst auf GitHub (Releases → „Draft a new release“, Tag neu anlegen, Ziel `main`, Titel `x.y.z`, Text aus `CHANGELOG.md`), wobei Claude Code ihn anleitet, oder Claude Code nach seiner Zustimmung mit `gh release create vx.y.z --target main --title "x.y.z" --notes-file ‹Auszug aus CHANGELOG›`. Vor 1.0 ist jedes Release als Vorabversion markiert (Häkchen „Set as a pre-release“ bzw. `--prerelease`, Anforderungsdokumentation E-40). Der Tag löst die Veröffentlichung aus. *(geändert in 0.15)*
 6. Der Product Owner prüft die veröffentlichte App unter `https://boardbrain.github.io/`.
 
 `CHANGELOG.md` ist deutsch und folgt dem Aufbau von „Keep a Changelog“: je Version ein Abschnitt mit Datum und den Unterabschnitten *Neu*, *Geändert*, *Behoben*, *Entfernt*, *Sicherheit*. Claude Code erstellt die Einträge aus den Titeln der Pull Requests seit dem letzten Release und formuliert sie für Nutzer verständlich.
@@ -270,6 +296,7 @@ Code ist immer englisch: Bezeichner, Kommentare, Testnamen, Fehler- und Protokol
 | Typen, Komponenten | PascalCase, ohne Präfix `I` | `GroupForm`, `RandomSource` | ja |
 | Variablen, Funktionen, Parameter | camelCase | `pickWinner` | ja |
 | Echte Konstanten auf Modulebene | UPPER_SNAKE_CASE | `MAX_GROUP_SIZE` | ja |
+| React-Kontexte (werden in JSX wie Komponenten verwendet) | PascalCase mit Endung `Context` | `AppDependenciesContext` | ja |
 | Wahrheitswerte | Präfix `is`, `has`, `can`, `should` | `isArchived` | ja |
 | Ereignis-Props und Behandler | `onX` bzw. `handleX` | `onSave`, `handleSave` | nein (Review) |
 | Fehlercodes | kebab-case-Zeichenketten | `'group-full'` | nein (Review) |
@@ -283,7 +310,7 @@ Abkürzungen nur, wenn allgemein üblich (`id`, `url`). Namen beschreiben den In
 |---|---|---|
 | Komponentendateien PascalCase, ihr CSS-Modul daneben | `GroupForm.tsx`, `GroupForm.module.css` | ja, ESLint `check-file` |
 | Andere Dateien camelCase | `buildingPlanner.ts` | ja |
-| Ordner klein, bei Bedarf mit Bindestrich | `core/placement/` | ja |
+| Ordner klein, bei Bedarf mit Bindestrich | `core/draws/` | ja |
 | Unit-Tests neben dem Code, Endung `.test.ts(x)`; statistische Tests `*.stat.test.ts` in `tests/statistical`; Ende-zu-Ende-Tests `*.spec.ts` in `tests/e2e` | `placement.test.ts` | ja (Testkonfiguration findet nur diese Muster) |
 | Eine exportierte Komponente je Datei | – | nein (Review) |
 
@@ -345,7 +372,8 @@ Kurzfassung der Architektur; Details in BoardBrain_Architektur.md.
 | Stile über CSS Modules; Inline-Stile nur für Motion-Werte und dynamische CSS-Variablen | nein (Review) |
 | Listen-Keys sind stabile Kennungen, nie der Index | teilweise, ESLint |
 | Echte Bedienelemente (`button`, `a`, `input` mit `label`) statt klickbarer `div`; jedes Bedienelement hat eine sichtbare oder hinterlegte Beschriftung aus der Sprachdatei. Grund ist sauberer Code und robuste Tests, nicht Barrierefreiheit, die kein Ziel ist (E-24) | nein (Review); Tests finden Elemente über Rolle und Name (8.3) |
-| Jede Ansicht ist von einer Error Boundary umschlossen (7.2) | nein (Review) |
+| Knöpfe und Links nur über `PressableButton` und `PressableLink` (`ui/components/Pressable.tsx`), damit jedes Bedienelement denselben Druckzustand zeigt (K-4, Architektur 13.6); kartenartige Elemente mit `look="card"` | ja, ESLint (Ausnahmen: die Bausteine selbst, Kartenhand) |
+| Jede Route liegt unter der Fehleransicht des Rahmens (`errorElement` in `src/main.tsx`, 7.2); keine Klassenkomponenten | teilweise, ESLint (Klassenkomponenten); sonst Review |
 | Berührungsflächen sind auf Smartphones bequem treffbar (Richtwert 44 × 44 Pixel) | nein (Review, manuelle Abnahme) |
 
 ---
@@ -370,7 +398,7 @@ TypeScript zwingt den Aufrufer, beide Fälle zu behandeln. Die Oberfläche über
 Programmierfehler, verletzte Invarianten und technische Störungen werden **geworfen** und aufgefangen
 
 1. in den Anwendungsdiensten, damit die Datenbanktransaktion vollständig zurückgerollt wird,
-2. in einer Error Boundary je Ansicht, die eine verständliche Meldung mit „Neu laden“ zeigt,
+2. in der Fehleransicht der Routen (`RouteErrorScreen` als `errorElement` des Rahmens, seit K-5): Sie fängt Fehler beim Zeichnen einer Ansicht, im Rahmen und beim Nachladen einer Ansicht und zeigt den Fehlerbildschirm über den ganzen Bildschirm mit „Neu laden“, „Zum Start“ und den Fehlerdetails (Referenz `docs/design/k5-error-screen-final-preview.html`),
 3. global über `error` und `unhandledrejection` für alles Übrige.
 
 Fehlerdetails werden nie übertragen (NFA-DH-01). Der Fehlerbildschirm bietet sie zum Kopieren an, damit sie in ein Issue übernommen werden können. Invarianten in `core` werden mit `assert(bedingung, 'beschreibung')` aus `core/shared` geprüft.
@@ -410,18 +438,20 @@ Die Teststrategie steht in Architektur Kapitel 14. Übersicht:
 | Mindestabdeckung 90 % (Zeilen und Verzweigungen) für `src/core` und `src/games` | ja, Vitest |
 | Testnamen englisch, als Verhalten formuliert, mit Bezug: `describe('US-AB-03 Repeat step')`, `it('AK-2: discards all following steps')` (Architektur ADR-027) | nein (Review) |
 | Aufbau jedes Tests: Ausgangslage herstellen, Handlung ausführen, Ergebnis prüfen | nein (Review) |
-| Kein echter Zufall in Unit-, Komponenten- und Ende-zu-Ende-Tests: nur `SeededRandomSource` oder `ScriptedRandomSource`; fast-check mit festem Startwert. Echter Zufall nur in der statistischen Suite | teilweise, ESLint (`Math.random` überall verboten, `crypto` außerhalb von `infra` und `tests/statistical`) |
+| Kein echter Zufall in Unit-, Komponenten- und Ende-zu-Ende-Tests: nur `SeededRandomSource` oder `ScriptedRandomSource`; fast-check mit festem Startwert. Echter Zufall nur in der statistischen Suite | teilweise, ESLint (`Math.random` überall verboten, `crypto` außerhalb von `infra` und `tests/statistical`). Ende-zu-Ende-Tests ersetzen `crypto.getRandomValues` im Browser über `useSeededRandom` aus `tests/e2e/seededRandom.ts` durch einen Generator mit festem Startwert (Architektur 14.5); nur diese Datei darf dafür `crypto` verwenden |
 | Testdaten über Hilfsfunktionen aus `tests/support` (z. B. `aGroup({ … })`), nicht über lange Literale in jedem Test | nein (Review) |
 | Neue Abläufe in der Oberfläche erhalten mindestens einen Ende-zu-Ende-Test für den Hauptweg | nein (Definition of Done) |
 | Kein vergessenes `.only`; übersprungene Tests nur mit Begründung im Kommentar | ja, ESLint und Playwright (`forbidOnly`) |
+| Während der Arbeit laufen nur die betroffenen Tests: einzelne Testdateien mit Vitest, Ende-zu-Ende-Tests einzeln und auf einem Gerät (`--project=chromium-phone`). Die vollen Suiten laufen vor dem Push (2.2) und auf GitHub. Entscheidung des Product Owners, um Wartezeit zu sparen; sie kann zurückgenommen werden | nein (Arbeitsweise) |
 | Ein unzuverlässiger Test wird repariert, nicht wiederholt. Einzige Ausnahme: die festgelegte einmalige Wiederholung in der statistischen Suite (NFA-ZF-02) | nein (Review) |
 
 ### 8.3 Ende-zu-Ende-Tests
 
 - Elemente werden über Rolle und Beschriftung gefunden (`getByRole('button', { name: 'Speichern' })`), nicht über CSS-Klassen oder interne Kennungen.
 - Der Netzwerkwächter lässt jeden Test fehlschlagen, der eine fremde Adresse anfragt (NFA-DH-01).
-- Formate: Smartphone und Tablet, jeweils Hoch- und Querformat (NFA-PL-04).
-- Jeder Test beginnt mit leerer Datenbank oder einem definierten Datenstand aus `tests/fixtures`.
+- Formate: Smartphones im Hochformat, Tablets im Hoch- und Querformat; der Hinweis zum Drehen auf Smartphones im Querformat hat einen eigenen Test (NFA-PL-04, E-29). *(geändert in 0.6)*
+- Jeder Test beginnt mit leerer Datenbank oder einem definierten Datenstand aus `tests/fixtures`. Braucht ein Test nur Personen und Tische als Ausgangslage, schreibt er sie direkt in die Datenbank (`seedDatabase` aus `tests/e2e/seedDatabase.ts`); wie man sie über die Oberfläche anlegt, prüfen die eigenen Tests der Verwaltung. *(neu in 0.12)*
+- Prüft ein Test, was nach dem Losen kommt (Antippen, Rückblick, Übersicht, Wiederholen), beginnt er mit einer ganz oder teilweise gelosten Partie, die `seedMatch` aus `tests/e2e/seedDatabase.ts` direkt in die Datenbank schreibt. Der Helfer rechnet die Partie mit der Spiellogik der App und festem Startwert aus, sodass sie immer gültig ist und eine Änderung des Datenmodells bei der Typprüfung auffällt. Ganze Partien über die Oberfläche durchgespielt werden nur in den Tests, die genau das prüfen (US-AB-01, US-AB-02, US-AB-05; Architektur 14.5). *(neu in 0.13)*
 
 ---
 
@@ -501,7 +531,7 @@ Dependabot-Pull-Requests zielen auf `develop` und tragen das Präfix `deps:`. Ak
 | `Setup-Anleitung.md`, `Setup-DoD.md` | Einrichtung und deren Nachweis |
 | `Abnahme-Checkliste.md` | Manuelle Abnahme vor jedem Release (ab I1) |
 | `test-reports/` | Ergebnisse von Messungen, z. B. Sackgassenquote |
-| `README.md` (Wurzel) | Kurzbeschreibung, Adresse der App, Verweis auf `docs/` |
+| `README.md` (Wurzel) | Kurzbeschreibung, Adresse der App, Stand, Lizenz; keine Verweise auf `docs/` |
 | `CHANGELOG.md` (Wurzel) | Änderungen je Release |
 | `CLAUDE.md` (Wurzel) | Kurzfassung dieser Richtlinien für Claude Code |
 
@@ -520,7 +550,7 @@ Markdown, deutsch, Tabellen für Festlegungen, Codebeispiele nur als Skizzen. Pr
 ### 12.1 Je Pull Request (Story-Bündel)
 
 1. Alle Abnahmekriterien der enthaltenen Stories sind erfüllt; jedes hat einen automatisierten Test oder einen manuellen Prüfschritt in der Beschreibung des Pull Requests.
-2. `npm run check` und `npm run test:e2e` sind lokal und auf GitHub bestanden, ohne neue Warnungen.
+2. `npm run check` und `npm run test:e2e` sind lokal und auf GitHub bestanden, ohne neue Warnungen; bei reinen Doku-Änderungen nur auf GitHub (3.6).
 3. Texte stammen aus der Sprachdatei, Farben aus den Tokens, Zufall aus `RandomSource`.
 4. Neue Abläufe in der Oberfläche haben einen Ende-zu-Ende-Test für den Hauptweg.
 5. Betroffene Dokumente in `docs/` sind im selben Pull Request angepasst.
@@ -577,5 +607,6 @@ Markdown, deutsch, Tabellen für Festlegungen, Codebeispiele nur als Skizzen. Pr
 - **Modelle und Aufwand:** nach Anforderungsdokumentation 9.3. Standard ist Sonnet 5.5 mit Aufwand „medium“; Opus 5.5 mit „high“ für das Setup und die kritischen Teile (Zufall, Platzierung und Sackgassen, Service Worker und Updates, Importkonflikte, Migrationen). Liegt Sonnet zweimal hintereinander daneben, auf Opus wechseln.
 - **Kontext:** Für jedes Bündel eine neue Sitzung beginnen (`/clear`). Das spart Kontingent und verhindert, dass alte Annahmen nachwirken. `CLAUDE.md` wird in jeder Sitzung automatisch gelesen.
 - **Berechtigungen:** nach Architektur 16.5. Harte Grenzen stehen in `.claude/settings.json`, nicht nur in `CLAUDE.md`.
-- **Auftrag formulieren:** Bündel nennen, Stories aufzählen, besondere Wünsche angeben. Beispiel: „Setze Bündel I1-A um: US-PG-01 bis US-PG-04. Halte dich an CLAUDE.md.“
+- **Auftrag formulieren:** Bündel und Aufgaben stehen mit Modell, Aufwand und Branch-Namen in `docs/Umsetzungsplan.md`, ebenso der genaue Ablauf einer Sitzung. Auftrag: „Setze Bündel I1-A aus docs/Umsetzungsplan.md um.“, bei Bedarf mit besonderen Wünschen.
+- **Designvorschläge:** bei Oberflächen vor dem Bau (2.5). *(neu in 0.5)*
 - **Nach dem Merge:** Claude Code wechselt zurück auf `develop` und holt den neuen Stand (`git switch develop && git pull`).

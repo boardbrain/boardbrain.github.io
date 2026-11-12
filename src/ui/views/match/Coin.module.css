@@ -1,0 +1,12 @@
+.coin {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.9em;
+  height: 1.9em;
+  font-weight: 800;
+  color: var(--color-on-catan);
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--color-border);
+}

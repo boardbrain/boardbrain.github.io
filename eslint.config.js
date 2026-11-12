@@ -110,7 +110,11 @@ const JSX_SYNTAX = [
     message: JSX_TEXT_MESSAGE,
   },
   { selector: 'JSXElement > JSXExpressionContainer > TemplateLiteral', message: JSX_TEXT_MESSAGE },
-  { selector: `JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > Literal`, message: JSX_TEXT_MESSAGE },
+  // An empty text is allowed: `alt=""` marks a decorative picture for screen readers.
+  {
+    selector: String.raw`JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > Literal[value=/\S/]`,
+    message: JSX_TEXT_MESSAGE,
+  },
   {
     selector: `JSXAttribute[name.name=/${TEXT_ATTRIBUTES}/] > JSXExpressionContainer > :matches(Literal[raw=/^['"]/], TemplateLiteral)`,
     message: JSX_TEXT_MESSAGE,
@@ -126,8 +130,22 @@ const JSX_SYNTAX = [
   {
     selector: String.raw`ClassDeclaration[superClass.name=/^(?:Component|PureComponent)$/], ClassDeclaration[superClass.property.name=/^(?:Component|PureComponent)$/]`,
     message:
-      'Function components only; the single exception is ErrorBoundary (Development Guidelines 6).',
+      'Function components only; errors are caught by the error view of the routes (Development Guidelines 6, K-5).',
   },
+];
+
+// K-4: every button and link shows the app's own pressed state (Pressable.tsx). Exceptions are the
+// building blocks themselves and the card hand with its own lift; since K-5 the error screen too
+// uses the building blocks.
+const CONTROL_SYNTAX = [
+  {
+    selector: String.raw`JSXOpeningElement[name.name=/^(?:button|a|Link|NavLink)$/]`,
+    message: 'Use PressableButton or PressableLink from ui/components/Pressable (K-4).',
+  },
+];
+const CONTROL_EXCEPTIONS = [
+  'src/ui/components/Pressable.tsx',
+  'src/ui/components/HandNavigation.tsx',
 ];
 
 /**
@@ -180,12 +198,19 @@ const AREAS = [
     files: ['tests/statistical/**'],
     allowed: { crypto: true, getRandomValues: true, randomUUID: true },
   },
+  // Replaces crypto.getRandomValues in the browser with a seeded generator (I2-C, variant A).
+  {
+    name: 'e2e-seeded-random',
+    files: ['tests/e2e/seededRandom.ts'],
+    allowed: { crypto: true, getRandomValues: true },
+  },
 ];
 const AREA_FILES = AREAS.flatMap((area) => area.files);
 
 export default defineConfig([
   globalIgnores([
     'dist/',
+    'dist-acceptance/',
     'coverage/',
     'playwright-report/',
     'test-results/',
@@ -213,7 +238,7 @@ export default defineConfig([
     extends: [tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.json', './tsconfig.node.json'],
+        project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.sw.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -250,6 +275,12 @@ export default defineConfig([
           prefix: ['is', 'has', 'can', 'should'],
         },
         { selector: 'variable', modifiers: ['destructured'], format: null },
+        // React contexts are rendered as JSX elements and therefore need a capital letter.
+        {
+          selector: 'variable',
+          filter: { regex: 'Context$', match: true },
+          format: ['PascalCase'],
+        },
         { selector: 'function', format: ['camelCase', 'PascalCase'] },
         { selector: 'typeLike', format: ['PascalCase'] },
         { selector: 'typeParameter', format: ['PascalCase'] },
@@ -299,13 +330,13 @@ export default defineConfig([
     extends: [reactHooks.configs.flat.recommended],
     languageOptions: { globals: globals.browser },
     rules: {
-      'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...JSX_SYNTAX],
+      'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...JSX_SYNTAX, ...CONTROL_SYNTAX],
     },
   },
   {
-    files: ['src/ui/components/ErrorBoundary.tsx'],
+    files: CONTROL_EXCEPTIONS,
     rules: {
-      'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...JSX_SYNTAX.slice(0, -1)],
+      'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...JSX_SYNTAX],
     },
   },
 

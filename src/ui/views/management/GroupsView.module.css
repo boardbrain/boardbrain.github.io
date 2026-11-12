@@ -1,0 +1,106 @@
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: var(--touch-target-min);
+  padding: 0;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.searchRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.room {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.card,
+.newCard {
+  display: grid;
+  height: 100%;
+  color: var(--color-text);
+  text-decoration: none;
+  gap: var(--space-1);
+  align-content: start;
+  justify-items: center;
+  min-width: 0;
+  padding: var(--space-4) var(--space-2);
+  text-align: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4);
+}
+
+.newCard {
+  width: 100%;
+  height: 100%;
+  color: var(--color-accent-text);
+  border-style: dashed;
+  border-color: var(--color-accent-text);
+}
+
+.plus {
+  position: relative;
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  border: 2px dashed var(--color-accent-text);
+  border-radius: 50%;
+}
+
+.plus::before,
+.plus::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2rem;
+  height: 3px;
+  content: '';
+  background: var(--color-accent-text);
+  transform: translate(-50%, -50%);
+}
+
+.plus::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.match {
+  font-size: var(--font-size-small);
+  color: var(--color-accent-text);
+}
+
+.backIcon,
+.closeIcon {
+  display: grid;
+}
+
+/* Phones: the editor fills the screen; wide screens: a large window over the room. */

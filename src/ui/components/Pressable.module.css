@@ -1,0 +1,29 @@
+/* K-4 (NFA-GB-04): pressed state instead of the browser's tap highlight. Motion animates --press
+   from 0 to 1 while the element is pressed (Pressable.tsx); the look follows from it here. The
+   properties are chosen so that they do not collide with the components' own transform and
+   shadow. */
+
+/* Cards and seats rise a little, grow a shadow and get darker (variant K1). */
+.card {
+  --press: 0;
+
+  translate: 0 calc(var(--press) * var(--press-lift));
+  filter: brightness(calc(1 - var(--press) * var(--press-darken)))
+    drop-shadow(0 calc(var(--press) * 4px) calc(var(--press) * 6px) var(--color-shadow));
+}
+
+/* Buttons, pills and rows shimmer in their own text colour (variant K): accent on pills, white
+   on filled buttons. */
+.control {
+  --press: 0;
+
+  box-shadow: inset 0 0 0 999px
+    color-mix(in srgb, currentcolor calc(var(--press) * var(--press-shimmer)), transparent);
+}
+
+/* Reduce motion: cards only get darker, they do not move. */
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    translate: none;
+  }
+}

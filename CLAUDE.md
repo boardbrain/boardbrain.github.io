@@ -4,27 +4,31 @@ Verbindliche Kurzfassung von `docs/Entwicklungsrichtlinien.md`. Dort stehen die 
 
 ## Projekt
 
-Progressive Web App für faire Zufallsentscheidungen und Statistik am Spieleabend (Catan). Veröffentlicht unter `https://boardbrain.github.io/` (Repository `boardbrain/boardbrain.github.io`). Stack: TypeScript strikt, React 19 mit React Compiler, Motion, Vite, Dexie (IndexedDB), Valibot, React Router (Hash), Zustand, Vitest, Playwright.
+Progressive Web App für faire Zufallsentscheidungen und Statistik am Spieleabend (Catan). Veröffentlicht unter `https://boardbrain.github.io/` (Repository `boardbrain/boardbrain.github.io`). Stack: TypeScript strikt, React 19 mit React Compiler, Motion, Vite, Dexie (IndexedDB), Valibot, React Router (Hash), Vitest, Playwright.
 
-Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBrain_Spezifikation.md` (User Stories, Abnahmekriterien), `BoardBrain_Architektur.md` (Wie, ADRs), `Entwicklungsrichtlinien.md` (Arbeitsregeln). Lies die betroffenen Kapitel, bevor du ein Bündel umsetzt. Rangfolge bei Widerspruch: Anforderungen > Spezifikation > Architektur > Richtlinien.
+Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBrain_Spezifikation.md` (User Stories, Abnahmekriterien), `BoardBrain_Architektur.md` (Wie, ADRs), `Entwicklungsrichtlinien.md` (Arbeitsregeln), `Umsetzungsplan.md` (Reihenfolge, Bündel, Modelle, Ablauf jeder Sitzung). Lies den Umsetzungsplan und die betroffenen Kapitel, bevor du ein Bündel umsetzt. Rangfolge bei Widerspruch: Anforderungen > Spezifikation > Architektur > Richtlinien.
 
 ## Befehle
 
 | Befehl | Zweck |
 |---|---|
 | `npm run dev` | Entwicklungsserver (HTTPS mit mkcert, im WLAN erreichbar) |
+| `npm run build:acceptance` | Build der lokalen Abnahme-App „BoardBrain Dev“ mit lila Symbol nach `dist-acceptance/`; ausliefern mit `npm run preview:acceptance` (Port 4174) |
 | `npm run check` | Typen, ESLint, Stylelint, Prettier, dependency-cruiser, Unit-Tests mit Abdeckung |
 | `npm run test:e2e` | Playwright |
 | `npm run test:stat` | Statistische Suite |
 | `npm run format` | Prettier schreibt |
+| `npm run icons` | App-Symbole aus Logo und Tokens neu erzeugen |
+| `npm run art` | Rohstoffkarten und Landschaft aus `scripts/art` und Tokens neu erzeugen (ADR-030) |
 
 ## Arbeitsablauf (EP-10, EP-11)
 
+0. Auftrag nennt ein Bündel oder eine Aufgabe aus `docs/Umsetzungsplan.md`. Zuerst kurzen Umsetzungsplan mit Tests, Paketen und Haltepunkt-Fragen zeigen; erst nach „los“ beginnen (Umsetzungsplan 4.1). Bei neuen oder geänderten Oberflächen zuerst Designvorschläge als lokale, klickbare HTML-Datei `…-preview….html` im Ordner `previews/` zeigen (per `.gitignore` nicht im Repository, über den Dev-Server auf allen Geräten erreichbar, alte Runden archivieren statt löschen) und erst nach der Wahl des Product Owners bauen. Die abgenommene finale Referenz kommt als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository und gilt pixelgenau; vor „fertig“ App und Referenz per Screenshot vergleichen (Richtlinien 2.5). Status im Umsetzungsplan im selben PR fortschreiben.
 1. Arbeitsbranch von aktuellem `develop`: `‹typ›/‹beschreibung›`, englisch, klein (`feat/us-pg-01-persons-and-groups`).
-2. Umsetzen mit Tests und Doku-Anpassungen; in sinnvollen Schritten committen.
-3. Vor dem Push: `npm run check` und `npm run test:e2e` bestanden. Vor einem PR nach `main` zusätzlich `npm run test:stat`.
+2. Umsetzen mit Tests und Doku-Anpassungen; in sinnvollen Schritten committen. Während der Arbeit nur die betroffenen Tests laufen lassen (einzelne Testdateien, E2E auf einem Gerät, z. B. `--project=chromium-phone`); die vollen Suiten erst vor dem Push (Richtlinien 8.2).
+3. Vor dem Push: `npm run check` und `npm run test:e2e` bestanden. Vor einem PR nach `main` zusätzlich `npm run test:stat`. Reine Doku-Änderungen (nur `docs/`, `README.md`, `CLAUDE.md`, belegt mit `git diff --name-only origin/develop`) ohne lokale Prüfungen; GitHub prüft trotzdem (Richtlinien 3.6).
 4. Pushen, PR nach `develop` mit `gh pr create`, Beschreibung nach `.github/pull_request_template.md`, inklusive Testanleitung.
-5. Entwicklungsserver starten und dem Product Owner sagen, was er testen soll. Rückmeldungen im selben Branch beheben.
+5. Entwicklungsserver frisch starten (nach jedem Branch-Wechsel neu, sonst läuft er ohne HTTPS) und dem Product Owner Adressen und Testschritte je Gerät nennen. Rückmeldungen im selben Branch beheben.
 6. **Nie selbst mergen.** Der Product Owner mergt.
 
 ## Haltepunkte: anhalten und fragen, wenn
@@ -55,7 +59,7 @@ Frage mit begründetem Vorschlag und Alternativen. Alles andere entscheidest du 
 - Keine festen Texte: alles aus `src/i18n/de.ts` über `t()`.
 - Keine Farbwerte außerhalb von `src/ui/styles/tokens.css`.
 - Animationen nur über Motion, keine CSS-Animationen; nie per React-Zustand pro Bild.
-- Echte Bedienelemente (`button`, `a`, `label`) mit Beschriftung aus der Sprachdatei. Kein manuelles `useMemo`/`useCallback`/`memo`. `useEffect` nur für externe Systeme.
+- Echte Bedienelemente (`button`, `a`, `label`) mit Beschriftung aus der Sprachdatei; Knöpfe und Links nur als `PressableButton`/`PressableLink` (Karten mit `look="card"`, K-4). Kein manuelles `useMemo`/`useCallback`/`memo`. `useEffect` nur für externe Systeme.
 
 **Code**
 - **Code immer englisch** (ADR-027): Bezeichner nach Architektur 4.5, Kommentare, Testnamen, Fehlermeldungen. Deutsch nur UI-Texte in `de.ts`, Doku, Commits, PRs. Doku-Kommentar an jedem Export in `core`, `games`, `app`; Anforderungs-ID nennen, wo Code eine Regel umsetzt (`// FA-PL-03: …`).
@@ -72,7 +76,7 @@ Frage mit begründetem Vorschlag und Alternativen. Alles andere entscheidest du 
 **Git**
 - PR-Titel nach Conventional Commits, Beschreibung deutsch: `feat(placement): Gebäude zufällig platzieren`. Typen: feat, fix, refactor, test, docs, chore, build, ci, deps, release, revert.
 - Squash nach `develop`, Merge commit nach `main`. Nach `main` nur aus `develop` oder `hotfix/…`.
-- Release nach Richtlinien 3.8. `git tag` und `gh release` nur nach ausdrücklicher Zustimmung.
+- Release nach Richtlinien 3.8; vor 1.0 Vorabversionen 0.x je Inkrement, als Pre-release markiert (E-40). Das Release legt der Product Owner meist selbst auf GitHub an, Claude Code leitet an. `git tag` und `gh release` nur nach ausdrücklicher Zustimmung.
 - Kein Force-Push, kein Umschreiben veröffentlichter Geschichte.
 - Keine Hinweise auf Claude in Commits und PRs: kein `Co-Authored-By`, kein „Generated with Claude Code“ (Richtlinien 3.3).
 

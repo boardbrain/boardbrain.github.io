@@ -3,6 +3,7 @@ node_modules/
 
 # Build
 dist/
+dist-acceptance/
 dist-ssr/
 *.tsbuildinfo
 
@@ -38,3 +39,8 @@ desktop.ini
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# Local design previews and archived proposals in their own folder (Development Guidelines 2.5);
+# a preview left in the root folder stays out of the repository as well
+/previews/
+/*-preview*.html

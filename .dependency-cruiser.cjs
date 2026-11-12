@@ -3,8 +3,6 @@ const CORE_MODULES = [
   'shared',
   'random',
   'model',
-  'board',
-  'placement',
   'draws',
   'generation',
   'results',
@@ -101,6 +99,14 @@ module.exports = {
       comment: 'The service worker is standalone (Architecture 4.2, 11).',
       from: { path: '^src/sw/' },
       to: { path: '^src/', pathNot: '^src/sw/' },
+    },
+    {
+      name: 'production-not-to-tests',
+      severity: 'error',
+      comment:
+        'Deterministic random sources and other test helpers only in test code (NFA-ZF-01, Architecture 6.1).',
+      from: { path: '^src/', pathNot: TEST_FILE },
+      to: { path: '^tests/' },
     },
     {
       name: 'dexie-only-in-infra-db',

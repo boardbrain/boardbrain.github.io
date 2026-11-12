@@ -1,0 +1,9 @@
+/* Design I1-F: Catan is marked as built in instead of opening a page. */
+.builtIn {
+  flex: none;
+  padding: 2px 8px;
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}

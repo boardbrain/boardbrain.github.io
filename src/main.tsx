@@ -1,12 +1,47 @@
-import { StrictMode, Suspense } from 'react';
+import { StrictMode, Suspense, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createHashRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
+import { createErrorLogService } from '@/app/services/errorLogService';
+import { createMasterDataService } from '@/app/services/masterDataService';
+import { createSessionService } from '@/app/services/sessionService';
+import { SUPPORTED_GAMES } from '@/games/registry';
+import { t } from '@/i18n/t';
+import { BoardBrainDb } from '@/infra/db/database';
+import { createDexieErrorLogStore } from '@/infra/db/errorLogStore';
+import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
+import { createDexieSessionStore } from '@/infra/db/sessionStore';
 import { readDiagnostics } from '@/infra/platform/diagnostics';
-import { ErrorBoundary } from '@/ui/components/ErrorBoundary';
+import { systemClock } from '@/infra/platform/systemClock';
+import { CryptoRandomSource } from '@/infra/random/cryptoRandomSource';
+import { uuidGenerator } from '@/infra/random/uuidGenerator';
+import { registerServiceWorker } from '@/infra/update/serviceWorker';
+import { AppDependenciesProvider, type AppDependencies } from '@/ui/AppDependencies';
+import { AppLayout } from '@/ui/components/AppLayout';
 import { ErrorScreen } from '@/ui/components/ErrorScreen';
+import { RouteErrorScreen } from '@/ui/components/RouteErrorScreen';
 import { installGlobalErrorHandlers } from '@/ui/globalErrorHandlers';
 import { DiagnosticsView } from '@/ui/views/diagnostics/DiagnosticsView';
+import { GamesView } from '@/ui/views/management/GamesView';
+import { GameView } from '@/ui/views/management/GameView';
+import { GroupsView } from '@/ui/views/management/GroupsView';
+import { GroupView } from '@/ui/views/management/GroupView';
+import { ManagementView } from '@/ui/views/management/ManagementView';
+import { PersonsView } from '@/ui/views/management/PersonsView';
+import { PersonView } from '@/ui/views/management/PersonView';
+import type * as MatchViews from '@/ui/views/match/matchViews';
+import { StartView } from '@/ui/views/start/StartView';
+
+// Design I2-C: the views of a match load on first use, their pictures are large. As a lazy route
+// of React Router they load during the navigation, and the previous view stays until then;
+// `lazy()` with Suspense showed them only after React's hold-back of 300 ms for a fallback.
+const loadMatch = (): Promise<typeof MatchViews> => import('@/ui/views/match/matchViews');
+function matchRoute(
+  pick: (views: typeof MatchViews) => ReactNode,
+): () => Promise<{ element: ReactNode }> {
+  return async () => ({ element: pick(await loadMatch()) });
+}
+
 import '@/ui/styles/tokens.css';
 import '@/ui/styles/global.css';
 
@@ -18,32 +53,117 @@ if (container === null) {
 }
 const root = createRoot(container);
 
-// The diagnostics only read; they are determined once at startup.
-const diagnostics = readDiagnostics();
-
-// ADR-019: hash routing. During setup the diagnostics view is the start view (Architecture 13.1).
-const router = createHashRouter([
-  { path: '/', element: <Navigate to="/diagnose" replace /> },
-  {
-    path: '/diagnose',
-    element: (
-      <ErrorBoundary>
-        <Suspense fallback={null}>
-          <DiagnosticsView diagnostics={diagnostics} version={__APP_VERSION__} />
-        </Suspense>
-      </ErrorBoundary>
-    ),
-  },
-  { path: '*', element: <Navigate to="/diagnose" replace /> },
-]);
+const db = new BoardBrainDb();
+// K-9: unexpected errors are kept for the diagnostics, from the views and from outside them.
+const errorLog = createErrorLogService({
+  store: createDexieErrorLogStore(db),
+  clock: systemClock,
+  version: __APP_VERSION__,
+});
+function recordError(error: unknown): void {
+  void errorLog.record(error, window.location.hash);
+}
 
 installGlobalErrorHandlers(window, (error) => {
   console.error('Unexpected error outside a view', error);
+  recordError(error);
   root.render(<ErrorScreen error={error} />);
 });
 
-root.render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
+// Architecture 11.4: only the production build has a service worker; the dev server runs without.
+if (import.meta.env.PROD) {
+  void registerServiceWorker();
+}
+
+// NFA-ZF-03: one source of randomness for drawing and for the decorative chance of the views.
+const rng = new CryptoRandomSource();
+const dependencies: AppDependencies = {
+  db,
+  masterData: createMasterDataService({
+    store: createDexieMasterDataStore(db),
+    ids: uuidGenerator,
+    clock: systemClock,
+    supportedGameNames: SUPPORTED_GAMES.map((game) => t(game.nameKey)),
+  }),
+  session: createSessionService({
+    store: createDexieSessionStore(db),
+    clock: systemClock,
+    rng,
+  }),
+  rng,
+  errorLog,
+};
+
+// A view may wait with use(). Errors are caught by the frame route below.
+function view(element: ReactNode): ReactNode {
+  return <Suspense fallback={null}>{element}</Suspense>;
+}
+
+// ADR-019: hash routing. The diagnostics view is reachable via #/diagnose only (Architecture
+// 13.1); the board shows in the placement of a match. K-5: the frame route shows the app's own
+// error screen for every error while drawing or loading a view, on the whole screen (design O2).
+const router = createHashRouter([
+  {
+    element: <AppLayout />,
+    errorElement: <RouteErrorScreen onError={recordError} />,
+    children: [
+      { path: '/', element: view(<StartView />) },
+      { path: '/verwaltung', element: view(<ManagementView />) },
+      { path: '/verwaltung/personen', element: view(<PersonsView />) },
+      { path: '/verwaltung/personen/:personId', element: view(<PersonView />) },
+      { path: '/verwaltung/gruppen', element: view(<GroupsView />) },
+      { path: '/verwaltung/gruppen/:groupId', element: view(<GroupView />) },
+      { path: '/verwaltung/gruppen/:groupId/bearbeiten', element: view(<GroupView isEditing />) },
+      { path: '/verwaltung/spiele', element: view(<GamesView />) },
+      { path: '/verwaltung/spiele/:gameId', element: view(<GameView />) },
+      {
+        path: '/partie/neu',
+        lazy: matchRoute((match) => view(<match.PreparationLayout />)),
+        children: [
+          { index: true, lazy: matchRoute((match) => <match.GameChoiceView />) },
+          { path: 'tisch', lazy: matchRoute((match) => <match.TableChoiceView />) },
+          { path: 'optionen', lazy: matchRoute((match) => <match.OptionsView />) },
+          { path: 'farben', lazy: matchRoute((match) => <match.ColorsView />) },
+        ],
+      },
+      { path: '/partie', lazy: matchRoute((match) => view(<match.MatchView />)) },
+      {
+        path: '/partie/uebersicht',
+        lazy: matchRoute((match) => view(<match.MatchOverviewView />)),
+      },
+      {
+        path: '/diagnose',
+        element: view(
+          <DiagnosticsView
+            readDiagnostics={readDiagnostics}
+            build={{
+              version: __APP_VERSION__,
+              commit: __BUILD_COMMIT__,
+              builtAt: __BUILD_TIME__,
+              isDevelopment: import.meta.env.DEV,
+            }}
+          />,
+        ),
+      },
+    ],
+  },
+  { path: '*', element: <Navigate to="/" replace /> },
+]);
+
+// Architecture 11.3: the app becomes usable only once the database is open and possible
+// migrations have run.
+db.open().then(
+  () => {
+    root.render(
+      <StrictMode>
+        <AppDependenciesProvider dependencies={dependencies}>
+          <RouterProvider router={router} />
+        </AppDependenciesProvider>
+      </StrictMode>,
+    );
+  },
+  (error: unknown) => {
+    console.error('Opening the database failed', error);
+    root.render(<ErrorScreen error={error} />);
+  },
 );

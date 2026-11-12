@@ -7,7 +7,13 @@ const ANIMATION_MESSAGE = 'No CSS animations; animations only via Motion (Archit
 /** @type {import('stylelint').Config} */
 export default {
   extends: ['stylelint-config-standard'],
-  ignoreFiles: ['dist/**', 'coverage/**', 'playwright-report/**', 'test-results/**'],
+  ignoreFiles: [
+    'dist/**',
+    'dist-acceptance/**',
+    'coverage/**',
+    'playwright-report/**',
+    'test-results/**',
+  ],
   rules: {
     'color-no-hex': [true, { message: COLOR_MESSAGE }],
     'color-named': ['never', { message: COLOR_MESSAGE }],
@@ -31,6 +37,17 @@ export default {
         'color-no-hex': null,
         'color-named': null,
         'function-disallowed-list': null,
+      },
+    },
+    // K-4: the shimmer mixes the element's own text colour (currentcolor) with transparent and
+    // depends on --press per element, so it cannot live in tokens.css. It adds no colour value.
+    {
+      files: ['src/ui/components/Pressable.module.css'],
+      rules: {
+        'function-disallowed-list': [
+          ['rgb', 'rgba', 'hsl', 'hsla', 'hwb', 'lab', 'lch', 'oklab', 'oklch', 'color'],
+          { message: COLOR_MESSAGE },
+        ],
       },
     },
   ],

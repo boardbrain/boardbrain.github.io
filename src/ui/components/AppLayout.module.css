@@ -1,0 +1,85 @@
+/* The frame fills the screen inside the safe areas (padding of body); only the view in between
+   scrolls (design D-3). Clip instead of hidden: the folded cards reach below the frame, and the
+   browser would otherwise scroll the frame to show a focused card, moving the view away. */
+.layout {
+  height: 100%;
+  overflow: clip;
+}
+
+/* The hand reaches into the bottom safe area (home indicator on iPad and iPhone). The cards keep
+   their height; the hand and the space kept free below the view shrink when it is folded. */
+.app,
+.foldedApp {
+  --card-height: calc(104px + env(safe-area-inset-bottom));
+  --hand-height: var(--card-height);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  /* Design I2-C: cards of a match are sized and laid out by the size of the app (cqw, cqh,
+     @container), not of the window. */
+  container-type: size;
+}
+
+/* Design K-3: off the start view the folded hand shows 30 px plus a 16 px fade. */
+.foldedApp {
+  --hand-height: calc(46px + env(safe-area-inset-bottom));
+}
+
+/* Design N1 (I1-D): the view reaches down behind the hand, so there is no hard cut above it. The
+   padding keeps views that fill their height (start, board) above the hand and lets the last
+   entry of a long view scroll clear of the cards. */
+.content {
+  flex: 1;
+  min-height: 0;
+  padding-bottom: var(--hand-height);
+  overflow-y: auto;
+
+  /* An element scrolled into view (focus, search result) stops above the hand. */
+  scroll-padding-bottom: var(--hand-height);
+  scrollbar-width: none;
+}
+
+.content::-webkit-scrollbar {
+  display: none;
+}
+
+.rotateHint {
+  display: none;
+}
+
+/* NFA-PL-04: phones are used upright. A low screen in landscape is a phone (tablets and PCs are
+   higher), on Android and iOS alike. */
+@media (orientation: landscape) and (height < 500px) {
+  .app,
+  .foldedApp {
+    display: none;
+  }
+
+  .rotateHint {
+    display: grid;
+    gap: 12px;
+    place-content: center;
+    justify-items: center;
+    height: 100%;
+    padding: 16px;
+    text-align: center;
+  }
+}
+
+.rotateIcon {
+  display: grid;
+  color: var(--color-accent-text);
+}
+
+.rotateTitle {
+  font-size: 1.15rem;
+}
+
+.rotateText {
+  max-width: 320px;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}

@@ -27,8 +27,10 @@
     "forceConsistentCasingInFileNames": true,
 
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@tests/*": ["./tests/*"]
     }
   },
-  "include": ["src", "tests/support", "tests/statistical"]
+  "include": ["src", "tests/support", "tests/statistical"],
+  "exclude": ["src/sw"]
 }

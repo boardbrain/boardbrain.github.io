@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.5 |
+| Version | 0.18 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 06.10.2026 |
+| Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -19,6 +19,19 @@
 | 0.3 | 05.10.2026 | Zuordnungen beim Import stets manuell, ohne Vorbelegung und ohne Speicherung; Auswahl einzelner Partien beim Export auf eine Gruppe beschränkt (gruppenübergreifend geparkt als PP-19) |
 | 0.4 | 06.10.2026 | Ergebnisse der Architekturphase: „Alle Daten“ wird zur Vollsicherung mit Einstellungen (US-EI-01, US-EI-02, US-EI-03, US-EI-07, 3.9, 3.11); Sicherungspunkt erst unmittelbar vor der Übernahme eines Imports (US-EI-03 AK-1); Konfliktregeln präzisiert (US-EI-04, US-EI-05, 3.9); Sperren während einer laufenden Partie (3.5, US-VW-02, US-VW-03, US-EI-03, US-DS-02); unterbrochene Animation wird erneut abgespielt (US-AB-05); Sicherungspunkte vor Updates, Tagesregel und Umfang (3.10, US-DS-01, US-DS-02); Update nur nach Bestätigung und Sicherungsdialog (neu 3.12, US-UP-01, neu US-UP-02); Installation und Speicherschutz (neu 3.13, neu US-IS-01 bis US-IS-03, US-DS-04); Ton respektiert die Stummschaltung (US-IN-03); Prüfkriterien und Abnahmeplattformen präzisiert (Kapitel 5); Kapitel 8 auf das Ergebnis der Architekturphase umgestellt |
 | 0.5 | 06.10.2026 | Ergebnisse der Setup-Planung: Bezug auf Anforderungsdokumentation v0.8; Umsetzung in Story-Bündeln und Platzhalter-Release 0.1.0 vor 1.0 (2.3); Hinweis zur Barrierefreiheit (Kapitel 5, E-24); Kapitel 8 um die Ergebnisse der Setup-Planung ergänzt (OP-12 geklärt, OP-13 neu) |
+| 0.6 | 07.10.2026 | Neue Story US-VW-05 „Personen und Gruppen im Überblick“ (Must, I1) zu FA-VW-06 (2.3, 2.5, 4.3, 6) (PR #13) |
+| 0.7 | 07.10.2026 | Design D-1 (Anforderungsdokumentation 0.13, NFA-GB-03, E-26): US-GB-01 wird „Design und Akzentfarbe wählen“ mit Standarddesign „Holz“ statt Standard Lila (2.5, 4.15); Vollsicherung enthält das gewählte Design (3.9) |
+| 0.8 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Gruppen können Catan ausschließen (FA-PG-04, E-27; 3.3, 3.4, US-PG-02 AK-7, US-PG-03 AK-2 und AK-4, US-AB-01 AK-1, US-VW-02 AK-6); Farbwerte nach E-28 (3.3). Bearbeiten nach Wunsch des Product Owners vorgezogen: neu US-VW-06 „Person umbenennen“ und US-VW-07 „Eigenes Spiel umbenennen“ (Must, I1) aus US-VW-01 und US-VW-04; US-VW-02 „Gruppe bearbeiten“ wird Must in I1; US-VW-01 und US-VW-04 behalten Archivieren und Löschen (2.3, 2.5, 4.3, 6) |
+| 0.9 | 08.10.2026 | Design D-3 (Anforderungsdokumentation 0.15, E-29): Smartphones nur im Hochformat, im Querformat ein Hinweis zum Drehen; Tablets in beiden Ausrichtungen (US-PL-01 AK-3, NFA-PL-04) |
+| 0.10 | 09.10.2026 | Neue Story US-SP-05 „Catan app-weit ausblenden („Ich hasse Catan!“)“ (Must, I6) zu FA-SP-06 und E-30 (Anforderungsdokumentation 0.16); US-VW-02 AK-7 (2.3, 2.5, 4.1, 4.3, 6) |
+| 0.11 | 26.10.2026 | Abnahme von I1-F (Anforderungsdokumentation 0.17, E-31): Personen- und Gruppennamen app-weit eindeutig, geprüft schon bei der Eingabe (3.4, US-PG-01 AK-3, neu US-PG-02 AK-8, US-VW-02 AK-1, US-VW-06 AK-2, A-02); „Neu anlegen“ beim Import mit vergebenem Namen nur mit anderem Namen (3.9) |
+| 0.12 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation 0.18, E-32): Umsetzung in fachlichen Blöcken (2.2); Inkremente neu nach Blöcken geschnitten, I5 wird „Verwaltung und Archiv“, I6 „Einstellungen und Feinschliff“ (2.3); US-PG-04, US-SR-01, US-IN-01 bis US-IN-04 und US-PL-05 nach I2, US-ER-02, US-ER-03, US-ST-03 und US-ST-04 nach I3, US-EI-02, US-EI-07, US-DS-03, US-DS-04 und US-IS-02 nach I4 (2.5); Summe in 2.5 berichtigt (61 statt 59 Stories) |
+| 0.13 | 02.11.2026 | Design I2-C (Anforderungsdokumentation 0.19, E-33, E-34): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung (3.1, US-AB-01 AK-3, US-LS-03 AK-1 und AK-3, US-PL-05 AK-1, neu AK-3, US-SR-01 AK-1); Vorwärts-Knopf „Losen“, „Blättern“, „Zur Übersicht“ (US-AB-02 AK-1); Rückblick auf frühere Schritte (neu US-AB-04 AK-3 und AK-4); Rückverfolgbarkeit (6) |
+| 0.14 | 09.11.2026 | Design I2-D (Anforderungsdokumentation 0.20, E-35 bis E-37): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (US-AB-02 AK-1, neu AK-3, US-AB-03 AK-1, US-AB-04 AK-4); Losen mit Karten statt Glücksrad (2.3, 2.5, 3.1, 3.3, US-IN-01 „Karten ziehen“ mit neuem AK-3, US-IN-03 AK-1); Startrohstoffe verdeckt, von Hand aufdecken (neu US-SR-01 AK-6); nach einem Neustart nur eine unterbrochene Animation erneut (3.5, US-AB-05 AK-3); Rückkehr zur laufenden Partie vom Start und Rückfrage bei neuer Partie (US-AB-04 AK-2, US-AB-05 AK-2); Hinweis auf die gesperrte Spielbindung im Tisch-Editor (3.5, US-VW-02 AK-5); Rückverfolgbarkeit (6); Wiederholen der Reihenfolge ab Platz k statt immer ganz (3.1, US-AB-03 AK-5, Entscheidung des Product Owners 10.11.2026) |
+| 0.15 | 10.11.2026 | Bündel I2-H: Steine auf dem Brett antippen und wiederholen, der Stein und die mit verworfenen Steine sind markiert, solange die Rückfrage offen ist (neu US-AB-03 AK-8, Entscheidung des Product Owners 10.11.2026); Rückblick und „Blättern“ gehen ganze Ansichten statt einzelner Schritte, Reihenfolge und Platzierung erscheinen als Ganzes (US-AB-04 AK-3, AK-4, Entscheidung des Product Owners 10.11.2026) |
+| 0.16 | 11.11.2026 | Design D-2 (Anforderungsdokumentation 0.21, E-38, E-39): Klänge nach Version 1 (US-IN-03, 2.1, 2.3, 3.9, Rückverfolgung); Aufblinken nach der Referenz `docs/design/d2-staging-final-preview.html`, verrät nichts über das Ergebnis, mit Spannungsmodus (US-IN-02 neu AK-3 bis AK-7, FA-IN-08) |
+| 0.17 | 12.11.2026 | Bündel I2-E: „Animation überspringen“ steht als gleich großer Knopf „Überspringen“ an der Stelle von „Wiederholen“, solange eine Bewegung läuft (US-IN-04 AK-1, Entscheidung des Product Owners 11.11.2026) |
+| 0.18 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation 0.22, E-40): Vorabversionen 0.x nach abgeschlossenen Inkrementen unter der echten Adresse, erste ist 0.2.0 nach I2 (2.3, 8) |
 
 ## Inhaltsverzeichnis
 
@@ -61,27 +74,29 @@ Version 1.0 wird erst veröffentlicht, wenn **alle** User Stories dieser Spezifi
 
 ### 2.2 Bedeutung der MoSCoW-Stufen
 
-Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang erscheint, steuert MoSCoW in diesem Projekt die **Reihenfolge der Umsetzung**, nicht den Umfang.
+Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang erscheint, bestimmt MoSCoW in diesem Projekt **nicht den Umfang**.
 
 | Stufe | Bedeutung |
 |---|---|
-| Must | Kern. Ohne ihn ist die App am Spieleabend nicht sinnvoll nutzbar. Wird zuerst umgesetzt. |
-| Should | Wichtig für das vorgesehene Erlebnis und den Alltag. Wird nach allen Must-Stories umgesetzt. |
-| Could | Komfort und Feinschliff. Wird zuletzt umgesetzt. |
+| Must | Kern. Ohne ihn ist die App am Spieleabend nicht sinnvoll nutzbar. |
+| Should | Wichtig für das vorgesehene Erlebnis und den Alltag. |
+| Could | Komfort und Feinschliff. |
 | Won't (V1) | Nicht Teil von Version 1. Entspricht dem Parkplatz (Anforderungsdokumentation, Kapitel 12). |
+
+**Reihenfolge nach Blöcken (E-32):** Umgesetzt wird in fachlichen Blöcken. Ein Inkrement schließt seinen Block vollständig ab, mit allen zugehörigen Must-, Should- und Could-Stories, bevor das nächste beginnt (2.3). Innerhalb eines Blocks kommen die Must-Stories in der Regel zuerst; Bündel und ihre Reihenfolge legt der Umsetzungsplan fest. *(geändert in 0.12; bis 0.11 kamen alle Should-Stories nach allen Must-Stories)*
 
 ### 2.3 Umsetzungsinkremente
 
 | Inkrement | Inhalt | Ergebnis |
 |---|---|---|
-| I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Brettdarstellung, Losbaustein | Stammdaten anlegbar, Brett sichtbar |
-| I2 Generierung | Ablauf, Losschritte, Platzierung | Vollständige Generierung ohne Inszenierung, am Spieleabend testbar |
-| I3 Ergebnisse und Statistik | Ergebniserfassung, Ergebnisliste, Kennzahlen, Rangliste | Langzeitstatistik nutzbar |
-| I4 Daten und Updates | Vollsicherung und Export, Import mit Konflikten und Zuordnung, Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS, Speicherschutz | Daten sicher und teilbar |
-| I5 Erlebnis und Ausbau | Alle Should-Stories | Vorgesehenes Spielerlebnis |
-| I6 Feinschliff | Alle Could-Stories | Kandidat für Release 1.0 |
+| I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Umbenennen und Gruppen bearbeiten, Brettdarstellung, Losbaustein *(ergänzt in 0.8)* | Stammdaten anlegbar und korrigierbar, Brett sichtbar |
+| I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Karten, Aufblinken, Spannungsmodus und Überspringen der Animation *(geändert in 0.12, 0.14 und 0.16; Klänge nach Version 1)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
+| I3 Ergebnisse und Statistik | Ergebniserfassung mit Siegpunkten und Catan-Farben, Ergebnisliste, Kennzahlen, Rangliste, Filter, Diagramme *(geändert in 0.12)* | Langzeitstatistik nutzbar |
+| I4 Daten und Updates | Vollsicherung, Teilexport und Export-Erinnerung, Import mit Konflikten und Zuordnung, automatische und manuelle Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS und Hinweis unter Android und Windows, Speicherschutz und Hinweis zum Schutz vor Datenverlust *(geändert in 0.12)* | Daten sicher und teilbar |
+| I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen; unterstützte und eigene Spiele getrennt *(geändert in 0.12)* | Stammdaten vollständig pflegbar |
+| I6 Einstellungen und Feinschliff | US-SP-05 „Ich hasse Catan!“, Design und Akzentfarbe *(geändert in 0.12)* | Kandidat für Release 1.0 |
 
-Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwickelt, die jeweils ein Bündel zusammengehöriger User Stories enthalten (etwa zwei bis vier Bündel je Inkrement; der Zuschnitt wird zu Beginn eines Inkrements festgelegt), und vom Product Owner im Pull Request abgenommen (EP-11). Nach `main` gelangt vor Release 1.0 nur der Platzhalter aus der Setup-Phase (Release 0.1.0, EP-02); danach erst der abgenommene Stand von Release 1.0. Über Vorabversionen wird nach I2 entschieden (OP-13). *(präzisiert in 0.5)*
+Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwickelt, die jeweils ein Bündel zusammengehöriger User Stories enthalten (etwa zwei bis vier Bündel je Inkrement, bei einem großen Block wie I2 mehr; der Zuschnitt wird zu Beginn eines Inkrements festgelegt), und vom Product Owner im Pull Request abgenommen (EP-11). Nach `main` gelangte zuerst der Platzhalter aus der Setup-Phase (Release 0.1.0, EP-02). Vor Release 1.0 folgen Vorabversionen (0.x) nach abgeschlossenen Inkrementen, nur nach Freigabe durch den Product Owner und ohne Versprechen für ihre Daten, beginnend mit 0.2.0 nach I2 (E-40); I6 ist Kandidat für Release 1.0. *(präzisiert in 0.5 und 0.18)*
 
 ### 2.4 Abgrenzung: nicht in Version 1
 
@@ -95,14 +110,18 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-SP-02 | Eigenes Spiel anlegen | M | I1 |
 | US-SP-03 | Unterstützte und eigene Spiele unterscheiden | S | I5 |
 | US-SP-04 | Spielversion und Modus wählen | M | I2 |
+| US-SP-05 | Catan app-weit ausblenden („Ich hasse Catan!“) | M | I6 |
 | US-PG-01 | Person anlegen | M | I1 |
 | US-PG-02 | Gruppe anlegen | M | I1 |
 | US-PG-03 | Farben einer Gruppe festlegen | M | I1 |
-| US-PG-04 | Catan-Farbe für eine Partie abweichend wählen | S | I5 |
-| US-VW-01 | Person bearbeiten, archivieren und löschen | S | I5 |
-| US-VW-02 | Gruppe bearbeiten | S | I5 |
+| US-PG-04 | Catan-Farbe für eine Partie abweichend wählen | S | I2 |
+| US-VW-01 | Person archivieren und löschen | S | I5 |
+| US-VW-02 | Gruppe bearbeiten | M | I1 |
 | US-VW-03 | Gruppe archivieren, wiederbeleben und löschen | S | I5 |
-| US-VW-04 | Eigenes Spiel bearbeiten, archivieren und löschen | S | I5 |
+| US-VW-04 | Eigenes Spiel archivieren und löschen | S | I5 |
+| US-VW-05 | Personen und Gruppen im Überblick | M | I1 |
+| US-VW-06 | Person umbenennen | M | I1 |
+| US-VW-07 | Eigenes Spiel umbenennen | M | I1 |
 | US-AB-01 | Partie vorbereiten | M | I2 |
 | US-AB-02 | Schritte einzeln bestätigen | M | I2 |
 | US-AB-03 | Schritt wiederholen | M | I2 |
@@ -116,40 +135,40 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-PL-02 | Gebäude zufällig platzieren | M | I2 |
 | US-PL-03 | Straßen zufällig platzieren | M | I2 |
 | US-PL-04 | Gebäude und Straßen erkennbar darstellen | M | I2 |
-| US-PL-05 | Platzierung überspringen | C | I6 |
-| US-SR-01 | Startrohstoffe ziehen | S | I5 |
-| US-IN-01 | Glücksrad | S | I5 |
-| US-IN-02 | Aufblinken bei der Platzierung | S | I5 |
-| US-IN-03 | Soundeffekte und Tonschalter | S | I5 |
-| US-IN-04 | Animation überspringen | S | I5 |
+| US-PL-05 | Platzierung überspringen | C | I2 |
+| US-SR-01 | Startrohstoffe ziehen | S | I2 |
+| US-IN-01 | Karten ziehen | S | I2 |
+| US-IN-02 | Aufblinken bei der Platzierung | S | I2 |
+| US-IN-03 | Soundeffekte und Tonschalter *(nach Version 1, E-38)* | S | – |
+| US-IN-04 | Animation überspringen | S | I2 |
 | US-ER-01 | Ergebnis erfassen | M | I3 |
-| US-ER-02 | Siegpunkte erfassen | S | I5 |
-| US-ER-03 | Catan-Farben im Ergebnis | C | I6 |
+| US-ER-02 | Siegpunkte erfassen | S | I3 |
+| US-ER-03 | Catan-Farben im Ergebnis | C | I3 |
 | US-ER-04 | Ergebnisse einer Gruppe ansehen | M | I3 |
 | US-ER-05 | Ergebnis bearbeiten und löschen | M | I3 |
 | US-ST-01 | Kennzahlen je Person | M | I3 |
 | US-ST-02 | Rangliste | M | I3 |
-| US-ST-03 | Statistik filtern | S | I5 |
-| US-ST-04 | Diagramme | S | I5 |
+| US-ST-03 | Statistik filtern | S | I3 |
+| US-ST-04 | Diagramme | S | I3 |
 | US-EI-01 | Vollsicherung exportieren | M | I4 |
-| US-EI-02 | Teilumfang exportieren | S | I5 |
+| US-EI-02 | Teilumfang exportieren | S | I4 |
 | US-EI-03 | Daten importieren | M | I4 |
 | US-EI-04 | Konflikte beim Import im Einzelfall lösen | M | I4 |
 | US-EI-05 | Importierte Daten vorhandenen Daten zuordnen | M | I4 |
 | US-EI-06 | Import rückgängig machen | M | I4 |
-| US-EI-07 | Export-Erinnerung | S | I5 |
+| US-EI-07 | Export-Erinnerung | S | I4 |
 | US-DS-01 | Automatische Sicherungspunkte | M | I4 |
 | US-DS-02 | Sicherungspunkt wiederherstellen | M | I4 |
-| US-DS-03 | Manuellen Sicherungspunkt anlegen | C | I6 |
-| US-DS-04 | Hinweis zum Schutz vor Datenverlust | S | I5 |
+| US-DS-03 | Manuellen Sicherungspunkt anlegen | C | I4 |
+| US-DS-04 | Hinweis zum Schutz vor Datenverlust | S | I4 |
 | US-UP-01 | Update-Hinweis und selbstbestimmtes Update | M | I4 |
 | US-UP-02 | Sicherung vor dem Update | M | I4 |
 | US-IS-01 | Nutzung unter iOS nur als installierte App | M | I4 |
-| US-IS-02 | Installationshinweis unter Android und Windows | S | I5 |
+| US-IS-02 | Installationshinweis unter Android und Windows | S | I4 |
 | US-IS-03 | Persistenten Speicher sicherstellen | M | I4 |
-| US-GB-01 | Akzentfarbe wählen | C | I6 |
+| US-GB-01 | Design und Akzentfarbe wählen | C | I6 |
 
-Summe: 57 User Stories (35 Must, 18 Should, 4 Could).
+Summe: 61 User Stories (40 Must, 17 Should, 4 Could). *(berichtigt in 0.12)*
 
 ---
 
@@ -169,14 +188,14 @@ Dieses Kapitel bündelt die in der Spezifikationsphase geklärten fachlichen Reg
 | 4 | LS-01: Wer legt die Landschaftsfelder aus? | abschaltbar, Standard an |
 | 5 | LS-03: Wer legt die Häfen aus? | abschaltbar, Standard an |
 | 6 | LS-04: Wer legt die Zahlenchips aus? | abschaltbar, Standard an |
-| 7 | LS-02: Platzierungsreihenfolge | immer |
-| 8 | Platzierung von Gebäuden und Straßen | immer, kann zu Beginn übersprungen werden |
+| 7 | LS-02: Platzierungsreihenfolge | Standard: gelost; abschaltbar: selbst festlegen oder ohne Platzierung *(geändert in 0.13)* |
+| 8 | Platzierung von Gebäuden und Straßen | wenn eine Reihenfolge feststeht; kann nach dem Losen der Reihenfolge übersprungen werden *(geändert in 0.13)* |
 | 9 | Startrohstoffe | abschaltbar, Standard aus |
 | 10 | Abschluss: Übersicht der laufenden Partie | immer |
 
 **Ein Schritt** ist die kleinste Einheit, die einzeln animiert, bestätigt und wiederholt wird:
 
-- ein Dreh des Glücksrads (LS-01, LS-03 und LS-04 je ein Dreh; LS-02 besteht aus n−1 Drehs, der letzte Platz ergibt sich automatisch),
+- das Losen einer Person (LS-01, LS-03 und LS-04 je eine Ziehung; LS-02 besteht aus n−1 Ziehungen, „Drehs“ genannt, wenn die Reihenfolge gelost wird, der letzte Platz ergibt sich automatisch) *(geändert in 0.14)*,
 - ein Gebäude (Siedlung oder Stadt),
 - eine Straße,
 - die Startrohstoffe einer Person.
@@ -188,7 +207,7 @@ Beispiel: 4 Personen, Städte & Ritter, alle Optionen aktiv: 3 Losschritte + 3 D
 | Wiederholter Schritt | Verworfene Folgeschritte |
 |---|---|
 | LS-01, LS-03 oder LS-04 | keine |
-| ein Dreh von LS-02 | die gesamte Reihenfolge wird neu gelost; die gesamte Platzierung wird verworfen |
+| ein Dreh von LS-02 (Platz k) | Platz k und alle späteren Plätze werden neu gelost, die früheren bleiben; die gesamte Platzierung wird verworfen *(geändert in 0.14)* |
 | Gebäude k | Straße k sowie alle später platzierten Gebäude und Straßen |
 | Straße k | keine |
 | Startrohstoffe einer Person | keine |
@@ -214,24 +233,25 @@ Es gelten die Regeln aus Kapitel 6 der Anforderungsdokumentation. Ergänzend:
 Regeln:
 
 1. Farben gelten ausschließlich innerhalb einer Gruppe. Eine Person kann in verschiedenen Gruppen verschiedene Farben haben.
-2. In globalen Gruppen mit 2 bis 4 Personen hat jede Person eine Gruppenfarbe und eine Catan-Farbe. Beide dürfen derselbe Farbton sein.
+2. In globalen Gruppen mit 2 bis 4 Personen, die Catan nicht ausschließen, hat jede Person eine Gruppenfarbe und eine Catan-Farbe. Beide dürfen derselbe Farbton sein. *(präzisiert in 0.8)*
 3. In an Catan gebundenen Gruppen ist die Catan-Farbe zugleich die Gruppenfarbe.
-4. In globalen Gruppen mit mehr als 4 Personen und in Gruppen, die an ein eigenes Spiel gebunden sind, gibt es nur die Gruppenfarbe.
+4. In globalen Gruppen mit mehr als 4 Personen, in globalen Gruppen, die Catan ausschließen, und in Gruppen, die an ein eigenes Spiel gebunden sind, gibt es nur die Gruppenfarbe. *(ergänzt in 0.8)*
 5. Beim Anlegen einer Gruppe werden die Farben automatisch der Reihe nach mit freien Farben der Palette belegt und sind änderbar. Farben aus anderen Gruppen werden nicht übernommen oder vorgeschlagen.
 6. Wählt man für eine Person eine Farbe, die in der Gruppe bzw. Partie bereits belegt ist, tauschen die beiden Personen ihre Farben.
 7. Die Catan-Farbe kann für eine einzelne Partie abweichend gewählt werden; die Standardfarbe bleibt unverändert.
-8. Verwendung: Catan-Farben auf dem Brett, im Glücksrad der Catan-Generierung und im Catan-Ergebnis; Gruppenfarben in Ergebnislisten, Rangliste und Diagrammen.
-9. Konkrete Farbwerte werden in der Designphase festgelegt (OP-11).
+8. Verwendung: Catan-Farben auf dem Brett, auf den Personenkarten der Catan-Generierung und im Catan-Ergebnis; Gruppenfarben in Ergebnislisten, Rangliste und Diagrammen.
+9. Die konkreten Farbwerte stehen in Architektur 13.4 (Anforderungsdokumentation E-26, E-28). *(geändert in 0.8)*
 
 ### 3.4 Gruppen und Spiele: Verträglichkeit
 
 | Gruppentyp | Erlaubte Spiele | Mitglieder |
 |---|---|---|
 | Global | alle Spiele; Catan nur bei 2 bis 4 Mitgliedern | 2 bis 12 |
+| Global ohne Catan *(neu in 0.8)* | alle Spiele außer Catan | 2 bis 12 |
 | An Catan gebunden | nur Catan | 2 bis 4 |
 | An ein eigenes Spiel gebunden | nur dieses Spiel | 2 bis 12 |
 
-Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Innerhalb einer Gruppe sind die Personennamen eindeutig (ohne Beachtung von Groß- und Kleinschreibung sowie von Leerzeichen am Anfang und Ende), damit Personen beim Import eindeutig zugeordnet werden können.
+Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen sind app-weit eindeutig, ebenso Gruppennamen, jeweils auch gegenüber archivierten Datensätzen (ohne Beachtung von Groß- und Kleinschreibung sowie von Leerzeichen am Anfang und Ende), damit Personen und Gruppen unterscheidbar bleiben und beim Import eindeutig zugeordnet werden können. Die App prüft das schon bei der Eingabe und lässt das Speichern eines vergebenen Namens nicht zu. *(geändert in 0.11)*
 
 ### 3.5 Lebenszyklus einer laufenden Partie
 
@@ -245,9 +265,9 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Innerhalb ein
 
 - Es gibt höchstens eine Partie in den Zuständen Vorbereitung, Generierung oder Laufend.
 - Generierung und Laufend überstehen das Schließen und Neustarten der App. Die Vorbereitung wird nicht gespeichert.
-- Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung.
+- Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung. Eine schon abgeschlossene Animation läuft nicht noch einmal ab, aufgedeckte Startrohstoffe bleiben aufgedeckt. *(ergänzt in 0.14)*
 - „Beenden ohne Ergebnis“ ist ab Beginn der Generierung jederzeit möglich.
-- **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden.
+- **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. Im Tisch-Editor steht der Hinweis direkt bei der Spielbindung, die Auswahl ist gesperrt und nach dem Beenden sofort frei. *(ergänzt in 0.14)*
 
 ### 3.6 Ergebnis
 
@@ -294,7 +314,7 @@ Niederlagen und Unentschieden beenden eine Siegesserie.
 
 **Exportumfang:** Vollsicherung; eine oder mehrere Gruppen (mit allen ihren Partien); ein oder mehrere Spiele (mit allen Partien dieser Spiele über alle Gruppen); frei ausgewählte einzelne Partien einer Gruppe (z. B. fünf bestimmte Partien), über eine nach Spiel filterbare Liste der Partien dieser Gruppe. Benötigte Personen, Gruppen und Spiele werden automatisch mit exportiert.
 
-**Vollsicherung:** Enthält alle Personen, Gruppen, eigenen Spiele, Partien und Ergebnisse sowie die Einstellungen (Ton, Akzentfarbe) und den Stand von Hinweisen und Erinnerungen. Nicht enthalten sind Sicherungspunkte und eine laufende Partie. Teilexporte enthalten keine Einstellungen.
+**Vollsicherung:** Enthält alle Personen, Gruppen, eigenen Spiele, Partien und Ergebnisse sowie die Einstellungen (Design, Akzentfarbe; Ton erst nach Version 1, E-38) und den Stand von Hinweisen und Erinnerungen. Nicht enthalten sind Sicherungspunkte und eine laufende Partie. Teilexporte enthalten keine Einstellungen.
 
 **Austausch:** Das Format ist JSON. Exportdateien werden über das Teilen-Menü des Systems weitergegeben oder, wo dieses fehlt, heruntergeladen; der Dateiname nennt Datum und Umfang. Importiert wird über die Dateiauswahl. Einen Austausch per QR-Code gibt es nicht.
 
@@ -317,7 +337,7 @@ Regeln:
 6. Das Exportformat ist versioniert. Exporte älterer Formatversionen werden übernommen; Exporte neuerer Formatversionen werden mit dem Hinweis abgelehnt, die App zu aktualisieren. Eine fehlerhafte oder unvollständige Datei wird vollständig abgelehnt.
 7. Der Archivstatus zählt beim Vergleich nicht zum Inhalt. Bei vorhandenen Datensätzen bleibt der lokale Archivstatus erhalten; neu angelegte Datensätze übernehmen den Status aus der Datei.
 8. Importierte Partien behalten ihre Kennung. Bei einem erneuten Import werden sie nach Anwendung der neu getroffenen Zuordnungen verglichen; bei gleicher Zuordnung ergibt sich K1, bei abweichender K2.
-9. Würde eine Option eine Regel verletzen (z. B. doppelte Personennamen in einer Gruppe, eine Spielbindung, die nicht zu den Partien passt, oder die Zuordnung zweier importierter Personen zu gleichnamigen Personen), wird sie deaktiviert und mit Begründung angezeigt. Mindestens eine zulässige Option („Meine behalten“ bzw. „Neu anlegen“) bleibt stets verfügbar.
+9. Würde eine Option eine Regel verletzen (z. B. doppelte Personennamen in einer Gruppe, eine Spielbindung, die nicht zu den Partien passt, oder die Zuordnung zweier importierter Personen zu gleichnamigen Personen), wird sie deaktiviert und mit Begründung angezeigt. Mindestens eine zulässige Option („Meine behalten“ bzw. „Neu anlegen“) bleibt stets verfügbar. Ist der Name einer neu anzulegenden Person oder Gruppe schon vergeben, verlangt „Neu anlegen“ einen anderen Namen (→ 3.4). *(ergänzt in 0.11)*
 10. Enthält die Datei Einstellungen, fragt die App einmal, ob sie übernommen werden sollen. In einen leeren Datenbestand werden alle Datensätze ohne Rückfrage mit ihren Kennungen übernommen.
 11. Der Sicherungspunkt „Vor Import“ wird unmittelbar vor der Übernahme angelegt, nachdem alle Entscheidungen getroffen sind. Ein abgebrochener Import erzeugt keinen Sicherungspunkt und erscheint nicht in der Liste der letzten Importe.
 12. Während einer laufenden Partie ist der Import gesperrt (→ 3.5).
@@ -397,6 +417,18 @@ Bezug: FA-SP-04, FA-AB-02
 - **AK-1:** Gegeben die Optionen einer Catan-Partie, dann kann ich zwischen „Basisspiel“ (vorausgewählt) und „Städte & Ritter“ wählen.
 - **AK-2:** Gegeben die Optionen einer Catan-Partie, dann ist der Modus „Standard“ vorausgewählt und in Version 1 die einzige Option.
 
+#### US-SP-05 Catan app-weit ausblenden („Ich hasse Catan!“) · M *(neu in 0.10)*
+Als Nutzer, der kein Catan spielt, möchte ich alle Catan-Funktionen ausblenden, damit die App nur zeigt, was ich brauche: Ergebnisse und Statistik meiner Spiele.
+Bezug: FA-SP-06, E-30
+
+- **AK-1:** Gegeben die Einstellungen, dann gibt es den Schalter „Ich hasse Catan!“ mit dem Untertitel „Die Catan-Funktionen werden ausgeblendet.“; Standard ist aus.
+- **AK-2:** Gegeben ich schalte ihn ein, dann erklärt eine Warnung, was ausgeblendet wird, und die Einstellung wird erst nach Bestätigung aktiv; Abbrechen lässt alles unverändert. Das Ausschalten wirkt ohne Rückfrage.
+- **AK-3:** Gegeben die Einstellung ist an, dann bietet die Startansicht keine neue Partie an, sondern direkt „Ergebnis eintragen“, und Catan erscheint weder in einer Spielauswahl noch in der Spieleverwaltung.
+- **AK-4:** Gegeben die Einstellung ist an, wenn ich eine Gruppe anlege oder bearbeite, dann ist „Catan ausschließen“ eingeschaltet und nicht änderbar und die Bindung „Nur Catan“ ausgegraut und nicht wählbar; neu angelegte Gruppen werden mit „Catan ausschließen“ gespeichert.
+- **AK-5:** Gegeben die Einstellung ist an, dann erscheinen bestehende Gruppen ohne Catan-Farben und Gruppen mit der Bindung „Nur Catan“ ausgegraut; ihre bisherigen Ergebnisse bleiben erreichbar, neue Partien und Ergebnisse sind für sie nicht möglich.
+- **AK-6:** Gegeben bisherige Catan-Ergebnisse, dann bleiben sie in Ergebnislisten und Statistik sichtbar; neue Catan-Ergebnisse kommen nicht hinzu.
+- **AK-7:** Gegeben ich schalte die Einstellung aus, dann ist alles wie zuvor: Die gespeicherten Einstellungen der Gruppen wurden nicht verändert. Gruppen, die währenddessen angelegt wurden, behalten „Catan ausschließen“ und können Catan über US-VW-02 AK-6 wieder zulassen.
+
 ### 4.2 Personen und Gruppen (PG)
 
 #### US-PG-01 Person anlegen · M
@@ -405,7 +437,7 @@ Bezug: FA-PG-01
 
 - **AK-1:** Gegeben die Personenverwaltung, wenn ich einen Namen eingebe und speichere, dann erscheint die Person in der Personenliste.
 - **AK-2:** Gegeben ein leerer Name, wenn ich speichern will, dann ist das nicht möglich.
-- **AK-3:** Gegeben eine Person mit gleichem Namen existiert bereits, wenn ich speichere, dann weist die App darauf hin und lässt das Speichern nach Bestätigung zu. In eine gemeinsame Gruppe können gleichnamige Personen nicht aufgenommen werden (→ 3.4).
+- **AK-3:** Gegeben eine Person mit gleichem Namen existiert bereits (auch archiviert), wenn ich den Namen eingebe, dann zeigt die App das sofort an und lässt das Speichern nicht zu (→ 3.4). *(geändert in 0.11)*
 
 #### US-PG-02 Gruppe anlegen · M
 Als Nutzer möchte ich Gruppen mit fester Zusammensetzung anlegen, damit Statistiken vergleichbar bleiben.
@@ -417,15 +449,17 @@ Bezug: FA-PG-02, FA-PG-03, FA-PG-04, FA-PG-09, FA-PG-10 → 3.4
 - **AK-4:** Gegeben mehr als 4 Mitglieder, dann ist die Bindung an Catan nicht wählbar und die App nennt den Grund.
 - **AK-5:** Gegeben eine Person gehört bereits einer Gruppe an, wenn ich sie einer weiteren Gruppe hinzufüge, dann ist das zulässig.
 - **AK-6:** Gegeben zwei ausgewählte Personen haben denselben Namen (ohne Beachtung von Groß- und Kleinschreibung), wenn ich speichern will, dann verhindert die App das und nennt die betroffenen Personen.
+- **AK-7:** Gegeben ich lege eine globale Gruppe mit 2 bis 4 Mitgliedern an, dann kann ich Catan ausschließen; die Gruppe kann dann kein Catan spielen. Bei mehr als 4 Mitgliedern ist Catan ohnehin ausgeschlossen. *(neu in 0.8)*
+- **AK-8:** Gegeben eine Gruppe mit gleichem Namen existiert bereits (auch archiviert), auch wenn es der vorgeschlagene Name ist, dann zeigt die App das sofort an und lässt das Speichern nicht zu (→ 3.4). *(neu in 0.11)*
 
 #### US-PG-03 Farben einer Gruppe festlegen · M
 Als Nutzer möchte ich jeder Person in einer Gruppe Farben zuweisen, damit sie auf dem Brett und in Statistiken erkennbar ist.
 Bezug: FA-PG-05, FA-PG-07, FA-PG-08, FA-SP-05 → 3.3
 
 - **AK-1:** Gegeben ich lege eine Gruppe an, dann sind die Farben automatisch der Reihe nach mit freien Farben belegt, ohne Übernahme aus anderen Gruppen.
-- **AK-2:** Gegeben eine globale Gruppe mit 2 bis 4 Mitgliedern, dann hat jede Person eine Gruppenfarbe und eine Catan-Farbe, und beide dürfen derselbe Farbton sein.
+- **AK-2:** Gegeben eine globale Gruppe mit 2 bis 4 Mitgliedern, die Catan nicht ausschließt, dann hat jede Person eine Gruppenfarbe und eine Catan-Farbe, und beide dürfen derselbe Farbton sein. *(präzisiert in 0.8)*
 - **AK-3:** Gegeben eine an Catan gebundene Gruppe, dann hat jede Person nur eine Catan-Farbe, die zugleich als Gruppenfarbe dient.
-- **AK-4:** Gegeben eine an ein eigenes Spiel gebundene Gruppe oder eine globale Gruppe mit mehr als 4 Mitgliedern, dann hat jede Person nur eine Gruppenfarbe.
+- **AK-4:** Gegeben eine an ein eigenes Spiel gebundene Gruppe, eine globale Gruppe mit mehr als 4 Mitgliedern oder eine globale Gruppe, die Catan ausschließt, dann hat jede Person nur eine Gruppenfarbe. *(ergänzt in 0.8)*
 - **AK-5:** Gegeben Person A hat Rot, wenn ich Person B Rot zuweise, dann erhält A die bisherige Farbe von B.
 
 #### US-PG-04 Catan-Farbe für eine Partie abweichend wählen · S
@@ -437,25 +471,29 @@ Bezug: FA-PG-06
 
 ### 4.3 Verwaltung (VW)
 
-#### US-VW-01 Person bearbeiten, archivieren und löschen · S
-Als Nutzer möchte ich Personen umbenennen, archivieren und löschen, damit meine Personenliste aktuell bleibt.
-Bezug: FA-VW-01, FA-VW-05, FA-PG-09
+#### US-VW-01 Person archivieren und löschen · S
+Als Nutzer möchte ich Personen archivieren und löschen, damit meine Personenliste aktuell bleibt. *(geändert in 0.8: Umbenennen ist jetzt US-VW-06)*
+Bezug: FA-VW-01, FA-VW-05
 
-- **AK-1:** Gegeben eine Person, wenn ich sie umbenenne, dann erscheint der neue Name überall, auch in bestehenden Ergebnissen und Statistiken.
+- **AK-1:** *(verschoben nach US-VW-06 AK-1 in 0.8)*
 - **AK-2:** Gegeben eine Person ist Mitglied mindestens einer Gruppe (auch einer archivierten), wenn ich sie löschen will, dann verhindert die App das und nennt die betroffenen Gruppen.
 - **AK-3:** Gegeben eine Person ohne Gruppenzugehörigkeit, wenn ich sie lösche und die Warnung bestätige, dann wird zuvor ein Sicherungspunkt angelegt und die Person entfernt.
 - **AK-4:** Gegeben eine Person, wenn ich sie archiviere, dann erscheint sie nicht mehr in der Auswahl für neue Gruppen; bestehende Gruppen, Ergebnisse und Statistiken bleiben unverändert. Ich kann sie jederzeit reaktivieren.
-- **AK-5:** Gegeben der neue Name gleicht dem Namen eines anderen Mitglieds einer ihrer Gruppen, wenn ich umbenenne, dann verhindert die App das und nennt die betroffene Gruppe.
+- **AK-5:** *(verschoben nach US-VW-06 AK-2 in 0.8)*
 
-#### US-VW-02 Gruppe bearbeiten · S
+#### US-VW-02 Gruppe bearbeiten · M
 Als Nutzer möchte ich Name, Farben und Spielbindung einer Gruppe ändern können, damit sie zur Realität passt.
 Bezug: FA-VW-02 → 3.3, 3.4
 
-- **AK-1:** Gegeben eine Gruppe, dann kann ich Namen und Farben ändern.
+- **AK-1:** Gegeben eine Gruppe, dann kann ich Namen und Farben ändern; der Name muss eindeutig sein wie in US-PG-02 AK-8. *(ergänzt in 0.11)*
 - **AK-2:** Gegeben eine Gruppe, dann bietet die App keine Möglichkeit, Mitglieder hinzuzufügen oder zu entfernen.
 - **AK-3:** Gegeben ich ändere die Spielbindung, wenn alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen, dann wird die Änderung übernommen; andernfalls verhindert die App sie und nennt den Grund.
 - **AK-4:** Gegeben die neue Bindung erfordert zusätzliche Farben, dann werden diese gemäß 3.3 automatisch belegt und sind änderbar.
-- **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann ist die Änderung der Spielbindung gesperrt (→ 3.5).
+- **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann ist die Änderung der Spielbindung gesperrt (→ 3.5); der Editor nennt den Grund bei der Spielbindung und bietet „Partie beenden“ an. *(ergänzt in 0.14)*
+- **AK-6:** Gegeben eine globale Gruppe, wenn ich Catan ausschließe oder wieder zulasse, dann entfallen die Catan-Farben bzw. werden gemäß 3.3 automatisch belegt; für das Zulassen gilt AK-3. *(neu in 0.8)*
+- **AK-7:** Gegeben die Einstellung „Ich hasse Catan!“ ist an, dann kann ich Catan nicht wieder zulassen und keine Bindung „Nur Catan“ wählen (→ US-SP-05). *(neu in 0.10)*
+
+*Hinweis (0.8):* Die Story ist nach Wunsch des Product Owners von Should (I5) nach Must (I1) vorgezogen. Bis I2 gibt es keine Partien; AK-3 wird deshalb in I1 für die Mitgliederzahl nachgewiesen und mit der Ergebniserfassung (I3) für bestehende Partien, AK-5 mit dem Ablauf einer Partie (I2).
 
 #### US-VW-03 Gruppe archivieren, wiederbeleben und löschen · S
 Als Nutzer möchte ich nicht mehr aktive Gruppen archivieren und bei Bedarf wiederbeleben oder endgültig löschen, damit die Übersicht aufgeräumt bleibt, ohne Statistik zu verlieren.
@@ -467,15 +505,39 @@ Bezug: FA-VW-03, FA-VW-05
 - **AK-4:** Gegeben ich bestätige das Löschen, dann wird zuvor ein Sicherungspunkt angelegt, und die Gruppe wird mit allen ihren Partien entfernt; die Personen bleiben erhalten.
 - **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann sind Archivieren und Löschen gesperrt (→ 3.5).
 
-#### US-VW-04 Eigenes Spiel bearbeiten, archivieren und löschen · S
-Als Nutzer möchte ich eigene Spiele umbenennen, archivieren und löschen können, damit die Spieleliste übersichtlich bleibt.
+#### US-VW-04 Eigenes Spiel archivieren und löschen · S
+Als Nutzer möchte ich eigene Spiele archivieren und löschen können, damit die Spieleliste übersichtlich bleibt. *(geändert in 0.8: Umbenennen ist jetzt US-VW-07)*
 Bezug: FA-VW-04, FA-VW-05
 
-- **AK-1:** Gegeben ein eigenes Spiel, dann kann ich es umbenennen (eindeutiger Name wie in US-SP-02).
+- **AK-1:** *(verschoben nach US-VW-07 AK-1 in 0.8)*
 - **AK-2:** Gegeben ein eigenes Spiel ohne Ergebnisse, wenn ich es lösche und bestätige, dann wird zuvor ein Sicherungspunkt angelegt und das Spiel entfernt.
 - **AK-3:** Gegeben ein eigenes Spiel mit Ergebnissen, wenn ich es löschen will, dann verhindert die App das und bietet stattdessen das Archivieren an.
 - **AK-4:** Gegeben ein archiviertes Spiel, dann erscheint es nicht in der Auswahl für neue Ergebnisse oder Gruppen; bestehende Daten und Statistiken bleiben erhalten, und ich kann es reaktivieren.
-- **AK-5:** Gegeben Catan, dann gibt es weder Umbenennen noch Archivieren noch Löschen.
+- **AK-5:** Gegeben Catan, dann gibt es weder Archivieren noch Löschen (für Umbenennen siehe US-VW-07 AK-2). *(geändert in 0.8)*
+
+#### US-VW-05 Personen und Gruppen im Überblick · M
+Als Nutzer möchte ich sehen, wer in welcher Gruppe ist, und von dort zu Personen und Gruppen springen, damit ich Zusammensetzung und Farben jederzeit nachsehen kann.
+Bezug: FA-VW-06
+
+- **AK-1:** Gegeben die Personenliste, dann zeigt sie zu jeder Person die Namen ihrer Gruppen oder einen Hinweis, dass sie keiner Gruppe angehört.
+- **AK-2:** Gegeben die Personenliste, wenn ich eine Person antippe, dann öffnet sich ihre Detailansicht mit Name und Gruppen.
+- **AK-3:** Gegeben die Verwaltung, dann gibt es eine Gruppenliste. Wenn ich dort oder in der Detailansicht einer Person eine Gruppe antippe, dann öffnet sich die Detailansicht der Gruppe mit Name, Bindung (global oder Spiel), Mitgliedern und deren Farben (→ 3.3).
+- **AK-4:** Gegeben die Detailansicht einer Gruppe, wenn ich ein Mitglied antippe, dann öffnet sich die Detailansicht dieser Person.
+- **AK-5:** Gegeben eine Detailansicht, wenn ich „Zurück“ wähle (auch die Zurück-Taste unter Android), dann komme ich zur vorherigen Ansicht.
+
+#### US-VW-06 Person umbenennen · M
+Als Nutzer möchte ich Personen umbenennen, damit ich Tippfehler korrigieren kann. *(neu in 0.8, aus US-VW-01)*
+Bezug: FA-VW-01, FA-PG-09
+
+- **AK-1:** Gegeben eine Person, wenn ich sie umbenenne, dann erscheint der neue Name überall, auch in bestehenden Ergebnissen und Statistiken. *(bisher US-VW-01 AK-1; Ergebnisse und Statistiken werden mit I3 nachgewiesen)*
+- **AK-2:** Gegeben der neue Name gleicht dem Namen einer anderen Person (auch archiviert), wenn ich ihn eingebe, dann zeigt die App das sofort an und lässt das Umbenennen nicht zu (→ 3.4). *(bisher US-VW-01 AK-5, geändert in 0.11)*
+
+#### US-VW-07 Eigenes Spiel umbenennen · M
+Als Nutzer möchte ich eigene Spiele umbenennen, damit ich Tippfehler korrigieren kann. *(neu in 0.8, aus US-VW-04)*
+Bezug: FA-VW-04
+
+- **AK-1:** Gegeben ein eigenes Spiel, dann kann ich es umbenennen (eindeutiger Name wie in US-SP-02). *(bisher US-VW-04 AK-1)*
+- **AK-2:** Gegeben Catan, dann gibt es kein Umbenennen. *(bisher Teil von US-VW-04 AK-5)*
 
 ### 4.4 Ablauf einer Partie (AB)
 
@@ -483,9 +545,9 @@ Bezug: FA-VW-04, FA-VW-05
 Als bedienende Person möchte ich Gruppe und Optionen festlegen, bevor die Generierung beginnt, damit sie zu unserem Abend passt.
 Bezug: FA-AB-01, FA-AB-02, FA-PG-10 → 3.1, 3.4
 
-- **AK-1:** Gegeben ich habe Catan gewählt, dann zeigt die App nur aktive Gruppen, die Catan spielen können (globale Gruppen mit 2 bis 4 Mitgliedern und an Catan gebundene Gruppen).
+- **AK-1:** Gegeben ich habe Catan gewählt, dann zeigt die App nur aktive Gruppen, die Catan spielen können (globale Gruppen mit 2 bis 4 Mitgliedern, die Catan nicht ausschließen, und an Catan gebundene Gruppen). *(präzisiert in 0.8)*
 - **AK-2:** Gegeben ich habe eine Gruppe gewählt, dann zeigt die App alle Mitglieder als Beteiligte an; eine Abwahl einzelner Mitglieder ist nicht möglich.
-- **AK-3:** Gegeben die Optionen, dann kann ich LS-01, LS-03 und LS-04 einzeln an- und abschalten (Standard: an); LS-02 wird als immer aktiv angezeigt.
+- **AK-3:** Gegeben die Optionen, dann kann ich LS-01, LS-03 und LS-04 einzeln an- und abschalten (Standard: an). „Reihenfolge losen“ (LS-02) ist an; schalte ich es ab, wähle ich „Selbst festlegen“ (ich tippe die Personen der Reihe nach an, der letzte Platz ergibt sich; erneutes Antippen nimmt ab dieser Person zurück) oder „Ohne Platzierung“. Weiter geht es erst, wenn die selbst festgelegte Reihenfolge vollständig ist. *(geändert in 0.13, FA-LS-07)*
 - **AK-4:** Gegeben die Optionen, dann kann ich die Startrohstoffe aktivieren (Standard: aus) und dabei die Anzahl von 1 bis 5 (Standard: 2) sowie „mit Zurücklegen“ (Standard) oder „ohne Zurücklegen“ einstellen.
 - **AK-5:** Gegeben ich starte die Generierung, dann laufen die aktiven Phasen in der Reihenfolge aus 3.1 ab.
 
@@ -493,35 +555,39 @@ Bezug: FA-AB-01, FA-AB-02, FA-PG-10 → 3.1, 3.4
 Als bedienende Person möchte ich jeden Schritt selbst bestätigen, damit alle am Tisch jedes Ergebnis sehen und umsetzen können.
 Bezug: FA-AB-03 → 3.1
 
-- **AK-1:** Gegeben ein Schritt ist abgeschlossen, dann bleibt sein Ergebnis sichtbar, bis ich „Weiter“ wähle; es gibt keinen automatischen Übergang.
+- **AK-1:** Gegeben ein Schritt ist abgeschlossen, dann bleibt sein Ergebnis sichtbar, bis ich den Vorwärts-Knopf wähle; es gibt keinen automatischen Übergang. Der Knopf heißt „Losen“, wenn er lost (den angezeigten Schritt ohne Ergebnis oder den nächsten Schritt derselben Ansicht), „Weiter“, wenn er den neuesten Schritt bestätigt und ohne zu losen zur nächsten Ansicht führt, „Blättern“, solange spätere Schritte schon gelost sind (geht einen Schritt vor, ohne zu losen), und „Zur Übersicht“ auf dem letzten Schritt. *(geändert in 0.13 und 0.14)*
 - **AK-2:** Gegeben die Platzierung, dann ist jedes Gebäude und jede Straße ein eigener Schritt mit eigener Animation und eigener Bestätigung.
+- **AK-3:** Gegeben die Ansicht wechselt (jeder Losschritt, Beginn der Reihenfolge, Beginn der Platzierung mit leerem Brett, Startrohstoffe jeder Person), auch nach „Generierung starten“ und nach einer Wiederholung, dann zeigt die App den Schritt zuerst ohne Ergebnis, mit dem, was gelost wird; ohne Ergebnis ist „Wiederholen“ ausgegraut, steht aber an seinem Platz, damit sich nichts verschiebt. In Reihenfolge und Platzierung geht es danach in derselben Ansicht direkt mit „Losen“ weiter; das Band unter dem Brett nennt „Als Nächstes“ das nächste Stück. *(neu in 0.14, E-35)*
 
 #### US-AB-03 Schritt wiederholen · M
 Als bedienende Person möchte ich einen Schritt wiederholen können, damit Fehler oder Missverständnisse am Tisch korrigierbar sind.
 Bezug: FA-AB-04 → 3.1
 
-- **AK-1:** Gegeben ein abgeschlossener Schritt, wenn ich „Wiederholen“ wähle, dann erscheint eine Warnung; nach Bestätigung wird der Schritt neu gelost und neu dargestellt.
+- **AK-1:** Gegeben ein abgeschlossener Schritt, wenn ich „Wiederholen“ wähle, dann erscheint eine Warnung; nach Bestätigung zeigt die App den Schritt ohne Ergebnis, und „Losen“ lost ihn neu. *(geändert in 0.14)*
 - **AK-2:** Gegeben der Schritt hat abhängige Folgeschritte gemäß 3.1, dann nennt die Warnung, welche Schritte verworfen werden.
 - **AK-3:** Gegeben ich wiederhole LS-01, LS-03, LS-04, eine Straße oder die Startrohstoffe einer Person, dann bleiben alle anderen Schritte unverändert.
 - **AK-4:** Gegeben ich wiederhole Gebäude k, dann werden Straße k und alle späteren Gebäude und Straßen verworfen und anschließend Schritt für Schritt neu durchlaufen.
-- **AK-5:** Gegeben ich wiederhole einen Dreh von LS-02, dann wird die gesamte Reihenfolge neu gelost und eine bereits begonnene Platzierung verworfen.
+- **AK-5:** Gegeben ich wiederhole den Dreh von LS-02 für Platz k, dann bleiben die Plätze vor k, Platz k und alle späteren Plätze werden aus den übrigen Personen neu gelost, und eine bereits begonnene Platzierung wird verworfen. Bei Platz 1 ist das die ganze Reihenfolge. *(geändert in 0.14)*
 - **AK-6:** Gegeben die Generierung ist abgeschlossen, dann kann ich in der Übersicht der laufenden Partie jeden Schritt auswählen und wiederholen.
 - **AK-7:** Gegeben eine Wiederholung, dann wird sie nirgends protokolliert.
+- **AK-8:** Gegeben ein Brett mit Gebäuden und Straßen (im Ablauf, im Rückblick oder in der Übersicht), wenn ich einen Stein antippe, dann folgt die Rückfrage zu genau diesem Stein, und er ist markiert, solange sie offen ist; bei einem Gebäude auch die Steine, die mit verworfen werden. *(neu in 0.15)*
 
 #### US-AB-04 Laufende Partie einsehen · M
 Als bedienende Person möchte ich das Ergebnis der Generierung während der Partie jederzeit einsehen, damit wir bei Unklarheiten nachschauen können.
 Bezug: FA-AB-05
 
 - **AK-1:** Gegeben die Generierung ist abgeschlossen, dann zeigt eine Übersicht das Brett mit allen Gebäuden und Straßen, die Ergebnisse von LS-01, LS-03 und LS-04, die Platzierungsreihenfolge mit Kennzeichnung der Startperson und ggf. die Startrohstoffe.
-- **AK-2:** Gegeben eine laufende Partie, wenn ich die Startansicht öffne, dann gelange ich mit einem Tipp zurück zur Übersicht.
+- **AK-2:** Gegeben eine Partie in Generierung oder laufend, wenn ich die Startansicht öffne, dann nennt ein Hinweis „‹Gruppe› spielt gerade“, und ich gelange mit einem Tipp zurück zum aktuellen Schritt bzw. zur Übersicht. *(präzisiert in 0.14)*
+- **AK-3:** Gegeben die Generierung läuft und ich bin nicht auf der ersten Ansicht, wenn ich „Zurück“ wähle, dann zeigt die App die vorherige Ansicht mit ihren gespeicherten Ergebnissen und dem Hinweis „Rückblick“ mit „Zum aktuellen Schritt“; es wird nichts gelost. Eine Ansicht ist ein Losschritt, die ganze Reihenfolge, die ganze Platzierung oder die Startrohstoffe einer Person. *(neu in 0.13, FA-AB-10, geändert in 0.15)*
+- **AK-4:** Gegeben der Rückblick oder die Wiederholung eines früheren Schritts, dann führt „Blättern“ genau eine Ansicht weiter bis zur neuesten; erst dort lost der Knopf wieder bzw. führt mit „Weiter“ zur nächsten Ansicht. *(neu in 0.13, ergänzt in 0.14, geändert in 0.15)*
 
 #### US-AB-05 Laufende Partie übersteht einen Neustart · M
 Als bedienende Person möchte ich, dass die laufende Partie erhalten bleibt, auch wenn die App geschlossen wird, damit nichts verloren geht.
 Bezug: FA-AB-07 → 3.5
 
 - **AK-1:** Gegeben eine Partie in Generierung oder laufend, wenn die App geschlossen und neu gestartet wird, dann öffnet sie exakt denselben Stand einschließlich des aktuellen Schritts.
-- **AK-2:** Gegeben eine laufende Partie, wenn ich eine neue Partie starten will, dann fragt die App, ob die laufende ohne Ergebnis beendet werden soll, oder kehrt auf Wunsch zu ihr zurück.
-- **AK-3:** Gegeben die App wird während der Animation eines Schritts beendet, wenn sie neu startet, dann wird die Animation mit demselben Ergebnis erneut abgespielt, und der Schritt wartet auf Bestätigung.
+- **AK-2:** Gegeben eine laufende Partie, wenn ich eine neue Partie starten will, dann fragt die App, ob die laufende ohne Ergebnis beendet werden soll („Neu beginnen“), oder kehrt auf Wunsch zu ihr zurück („Zur Partie“, Standard). *(präzisiert in 0.14)*
+- **AK-3:** Gegeben die App wird während der Animation eines Schritts beendet, wenn sie neu startet, dann wird die Animation mit demselben Ergebnis erneut abgespielt, und der Schritt wartet auf Bestätigung; eine schon abgeschlossene Animation läuft nicht noch einmal ab. *(ergänzt in 0.14)*
 
 #### US-AB-06 Partie beenden · M
 Als bedienende Person möchte ich eine Partie mit oder ohne Ergebnis beenden, damit die App für die nächste Partie bereit ist.
@@ -554,9 +620,9 @@ Bezug: FA-LS-01, FA-LS-03, FA-LS-04 → 3.1
 Als Spielende möchten wir eine zufällige Platzierungsreihenfolge, damit niemand dauerhaft den Vorteil des ersten Zugs hat.
 Bezug: FA-LS-02 → 3.1
 
-- **AK-1:** Gegeben die Generierung, dann wird LS-02 immer nach LS-04 ausgeführt.
+- **AK-1:** Gegeben die Reihenfolge wird gelost, dann wird LS-02 nach LS-04 ausgeführt. *(geändert in 0.13)*
 - **AK-2:** Gegeben n Personen, dann wird die Reihenfolge in n−1 Drehs aus den jeweils verbleibenden Personen gelost; der letzte Platz ergibt sich automatisch.
-- **AK-3:** Gegeben die Reihenfolge steht fest, dann ist die Person auf Platz 1 als Startperson des Spiels gekennzeichnet.
+- **AK-3:** Gegeben die Reihenfolge steht fest (gelost oder selbst festgelegt, *ergänzt in 0.13*), dann ist die Person auf Platz 1 als Startperson des Spiels gekennzeichnet.
 - **AK-4:** Gegeben n Personen, dann ist jede der n! Reihenfolgen gleich wahrscheinlich (Nachweis durch automatisierte Tests).
 
 ### 4.6 Platzierung (PL)
@@ -567,7 +633,7 @@ Bezug: FA-PL-07, FA-PL-08, NFA-GB-06, NFA-PL-04
 
 - **AK-1:** Gegeben die Platzierung, dann zeigt die App 19 Felder mit nach oben zeigender Spitze in Reihen zu 3, 4, 5, 4 und 3 Feldern; der Umriss ist oben und unten gerade und links und rechts spitz.
 - **AK-2:** Gegeben die Darstellung, dann tragen die Felder keine Landschaften oder Zahlen und es werden keine Original-Grafiken des Spiels verwendet.
-- **AK-3:** Gegeben Hoch- oder Querformat auf Smartphone oder Tablet, dann ist das Brett vollständig sichtbar und behält seine Ausrichtung.
+- **AK-3:** Gegeben Hochformat auf einem Smartphone oder Hoch- oder Querformat auf einem Tablet, dann ist das Brett vollständig sichtbar und behält seine Ausrichtung. *(geändert in 0.9, E-29)*
 
 #### US-PL-02 Gebäude zufällig platzieren · M
 Als Spielende möchten wir, dass die App unsere Startgebäude regelkonform und fair platziert, damit niemand die besten Plätze wählen kann.
@@ -597,42 +663,52 @@ Bezug: FA-PL-05, FA-PL-06
 Als bedienende Person möchte ich die Platzierung ausnahmsweise überspringen können, damit wir die App auch nutzen können, wenn wir einmal selbst wählen wollen.
 Bezug: FA-PL-09
 
-- **AK-1:** Gegeben der Beginn der Platzierung, dann gibt es einen kleinen, unauffälligen Button „Platzierung überspringen“.
+- **AK-1:** Gegeben der Beginn der Platzierung nach einer gelosten Reihenfolge *(ergänzt in 0.13)*, dann gibt es einen kleinen, unauffälligen Button „Platzierung überspringen“.
 - **AK-2:** Gegeben ich bestätige das Überspringen, dann geht es mit den Startrohstoffen (falls aktiv) oder mit dem Abschluss weiter; die Übersicht zeigt Reihenfolge und Startperson, aber keine Gebäude.
+- **AK-3:** Gegeben „Ohne Platzierung“, dann entfällt die Platzierung von Anfang an; die Übersicht zeigt die Sitzreihenfolge ohne Startperson und keine Gebäude. *(neu in 0.13, FA-LS-07)*
 
 ### 4.7 Startrohstoffe (SR)
 
 #### US-SR-01 Startrohstoffe ziehen · S
 Als Spielende möchten wir auf Wunsch zufällige Startrohstoffe erhalten, damit der Spielbeginn abwechslungsreicher wird.
-Bezug: FA-SR-01 bis FA-SR-04
+Bezug: FA-SR-01 bis FA-SR-05
 
-- **AK-1:** Gegeben die Option ist aktiv, dann werden die Startrohstoffe nach der Platzierung (bzw. nach LS-02, falls die Platzierung übersprungen wurde) gezogen, je Person ein Schritt in Platzierungsreihenfolge.
+- **AK-1:** Gegeben die Option ist aktiv, dann werden die Startrohstoffe nach der Platzierung (bzw. nach LS-02, falls die Platzierung übersprungen wurde) gezogen, je Person ein Schritt in Platzierungsreihenfolge; ohne Reihenfolge („Ohne Platzierung“) in der Sitzreihenfolge der Gruppe. *(ergänzt in 0.13)*
 - **AK-2:** Gegeben die eingestellte Anzahl k, dann erhält jede Person genau k Rohstoffe aus Holz, Lehm, Wolle, Getreide und Erz.
 - **AK-3:** Gegeben „mit Zurücklegen“, dann ist jede Ziehung gleichverteilt über alle fünf Rohstoffe und Doppelungen sind möglich.
 - **AK-4:** Gegeben „ohne Zurücklegen“, dann erhält jede Person nur unterschiedliche Rohstoffe, und jede Ziehung ist gleichverteilt über die für diese Person noch verbleibenden.
 - **AK-5:** Gegeben ein Ergebnis, dann werden die Rohstoffe mit eigenem Symbol und Namen angezeigt.
+- **AK-6:** Gegeben die Rohstoffe einer Person sind gezogen, dann liegen sie verdeckt; ich decke sie einzeln durch Antippen oder alle mit „Alle umdrehen“ auf, erst danach führt der Knopf mit „Weiter“ fort. Aufgedeckte Karten bleiben aufgedeckt, auch nach einem Neustart. *(neu in 0.14, FA-SR-05)*
 
 ### 4.8 Inszenierung (IN)
 
-#### US-IN-01 Glücksrad · S
-Als Spielende möchten wir das Losen als Glücksrad erleben, damit der Aufbau spannend wird.
+#### US-IN-01 Karten ziehen · S *(bis 0.13 „Glücksrad“)*
+Als Spielende möchten wir das Losen als Ziehen von Karten erleben, damit der Aufbau spannend und nachvollziehbar wird.
 Bezug: FA-IN-02
 
-- **AK-1:** Gegeben ein Losschritt, dann zeigt das Rad für jede zur Wahl stehende Person ein gleich großes Segment mit Name und Farbe.
-- **AK-2:** Gegeben die Ziehung, dann hält das Rad sichtbar bei der gelosten Person an; die Animation bestimmt oder verändert das Ergebnis nicht.
+- **AK-1:** Gegeben ein Losschritt oder die Reihenfolge, dann liegen vor dem Losen die Karten aller zur Wahl stehenden Personen offen, mit Name und Farbe. *(geändert in 0.14)*
+- **AK-2:** Gegeben die Ziehung, dann werden die Karten gemischt, und die Karte der gelosten Person wird sichtbar aufgedeckt; die Animation bestimmt oder verändert das Ergebnis nicht. *(geändert in 0.14)*
+- **AK-3:** Gegeben die Reihenfolge, dann mischt das erste „Losen“ einmal, legt alle Karten verdeckt auf die Plätze und deckt Platz 1 auf; jedes weitere „Losen“ deckt den nächsten Platz auf, der letzte deckt sich von selbst auf. Gelost und gespeichert wird weiterhin Platz für Platz. *(neu in 0.14, E-36)*
 
 #### US-IN-02 Aufblinken bei der Platzierung · S
 Als Spielende möchten wir sehen, wie mögliche Positionen aufblinken, bevor eine festgelegt wird, damit die Platzierung spannend und nachvollziehbar wirkt.
-Bezug: FA-IN-01
+Bezug: FA-IN-01, FA-IN-08 *(ergänzt in 0.16)*
 
 - **AK-1:** Gegeben die Platzierung eines Gebäudes, dann blinken vor der Festlegung mehrere gültige Kreuzungen auf, bevor die geloste hervorgehoben wird.
 - **AK-2:** Gegeben die Animation, dann blinken nur gültige Kreuzungen bzw. die an das Gebäude angrenzenden Kanten auf.
+- **AK-3:** Gegeben die Animation, dann entsteht sie ohne Kenntnis des Ergebnisses: Start, Reihenfolge und Länge sind zufällig, jeder noch leuchtende Platz ist bis zur Landung gleich wahrscheinlich das Ergebnis, erst die Landung zeigt es. *(neu in 0.16, E-39)*
+- **AK-4:** Gegeben ein Stein ist gelost, dann springt ein Licht in der Farbe der Person über die gültigen Plätze, wird langsamer und landet auf dem Ergebnis; danach wird der Stein von oben gesetzt, und ein Lichtring läuft nach außen (Referenz `docs/design/d2-staging-final-preview.html`). *(neu in 0.16)*
+- **AK-5:** Gegeben die Platzierung, dann gibt es oben rechts einen Schalter „Spannungsmodus“; eingeschaltet gilt er ab dem nächsten Stein für alle folgenden, bis ich ihn ausschalte. Bei jeder neuen Partie und nach einem Neustart der App ist er aus. *(neu in 0.16, FA-IN-08)*
+- **AK-6:** Gegeben der Spannungsmodus und ein Gebäude, dann wird das Brett dunkler, alle gültigen Kreuzungen leuchten und erlöschen in zufälliger Reihenfolge, bis zwei bleiben; der Gegner ist rein zufällig. Dann hält die Darstellung mit „Zwei übrig“ an, und erst der Knopf „Duell“ startet das Duell, in dem der Stein zwischen beiden springt und auf dem Ergebnis landet. *(neu in 0.16, FA-IN-08)*
+- **AK-7:** Gegeben der Spannungsmodus und eine Straße, dann wird das Brett dunkler, die freien Kanten leuchten und erlöschen nacheinander, ohne Duell und ohne Halt; das Haus an der Straße bleibt hell darüber. *(neu in 0.16, FA-IN-08)*
 
-#### US-IN-03 Soundeffekte und Tonschalter · S
+#### US-IN-03 Soundeffekte und Tonschalter · S *(nach Version 1 verschoben in 0.16, E-38)*
 Als bedienende Person möchte ich dezente Soundeffekte, die ich abschalten kann, damit die Stimmung passt, ohne zu stören.
 Bezug: FA-IN-03, FA-IN-04, FA-IN-05
 
-- **AK-1:** Gegeben der Ton ist an, dann begleiten dezente Soundeffekte Glücksrad, Aufblinken und Festlegung.
+Nicht Teil von Version 1 (Anforderungsdokumentation E-38, PP-20). AK-3 (keine Vibration, FA-IN-04) gilt in Version 1 weiter.
+
+- **AK-1:** Gegeben der Ton ist an, dann begleiten dezente Soundeffekte das Ziehen der Karten, Aufblinken und Festlegung.
 - **AK-2:** Gegeben die Einstellungen, dann gibt es einen Tonschalter (Standard: an); ist er aus, erklingt kein Ton. Die Einstellung bleibt gespeichert.
 - **AK-3:** Gegeben die gesamte App, dann wird keine Vibration ausgelöst.
 - **AK-4:** Gegeben das Gerät ist stummgeschaltet, dann erklingt kein Ton, soweit die Plattform das erlaubt; gegeben eine andere App spielt Musik, dann wird diese durch die Soundeffekte nicht unterbrochen.
@@ -641,7 +717,7 @@ Bezug: FA-IN-03, FA-IN-04, FA-IN-05
 Als bedienende Person möchte ich eine Animation gezielt überspringen können, damit es bei Bedarf schneller geht, ohne versehentlich etwas zu überspringen.
 Bezug: FA-IN-06
 
-- **AK-1:** Gegeben eine laufende Animation, dann gibt es einen klar beschrifteten Button „Animation überspringen“.
+- **AK-1:** Gegeben eine laufende Animation, dann steht an der Stelle von „Wiederholen“ ein gleich großer, klar beschrifteter Button „Überspringen“ mit eigenem Symbol, vorgelesen als „Animation überspringen“; er erscheint sofort mit der Animation, danach steht dort wieder „Wiederholen“. *(geändert in 0.17)*
 - **AK-2:** Gegeben ich nutze ihn, dann erscheint sofort das Ergebnis, und der Schritt muss weiterhin bestätigt werden.
 - **AK-3:** Gegeben ein Tippen außerhalb dieses Buttons, dann beeinflusst es die Animation nicht.
 - **AK-4:** Gegeben die Einstellungen, dann gibt es keine Einstellung für das Animationstempo.
@@ -885,12 +961,14 @@ Bezug: FA-IS-03 → 3.13
 
 ### 4.15 Erscheinungsbild (GB)
 
-#### US-GB-01 Akzentfarbe wählen · C
-Als Nutzer möchte ich die Akzentfarbe ändern, damit die App meinem Geschmack entspricht.
+#### US-GB-01 Design und Akzentfarbe wählen · C
+Als Nutzer möchte ich Design und Akzentfarbe ändern, damit die App meinem Geschmack entspricht.
 Bezug: NFA-GB-03
 
-- **AK-1:** Gegeben die Einstellungen, dann kann ich aus 6 bis 8 vordefinierten Akzentfarben wählen; Standard ist ein dunkles Lila.
-- **AK-2:** Gegeben ich wähle eine Farbe, dann wirkt sie sofort und bleibt gespeichert.
+- **AK-1:** Gegeben die Einstellungen, dann kann ich eines der Designs „Holz“, „Tiefsee“, „Wald“ und „Glas“ wählen; Standard ist „Holz“.
+- **AK-2:** Gegeben die Einstellungen, dann kann ich aus 6 bis 8 vordefinierten Akzentfarben wählen; ohne Auswahl gilt die Standard-Akzentfarbe des Designs (bei „Holz“ Bernstein).
+- **AK-3:** Gegeben ich wähle ein Design oder eine Akzentfarbe, dann wirkt die Wahl sofort und bleibt gespeichert.
+- **AK-4:** Gegeben ein beliebiges Design, dann sind Catan- und Gruppenfarben unverändert und gut erkennbar.
 
 ---
 
@@ -904,7 +982,7 @@ Bezug: NFA-GB-03
 | NFA-PL-01 | Abnahme auf Android (Brave), iPhone und iPad (Safari, installiert) und Windows (Brave, installiert); Chrome als Vergleichsbrowser | Manueller Test | M |
 | NFA-PL-02 | Eine gemeinsame Codebasis für alle Plattformen | Code-Review | M |
 | NFA-PL-03 | Alle Funktionen außer Updates arbeiten im Flugmodus | Manueller Test | M |
-| NFA-PL-04 | Alle Ansichten sind auf Smartphone und Tablet in Hoch- und Querformat ohne abgeschnittene Inhalte nutzbar | Manueller Test | M |
+| NFA-PL-04 | Alle Ansichten sind auf Smartphones im Hochformat und auf Tablets in Hoch- und Querformat ohne abgeschnittene Inhalte nutzbar; ein Smartphone im Querformat zeigt nur den Hinweis, das Gerät zu drehen *(geändert in 0.9, E-29)* | Manueller Test, automatisierter Test | M |
 | NFA-DH-01 bis -03 | Keine Netzwerkzugriffe außer für Updates; keine Konten, keine Anmeldung, kein Tracking; eine Content-Security-Policy erlaubt nur die eigene Herkunft; Ende-zu-Ende-Tests schlagen bei Anfragen an fremde Adressen fehl | Code-Review, Netzwerkmitschnitt, automatisierter Test | M |
 | NFA-DH-04 | Jeder Export enthält eine Formatversion; Import älterer Versionen ist durch Tests abgedeckt | Automatisierter Test | M |
 | NFA-DH-05 | Jeder Datensatz hat eine zufällige, weltweit eindeutige Kennung | Code-Review | M |
@@ -931,41 +1009,44 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-SP-03 | US-SP-03 |
 | FA-SP-04 | US-SP-04 |
 | FA-SP-05 | US-SP-02, US-PG-03 |
+| FA-SP-06 | US-SP-05, US-VW-02 |
 | FA-PG-01 | US-PG-01 |
-| FA-PG-02 bis FA-PG-04 | US-PG-02 |
+| FA-PG-02 bis FA-PG-04 | US-PG-02; FA-PG-04 auch US-PG-03, US-VW-02 |
 | FA-PG-05 | US-PG-03 |
 | FA-PG-06 | US-PG-04 |
 | FA-PG-07, FA-PG-08 | US-PG-03 |
-| FA-PG-09 | US-PG-02, US-VW-01 |
+| FA-PG-09 | US-PG-01, US-PG-02, US-VW-01, US-VW-02, US-VW-06 |
 | FA-PG-10 | US-PG-02, US-AB-01 |
-| FA-VW-01 | US-VW-01 |
+| FA-VW-01 | US-VW-01, US-VW-06 |
 | FA-VW-02 | US-VW-02 |
 | FA-VW-03 | US-VW-03 |
-| FA-VW-04 | US-VW-04 |
+| FA-VW-04 | US-VW-04, US-VW-07 |
 | FA-VW-05 | US-VW-01, US-VW-03, US-VW-04 |
+| FA-VW-06 | US-VW-05 |
 | FA-AB-01 | US-SP-01, US-AB-01 |
 | FA-AB-02 | US-SP-04, US-AB-01 |
 | FA-AB-03 | US-AB-02 |
 | FA-AB-04 | US-AB-03 |
-| FA-AB-05 | US-AB-04 |
+| FA-AB-05, FA-AB-10 | US-AB-04 |
 | FA-AB-06 | US-AB-06 |
 | FA-AB-07 | US-AB-05 |
 | FA-AB-08 | US-AB-06 |
 | FA-AB-09 | US-VW-02, US-VW-03, US-EI-03, US-DS-02 |
 | FA-LS-01, FA-LS-03, FA-LS-04 | US-LS-02 |
 | FA-LS-02 | US-LS-03 |
+| FA-LS-07 | US-AB-01, US-LS-03, US-PL-05, US-SR-01 |
 | FA-LS-05, FA-LS-06 | US-LS-01 |
 | FA-PL-01 | US-PL-02, US-PL-03 |
 | FA-PL-02 bis FA-PL-04 | US-PL-02 |
 | FA-PL-05, FA-PL-06 | US-PL-04 |
 | FA-PL-07, FA-PL-08 | US-PL-01 |
 | FA-PL-09 | US-PL-05 |
-| FA-SR-01 bis FA-SR-04 | US-SR-01 |
-| FA-IN-01 | US-IN-02 |
+| FA-SR-01 bis FA-SR-05 | US-SR-01 |
+| FA-IN-01, FA-IN-08 | US-IN-02 |
 | FA-IN-02 | US-IN-01 |
-| FA-IN-03 bis FA-IN-05 | US-IN-03 |
+| FA-IN-03 bis FA-IN-05 | US-IN-03 (nach Version 1) |
 | FA-IN-06 | US-IN-04 |
-| FA-IN-07 | US-IN-03 |
+| FA-IN-07 | US-IN-03 (nach Version 1) |
 | FA-ER-01, FA-ER-02, FA-ER-07 | US-ER-01 |
 | FA-ER-03 | US-ER-01, US-ER-02 |
 | FA-ER-04 | US-ER-05 |
@@ -1012,7 +1093,7 @@ Die folgenden Punkte wurden in der Klärung nicht ausdrücklich entschieden, in 
 | ID | Annahme |
 |---|---|
 | A-01 | Die Palette der Gruppenfarben umfasst 12 Farben; eine Gruppe hat daher höchstens 12 Mitglieder. |
-| A-02 | Gleichnamige Personen sind in der Personenliste nach Hinweis erlaubt, innerhalb einer Gruppe jedoch nicht; Spielnamen müssen eindeutig sein. *(geändert in 0.2)* |
+| A-02 | Personen-, Gruppen- und Spielnamen sind app-weit eindeutig. *(geändert in 0.2 und 0.11)* |
 | A-03 | Der Export eines Spiels umfasst alle Partien dieses Spiels über alle Gruppen. |
 | A-04 | Schritte können wiederholt werden, solange die Partie läuft, also auch nach Abschluss der Generierung. |
 | A-05 | Die Wiederholung von LS-02 verwirft die Platzierung, nicht aber bereits gezogene Startrohstoffe. |
@@ -1037,7 +1118,7 @@ Die in Version 0.3 an die Architekturphase übergebenen Punkte sind gelöst. Die
 | Persistenz der laufenden Partie | Schrittergebnis wird vor der Animation gespeichert; unterbrochene Animation wird wiederholt | ADR-014, 3.5, US-AB-05 |
 | Kennungen und Zuordnungen | UUID Version 4; Zuordnungen nur im Speicher während eines Imports | ADR-011, 3.9 |
 | Sicherungspunkte | Im Exportformat in derselben Datenbank; Wiederherstellung in einer Transaktion | ADR-013, 3.10 |
-| Ton | Web Audio mit Audio-Session „ambient“ | ADR-017, US-IN-03 |
+| Ton | Web Audio mit Audio-Session „ambient“; nach Version 1 (E-38) | ADR-017, US-IN-03 |
 | Update-Mechanismus | Kontrollierte Umschaltung über versionierte Caches; Sicherungsdialog | ADR-015, 3.12, US-UP-01, US-UP-02 |
 
 Ergebnisse der Setup-Planung *(ergänzt in 0.5)*:
@@ -1046,7 +1127,8 @@ Ergebnisse der Setup-Planung *(ergänzt in 0.5)*:
 |---|---|---|
 | Dauerhafte Adresse | `https://boardbrain.github.io/` über die Organisation `boardbrain` | OP-12, E-21, ADR-022 |
 | Arbeitsweise | Story-Bündel in Arbeitsbranches; Claude Code eröffnet Pull Requests, der Product Owner nimmt ab und mergt; Haltepunkte | EP-10 bis EP-12, E-22, ADR-023 |
-| Erste Veröffentlichung | Platzhalter-Release 0.1.0 ohne Service Worker; Vorabversionen offen | EP-02, E-25, OP-13 |
+| Erste Veröffentlichung | Platzhalter-Release 0.1.0 ohne Service Worker | EP-02, E-25 |
+| Vorabversionen | 0.x nach abgeschlossenen Inkrementen unter der echten Adresse, Daten ohne Versprechen, erste 0.2.0 nach I2 | EP-02, E-40, OP-13 geklärt |
 | Arbeitsregeln | Entwicklungsrichtlinien und `CLAUDE.md` im Repository | EP-12 |
 
-Offen ist OP-13 (Vorabversionen), zu entscheiden nach Inkrement I2.
+OP-13 (Vorabversionen) ist seit 0.18 geklärt (E-40).

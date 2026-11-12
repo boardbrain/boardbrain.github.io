@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.10 |
+| Version | 0.22 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 06.10.2026 |
+| Stand | 12.11.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -24,6 +24,18 @@
 | 0.8 | 06.10.2026 | Ergebnisse der Setup-Planung: OP-12 geklärt (E-21, Adresse `https://boardbrain.github.io/`); Arbeitsweise mit Story-Bündeln, Haltepunkten und Abnahme durch den Product Owner (neu EP-10 bis EP-12, E-22); `main` vor Release 1.0 nur mit Platzhalter (EP-02 präzisiert, E-25); Arbeitsbranches und Pull Requests präzisiert (EP-03, EP-04); Lizenz MIT (E-23); Barrierefreiheit ausdrücklich kein Ziel von Version 1 (E-24); Modelleinsatz für Setup und kritische Teile ergänzt (9.3); neuer offener Punkt OP-13 (Vorabversionen) |
 | 0.9 | 06.10.2026 | Lizenz von MIT auf PolyForm Strict License 1.0.0 geändert (E-23) (PR #1) |
 | 0.10 | 07.10.2026 | OP-13 ergänzt: Abnahme auf dem iPhone nur über Geräte von Freunden (PR #2) |
+| 0.11 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung beginnt vor dem Design; OP-11 parallel zu I1, OP-06 vor I5; Verweis auf `docs/Umsetzungsplan.md` (13) |
+| 0.12 | 07.10.2026 | Übersicht über Personen und Gruppen mit Detailansichten (neu FA-VW-06) (PR #13) |
+| 0.13 | 07.10.2026 | Design D-1: OP-11 geklärt (E-26); wählbare Designs mit Standard „Holz“ und Standard-Akzent je Design statt einer einzelnen Akzentfarbe mit Standard Lila (NFA-GB-03) |
+| 0.14 | 08.10.2026 | Abnahme von I1-C: globale Gruppen können Catan ausschließen (FA-PG-04, E-27); überarbeitete Gruppenfarben-Palette und Kontrastregel für Spielfarben (E-28, E-26 angepasst) |
+| 0.15 | 08.10.2026 | Design D-3: Smartphones nur im Hochformat, Tablets und PC in beiden Ausrichtungen (NFA-PL-04 präzisiert, E-29) |
+| 0.16 | 09.10.2026 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus (FA-SP-06, E-30) |
+| 0.17 | 26.10.2026 | Abnahme von I1-F: Personen- und Gruppennamen app-weit eindeutig, auch gegenüber archivierten (FA-PG-09, FA-VW-01, FA-VW-02, E-31) |
+| 0.18 | 29.10.2026 | Zuschnitt von I2: Umsetzung in fachlichen Blöcken einschließlich ihrer Should- und Could-Anteile (E-32); Design der Inszenierung (OP-06) innerhalb von I2 (13) |
+| 0.19 | 02.11.2026 | Design I2-C (Entscheidungen des Product Owners): Platzierungsreihenfolge abschaltbar, dann selbst festlegen oder ohne Platzierung spielen (5.4, FA-AB-02, neu FA-LS-07, FA-PL-09, FA-SR-04, E-33); Vorwärts-Knopf nennt, was er tut, und Rückblick auf frühere Schritte (FA-AB-03, neu FA-AB-10, E-34) |
+| 0.20 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (FA-AB-03, E-35); Personen werden mit Karten gelost statt mit einem Glücksrad (Begriff „Schritt“, FA-AB-03, FA-LS-02, FA-IN-02, E-36, OP-06); Startrohstoffe liegen verdeckt und werden von Hand aufgedeckt (neu FA-SR-05, E-37); nach einem Neustart läuft nur eine unterbrochene Animation erneut ab (FA-AB-07) |
+| 0.21 | 11.11.2026 | Design D-2 (Entscheidungen des Product Owners): Klänge nach Version 1 verschoben (FA-IN-03, FA-IN-05, FA-IN-07, E-38, PP-20); Aufblinken verrät bis zur Festlegung nichts über das Ergebnis (FA-IN-01, E-39); neuer Spannungsmodus der Platzierung (neu FA-IN-08, FA-IN-06, E-39); OP-06 geklärt (13) |
+| 0.22 | 12.11.2026 | OP-13 geklärt: Vorabversionen 0.x der echten App unter der echten Adresse nach abgeschlossenen Inkrementen, Daten ohne Versprechen, Update durch Schließen und Neuöffnen bis I4, kein Hinweis „Testversion“ (E-40, EP-02, 13) |
 
 ## Inhaltsverzeichnis
 
@@ -99,7 +111,7 @@ BoardBrain ist eine plattformunabhängige, vollständig offline nutzbare App, di
 | Ergebnis | Die zu einer Partie erfassten Daten: Datum, optional Uhrzeit, Sieger bzw. Unentschieden, optional Siegpunkte aller Beteiligten und Notizen; bei Catan zusätzlich Spielversion, Modus und Catan-Farben. |
 | Generierung | Der von der App gesteuerte, schrittweise Ablauf aller Zufallsentscheidungen beim Aufbau einer Partie. |
 | Losschritt | Ein einzelner Zufallsentscheid innerhalb der Generierung, z. B. „Wer legt die Häfen?“. |
-| Schritt | Kleinste Einheit der Generierung, die einzeln dargestellt, bestätigt und wiederholt wird: ein Dreh des Glücksrads, ein Gebäude, eine Straße oder die Startrohstoffe einer Person. |
+| Schritt | Kleinste Einheit der Generierung, die einzeln dargestellt, bestätigt und wiederholt wird: das Losen einer Person (Losschritt oder ein Platz der Reihenfolge), ein Gebäude, eine Straße oder die Startrohstoffe einer Person. |
 | Kreuzung | Eckpunkt zwischen Feldern, an dem Siedlungen und Städte stehen. |
 | Kante | Verbindung zwischen zwei Kreuzungen, auf der Straßen liegen. |
 | Inlandkreuzung | Kreuzung, die an drei Landfelder grenzt, also nicht an Wasser. |
@@ -140,6 +152,7 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | FA-SP-03 | Eigene Spiele werden in einem separaten Bereich „Eigene Spiele“ angezeigt und sind dadurch von unterstützten Spielen unterscheidbar. |
 | FA-SP-04 | Für unterstützte Spiele können eine Spielversion und ein Modus gewählt werden. |
 | FA-SP-05 | Spielfarben und Siegpunkte sind spielspezifische Merkmale. Jedes Spiel legt fest, ob es diese unterstützt. In Version 1 unterstützt ausschließlich Catan Spielfarben (Rot, Blau, Weiß, Orange) und Siegpunkte; eigene Spiele haben keine Spielfarben und keine Siegpunkte. Gruppenfarben (FA-PG-07) sind davon unabhängig. *(geändert in 0.4)* |
+| FA-SP-06 | Die Einstellung „Ich hasse Catan!“ (Untertitel „Die Catan-Funktionen werden ausgeblendet.“) blendet Catan app-weit aus: keine Generierung und keine neue Catan-Partie, Catan in keiner Spielauswahl, bei allen Gruppen ist Catan ausgeschlossen und die Bindung „Nur Catan“ nicht wählbar. Bisherige Catan-Ergebnisse bleiben sichtbar. Das Einschalten erfordert eine Bestätigung nach einer Warnung; die Einstellung ist jederzeit umkehrbar und verändert die gespeicherten Einstellungen der Gruppen nicht. Standard ist aus. *(neu in 0.16)* |
 
 ### 5.2 Personen und Gruppen
 
@@ -148,12 +161,12 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | FA-PG-01 | Nutzer können beliebig viele Personen anlegen. |
 | FA-PG-02 | Nutzer können beliebig viele Gruppen anlegen. |
 | FA-PG-03 | Eine Gruppe besteht aus einer festen Menge von Personen. Eine Person kann mehreren Gruppen angehören. |
-| FA-PG-04 | Eine Gruppe ist entweder global oder an genau ein Spiel gebunden. |
+| FA-PG-04 | Eine Gruppe ist entweder global oder an genau ein Spiel gebunden. Eine globale Gruppe kann Catan ausschließen; sie spielt dann alle übrigen Spiele und hat keine Catan-Farben. *(ergänzt in 0.14)* |
 | FA-PG-05 | Bei Spielen mit Spielfarben (FA-SP-05) hat jede Person innerhalb einer Gruppe, die dieses Spiel spielen kann, je Spiel eine Standard-Spielfarbe. *(präzisiert in 0.4)* |
 | FA-PG-06 | Die Spielfarbe einer Person kann für eine einzelne Partie abweichend gewählt werden, ohne die Standardfarbe zu verändern. |
 | FA-PG-07 | Jede Person hat innerhalb einer Gruppe eine Gruppenfarbe aus einer modernen, spielunabhängigen Palette, die auch die vier Catan-Farben enthält. Gruppenfarbe und Catan-Farbe dürfen gleich sein. In an Catan gebundenen Gruppen ist die Catan-Farbe zugleich die Gruppenfarbe. *(neu in 0.4)* |
 | FA-PG-08 | Farben gelten ausschließlich innerhalb einer Gruppe und sind dort je Farbart eindeutig. Wird eine bereits belegte Farbe gewählt, tauschen die beiden Personen ihre Farben. Beim Anlegen einer Gruppe werden freie Farben automatisch der Reihe nach vergeben; Farben aus anderen Gruppen werden weder übernommen noch vorgeschlagen. *(neu in 0.4)* |
-| FA-PG-09 | Eine Gruppe hat einen Namen und 2 bis 12 Mitglieder. Die Mitglieder sind nach dem Anlegen unveränderlich. Innerhalb einer Gruppe sind die Personennamen eindeutig, damit Personen beim Import eindeutig zugeordnet werden können. *(neu in 0.4, ergänzt in 0.5)* |
+| FA-PG-09 | Eine Gruppe hat einen Namen und 2 bis 12 Mitglieder. Die Mitglieder sind nach dem Anlegen unveränderlich. Personennamen sind app-weit eindeutig, ebenso Gruppennamen, jeweils auch gegenüber archivierten Datensätzen, damit Personen und Gruppen unterscheidbar bleiben und beim Import eindeutig zugeordnet werden können. *(neu in 0.4, ergänzt in 0.5, geändert in 0.17)* |
 | FA-PG-10 | Catan kann nur von Gruppen mit 2 bis 4 Mitgliedern gespielt werden. Eine an Catan gebundene Gruppe hat höchstens 4 Mitglieder. *(neu in 0.4)* |
 
 ### 5.3 Ablauf einer Partie mit Generierung
@@ -161,27 +174,29 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | ID | Anforderung |
 |---|---|
 | FA-AB-01 | Der Ablauf beginnt mit der Auswahl von Spiel und Gruppe. Alle Mitglieder der Gruppe gelten als beteiligt. |
-| FA-AB-02 | Vor der Generierung werden Spielversion, Modus und Optionen festgelegt, insbesondere welche Losschritte aktiv sind und ob Startrohstoffe gezogen werden. |
-| FA-AB-03 | Jeder Schritt der Generierung muss vom Nutzer ausdrücklich bestätigt werden, bevor der nächste beginnt. Es gibt keinen automatischen Durchlauf. Ein Schritt ist ein Dreh des Glücksrads, ein Gebäude, eine Straße oder die Startrohstoffe einer Person; jedes Gebäude und jede Straße hat eine eigene Animation. *(präzisiert in 0.4)* |
+| FA-AB-02 | Vor der Generierung werden Spielversion, Modus und Optionen festgelegt, insbesondere welche Losschritte aktiv sind, ob die Platzierungsreihenfolge gelost, selbst festgelegt oder ohne Platzierung gespielt wird und ob Startrohstoffe gezogen werden. *(ergänzt in 0.19)* |
+| FA-AB-03 | Jeder Schritt der Generierung muss vom Nutzer ausdrücklich bestätigt werden, bevor der nächste beginnt. Es gibt keinen automatischen Durchlauf. Ein Schritt ist das Losen einer Person (Losschritt oder ein Platz der Reihenfolge), ein Gebäude, eine Straße oder die Startrohstoffe einer Person; jedes Gebäude und jede Straße hat eine eigene Animation. Wechselt die Ansicht (jeder Losschritt, Beginn der Reihenfolge, Beginn der Platzierung, Startrohstoffe jeder Person), zeigt die App den Schritt zuerst ohne Ergebnis; gelost wird erst auf Wunsch. Der Knopf zum Bestätigen nennt, was er tut: „Losen“, wenn er lost, „Weiter“, wenn er ohne zu losen zur nächsten Ansicht führt, „Zur Übersicht“ nach dem letzten Schritt. *(präzisiert in 0.4, ergänzt in 0.19 und 0.20)* |
 | FA-AB-04 | Jeder Schritt kann wiederholt werden, solange die Partie läuft. Vor der Wiederholung erscheint eine Warnung. Verworfen werden nur die vom wiederholten Schritt abhängigen Folgeschritte: bei einem Gebäude die zugehörige Straße und alle späteren Gebäude und Straßen, bei der Platzierungsreihenfolge die Platzierung; bei LS-01, LS-03, LS-04, einer Straße oder Startrohstoffen keine. Wiederholungen werden nicht protokolliert. *(präzisiert in 0.4)* |
 | FA-AB-05 | Nach Abschluss der Generierung bleibt das Ergebnis während der laufenden Partie einsehbar. |
 | FA-AB-06 | Nach der Generierung bietet die App das Eintragen eines Ergebnisses an. Dies ist optional und kein Pflichtschritt. |
-| FA-AB-07 | Es gibt höchstens eine laufende Partie. Sie übersteht das Schließen und Neustarten der App unverändert. Das Ergebnis eines Schritts steht fest, bevor seine Animation beginnt; wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt. *(neu in 0.4, ergänzt in 0.7)* |
+| FA-AB-07 | Es gibt höchstens eine laufende Partie. Sie übersteht das Schließen und Neustarten der App unverändert. Das Ergebnis eines Schritts steht fest, bevor seine Animation beginnt; wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; eine schon abgeschlossene Animation läuft nicht noch einmal ab. *(neu in 0.4, ergänzt in 0.7 und 0.20)* |
 | FA-AB-08 | Eine laufende Partie endet mit dem Speichern eines Ergebnisses oder mit „Beenden ohne Ergebnis“. Danach wird die Generierung verworfen; gespeichert bleibt nur ein ggf. erfasstes Ergebnis. *(neu in 0.4)* |
 | FA-AB-09 | Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. *(neu in 0.7)* |
+| FA-AB-10 | Während der Generierung lassen sich frühere Schritte mit ihrem gespeicherten Ergebnis ansehen (Rückblick), ohne dass etwas gelost wird. *(neu in 0.19)* |
 
 ### 5.4 Losschritte (Catan, Modus „Standard“)
 
-Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt; anschließend folgen Platzierung und Startrohstoffe. LS-01, LS-03 und LS-04 sind einzeln aktivierbar bzw. überspringbar. LS-02 ist immer aktiv, da die Platzierung zum Kern gehört. *(geändert in 0.4)*
+Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt; anschließend folgen Platzierung und Startrohstoffe. LS-01, LS-03 und LS-04 sind einzeln aktivierbar bzw. überspringbar. LS-02 ist Standard; statt zu losen, kann die Reihenfolge selbst festgelegt oder ohne Platzierung gespielt werden (FA-LS-07). *(geändert in 0.4 und 0.19)*
 
 | ID | Anforderung |
 |---|---|
 | FA-LS-01 | Losen, welche Person die gemischten Landschaftsfelder auslegt. |
-| FA-LS-02 | Losen der Platzierungsreihenfolge aller beteiligten Personen in aufeinanderfolgenden Drehs des Glücksrads; der letzte Platz ergibt sich automatisch. Die Person auf Platz 1 beginnt anschließend auch das Spiel. *(präzisiert in 0.4)* |
+| FA-LS-02 | Losen der Platzierungsreihenfolge aller beteiligten Personen in aufeinanderfolgenden Ziehungen aus den jeweils verbleibenden Personen; der letzte Platz ergibt sich automatisch. Die Person auf Platz 1 beginnt anschließend auch das Spiel. *(präzisiert in 0.4, geändert in 0.20)* |
 | FA-LS-03 | Losen, welche Person die gemischten Häfen auslegt. |
 | FA-LS-04 | Losen, welche Person die Zahlenchips aus dem Beutel auf die Felder legt. |
 | FA-LS-05 | Das Losen einer Person (FA-LS-01, 03, 04) wird als wiederverwendbarer, spielunabhängiger Baustein umgesetzt. |
 | FA-LS-06 | Die Ziehungen von FA-LS-01, 03 und 04 sind unabhängig; dieselbe Person kann mehrfach gelost werden. *(neu in 0.4)* |
+| FA-LS-07 | Statt die Platzierungsreihenfolge zu losen, kann die bedienende Person sie selbst festlegen, indem sie die Personen der Reihe nach antippt (der letzte Platz ergibt sich; die Platzierung folgt dieser Reihenfolge), oder ohne Platzierung spielen. Standard ist Losen. *(neu in 0.19)* |
 
 ### 5.5 Platzierung von Gebäuden und Straßen
 
@@ -195,7 +210,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | FA-PL-06 | Gebäude und Straßen werden in der Farbe der jeweiligen Person dargestellt. |
 | FA-PL-07 | Die Darstellung des Bretts entspricht der Ausrichtung des physischen Bretts: Felder mit nach oben zeigender Spitze in Reihen mit 3, 4, 5, 4 und 3 Feldern von oben nach unten; der Umriss des Bretts ist oben und unten gerade und links und rechts spitz. *(präzisiert in 0.4, vereinheitlicht in 0.7)* |
 | FA-PL-08 | Die App kennt in Version 1 weder Landschaften noch Zahlenchips. Das Brett wird ohne Inhalte dargestellt. |
-| FA-PL-09 | Die Platzierung ist fester Bestandteil der Generierung. Zu ihrem Beginn bietet ein kleiner Button an, sie ausnahmsweise zu überspringen. *(neu in 0.4)* |
+| FA-PL-09 | Die Platzierung gehört zur Generierung, sofern eine Platzierungsreihenfolge feststeht (FA-LS-07). Nach dem Losen der Reihenfolge bietet ein kleiner Button an, sie ausnahmsweise zu überspringen. *(neu in 0.4, geändert in 0.19)* |
 
 ### 5.6 Startrohstoffe
 
@@ -204,19 +219,21 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | FA-SR-01 | Das Ziehen der Startrohstoffe ist eine aktivierbare Option. Standard ist deaktiviert. *(präzisiert in 0.4)* |
 | FA-SR-02 | Jede Person erhält eine einstellbare Anzahl von 1 bis 5 Startrohstoffen (Standard: 2), die zufällig aus den fünf Rohstoffarten gezogen werden (Holz, Lehm, Wolle, Getreide, Erz). |
 | FA-SR-03 | Einstellbar ist, ob mit oder ohne Zurücklegen gezogen wird. Standard ist mit Zurücklegen, wobei doppelte Rohstoffe möglich sind. Ohne Zurücklegen erhält jede Person nur unterschiedliche Rohstoffe. |
-| FA-SR-04 | Die Startrohstoffe werden nach der Platzierung gezogen, je Person ein Schritt in Platzierungsreihenfolge. *(neu in 0.4)* |
+| FA-SR-04 | Die Startrohstoffe werden nach der Platzierung gezogen, je Person ein Schritt in Platzierungsreihenfolge; ohne Reihenfolge in der Sitzreihenfolge der Gruppe. *(neu in 0.4, ergänzt in 0.19)* |
+| FA-SR-05 | Die gezogenen Startrohstoffe einer Person liegen zunächst verdeckt; die bedienende Person deckt sie selbst auf, einzeln durch Antippen oder alle auf einmal. Aufgedeckte Karten bleiben aufgedeckt, auch nach einem Neustart. *(neu in 0.20, E-37)* |
 
 ### 5.7 Inszenierung
 
 | ID | Anforderung |
 |---|---|
-| FA-IN-01 | Die Platzierung wird schrittweise dargestellt, wobei Kreuzungen und Kanten vor der Festlegung aufblinken. |
-| FA-IN-02 | Das Losen von Personen wird als Glücksrad dargestellt. |
-| FA-IN-03 | Die Generierung wird von dezenten Soundeffekten begleitet. |
+| FA-IN-01 | Die Platzierung wird schrittweise dargestellt, wobei Kreuzungen und Kanten vor der Festlegung aufblinken. Bis zur Festlegung verrät die Darstellung nichts über das Ergebnis, auch nicht für jemanden, der ihre Regeln kennt. *(ergänzt in 0.21, E-39)* |
+| FA-IN-02 | Das Losen von Personen wird als Ziehen von Karten dargestellt: Vor dem Losen liegen die Personenkarten offen, sie werden gemischt, und die geloste Karte wird aufgedeckt. *(geändert in 0.20, E-36)* |
+| FA-IN-03 | Die Generierung wird von dezenten Soundeffekten begleitet. *(nach Version 1 verschoben in 0.21, E-38)* |
 | FA-IN-04 | Es wird keine Vibration verwendet. |
-| FA-IN-05 | Ein Tonschalter in den Einstellungen schaltet alle Soundeffekte ab. Standard ist eingeschaltet. *(neu in 0.4)* |
-| FA-IN-06 | Animationen lassen sich nur über einen klar beschrifteten Button überspringen; Antippen anderer Stellen beschleunigt oder überspringt nichts. Eine Einstellung für das Animationstempo gibt es nicht. *(neu in 0.4)* |
-| FA-IN-07 | Soundeffekte respektieren die Stummschaltung des Geräts, soweit die Plattform das erlaubt, und unterbrechen keine Musikwiedergabe anderer Apps. *(neu in 0.7)* |
+| FA-IN-05 | Ein Tonschalter in den Einstellungen schaltet alle Soundeffekte ab. Standard ist eingeschaltet. *(neu in 0.4; nach Version 1 verschoben in 0.21, E-38)* |
+| FA-IN-06 | Animationen lassen sich nur über einen klar beschrifteten Button überspringen; Antippen anderer Stellen beschleunigt oder überspringt nichts. Eine Einstellung für das Animationstempo gibt es nicht; der Spannungsmodus (FA-IN-08) ist keine solche Einstellung, sondern eine eigene Darstellung der Platzierung. *(neu in 0.4, ergänzt in 0.21)* |
+| FA-IN-07 | Soundeffekte respektieren die Stummschaltung des Geräts, soweit die Plattform das erlaubt, und unterbrechen keine Musikwiedergabe anderer Apps. *(neu in 0.7; nach Version 1 verschoben in 0.21, E-38)* |
+| FA-IN-08 | Ein Schalter auf der Platzierung schaltet einen Spannungsmodus ein. Er gilt ab dem nächsten Stein für alle folgenden, bis er wieder ausgeschaltet wird, und ist bei jeder neuen Partie und nach jedem Neustart der App aus. Bei einem Gebäude leuchten alle gültigen Kreuzungen und erlöschen nacheinander; bei zwei verbleibenden hält die Darstellung an, und erst auf Knopfdruck entscheidet ein Duell der beiden. Bei einer Straße erlöschen die freien Kanten nacheinander, ohne Duell. *(neu in 0.21, E-39)* |
 
 ### 5.8 Ergebnisse
 
@@ -285,11 +302,12 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 
 | ID | Anforderung |
 |---|---|
-| FA-VW-01 | Personen können umbenannt werden, sofern dadurch in keiner ihrer Gruppen ein doppelter Name entsteht, und archiviert werden. Löschen ist nur möglich, wenn die Person keiner Gruppe angehört, auch keiner archivierten. *(ergänzt in 0.5)* |
-| FA-VW-02 | Gruppen können umbenannt, in ihren Farben geändert und in ihrer Spielbindung geändert werden, sofern alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen. Die Mitglieder sind nicht änderbar. |
+| FA-VW-01 | Personen können umbenannt werden, sofern der neue Name noch nicht vergeben ist (FA-PG-09), und archiviert werden. Löschen ist nur möglich, wenn die Person keiner Gruppe angehört, auch keiner archivierten. *(ergänzt in 0.5, geändert in 0.17)* |
+| FA-VW-02 | Gruppen können umbenannt (mit eindeutigem Namen, FA-PG-09), in ihren Farben geändert und in ihrer Spielbindung geändert werden, sofern alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen. Die Mitglieder sind nicht änderbar. *(ergänzt in 0.17)* |
 | FA-VW-03 | Gruppen können archiviert und wiederbelebt werden; Partien und Statistik bleiben dabei erhalten. Aktive und archivierte Gruppen können nach deutlicher Warnung gelöscht werden; dabei werden alle ihre Partien entfernt. |
 | FA-VW-04 | Eigene Spiele können umbenannt und archiviert werden. Löschen ist nur ohne zugehörige Ergebnisse möglich. Catan kann weder umbenannt noch archiviert noch gelöscht werden. |
 | FA-VW-05 | Archivierte Personen, Gruppen und Spiele erscheinen in keiner Auswahlliste für neue Daten, bleiben aber in bestehenden Daten und Statistiken sichtbar. |
+| FA-VW-06 | Die Personenliste zeigt zu jeder Person ihre Gruppen. Personen und Gruppen lassen sich antippen und öffnen eine Detailansicht: bei Personen mit ihren Gruppen, bei Gruppen mit Bindung, Mitgliedern und deren Farben. Gruppen und Mitglieder sind in den Detailansichten wiederum antippbar. *(neu in 0.12)* |
 
 ### 5.14 Installation und Speicherschutz *(neu in 0.7)*
 
@@ -349,7 +367,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | NFA-PL-01 | Die App läuft auf Android, iOS (Smartphone und iPad) und Windows. Abgenommen wird mit Brave unter Android und Windows sowie mit Safari unter iOS und iPadOS; Chrome dient als Vergleichsbrowser. *(präzisiert in 0.7)* |
 | NFA-PL-02 | Die App ist so plattformunabhängig wie möglich umgesetzt. |
 | NFA-PL-03 | Die App funktioniert nach der Installation vollständig offline. Internet wird nur für Updates benötigt. |
-| NFA-PL-04 | Die Darstellung passt sich an Smartphone- und Tablet-Bildschirme an. |
+| NFA-PL-04 | Die Darstellung passt sich an Smartphone- und Tablet-Bildschirme an. Smartphones werden im Hochformat genutzt; im Querformat zeigt die App auf Smartphones nur einen Hinweis, das Gerät zu drehen. Tablets und PC sind in beiden Ausrichtungen nutzbar. *(präzisiert in 0.15, E-29)* |
 
 ### 7.3 Datenhaltung und Datenschutz
 
@@ -367,7 +385,7 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 |---|---|
 | NFA-GB-01 | Modernes, frisches Erscheinungsbild mit eigenständiger Handschrift, bewusst kein generischer „KI-Look“. |
 | NFA-GB-02 | Version 1 erhält ausschließlich einen Dunkelmodus in angenehmen, mitteldunklen Tönen, kein reines Schwarz. |
-| NFA-GB-03 | Es gibt eine Akzentfarbe, die der Nutzer aus 6 bis 8 vordefinierten Tönen wählen kann. Standard ist ein dunkles Lila. *(präzisiert in 0.4)* |
+| NFA-GB-03 | Das Erscheinungsbild ist über Designs wählbar. Ein Design legt Oberflächen, Text, Hintergrund und eine Standard-Akzentfarbe fest; Catan- und Gruppenfarben sind in allen Designs gleich. Version 1 enthält die Designs „Holz“ (Standard), „Tiefsee“, „Wald“ und „Glas“; weitere Designs lassen sich ohne Umbau ergänzen. Zusätzlich kann der Nutzer die Akzentfarbe aus 6 bis 8 vordefinierten Tönen wählen; ohne Auswahl gilt die Standard-Akzentfarbe des Designs. *(präzisiert in 0.4, geändert in 0.13: vorher eine Akzentfarbe mit Standard Lila)* |
 | NFA-GB-04 | Mikroanimationen wie Hover-Effekte. Auf Touch-Geräten werden gleichwertige Effekte bei Berührung eingesetzt. |
 | NFA-GB-05 | Farben werden zentral als Design-Tokens definiert, damit ein späterer Hellmodus ohne Umbau möglich ist. |
 | NFA-GB-06 | Die Darstellung des Bretts ist eine eigenständige, generische Grafik ohne Verwendung von Original-Grafiken des Spiels. |
@@ -426,7 +444,7 @@ Das Projekt folgt einem strukturierten, sequenziellen Vorgehen:
 | ID | Festlegung |
 |---|---|
 | EP-01 | Die Versionsverwaltung erfolgt mit Git auf GitHub. |
-| EP-02 | Es wird mit Branches gearbeitet. Der Branch `main` enthält ausschließlich freigegebene, veröffentlichungsreife Stände. Vor Release 1.0 enthält `main` nur den Platzhalter aus der Setup-Phase (Release 0.1.0): eine Seite ohne Service Worker und ohne Datenspeicherung, mit der die Veröffentlichungskette nachgewiesen wird (E-25). *(präzisiert in 0.8)* |
+| EP-02 | Es wird mit Branches gearbeitet. Der Branch `main` enthält ausschließlich freigegebene, veröffentlichungsreife Stände. Vor Release 1.0 enthält `main` Vorabversionen (0.x) nach abgeschlossenen Inkrementen, veröffentlicht nur nach Freigabe durch den Product Owner (E-40). Der erste Stand war der Platzhalter aus der Setup-Phase (Release 0.1.0): eine Seite ohne Service Worker und ohne Datenspeicherung, mit der die Veröffentlichungskette nachgewiesen wurde (E-25). *(präzisiert in 0.8 und 0.22)* |
 | EP-03 | Die Entwicklung findet in separaten Branches statt: `develop` als Integrationsstand sowie kurzlebige Arbeitsbranches, die von `develop` abzweigen und jeweils ein Bündel zusammengehöriger User Stories oder eine Aufgabe enthalten. Pushes in diese Branches haben keine Auswirkung auf die veröffentlichte App. *(präzisiert in 0.8)* |
 | EP-04 | Änderungen gelangen ausschließlich per Pull Request und Merge nach `develop` und `main`, nachdem sie getestet wurden. Nach `main` gelangen nur Pull Requests aus `develop` (Release) oder aus einem Hotfix-Branch. GitHub erzwingt dies über Schutzregeln. *(präzisiert in 0.8)* |
 | EP-05 | Jede Veröffentlichung wird als Release mit Versionsnummer nach Semantic Versioning (z. B. 1.0.0) und einer kurzen Änderungsbeschreibung markiert. |
@@ -486,6 +504,21 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-23 | Der Quellcode steht unter der PolyForm Strict License 1.0.0 mit dem Hinweis „Required Notice: Copyright (c) 2026 Jonasss29“; er ist öffentlich einsehbar (E-06), aber nicht Open Source: Nutzung nur für nichtkommerzielle Zwecke, Weitergabe und Änderungen durch Dritte sind nicht erlaubt. Klänge und Schriften behalten ihre eigenen Lizenzen *(neu in 0.8, geändert in 0.9: vorher MIT)* | Der Product Owner behält die Kontrolle über Weitergabe und kommerzielle Nutzung; standardisierter, verständlicher Lizenztext; verträglich mit den Lizenzen der Abhängigkeiten (MIT, ISC, BSD, Apache 2.0 erlauben die Verwendung in nicht offenem Code); enthält einen Haftungsausschluss; Pseudonym statt Klarname |
 | E-24 | Barrierefreiheit ist kein Ziel von Version 1 *(neu in 0.8)* | Die App wird nur im Freundeskreis genutzt. Unberührt bleiben die Erkennbarkeit von Gebäuden und Straßen (FA-PL-05, FA-PL-06, US-PL-04) und die technische Regel, echte Bedienelemente mit Beschriftung zu verwenden (Entwicklungsrichtlinien) |
 | E-25 | Erste Veröffentlichung ist ein Platzhalter (Release 0.1.0) ohne Service Worker und ohne Datenspeicherung; über Vorabversionen der echten App vor 1.0 wird nach Inkrement I2 entschieden (OP-13) *(neu in 0.8)* | Die Veröffentlichungskette wird früh auf der echten Adresse nachgewiesen, ohne dass etwas auf den Geräten zurückbleibt |
+| E-26 | Farbwerte nach Design D-1: Standarddesign „Holz“ (warmes, mitteldunkles Braun, Akzent Bernstein); weitere Designs „Tiefsee“ (Petrol), „Wald“ (Grüngrau) und „Glas“ (Farbverlauf mit Milchglasflächen); kräftige Catan-Farben und eine gedeckte Gruppenfarben-Palette; 6 Akzentfarben (Indigo, Blau, Petrol, Grün, Bernstein, Beere). Die Werte stehen ausschließlich in `src/ui/styles/tokens.css` *(neu in 0.13; Gruppenfarben und Kontrastregel geändert in 0.14 durch E-28)* | Auswahl des Product Owners anhand einer Vorschau auf den Abnahmegeräten; alle Werte erreichen in allen Designs mindestens 4,5 : 1 für Text, sodass die App unabhängig vom Design lesbar bleibt |
+| E-27 | Eine globale Gruppe kann Catan ausschließen; sie hat dann auch bei 2 bis 4 Mitgliedern nur Gruppenfarben *(neu in 0.14)* | Wer mit einer kleinen Gruppe nie Catan spielt, muss keine Catan-Farben vergeben; die Gruppe bleibt dennoch für alle übrigen Spiele offen. Wunsch des Product Owners bei der Abnahme von I1-C |
+| E-28 | Überarbeitete Gruppenfarben-Palette mit 12 gut unterscheidbaren, gedeckten Farben: Rot, Blau, Orange und Weiß (Catan-Töne), Gelb, Moosgrün, Indigo (hell), Petrol, Magenta, Kaffee, Rosé, Steingrau. Spielfarben erreichen mindestens 3 : 1 zum Hintergrund jedes Designs und mindestens 2,3 : 1 auf dessen Karten *(neu in 0.14)* | Die Unterscheidbarkeit der Personenfarben untereinander hat Vorrang vor dem Kontrast zum Hintergrund: In der Palette aus D-1 waren Grün, Limette und Petrol sowie Violett und Indigo zu ähnlich (Farbabstand ΔE bis 13); die neue Palette erreicht mindestens ΔE 29. Ausgewählt vom Product Owner in der Farbvorschau auf den Abnahmegeräten, in allen vier Designs geprüft |
+| E-29 | Smartphones nur im Hochformat; im Querformat erscheint statt der App ein Hinweis zum Drehen. Tablets (auch aufgeklappte Falt-Smartphones) und PC in beiden Ausrichtungen *(neu in 0.15)* | Im Querformat ist ein Smartphone zu niedrig für Navigation und Inhalt; ein Hinweis wirkt auf Android und iOS gleich, eine echte Sperre gibt es nur unter Android und würde dort auch Tablets sperren. Entscheidung des Product Owners in Design D-3 |
+| E-30 | Einstellung „Ich hasse Catan!“ blendet die Catan-Funktionen app-weit aus; Einschalten nur nach Warnung und Bestätigung; umkehrbar ohne Änderung gespeicherter Gruppeneinstellungen; Gruppen, die währenddessen angelegt werden, schließen Catan aus und können es später wieder zulassen *(neu in 0.16)* | Voraussichtlich nutzen viele die App ganz ohne Catan, nur für Ergebnisse und Statistik; für sie sind Generierung, Catan-Farben und Catan-Auswahl nur Ballast. Entscheidung des Product Owners nach Design D-3 |
+| E-31 | Personen- und Gruppennamen sind app-weit eindeutig, auch gegenüber archivierten Datensätzen; Groß- und Kleinschreibung sowie Leerzeichen am Anfang und Ende zählen nicht. Die App prüft schon bei der Eingabe *(neu in 0.17)* | Personen und Tische bleiben in Listen, Suche, Ergebnissen und beim Import unterscheidbar; ein bloßer Hinweis ließe Verwechslungen zu. Entscheidung des Product Owners bei der Abnahme von I1-F |
+| E-32 | Umgesetzt wird in fachlichen Blöcken: Ein Inkrement schließt einen Block vollständig ab, mit allen zugehörigen Must-, Should- und Could-Stories. Die Generierung (I2) umfasst damit auch Inszenierung, Startrohstoffe, abweichende Farben einer Partie und das Überspringen der Platzierung. Präzisiert E-10; der Umfang von Version 1 bleibt unverändert *(neu in 0.18)* | Ein Bereich soll fertig sein, bevor ein anderer beginnt, statt über mehrere Inkremente verteilt zu bleiben. Animationen und Design gehören zum Kern der App. Entscheidung des Product Owners beim Zuschnitt von I2 |
+| E-33 | Die Platzierungsreihenfolge ist abschaltbar: Statt zu losen, wird sie selbst festgelegt (die Platzierung folgt ihr) oder es wird ohne Platzierung gespielt; Startrohstoffe folgen dann der festgelegten Reihenfolge bzw. der Sitzreihenfolge der Gruppe *(neu in 0.19)* | Manche Gruppen wollen Reihenfolge oder Startaufstellung selbst bestimmen und trotzdem Losschritte und Startrohstoffe der App nutzen. Entscheidung des Product Owners im Design von I2-C |
+| E-34 | Der Vorwärts-Knopf im Ablauf nennt, was er tut („Losen“, „Blättern“, „Zur Übersicht“); frühere Schritte lassen sich im Rückblick ansehen, ohne neu zu losen *(neu in 0.19)* | Am Tisch soll niemand versehentlich einen Schritt losen, der schon feststeht; bei Unklarheiten kann man nachschauen, ohne etwas zu verändern. Entscheidung des Product Owners im Design von I2-C |
+| E-35 | Ein Schritt erscheint zuerst ohne Ergebnis, wenn die Ansicht wechselt (jeder Losschritt, Beginn der Reihenfolge, Beginn der Platzierung, Startrohstoffe jeder Person); innerhalb von Reihenfolge und Platzierung geht es direkt mit „Losen“ weiter. Der Knopf „Weiter“ führt ohne zu losen zur nächsten Ansicht *(neu in 0.20)* | Am Tisch sollen alle sehen, was als Nächstes gelost wird, statt mit einem Ergebnis begrüßt zu werden; wo der nächste Schritt offensichtlich ist, kostet eine eigene Seite nur Tipps. Entscheidung des Product Owners im Design von I2-D |
+| E-36 | Personen werden mit Karten gelost statt mit einem Glücksrad: Die Karten liegen offen, werden gemischt, und die geloste Karte wird aufgedeckt; die Reihenfolge wird einmal gemischt, verdeckt ausgeteilt und Platz für Platz aufgedeckt *(neu in 0.20)* | Karten passen zum Stil der App (Spielkarten, Kartenhand) und zeigen vor dem Losen, wer im Spiel ist; das Mischen ist am Tisch vertraut und nachvollziehbar. Entscheidung des Product Owners im Design von I2-D |
+| E-37 | Startrohstoffe werden verdeckt ausgeteilt und von Hand aufgedeckt *(neu in 0.20)* | Eine kurze Bewegung statt einer langen Animation je Karte spart Zeit; das Aufdecken macht die bedienende Person selbst, so spannend, wie sie will. Entscheidung des Product Owners im Design von I2-D |
+| E-38 | Klänge (FA-IN-03, FA-IN-05, FA-IN-07, US-IN-03) sind nicht Teil von Version 1; sie stehen als Idee nach dem ersten Release im Parkplatz (PP-20). Ausnahme zu E-10 *(neu in 0.21)* | Ton ist unter iOS und iPadOS der heikelste Teil der Inszenierung (Stummschalter, Musik anderer Apps, Freischaltung) und nur von Hand prüfbar; die Einstellungsseite für den Tonschalter gehört ohnehin zu I6; die Spannung entsteht schon durch Karten und Aufblinken. Entscheidung des Product Owners im Design D-2 (11.11.2026) |
+| E-39 | Aufblinken und Spannungsmodus der Platzierung nach `docs/design/d2-staging-final-preview.html`: Standard ist ein Lauflicht in der Farbe der Person, danach wird der Stein von oben gesetzt; der Spannungsmodus (FA-IN-08) zeigt bei Gebäuden Ausschluss, Halt bei zwei und ein Duell auf Knopfdruck mit rein zufälligem Gegner. Die Darstellung entsteht ohne Kenntnis des Ergebnisses (Start, Reihenfolge, Länge zufällig), erst die Landung zeigt es *(neu in 0.21)* | Am Tisch soll die Platzierung spannend sein, wenn man will, und schnell, wenn nicht. Fairness ist das Kernversprechen der App: Wer die Darstellung kennt und oft spielt, darf daraus nichts ablesen; eine Wahl des Gegners nach Abstand hätte das Ergebnis teilweise verraten und wurde deshalb verworfen. Entscheidung des Product Owners im Design D-2 (11.11.2026) |
+| E-40 | Vorabversionen der echten App erscheinen vor Release 1.0 unter der echten Adresse `https://boardbrain.github.io/`, jeweils nach einem abgeschlossenen Inkrement und nur nach Freigabe durch den Product Owner; die erste ist 0.2.0 nach I2. Die Versionsnummer folgt Semantic Versioning wie bisher (EP-05, je Inkrement eine neue MINOR-Version); das GitHub-Release ist als Vorabversion (Pre-release) markiert. Für Daten aus Vorabversionen gilt kein Versprechen: Sie dürfen bei einer Änderung des Datenbankschemas verloren gehen; ob Release 1.0 mit leerer Datenbank beginnt oder die Daten übernimmt, wird vor 1.0 entschieden. Bis zum Update-Weg aus I4 (US-UP-01) wird eine neue Version erst aktiv, wenn die App ganz geschlossen und neu geöffnet wurde. Die App zeigt keinen Hinweis „Testversion“; die Versionsnummer steht in der Diagnose *(neu in 0.22)* | Freunde sollen den bisherigen Stand am Spieleabend ausprobieren können, auch auf dem iPhone und ohne lokales Zertifikat (OP-13, NFA-PL-01). Eine getrennte Testadresse hätte eine zweite GitHub-Organisation erfordert, weil ein Unterordner dieselbe Herkunft und damit dieselbe Datenbank hat. Datenverlust ist vor 1.0 hinnehmbar; Übergangsregeln für Testdaten wären Aufwand ohne Nutzen. Entscheidung des Product Owners (12.11.2026) |
 
 ---
 
@@ -498,14 +531,14 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | OP-03 | Konkrete Konfliktfälle beim Import und deren Auflösungsoptionen | Spezifikation | geklärt: FA-EI-03, FA-EI-06 bis -08, Spezifikation 3.9 |
 | OP-04 | Häufigkeit und Anzahl der internen Sicherungspunkte | Spezifikation | geklärt: FA-DS-04 bis -06, Spezifikation 3.10 |
 | OP-05 | Intervall und Form der Export-Erinnerung | Spezifikation | geklärt: FA-EI-05, Spezifikation 3.11 |
-| OP-06 | Gestaltung von Glücksrad, Aufblinken, Tempo und Sounds im Detail | Design | teilweise geklärt: Funktion in FA-IN-05, FA-IN-06; visuelle Gestaltung offen |
+| OP-06 | Gestaltung von Glücksrad, Aufblinken, Tempo und Sounds im Detail | Design | geklärt: Funktion in FA-IN-05, FA-IN-06; Losen mit Karten (E-36, Referenz `docs/design/i2d-running-match-final-preview.html`); Aufblinken, Spannungsmodus und Tempo (E-39, FA-IN-08, Referenz `docs/design/d2-staging-final-preview.html`); Klänge nach Version 1 (E-38) |
 | OP-07 | Verwaltungsfunktionen: Bearbeiten, Löschen und ggf. Archivieren von Personen, Gruppen und Spielen sowie Auswirkungen auf bestehende Statistiken | Spezifikation | geklärt: FA-VW-01 bis -05 |
 | OP-08 | Verhalten der Standardfarben bei Personen in mehreren Gruppen und bei Farbkonflikten innerhalb einer Partie | Spezifikation | geklärt: FA-PG-05 bis -08, Spezifikation 3.3 |
 | OP-09 | Persistenz des Speichers unter iOS (Installation auf dem Home-Bildschirm erforderlich) | Architektur | geklärt: E-17, FA-IS-01 bis -03, Architektur ADR-016 |
 | OP-10 | Priorisierung aller Anforderungen nach MoSCoW und Festlegung des Umfangs von Version 1 | Spezifikation | geklärt: E-10, Spezifikation Kapitel 2 |
-| OP-11 | Konkrete Farbwerte der Catan-Farben, der Gruppenfarben-Palette und der Akzentfarben unter Berücksichtigung der Lesbarkeit im Dunkelmodus | Design | offen |
+| OP-11 | Konkrete Farbwerte der Catan-Farben, der Gruppenfarben-Palette und der Akzentfarben unter Berücksichtigung der Lesbarkeit im Dunkelmodus | Design | geklärt: E-26, NFA-GB-03, Architektur 13.4 |
 | OP-12 | Dauerhafte Adresse (Herkunft) der App: eigene GitHub-Organisation mit eigener Herkunft (Empfehlung) oder Projektseite unter dem persönlichen Konto. Ein späterer Wechsel trennt die Nutzer von ihren Daten. | Setup | geklärt: E-21, Architektur ADR-022 |
-| OP-13 | Veröffentlichung von Vorabversionen der echten App (0.x) vor Release 1.0, etwa für Test-Spieleabende außerhalb des Heimnetzes. Erfordert eine Festlegung zum Umgang mit Daten aus Vorabversionen und einen funktionierenden Update-Mechanismus. Zusätzlich gilt: Der Product Owner besitzt kein eigenes iPhone; die Abnahme auf dem iPhone (NFA-PL-01) ist nur über Geräte von Freunden möglich. Vorabversionen unter der echten Adresse würden das erleichtern, weil dafür kein lokales Zertifikat auf fremden Geräten nötig ist. *(neu in 0.8, präzisiert in 0.10)* | Umsetzung (nach I2) | offen |
+| OP-13 | Veröffentlichung von Vorabversionen der echten App (0.x) vor Release 1.0, etwa für Test-Spieleabende außerhalb des Heimnetzes. Erfordert eine Festlegung zum Umgang mit Daten aus Vorabversionen und einen funktionierenden Update-Mechanismus. Zusätzlich gilt: Der Product Owner besitzt kein eigenes iPhone; die Abnahme auf dem iPhone (NFA-PL-01) ist nur über Geräte von Freunden möglich. Vorabversionen unter der echten Adresse würden das erleichtern, weil dafür kein lokales Zertifikat auf fremden Geräten nötig ist. *(neu in 0.8, präzisiert in 0.10)* | Umsetzung (nach I2) | geklärt: E-40, EP-02 |
 
 ---
 
@@ -534,12 +567,13 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 | PP-17 | Eigene Spielfarben-Paletten für weitere Spiele |
 | PP-18 | Sammelentscheidung für gleichartige Konflikte beim Import |
 | PP-19 | Gruppenübergreifende Auswahl einzelner Partien beim Export |
+| PP-20 | Soundeffekte mit Tonschalter (FA-IN-03, FA-IN-05, FA-IN-07, US-IN-03), etwa ein Trommelwirbel im Spannungsmodus; nach dem ersten Release (E-38) *(neu in 0.21)* |
 
 ---
 
 ## 13. Nächste Schritte
 
-1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08)
-2. Design der Inszenierung und Farbwerte (OP-06, OP-11)
-3. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10)
-4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13)
+1. Setup durchführen nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; dabei Überführung der Dokumentation nach `docs/` (EP-08) – *abgeschlossen am 07.10.2026 mit Release 0.1.0*
+2. Umsetzung ab Inkrement I1 gemäß Spezifikation, Kapitel 2.3, in Story-Bündeln (EP-10); Reihenfolge, Zuschnitt und Ablauf in `docs/Umsetzungsplan.md`
+3. Design der Farbwerte (OP-11) parallel zu Inkrement I1; Design der Inszenierung (OP-06) innerhalb von Inkrement I2, sobald der Ablauf einer Partie steht und bevor Aufblinken und Klänge gebaut werden (E-32; das Losen mit Karten ist seit 0.20 mit I2-D festgelegt, E-36). Die Farbwerte blockieren nichts, weil sie nur in den Design-Tokens stehen – *OP-11 erledigt am 07.10.2026 (E-26); OP-06 verschoben in 0.18, erledigt am 11.11.2026 (E-38, E-39)*
+4. Nach Inkrement I2: Entscheidung über Vorabversionen (OP-13) – *erledigt am 12.11.2026 (E-40); erste Vorabversion 0.2.0*

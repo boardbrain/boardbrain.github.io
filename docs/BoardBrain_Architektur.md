@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.5 |
+| Version | 0.35 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 07.10.2026 |
+| Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -18,7 +18,37 @@
 | 0.2 | 06.10.2026 | Ergebnisse der Setup-Planung: ADR-022 angenommen (`https://boardbrain.github.io/`); neue ADR-023 (Branch- und Release-Modell), ADR-024 (Prettier), ADR-025 (Fehlerbehandlung); Stack um Formatierer, Prüfwerkzeuge und Node.js-Version ergänzt (3.1); Modul `core/shared` (4.3); Fehlerbehandlung (neu 4.6); Content-Security-Policy als Meta-Tag (12.4); Diagnoseansicht (13.1); CSS-Animationen verboten (13.6); Teststrategie präzisiert (14.1, 14.5, 14.6); Ordnerstruktur vervollständigt (15); Kapitel 16 neu gefasst (Werkzeuge, Befehle, Branches und Auslieferung, `CLAUDE.md`, Claude Code, lokales HTTPS); Risiken und offene Punkte aktualisiert (18); nächste Schritte (19) |
 | 0.3 | 06.10.2026 | Lizenz in der Ordnerstruktur auf PolyForm Strict License 1.0.0 geändert (15; Anforderungsdokumentation E-23) (PR #1) |
 | 0.4 | 07.10.2026 | Ergebnisse des Setups: Node.js 26 statt 24 (3.1, 16.1); TypeScript 6, React Compiler über `@rolldown/plugin-babel` (3.1); ESLint 10 ohne `eslint-plugin-react`, Ersatzregeln über `no-restricted-syntax` (neu ADR-026; 3.1, 13.3, 14.7, ADR-018); Markdown von Prettier ausgenommen (3.1); Ende-zu-Ende-Tests lokal über HTTPS mit ignorierten Zertifikatsfehlern (14.5); `tsconfig.node.json` (15); Berechtigungen für PowerShell und keine Hinweise auf Claude in Commits und Pull Requests (16.5); Zertifizierungsstelle nicht auf dem iPhone (16.6); Code durchgehend englisch, auch Kommentare und Testnamen (neu ADR-027; 4.5, 16.4, ADR-008) (PR #2) |
-| 0.5 | 07.10.2026 | Job `e2e` im offiziellen Playwright-Container statt Browserinstallation auf dem Runner; Vorjob `playwright-version` liest den Tag aus `package-lock.json` (16.3) |
+| 0.5 | 07.10.2026 | Job `e2e` im offiziellen Playwright-Container statt Browserinstallation auf dem Runner; Vorjob `playwright-version` liest den Tag aus `package-lock.json` (16.3) (PR #6) |
+| 0.6 | 07.10.2026 | Nächste Schritte nach Abschluss des Setups: Umsetzung nach `docs/Umsetzungsplan.md`, Design OP-11 parallel zu I1 und OP-06 vor I5; `core/placement` als erstes Bündel von I2 (19) |
+| 0.7 | 07.10.2026 | Bündel I1-A: Codeskizzen in 6.1 und 6.2 an die Umsetzung angeglichen (`type` statt `interface` nach der ESLint-Regel `consistent-type-definitions`, Dateinamen in camelCase, `pick` ohne `!`); Testquellen über `@tests/…` und Regel `production-not-to-tests` (6.1, 14.2) (PR #11) |
+| 0.8 | 07.10.2026 | Bündel I1-B: Textschlüssel der Spielmodule ohne Abhängigkeit von `i18n` (5.1); Schemaversionen als Liste (Migrationsgerüst), Datenbankklasse ohne `!`, alle Stores ab Version 1 (7.3); Startansicht statt Diagnose unter `#/`, Kopfzeile mit Hauptnavigation (13.1); Abhängigkeiten der Ansichten über `AppDependenciesProvider` (13.2); globales `fake-indexeddb` für Lesehooks in Komponententests (14.1) (PR #12) |
+| 0.9 | 07.10.2026 | Design D-1: OP-11 geklärt; Paletten, Farbschlüssel und wählbare Designs über `data-theme` mit Standard „Holz“ (13.4, 18.2, 19); Einstellung „Design“ in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
+| 0.10 | 08.10.2026 | Abnahme von I1-C (Anforderungsdokumentation 0.14): globale Bindung mit `excludesCatan` (4.5, 7.1, FA-PG-04, E-27); Gruppenfarben-Schlüssel und Reihenfolge der Vergabe nach E-28, Kontrastregel für Spielfarben 3 : 1 zum Hintergrund und 2,3 : 1 auf Karten (13.4) |
+| 0.11 | 08.10.2026 | Design D-3: Rahmen mit Logo, Hauptnavigation als Kartenhand am unteren Rand, Startansicht ohne Scrollen, Zurück zur vorherigen Seite, Hinweis zum Drehen auf Smartphones im Querformat, Design-Referenz in `docs/design/` (13.1, NFA-PL-04, E-29); Tests ohne Smartphone im Querformat (14.5) |
+| 0.12 | 09.10.2026 | Einstellung „Ich hasse Catan!“ (US-SP-05, E-30) in `SettingsService`, `meta.settings` und der Einstellungsansicht (4.4, 7.3, 13.1) |
+| 0.13 | 25.10.2026 | Bündel I1-E: Detailansichten `#/verwaltung/personen/‹id›` und `#/verwaltung/gruppen/‹id›`, Kennungen aus der Adresse als `Result`, Design-Referenz `docs/design/i1e-persons-tables-final-preview.html` (13.1) |
+| 0.14 | 26.10.2026 | Bündel I1-F: Bearbeiten im `MasterDataService` mit `update` in den Repositories (4.4, 7.3); Umbenennen an Ort und Stelle, Spielseite `#/verwaltung/spiele/‹id›`, Editor unter `#/verwaltung/gruppen/‹id›/bearbeiten`, Rückfrage bei ungespeicherten Änderungen über `useBlocker`, Design-Referenz `docs/design/i1f-edit-final-preview.html` (13.1); Komponententests mit Daten-Router (14.1) |
+| 0.15 | 27.10.2026 | Bündel I1-D: Brettmodell mit Kennungen aus den Feldern, Küstenlinien und Zahl der Landfelder je Kreuzung (5.2); minimaler Service Worker mit Cache je Build, Registrierung in `infra/update`, eigene `tsconfig.sw.json` (11.4, 15); App-Symbol D8 aus `scripts/generate-icons.mjs`, Farben von Manifest und Statusleiste aus den Tokens (12.1, 16.2); Seite `#/brett`, „Offline bereit“ in der Diagnose und Verweis auf die Diagnose in der Verwaltung, Rahmenhöhe ohne `100dvh`, volle Höhe in der installierten App unter iPadOS, Kartenhand bis in die sichere Zone, Übergang N1 statt eines eigenen Streifens unter der Ansicht (13.1); Brett-Tokens (13.4); Design-Referenz `docs/design/i1d-board-final-preview.html` mit Gebäuden und Straßen für I2 (13.5); Offline-Test nur in Chromium (14.5) |
+| 0.16 | 28.10.2026 | Aufgabe K-3: Kartenhand auf dem Handy nur auf dem Start aufgefächert, sonst eingefahren; auf Tablet und PC überall aufgefächert mit direktem Antippen und Auffächern durch langes Drücken (`HandNavigation`, `cardHand.ts`); Rahmen mit `overflow: clip`; Design-Referenz `docs/design/k3-card-hand-final-preview.html` (13.1); Motion 14 installiert, über `LazyMotion` mit `domAnimation`, `m`-Komponenten und `MotionConfig reducedMotion="user"` (3.1, 13.6) |
+| 0.17 | 28.10.2026 | README ohne Verweise auf `docs/` (Ordnerstruktur in 15) |
+| 0.18 | 28.10.2026 | Aufgabe K-4: Berührungsverhalten app-weit; Druckzustand über `PressableButton` und `PressableLink` mit `whileTap` auf der CSS-Variable `--press` (Knöpfe schimmern in ihrer Textfarbe, Karten heben sich), keine Tipp-Markierung, keine Linkvorschau und kein Markieren außer in Textfeldern, Browsermenü bei Berührung zentral unterdrückt (`touchMenu.ts` in `AppLayout`), Links nicht ziehbar; ESLint verbietet nackte `button`, `a`, `Link`, `NavLink`; Design-Referenz `docs/design/k4-touch-final-preview.html` (13.6) |
+| 0.19 | 29.10.2026 | Zuschnitt von I2 (Anforderungsdokumentation E-32): Design der Inszenierung (OP-06) innerhalb von I2 (19); reine Doku-Änderungen ohne lokale Prüfungen (14.1, 16.4; Entwicklungsrichtlinien 3.6) |
+| 0.20 | 29.10.2026 | Bündel I2-A: Was nur Catan betrifft, liegt im Catan-Modul (neu ADR-028): Brett, Platzierungsregeln, Sackgassen-Strategie, Gebäudearten, Spielversionen und Rohstoffe in `games/catan`, die Module `core/board` und `core/placement` entfallen (4.1, 4.3, 5.2 bis 5.6, 15); Farbmodell der Gruppen bleibt in `core/model`; Bezeichner für Rohstoffe und Zurücklegen (4.5); gemessene Sackgassenquote in `docs/test-reports/sackgassen.md` (14.4) (PR #27) |
+| 0.21 | 29.10.2026 | Bündel I2-B: spielunabhängige Ablaufsteuerung mit allgemeinem Schritt und `GenerationDefinition` in `core/generation`, Catan-Ablauf mit Schrittarten, Optionen, verdecktem Plan und Überspringen der Platzierung in `games/catan/generation` (4.3, 5.5, 15); Farben der Partie mit Tausch in `core/model` (5.5); gespeicherte Sitzung mit `setup` statt `options` und `matchColors`, Port `SessionStore`, `SessionService` (10.2, 10.3); Sperre der Spielbindung im `MasterDataService` in derselben Transaktion (10.4); Dienst-Tests mit Speicher-Attrappe, Neustart im Datenbanktest über eine neue Verbindung (14.1) (PR #28) |
+| 0.22 | 03.11.2026 | Bündel I2-C: kein Paket Zustand; laufende Partie über den Lesehook `useCurrentSession`, Vorbereitung im Zustand der Layout-Route `#/partie/neu` mit Outlet-Kontext (neu ADR-029; 3.1, 10.3, 13.2, 15); `start` lost den ersten Schritt in derselben Transaktion, `advance(shownStep)` mit `step-changed` statt `drawNextStep` und `confirmStep`, `skipPlacement` lost den nächsten Schritt (10.3); Reihenfolge abschaltbar und Fortschritt in Phasen im Catan-Modul (5.5, FA-LS-07); Adressen der Partie, Laden bei Bedarf, Startstapel, Gedrückt halten, niedrige Tablets im Querformat (13.1); Tokens für Landschaften, Rohstoffe, Karten und Illustrationen (13.4); Gebäude und Straßen auf dem Brett (13.5); schlichtes Einblenden (13.6); fester Startwert des Zufalls in Ende-zu-Ende-Tests (14.5); Design-Referenz `docs/design/i2-match-final-preview.html`; Rohstoffkarten und Landschaft der Catan-Karte als erzeugte Bilder aus SVG-Quellen (`npm run art`, neu ADR-030; 13.4, 15, 16) |
+| 0.23 | 03.11.2026 | Lokal höchstens vier Ende-zu-Ende-Tests gleichzeitig, weil WebKit unter Windows bei mehr parallelen Browsern gelegentlich einfror (14.5) |
+| 0.24 | 05.11.2026 | Auch auf GitHub vier Ende-zu-Ende-Tests gleichzeitig statt der Voreinstellung zwei, der Rechner hat vier Kerne (14.5) |
+| 0.25 | 09.11.2026 | Bündel I2-D: Personen werden mit Karten gelost statt mit einem Glücksrad (Anforderungsdokumentation E-36; 3, 4.5, 13.6, 15, 18, 19); Losen und Bestätigen getrennt, Wiederholen ohne sofortiges Losen, Seite ohne Ergebnis abgeleitet statt gespeichert, aufgedeckte Startrohstoffe im Zustand des Catan-Moduls, Sitzung Version 2 (10.2, 10.3); Rückblick über `#/partie?schritt=N`, Band auf dem Start, Rückfrage bei neuer Partie, Sperre im Tisch-Editor, `#/brett` entfällt (13.1); Kartentisch in Pixeln aus der Referenz (13.6) |
+| 0.26 | 10.11.2026 | Bündel I2-G: Rahmen ohne Kopfzeile, Logo und App-Name nur auf dem Start; alle Ansichten außer dem Start mit gemeinsamer Breite, Polsterung und Kopfhöhe aus Tokens, Kopf der Platzierung im Querformat über beiden Spalten; Entwicklungskarte auf Tablets bis 280 px (13.1); Design-Referenz `docs/design/i2g-more-room-final-preview.html` |
+| 0.27 | 10.11.2026 | Bündel I2-H: Steine auf dem Brett antippen; unsichtbare Knöpfe über den Steinen, Zuordnung eines Tipps in `ui/board/pieceHit.ts`, Markierung und Scheinwerfer in der Rückfrage, Fenster weicht den Steinen aus (13.5); Rückblick in ganzen Ansichten, Messung vor dem Zeichnen (13.1); Design-Referenz `docs/design/i2h-tap-pieces-final-preview.html` |
+| 0.28 | 11.11.2026 | Kleine Aufgabe K-6: Tests nach dem Losen beginnen mit einer Partie aus `seedMatch`, lokal sechs Ende-zu-Ende-Tests gleichzeitig (14.5); `ci.yml` nur bei neuen Commits, Titelprüfung im eigenen Workflow `pr-title.yml` auch bei Bearbeitungen, Ende-zu-Ende-Tests in zwei gleichzeitigen Hälften mit Sammeljob `e2e` (15, 16.3) |
+| 0.29 | 11.11.2026 | Kleine Aufgabe K-5: unerwartete Fehler einer Ansicht fängt die Fehleransicht der Routen (`RouteErrorScreen` als `errorElement` des Rahmens) statt einer Error Boundary je Ansicht, auch beim Nachladen der Partie-Ansichten; der Fehlerbildschirm füllt den ganzen Bildschirm (4.6, 13.1, 13.2, 19); Design-Referenz `docs/design/k5-error-screen-final-preview.html` |
+| 0.30 | 11.11.2026 | Kleine Aufgabe K-7: Ende-zu-Ende-Tests auf GitHub in drei gleichzeitigen Läufen je Geräteart (Handy, Tablet hochkant, Tablet quer) mit Chromium und WebKit statt zwei Hälften nach `--shard`, die alle Chromium-Geräte in die eine und alle langsameren WebKit-Geräte in die andere Hälfte legten (14.5, 16.3) |
+| 0.31 | 11.11.2026 | Design D-2 (Anforderungsdokumentation 0.21, E-38, E-39): Aufblinken, Spannungsmodus und Tempo nach `docs/design/d2-staging-final-preview.html` (13.6); Klänge nach Version 1, 12.3 und ADR-017 zurückgestellt (4.4, 12.3, ADR-017); OP-06 geklärt (18, 19) |
+| 0.32 | 12.11.2026 | Bündel I2-E: Merker `isStaged` je Schritt für FA-AB-07, `markStaged` im Kern und im `SessionService`, Sitzung Version 3 (10.2, 10.3); Bewegungen der Karten als reiner Plan mit Abspieler, „Überspringen“ an der Stelle von „Wiederholen“, „Partie beenden“ auch während einer Bewegung, Gleiten nach „Wiederholen“, weiche Wechsel von Band und Knöpfen, Zeiten in `stagePlan.ts` (13.6); „Bewegung reduzieren“ in den übrigen Partie-Tests, Tempo in `cardDraw.spec.ts`, lokal wieder vier Tests gleichzeitig (14.5); Design-Referenz `docs/design/i2e-card-moves-final-preview.html`; nach der Abnahme: Vorderseiten skalieren auch nach oben, kleinere Karten unten auf der Reihenfolge, Band der Startrohstoffe bleibt stehen, Fortschritt zählt den anstehenden Schritt, „Tisch anlegen“ auf dem Handy nicht mehr angeheftet (13.1, 13.6) |
+| 0.33 | 12.11.2026 | Bündel I2-F: Aufblinken und Spannungsmodus umgesetzt; gültige Plätze aus `catanPlacementSpots`, Plan `planHighlight` mit Abspieler `playHighlight`, Ebenen des Bretts über den Steinen, Spannungsmodus als Zustand der Ansicht je Partie, „Bewegung reduzieren“ ohne Halt, Zeiten als Konstanten `HIGHLIGHT_MS` statt Tokens (13.6) |
+| 0.34 | 12.11.2026 | Kleine Aufgabe K-9: Diagnose überarbeitet (13.1): Werte bei jedem Öffnen frisch gelesen, Gerät und Darstellung, Daten als Anzahlen, Würfeltest `runDiceTest` in `core/random`, Build-Kennung `__BUILD_COMMIT__` und `__BUILD_TIME__` aus der Bauanleitung, Bericht teilen oder kopieren; die letzten fünf unerwarteten Fehler unter `errors` in `meta` (7.3), geschrieben über `ErrorLogService` aus der Fehleransicht der Routen und den globalen Fehlerhandlern |
+| 0.35 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation E-40): Vorabversionen 0.x unter der echten Adresse, GitHub-Release als Pre-release, das Release erzeugt der Product Owner oder Claude Code nach Zustimmung (16.3); Build-Modus `acceptance` mit `npm run build:acceptance` für die lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol auf Port 4174 neben der veröffentlichten App (12.1, 15, 16.2, 16.6); OP-13 in 18.2 und 19 erledigt |
 
 ## Inhaltsverzeichnis
 
@@ -129,13 +159,13 @@ Es gibt genau zwei Wege, auf denen Daten das Gerät berühren: App-Dateien komme
 | Auslieferungsform | Progressive Web App ohne nativen Wrapper | Eine Codebasis, installierbar, offline, kostenlos | ADR-001 |
 | Sprache | TypeScript im strikten Modus, Version 6 (Version 7 erst, wenn typescript-eslint sie unterstützt) | Typen machen Code überprüfbar und lesbar | ADR-002 |
 | UI-Framework | React 19 mit React Compiler | Darstellung und Interaktion | ADR-003 |
-| Animationen | Motion (`motion/react`) | Glücksrad, Aufblinken, Übergänge, Mikroanimationen | ADR-004 |
+| Animationen | Motion (`motion/react`), Version 14, installiert seit K-3 | Karten ziehen, Aufblinken, Übergänge, Mikroanimationen | ADR-004 |
 | Build-Werkzeug | Vite mit `@vitejs/plugin-react`; React Compiler über `@rolldown/plugin-babel` mit `babel-plugin-react-compiler` | Entwicklungsserver, Bündeln, Plugins | ADR-005 |
 | PWA | `vite-plugin-pwa` mit eigenem Service Worker (`injectManifest`) | Manifest, Precache-Liste, kontrollierte Updates | ADR-015 |
 | Speicher | IndexedDB mit Dexie, `dexie-react-hooks` | Lokale Datenbank mit Transaktionen und Migrationen | ADR-007 |
 | Schemaprüfung | Valibot | Prüfung importierter Dateien und Sicherungspunkte | ADR-012 |
 | Navigation | React Router mit Hash-Routing | Ansichten, Zurück-Taste unter Android | ADR-019 |
-| Sitzungszustand | Zustand | Laufende Partie und Vorbereitung in der Oberfläche | ADR-019 |
+| Sitzungszustand | Kein eigenes Paket: laufende Partie über einen Lesehook, Vorbereitung im Zustand einer Layout-Route *(geändert in 0.22)* | Laufende Partie und Vorbereitung in der Oberfläche | ADR-019, ADR-029 |
 | Texte | Eigene typisierte Lösung, `Intl` für Datum und Zahlen | Ausgelagerte Texte (NFA-I18N) | ADR-018 |
 | Gestaltung | CSS Modules, Design-Tokens als CSS-Variablen | Gekapseltes CSS, zentrale Farben (NFA-GB-05) | ADR-018 |
 | Diagramme | Eigene SVG-Komponenten | Verlauf und Verteilung (US-ST-04) | ADR-021 |
@@ -175,7 +205,7 @@ Konkrete Versionen werden in der Setup-Phase auf den dann aktuellen stabilen Sta
 ├──────────────────────────────────────────────────────────────────────────────┤
 │ games     Spielmodule (Catan, eigene Spiele) auf Basis der Fachlogik           │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ core      Fachlogik in reinem TypeScript: Modell, Brett, Regeln, Zufall,       │
+│ core      Fachlogik in reinem TypeScript: Modell, Zufall, Losbausteine,        │
 │           Generierung, Statistik, Exportformat, Importanalyse, Sicherung       │
 └──────────────────────────────────────────────────────────────────────────────┘
           ▲ implementiert Schnittstellen aus core und app
@@ -207,14 +237,14 @@ Die Regeln prüft `dependency-cruiser` bei jedem `npm run check`. Die Zusammense
 |---|---|---|
 | `core/random` | Schnittstelle `RandomSource`, verzerrungsfreie Ganzzahl, Auswahl aus Listen | NFA-ZF-01 bis -03 |
 | `core/model` | Entitäten, Kennungstypen, Invarianten (Gruppengröße, eindeutige Namen, Verträglichkeit) | FA-PG-*, FA-VW-*, 3.4 |
-| `core/board` | Brettgeometrie: Felder, Kreuzungen, Kanten, Nachbarschaften, Inlandkreuzungen; optionaler Feldinhalt | FA-PL-07, NFA-EW-03 bis -05 |
-| `core/placement` | Platzierungsregeln als Bausteine; Strategie für Sackgassen | FA-PL-01 bis -04, NFA-EW-02, NFA-EW-08 |
-| `core/draws` | Person losen, Reihenfolge losen, Startrohstoffe ziehen | FA-LS-*, FA-SR-* |
+| `core/draws` | Person losen, Reihenfolge losen | FA-LS-* |
 | `core/generation` | Schritte, Ablaufsteuerung, Wiederholung mit Abhängigkeiten, Sitzungsmodell | FA-AB-*, 3.1, 3.5 |
 | `core/results` | Ergebnisregeln, Plausibilitätswarnungen, Sortierung von Partien | FA-ER-*, 3.6, 3.7 |
 | `core/stats` | Kennzahlen, Siegesserien, Rangliste, Diagrammdaten, Filter | FA-ST-*, 3.8 |
 | `core/exchange` | Exportformat, Schema, Migrationskette, Teilumfang, Importanalyse (K1 bis K4), Prüfung von Optionen | FA-EI-*, 3.9 |
 | `core/backup` | Aufbewahrung (15, geschützte Importpunkte), Auslöser „Täglich“, Erinnerungslogik | FA-DS-*, FA-EI-05, 3.10, 3.11 |
+
+Brett, Platzierung und Startrohstoffe betreffen nur Catan und liegen deshalb seit I2-A im Catan-Modul: `games/catan/board` (Brettgeometrie, FA-PL-07, NFA-EW-03 bis -05), `games/catan/placement` (Regeln, Sackgassen-Strategie, Straße, Schlangenreihenfolge, Spielversionen; FA-PL-01 bis -04, NFA-EW-02, NFA-EW-08) und `games/catan/startingResources.ts` (FA-SR-*). In `core` liegt nur, was auch Personen, Gruppen oder andere Spiele betrifft (ADR-028). *(neu in 0.20)* Seit I2-B kommt `games/catan/generation` hinzu: Schrittarten, Optionen, Ablauf und Übersicht einer Catan-Partie (5.5). *(ergänzt in 0.21)*
 | `core/shared` | Gemeinsame Bausteine ohne Fachbezug: Ergebnistyp `Result`, `assert` für Invarianten, Hilfstypen (Kapitel 4.6) | – |
 
 ### 4.4 Anwendungsdienste (`app`)
@@ -231,7 +261,7 @@ Anwendungsdienste setzen Fachlogik und Speicher zu vollständigen Abläufen zusa
 | `BackupService` | Sicherungspunkte anlegen, aufbewahren, wiederherstellen; tägliche Prüfung |
 | `UpdateService` | Update-Status abfragen, Sicherungsdialog, Umschaltung auslösen |
 | `PlatformService` | Installationsstatus, persistenter Speicher, Plattformerkennung |
-| `SettingsService` | Ton, Akzentfarbe, Hinweisstand |
+| `SettingsService` | Design, Akzentfarbe, „Ich hasse Catan!“ (US-SP-05), Hinweisstand; Ton erst nach Version 1 (Anforderungsdokumentation E-38) |
 
 ### 4.5 Bezeichner im Code
 
@@ -241,6 +271,7 @@ Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberflä
 |---|---|
 | Person, Gruppe, Mitglied | `Person`, `Group`, `GroupMember` |
 | Globale / spielgebundene Gruppe | `binding: { kind: 'global' }` / `{ kind: 'game', gameId }` |
+| Catan ausschließen (globale Gruppe) | `binding: { kind: 'global', excludesCatan: true }` |
 | Spiel, eigenes Spiel, unterstütztes Spiel | `Game`, `CustomGame`, `GameModule` |
 | Spielversion (Basisspiel, Städte & Ritter) | `edition` (`'base'`, `'cities-and-knights'`) |
 | Modus | `mode` (`'standard'`) |
@@ -255,7 +286,9 @@ Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberflä
 | Siedlung, Stadt, Straße | `Settlement`, `City`, `Road` |
 | Sackgasse | `DeadEnd` |
 | Startrohstoffe | `startingResources` |
-| Glücksrad, Aufblinken | `Wheel`, `Flash` |
+| Holz, Lehm, Wolle, Getreide, Erz | `'lumber'`, `'brick'`, `'wool'`, `'grain'`, `'ore'` (`CatanResource`) |
+| Mit / ohne Zurücklegen | `replacement: 'with'` / `'without'` |
+| Karten ziehen, Aufblinken | `CardDraw`, `Flash` |
 | Kennung | `id` |
 | Sicherungspunkt, Vollsicherung | `Snapshot`, `FullBackup` |
 | Zuordnung (beim Import) | `Mapping` |
@@ -266,7 +299,7 @@ Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberflä
 | Art | Beispiele | Behandlung |
 |---|---|---|
 | Erwartbare Fehler | Ungültige Eingabe, volle Gruppe, doppelter Name, kaputte Importdatei, gesperrte Aktion während einer Partie | Rückgabe als `Result<T, E>` mit typisiertem Fehlercode; die Oberfläche übersetzt den Code über die Sprachdatei in eine Meldung |
-| Unerwartete Fehler | Programmierfehler, verletzte Invariante, Datenbank antwortet nicht | Werfen (`Error`); Auffangen in den Anwendungsdiensten (Transaktion wird vollständig zurückgerollt), in einer Error Boundary je Ansicht und global (`error`, `unhandledrejection`) |
+| Unerwartete Fehler | Programmierfehler, verletzte Invariante, Datenbank antwortet nicht | Werfen (`Error`); Auffangen in den Anwendungsdiensten (Transaktion wird vollständig zurückgerollt), in der Fehleransicht der Routen (`RouteErrorScreen` als `errorElement` des Rahmens, seit K-5) und global (`error`, `unhandledrejection`) |
 
 ```ts
 // core/shared/result.ts (Skizze)
@@ -287,17 +320,19 @@ Jedes unterstützte Spiel ist ein Modul, das eine gemeinsame Schnittstelle erfü
 
 ```ts
 // games/types.ts (Skizze)
-export interface GameModule {
+export type GameModule = {
   id: GameId;                       // feste Kennung, z. B. CATAN_GAME_ID
-  nameKey: MessageKey;              // Text aus der Sprachdatei
+  nameKey: string;                  // Textschlüssel, z. B. 'spiele.namen.catan'
   playerCount: { min: number; max: number };
-  editions: EditionDef[];           // leer, wenn das Spiel keine Versionen kennt
-  modes: ModeDef[];
-  playerColors: PlayerColorPalette | null;   // Catan: Rot, Blau, Weiß, Orange (FA-SP-05)
+  editions: EditionDef[];           // leer, wenn das Spiel keine Versionen kennt (ab US-SP-04)
+  modes: ModeDef[];                 // ab US-SP-04
+  playerColors: readonly CatanColorKey[] | null;   // Catan: Rot, Blau, Weiß, Orange (FA-SP-05)
   supportsVictoryPoints: boolean;
-  generation: GenerationDefinition | null;   // null: nur Ergebniserfassung
-}
+  generation: GenerationDefinition | null;   // null: nur Ergebniserfassung (ab I2)
+};
 ```
+
+`games` darf nur `core` verwenden und kennt daher den Typ der Textschlüssel aus `src/i18n` nicht. `nameKey` ist deshalb in der Schnittstelle ein einfacher String; `SUPPORTED_GAMES` wird mit `as const satisfies` angelegt und behält so den genauen Schlüssel. Die Oberfläche ruft `t(game.nameKey)` auf, und der Compiler prüft den Schlüssel dort. Die Namen der unterstützten Spiele erhält der `MasterDataService` in `src/main.tsx`, damit eigene Spiele nicht „Catan“ heißen können (US-SP-02 AK-2).
 
 Eigene Spiele sind keine Module, sondern Datensätze (`CustomGame`). Sie haben keine Versionen, Modi, Spielfarben, Siegpunkte oder Generierung. Die Oberfläche fragt Fähigkeiten immer über eine gemeinsame Funktion ab (`gameCapabilities(gameId)`), damit sie nicht zwischen „Modul“ und „eigenem Spiel“ unterscheiden muss.
 
@@ -320,12 +355,14 @@ Das Brett wird aus einer Liste von Feldkoordinaten berechnet, nicht fest einprog
 
 Ein Test sichert die Eckdaten aus Anforderung 6.1 ab: 19 Felder, 54 Kreuzungen, 72 Kanten, 24 Inlandkreuzungen, und jede Inlandkreuzung hat genau 3 angrenzende Kanten. Die Darstellung (Kapitel 13.5) berechnet ihre Koordinaten aus demselben Modell.
 
+**Umsetzung (I1-D):** `createBoard(coords)` berechnet aus beliebigen Feldkoordinaten die Kreuzungen (`VertexId` aus den drei Feldern, auf jedem Gerät gleich), die Kanten (`EdgeId` aus den beiden Kreuzungen), Nachbarschaften, Inlandkreuzungen und die Küstenlinien als geschlossene Folgen von Kreuzungen; `STANDARD_BOARD` ist das Brett mit Radius 2. Jede Kreuzung und Kante kennt die Zahl ihrer Landfelder; ein späterer Modus mit Küstenkreuzungen (PP-01) ist damit nur eine weitere Regel (5.3). `hexCenter`, `hexCorners` und `vertexPoint` liefern Punkte in Brett-Einheiten für die Darstellung. Ein Eigenschaftstest prüft die Eckdaten für Bretter mit Radius 0 bis 5. *(neu in 0.15)* Seit I2-A liegt das Brettmodell im Catan-Modul unter `games/catan/board`, das Brett mit Radius 2 heißt `CATAN_BOARD` (ADR-028). *(ergänzt in 0.20)*
+
 ### 5.3 Platzierungsregeln als Bausteine
 
 Eine Regel entscheidet für eine Kreuzung, ob dort im aktuellen Zustand gebaut werden darf. Ein Modus ist eine Liste von Regeln (NFA-EW-02).
 
 ```ts
-// core/placement/rules.ts (Skizze)
+// games/catan/placement/rules.ts (Skizze; Ort seit 0.20, ADR-028)
 export interface VertexRule {
   allows(vertex: VertexId, state: PlacementState): boolean;
 }
@@ -345,12 +382,14 @@ export const catanStandardRules: VertexRule[] = [inlandOnly, distanceRule];
 
 Spätere Modi wie Küstenkreuzungen (PP-01) oder inhaltsabhängige Regeln (PP-04) ergänzen oder ersetzen Bausteine, ohne die bestehenden zu ändern.
 
+**Umsetzung (I2-A):** `VertexRule` ist ein Typ mit der Funktion `allows`; `inlandOnly` prüft die Zahl der Landfelder der Kreuzung (5.2), `CATAN_STANDARD_RULES` ist die Liste beider Regeln. `validVertices(board, rules, occupied)` liefert die gültigen Kreuzungen immer in der festen Reihenfolge des Bretts, damit derselbe Zufallswert stets dieselbe Kreuzung wählt; `drawBuilding` lost daraus mit `pick` und liefert bei einer Sackgasse `undefined`, ohne einen Zufallswert zu verbrauchen. *(neu in 0.20)*
+
 ### 5.4 Sackgassen: verdeckte Vorausberechnung
 
 Die Behandlung von Sackgassen ist eine austauschbare Strategie (NFA-EW-08). Version 1 nutzt Variante B (E-09): Zu Beginn der Platzierung bzw. ab einem wiederholten Gebäude werden alle verbleibenden Gebäude verdeckt gelost. Endet ein Durchlauf in einer Sackgasse, wird er verworfen und neu gelost. Angezeigt wird erst danach, Schritt für Schritt.
 
 ```ts
-// core/placement/strategy.ts (Skizze)
+// games/catan/placement/planner.ts (Skizze; Ort seit 0.20, ADR-028)
 export interface BuildingPlanner {
   /** Lost die Positionen der Gebäude fixed.length + 1 … total. */
   plan(input: PlanInput, rng: RandomSource): PlanResult;
@@ -385,6 +424,8 @@ Eigenschaften:
 
 Straßen hängen nicht von anderen Straßen oder fremden Gebäuden ab (Regel 6.3). Sie werden deshalb nicht vorausberechnet, sondern im jeweiligen Straßenschritt gleichverteilt aus den angrenzenden Kanten gelost.
 
+**Umsetzung (I2-A):** `BuildingPlanner` ist ein Typ, `RetryOnDeadEnd` eine Klasse mit der Obergrenze `MAX_PLAN_ATTEMPTS` = 10.000. Wird sie erreicht, wirft der Planer einen `InvariantError` statt eines eigenen `PlacementError`, weil das nur bei einem Programmierfehler geschehen kann (ADR-025). Ein Neuversuch beginnt immer beim ersten offenen Gebäude; feste Gebäude bleiben unverändert. Die Straße lost `drawRoad(board, building, rng)`. Die Schlangenreihenfolge liefert `placementSchedule(order, rounds)`, die Gebäudeart je Runde `catanPlacementRounds(edition)` (`CatanBuildingType`). Gemessen wurde bei 4 Personen eine Sackgasse in rund 0,02 % der Durchläufe, nie mehr als zwei Durchläufe je Platzierung (`docs/test-reports/sackgassen.md`). *(neu in 0.20)*
+
 ### 5.5 Generierung als Folge von Schritten
 
 Die Generierung ist eine Liste von Schritten im Sinne von Spezifikation 3.1. Jeder Schritt hat eine Art, ein Ergebnis und einen Bestätigungsstatus.
@@ -411,6 +452,14 @@ Das Catan-Modul liefert eine `GenerationDefinition` mit drei Funktionen:
 
 Die Ablaufsteuerung in `core/generation` ist spielunabhängig: Sie ruft `nextStep` auf, verwaltet Bestätigung und Wiederholung und kennt kein Catan-Detail. Der Baustein „Person losen“ (`core/draws/drawPerson`) ist unabhängig von Catan nutzbar (FA-LS-05).
 
+**Hinweis zu ADR-028 (0.20):** Die Skizze von `Step` oben zählt Catan-Schrittarten in `core` auf. Nach ADR-028 kennt `core/generation` nur einen allgemeinen Schritt mit Art, Ergebnis und Status; die Catan-Schrittarten (Gebäude und Straße mit `VertexId` und `EdgeId`, Startrohstoffe mit `CatanResource`) legt I2-B im Catan-Modul an.
+
+**Umsetzung (I2-B):** `core/generation` kennt `StepRecord<S>` (Schritt mit Status `revealed` oder `confirmed`), `Generation<S, G>` (Zustand `generation` oder `running`, Schritte in der Reihenfolge des Ablaufs, Zustand des Spielmoduls `G`) und `GenerationDefinition<C, S, G>` mit der Einrichtung einer Partie `C`. Die Definition hat vier Funktionen: `nextStep` lost den ersten fehlenden Schritt des Ablaufs und nennt die Stelle, an der er eingefügt wird; `isComplete` prüft, ohne zu losen, ob ein Schritt fehlt; `invalidatedBy` liefert die abhängigen Schritte; `gameStateAfterRepeat` passt den Zustand des Spielmoduls an. `summary` gehört nicht zur Steuerung, weil nur die Oberfläche die Übersicht braucht; Catan liefert sie als `catanSummary`. Die reinen Funktionen `drawNextStep`, `confirmStep`, `repeatStep` und `stepsDiscardedBy` bilden die Steuerung. **Wiederholen** verwirft den Schritt und seine abhängigen Schritte und lost dann den ersten fehlenden Schritt des Ablaufs; das ist genau der wiederholte. Andere Schritte behalten Ergebnis und Stelle (US-AB-03 AK-3), verworfene werden danach wieder einzeln durchlaufen. Solange ein Schritt auf „Weiter“ wartet, wird nichts anderes gelost oder wiederholt (`step-pending`). Der Zustand `running` ergibt sich, sobald kein Schritt fehlt und keiner wartet; eine Wiederholung in der Übersicht (AK-6) führt zurück nach `generation`.
+
+Im Catan-Modul (`games/catan/generation`) liegen `CatanStep` (Losschritt, Dreh, Gebäude, Straße, Startrohstoffe; Drehs, Gebäude und Straßen zählen ab 0), `CatanOptions` (Spielversion, Modus `standard`, LS-01/03/04 einzeln, Startrohstoffe oder `null`), `CatanSetup` (Beteiligte in der Reihenfolge der Gruppe, Optionen, Farben der Partie) und `CATAN_GENERATION`. Der Ablauf ergibt sich aus den Optionen und den bisherigen Ergebnissen: Platzierung und Startrohstoffe folgen erst, wenn die Reihenfolge vollständig ist. Beim ersten Gebäude und nach einem wiederholten Gebäude lost `RetryOnDeadEnd` alle restlichen Gebäude verdeckt; `CatanGameState.hiddenPlan` hält die noch nicht gezeigten, jedes Gebäude nimmt das nächste daraus. Wiederholte Gebäude und Drehs verwerfen den Plan. `skipCatanPlacement` überspringt die Platzierung, solange die Reihenfolge bestätigt und noch kein Gebäude gelost ist (US-PL-05). Wird danach ein Dreh der Reihenfolge wiederholt, beginnt die Platzierung wieder und kann erneut übersprungen werden (Entscheidung des Product Owners in I2-B). Startrohstoffe bleiben bei einer neuen Reihenfolge als Schritte unverändert; die Übersicht zeigt sie in der neuen Platzierungsreihenfolge. `canPlayCatan` prüft, ob eine Gruppe eine Partie beginnen kann (US-AB-01 AK-1). Die Farben einer Partie (`MatchColor`, `matchColorsOf`, `setMatchColor` mit Tausch nach US-PG-04) liegen beim Farbmodell in `core/model` (ADR-028). *(neu in 0.21)*
+
+**Umsetzung (I2-C):** `CatanOptions.order` ist `{ mode: 'draw' }` (Standard), `{ mode: 'manual', order }` (selbst festgelegt, eine vollständige Reihenfolge der Beteiligten) oder `{ mode: 'none' }` („Ohne Platzierung“, FA-LS-07). Ohne gelostes Los entfallen die Drehs; „Selbst festlegen“ platziert in der festgelegten Reihenfolge, „Ohne Platzierung“ hat keine Gebäude und Straßen, und die Startrohstoffe folgen dann der Sitzreihenfolge der Gruppe. `catanPlacementOrder` liefert die gestellte Reihenfolge, ohne Reihenfolge `undefined`; Überspringen (US-PL-05) gibt es nur beim gelosten Los. `catanProgress(setup, generation, stepIndex)` fasst die Schritte für den Fortschritt in die Phasen Losen, Reihenfolge, Platzierung und Rohstoffe mit Gesamtzahl, erledigten Schritten und der aktuellen Phase; Phasen ohne Schritte fehlen, abgeschaltete Platzierung und Startrohstoffe erscheinen als „aus“. *(neu in 0.22)*
+
 ### 5.6 Losschritte und Startrohstoffe
 
 | Ziehung | Verfahren | Anforderung |
@@ -419,6 +468,8 @@ Die Ablaufsteuerung in `core/generation` ist spielunabhängig: Sie ruft `nextSte
 | Platzierungsreihenfolge (LS-02) | n−1 Ziehungen `pick(verbleibende)`; der letzte Platz ergibt sich; alle n! Reihenfolgen gleich wahrscheinlich | FA-LS-02, US-LS-03 |
 | Startrohstoffe mit Zurücklegen | k Ziehungen `pick(alleFünf)` | FA-SR-03 |
 | Startrohstoffe ohne Zurücklegen | k Ziehungen `pick(nochNichtGezogene)` | FA-SR-03 |
+
+**Umsetzung (I2-A):** Weil jeder Dreh der Reihenfolge ein eigener Schritt ist (Spezifikation 3.1), gibt es in `core/draws` neben `drawPlacementOrder` die Einzelteile `drawOrderSpin(persons, drawn, rng)` und `completeOrder(persons, drawn)`; `startingPerson(order)` liefert Platz 1. Die Reihenfolge betrifft Personen und bleibt deshalb in `core`. Die Startrohstoffe betreffen nur Catan: `drawCatanStartingResources({ count, replacement }, rng)` mit `CATAN_RESOURCES` und der Anzahl 1 bis 5 liegt im Catan-Modul (ADR-028). *(neu in 0.20)*
 
 ---
 
@@ -429,22 +480,25 @@ Die Ablaufsteuerung in `core/generation` ist spielunabhängig: Sie ruft `nextSte
 Alle Zufallswerte stammen aus einer einzigen Schnittstelle (NFA-ZF-03). Im Produktivcode gibt es genau eine Implementierung, die den kryptografisch sicheren Generator des Browsers nutzt (NFA-ZF-01).
 
 ```ts
-// core/random/source.ts
-export interface RandomSource {
+// core/random/randomSource.ts
+export type RandomSource = {
   /** Gleichverteilte Ganzzahl 0 … 2^32 − 1 */
   nextUint32(): number;
-}
+};
 
-// infra/random/crypto-source.ts
+// infra/random/cryptoRandomSource.ts (gekürzt)
 export class CryptoRandomSource implements RandomSource {
-  private buffer = new Uint32Array(256);
-  private index = this.buffer.length;
+  private readonly buffer = new Uint32Array(256);
+  private index = 256;
   nextUint32(): number {
-    if (this.index >= this.buffer.length) {
+    if (this.index >= 256) {
       crypto.getRandomValues(this.buffer);   // CSPRNG des Betriebssystems
       this.index = 0;
     }
-    return this.buffer[this.index++];
+    const value = this.buffer[this.index];
+    assert(value !== undefined, '…');        // noUncheckedIndexedAccess, kein `!`
+    this.index += 1;
+    return value;
   }
 }
 ```
@@ -452,7 +506,7 @@ export class CryptoRandomSource implements RandomSource {
 Regeln:
 
 - `Math.random` ist im gesamten Produktivcode per ESLint verboten, auch für dekorative Zwecke wie das Aufblinken.
-- Deterministische Quellen (mit Startwert) liegen ausschließlich unter `tests/support`.
+- Deterministische Quellen (mit Startwert) liegen ausschließlich unter `tests/support`. Tests in `src` importieren sie über den Kurznamen `@tests/…` (nur in der Vitest-Konfiguration); die Regel `production-not-to-tests` in dependency-cruiser verbietet Importe aus `tests/` im Produktivcode.
 - Die Oberfläche bestimmt kein Ergebnis. Animationen erhalten das bereits feststehende Ergebnis und stellen es dar (US-IN-01 AK-2).
 
 ### 6.2 Verzerrungsfreie Umrechnung
@@ -471,11 +525,17 @@ export function uniformIntFromWords(n: number, nextWord: () => number, bits: num
   return x % n;
 }
 
-export const uniformInt = (n: number, rng: RandomSource) =>
-  uniformIntFromWords(n, () => rng.nextUint32(), 32);
+export function uniformInt(n: number, rng: RandomSource): number {
+  return uniformIntFromWords(n, () => rng.nextUint32(), 32);
+}
 
-export const pick = <T>(items: readonly T[], rng: RandomSource): T =>
-  items[uniformInt(items.length, rng)]!;          // leere Liste: uniformInt wirft RangeError
+export function pick<T>(items: readonly T[], rng: RandomSource): T {
+  const index = uniformInt(items.length, rng);    // leere Liste: uniformInt wirft RangeError
+  for (const [position, item] of items.entries()) {
+    if (position === index) return item;          // ohne `!`, `undefined` bleibt ein gültiges Element
+  }
+  throw new InvariantError('picked index lies within the list');
+}
 ```
 
 Weil die Produktivfunktion nur eine Einstellung der allgemeinen Fassung ist, lässt sich deren Korrektheit exakt nachweisen (Kapitel 14.3).
@@ -495,7 +555,9 @@ export interface Person {
 
 export interface Group {
   id: GroupId; name: string; archived: boolean;
-  binding: { kind: 'global' } | { kind: 'game'; gameId: GameId };
+  binding:
+    | { kind: 'global'; excludesCatan?: boolean } // FA-PG-04, E-27; fehlt = false
+    | { kind: 'game'; gameId: GameId };
   members: GroupMember[];                    // 2 bis 12, nach Anlage unveränderlich
   createdAt: IsoTimestamp; updatedAt: IsoTimestamp;
 }
@@ -548,22 +610,14 @@ Eine IndexedDB-Datenbank `boardbrain` mit folgenden Stores (ADR-007):
 | `matches` | `id` | `groupId`, `gameId`, `[groupId+date]` | Partien mit Ergebnis |
 | `snapshots` | `id` | `createdAt`, `reason` | Sicherungspunkte (Kapitel 9) |
 | `session` | `id` | – | Genau ein Eintrag `current` oder leer (Kapitel 10) |
-| `meta` | `key` | – | `settings` (Ton, Akzentfarbe) und `state` (Zeitstempel, Hinweise, Erinnerung) |
+| `meta` | `key` | – | `settings` (Ton, Design, Akzentfarbe, „Ich hasse Catan!“), `state` (Zeitstempel, Hinweise, Erinnerung) und `errors` (die letzten fünf unerwarteten Fehler für die Diagnose, keine Nutzerdaten im Sinne von 7.4; seit K-9) |
 
 ```ts
 // infra/db/database.ts (Skizze)
-export class BoardBrainDb extends Dexie {
-  persons!: Table<Person, PersonId>;
-  groups!: Table<Group, GroupId>;
-  games!: Table<CustomGame, GameId>;
-  matches!: Table<Match, MatchId>;
-  snapshots!: Table<Snapshot, string>;
-  session!: Table<StoredSession, 'current'>;
-  meta!: Table<MetaEntry, MetaKey>;
-
-  constructor() {
-    super('boardbrain', { chromeTransactionDurability: 'strict' });
-    this.version(1).stores({
+export const SCHEMA_VERSIONS: readonly SchemaVersion[] = [
+  {
+    version: 1,
+    stores: {
       persons: 'id, name',
       groups: 'id',
       games: 'id',
@@ -571,12 +625,34 @@ export class BoardBrainDb extends Dexie {
       snapshots: 'id, createdAt, reason',
       session: 'id',
       meta: 'key',
-    });
+    },
+  },
+  // Version 2: { version: 2, stores: { … nur geänderte Stores … }, upgrade: async (tx) => { … } }
+];
+
+export class BoardBrainDb extends Dexie {
+  readonly persons: Table<Person, PersonId>;
+  readonly games: Table<CustomGame, GameId>;
+  readonly meta: Table<MetaEntry, MetaEntry['key']>;
+  // groups, matches, snapshots, session: Typen folgen mit ihren Bündeln
+
+  constructor(name = 'boardbrain', options: Pick<DexieOptions, 'indexedDB' | 'IDBKeyRange'> = {}) {
+    super(name, { ...options, chromeTransactionDurability: 'strict' });
+    for (const schema of SCHEMA_VERSIONS) {
+      const version = this.version(schema.version).stores(schema.stores);
+      if (schema.upgrade !== undefined) version.upgrade(schema.upgrade);
+    }
+    this.persons = this.table('persons');
+    // …
   }
 }
 ```
 
 `chromeTransactionDurability: 'strict'` sorgt dafür, dass Chromium-Browser wie Brave eine Transaktion erst als abgeschlossen melden, wenn sie dauerhaft geschrieben ist. Das ist für die laufende Partie wichtig.
+
+**Migrationsgerüst:** Die Schemaversionen stehen als Liste in `SCHEMA_VERSIONS`. Eine Schemaänderung hängt eine neue Version mit den geänderten Stores und, falls Daten umgewandelt werden müssen, einer `upgrade`-Funktion an; bestehende Einträge werden nie geändert, damit jede ältere Datenbank Schritt für Schritt aktualisiert werden kann. Version 1 enthält bereits alle Stores der Version 1 der App, damit spätere Bündel für ihre Stores keine Migration brauchen. Die Tabellen werden ohne Definite-Assignment-Behauptung (`!`) mit `this.table(…)` belegt; Tests übergeben eine eigene IndexedDB aus `fake-indexeddb`. `src/main.tsx` öffnet die Datenbank, bevor die App bedienbar wird (11.3, Schritt 7); scheitert das Öffnen, erscheint der Fehlerbildschirm.
+
+**Schnittstellen:** `app/ports.ts` definiert `MasterDataStore` mit `transaction(work)` und den Repositories, dazu `IdGenerator` und `Clock`. `infra/db` implementiert den Speicher (`createDexieMasterDataStore`), `infra/random/uuidGenerator.ts` die Kennungen und `infra/platform/systemClock.ts` die Uhr.
 
 Wahrheitswerte wie `archived` sind in IndexedDB nicht indizierbar. Gefiltert wird im Speicher; bei der erwarteten Datenmenge ist das unkritisch.
 
@@ -798,22 +874,34 @@ export interface StoredSession {
 }
 ```
 
+**Umsetzung (I2-B):** Die gespeicherte Sitzung ist `Session<C, S, G>` aus `core/generation`, in `app/ports` als `StoredSession` für Catan festgelegt. Statt `options`, `matchColors` und `hiddenPlan` enthält sie die Einrichtung `setup` (Beteiligte, Optionen, Farben der Partie als Liste in der Reihenfolge der Gruppe) und die Generierung `generation` mit Zustand, Schritten und Zustand des Spielmoduls (verdeckter Plan, übersprungene Platzierung). So bleibt `core` frei von Catan (ADR-028). `SESSION_SCHEMA_VERSION` ist 1. Der Port `SessionStore` öffnet eine Transaktion über `session` und lesend über `groups`; das Schreiben der Sitzung zählt nicht als Änderung der Nutzerdaten (7.4). *(neu in 0.21)*
+**Umsetzung (I2-E):** Jeder Schritt trägt den Merker `isStaged`: Seine Bewegung ist abgelaufen oder wurde übersprungen. Ein neu geloster Schritt beginnt mit `false`; die Oberfläche setzt ihn über `markStaged`, sobald die Bewegung endet. Deshalb ist `SESSION_SCHEMA_VERSION` jetzt 3; eine Sitzung der Version 2 meldet sich als unbekannt und lässt sich beenden. *(neu in 0.32)*
+
 ### 10.3 Verhalten
 
 | Situation | Verhalten |
 |---|---|
 | App wird während einer Animation beendet | Nach dem Neustart wird die Animation des letzten Schritts (status `revealed`) mit demselben Ergebnis erneut abgespielt; danach wartet die App auf „Weiter“ (US-AB-05 AK-3) |
-| App wird nach einer Bestätigung beendet | Nach dem Neustart erscheint der Stand mit dem nächsten, noch nicht gelosten Schritt |
+| App wird nach einer Bestätigung beendet | Nach dem Neustart erscheint der nächste, noch nicht geloste Schritt ohne Ergebnis (US-AB-02 AK-3) |
 | Schritt wiederholen | `invalidatedBy` liefert die zu verwerfenden Schritte; neuer Stand wird gespeichert, dann wird neu gelost (wieder erst speichern, dann zeigen) |
 | Ergebnis speichern | Eine Transaktion legt die Partie an und löscht die Sitzung (FA-AB-08) |
 | Beenden ohne Ergebnis | Die Sitzung wird gelöscht |
-| Vorbereitung | Liegt nur im Arbeitsspeicher (Zustand-Store); geht bei einem Neustart verloren |
+| Vorbereitung | Liegt nur im Arbeitsspeicher (Zustand der Layout-Route `#/partie/neu`, ADR-029); geht bei einem Neustart verloren |
 
 Weil Updates während einer Partie gesperrt sind (FA-UP-02), wechselt eine Sitzung nie die App-Version. `schemaVersion` dient dennoch als Schutz: Eine unbekannte Version führt zu einer verständlichen Meldung statt zu einem Absturz.
+
+**Umsetzung (I2-B):** Der `SessionService` bietet `current`, `isSessionActive`, `prepare` (Startwerte zu einer Gruppe: alle Mitglieder, Standardoptionen, Catan-Farben der Gruppe), `start`, `drawNextStep`, `confirmStep`, `repeatStep`, `skipPlacement` und `endWithoutResult`. Jede Änderung liest, ändert und speichert die Sitzung in einer Transaktion; erst danach erhält die Oberfläche das Ergebnis. `start` speichert die Sitzung ohne Schritt, den ersten Schritt lost erst `drawNextStep`. Erwartbare Fehler sind `no-session`, `session-unsupported` (unbekannte `schemaVersion`), `session-active`, `group-not-eligible`, `step-pending`, `no-step-revealed`, `generation-complete` und `placement-not-skippable`. Eine Sitzung unbekannter Version zählt für die Sperren als laufend und lässt sich mit `endWithoutResult` beenden. Die Warnung vor dem Wiederholen erhält ihre Liste aus `stepsDiscardedBy`. In `src/main.tsx` wird der Dienst zusammen mit der Oberfläche in I2-C eingebunden. *(neu in 0.21)*
+
+**Umsetzung (I2-C):** Ein Tipp ist genau eine Transaktion. `start` lost den ersten Schritt in derselben Transaktion; hat die Partie keinen Schritt (alle Losschritte aus, „Ohne Platzierung“, keine Startrohstoffe), ist sie sofort laufend. `drawNextStep` und `confirmStep` des Dienstes ersetzt `advance(shownStep)` für „Losen“ und „Zur Übersicht“: Die Oberfläche übergibt den Index des angezeigten Schritts (`null`, wenn keiner wartet). Weicht er vom wartenden Schritt ab, etwa nach einem doppelten Tipp, antwortet der Dienst mit `step-changed` und ändert nichts; sonst bestätigt er den Schritt und lost den nächsten, nach dem letzten ist die Partie laufend (`generation-complete`, wenn nichts mehr zu tun ist). `skipPlacement` bestätigt den letzten Dreh, überspringt die Platzierung und lost den nächsten Schritt. `step-pending` und `no-step-revealed` entfallen für den Dienst. `src/main.tsx` setzt den Dienst mit `CryptoRandomSource` zusammen. *(neu in 0.22)*
+
+**Umsetzung (I2-D):** `advance` ist aufgeteilt in `draw(shownStep)` für „Losen“ (bestätigt einen wartenden Schritt und lost den nächsten in einer Transaktion) und `confirm(shownStep)` für „Weiter“ und „Zur Übersicht“ (bestätigt nur; `nothing-to-confirm`, wenn nichts wartet). `start` lost nichts mehr, und `repeatStep` in `core/generation` verwirft nur noch den Schritt und seine Folgeschritte, ohne `RandomSource`: Der wiederholte Schritt ist danach der erste fehlende. Wartet beim Wiederholen ein anderer Schritt, bestätigt der Dienst ihn zuerst, denn er wurde schon gesehen (Rückblick). `skipPlacement` lost ebenfalls nicht. Ob ein Schritt ohne Ergebnis gezeigt wird, wird nicht gespeichert, sondern abgeleitet: Es wartet kein Schritt, und `catanNextSlot` nennt den ersten fehlenden Platz des Ablaufs samt seiner Stelle unter den Schritten (E-35). Die aufgedeckten Startrohstoffe (FA-SR-05) liegen als `openedResources` im Zustand des Catan-Moduls; `openResources(personId, cards)` speichert sie ohne zu losen, ein wiederholter Startrohstoff-Schritt liegt wieder verdeckt. Deshalb ist `SESSION_SCHEMA_VERSION` jetzt 2; eine Sitzung der Version 1 meldet sich als unbekannt und lässt sich beenden. Dass eine schon abgeschlossene Animation nach einem Neustart nicht noch einmal abläuft (FA-AB-07), braucht erst die längeren Bewegungen aus I2-E; das schlichte Einblenden in I2-D läuft nach einem Neustart erneut. Die Definition hat dafür eine optionale fünfte Funktion `arrangeSteps`: Nach jedem gelosten Schritt bringt sie die Schritte in die Reihenfolge des Ablaufs, wo diese von einem Ergebnis abhängt. Catan nutzt sie, damit schon geloste Startrohstoffe nach einer neu gelosten Reihenfolge deren Reihenfolge folgen (US-SR-01 AK-1); ihre Ergebnisse bleiben (US-AB-03 AK-3). *(neu in 0.25)*
+**Umsetzung (I2-E):** `markStaged(index)` in `core/generation` setzt den Merker eines Schritts (`no-such-step`, wenn es ihn nicht mehr gibt, etwa nach einem Wiederholen in der Zwischenzeit); der `SessionService` bietet es in einer eigenen Transaktion an. `unstagedStepIndex` nennt den Schritt, dessen Bewegung noch aussteht; nur der zuletzt geloste kann es sein. Nach einem Neustart spielt die Oberfläche diese Bewegung mit demselben Ergebnis erneut ab, eine abgelaufene nicht (FA-AB-07, US-AB-05 AK-3). Die Platzierung setzt den Merker sofort, ihr Aufblinken folgt mit I2-F. *(neu in 0.32)*
 
 ### 10.4 Sperren
 
 Der `SessionService` stellt `isSessionActive()` bereit. `ImportService`, `BackupService.restore`, `MasterDataService` (Archivieren, Löschen, Bindung der beteiligten Gruppe) und `UpdateService` prüfen diese Sperre selbst, nicht nur die Oberfläche (FA-AB-09, E-20).
+
+**Umsetzung (I2-B):** Der `MasterDataService` liest die Sitzung in derselben Transaktion wie die Gruppe (`MasterDataRepositories.session`), damit Prüfung und Änderung nicht auseinanderfallen. `editGroup` lehnt eine geänderte Spielbindung der beteiligten Gruppe mit `group-in-session` ab; Name und Farben bleiben änderbar, weil die Partie ihre Farben beim Start übernommen hat (US-VW-02 AK-5). Archivieren und Löschen folgen mit ihren Bündeln. *(neu in 0.21)* Seit I2-D nennt der Tisch-Editor die Sperre direkt bei „Was wird gespielt?“ und bietet „Partie beenden“ an; Auswahl und Schalter sind bis dahin gesperrt (Spezifikation 3.5, Design S1). *(ergänzt in 0.25)*
 
 ---
 
@@ -864,6 +952,7 @@ Schlägt eine Datenmigration fehl, zeigt die App eine verständliche Meldung und
 - **Versionsanzeige:** App-Version und Build-Kennung stehen in den Einstellungen (US-UP-01 AK-5).
 - **Entwicklung:** Im Entwicklungsserver ist der Service Worker abgeschaltet. Update-Abläufe werden mit `npm run preview` (Produktions-Build über HTTPS) und in Playwright mit zwei aufeinanderfolgenden Builds getestet.
 - **Umsetzung:** `vite-plugin-pwa` im Modus `injectManifest` erzeugt die Liste der Dateien mit Prüfsummen; der Service Worker selbst ist eigener Code in `src/sw/` (rund 150 Zeilen).
+- **Stand I1 (I1-D):** Der Service Worker speichert jeden Build in einem eigenen Cache (`boardbrain-build-‹Prüfsumme›`), beantwortet Navigationen mit `index.html` und Dateien der eigenen Herkunft aus dem Cache und löscht ältere Caches. Ein neuer Build wird wie im Standardverfahren erst aktiv, wenn alle Fenster der App geschlossen waren; Zeiger, Benachrichtigung und Umschaltung auf Befehl (11.2, ADR-015) ersetzen das in I4. Bis dahin ist das unbedenklich, weil vor 1.0 nichts nach `main` geht (EP-02). `infra/update/serviceWorker.ts` registriert `/sw.js` nur im Produktions-Build. `vite-plugin-pwa` nennt Manifest und Symbole doppelt in der Dateiliste; der Service Worker entfernt Dubletten, weil `cache.addAll` sonst die Installation abbricht. Der Service Worker hat eine eigene Typprüfung mit den Typen für Worker (`tsconfig.sw.json`). *(neu in 0.15)*
 
 ---
 
@@ -889,11 +978,17 @@ export const isAppleMobile = () =>
 
 Die Erkennung anderer Browser unter iOS ist nur näherungsweise möglich, weil manche die Kennung von Safari verwenden. Die Anleitung ist deshalb so formuliert, dass sie in jedem Fall zum Ziel führt („Öffne diese Seite in Safari und tippe auf ‚Teilen‘ …“).
 
+**Symbole und Manifest (I1-D):** App-Symbol D8 „Zwei Karten“ aus der Design-Referenz `docs/design/i1d-board-final-preview.html`. `npm run icons` (`scripts/generate-icons.mjs`) zeichnet es aus dem Logo und den Farben in `tokens.css` und rendert es mit Playwright als PNG nach `public/icons/`: `icon-192.png` und `icon-512.png` (Zweck `any`), `icon-maskable-512.png` (Karten in der sicheren Mitte, für den runden Zuschnitt unter Android) und `apple-touch-icon.png` (180 px, iOS und iPadOS). Das Manifest (`vite.config.ts`) nimmt Name und Beschreibung aus `de.ts` und Hintergrund- und Themenfarbe aus `--color-surface` des Designs „Holz“; es legt keine Ausrichtung fest (13.1, E-29). Für iOS kommen `apple-touch-icon`, `apple-mobile-web-app-title` und die Statusleiste `black-translucent` hinzu; der Rahmen hält mit `env(safe-area-inset-*)` Abstand. Der Browser-Tab behält `favicon.svg`. *(neu in 0.15)*
+
+**Symbole der lokalen Abnahme-App (E-40):** `npm run icons` zeichnet dasselbe Symbol zusätzlich in Lila (Tokens `--color-acceptance-icon-*`) nach `public-acceptance/icons/`, mit denselben Dateinamen. Nur der Build-Modus `acceptance` (16.6) liefert sie unter `/icons-acceptance/` aus und verweist im Manifest und in `apple-touch-icon` darauf; der Build für GitHub enthält sie nicht. *(neu in 0.35)*
+
 ### 12.2 Persistenter Speicher
 
 Beim Start ruft die App `navigator.storage.persisted()` und, falls nötig, `navigator.storage.persist()` auf. Der Status und `navigator.storage.estimate()` erscheinen im Bereich „Sicherung“. Ist der Speicher nicht geschützt, erscheint eine Warnung mit Ursachen und Abhilfen (US-IS-03), etwa die Ausnahme für BoardBrain in Braves Einstellung „Websitedaten beim Schließen löschen“.
 
 ### 12.3 Ton (ADR-017)
+
+*Zurückgestellt in 0.31: Klänge sind nicht Teil von Version 1 (Anforderungsdokumentation E-38, PP-20). Der folgende Plan gilt, wenn sie nach dem ersten Release kommen.*
 
 - Web Audio API; Klänge als kurze MP3-Dateien im App-Paket, beim Start in `AudioBuffer` dekodiert.
 - Der `AudioContext` wird mit dem Tipp auf „Generierung starten“ freigeschaltet (iOS verlangt eine Nutzeraktion).
@@ -917,6 +1012,23 @@ Beim Start ruft die App `navigator.storage.persisted()` und, falls nötig, `navi
 
 Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktionieren direkte Aufrufe und die Zurück-Taste unter Android ohne Serverkonfiguration auf GitHub Pages (ADR-019).
 
+Ein Rahmen (`AppLayout`) füllt den Bildschirm: die Ansicht (nur sie scrollt) und unten die Hauptnavigation als Kartenhand – jeder Bereich ist eine Spielkarte, die aktive ist herausgezogen. Die Kartenhand nennt nur Bereiche, die es schon gibt (seit I1-B „Start“ und „Verwaltung“); auf den Unterseiten der Verwaltung ist „Verwaltung“ aktiv. Adressen sind deutsch, z. B. `#/verwaltung/personen`; unbekannte Adressen führen zur Startansicht `#/`. Jede Ansicht ist von einer eigenen Error Boundary umschlossen. Aussehen, Maße und die Plätze späterer Funktionen legt die Design-Referenz `docs/design/d3-start-navigation-final-preview.html` fest. *(geändert in 0.11, Design D-3)*
+
+- **Startansicht:** Personen, Tische und Spiele als Fächer aus Spielkarten mit der Anzahl in den Ecken, direkt über der Kartenhand; die Ansicht scrollt nie, die Karten passen ihre Größe dem Platz an. Darüber liegt seit I2-C der Stapel „Partie“ als Nachziehstapel: ohne Sitzung führt er zu `#/partie/neu`, sonst zur Partie (US-AB-04 AK-2). Oben erscheinen später die Banner; sie verschieben den Inhalt nicht, solange der Platz reicht. *(geändert in 0.22)*
+- **Verwaltung:** dieselben Spielkarten als Raster mit den ersten Namen jedes Bereichs.
+- **Personen und Tische im Überblick (US-VW-05, FA-VW-06):** Die Personenliste zeigt jede Person als Spielkarte mit ihren Tischen; jede Karte öffnet `#/verwaltung/personen/‹id›`, jeder Tisch im Spielraum und auf der Personenseite `#/verwaltung/gruppen/‹id›`, jeder Platz und jedes Mitglied auf der Tischseite wieder die Person. Die Kennung aus der Adresse liest `parsePersonId` bzw. `parseGroupId` als `Result` (ADR-025); eine unbekannte oder ungültige Kennung zeigt einen Hinweis statt eines Fehlers. Die Lesehooks `usePerson` und `useGroup` liefern `null` für „nicht vorhanden“. Catan-Farben erscheinen nur im Editor. Aussehen und Maße legt `docs/design/i1e-persons-tables-final-preview.html` fest; dort ist auch zu sehen, wo Bearbeiten (I1-F), Ergebnisse und Statistik (I3) sowie Archivieren (I5) andocken. *(neu in 0.13)*
+- **Bearbeiten (US-VW-06, US-VW-02, US-VW-07, FA-VW-01, FA-VW-02, FA-VW-04):** Auf Personen-, Tisch- und Spielseite sitzen die Aktionen als kleine Pillen unter den Angaben („✎ Umbenennen“ bzw. „✎ Bearbeiten“; Archivieren und Löschen kommen mit I5 daneben). Person und eigenes Spiel werden an Ort und Stelle umbenannt: Feld und „Abbrechen | Speichern“ ersetzen das Profil neben der Karte, Meldungen erscheinen darunter. Personen-, Tisch- und Spielnamen sind app-weit eindeutig, archivierte eingeschlossen (FA-PG-09, E-31). Die Oberfläche prüft schon beim Tippen, beim Anlegen wie beim Bearbeiten: Ein leerer oder vergebener Name zeigt sofort einen Fehler und sperrt „Speichern“; der Dienst prüft in der Transaktion noch einmal (`name-duplicate`). Eigene Spiele haben eine Seite `#/verwaltung/spiele/‹id›` mit den Tischen, die nur dieses Spiel spielen; Catan hat keine (Lesehook `useCustomGame`, Kennung über `parseGameId`). „Bearbeiten“ am Tisch öffnet unter `#/verwaltung/gruppen/‹id›/bearbeiten` denselben Editor wie „Neuer Tisch“, ohne Bank, weil die Mitglieder fest sind; die eigene Adresse lässt die Zurück-Taste unter Android den Editor schließen. Ungespeicherte Änderungen fragen beim Verlassen „Änderungen verwerfen?“ (`UnsavedChangesGuard` mit `useBlocker`); „Abbrechen“ verwirft ohne Rückfrage. Der Router kann nur Navigationen aufhalten, die er selbst angelegt hat; nach einer von Hand eingetippten Adresse führt Zurück ohne Rückfrage weiter. Der Knopf zum Anlegen und Speichern steht im Tisch-Editor auf allen Geräten am Ende der Angaben; auf dem Handy ist er nicht mehr am unteren Rand angeheftet, damit man beim Herunterscrollen an allen Optionen vorbeikommt (Product Owner 12.11.2026). Aussehen legt `docs/design/i1f-edit-final-preview.html` fest. *(neu in 0.14)*
+- **Zurück:** Unterseiten haben links neben dem Titel einen Zurück-Knopf. Er führt wie die Zurück-Taste unter Android zur vorherigen Seite (`navigate(-1)`); wurde die Seite direkt aufgerufen, zur Verwaltung.
+- **Fehlerbildschirm (K-5, ADR-025):** Ein unerwarteter Fehler beim Zeichnen einer Ansicht, im Rahmen oder beim Nachladen einer Ansicht (etwa wenn nach einem Update die alten Dateien fehlen) landet in der Fehleransicht des Rahmens (`errorElement` in `src/main.tsx`, `RouteErrorScreen`). Sie ersetzt den ganzen Rahmen samt Kartenhand, weil der Rahmen selbst kaputt sein kann: eine Karte in der Mitte mit Warnzeichen, Überschrift (╯°□°)╯︵ ┻━┻ (vorgelesen „Etwas ist schiefgelaufen“), „Neu laden“ (aktuelle Adresse), „Zum Start“ (lädt die App unter `#/` neu, damit kein kaputter Zustand bleibt) und aufklappbaren Details mit „Details kopieren“ (Fehlertext, Adresse, Version, Gerät; nur in die Zwischenablage). Denselben Bildschirm zeigen die globalen Fehlerhandler und ein Fehler beim Öffnen der Datenbank. Referenz `docs/design/k5-error-screen-final-preview.html`.
+- **Smartphone im Querformat (NFA-PL-04, E-29):** Ein Fenster im Querformat, das niedriger als 500 px ist, gilt als Smartphone; der Rahmen zeigt dann per Media Query nur den Hinweis, das Gerät zu drehen. Das wirkt auf Android und iOS gleich; eine Sperre im Manifest entfällt, weil iOS sie nicht kennt und sie unter Android auch Tablets sperren würde.
+- **Kartenhand:** Die Bereiche stehen als Liste in `AppLayout`; ein weiterer Bereich ist ein Eintrag. `HandNavigation` zeigt sie, Drehung, Breite und Lage berechnet `cardHand.ts` (9° je Karte, ab sechs Karten 70 px breit und 6°). *(geändert in 0.16)*
+- **Eingefahrene Kartenhand (K-3):** Nur auf dem Handy, also unter 600 px Breite (`useIsPhone`; kleine Tablets wie iPad mini oder Galaxy Tab im Hochformat liegen darüber, anders als bei der Grenze 48rem von `useIsWideScreen`), wird die Hand eingefahren; auf Tablet und PC ist genug Platz, dort bleibt sie überall aufgefächert wie in D-3 (Entscheidung des Product Owners). Auf dem Handy ist sie nur auf dem Start aufgefächert. Auf allen anderen Seiten, auch in der Verwaltung, fährt sie in einen flachen Bogen ein (3° je Karte): Die aktive Karte zeigt 30 px, die übrigen 25 px, jeweils nur ihr Symbol; die Ansicht hält unten nur noch 46 px statt 104 px frei, der Verlauf ist 32 px lang. Ein Tipp auf eine Karte führt direkt in ihren Bereich; jede Karte hat über ein Pseudo-Element eine Tippfläche von mindestens 44 px Höhe und der Breite ihres Platzes. Langes Drücken (450 ms) fächert die Hand mit Namen über einem abgedunkelten Hintergrund auf; ein Tipp auf den Hintergrund, Escape oder ein Seitenwechsel faltet sie wieder. Der Zustand „aufgefächert“ gilt nur für die Adresse, auf der er entstand, deshalb braucht der Seitenwechsel keinen Effekt. Das Browsermenü beim langen Drücken auf einen Link unterdrücken `onContextMenu` (Android) und `-webkit-touch-callout` (iOS). Die Karten heißen für Bildschirmleser weiter wie ihr Bereich. Weil die eingefahrenen Karten unter den Rahmen ragen, schneidet `.layout` mit `overflow: clip` statt `hidden`: Sonst scrollte der Browser den Rahmen, um eine fokussierte Karte zu zeigen, und die Kopfzeile verrutschte. Ob die Hand auch in der Verwaltung groß bleiben oder überall klein sein soll, ist als Einstellung erwogen und für I6 offen (Umsetzungsplan, Kapitel 7). Aussehen und Maße legt `docs/design/k3-card-hand-final-preview.html` fest; für den Start gilt weiter D-3. *(neu in 0.16)*
+- **Höhe und Ränder (I1-D):** Die Höhe des Rahmens kommt aus `html`, `body` und `#root` mit `height: 100%` und `overflow: hidden`, nicht aus `100dvh`: Brave unter Android meldete in der installierten App nach dem Herunterziehen zum Aktualisieren eine größere dynamische Höhe, und die ganze Seite ließ sich verschieben. Herunterziehen zum Aktualisieren entfällt damit (Entscheidung des Product Owners). In der installierten App (`display-mode: standalone`) sind `html` und `body` `100lvh` hoch, `body` fest positioniert: iPadOS und iOS machen das Dokument bei durchscheinender Statusleiste sonst um deren Höhe kürzer als den Bildschirm, und unten bliebe ein Streifen. Die Kartenhand reicht bis unter den Home-Strich (`env(safe-area-inset-bottom)`), nur der Inhalt der Karten hält Abstand. **Übergang N1:** Die Hand hat keinen eigenen Streifen mehr, sondern liegt über dem unteren Rand der Ansicht; die Ansicht reicht bis zum Rand, hält mit einem Innenabstand in Höhe der Hand Ansichten mit voller Höhe (Start, Brett) über ihr und lässt lange Ansichten so weit scrollen, dass der letzte Eintrag über den Karten steht. Unterhalb der Oberkante der Hand läuft ihr Hintergrund auf 48 px von durchsichtig in `--color-surface` über, sodass der Inhalt sanft verschwindet statt hart abgeschnitten zu werden. Bewusst ein Verlauf und keine Maske auf der Ansicht: Eine Maske machte die Ansicht zu einem eigenen Stapelkontext, und Overlays wie der Tisch-Editor lägen unter der Hand. Weil die Hand in der Grundfarbe endet, geht sie nahtlos in die Fläche über, die Android hinter der Gestenleiste selbst in dieser Farbe malt. Im Design „Glas“ verdeckt der Verlauf den Farbschein am unteren Rand; das ist hingenommen. Das ersetzt den Streifen aus D-3; maßgeblich ist `docs/design/i1d-board-final-preview.html`. *(neu in 0.15)*
+- **Partie (I2-C, US-AB-01, US-AB-02, US-AB-04):** Die Vorbereitung liegt unter der Layout-Route `#/partie/neu` mit der Spielwahl (Index), `tisch`, `optionen` und `farben`; die Generierung unter `#/partie`, die Übersicht unter `#/partie/uebersicht`. Die Layout-Route führt während einer Partie zu `#/partie`, auch wenn die Zurück-Taste dort landet; Optionen und Farben ohne gewählten Tisch (etwa nach einem Neuladen) führen zur Tischwahl. `#/partie` führt ohne Sitzung zum Start und bei einer laufenden Partie zur Übersicht. Die Ansichten der Partie lädt `src/main.tsx` bei Bedarf als `lazy`-Routen von React Router (über `ui/views/match/matchViews.ts`), weil die Illustrationen der Rohstoffkarten groß sind. Der Code lädt während der Navigation, die bisherige Ansicht bleibt so lange stehen; `lazy()` mit Suspense zeigte die Ansicht erst nach der Zurückhaltung von 300 ms, die React 19 für Platzhalter einhält (gemessen: erstes Öffnen nach dem Start unter Chromium 383 statt 79 ms). Während der Partie ist in der Kartenhand „Start“ aktiv (`alsoOn: ['/partie']`). Die Tischwahl zeigt die aktiven Tische, die Catan spielen können, alphabetisch wie unter „Tische“; ein Tipp führt weiter, **Gedrückt halten** (500 ms, bis 10 px Bewegung, `ui/components/useLongPress.ts`) zeigt alle Personen, der Klick danach entfällt. Ein neues Muster der App, sonst nur an der Kartenhand. Die Übersicht ist in I2-C nur zum Ansehen; Wiederholen aus der Übersicht und der Rückblick („Blättern“) folgen mit I2-D (siehe unten). **Niedrige Tablets im Querformat** (Galaxy Tab, iPad, unter 720 px Höhe der App): Karte des Losschritts und Rohstoffkarten bleiben im Raum zwischen Fortschritt und Knöpfen (eigene Größen-Container mit der Breite der Referenz als Obergrenze, `@property`), die Platzierung zeigt die Reihenfolge im Band statt als Liste, damit die Knöpfe über der Kartenhand stehen. Die Rahmen der Referenz sind höher und bleiben unverändert. Aussehen und Maße legt `docs/design/i2-match-final-preview.html` fest. *(neu in 0.22)*
+- **Laufende Partie (I2-D, US-AB-02 bis US-AB-05, US-SR-01 AK-6, US-VW-02 AK-5):** `ui/views/match/matchFlow.ts` leitet aus der gespeicherten Sitzung die Seite ab: den wartenden Schritt oder den nächsten ohne Ergebnis, im Rückblick einen früheren Schritt unter `#/partie?schritt=N` (ersetzt den Verlauf, damit die Zurück-Taste nicht durch alle Schritte führt). Der Kopf hat einen Zurück-Knopf außer auf dem ersten Schritt; der Hinweis „Rückblick“ schwebt unter dem Fortschritt und nimmt nur Platz ein, wenn er etwas verdecken würde (je Seite gemessen, sonst würde er hin- und herspringen). Der Vorwärts-Knopf heißt „Losen“, „Weiter“, „Blättern“, „Alle umdrehen“ oder „Zur Übersicht“. Nach einem Wiederholen bleiben die späteren Schritte erhalten; der Ablauf zeigt eine Ansicht mit mehreren Schritten (Reihenfolge, Platzierung) dann als Ganzes, statt die behaltenen Schritte einzeln nachzuspielen, „Blättern“ geht von Ansicht zu Ansicht, und der Hinweis „Rückblick“ führt „Zur Übersicht“, wenn nichts mehr zu losen ist (`shownRange`, `lookBackTarget`). Die Übersicht wiederholt über antippbare Zeilen und Stücke und führt danach in den Ablauf; ihr Zurück-Knopf führt zum letzten Schritt, wenn sie aus dem Ablauf kam, sonst zum Start. Auf dem Start steht oben das Band „‹Tisch› spielt gerade · Weiter“. Öffnet sich `#/partie/neu` während einer Partie, fragt die Spielwahl „Zur Partie“ oder „Neu beginnen“ (Q1); die späteren Seiten der Vorbereitung führen zur Partie, wie direkt nach „Generierung starten“. Die Prüfseite `#/brett` und ihr Verweis in der Diagnose sind entfallen; das Brett zeigt die Platzierung. Aussehen und Maße legt `docs/design/i2d-running-match-final-preview.html` fest. *(neu in 0.25)*
+- **Rückblick in ganzen Ansichten (I2-H, US-AB-04 AK-3, AK-4):** „Zurück“ und „Blättern“ gehen von Ansicht zu Ansicht, nicht mehr Schritt für Schritt: Ein Losschritt und die Startrohstoffe einer Person sind je eine Ansicht, die Reihenfolge und die Platzierung je eine ganze. `shownRange` liefert für jeden Schritt seine Ansicht (eine fehlende Stelle trennt sie), `pageAt`, `previousPage` und `nextPage` führen auf deren ersten Schritt oder auf die aktuelle Seite, wenn die Ansicht zu ihr gehört; der Fortschritt zählt bis zum letzten gezeigten Schritt (`progressIndex`); auf einer Seite ohne Ergebnis zählen Balken und Aufschrift den anstehenden Schritt schon mit („Losen 1/3“, sobald die Seite erscheint, Product Owner 12.11.2026). Nur der gerade geloste Stein wird eingeblendet; „Wiederholen“ auf einer ganzen Ansicht wiederholt ihren letzten Schritt, jeden anderen Stein erreicht man auf dem Brett. Der Hinweis „Rückblick“ und der Kartentisch messen vor dem Zeichnen (`useLayoutEffect`), der Hinweis misst nach, wenn Teile später erscheinen (MutationObserver, nur hinzugefügte Teile). Die Übersicht erhält aus jedem Weg des Ablaufs die Herkunft, damit ihr Zurück-Knopf wieder in den Ablauf führt. Abweichend von den Referenzen aus I2-D und I2-H, die den Rückblick Schritt für Schritt zeigen (Entscheidung des Product Owners 10.11.2026). *(neu in 0.27)*
+- **Logo:** ein Gehirn, dessen linke Hälfte ein Schachbrett ist (`Logo`, Farbe `--color-accent-text`); als Symbol im Browser-Tab `public/favicon.svg` mit festem Farbwert, weil eine Bilddatei die Tokens nicht lesen kann. Die Symbole für Startbildschirm und Manifest (D8, zwei Karten mit dem Logo) erzeugt `npm run icons` aus derselben Grafik (12.1). *(geändert in 0.15)*
+
 | Bereich | Ansichten |
 |---|---|
 | Start | Startansicht, Banner (Erinnerung, Update, Speicherwarnung), Rückkehr zur laufenden Partie |
@@ -925,18 +1037,19 @@ Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktion
 | Statistik | Kennzahlen, Rangliste, Diagramme, Filter |
 | Verwaltung | Personen, Gruppen, Spiele, Archiv |
 | Daten | Export, Import mit Entscheidungsdialogen, Sicherung mit Sicherungspunkten und Importliste |
-| Einstellungen | Ton, Akzentfarbe, Version |
+| Einstellungen | Ton, „Ich hasse Catan!“ mit Bestätigung, Design, Akzentfarbe, Version |
 | Installation | Anleitung (iOS ausschließlich diese Ansicht im Browser) |
-| Diagnose | Technische Prüfwerte für die Abnahme auf Geräten: Version, sicherer Kontext, Verfügbarkeit von `crypto.randomUUID`, Service Worker und persistentem Speicher, Installationsstatus. Nur über die direkte Adresse `#/diagnose` erreichbar; entsteht im Setup und ist im Platzhalter-Release die Startansicht |
+| Diagnose | Technische Werte für die Abnahme und für Berichte von Testenden (K-9, *geändert in 0.34*): oben eine Zusammenfassung mit Hinweisen (fehlende Voraussetzung, aufgezeichnete Fehler, Partie aus anderer Version, nicht installiert, Speicher nicht geschützt, nicht offline bereit; „offline“ nicht auf dem Entwicklungsserver) und „Bericht teilen“ (Web Share, wo vorhanden) und „Bericht kopieren“; darunter App (Version, Build-Kennung aus Commit und Bauzeit, installiert, „Offline bereit“), Gerät (Browser und System aus dem User-Agent, Bildschirm, Ausrichtung, sichere Zonen, Schriftgröße, „Bewegung reduzieren“, Bedienung, Sprache, User-Agent), Daten (Speicherschutz nur gelesen, `navigator.storage.estimate()`, Schemaversion, Anzahlen ohne Namen, laufende Partie, letzte Änderung), Würfeltest (60.000 Würfe mit der `RandomSource` der App, Chi-Quadrat gegen α = 0,1 % wie die statistische Suite), Voraussetzungen (HTTPS, `crypto.getRandomValues`, `crypto.randomUUID`, IndexedDB, Service Worker, persistenter Speicher) und die letzten Fehler mit „Liste leeren“. Die Werte des Geräts liest `infra/platform/diagnostics.ts` bei jedem Öffnen neu; Seite und Bericht entstehen aus demselben Modell (`diagnosticsModel.ts`). Ziehungen erscheinen nicht (E-02). Über die direkte Adresse `#/diagnose` erreichbar, nicht in der Kartenhand; weil installierte Apps keine Adressleiste haben, führt seit I1-D ein unauffälliger Verweis „Diagnose“ unten rechts in der Verwaltung dorthin, der nichts verschiebt. Ab I6 öffnet zehnmaliges schnelles Tippen auf die Versionsnummer in den Einstellungen die Diagnose; dann entfällt der Verweis *(geändert in 0.15)*; entstand im Setup und war im Platzhalter-Release die Startansicht, seit I1-B ist `#/` die Startansicht |
 
 ### 13.2 Zustand in der Oberfläche
 
 | Art | Lösung |
 |---|---|
 | Gespeicherte Daten | `useLiveQuery` aus `dexie-react-hooks`; Ansichten aktualisieren sich bei jeder Änderung automatisch (US-ER-05 AK-3) |
-| Laufende Partie | Zustand-Store mit Abbild der gespeicherten Sitzung; Änderungen nur über `SessionService` |
-| Vorbereitung | Zustand-Store, nur im Arbeitsspeicher |
-| Formulare | Lokaler Komponentenzustand |
+| Laufende Partie | Lesehook `useCurrentSession(db)` (`infra/db/readHooks.ts`) über `useLiveQuery`: `none`, `unsupported` (unbekannte `schemaVersion`) oder `active` mit der Sitzung; Änderungen nur über `SessionService`, jede Ansicht zeigt danach den gespeicherten Stand (ADR-014, ADR-029) *(geändert in 0.22)* |
+| Vorbereitung | Zustand der Layout-Route `#/partie/neu` (`PreparationLayout`), an Spielwahl, Tisch, Optionen und Farben über den Outlet-Kontext gereicht; nur im Arbeitsspeicher (ADR-029) *(geändert in 0.22)* |
+| Formulare | Lokaler Komponentenzustand; Speichern über `useTransition`, damit unerwartete Fehler die Fehleransicht der Routen erreichen |
+| Datenbank und Dienste | `AppDependenciesProvider` (`ui/AppDependencies.tsx`) reicht die in `src/main.tsx` zusammengesetzte Datenbank und die Anwendungsdienste an die Ansichten weiter; Lesehooks wie `usePersons(db)` aus `infra/db/readHooks.ts` erhalten die Datenbank als Parameter |
 
 ### 13.3 Texte (ADR-018)
 
@@ -948,8 +1061,13 @@ Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktion
 ### 13.4 Design-Tokens (ADR-018)
 
 - Alle Farben, Abstände, Radien, Schatten und Dauern stehen als CSS-Variablen in `src/ui/styles/tokens.css`.
-- Paletten: Oberflächen im Dunkelmodus (NFA-GB-02), 6 bis 8 Akzentfarben über `data-accent` am Wurzelelement (US-GB-01), 4 Catan-Farben, 12 Gruppenfarben. Die Werte legt die Designphase fest (OP-11).
+- Paletten: 4 Catan-Farben (`--color-catan-‹key›`) und 12 Gruppenfarben (`--color-group-‹key›`), in allen Designs gleich; Rot, Orange, Blau und Weiß der Gruppenfarben verweisen auf die Catan-Töne (FA-PG-07). 6 Akzentfarben mit je einem Flächenwert für weiße Schrift und einem Textwert für dunkle Flächen. Werte aus Design D-1 (OP-11, E-26).
+- Farbschlüssel: Catan `red`, `blue`, `white`, `orange`; Gruppen `red`, `blue`, `yellow`, `green` (Moosgrün), `indigo`, `orange`, `teal` (Petrol), `magenta`, `brown` (Kaffee), `pink` (Rosé), `gray` (Steingrau), `white` – in dieser Reihenfolge vergibt `core/model` die Farben automatisch (E-28); Akzent `indigo`, `blue`, `teal`, `green`, `amber`, `berry`. Die Reihenfolge der automatischen Vergabe legt `core/model` fest, nicht die Tokens. *(Gruppen geändert in 0.10: `lime`, `cyan`, `violet` entfallen, `magenta`, `brown`, `gray` neu)*
+- Designs (NFA-GB-03): Jedes Design ist ein Satz Werte für Oberflächen, Text, Rahmen, Hintergrundbild (`--background-image`) und Standard-Akzent unter `:root[data-theme='‹key›']`. Standard ist `wood` („Holz“, auch unter `:root` ohne Merkmal); dazu `ocean`, `forest`, `glass`. Eine gewählte Akzentfarbe setzt `data-accent` am Wurzelelement und überschreibt den Standard-Akzent, weil ihre Regeln danach stehen. Ein weiteres Design ist ein weiterer Block, ohne Änderung an Komponenten.
+- Alle Designs sind dunkel (NFA-GB-02). Mindestkontrast für Text: 4,5 : 1 auf jeder Fläche jedes Designs. Catan- und Gruppenfarben: 3 : 1 zum Hintergrund (`--color-surface`) jedes Designs und 2,3 : 1 auf dessen Karten und Überlagerungen (`--color-surface-raised`, `--color-surface-overlay`); untereinander unterscheiden sich die Gruppenfarben um mindestens ΔE 25 (CIE76), Vorrang hat diese Unterscheidbarkeit (E-28). *(geändert in 0.10)* „Glas“ nutzt durchscheinende Flächen mit Unschärfe; das kostet Rechenleistung und wird in US-GB-01 auf älteren Geräten geprüft.
 - Gespeicherte Farbschlüssel werden über eine Zuordnung in Variablen übersetzt, z. B. `catanColor: 'white'` → `var(--color-catan-white)`.
+- Brett (US-PL-01, Design I1-D): `--color-board-sea`, `-sea-deep`, `-shallow`, `-wave`, `-sand`, `-wood-top`, `-wood-bottom`, `-wood-edge`, `-highlight`; in allen Designs gleich. *(neu in 0.15)*
+- Partie (Design I2-C): Landschaften, Häfen und Rohstoffe (`--color-resource-‹rohstoff›`), Karten (`--color-card-paper`, `-ribbon-…`, `-frame`, `-glow` u. a.), Schrift auf Catan-Farben (`--color-on-catan`, `-strong`), Bänder je Catan-Farbe (`--color-catan-‹key›-band-light/-dark`), Konturen der Stücke (`--color-piece-outline`) und `--color-danger`; die Illustrationen der Referenz (Landschaft, Losschritte, Symbole, Rohstoffkarten S4) nutzen eine eigene Palette `--color-art-‹familie›-‹n›`. Kleine Grafiken (Losschritte, Symbole der Optionen und Rohstoffe) liegen als Komponenten in `ui/art`, aus der Referenz übernommen; Kennungen ihrer Verläufe kommen aus `useId`. Die großen Bilder, die Rohstoffkarten und die Landschaft der Catan-Karte, sind erzeugte Bilder (ADR-030): Quellen als SVG in `scripts/art` mit Verweisen auf die Tokens, `npm run art` (`scripts/generate-art.mjs`) zeichnet sie mit Playwright und den Werten aus `tokens.css` als WebP mit Transparenz in 1200 px Breite nach `public/art/`; `ui/art/Pictures.tsx` zeigt sie als Bild mit leerem `alt`. Der Service Worker hält sie für die Offline-Nutzung vor. In allen Designs gleich. *(neu in 0.22)*
 - Stylelint verbietet Farbwerte außerhalb von `tokens.css`; ESLint verbietet Farbwerte in TypeScript (NFA-GB-05).
 - Ein späterer Hellmodus (PP-09) ist ein zweiter Satz von Werten für dieselben Variablen.
 - Komponenten nutzen CSS Modules (`*.module.css`), sodass Stile nicht über Komponenten hinweg wirken.
@@ -959,15 +1077,26 @@ Navigation über React Router mit Hash-Routing (`#/gruppen/…`). Damit funktion
 - Das Brett ist ein SVG mit festem `viewBox`, berechnet aus dem Brettmodell (Kapitel 5.2), und skaliert mit `preserveAspectRatio="xMidYMid meet"` in jede Fläche, ohne seine Ausrichtung zu ändern (US-PL-01 AK-3).
 - Felder ohne Inhalt, eigenständige Grafik ohne Originalgrafiken (NFA-GB-06).
 - Siedlung und Stadt unterscheiden sich durch ihre Form (US-PL-04 AK-2); alle Gebäude und Straßen haben eine Kontur, damit Weiß auf dunklem Grund erkennbar bleibt (AK-3).
+- Aussehen nach `docs/design/i1d-board-final-preview.html` (Variante H1): sechseckiges Meer mit Wellenmuster und Schatten, flaches Wasser und Sandküste entlang der Küstenlinie, Holzfelder auf 92 % mit weichem Schatten und heller Oberkante, `viewBox` `-60 -53 120 106`. `ui/board/boardLayout.ts` berechnet die Formen aus dem Brettmodell, `Board.tsx` zeichnet sie; Farben nur über Tokens (13.4). Für I2 legt die Referenz Gebäude G1 (Haus, Stadt mit Turm) und Straßen R1 (abgerundeter Balken) mit dunkler Kontur fest, auch für Gebäude am Ufer (PP-01). Meer, Küste, Felder, Gebäude und Straßen bleiben getrennte Bausteine, damit weitere Stile später ein Eintrag mehr sind. *(neu in 0.15)*
+- **Gebäude und Straßen (I2-C):** `Board` erhält `buildings` (Kreuzung, Art, Catan-Farbe) und `roads` (Kante, Kreuzung des Gebäudes, Farbe) und zeichnet erst die Straßen, dann die Gebäude darüber. `ui/board/pieces.ts` berechnet die Formen: Haus und Stadt mit Turm um die Kreuzung (G1), die Straße von 34 % bis 86 % der Kante, vom Gebäude weg (R1); `vertexInSvg` und `edgeInSvg` in `boardLayout.ts` liefern die Punkte. `PieceMark` zeigt dieselben Formen klein in Listen und Bändern. *(neu in 0.22)*
+- **Steine antippen (I2-H, US-AB-03 AK-8):** `Board` zeichnet das SVG in einer Fläche in der Form des Bretts, so groß wie sie passt (`aspect-ratio`, Container-Einheiten); darüber liegen mit `onPieceTap` unsichtbare `PressableButton` von 44 px, je Stein einer mit Namen aus der Sprachdatei („Siedlung von Anna wiederholen“), in Prozent des `viewBox` platziert. Auf dem Bild kommt nichts hinzu. Die Knöpfe überlappen sich auf dem Handy; welcher Stein gemeint ist, entscheidet `pieceAt` in `ui/board/pieceHit.ts` aus der Stelle des Fingers: bis 4,5 Einheiten um eine Kreuzung das Gebäude, weiter außen der nächste Stein, eine Straße gemessen an ihrem gezeichneten Teil. Ein Klick ohne Zeiger (Tastatur, Bildschirmleser) meint den Stein des Knopfs. Während der Rückfrage markiert `Board` den Stein mit einem goldenen Ring (Token `--color-piece-mark`) und die mit verworfenen Steine schwächer (M1); welche das sind, liefert `stepsDiscardedBy` aus `core/generation` (`ui/views/match/boardPieces.ts`). `MatchDialog` legt mit `focus` die markierten Steine allein (`BoardSpotlight`) hell über das Dunkel, genau über das Brett, und stellt das Fenster dorthin, wo es die wenigsten verdeckt (`dialogPlace`: unten oder oben, ab 700 px Breite im Querformat links oder rechts); gemessen wird vor dem Zeichnen und bei jeder Größenänderung (ResizeObserver). Aussehen nach `docs/design/i2h-tap-pieces-final-preview.html` (R7, H1). *(neu in 0.27)*
 
 ### 13.6 Animationen (ADR-004)
 
-- Glücksrad, Aufblinken, Schrittübergänge und Mikroanimationen nutzen Motion.
+- Karten ziehen, Aufblinken, Schrittübergänge und Mikroanimationen nutzen Motion. *(Karten statt Glücksrad seit 0.25, Anforderungsdokumentation E-36)*
 - **Regel:** Animationen laufen über Motion-Werte, nie über React-Zustand, der pro Bild geändert wird. So bleibt die Darstellung auch auf älteren Geräten flüssig.
-- Jede Animation erhält ihr Ergebnis fertig aus der Fachlogik. Der Zielwinkel des Glücksrads wird aus dem gelosten Segment berechnet; welche Kreuzungen vorher aufblinken, lost die Oberfläche über dieselbe `RandomSource` (dekorativ, NFA-ZF-01).
+- Jede Animation erhält ihr Ergebnis fertig aus der Fachlogik. Beim Ziehen der Karten steht die geloste Karte vorher fest, das Mischen führt nur zu ihr hin; welche Karte beim Mischen herausgezogen wird und welche Kreuzungen vorher aufblinken, lost die Oberfläche über dieselbe `RandomSource` (dekorativ, NFA-ZF-01).
 - „Animation überspringen“ springt zum Endzustand; andere Berührungen beeinflussen die Animation nicht (US-IN-04).
 - Dauern und Kurven stehen als Tokens bereit; eine Einstellung für das Tempo gibt es nicht.
+- **Einblenden (I2-C):** Bis zu den Bewegungen der Karten in I2-E erscheint jedes Ergebnis schlicht: `Reveal` blendet es in 0,42 s mit kurzem Anheben ein, das neue Stück auf dem Brett in 0,52 s. Ein neuer Schlüssel je Ergebnis startet das Einblenden, auch nach einem Neustart (US-AB-05 AK-3). Markieren und Abdunkeln legt D-2 fest. Einstellungen, die ein Schalter in den Optionen aufklappt, öffnen sich in 0,2 s (`Unfold`), danach scrollt die Seite gerade so weit, dass sie ganz über der Kartenhand stehen (Wunsch des Product Owners). *(neu in 0.22)*
+- **Karten (I2-D):** Losschritt, Reihenfolge und Startrohstoffe liegen als Karten auf einem Kartentisch (`ui/views/match/cards`). Seine Größe misst `useElementSize` (ResizeObserver), die Lagen und Größen rechnet `cardLayout.ts` in Pixeln wie die Referenz, weil Karten über, neben und auf Plätzen liegen und später (I2-E) zwischen ihnen fliegen. Eine Karte hat Vorder- und Rückseite gleicher Größe (`TableCard`, Rückseite R1 als SVG `CardBack` mit Tokens `--color-card-back-*`); Umdrehen dreht sie mit Motion um die y-Achse (0,34 s), eine Karte, die schon offen oder verdeckt erscheint, zeigt sich ohne Bewegung. Die abgewandte Seite wird zur Hälfte der Drehung zusätzlich ausgeblendet, weil WebKit sie mit `backface-visibility` allein über die Vorderseite zeichnete. Vorderseiten sind für Karten von 83 px Breite gestaltet und werden als Ganzes auf die Breite der Karte skaliert, kleiner wie größer, damit Münze und Name auch auf Tablets im Verhältnis zur Karte stehen (Product Owner 12.11.2026; bis 0.32 nur verkleinert). Der Kartentisch hat keine Mindesthöhe, die Rohstoffkarten unten nehmen höchstens 40 % der freien Höhe. Die gezogene Karte und die neue Reihenfolge erscheinen mit dem schlichten Einblenden. *(neu in 0.25)*
+- **Mehr Platz (I2-G):** Der Rahmen hat keine Kopfzeile mehr; jede Ansicht beginnt mit ihrer eigenen Überschrift, der Abstand zur Statusleiste kommt aus der sicheren Zone (`padding` von `body`). Logo und App-Name stehen nur auf dem Start, mittelgroß oben mittig über dem Band einer laufenden Partie (L5); der freie Raum darunter fängt sie ab, Stapel und Kartenfächer bleiben an ihrer Stelle. Alle anderen Ansichten (Verwaltung mit Unterseiten, Vorbereitung, Ablauf, Übersicht, Diagnose) teilen Breite, Polsterung und Kopfhöhe über die Tokens `--page-max-width` (80rem), `--page-padding-top` (20 px), `--page-padding-side` (16 px) und `--page-head-height` (52 px, so hoch wie ein Kopf mit Unterzeile); Knöpfe und Titel stehen darin mittig auf einer Ebene. So sitzt „Zurück“ auf jeder Seite an derselben Stelle (Ende-zu-Ende-Test `layout.spec.ts`). Die Platzierung im Querformat stellt den Kopf deshalb über beide Spalten. Die Unterscheidung schmal/breit (`Page` mit `isWide`, `.wideMain`) entfällt. Auf einem Kartentisch ab 560 px Breite ist die Entwicklungskarte bis 280 px breit (G4), die Personenkarten wachsen im gleichen Maß; sie bleibt dieselbe Karte, als Ganzes skaliert. Aussehen und Maße legt `docs/design/i2g-more-room-final-preview.html` fest; für Rahmen, Breiten und Kopf ersetzt sie die älteren Referenzen D-3, I1-E, I1-F, I2-C und I2-D. *(neu in 0.26)*
+- **Aufblinken und Spannungsmodus (D-2, für I2-F):** Aussehen, Maße und Zeiten legt `docs/design/d2-staging-final-preview.html` fest. Nach „Losen“ eines Steins ist das Ergebnis gespeichert (ADR-014); die Seite zeigt währenddessen den Schritt ohne Ergebnis, Knöpfe und Tippflächen sind gesperrt, dann wird der Stein gesetzt (Fallen von oben mit Lichtring). Standard ist ein Lauflicht in der Catan-Farbe der Person (Form der Markierung M1 aus I2-H). Der Spannungsmodus (FA-IN-08) ist reiner Zustand der Oberfläche im Ablauf, wird nicht gespeichert und ist nach jedem Start und bei jeder neuen Partie aus; sein Schalter (Trommel) steht im Kopf jeder Seite der Platzierung neben „Partie beenden“. Bei Gebäuden: Brett dunkel, alle gültigen Kreuzungen leuchten und erlöschen, bei zwei hält die Darstellung an und der Vorwärts-Knopf „Duell“ startet das Duell; bei Straßen erlöschen die Kanten nacheinander, das Haus bleibt hell darüber. Den Ablauf plant eine reine Funktion aus der Menge der gültigen Plätze und dem Ergebnis mit der `RandomSource` (dekorativ, NFA-ZF-01): Lauflicht und Duell entstehen ohne Kenntnis des Ergebnisses, erst die Landung zeigt es; Erlöschen und Gegner sind gleichverteilt (Anforderungsdokumentation E-39, US-IN-02 AK-3). Unit-Tests weisen das statistisch nach (Anteil des Ergebnisses je Station 1/n). Ein Neustart während des Aufblinkens oder in der Pause spielt es von vorn ab (FA-AB-07); „Animation überspringen“ (I2-E) springt zum Ergebnis. Das Tempo aller übrigen Bewegungen bleibt das der Referenz aus I2-D. *(neu in 0.31)*
+- **Aufblinken und Spannungsmodus umgesetzt (I2-F):** Die gültigen Plätze eines Steins liefert `catanPlacementSpots` im Catan-Modul: freie Inlandkreuzungen nach der Abstandsregel, gegeben die Gebäude davor, bzw. die Kanten am Gebäude einer Straße (US-IN-02 AK-2). `planHighlight` (`ui/views/match/placement/highlightPlan.ts`) plant daraus mit dem gelosten Ergebnis und der gemeinsamen `RandomSource` den Ablauf als Daten: Lauflicht als Irrfahrt ohne Kenntnis des Ergebnisses mit Landung, im Spannungsmodus Erlöschen in zufälliger Reihenfolge, Gegner rein zufällig, Duell mit zufälligem Beginn und zufälliger Länge; mit Duell in zwei Teilen, getrennt durch den Halt. Unit-Tests weisen mit festem Startwert per Chi-Quadrat nach, dass jede Station des Lauflichts über alle Plätze gleich verteilt ist, jede Station des Duells mit 1/2 das Ergebnis ist und jede Menge noch leuchtender Plätze gleich häufig vorkommt. `playHighlight` spielt den Plan mit Motion ab; der Halt meldet sich bei der Ansicht, „Duell“ setzt fort, „Überspringen“ beendet ihn jederzeit. `HighlightLayer` zeichnet Lichter, Ringe, dunkles Brett und den Stein des Duells; `Board` hat dafür eine Ebene über den Steinen (`overlay`), darüber angehobene Steine (`lifted`, etwa das Haus an der Straße) und eine oberste Ebene (`top`, der Lichtring beim Setzen). Während des Aufblinkens zeigt das Brett den Stein noch nicht; danach fällt er von oben (`SettleTop`), und der Lichtring wächst über seinen Radius, damit sein Rand dünn bleibt (WebKit animiert `r` nicht als Stil, Motion setzt das Attribut je Bild), außer nach „Überspringen“ und bei „Bewegung reduzieren“: Dann ist er sofort da, auch im Spannungsmodus ohne Halt. Der Spannungsmodus ist Zustand der Ansicht (`tensionMode.ts`), gebunden an den Beginn der Partie, damit eine neue Partie ihn aus hat; die Übersicht und zurück behalten ihn, ein Neustart der App setzt ihn zurück. Wie in I2-E stehen die Zeiten als Konstanten an einer Stelle (`HIGHLIGHT_MS`) statt als Tokens; das Lauflicht dauert 3,5 s bei Gebäuden und 2,5 s bei Straßen, der Spannungsmodus beim Gebäude 7,0 s (Entscheidungen des Product Owners 12.11.2026). *(neu in 0.33)*
+- **Bewegungen der Karten (I2-E):** Aussehen und Zeiten legt `docs/design/i2e-card-moves-final-preview.html` fest. Eine reine Funktion je Szene plant die Bewegung als Daten (`stagePlan.ts`: `planDraw`, `planOrder`, `planResources`): Karten mit Start, Zügen, Umdrehen und Einblenden in Millisekunden. Sie ist ohne Browser testbar (`stagePlan.test.ts`); `playStage.ts` spielt sie als eine Abfolge mit `animate` von Motion ab, `StagedCards` zeichnet die Karten. Jede Bewegung ist eine einzige `transform` mit gegebenem Startwert, die Startlage wird direkt als Stil gesetzt: So übergibt Motion die Bewegung dem Browser (Web Animations), sie bleibt flüssig, auch wenn die Seite gerade rechnet, und vor dem Start wird nichts aus der Seite gelesen (auf dem Handy ruckelte das Austeilen, solange Motion `x`, `y`, `rotate` und `scale` einzeln per JavaScript setzte). Die Bewegung verrät nichts: Mischen und Austeilen sind für jedes Ergebnis gleich, die Vorderseiten erhalten die Karten erst beim Umdrehen; die dekorativen Züge lost die gemeinsame `RandomSource` (`AppDependencies.rng`, NFA-ZF-01). Motion verbindet zwei Setzungen desselben Werts zu einem langsamen Übergang über die Zeit dazwischen; Umschalter sind deshalb immer Paare `[von, bis]` mit 1 ms Dauer. `zIndex` animiert Motion gar nicht, es springt sofort auf seinen letzten Wert; die Stapelordnung setzt deshalb ein Zeitpunkt-Schritt der Abfolge, beim Überspringen gilt der späteste je Karte. Während einer Bewegung steht „Überspringen“ an der Stelle von „Wiederholen“ (US-IN-04); es springt zum Ende der Abfolge. „Zurück“ ist gesperrt, der Vorwärts-Knopf grau, „Partie beenden“ bleibt bedienbar. Nach dem Ende oder dem Überspringen setzt die Ansicht `markStaged` (10.3). Nach „Wiederholen“ im Ablauf, auch auf einer Seite des Rückblicks, nicht aber aus der Übersicht, gleiten Karten und Plätze in 0,3 s an ihre neue Lage (`glide.ts`, FLIP über `data-flip`); aufgedeckte Startrohstoffe drehen sich vorher um, verworfene Steine steigen auf und verblassen. Nach einem Wiederholen der Reihenfolge ab Platz k sammelt das nächste „Losen“ die verdeckten Karten ein und teilt neu aus (E1). Bei „Weiter“ fliegen die Startrohstoffe verkleinert in die Münze der Person im Band (W3). Das Band blendet bei einem Wechsel der Person über (0,26 s), der Ring gleitet zur nächsten Münze (0,32 s), bei der Platzierung wie bei den Startrohstoffen: Dort beginnt nur der Kartentisch je Person neu, das Band bleibt stehen; im Band der Platzierung steht der Name immer unten, darüber „Jetzt“, „Als Nächstes“ oder „Alle gesetzt“. Knöpfe werden in 0,22 s grau und wieder frei; eine neue Aufschrift blendet in 0,18 s über die alte. Auf der Reihenfolge sind die Plätze höchstens 120 px breit, die Karten unten und der Mischstapel höchstens so breit wie der Stapel der Startrohstoffe (96 px); im Flug wachsen die Karten auf die Größe der Plätze (Product Owner 12.11.2026). Ein Flug mit Bogen läuft auf einer einzigen Kurve, als 24 Punkte entlang der Beschleunigungskurve mit linearem Verlauf, weil Motion eine Beschleunigung je Abschnitt zwischen zwei Lagen anwendet und der Flug sonst über der Mitte stockte. Beim Mischen gleitet die gezogene Karte auf ihrer Ebene aus dem Stapel und kommt erst beim Zurücklegen oben auf. Dekorative Bewegungen vor dem Speichern (Steine, die bei „Wiederholen“ verblassen) warten höchstens ihre Dauer und 0,2 s ab (`atMost`), damit ein entferntes Element nichts aufhält. Nach einer sichtbaren Bewegung (über 0,3 s) nimmt „Wiederholen“ 0,5 s lang keinen Tipp an, damit ein später Tipp auf „Überspringen“ nicht die Rückfrage öffnet. Bei „Bewegung reduzieren“ springt jede Bewegung ans Ende. Abweichend vom Grundsatz oben stehen die Zeiten der Bewegungen nicht als CSS-Tokens, sondern als Konstanten an einer Stelle (`STAGE_MS` in `stagePlan.ts`, kurze Wechsel in der jeweiligen Komponente), weil Motion sie als Zahlen braucht und die Pläne in Unit-Tests ohne CSS laufen. *(neu in 0.32)*
 - CSS-Animationen (`animation`, `transition`, `@keyframes`) verbietet Stylelint, damit es genau einen Weg für Animationen gibt; Mikroanimationen bei Hover und Berührung (NFA-GB-04) nutzen `whileHover` und `whileTap` von Motion.
+- **Druckzustand (seit K-4, NFA-GB-04):** Alle Knöpfe und Links sind `PressableButton` bzw. `PressableLink` (`ui/components/Pressable.tsx`); ESLint verbietet nackte `button`, `a`, `Link` und `NavLink` außer in diesen Bausteinen, der Kartenhand (eigenes Anheben aus K-3) und dem Fehlerbildschirm. `whileTap` animiert nur die CSS-Variable `--press` von 0 auf 1; das Aussehen steht in `Pressable.module.css`, die Stärken als Tokens (`--press-lift`, `--press-darken`, `--press-shimmer`). Knöpfe, Pillen und Zeilen schimmern schnell (90 ms hin, 220 ms zurück) in ihrer eigenen Textfarbe, gefüllte Knöpfe also weiß; Karten und Plätze am Tisch (`look="card"`) heben sich weich um 3 px mit zusätzlichem Schatten und werden dunkler (180 ms hin, 300 ms zurück). Eigene CSS-Eigenschaften (`translate`, `filter`, `box-shadow` nur bei Knöpfen) kollidieren nicht mit `transform` und Schatten der Komponenten. Bei „Bewegung reduzieren“ werden Karten nur dunkler. Der Druckzustand beginnt sofort, der Seitenwechsel beim Loslassen ebenfalls. Links sind nicht ziehbar (`draggable={false}`), sonst schluckt Safari das Loslassen nach einer Bewegung. Global gilt: keine Tipp-Markierung (`-webkit-tap-highlight-color`), keine Linkvorschau (`-webkit-touch-callout`) und kein Markieren (`user-select`) außer in Textfeldern; das Browsermenü bei langem Drücken mit Finger oder Stift unterdrückt `suppressTouchContextMenu` (`ui/components/touchMenu.ts`) einmal für das ganze Dokument, der Rechtsklick mit der Maus und das Menü in Textfeldern bleiben. Referenz `docs/design/k4-touch-final-preview.html`. *(neu in 0.18)*
+- **Einbindung (seit K-3):** `AppLayout` lädt Motion über `LazyMotion` mit `domAnimation` im strikten Modus; animierte Elemente sind deshalb `m.div` usw., nicht `motion.div`. Braucht eine spätere Animation Ziehen oder Layout-Animationen, wechselt die App auf `domMax`. `MotionConfig reducedMotion="user"` folgt der Systemeinstellung „Bewegung reduzieren“: Bewegungen springen dann ans Ziel, Ein- und Ausblenden bleibt. Motion vergrößert das Bündel um rund 32 kB (gzip). Eine Abfolge von Transformationen, die von der Reihenfolge von Motion abweicht, legt `transformTemplate` fest (Kartenhand: erst drehen, dann entlang der Karte verschieben wie in D-3). *(neu in 0.16)*
 
 ### 13.7 Diagramme (ADR-021)
 
@@ -981,25 +1110,29 @@ Zwei eigene SVG-Komponenten: Liniendiagramm der kumulierten Siege und Verteilung
 
 | Ebene | Werkzeug | Gegenstand | Wann |
 |---|---|---|---|
-| Unit-Tests | Vitest | `core`, `games`, `app` (mit Speicher-Attrappen); Mindestabdeckung 90 % für `core` und `games` | `npm test`, in `npm run check` mit Abdeckungsprüfung |
+| Unit-Tests | Vitest | `core`, `games`, `app` (mit Speicher-Attrappen; einen Neustart bildet ein neuer Dienst auf derselben Attrappe ab); Mindestabdeckung 90 % für `core` und `games` | `npm test`, in `npm run check` mit Abdeckungsprüfung |
 | Eigenschaftstests | Vitest mit fast-check | Invarianten über viele zufällige Fälle mit festem Startwert | `npm test` |
 | Exakter Nachweis | Vitest | Verzerrungsfreiheit von `uniformIntFromWords` | `npm test` |
 | Statistische Tests | Vitest, eigene Suite | Gleichverteilung mit dem echten Generator; Sackgassenquote | `npm run test:stat`, vor jedem Merge nach `main` |
-| Datenbanktests | Vitest mit `fake-indexeddb` | Repositories, Transaktionen, Migrationen, Sicherungspunkte | `npm test` |
+| Datenbanktests | Vitest mit `fake-indexeddb` (je Test eine eigene `IDBFactory`); in Komponententests zusätzlich global eingebunden, weil Dexies Live-Abfragen ein globales IndexedDB voraussetzen | Repositories, Transaktionen, Migrationen, Sicherungspunkte; Neustart über eine neue Verbindung zur selben `IDBFactory` | `npm test` |
+
+Komponententests rendern über `renderWithApp` mit einem Daten-Router (`createMemoryRouter`) wie die App, damit `useBlocker` funktioniert. *(neu in 0.14)*
 | Komponententests | Vitest mit React Testing Library | Formulare, Dialoge, Entscheidungsdialoge beim Import | `npm test` |
 | Ende-zu-Ende-Tests | Playwright (Chromium, WebKit; Smartphone- und Tablet-Formate) | Vollständige Abläufe im Browser | `npm run test:e2e`, vor jedem Merge |
 | Manuelle Abnahme | Checkliste | Echte Geräte: Android (Brave), iPhone und iPad (Safari), Windows (Brave) | Vor jedem Release |
 | Statische Prüfung | TypeScript, ESLint, Stylelint, Prettier, dependency-cruiser | Typen, Projektregeln, Form, Schichten | `npm run check` |
 | Konventionen auf GitHub | commitlint, Herkunftsprüfung | Titel des Pull Requests; Pull Requests nach `main` nur aus `develop` oder `hotfix/…` | bei jedem Pull Request (16.3) |
 
-`npm run check` bündelt Typprüfung, Lint-Regeln, Formatprüfung, Schichtprüfung und Unit-Tests mit Abdeckungsprüfung. Vor jedem Pull Request führt Claude Code `npm run check` und `npm run test:e2e` aus, vor einem Pull Request nach `main` zusätzlich `npm run test:stat`; dieselben Prüfungen laufen auf GitHub und sperren den Merge, bis sie bestanden sind (EP-06, 16.3).
+`npm run check` bündelt Typprüfung, Lint-Regeln, Formatprüfung, Schichtprüfung und Unit-Tests mit Abdeckungsprüfung. Vor jedem Pull Request führt Claude Code `npm run check` und `npm run test:e2e` aus, vor einem Pull Request nach `main` zusätzlich `npm run test:stat`; bei reinen Doku-Änderungen entfallen die lokalen Prüfungen (Entwicklungsrichtlinien 3.6). Dieselben Prüfungen laufen auf GitHub und sperren den Merge, bis sie bestanden sind (EP-06, 16.3).
 
 ### 14.2 Deterministische Tests
 
 Für reproduzierbare Tests gibt es unter `tests/support` zwei Testquellen:
 
 - `SeededRandomSource`: ein einfacher Generator mit Startwert (z. B. xoshiro128\*\*), für Abläufe und Eigenschaftstests.
-- `ScriptedRandomSource`: liefert eine vorgegebene Folge von Werten, um gezielt Fälle herzustellen, etwa eine bestimmte Sackgasse oder eine bestimmte Reihenfolge.
+- `ScriptedRandomSource`: liefert eine vorgegebene Folge von Werten, um gezielt Fälle herzustellen, etwa eine bestimmte Sackgasse oder eine bestimmte Reihenfolge. Ist die Folge aufgebraucht, wirft sie einen Fehler; so fällt auf, wenn der Code öfter zieht als erwartet.
+
+Beide Testquellen haben eigene Tests in `tests/support` (Referenzwerte von xoshiro128\*\*, Prüfung der vorgegebenen Werte); das Vitest-Projekt `unit` führt sie mit aus.
 
 Mit ihnen werden unter anderem alle Abnahmekriterien zu LS, PL und SR automatisiert geprüft (NFA-EW-07), darunter die Schlangenreihenfolge, Siedlung und Stadt bei Städte & Ritter, die Abstandsregel, die angrenzende Straße und die Wiederholungsregeln aus Spezifikation 3.1.
 
@@ -1043,7 +1176,7 @@ Die statistische Suite prüft mit dem echten `CryptoRandomSource` und jeweils 10
 
 Verfahren: Chi-Quadrat-Anpassungstest gegen die Gleichverteilung mit α = 0,001 je Test. Die kritischen Werte stehen als Tabelle in `tests/support`. Weil auch korrekter Code bei vielen Tests gelegentlich zufällig auffällt, wird ein fehlgeschlagener Test einmal wiederholt; erst ein zweiter Fehlschlag gilt als Fehler.
 
-Zusätzlich misst die Suite für 4 Personen in beiden Spielversionen über 100.000 vollständige Platzierungen, wie oft verdeckt neu gelost werden musste. Das Ergebnis wird in `docs/test-reports/sackgassen.md` festgehalten (NFA-EW-08).
+Zusätzlich misst die Suite für 4 Personen in beiden Spielversionen über 100.000 vollständige Platzierungen, wie oft verdeckt neu gelost werden musste. Das Ergebnis wird in `docs/test-reports/sackgassen.md` festgehalten (NFA-EW-08); `npm run test:stat` läuft mit dem ausführlichen Reporter und gibt die Messung bei jedem Lauf als Anmerkung aus.
 
 ### 14.5 Ende-zu-Ende-Tests
 
@@ -1051,21 +1184,23 @@ Playwright-Szenarien (Auswahl):
 
 - Vollständige Generierung mit 2, 3 und 4 Personen in beiden Spielversionen, mit allen Optionen und Wiederholungen.
 - Neustart während einer Animation und nach einer Bestätigung (US-AB-05).
-- Offline: alle Funktionen bei abgeschaltetem Netz (NFA-PL-03).
+- Offline: alle Funktionen bei abgeschaltetem Netz (NFA-PL-03). Seit I1-D prüft `install.spec.ts` Manifest, Symbole und den Start ohne Netz. Der Offline-Test läuft nur in Chromium, weil Playwrights WebKit unter Windows jedes Neuladen im Offline-Modus abbricht, auch wenn ein Service Worker antwortet; Safari wird auf dem iPad geprüft (14.6). Alle übrigen Tests sperren den Service Worker (`serviceWorkers: 'block'`), damit sie nicht von seinem Cache abhängen. *(ergänzt in 0.15)*
 - Export und Import mit allen Konfliktfällen; Rückgängig; Import aller Beispieldateien älterer Formatversionen.
 - Sicherungspunkte: Auslöser, Aufbewahrung, Wiederherstellung, Sperren während einer Partie.
 - Update: zwei aufeinanderfolgende Builds; neue Version bleibt nach Neustart inaktiv; Hinweis nicht während einer Partie; Sicherungsdialog; Sicherungspunkt „Vor Update“; Datenmigration.
 - Netzwerkwächter: Jeder Test schlägt fehl, wenn eine Anfrage an eine fremde Adresse geht (NFA-DH-01).
-- Darstellung: Smartphone und Tablet in Hoch- und Querformat ohne abgeschnittene Inhalte (NFA-PL-04).
+- Darstellung: Smartphones im Hochformat, Tablets im Hoch- und Querformat ohne abgeschnittene Inhalte; Smartphones im Querformat zeigen nur den Hinweis zum Drehen (NFA-PL-04, E-29).
 - Content-Security-Policy: Der Produktions-Build enthält das Meta-Tag aus 12.4.
+- Fester Zufall (seit I2-C): `useSeededRandom(page, seed)` aus `tests/e2e/seededRandom.ts` ersetzt vor dem Laden der App `crypto.getRandomValues` durch Mulberry32 mit festem Startwert, sodass jeder Lauf dieselben Schritte lost. Der Produktions-Build bleibt unverändert; `crypto.randomUUID` arbeitet wie zuvor. Nur diese Datei darf `crypto` dafür verwenden (ESLint, Entwicklungsrichtlinien 8.2). `match.spec.ts` geht ganze Partien durch: 2, 3 und 4 Personen, beide Spielversionen, Startrohstoffe mit und ohne Zurücklegen, Reihenfolge selbst festgelegt, „Ohne Platzierung“, Wiederholen, Überspringen und Beenden. *(neu in 0.22)* Tests dessen, was nach dem Losen kommt (Antippen, Rückblick, Übersicht, Wiederholen), beginnen dagegen mit einer Partie, die `seedMatch` aus `tests/e2e/seedDatabase.ts` mit der Spiellogik und `SeededRandomSource` ausrechnet und direkt in die Datenbank schreibt (Entwicklungsrichtlinien 8.3). *(neu in 0.28)*
+- Bewegungen der Karten (seit I2-E): `cardDraw.spec.ts` prüft sie im echten Tempo: Überspringen, Sperren während der Bewegung, Neustart mitten darin (FA-AB-07) und das Einsammeln der Reihenfolge nur nach „Wiederholen“ (E1). Die übrigen Partie-Tests (`match.spec.ts`, `board.spec.ts`, `layout.spec.ts`) laufen mit „Bewegung reduzieren“ (`reducedMotion: 'reduce'`), die Bewegungen springen dort ans Ende. Komponententests schalten Motion ganz ab (`MotionGlobalConfig.skipAnimations` in `tests/support/setupDom.ts`). *(neu in 0.32)*
 
 Die Ende-zu-Ende-Tests laufen gegen `npm run preview`; lokal baut `npm run test:e2e` vorher den aktuellen Stand. Lokal laufen sie mit dem mkcert-Zertifikat über HTTPS; weil Playwrights WebKit unter Windows dem Zertifikatsspeicher von Windows nicht vertraut, ignorieren die Tests Zertifikatsfehler (die Seite bleibt ein sicherer Kontext). Auf GitHub laufen sie über `http://localhost`, das Browser ebenfalls als sicheren Kontext behandeln. Eine Fixture lässt jeden Test zusätzlich bei Fehlern in der Browser-Konsole fehlschlagen, darunter Verstöße gegen die Content-Security-Policy.
 
-WebKit unter Windows nähert Safari an, ersetzt aber nicht den Test auf echten Apple-Geräten.
+WebKit unter Windows nähert Safari an, ersetzt aber nicht den Test auf echten Apple-Geräten. Es zeichnet ohne Grafikkarte; mit sechs gleichzeitigen Läufen fror bei den langen Partie-Tests gelegentlich eine Seite ganz ein. Lokal liefen deshalb höchstens vier Tests gleichzeitig (`workers` in `playwright.config.ts`). *(neu in 0.23)* Seit die meisten Partie-Tests mit einer Partie aus `seedMatch` beginnen, laufen lokal wieder sechs gleichzeitig: drei volle Läufe damit waren fehlerfrei und etwa 15 % schneller als mit vier. Friert eine Seite wieder ein, geht es zurück auf vier. *(geändert in 0.28)* Am 12.11.2026 fror mit sechs wieder eine WebKit-Seite ein (I2-E); lokal laufen deshalb wieder vier. *(geändert in 0.32)* Auf GitHub vier: Der Rechner hat vier Kerne, die Voreinstellung nutzte nur zwei. Die Tests verteilen sich dort auf drei gleichzeitige Läufe, je einen pro Geräteart (16.3). *(geändert in 0.30)*
 
 ### 14.6 Manuelle Abnahme vor jedem Release
 
-Eine Checkliste in `docs/Abnahme-Checkliste.md` (angelegt in Inkrement I1) umfasst je Plattform: Installation, Start im Flugmodus, eine vollständige Generierung, Neustart mitten in der Generierung, Ton mit und ohne Stummschaltung bei laufender Musik, Vollsicherung über das Teilen-Menü, Import auf einem zweiten Gerät, Update mit Sicherungsdialog und persistenten Speicher. Unter iOS zusätzlich: Verhalten im Safari-Tab (nur Anleitung).
+Eine Checkliste in `docs/Abnahme-Checkliste.md` (angelegt mit I1-D) umfasst je Plattform: Installation, Start im Flugmodus, eine vollständige Generierung, Neustart mitten in der Generierung, Ton mit und ohne Stummschaltung bei laufender Musik, Vollsicherung über das Teilen-Menü, Import auf einem zweiten Gerät, Update mit Sicherungsdialog und persistenten Speicher. Unter iOS zusätzlich: Verhalten im Safari-Tab (nur Anleitung).
 
 ### 14.7 Nachweis der Prüfkriterien (Spezifikation, Kapitel 5)
 
@@ -1097,7 +1232,8 @@ Eine Checkliste in `docs/Abnahme-Checkliste.md` (angelegt in Inkrement I1) umfas
 boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 ├─ .github/
 │  ├─ workflows/
-│  │  ├─ ci.yml                       Prüfungen bei jedem Pull Request (16.3)
+│  │  ├─ ci.yml                       Prüfungen bei neuen Commits eines Pull Requests (16.3)
+│  │  ├─ pr-title.yml                 Titelprüfung, auch bei jeder Bearbeitung (16.3)
 │  │  └─ deploy.yml                   Veröffentlichung bei Tags v* (16.3)
 │  ├─ dependabot.yml                  Abhängigkeits-Updates, Ziel develop
 │  └─ pull_request_template.md        PR-Vorlage mit Definition of Done
@@ -1116,17 +1252,22 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  ├─ Abnahme-Checkliste.md           Manuelle Abnahme vor Releases (ab I1)
 │  └─ test-reports/                   z. B. sackgassen.md
 ├─ public/
-│  ├─ icons/                          App-Symbole für alle Plattformen
+│  ├─ icons/                          App-Symbole für alle Plattformen (aus npm run icons)
+│  ├─ art/                            Rohstoffkarten und Landschaft als WebP (aus npm run art, ADR-030)
 │  ├─ fonts/                          WOFF2-Schriften
 │  └─ sounds/                         Klänge und LICENSES.md
+├─ public-acceptance/
+│  └─ icons/                          lila App-Symbole nur für den Build-Modus acceptance (12.1)
+├─ scripts/
+│  ├─ art/                            SVG-Quellen der großen Bilder einer Partie (ADR-030)
+│  ├─ generate-art.mjs                Bilder aus den SVG-Quellen und Tokens erzeugen (ADR-030)
+│  └─ generate-icons.mjs              App-Symbole aus Logo und Tokens erzeugen (12.1)
 ├─ src/
 │  ├─ core/                           Fachlogik, framework-frei
 │  │  ├─ shared/                      Result, assert, Hilfstypen (4.6)
 │  │  ├─ random/                      RandomSource, uniformInt, pick
 │  │  ├─ model/                       Entitäten, Kennungen, Invarianten
-│  │  ├─ board/                       Brettgeometrie
-│  │  ├─ placement/                   Regeln (Bausteine), BuildingPlanner
-│  │  ├─ draws/                       Person losen, Reihenfolge, Startrohstoffe
+│  │  ├─ draws/                       Person losen, Reihenfolge
 │  │  ├─ generation/                  Schritte, Ablauf, Wiederholung, Sitzungsmodell
 │  │  ├─ results/                     Ergebnisregeln, Plausibilität, Sortierung
 │  │  ├─ stats/                       Kennzahlen, Rangliste, Diagrammdaten
@@ -1135,7 +1276,11 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  ├─ games/
 │  │  ├─ types.ts                     Schnittstelle GameModule
 │  │  ├─ registry.ts                  Liste der unterstützten Spiele
-│  │  └─ catan/                       Spielmodul Catan
+│  │  └─ catan/                       Spielmodul Catan (ADR-028)
+│  │     ├─ board/                    Brettgeometrie, CATAN_BOARD
+│  │     ├─ placement/                Regeln, BuildingPlanner, Straße, Schlangenreihenfolge, Spielversionen
+│  │     ├─ generation/               Schrittarten, Optionen, Ablauf, Übersicht (ab I2-B)
+│  │     └─ startingResources.ts      Rohstoffe und Startrohstoffe
 │  ├─ app/
 │  │  ├─ ports.ts                     Schnittstellen zu infra
 │  │  └─ services/                    Anwendungsdienste (Kapitel 4.4)
@@ -1147,12 +1292,12 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  │  └─ update/                      Brücke zum Service Worker
 │  ├─ sw/                             Service Worker (ab I1, nicht im Setup)
 │  ├─ ui/
-│  │  ├─ views/                       Ansichten je Bereich, darunter diagnostics/
-│  │  ├─ components/                  Wiederverwendbare Bausteine, ErrorBoundary
+│  │  ├─ views/                       Ansichten je Bereich, darunter diagnostics/ und match/ (Partie)
+│  │  ├─ art/                         Illustrationen der Partie aus der Referenz I2
+│  │  ├─ components/                  Wiederverwendbare Bausteine, Fehlerbildschirm
 │  │  ├─ board/                       Brett-SVG
-│  │  ├─ wheel/                       Glücksrad
+│  │  ├─ match/cards/                 Karten ziehen (Personen-, Rohstoffkarten, Rückseite)
 │  │  ├─ charts/                      Diagramme
-│  │  ├─ state/                       Zustand-Stores
 │  │  └─ styles/                      tokens.css, globale Stile
 │  ├─ i18n/                           de.ts, t()
 │  └─ main.tsx                        Einstieg, Zusammensetzung der Abhängigkeiten
@@ -1162,7 +1307,7 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  ├─ statistical/                    *.stat.test.ts
 │  └─ e2e/                            Playwright-Szenarien
 ├─ CLAUDE.md                          Kurzfassung der Entwicklungsrichtlinien für Claude Code
-├─ README.md                          Kurzbeschreibung, Adresse, Verweis auf docs/
+├─ README.md                          Kurzbeschreibung, Adresse, Stand, Lizenz
 ├─ LICENSE                            PolyForm Strict 1.0.0, Copyright (c) 2026 Jonasss29
 ├─ CHANGELOG.md                       Änderungen je Release (deutsch)
 ├─ .gitattributes                     LF für alle Textdateien
@@ -1173,8 +1318,9 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 ├─ commitlint.config.js
 ├─ index.html                         mit Content-Security-Policy (12.4)
 ├─ package.json, package-lock.json
-├─ tsconfig.json                      Typprüfung von src und tests/support, tests/statistical
+├─ tsconfig.json                      Typprüfung von src (ohne src/sw) und tests/support, tests/statistical
 ├─ tsconfig.node.json                 Typprüfung der Konfigurationsdateien und tests/e2e
+├─ tsconfig.sw.json                   Typprüfung des Service Workers mit den Typen für Worker
 ├─ vite.config.ts
 ├─ vitest.config.ts
 ├─ playwright.config.ts
@@ -1215,11 +1361,15 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 |---|---|
 | `npm run dev` | Entwicklungsserver, im WLAN erreichbar; über HTTPS, wenn das Zertifikat vorhanden ist (16.6); ohne Service Worker und ohne Content-Security-Policy |
 | `npm run build` | Typprüfung und Produktions-Build nach `dist/` |
+| `npm run build:acceptance` | wie `build`, im Modus `acceptance` nach `dist-acceptance/` für die lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol (16.6, E-40) |
+| `npm run preview:acceptance` | liefert `dist-acceptance/` auf Port 4174 aus, im WLAN erreichbar, über HTTPS wie `dev` |
 | `npm run preview` | Produktions-Build lokal ausliefern, im WLAN erreichbar, über HTTPS wie `dev` |
 | `npm test` | Unit-, Eigenschafts-, Datenbank- und Komponententests |
 | `npm run test:stat` | Statistische Suite |
 | `npm run test:e2e` | Playwright gegen `preview` (Chromium, WebKit; Smartphone- und Tablet-Formate) |
 | `npm run format` | Prettier formatiert alle Dateien außer `docs/` |
+| `npm run icons` | App-Symbole aus Logo und Tokens neu erzeugen (12.1); nur nach Änderungen an Logo oder Farben |
+| `npm run art` | Rohstoffkarten und Landschaft aus den SVG-Quellen in `scripts/art` und den Tokens neu erzeugen (ADR-030); nur nach Änderungen an einer Quelle oder an Farben |
 | `npm run check` | Typen, ESLint, Stylelint, Prettier (nur prüfen), dependency-cruiser, `npm test` mit Abdeckungsprüfung |
 
 ### 16.3 Branches, Pull Requests und Auslieferung (ADR-023)
@@ -1230,31 +1380,36 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 
 **Schutzregeln (Rulesets).** Für `develop` und `main`: Änderungen nur per Pull Request, null erforderliche Freigaben (der Product Owner kann seinen eigenen Pull Request nicht freigeben; die Kontrolle liegt darin, dass nur er mergt), erforderliche Prüfungen, kein Force-Push, kein Löschen, keine Ausnahmen. Für Tags `v*`: kein Verschieben, kein Löschen.
 
-**Workflow `ci.yml`** (bei jedem Pull Request nach `develop` oder `main`, nur Leserechte):
+**Workflow `ci.yml`** (bei jedem Pull Request nach `develop` oder `main`, nur Leserechte; nur beim Öffnen und bei neuen Commits, nicht bei einer Bearbeitung von Titel oder Beschreibung):
 
 | Job | Inhalt | Erforderlich für |
 |---|---|---|
 | `check` | `npm ci`, `npm run check`, `npm audit --omit=dev --audit-level=high` | `develop`, `main` |
-| `e2e` | läuft im offiziellen Playwright-Container (`mcr.microsoft.com/playwright`, Browser vorinstalliert); `npm ci`, `npm run build`, `npm run test:e2e`. Der Tag des Containers wird im Vorjob `playwright-version` aus `package-lock.json` gelesen und passt so immer exakt zur installierten Playwright-Version | `develop`, `main` |
-| `pr-title` | commitlint prüft den Titel des Pull Requests | `develop`, `main` |
+| `e2e` | sammelt das Ergebnis der drei Läufe `e2e phone`, `e2e tablet` und `e2e tablet-landscape` und besteht nur, wenn alle bestanden haben. Die Läufe arbeiten gleichzeitig im offiziellen Playwright-Container (`mcr.microsoft.com/playwright`, Browser vorinstalliert); je `npm ci`, `npm run build`, `npm run test:e2e -- --project=chromium-‹Geräteart› --project=webkit-‹Geräteart›`. Jeder Lauf hat damit gleich viel Arbeit in Chromium und im langsameren WebKit; `--shard` verteilt nur nach der Anzahl der Tests in der Reihenfolge der Projekte und legte alle WebKit-Geräte in eine Hälfte (3,7 gegenüber 7,9 Minuten). Jeder Test läuft weiterhin auf jedem Gerät. Eine neue Geräteart braucht einen Eintrag in der Matrix von `ci.yml`, sonst läuft sie auf GitHub nicht. Der Tag des Containers wird im Vorjob `playwright-version` aus `package-lock.json` gelesen und passt so immer exakt zur installierten Playwright-Version *(geändert in 0.30)* | `develop`, `main` |
 | `stat` | `npm run test:stat` (nur bei Ziel `main`) | `main` |
 | `guard-main` | schlägt fehl, wenn ein Pull Request nach `main` nicht aus `develop` oder `hotfix/…` kommt (nur bei Ziel `main`) | `main` |
 
-Übersprungene Jobs gelten bei GitHub als bestanden; `stat` und `guard-main` blockieren Pull Requests nach `develop` daher nicht. Aus demselben Grund läuft `e2e` auch dann, wenn der Vorjob `playwright-version` scheitert, und schlägt in diesem Fall fehl, statt übersprungen zu werden.
+Übersprungene Jobs gelten bei GitHub als bestanden; `stat` und `guard-main` blockieren Pull Requests nach `develop` daher nicht. Aus demselben Grund laufen die drei Läufe von `e2e` auch dann, wenn der Vorjob `playwright-version` scheitert, und schlagen in diesem Fall fehl, statt übersprungen zu werden; `e2e` läuft auch nach einem gescheiterten oder übersprungenen Lauf und schlägt dann fehl.
+
+**Workflow `pr-title.yml`** (bei jedem Pull Request nach `develop` oder `main`, nur Leserechte; beim Öffnen, bei neuen Commits und bei jeder Bearbeitung): Job `pr-title`, commitlint prüft den Titel des Pull Requests; erforderlich für `develop` und `main`. Er steht in einem eigenen Workflow, damit eine Bearbeitung des Pull Requests, etwa ein Haken in der Beschreibung, nur ihn neu startet und nicht alle Prüfungen. Bei neuen Commits läuft er trotzdem, weil GitHub erforderliche Prüfungen dem neuesten Commit zuordnet; ohne Ergebnis dort wartete der Merge auf ihn. Die Bedingung steht im Auslöser `on`, nicht in einem `if`, weil ein übersprungener erforderlicher Job als bestanden gälte. *(neu in 0.28)*
+
+Wird das Ziel eines offenen Pull Requests geändert (z. B. von `develop` auf `main`), startet `ci.yml` nicht neu; die Jobs für `main` fehlen dann und blockieren den Merge. Abhilfe: Pull Request schließen und wieder öffnen. *(neu in 0.28)*
 
 **Workflow `deploy.yml`** (bei Push eines Tags `v*`): `npm ci`, `npm run check`, `npm run build`, Hochladen und Veröffentlichen über die GitHub-eigenen Pages-Actions. Nur dieser Workflow erhält die Rechte `pages: write` und `id-token: write`. Die Umgebung `github-pages` erlaubt zusätzlich nur Tags `v*`, sodass GitHub die Regel „nur Releases werden veröffentlicht“ unabhängig vom Workflow durchsetzt (EP-03).
 
-**Release.** (1) Pull Request `chore/release-x.y.z` nach `develop` mit Versionsnummer und Eintrag in `CHANGELOG.md`; (2) Pull Request `develop` nach `main` mit Titel `release: x.y.z`; (3) nach dem Merge erzeugt Claude Code nach Zustimmung des Product Owners mit `gh release create vx.y.z --target main` das GitHub-Release mit Tag; der Tag löst die Veröffentlichung aus. Bei Hotfixes wird `main` danach per Pull Request nach `develop` zurückgeführt.
+**Release.** (1) Pull Request `chore/release-x.y.z` nach `develop` mit Versionsnummer und Eintrag in `CHANGELOG.md`; (2) Pull Request `develop` nach `main` mit Titel `release: x.y.z`; (3) nach dem Merge erzeugt der Product Owner auf GitHub (Releases, „Draft a new release“) oder Claude Code nach seiner Zustimmung mit `gh release create vx.y.z --target main` das GitHub-Release mit Tag; der Tag löst die Veröffentlichung aus. Vor 1.0 ist das Release als Vorabversion markiert (Häkchen „Set as a pre-release“, `--prerelease`) *(geändert in 0.35)*. Bei Hotfixes wird `main` danach per Pull Request nach `develop` zurückgeführt.
 
 **Erste Veröffentlichung.** Release 0.1.0 am Ende der Setup-Phase: der Stand des Setups mit der Diagnoseansicht (13.1), ohne Service Worker und ohne Datenspeicherung (EP-02, E-25). Er weist die gesamte Kette bis zur echten Adresse nach.
 
-**Keine öffentlichen Vorschauversionen.** Eine Vorschau unter derselben Herkunft würde dieselbe Datenbank wie die echte App sehen. Getestet wird lokal. Über Vorabversionen der echten App wird nach I2 entschieden (OP-13).
+**Vorabversionen (E-40).** Vor 1.0 erscheinen Vorabversionen 0.x der echten App unter der echten Adresse, jeweils nach einem abgeschlossenen Inkrement und nur nach Freigabe durch den Product Owner; die erste ist 0.2.0 nach I2. Für ihre Daten gibt es kein Versprechen: Eine Änderung des Datenbankschemas darf sie verwerfen, statt sie zu übernehmen. Bis zum Update-Weg aus I4 (ADR-015) übernimmt der minimale Service Worker eine neue Version erst, wenn alle Fenster der App geschlossen sind (11); Testpersonen schließen die App dafür ganz und öffnen sie neu. *(neu in 0.35)*
+
+**Keine öffentlichen Vorschauversionen einzelner Stände.** Eine Vorschau unter derselben Herkunft würde dieselbe Datenbank wie die echte App sehen; ein Unterordner wie `/test/` hätte dieselbe Herkunft. Zwischenstände werden lokal geprüft (16.6). *(geändert in 0.35)*
 
 **Sicherheit auf GitHub.** Erlaubt sind nur Actions von GitHub selbst, Workflows haben standardmäßig nur Leserechte; Secret scanning mit Push protection, Dependabot alerts und security updates, CodeQL (Default setup) und Private vulnerability reporting sind aktiv. Dependabot version updates laufen monatlich, gebündelt, mit Ziel `develop` und Titelpräfix `deps:`.
 
 ### 16.4 `CLAUDE.md`
 
-Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrichtlinien für Claude Code und verweist für Details auf diese. Sie enthält unter anderem: Arbeitsablauf mit Story-Bündeln und Haltepunkten (EP-10); Schichten und Abhängigkeitsregeln; durchgehend englischer Code; kein `Math.random`, Zufall nur über `RandomSource`; keine Farbwerte außerhalb der Tokens; keine festen Texte; Animationen nur über Motion; jeder Schreibzugriff über Repositories; Sperren in Diensten prüfen; Fehlerbehandlung nach 4.6; Tests zu jeder Fachlogik; Git-Konventionen; vor jedem Pull Request `npm run check` und `npm run test:e2e`, vor einem Pull Request nach `main` zusätzlich `npm run test:stat`. Sie verweist auf die Dokumente in `docs/`.
+Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrichtlinien für Claude Code und verweist für Details auf diese. Sie enthält unter anderem: Arbeitsablauf mit Story-Bündeln und Haltepunkten (EP-10); Schichten und Abhängigkeitsregeln; durchgehend englischer Code; kein `Math.random`, Zufall nur über `RandomSource`; keine Farbwerte außerhalb der Tokens; keine festen Texte; Animationen nur über Motion; jeder Schreibzugriff über Repositories; Sperren in Diensten prüfen; Fehlerbehandlung nach 4.6; Tests zu jeder Fachlogik; Git-Konventionen; vor jedem Pull Request `npm run check` und `npm run test:e2e` (außer bei reinen Doku-Änderungen), vor einem Pull Request nach `main` zusätzlich `npm run test:stat`. Sie verweist auf die Dokumente in `docs/`.
 
 ### 16.5 Claude Code
 
@@ -1277,6 +1432,8 @@ Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrich
 
 mkcert erzeugt eine lokale Zertifizierungsstelle, die in Windows sowie von Hand auf Android und dem iPad als vertrauenswürdig installiert wird (ein eigenes iPhone gibt es nicht, auf fremden Geräten wird sie nie installiert; Anforderungsdokumentation OP-13), und ein Serverzertifikat für `localhost`, `127.0.0.1`, `::1` und die feste IP-Adresse des PCs im Heimnetz (Adressreservierung in der FRITZ!Box). Das Serverzertifikat liegt unter `%USERPROFILE%\.boardbrain-certs\` (`cert.pem`, `key.pem`) und wird vom Product Owner erzeugt, nicht von Claude Code. `vite.config.ts` liest es von dort und schaltet HTTPS nur ein, wenn die Dateien vorhanden sind; ohne Zertifikat (z. B. auf GitHub) laufen `dev` und `preview` über `http://localhost`. Der Schlüssel der Zertifizierungsstelle verlässt den PC nie.
 
+
+**Lokale Abnahme-App (E-40).** Zur Abnahme baut Claude Code mit `npm run build:acceptance` nach `dist-acceptance/` und liefert mit `npm run preview:acceptance` auf Port 4174 aus (`https://192.168.178.20:4174/`). Der Modus `acceptance` gibt der App den Namen „BoardBrain Dev“ (`de.app.nameAbnahme`) und die lila Symbole (12.1). Weil sich die Herkunft von `https://boardbrain.github.io/` unterscheidet, ist sie ohnehin eine eigene App mit eigenen Daten; Name und Symbol machen sie auf dem Startbildschirm unterscheidbar. Eigener Ordner und eigener Port verhindern, dass die Ende-zu-Ende-Tests, die einen laufenden Server auf Port 4173 mitbenutzen, den Abnahme-Build prüfen. Ende-zu-Ende-Tests und Veröffentlichung bauen im Standardmodus nach `dist/`. *(neu in 0.35)*
 ---
 
 ## 17. Architekturentscheidungen (ADR)
@@ -1305,7 +1462,7 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | ADR-016 | Nutzung unter iOS nur installiert; persistenter Speicher | Angenommen |
 | ADR-017 | Ton über Web Audio mit Audio-Session „ambient“ | Angenommen |
 | ADR-018 | Eigene Textlösung und Design-Tokens als CSS-Variablen | Angenommen |
-| ADR-019 | Hash-Routing mit React Router; Zustand für Sitzungszustand | Angenommen |
+| ADR-019 | Hash-Routing mit React Router; Zustand für Sitzungszustand | Angenommen; für den Sitzungszustand ersetzt durch ADR-029 |
 | ADR-020 | Teststrategie für den Zufall | Angenommen |
 | ADR-021 | Eigene SVG-Diagramme | Angenommen |
 | ADR-022 | Hosting auf GitHub Pages mit eigener Herkunft | Angenommen |
@@ -1314,6 +1471,9 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | ADR-025 | Fehlerbehandlung mit Ergebnistyp | Angenommen |
 | ADR-026 | ESLint 10 ohne eslint-plugin-react | Angenommen |
 | ADR-027 | Code durchgehend englisch | Angenommen |
+| ADR-028 | Spielspezifisches nur im Spielmodul | Angenommen |
+| ADR-029 | Laufende Partie über Lesehook, Vorbereitung in einer Layout-Route | Angenommen |
+| ADR-030 | Große Illustrationen als erzeugte Bilder | Angenommen |
 
 ---
 
@@ -1549,6 +1709,8 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 
 **Konsequenzen:** Auf Plattformen ohne Audio-Session-Steuerung entscheidet der Browser über das Verhalten bei Stummschaltung; der Tonschalter der App greift immer.
 
+**Status (0.31):** zurückgestellt bis nach Version 1 (Anforderungsdokumentation E-38); die Entscheidung gilt, sobald Klänge kommen.
+
 ---
 
 ### ADR-018: Eigene Textlösung und Design-Tokens als CSS-Variablen
@@ -1574,6 +1736,8 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 **Betrachtete Optionen:** Pfad-Routing (braucht Umleitungstricks auf GitHub Pages); eigene Navigation ohne Bibliothek (Zurück-Taste aufwendig); React Context mit `useReducer` (möglich, aber mehr Code und unnötige Neuberechnungen).
 
 **Konsequenzen:** Adressen enthalten `#`, was für eine installierte App unsichtbar ist.
+
+**Nachtrag (0.22):** Der Teil „Zustand für Sitzung und Vorbereitung“ ist durch ADR-029 ersetzt; das Paket wurde nie installiert.
 
 ---
 
@@ -1722,6 +1886,55 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 
 ---
 
+### ADR-028: Spielspezifisches nur im Spielmodul
+
+**Status:** Angenommen (Bündel I2-A, 29.10.2026; Entscheidung des Product Owners)
+
+**Kontext:** Die Skizzen in 4.3 und 5.2 bis 5.6 legten Teile, die nur Catan betreffen, in `core`: Brettmodell, Platzierungsregeln, Sackgassen-Strategie, Gebäudearten, Rohstoffe und die Schrittarten der Generierung. Ein anderes Spiel mit sechseckigem Brett und Sackgassen ist nicht absehbar; spätere Varianten wie weitere Modi (PP-01), Regeln nach Feldinhalt (PP-04), Seefahrer (PP-11) oder die vorausschauende Gültigkeit (PP-14) sind ebenfalls Catan.
+
+**Entscheidung:** Was nur Catan betrifft, liegt im Catan-Modul `games/catan`, zusammen mit seinen Tests:
+
+- das Brettmodell und das Brett (`games/catan/board`, `CATAN_BOARD`),
+- Platzierungsregeln, Sackgassen-Strategie, Straße, Schlangenreihenfolge, Spielversionen und Gebäudearten (`games/catan/placement`),
+- die Rohstoffe und die Startrohstoffe (`games/catan/startingResources.ts`),
+- ab I2-B die Schrittarten der Generierung; `core/generation` kennt nur einen allgemeinen Schritt.
+
+In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betrifft: Zufall, Person und Reihenfolge losen, Entitäten, Ablaufsteuerung, Statistik. Dazu gehört auch das Farbmodell der Gruppen (`catanColor`, `excludesCatan`, `CATAN_COLOR_KEYS` in `core/model`), weil die Catan-Farbe und „Catan ausschließen“ nach Spezifikation 3.3 und FA-PG-04 Eigenschaften der Gruppe und Teil der gespeicherten Daten sind (7.1).
+
+**Betrachtete Optionen:** Catan-Teile in `core` wie in den Skizzen (gegen NFA-EW-01); allgemeine Bausteine für Brett und Platzierung in `core`, nur die Catan-Regeln im Spielmodul (verworfen: ein zweites Spiel mit dieser Mechanik ist nicht absehbar, die Bausteine hätten nur Spielzeugbeispiele als zweite Anwendung); das Farbmodell sofort zu einer allgemeinen Spielerfarbe je Spiel verallgemeinern (verworfen: ohne zweites Spiel mit Farben wäre die allgemeine Form geraten).
+
+**Konsequenzen:** Die Module `core/board` und `core/placement` entfallen; dependency-cruiser prüft die Schichtregel `core` ← `games` unverändert. Die Oberfläche bezieht Brett und Geometrie über `@/games/catan`. Die Varianten PP-01, PP-04, PP-11 und PP-14 ergänzen Regeln, Bretter oder Strategien im Catan-Modul. Die Skizzen in 5.3 bis 5.5 bleiben zur Veranschaulichung stehen; die Abschnitte „Umsetzung (I2-A)“ nennen den tatsächlichen Ort. Das Farbmodell wird erst verallgemeinert, wenn ein zweites Spiel mit Spielfarben hinzukommt, dann mit einer Datenmigration (8.2).
+
+---
+
+### ADR-029: Laufende Partie über Lesehook, Vorbereitung in einer Layout-Route
+
+**Status:** Angenommen (Bündel I2-C, 02.11.2026; Entscheidung des Product Owners)
+
+**Kontext:** ADR-019 sah Zustand für die laufende Partie und die Vorbereitung vor. Die laufende Partie steht aber ohnehin in der Datenbank und wird dort nach jedem Tipp gespeichert, bevor sie erscheint (ADR-014); ein Abbild in einem Store müsste nach jeder Änderung von Hand mit der Datenbank abgeglichen werden. Die Vorbereitung lebt nur über die vier Seiten Spiel, Tisch, Optionen und Farben und geht bei einem Neustart bewusst verloren (Spezifikation 3.5).
+
+**Entscheidung:** Kein Paket Zustand. Die laufende Partie liest jede Ansicht über den Lesehook `useCurrentSession(db)` mit `useLiveQuery`, wie alle gespeicherten Daten (13.2); geändert wird sie nur über den `SessionService`. Die Vorbereitung hält die Layout-Route `#/partie/neu` (`PreparationLayout`) mit `useState` und reicht sie über den Outlet-Kontext von React Router an ihre Seiten.
+
+**Betrachtete Optionen:** Zustand wie in ADR-019 (eine Abhängigkeit mehr und ein zweiter Stand neben der Datenbank); React Context mit eigenem Provider für die Vorbereitung (gleichwertig, aber ein zusätzlicher Baustein neben der ohnehin nötigen Layout-Route); Vorbereitung in der Adresse (lange Adressen, Personen und Farben ließen sich von Hand verfälschen).
+
+**Konsequenzen:** Eine Quelle der Wahrheit für die Partie; ein Neustart, ein zweiter Tab oder ein doppelter Tipp zeigen immer den gespeicherten Stand, den Doppeltipp fängt `advance(shownStep)` ab (10.3). Die Vorbereitung verschwindet, sobald man `#/partie/neu` verlässt; das entspricht Spezifikation 3.5. Braucht später eine weitere Ansicht sie, liegt sie unter derselben Layout-Route.
+
+---
+
+### ADR-030: Große Illustrationen als erzeugte Bilder
+
+**Status:** Angenommen (Bündel I2-C, 03.11.2026; Entscheidung des Product Owners)
+
+**Kontext:** Die Illustrationen der Referenz I2 waren als SVG-Komponenten in die App übernommen und wurden bei jeder Anzeige mit SVG-Filtern gezeichnet (heller Rand um das Symbol, Weichzeichner). Safari unter iPadOS malte um das große Symbol der Rohstoffkarten einen dunklen Kasten; Chrome unter Android und Playwrights WebKit unter Windows zeigten keinen Fehler. Allein die Rohstoffkarten waren rund 10.600 Zeilen und der größte Teil des Partie-Codes (530 kB).
+
+**Entscheidung:** Die großen Illustrationen, die fünf Rohstoffkarten und die Landschaft der Catan-Karte, sind fertige Bilder. Ihre Quellen liegen als SVG in `scripts/art` und verweisen auf die Tokens (`var(--color-art-…)`); `npm run art` (`scripts/generate-art.mjs`) zeichnet sie mit Playwright und den Werten aus `tokens.css` und speichert sie als WebP mit Transparenz in 1200 px Breite in `public/art/`. Die Bilder werden mit committet, wie die App-Symbole (12.1). Kleine Grafiken ohne Probleme bleiben SVG-Komponenten in `ui/art`.
+
+**Betrachtete Optionen:** SVG-Komponenten behalten und den Filter für Safari umbauen (ungewiss, ohne iPad nicht nachstellbar, Code bleibt groß); Bilder von Hand mit einem Grafikprogramm erstellen (Farben nicht mehr aus den Tokens, keine reproduzierbare Quelle); PNG statt WebP (rund doppelt so groß bei gleicher Schärfe).
+
+**Konsequenzen:** Alle Browser zeigen dieselben Pixel. Der Partie-Code schrumpft von 530 auf 101 kB (gepackt von 93 auf 26 kB); die sechs Bilder sind zusammen rund 720 kB und liegen im Speicher des Service Workers. Eine Farbe oder Form ändert man in Tokens oder Quelle und erzeugt die Bilder mit `npm run art` neu; vergisst man das, zeigt die App den alten Stand. Die Bilder sind auf 1200 px Breite begrenzt, das reicht für die größten Karten in dreifacher Auflösung (Entscheidung des Product Owners: hohe Auflösung).
+
+---
+
 ## 18. Risiken und offene Punkte
 
 ### 18.1 Risiken
@@ -1743,15 +1956,15 @@ Alle ADRs haben, sofern nicht anders angegeben, den Status **Angenommen**, das D
 | ID | Punkt | Phase |
 |---|---|---|
 | OP-12 | Dauerhafte Adresse der App | Setup – geklärt: ADR-022 |
-| OP-13 | Vorabversionen der echten App vor 1.0 | Umsetzung, nach I2 |
-| OP-06 | Visuelle Gestaltung von Glücksrad, Aufblinken und Klängen | Design |
-| OP-11 | Konkrete Farbwerte der Paletten | Design |
+| OP-13 | Vorabversionen der echten App vor 1.0 | Umsetzung – geklärt: 16.3, Anforderungsdokumentation E-40 |
+| OP-06 | Visuelle Gestaltung von Glücksrad, Aufblinken und Klängen | Design – geklärt: Karten ziehen statt Glücksrad (`docs/design/i2d-running-match-final-preview.html`); Aufblinken, Spannungsmodus und Tempo mit D-2 (`docs/design/d2-staging-final-preview.html`, 13.6); Klänge nach Version 1 (Anforderungsdokumentation E-38) |
+| OP-11 | Konkrete Farbwerte der Paletten | Design – geklärt: 13.4, Anforderungsdokumentation E-26 |
 
 ---
 
 ## 19. Nächste Schritte
 
-1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0.
-2. **Design:** OP-06 und OP-11.
-3. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10): zuerst `core/random`, `core/board` und `core/placement` mit ihren Tests, weil dort die strengsten Prüfkriterien gelten; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
-4. **Nach I2:** Entscheidung über Vorabversionen (OP-13).
+1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0. *Abgeschlossen am 07.10.2026.*
+2. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10) nach `docs/Umsetzungsplan.md`: zuerst `core/random` mit dem Losbaustein, weil dort die strengsten Prüfkriterien gelten; `core/board` in I1, `core/placement` als erstes Bündel von I2; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
+3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 innerhalb von I2, bevor Aufblinken und Klänge gebaut werden (Anforderungsdokumentation E-32); das Ziehen der Karten legt seit 0.25 die Referenz aus I2-D fest. *OP-11 erledigt am 07.10.2026 (13.4).* *OP-06 erledigt am 11.11.2026 mit D-2.*
+4. **Nach I2:** Entscheidung über Vorabversionen (OP-13). *Erledigt am 12.11.2026 (16.3, E-40); erste Vorabversion 0.2.0.*

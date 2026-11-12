@@ -1,0 +1,47 @@
+.card {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  align-content: center;
+  aspect-ratio: 5 / 7;
+  padding: 18px 10px;
+  color: var(--color-text);
+  text-align: center;
+  text-decoration: none;
+  background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px var(--color-shadow);
+}
+
+.corner,
+.cornerBottom {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-accent-text);
+}
+
+/* Bottom right, upside down like the index of a real card. */
+.cornerBottom {
+  inset: auto 10px 8px auto;
+  transform: rotate(180deg);
+}
+
+/* The symbol sits on a text line like in the design reference, which leaves a little space
+   below it. */
+.icon {
+  color: var(--color-accent-text);
+}
+
+.title {
+  font-weight: 700;
+}
+
+.note {
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
+}
