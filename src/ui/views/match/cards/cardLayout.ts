@@ -26,6 +26,8 @@ const RESOURCE_RATIO = 1.5;
 const RESOURCE_KINDS = 5;
 const MOST_KIND_WIDTH = 96;
 const MOST_PLACE_WIDTH = 180;
+// PO 12.11.2026: order cards filling the width of a tablet in portrait were too large.
+const MOST_ORDER_WIDTH = 120;
 
 // A row of `count` cards of width `width`, centred; the gap is at most `maxGap`.
 function rowXs(roomWidth: number, width: number, count: number, maxGap: number): number[] {
@@ -99,7 +101,8 @@ export type OrderLayout = {
  * drawn fit one above the other. The cards below, the stack among them, are at most as wide as
  * the stack of the starting resources (PO 12.11.2026: on a tablet in portrait they only grow
  * large on the places); on phones both have one size. The row of places stays centred where the
- * room allows it (as the order row of I2-C); otherwise both rows together are centred.
+ * room allows it (as the order row of I2-C); otherwise both rows together are centred. On
+ * tablets the places are at most 120 px wide (PO 12.11.2026).
  */
 export function orderLayout(width: number, height: number, persons: number): OrderLayout {
   const gap = 8;
@@ -108,6 +111,7 @@ export function orderLayout(width: number, height: number, persons: number): Ord
   // places take the rest.
   const tall = (height - rowGap - 8) / CARD_RATIO;
   const w = Math.min(
+    MOST_ORDER_WIDTH,
     (width - 3 * gap) / 4,
     (width - (persons - 1) * gap) / persons,
     tall / 2 <= MOST_KIND_WIDTH ? tall / 2 : tall - MOST_KIND_WIDTH,
