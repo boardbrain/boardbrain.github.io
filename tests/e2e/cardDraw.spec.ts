@@ -154,6 +154,29 @@ test.describe('US-IN-04 Skip the animation', () => {
   });
 });
 
+test.describe('US-AB-03 AK-8 Repeat a piece on the board (design I2-E)', () => {
+  test('the pieces taken away fade out, then the page before drawing shows and can be used', async ({
+    page,
+  }) => {
+    await seedMatch(page, { table: TABLE, steps: 6 });
+    const losen = main(page).getByRole('button', { name: 'Losen' });
+    for (let piece = 0; piece < 2; piece++) {
+      await losen.click();
+      await expect(losen).toBeEnabled();
+    }
+
+    // The dialog shows the marked pieces a second time and closes while they fade on the board.
+    await main(page)
+      .getByRole('button', { name: /^Siedlung von .* wiederholen$/ })
+      .click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+
+    await expect(main(page)).toHaveAttribute('data-page', /^next-6:draw$/);
+    await expect(losen).toBeEnabled();
+    await expect(main(page).getByRole('button', { name: /wiederholen$/ })).toHaveCount(0);
+  });
+});
+
 test.describe('US-AB-05 AK-3 Restart during a movement', () => {
   test('FA-AB-07: an interrupted movement plays again with the same result, a finished one does not', async ({
     page,

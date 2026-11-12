@@ -90,6 +90,17 @@ const SHOWN_MOVEMENT_MS = 300;
 // Pieces discarded by a repetition rise by 9 px and fade (design I2-E).
 const PIECE_RISE = -9;
 const PIECE_LEAVE_SECONDS = 0.3;
+// A movement before storing is decoration: it never holds up storing for longer than planned.
+const MOVEMENT_SLACK_SECONDS = 0.2;
+
+async function atMost(movement: Promise<unknown>, seconds: number): Promise<void> {
+  await Promise.race([
+    movement,
+    new Promise((resolve) => {
+      setTimeout(resolve, (seconds + MOVEMENT_SLACK_SECONDS) * 1000);
+    }),
+  ]);
+}
 
 // The steps shown with a movement of cards (design I2-E).
 function hasMovement(step: CatanSlot): boolean {
@@ -321,16 +332,21 @@ export function MatchView(): React.JSX.Element | null {
     }
     const marking = pieceMarking(session, index);
     if (marking !== null) {
-      await Promise.all(
-        [marking.main, ...marking.others].map((key) =>
-          body.querySelector<SVGElement>(`[data-piece="${key}"]`) === null
-            ? Promise.resolve()
-            : animate(
-                `[data-piece="${key}"]`,
-                { opacity: [1, 0], y: [0, PIECE_RISE] },
-                { duration: PIECE_LEAVE_SECONDS, ease: 'easeIn' },
-              ).finished,
-        ),
+      // Only the pieces on the board: the dialog shows them a second time and closes meanwhile,
+      // and a movement of a piece taken away would never end (PO 12.11.2026: everything stayed
+      // locked after repeating a building).
+      const pieces = [marking.main, ...marking.others].flatMap((key) => [
+        ...body.querySelectorAll<SVGElement>(`[data-piece="${key}"]`),
+      ]);
+      await atMost(
+        pieces.length === 0
+          ? Promise.resolve()
+          : animate(
+              pieces,
+              { opacity: [1, 0], y: [0, PIECE_RISE] },
+              { duration: PIECE_LEAVE_SECONDS, ease: 'easeIn' },
+            ).finished,
+        PIECE_LEAVE_SECONDS,
       );
     }
     if (session.generation.steps[index]?.step.kind === 'starting-resources') {
