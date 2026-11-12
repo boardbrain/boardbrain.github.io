@@ -66,7 +66,13 @@ type PlacementStepProps = {
   /** How the newest piece is set right after its highlighting; `null` shows it at rest. */
   readonly settle?: SettleLook | null;
   /** A short hint on top of the board, e.g. "Zwei übrig" (design D-2); `key` restarts it. */
-  readonly hint?: { readonly key: string; readonly text: string; readonly isBrief: boolean } | null;
+  readonly hint?: {
+    readonly key: string;
+    readonly text: string;
+    /** Shown for 1.5 s only, then `onEnd` is called. */
+    readonly isBrief: boolean;
+    readonly onEnd?: () => void;
+  } | null;
 };
 
 // "Spannung an" stays 1.5 s: in within 15 %, out from 75 % (design D-2).
@@ -180,6 +186,11 @@ export function PlacementStep({
               }
               exit={{ opacity: 0 }}
               transition={hint.isBrief ? BRIEF_HINT : HINT_FADE}
+              onAnimationComplete={() => {
+                if (hint.isBrief) {
+                  hint.onEnd?.();
+                }
+              }}
             >
               {hint.text}
             </m.div>

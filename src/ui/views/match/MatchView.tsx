@@ -193,6 +193,7 @@ export function MatchView(): React.JSX.Element | null {
   const [switchHint, setSwitchHint] = useState<{
     readonly count: number;
     readonly isOn: boolean;
+    readonly isShown: boolean;
   } | null>(null);
   const [isTension, setTension] = useTensionMode(
     current?.status === 'active' ? current.session.startedAt : '',
@@ -517,7 +518,11 @@ export function MatchView(): React.JSX.Element | null {
               {...greyedOut(isStaging, GREY)}
               onClick={() => {
                 setTension(!isTension);
-                setSwitchHint({ count: (switchHint?.count ?? 0) + 1, isOn: !isTension });
+                setSwitchHint({
+                  count: (switchHint?.count ?? 0) + 1,
+                  isOn: !isTension,
+                  isShown: true,
+                });
               }}
             >
               <DrumIcon size={22} />
@@ -608,13 +613,16 @@ export function MatchView(): React.JSX.Element | null {
             hint={
               duel === 'waiting'
                 ? { key: 'duel', text: t('partie.zweiUebrig'), isBrief: false }
-                : switchHint === null
-                  ? null
-                  : {
+                : switchHint?.isShown === true
+                  ? {
                       key: `switch-${String(switchHint.count)}`,
                       text: switchHint.isOn ? t('partie.spannungAn') : t('partie.spannungAus'),
                       isBrief: true,
+                      onEnd: () => {
+                        setSwitchHint({ ...switchHint, isShown: false });
+                      },
                     }
+                  : null
             }
             nameOf={nameOf}
             skip={skip}
