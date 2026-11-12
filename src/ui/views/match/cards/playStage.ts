@@ -19,7 +19,12 @@ const seconds = (ms: number): number => ms / 1000;
 const SWITCH = 0.001;
 
 // What each card shows and how high it lies, followed while the segments are built in time order.
-type Tracked = { face: Map<string, string>; z: Map<string, number> };
+type Tracked = {
+  face: Map<string, string>;
+  z: Map<string, number>;
+  // When the stacking order of a card was set last, so that skipping keeps the latest one.
+  zSetAt: Map<string, number>;
+};
 
 function find(root: HTMLElement, selector: string): HTMLElement | null {
   return root.querySelector<HTMLElement>(selector);
@@ -109,7 +114,19 @@ function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): Anima
           ];
       const z = tracked.z.get(step.card);
       if (step.z !== undefined && z !== step.z) {
-        segments.push([card, { zIndex: [z ?? step.z, step.z] }, { at, duration: SWITCH }]);
+        // Motion does not animate zIndex: it would jump to its last value at once, and a pulled
+        // card would mix behind the stack. A step at the moment sets it instead.
+        const level = String(step.z);
+        const id = step.card;
+        segments.push([
+          (progress: number) => {
+            if (progress > 0 && (tracked.zSetAt.get(id) ?? -1) <= at) {
+              card.style.zIndex = level;
+              tracked.zSetAt.set(id, at);
+            }
+          },
+          { at, duration: SWITCH },
+        ]);
         tracked.z.set(step.card, step.z);
       }
       return segments;
@@ -237,6 +254,7 @@ export function playStage(root: HTMLElement, plan: StagePlan): StageRun {
       plan.cards.map((card) => [card.id, card.isFaceDown ? 'back' : (card.fronts[0] ?? '')]),
     ),
     z: new Map(plan.cards.map((card) => [card.id, card.z])),
+    zSetAt: new Map(),
   };
   const sequence = [...plan.steps]
     .sort((a, b) => a.at - b.at)
