@@ -7757,9 +7757,10 @@
           glows.forEach((el) => flAnim(el, [{ opacity: 0 }, { opacity: 1 }], 260));
           await sleep(420);
           const rest = flShuffle(pool.filter((c) => c !== chosen));
-          const w = growing(rest.length + 1);
-          for (let k = 0; k < rest.length; k++) { await sleep(total * 0.85 * w[k]); flAnim(glows.get(rest[k]), [{ opacity: 0 }], 260); }
-          await sleep(total * 0.85 * w[rest.length]);
+          // PO 12.11.2026 (I2-F): the two edges left stand longest, the drawn one alone only 0.3 s
+          const w = growing(rest.length);
+          for (let k = 0; k < rest.length; k++) { await sleep((total * 0.85 - 300) * w[k]); flAnim(glows.get(rest[k]), [{ opacity: 0 }], 260); }
+          await sleep(300);
           glows.get(chosen).remove();
           flMark(chosen, col, layer);
           return { dimmed: d2.dramaDim === 'on' };
@@ -8041,7 +8042,7 @@
           spec('Spannungsmodus: Straßen (R1)', [
             'Das Haus an der Straße liegt immer über dem Kantenlicht und über dem dunklen Brett, hell und unverdeckt.',
             'Kein Duell, keine Pause, keine Punkte. Alle freien Kanten am Gebäude leuchten schwach in der Form der Standard-Markierung (35 % deckend), eingeblendet in 0,26 s, dann 0,42 s Ruhe.',
-            'Eine nach der anderen erlischt in zufälliger Reihenfolge (0,26 s), Abstände wachsen mit 1,22^k, zusammen 2,5 s; die verbleibende wird zur vollen Markierung, dann die Festlegung.',
+            'Eine nach der anderen erlischt in zufälliger Reihenfolge (0,26 s), Abstände wachsen mit 1,22^k, zusammen 2,2 s, sodass die letzten zwei am längsten stehen; die verbleibende steht nur 0,3 s allein und wird dann zur vollen Markierung, dann die Festlegung (PO 12.11.2026 in I2-F, vorher stand die letzte am längsten allein).',
           ]),
           spec('Schalter (K4)', [
             'Runder Knopf 44 px mit Trommel, oben rechts auf jeder Seite der Platzierung, links neben „Partie beenden“, Abstand 8 px; nur dort. Name „Spannungsmodus“, Zustand über aria-pressed.',

@@ -38,6 +38,11 @@ export const HIGHLIGHT_MS = {
   darkIn: 300,
   lightIn: 260,
   rest: 420,
+  /**
+   * Tension mode, road: the edge drawn stands alone this long before it becomes the mark; the two
+   * last edges stand longest before (PO 12.11.2026).
+   */
+  roadAlone: 300,
   /** A dot goes out; an edge goes out. */
   dotOut: 220,
   glowOut: 260,
@@ -300,9 +305,13 @@ function planTensionRoad<T extends string>(
     spots.filter((spot) => spot !== result),
     rng,
   );
-  // One more share for the wait before the last edge becomes the mark.
-  const shares = growingShares(goingOut.length + 1, OUT_GROWTH);
-  const outAt = cumulative(HIGHLIGHT_MS.rest, total, shares);
+  // PO 12.11.2026: the two edges left stand longest (the gaps grow), then one goes out and the
+  // edge drawn stands alone only briefly before it becomes the mark.
+  const outAt = cumulative(
+    HIGHLIGHT_MS.rest,
+    total - HIGHLIGHT_MS.roadAlone,
+    growingShares(goingOut.length, OUT_GROWTH),
+  );
   const end = HIGHLIGHT_MS.rest + total;
   return {
     kind: 'tension',

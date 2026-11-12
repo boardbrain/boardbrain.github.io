@@ -249,6 +249,16 @@ describe('US-IN-02 highlighting before a piece is fixed (design D-2)', () => {
     }
   });
 
+  it('AK-7: the two edges left stand longest, then the drawn one stands alone only briefly', () => {
+    for (const plan of plans(50, (rng) => planHighlight(['a', 'b', 'c'], 'c', 'road', true, rng))) {
+      const [first, second, mark] = plan.lead.steps.slice(2).map((step) => step.at);
+      const lastTwo = (second ?? 0) - (first ?? 0);
+      expect(lastTwo).toBeGreaterThan((first ?? 0) - HIGHLIGHT_MS.rest);
+      expect((mark ?? 0) - (second ?? 0)).toBeCloseTo(HIGHLIGHT_MS.roadAlone, 6);
+      expect(lastTwo).toBeGreaterThan(HIGHLIGHT_MS.roadAlone);
+    }
+  });
+
   it('AK-3: the first edge to go out is any of the others with the same probability', () => {
     const edges = ['a', 'b', 'c'] as const;
     const all = plans(RUNS, (rng) => planHighlight(edges, 'b', 'road', true, rng));
