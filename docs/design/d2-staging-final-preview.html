@@ -7361,7 +7361,7 @@
         flow: { all: '4 Personen, Städte & Ritter, Startrohstoffe' },
       };
       const MARK_GOLD = '#f5be5b';
-      const BASE_MS = { building: 2000, road: 1200, hold: 320 };
+      const BASE_MS = { building: 3500, road: 2500, hold: 320 }; // PO 12.11.2026 (I2-F): before 2000 and 1200
       const SETTLE_MS = { F1: 520, F2: 560, F3: 420, F4: 760, F5: 1600, F24: 760 };
       const NS = 'http://www.w3.org/2000/svg';
       function flEl(tag, attrs = {}, parent) {
@@ -7415,7 +7415,7 @@
         // PO 11.11.2026: the hops carry no information about the result. A random walk over the spots that does not
         // know the result (random start, no direct repetition, random length), then one landing on the result,
         // which may be the spot the light is on already.
-        const [lo, hi] = isRoad ? [4, 6] : [9, 14];
+        const [lo, hi] = isRoad ? [5, 8] : [9, 14]; // PO 12.11.2026 (I2-F): roads 4 to 7 hops, before 3 to 5
         const hops = lo + Math.floor(drnd() * (hi - lo + 1));
         const seq = [pool[Math.floor(drnd() * pool.length)]];
         while (seq.length < hops - 1) {
@@ -7742,7 +7742,8 @@
       };
       const growing = (n, f = 1.22) => { const w = Array.from({ length: n }, (_, k) => Math.pow(f, k)); const sum = w.reduce((a, b) => a + b, 0) || 1; return w.map((x) => x / sum); };
       async function runDrama({ layer, svg, cands, chosen, col, color, city, isRoad }) {
-        const total = (isRoad ? 2000 : 3500) * (d2.dramaLen === 'L2' ? 1.45 : 1);
+        // PO 12.11.2026 (I2-F): a building takes 7 s instead of 5.1 s (L2)
+        const total = isRoad ? 2000 * (d2.dramaLen === 'L2' ? 1.45 : 1) : 7000;
         if (d2.dramaDim === 'on') {
           const r = flEl('rect', { x: -60, y: -53, width: 120, height: 106, 'clip-path': 'url(#seaClip)', fill: '#0d0a08', 'fill-opacity': 0.55 });
           svg.insertBefore(r, layer);
@@ -7756,9 +7757,10 @@
           glows.forEach((el) => flAnim(el, [{ opacity: 0 }, { opacity: 1 }], 260));
           await sleep(420);
           const rest = flShuffle(pool.filter((c) => c !== chosen));
-          const w = growing(rest.length + 1);
-          for (let k = 0; k < rest.length; k++) { await sleep(total * 0.85 * w[k]); flAnim(glows.get(rest[k]), [{ opacity: 0 }], 260); }
-          await sleep(total * 0.85 * w[rest.length]);
+          // PO 12.11.2026 (I2-F): the two edges left stand longest, the drawn one alone only 0.3 s
+          const w = growing(rest.length);
+          for (let k = 0; k < rest.length; k++) { await sleep((total * 0.85 - 300) * w[k]); flAnim(glows.get(rest[k]), [{ opacity: 0 }], 260); }
+          await sleep(300);
           glows.get(chosen).remove();
           flMark(chosen, col, layer);
           return { dimmed: d2.dramaDim === 'on' };
@@ -8018,20 +8020,20 @@
           ]),
           spec('Standard: Lauflicht (A2)', [
             'Farbe: Catan-Farbe der Person, die setzt. Form wie die Markierung M1 aus I2-H: Kreuzung Kreis r 5,6 mit 25 % Füllung und Rand 1,1; Kante Linie von 30 % bis 90 % der Kante, 7,5 breit, 60 % deckend, runde Enden (Brett-Einheiten, viewBox -60 -53 120 106).',
-            'Ein Ring springt über alle gültigen Plätze: zufälliger Start, jeder Sprung zu einem zufälligen anderen Platz, zufällig 8 bis 13 Sprünge bei Gebäuden, 3 bis 5 bei Straßen, ohne Kenntnis des Ergebnisses. Dann landet er auf dem Ergebnis; steht er schon dort, bleibt er stehen.',
-            'Rhythmus langsamer werdend: Abstand k wächst mit 1,3^k; Summe Gebäude 2,0 s, Straße 1,2 s. Der vorige Ring blendet in 0,14 s aus. Danach 0,32 s Halt auf dem Ergebnis.',
+            'Ein Ring springt über alle gültigen Plätze: zufälliger Start, jeder Sprung zu einem zufälligen anderen Platz, zufällig 8 bis 13 Sprünge bei Gebäuden, 4 bis 7 bei Straßen (PO 12.11.2026 in I2-F, vorher 3 bis 5), ohne Kenntnis des Ergebnisses. Dann landet er auf dem Ergebnis; steht er schon dort, bleibt er stehen.',
+            'Rhythmus langsamer werdend: Abstand k wächst mit 1,3^k; Summe Gebäude 3,5 s, Straße 2,5 s (PO 12.11.2026 in I2-F, vorher 2,0 s und 1,2 s). Der vorige Ring blendet in 0,14 s aus. Danach 0,32 s Halt auf dem Ergebnis.',
           ]),
           spec('Festlegung: Aufsetzen mit Lichtring (F2 + F4)', [
             'Der Stein fällt auf seinen Platz: von 9 Einheiten oben und 125 % Größe, unsichtbar, bei 55 % der Zeit am Boden in voller Größe, bei 75 % noch einmal 1,3 Einheiten hoch, dann ruhig; 0,56 s, Kurve cubic-bezier(.4, 0, .6, 1).',
-            'Gleichzeitig läuft ein Ring vom Platz nach außen: Kreis r 6, Rand 1,4 in der Personenfarbe, von 40 % auf 260 % Größe, von deckend zu unsichtbar, 0,76 s. Die Markierung des Ergebnisses blendet in 0,52 s aus.',
+            'Gleichzeitig läuft ein Ring vom Platz nach außen: Kreis in der Personenfarbe, Radius von 2,4 auf 15,6 (40 % bis 260 % von r 6), Rand bleibt 1,4 breit, von deckend zu unsichtbar, 0,76 s (PO 12.11.2026 in I2-F: mitwachsender Rand wirkte als dunkles Band). Die Markierung des Ergebnisses blendet in 0,52 s aus.',
             'Das Brett bleibt die ganze Zeit hell.',
           ]),
           spec('Spannungsmodus: Gebäude (D2, E4, L2)', [
             'Alle gültigen Kreuzungen leuchten als Punkt in der Personenfarbe (Kern r 2,1, Hof r 4,4 mit 28 %, heller Mittelpunkt r 0,95 mit 80 %), eingeblendet in 0,26 s, dann 0,42 s Ruhe.',
             'Gegner im Duell: rein zufällig unter allen übrigen Plätzen; er kann auch an der Nachbarkreuzung liegen (eine Kante). Jede Wahl nach Abstand hinge vom Ergebnis ab und verriete es („etwas entfernt“ verworfen).',
-            'Ausschluss: alle außer Ergebnis und Gegner erlöschen in zufälliger Reihenfolge, je in 0,22 s; Abstände wachsen mit 1,22^k und ergeben zusammen 2,8 s (55 % von 5,1 s).',
+            'Ausschluss: alle außer Ergebnis und Gegner erlöschen in zufälliger Reihenfolge, je in 0,22 s; Abstände wachsen mit 1,22^k und ergeben zusammen 3,85 s (55 % von 7,0 s; PO 12.11.2026 in I2-F, vorher 2,8 s von 5,1 s).',
             'Halt bei zwei: oben auf dem Brett das Schild „Zwei übrig“, der Vorwärts-Knopf heißt „Duell“; „Wiederholen“ bleibt gesperrt. Erst der Tipp auf „Duell“ startet das Duell.',
-            'Duell E4: der Stein selbst (deckend, verdeckt den Punkt) springt zwischen beiden hin und her, jeder Sprung landet mit 2,5 Einheiten Fall in 0,12 s. Beginn zufällig bei einem der beiden, zufällig 5 bis 8 Stationen im Wechsel, ohne Kenntnis des Ergebnisses; dann landet er auf dem Ergebnis; steht er schon dort, bleibt er ruhig stehen, ohne erneutes Aufsetzen. Abstände wachsen mit 1,32^k und ergeben zusammen 2,0 s. Dann erlischt der Gegner, der Stein des Duells verschwindet, und der gespeicherte Stein wird wie immer gesetzt: Fallen von oben mit Lichtring.',
+            'Duell E4: der Stein selbst (deckend, verdeckt den Punkt) springt zwischen beiden hin und her, jeder Sprung landet mit 2,5 Einheiten Fall in 0,12 s. Beginn zufällig bei einem der beiden, zufällig 5 bis 8 Stationen im Wechsel, ohne Kenntnis des Ergebnisses; dann landet er auf dem Ergebnis; steht er schon dort, bleibt er ruhig stehen, ohne erneutes Aufsetzen. Abstände wachsen mit 1,32^k und ergeben zusammen 2,8 s (40 % von 7,0 s; PO 12.11.2026 in I2-F, vorher 2,0 s). Dann erlischt der Gegner, der Stein des Duells verschwindet, und der gespeicherte Stein wird wie immer gesetzt: Fallen von oben mit Lichtring.',
           ]),
           spec('Spannungsmodus: Brett dunkel', [
             'Sobald die Punkte bzw. Kanten erscheinen, wird das Brett in seiner Form dunkler (Meer, Felder und alle Steine unter 55 % Dunkel #0d0a08), eingeblendet in 0,3 s. Punkte, Kantenlicht, Stein im Duell und das Schild „Zwei übrig“ liegen hell darüber; es bleibt dunkel auch in der Pause.',
@@ -8040,7 +8042,7 @@
           spec('Spannungsmodus: Straßen (R1)', [
             'Das Haus an der Straße liegt immer über dem Kantenlicht und über dem dunklen Brett, hell und unverdeckt.',
             'Kein Duell, keine Pause, keine Punkte. Alle freien Kanten am Gebäude leuchten schwach in der Form der Standard-Markierung (35 % deckend), eingeblendet in 0,26 s, dann 0,42 s Ruhe.',
-            'Eine nach der anderen erlischt in zufälliger Reihenfolge (0,26 s), Abstände wachsen mit 1,22^k, zusammen 2,5 s; die verbleibende wird zur vollen Markierung, dann die Festlegung.',
+            'Eine nach der anderen erlischt in zufälliger Reihenfolge (0,26 s), Abstände wachsen mit 1,22^k, zusammen 2,2 s, sodass die letzten zwei am längsten stehen; die verbleibende steht nur 0,3 s allein und wird dann zur vollen Markierung, dann die Festlegung (PO 12.11.2026 in I2-F, vorher stand die letzte am längsten allein).',
           ]),
           spec('Schalter (K4)', [
             'Runder Knopf 44 px mit Trommel, oben rechts auf jeder Seite der Platzierung, links neben „Partie beenden“, Abstand 8 px; nur dort. Name „Spannungsmodus“, Zustand über aria-pressed.',

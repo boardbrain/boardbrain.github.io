@@ -1,0 +1,51 @@
+/* Highlighting before a piece is fixed (design D-2, docs/design/d2-staging-final-preview.html);
+   measures in SVG units of the board. Colours of the person come from the component. */
+
+/* Mark M1 of I2-H in the person's colour: a ring around a vertex, a glow along an edge */
+.ring {
+  fill-opacity: 0.25;
+  stroke-width: 1.1;
+}
+
+.glow,
+.glowWeak {
+  stroke-width: 7.5;
+  stroke-linecap: round;
+}
+
+.glow {
+  stroke-opacity: 0.6;
+}
+
+.glowWeak {
+  stroke-opacity: 0.35;
+}
+
+/* A dot of the tension mode: glow 28 %, core, bright centre 80 % */
+.dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.dotGlow {
+  fill-opacity: 0.28;
+}
+
+.dotCore {
+  fill: var(--color-highlight-core);
+  fill-opacity: 0.8;
+}
+
+/* The board under 55 % dark in the tension mode */
+.dark {
+  fill: var(--color-board-dark);
+  fill-opacity: 0.55;
+}
+
+/* F4: the ring that runs outwards when a piece is set; it grows by its radius, so its line stays
+   1.4 wide */
+.settleRing {
+  fill: none;
+  stroke-width: 1.4;
+  opacity: 0;
+}

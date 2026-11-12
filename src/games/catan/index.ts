@@ -96,6 +96,7 @@ export {
   type VertexRule,
 } from './placement/rules';
 export { placementSchedule, type PlacementTurn } from './placement/schedule';
+export { catanPlacementSpots, type CatanPlacementSpots } from './placement/spots';
 export {
   CATAN_RESOURCES,
   CATAN_STARTING_RESOURCES_COUNT,

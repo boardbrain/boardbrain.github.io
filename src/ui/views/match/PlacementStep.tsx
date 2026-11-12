@@ -1,7 +1,16 @@
+import { AnimatePresence, m } from 'motion/react';
 import type { ReactNode, Ref } from 'react';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
-import { CATAN_BOARD, catanPlacementRounds, catanSummary, type CatanSlot } from '@/games/catan';
+import {
+  CATAN_BOARD,
+  catanPlacementRounds,
+  catanPlacementSpots,
+  catanSummary,
+  type CatanBuildingStep,
+  type CatanRoadStep,
+  type CatanSlot,
+} from '@/games/catan';
 import { t } from '@/i18n/t';
 import { Board, type PieceMarking } from '@/ui/board/Board';
 import { PieceMark } from '@/ui/board/PieceMark';
@@ -12,6 +21,15 @@ import { Coin } from './Coin';
 import { colorOf } from './matchColors';
 import { orderOrSeats } from './matchFlow';
 import { pieceName } from './matchTexts';
+import {
+  HighlightLayer,
+  SettleTop,
+  SettleUnder,
+  settlePlace,
+  type HighlightHandle,
+  type HighlightPiece,
+  type SettleLook,
+} from './placement/PlacementHighlight';
 import { TurnBand } from './TurnBand';
 import styles from './MatchView.module.css';
 import { cx } from '@/ui/components/classNames';
@@ -37,7 +55,52 @@ type PlacementStepProps = {
   readonly marked?: PieceMarking | null | undefined;
   /** The area of the board, for the question about a piece. */
   readonly boardRef?: Ref<HTMLDivElement> | undefined;
+  /**
+   * The piece drawn and stored but not shown yet: its highlighting plays on the board, which
+   * does not show it (US-IN-02, design D-2). `null` otherwise.
+   */
+  readonly highlight?: {
+    readonly step: CatanBuildingStep | CatanRoadStep;
+    readonly handle: HighlightHandle;
+  } | null;
+  /** How the newest piece is set right after its highlighting; `null` shows it at rest. */
+  readonly settle?: SettleLook | null;
+  /** A short hint on top of the board, e.g. "Zwei übrig" (design D-2); `key` restarts it. */
+  readonly hint?: {
+    readonly key: string;
+    readonly text: string;
+    /** Shown for 1.5 s only, then `onEnd` is called. */
+    readonly isBrief: boolean;
+    readonly onEnd?: () => void;
+  } | null;
 };
+
+// "Spannung an" stays 1.5 s: in within 15 %, out from 75 % (design D-2).
+const BRIEF_HINT = { duration: 1.5, times: [0, 0.15, 0.75, 1] };
+const HINT_FADE = { duration: 0.2 } as const;
+const HINT_RISE = 6;
+
+// The piece of a step and the places it could have been drawn on (US-IN-02 AK-2).
+function highlightPiece(
+  session: StoredSession,
+  step: CatanBuildingStep | CatanRoadStep,
+): HighlightPiece | null {
+  const spots = catanPlacementSpots(
+    session.generation.steps.map((record) => record.step),
+    step,
+  );
+  if (spots === null) {
+    return null;
+  }
+  if (step.kind === 'building') {
+    return spots.kind === 'building'
+      ? { kind: 'building', type: step.type, result: step.result, spots: spots.vertices }
+      : null;
+  }
+  return spots.kind === 'road'
+    ? { kind: 'road', building: spots.building, result: step.result, spots: spots.edges }
+    : null;
+}
 
 function pieceKind(slot: CatanSlot): PieceKind {
   if (slot.kind === 'road') {
@@ -62,6 +125,9 @@ export function PlacementStep({
   onRepeatPiece,
   marked,
   boardRef,
+  highlight = null,
+  settle = null,
+  hint = null,
 }: PlacementStepProps): React.JSX.Element {
   const summary = catanSummary(session.setup, session.generation);
   const pieces = matchBoardPieces(session, nameOf);
@@ -76,6 +142,7 @@ export function PlacementStep({
     announced !== null && (announced.kind === 'building' || announced.kind === 'road')
       ? announced
       : null;
+  const layers = boardLayers(session, pieces, highlight, newest, settle);
 
   return (
     <div className={styles.placement}>
@@ -88,7 +155,9 @@ export function PlacementStep({
           })}
           buildings={pieces.buildings}
           roads={pieces.roads}
-          newestKey={newest === null ? undefined : `${newest.kind}-${String(newest.index)}`}
+          overlay={layers.overlay}
+          lifted={layers.lifted}
+          top={layers.top}
           ref={boardRef}
           marked={marked}
           onPieceTap={
@@ -103,6 +172,30 @@ export function PlacementStep({
           }
         />
         {skip !== undefined && skip !== false && <div className={styles.skipOver}>{skip}</div>}
+        <AnimatePresence>
+          {hint !== null && (
+            <m.div
+              key={hint.key}
+              className={styles.boardHint}
+              role="status"
+              initial={{ opacity: 0, y: HINT_RISE }}
+              animate={
+                hint.isBrief
+                  ? { opacity: [0, 1, 1, 0], y: [HINT_RISE, 0, 0, 0] }
+                  : { opacity: 1, y: 0 }
+              }
+              exit={{ opacity: 0 }}
+              transition={hint.isBrief ? BRIEF_HINT : HINT_FADE}
+              onAnimationComplete={() => {
+                if (hint.isBrief) {
+                  hint.onEnd?.();
+                }
+              }}
+            >
+              {hint.text}
+            </m.div>
+          )}
+        </AnimatePresence>
       </div>
       {/* The band stays in its place and changes its content only (PO 10.11.2026); the name stays
           at the bottom, the line above it is never empty (design I2-E, J1 and D1). */}
@@ -186,4 +279,73 @@ export function PlacementStep({
       {actions}
     </div>
   );
+}
+
+type BoardLayers = {
+  readonly overlay: ReactNode;
+  readonly lifted: readonly string[];
+  readonly top: ReactNode;
+};
+
+// What the board draws over its pieces (design D-2): while a piece is highlighted, the
+// highlighting, with the building of a road on top of it; right after, the piece being set.
+function boardLayers(
+  session: StoredSession,
+  pieces: ReturnType<typeof matchBoardPieces>,
+  highlight: PlacementStepProps['highlight'],
+  newest: PlacementStepProps['newest'],
+  settle: SettleLook | null,
+): BoardLayers {
+  if (highlight !== undefined && highlight !== null) {
+    const { step, handle } = highlight;
+    const piece = highlightPiece(session, step);
+    if (piece === null) {
+      return { overlay: null, lifted: [], top: null };
+    }
+    return {
+      overlay: (
+        <HighlightLayer
+          key={`${step.kind}:${step.result}`}
+          board={CATAN_BOARD}
+          piece={piece}
+          color={colorOf(session, step.personId)}
+          handle={handle}
+        />
+      ),
+      lifted: step.kind === 'road' ? [`building-${String(step.index)}`] : [],
+      top: null,
+    };
+  }
+  if (settle === null || newest === null) {
+    return { overlay: null, lifted: [], top: null };
+  }
+  const key = `${newest.kind}-${String(newest.index)}`;
+  const building = pieces.buildings.find((candidate) => candidate.key === key);
+  const road = pieces.roads.find((candidate) => candidate.key === key);
+  const place =
+    building !== undefined
+      ? settlePlace(CATAN_BOARD, { kind: 'building', vertex: building.vertex })
+      : road === undefined
+        ? null
+        : settlePlace(CATAN_BOARD, { kind: 'road', edge: road.edge, from: road.from });
+  const color = building?.color ?? road?.color;
+  if (place === null || color === undefined) {
+    return { overlay: null, lifted: [], top: null };
+  }
+  return {
+    overlay: (
+      // Own keys for both parts: they are siblings on the board, and React leaves one of two
+      // siblings with the same key behind (PO 12.11.2026: an old mark lit up again).
+      <SettleUnder
+        key={`under-${key}`}
+        pieceKey={key}
+        board={CATAN_BOARD}
+        place={place}
+        color={color}
+        look={settle}
+      />
+    ),
+    lifted: newest.kind === 'road' ? [key, `building-${String(newest.index)}`] : [key],
+    top: <SettleTop key={`top-${key}`} pieceKey={key} place={place} color={color} />,
+  };
 }

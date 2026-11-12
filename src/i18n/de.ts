@@ -317,6 +317,12 @@ export const de = {
       'Ihr setzt Gebäude und Straßen selbst. Die Reihenfolge bleibt; danach ist die Generierung fertig.',
     ueberspringen: 'Überspringen',
     animationUeberspringen: 'Animation überspringen',
+    // Tension mode of the placement (US-IN-02 AK-5 to AK-7, design D-2)
+    spannungsmodus: 'Spannungsmodus',
+    spannungAn: 'Spannung an',
+    spannungAus: 'Spannung aus',
+    zweiUebrig: 'Zwei übrig',
+    duell: 'Duell',
     siedlung: 'Siedlung',
     stadt: 'Stadt',
     strasse: 'Straße',

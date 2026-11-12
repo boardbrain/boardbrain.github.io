@@ -226,6 +226,28 @@ export function SkipIcon({ size = ICON_SIZE }: IconProps): React.JSX.Element {
 }
 
 /**
+ * Drum with two sticks for the tension mode (design D-2, K4). Decorative: the button around it
+ * carries the label.
+ */
+export function DrumIcon({ size = ICON_SIZE }: IconProps): React.JSX.Element {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4.5 10c0-1.7 3.4-3 7.5-3s7.5 1.3 7.5 3v6.5c0 1.7-3.4 3-7.5 3s-7.5-1.3-7.5-3zM4.5 10c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3M7 3l4 5.5M17 3l-4 5.5" />
+    </svg>
+  );
+}
+
+/**
  * Letter i in a circle for more information. Decorative: the button around it carries the label.
  */
 export function InfoIcon({ size }: IconProps): React.JSX.Element {

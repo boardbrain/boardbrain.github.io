@@ -61,7 +61,6 @@ describe('US-PL-04 pieces on the board', () => {
           { key: 'b1', vertex: to, type: 'city', color: 'blue' },
         ]}
         roads={[{ key: 'r0', edge, from, color: 'red' }]}
-        newestKey="r0"
       />,
     );
 
@@ -69,6 +68,38 @@ describe('US-PL-04 pieces on the board', () => {
     expect(screen.getAllByTestId('board-settlement')).toHaveLength(1);
     expect(screen.getAllByTestId('board-city')).toHaveLength(1);
     expect(screen.getAllByTestId('board-road')).toHaveLength(1);
+  });
+});
+
+describe('US-IN-02 layers for the highlighting (design D-2)', () => {
+  it('AK-7: draws lifted pieces over the overlay, and the top layer over everything', () => {
+    const { edge, from, to } = anEdge();
+
+    render(
+      <Board
+        board={CATAN_BOARD}
+        buildings={[
+          { key: 'b0', vertex: from, type: 'settlement', color: 'red' },
+          { key: 'b1', vertex: to, type: 'city', color: 'blue' },
+        ]}
+        roads={[{ key: 'r0', edge, from, color: 'red' }]}
+        overlay={<g data-testid="overlay" />}
+        lifted={['b0']}
+        top={<g data-testid="top" />}
+      />,
+    );
+
+    const inOrder = [
+      screen.getByTestId('board-road'),
+      screen.getByTestId('board-city'),
+      screen.getByTestId('overlay'),
+      screen.getByTestId('board-settlement'),
+      screen.getByTestId('top'),
+    ];
+    inOrder.slice(1).forEach((later, index) => {
+      const earlier = inOrder[index];
+      expect(earlier?.compareDocumentPosition(later)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
   });
 });
 
