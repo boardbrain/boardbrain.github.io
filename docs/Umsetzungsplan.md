@@ -44,7 +44,7 @@
 | 0.29 | 11.11.2026 | Neue kleine Aufgabe K-7 „Ende-zu-Ende-Hälften auf GitHub gleichmäßig verteilen“ vor D-2 (Entscheidung des Product Owners 11.11.2026) und umgesetzt: drei gleichzeitige Läufe je Geräteart statt zwei Hälften (2, 6) |
 | 0.30 | 11.11.2026 | Design D-2 umgesetzt (Entscheidungen des Product Owners, Anforderungsdokumentation 0.21, E-38, E-39): Referenz `docs/design/d2-staging-final-preview.html`; Klänge nach Version 1; I2-F wird „Aufblinken und Spannungsmodus“ (Opus, high), die Karte „Einstellungen“ kommt erst mit I6 (2, 7, 8); neue kleine Aufgabe K-8 „Doku-PRs auf GitHub schnell grün“ (2, 6; Entscheidung des Product Owners 11.11.2026) |
 | 0.31 | 12.11.2026 | I2-E umgesetzt (#42): Referenz `docs/design/i2e-card-moves-final-preview.html`; „Überspringen“ an der Stelle von „Wiederholen“ (Spezifikation 0.17, US-IN-04 AK-1), Einsammeln nach Wiederholen der Reihenfolge, Gleiten nach „Wiederholen“, weiche Wechsel von Band und Knöpfen (Entscheidungen des Product Owners 11.11.2026); Prüfpunkt Schärfe erledigt (2, 8) |
-| 0.32 | 12.11.2026 | I2-F umgesetzt: Aufblinken und Spannungsmodus nach der Referenz aus D-2; bei „Bewegung reduzieren“ auch im Spannungsmodus sofort das Ergebnis, Zeiten als Konstanten wie in I2-E, Lauflicht länger (3,5 s statt 2,0 s, Straße 2,5 s statt 1,2 s mit 4 bis 7 Sprüngen), Spannungsmodus beim Gebäude 7,0 s statt 5,1 s, Lichtring mit dünnem Rand (Referenz angepasst) (Entscheidungen des Product Owners 12.11.2026) (2, 8) |
+| 0.32 | 12.11.2026 | I2-F umgesetzt (#43): Aufblinken und Spannungsmodus nach der Referenz aus D-2; bei „Bewegung reduzieren“ auch im Spannungsmodus sofort das Ergebnis, Zeiten als Konstanten wie in I2-E, Lauflicht länger (3,5 s statt 2,0 s, Straße 2,5 s statt 1,2 s mit 4 bis 7 Sprüngen), Spannungsmodus beim Gebäude 7,0 s statt 5,1 s, Lichtring mit dünnem Rand (Referenz angepasst) (Entscheidungen des Product Owners 12.11.2026) (2, 8) |
 
 ## 1. Zweck
 
@@ -62,7 +62,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 2a | Design D-3: Startansicht und Navigation | nach I1-C, vor I1-E | umgesetzt (#17) |
 | 2b | Kleine Aufgabe K-3: Kartenhand einfahren | nach I1, vor I2 | umgesetzt (#23) |
 | 2c | Kleine Aufgabe K-4: Berührungsverhalten app-weit | direkt nach K-3, vor I2 | umgesetzt (#25) |
-| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31), I2-D (#34), I2-G (#35), I2-H (#36), D-2 (#41), I2-E (#42), I2-F |
+| 3 | Inkrement I2 Generierung: Bündel I2-A, I2-B, I2-C, I2-D, Design D-2, Bündel I2-E, I2-F (Kapitel 8) | nach I1, in dieser Reihenfolge | in Arbeit: I2-A (#27), I2-B (#28), I2-C (#31), I2-D (#34), I2-G (#35), I2-H (#36), D-2 (#41), I2-E (#42), I2-F (#43) |
 | 3a | Kleine Aufgabe K-6: Ende-zu-Ende-Tests schneller, Prüfungen nicht bei jeder Bearbeitung eines PRs | nach I2-H, vor K-5 | umgesetzt (#38) |
 | 3b | Kleine Aufgabe K-5: Fehlerbildschirm auch bei Fehlern in einer Ansicht | nach K-6, vor D-2 | umgesetzt (#39) |
 | 3c | Kleine Aufgabe K-7: Ende-zu-Ende-Hälften auf GitHub gleichmäßig verteilen | nach K-5, vor D-2 | umgesetzt (#40) |
@@ -285,7 +285,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 | I2-H Steine auf dem Brett antippen *(neu in 0.23)* | US-AB-03 (Oberfläche) | Opus, high | `feat/us-ab-03-tap-pieces` | umgesetzt (#36) |
 | D-2 Design der Inszenierung (OP-06) | Aufblinken, Spannungsmodus, Tempo | Opus, medium | `chore/op-06-staging-design` | umgesetzt (#41) |
 | I2-E Karten ziehen und Überspringen | US-IN-01, US-IN-04 | Opus, high | `feat/us-in-01-card-draw` | umgesetzt (#42) |
-| I2-F Aufblinken und Spannungsmodus *(bis 0.29 „Aufblinken und Klänge“)* | US-IN-02 | Opus, high | `feat/us-in-02-highlight-and-tension` | umgesetzt |
+| I2-F Aufblinken und Spannungsmodus *(bis 0.29 „Aufblinken und Klänge“)* | US-IN-02 | Opus, high | `feat/us-in-02-highlight-and-tension` | umgesetzt (#43) |
 
 **Warum diese Reihenfolge:** Erst die Fachlogik ohne Oberfläche (A, B), weil dort die strengsten Prüfkriterien gelten (Zufall, Sackgassen, erst speichern, dann zeigen). Dann der Ablauf in der App (C, D), sodass am Spieleabend schon gespielt werden kann. D-2 folgt, wenn der Ablauf läuft, damit Aufblinken und Klänge am echten Ablauf beurteilt werden. Die Inszenierung (E, F) ersetzt dann nur Bausteine der Oberfläche; Fachlogik und Datenbank bleiben unverändert, weil jede Animation ihr Ergebnis fertig erhält (Architektur 13.6).
 
