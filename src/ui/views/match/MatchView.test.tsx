@@ -173,7 +173,9 @@ describe('US-AB-02 Go through the generation', () => {
     await tapForward(user, 'Zur Übersicht');
 
     expect(await screen.findByRole('heading', { name: 'overview page' })).toBeInTheDocument();
-  });
+    // Twelve taps through every person: with coverage and other test files running at the same
+    // time this takes longer than the default 5 s.
+  }, 15_000);
 });
 
 describe('US-AB-04 AK-3, AK-4 Look back', () => {
