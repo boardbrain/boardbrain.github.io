@@ -13,8 +13,9 @@ const FLIP = { duration: 0.34, ease: 'easeInOut' } as const;
 // backface-visibility alone and would draw the back over the front.
 const FACE_SWITCH = { duration: 0, delay: FLIP.duration / 2 } as const;
 
-// Fronts are laid out for cards of at least this width (an order card on a phone); smaller
-// cards, as on low tablets in landscape, show the front scaled down as a whole.
+// Fronts are laid out for cards of this width (an order card on a phone); every other card shows
+// the front scaled as a whole, so coin and name keep their size in proportion to the card, also
+// on a tablet (PO 12.11.2026).
 const FRONT_WIDTH = 83;
 
 type TableCardProps = {
@@ -103,11 +104,11 @@ type FittedFrontProps = {
 };
 
 /**
- * A front as laid out for cards of at least 83 px; a smaller card shows it scaled down as a
- * whole (design I2-D).
+ * A front as laid out for cards of 83 px, scaled as a whole to the width of the card (design
+ * I2-D; scaled up as well since PO 12.11.2026).
  */
 export function FittedFront({ w, h, children }: FittedFrontProps): React.JSX.Element {
-  return w < FRONT_WIDTH ? (
+  return w !== FRONT_WIDTH ? (
     <div
       className={styles.scaledFront}
       style={{

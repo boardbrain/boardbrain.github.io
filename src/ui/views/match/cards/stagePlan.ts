@@ -278,7 +278,7 @@ function gatherAndMix(
     // As in the reference, the card slides out at its own level, from within the stack; it only
     // goes on top when it is put back (PO 12.11.2026).
     const out = planner.move(card, end, STAGE_MS.mixOut, {
-      x: home.x + side * size.w * MIX_OUT,
+      x: home.x + side * stack(0).w * MIX_OUT,
       rotate: side * MIX_TURN,
     });
     order = [...order.filter((other) => other !== card), card];
@@ -474,8 +474,14 @@ export function planOrder({
         }));
   const planner = new Planner(cards);
   const below = row[0] ?? first;
-  const stackX = centreX(row, w);
-  const stack = (level: number): CardBox => ({ x: stackX, y: below.y - level * STACK_STEP, w, h });
+  // The stack has the size of the row below, which may be smaller than the places (PO 12.11.2026).
+  const stackX = centreX(row, below.w);
+  const stack = (level: number): CardBox => ({
+    x: stackX,
+    y: below.y - level * STACK_STEP,
+    w: below.w,
+    h: below.h,
+  });
   let at = 0;
   // Which card lies on which place after dealing.
   const onPlace = new Map<number, string>(

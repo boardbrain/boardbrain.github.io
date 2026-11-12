@@ -42,8 +42,20 @@ describe('Design I2-D page 6: order', () => {
       rounded(defined(orderLayout(SMALL_PHONE.width, SMALL_PHONE.height, 4).slots[0])),
     ).toEqual([0, 60, 76, 112]);
     const landscape = orderLayout(TABLET_LANDSCAPE.width, TABLET_LANDSCAPE.height, 2);
-    expect(rounded(defined(landscape.slots[0]))).toEqual([179, 4, 121, 179]);
-    expect(Math.round(defined(landscape.row(2)[0]).y)).toBe(195);
+    expect(rounded(defined(landscape.slots[0]))).toEqual([154, 4, 146, 216]);
+    expect(Math.round(defined(landscape.row(2)[0]).y)).toBe(232);
+  });
+
+  it('PO 12.11.: on tablets the cards below are as wide as the stack of the starting resources', () => {
+    for (const room of [TABLET, TABLET_LANDSCAPE]) {
+      const layout = orderLayout(room.width, room.height, 4);
+      const [slot] = layout.slots;
+      const below = defined(layout.row(4)[0]);
+      expect([Math.round(below.w), Math.round(below.h)]).toEqual([96, 142]);
+      expect(Math.round(defined(slot).w)).toBe(146);
+      expect(defined(slot).y + defined(slot).h).toBeLessThan(below.y);
+      expect(below.y + below.h).toBeLessThanOrEqual(room.height);
+    }
   });
 });
 
