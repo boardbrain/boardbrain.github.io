@@ -44,6 +44,15 @@
   /* Marked pieces while repeating one is asked (US-AB-03 AK-8, design I2-H, M1): the gold of the app */
   --color-piece-mark: #f5be5b;
 
+  /* Highlighting and tension mode of the placement (design D-2): the dark laid over the board
+     (55 % in the style sheet), the bright centre of a dot, the golden switch with its glow */
+  --color-board-dark: #0d0a08;
+  --color-highlight-core: #fff;
+  --color-tension-on: #f5be5b;
+  --color-on-tension: #231d18;
+  --color-tension-glow-near: #f5be5b2e;
+  --color-tension-glow: #f5be5b73;
+
   /* Ink on Catan colours: coins, swatches and the band of the person at turn (design I2-C) */
   --color-on-catan: #231d18;
   --color-on-catan-strong: #fff;

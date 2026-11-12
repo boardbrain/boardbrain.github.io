@@ -592,3 +592,38 @@
   align-items: center;
   justify-content: center;
 }
+
+/* The buttons on the right of the head: the tension mode left of "Partie beenden" (design D-2). */
+.headBtns {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+/* K4 switched on: golden with a glow (design D-2). */
+.tensionOn {
+  color: var(--color-on-tension);
+  background: var(--color-tension-on);
+  border-color: var(--color-tension-on);
+  box-shadow:
+    0 0 0 4px var(--color-tension-glow-near),
+    0 0 18px var(--color-tension-glow);
+}
+
+/* A short hint on top of the board, e.g. "Zwei übrig" or "Spannung an" (design D-2). */
+.boardHint {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  left: 0;
+  z-index: 5;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-on-tension);
+  pointer-events: none;
+  background: var(--color-tension-on);
+  border-radius: 999px;
+}

@@ -1,5 +1,4 @@
-import { m } from 'motion/react';
-import { useId, useRef, type Ref } from 'react';
+import { useId, useRef, type ReactNode, type Ref } from 'react';
 import type { CatanBuildingType, Board as BoardModel, EdgeId, VertexId } from '@/games/catan';
 import type { CatanColorKey } from '@/core/model';
 import { t } from '@/i18n/t';
@@ -50,20 +49,21 @@ type BoardProps = {
   readonly roads?: readonly BoardRoad[];
   /** Name of the board for screen readers; by default the empty board. */
   readonly label?: string;
-  /** Key of the piece just drawn; it fades in (design I2-C), without a mark of its own. */
-  readonly newestKey?: string | undefined;
+  /**
+   * Drawn over the pieces, e.g. the highlighting before a piece is fixed (design D-2); in the
+   * board's SVG units.
+   */
+  readonly overlay?: ReactNode;
+  /** Keys of pieces drawn over `overlay`, e.g. the building of a road while it is highlighted. */
+  readonly lifted?: readonly string[] | undefined;
+  /** Drawn over everything, e.g. the ring when a piece is set (design D-2, F4). */
+  readonly top?: ReactNode;
   /** Makes every piece with a label a button (US-AB-03 AK-8); it gets the key of the piece. */
   readonly onPieceTap?: ((key: string) => void) | undefined;
   readonly marked?: PieceMarking | null | undefined;
   /** The area the board is drawn in, e.g. to lay the marked pieces over a dialog's backdrop. */
   readonly ref?: Ref<HTMLDivElement> | undefined;
 };
-
-// I2-C: the new piece fades in; D-2 designs the highlighting on its own. Every piece keeps the
-// target, so a fade cut short by the next piece still ends opaque (PO 09.11.2026: pieces stayed
-// partly transparent when the next one came within the fade).
-const FADE = { duration: 0.52, ease: 'easeOut' } as const;
-const OPAQUE = { opacity: 1 } as const;
 
 // Design I2-H: a tap area is 44 px square, centred on its piece.
 const TAP_AREA = 44;
@@ -74,14 +74,6 @@ const MARK_RADIUS = { main: 5.8, other: 5.2 } as const;
 const MARK_DASHES = 12;
 const MARK_PERIOD = (2 * Math.PI * MARK_RADIUS.other) / MARK_DASHES;
 const MARK_DASH_ARRAY = `${(MARK_PERIOD * (4 / 7)).toFixed(3)} ${(MARK_PERIOD * (3 / 7)).toFixed(3)}`;
-
-function fadeIn(isNewest: boolean): {
-  initial: { opacity: number } | false;
-  animate: typeof OPAQUE;
-  transition: typeof FADE;
-} {
-  return { initial: isNewest ? { opacity: 0 } : false, animate: OPAQUE, transition: FADE };
-}
 
 type PlacedRoad = BoardRoad & {
   readonly start: { x: number; y: number };
@@ -107,7 +99,9 @@ export function Board({
   buildings = [],
   roads = [],
   label = t('brett.beschreibung'),
-  newestKey,
+  overlay,
+  lifted = [],
+  top,
   onPieceTap,
   marked,
   ref,
@@ -183,11 +177,19 @@ export function Board({
           ))}
           <Pieces
             board={board}
-            buildings={buildings}
-            roads={placed}
-            newestKey={newestKey}
+            buildings={buildings.filter((building) => !lifted.includes(building.key))}
+            roads={placed.filter((road) => !lifted.includes(road.key))}
             marked={marked}
           />
+          {overlay}
+          {lifted.length > 0 && (
+            <Pieces
+              board={board}
+              buildings={buildings.filter((building) => lifted.includes(building.key))}
+              roads={placed.filter((road) => lifted.includes(road.key))}
+            />
+          )}
+          {top}
         </svg>
         {onPieceTap !== undefined && (
           <TapLayer
@@ -207,13 +209,12 @@ type PiecesProps = {
   readonly board: BoardModel;
   readonly buildings: readonly BoardBuilding[];
   readonly roads: readonly PlacedRoad[];
-  readonly newestKey?: string | undefined;
   readonly marked?: PieceMarking | null | undefined;
 };
 
 // The marks below the pieces (design I2-H, M1), then the roads, then the buildings on top of them
 // (design I2-C).
-function Pieces({ board, buildings, roads, newestKey, marked }: PiecesProps): React.JSX.Element {
+function Pieces({ board, buildings, roads, marked }: PiecesProps): React.JSX.Element {
   const isMain = (key: string): boolean => marked?.main === key;
   const isMarked = (key: string): boolean => isMain(key) || (marked?.others.includes(key) ?? false);
   return (
@@ -259,20 +260,14 @@ function Pieces({ board, buildings, roads, newestKey, marked }: PiecesProps): Re
       {roads.map((road) => {
         const line = roadLine(road.start, road.end);
         return (
-          <m.g
-            key={road.key}
-            data-testid="board-road"
-            data-piece={road.key}
-            {...fadeIn(road.key === newestKey)}
-          >
+          <g key={road.key} data-testid="board-road" data-piece={road.key}>
             <RoadShape start={line.start} end={line.end} color={road.color} />
-          </m.g>
+          </g>
         );
       })}
       {buildings.map((building) => (
-        <m.path
+        <path
           key={building.key}
-          {...fadeIn(building.key === newestKey)}
           d={buildingPath(building.type, vertexInSvg(board, building.vertex))}
           className={pieceStyles.building}
           fill={`var(--color-catan-${building.color})`}

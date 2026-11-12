@@ -7,14 +7,23 @@ import type { PersonId } from '@/core/model';
 import {
   catanOpenedResources,
   catanProgress,
+  type CatanBuildingStep,
   type CatanPhase,
+  type CatanRoadStep,
   type CatanSlot,
 } from '@/games/catan';
 import { t, type TextKey } from '@/i18n/t';
 import { useCurrentSession, useGroup, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { cx } from '@/ui/components/classNames';
-import { AgainIcon, BackIcon, ChevronIcon, ExitDoorIcon, SkipIcon } from '@/ui/components/Icons';
+import {
+  AgainIcon,
+  BackIcon,
+  ChevronIcon,
+  DrumIcon,
+  ExitDoorIcon,
+  SkipIcon,
+} from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
 import { pieceMarking } from './boardPieces';
 import { DrawScene } from './cards/DrawScene';
@@ -44,6 +53,9 @@ import {
 } from './matchFlow';
 import { editionName, repeatLines, stepTitle } from './matchTexts';
 import { PieceSpot } from './PieceSpot';
+import type { HighlightHandle, SettleLook } from './placement/PlacementHighlight';
+import type { HighlightRun } from './placement/playHighlight';
+import { useTensionMode } from './placement/tensionMode';
 import { PlacementStep } from './PlacementStep';
 import { UnsupportedSession } from './UnsupportedSession';
 import shared from './Match.module.css';
@@ -102,12 +114,14 @@ async function atMost(movement: Promise<unknown>, seconds: number): Promise<void
   ]);
 }
 
-// The steps shown with a movement of cards (design I2-E).
-function hasMovement(step: CatanSlot): boolean {
-  return (
-    step.kind === 'person-draw' || step.kind === 'order-spin' || step.kind === 'starting-resources'
-  );
+// A piece on the board, highlighted before it is shown (design D-2).
+function isPiece(step: CatanSlot | undefined): step is CatanBuildingStep | CatanRoadStep {
+  return step?.kind === 'building' || step?.kind === 'road';
 }
+
+// The stop at two places left in the tension mode (US-IN-02 AK-6): none, waiting for "Duell",
+// or the duel running.
+type DuelState = 'none' | 'waiting' | 'running';
 
 // The address of a page: the current page has none, a look back names its step (US-AB-04 AK-3).
 function pathOf(page: FlowPage | null, session: StoredSession): string {
@@ -166,6 +180,23 @@ export function MatchView(): React.JSX.Element | null {
   const [isDrawnFromPending, setDrawnFromPending] = useState(false);
   // "Alle umdrehen" turns the cards over one after another (design I2-D).
   const [isTurningAll, setTurningAll] = useState(false);
+  // Design D-2: the highlighting playing, "Duell" continues it after the stop at two.
+  const highlightRef = useRef<HighlightRun | null>(null);
+  const skippedRef = useRef(false);
+  const [duel, setDuel] = useState<DuelState>('none');
+  // The piece set right after its highlighting falls from above (F2, F4).
+  const [settle, setSettle] = useState<{
+    readonly index: number;
+    readonly look: SettleLook;
+  } | null>(null);
+  // "Spannung an" or "aus" on the board for 1.5 s; the count starts it again.
+  const [switchHint, setSwitchHint] = useState<{
+    readonly count: number;
+    readonly isOn: boolean;
+  } | null>(null);
+  const [isTension, setTension] = useTensionMode(
+    current?.status === 'active' ? current.session.startedAt : '',
+  );
 
   const session = current?.status === 'active' ? current.session : null;
   const page = session === null ? null : pageAt(session, lookBackOf(search.get('schritt')));
@@ -226,14 +257,14 @@ export function MatchView(): React.JSX.Element | null {
   const shown = shownEnd === null ? session : sessionUpTo(session, shownEnd);
   // Only the step just drawn is new; a look back or a kept view shows its whole view as it is.
   const isDrawnNow = page.kind === 'step' && page.index === revealed;
-  // FA-AB-07, design I2-E: the step drawn last plays its movement until it is staged, also again
-  // after a restart; meanwhile only "Animation überspringen" and "Partie beenden" can be used.
+  // FA-AB-07, design I2-E and D-2: the step drawn last plays its movement until it is staged, also
+  // again after a restart; meanwhile only "Animation überspringen" and "Partie beenden" can be
+  // used, and "Duell" at the stop of the tension mode.
   const unstaged = unstagedStepIndex(session.generation);
   const stagedIndex =
-    page.kind === 'step' && page.index === unstaged && step !== undefined && hasMovement(step)
-      ? unstaged
-      : null;
+    page.kind === 'step' && page.index === unstaged && step !== undefined ? unstaged : null;
   const isStaging = stagedIndex !== null;
+  const highlighted = isStaging && isPiece(step) ? step : null;
   const markStaged = (): void => {
     const now = performance.now();
     if (now - movementStartRef.current > SHOWN_MOVEMENT_MS) {
@@ -257,7 +288,43 @@ export function MatchView(): React.JSX.Element | null {
         onDone: markStaged,
       }
     : null;
+  const highlight: { step: CatanBuildingStep | CatanRoadStep; handle: HighlightHandle } | null =
+    highlighted === null
+      ? null
+      : {
+          step: highlighted,
+          handle: {
+            rng,
+            isTension,
+            onRun: (run) => {
+              if (run !== null && runRef.current === null) {
+                movementStartRef.current = performance.now();
+                skippedRef.current = false;
+              }
+              runRef.current = run;
+              highlightRef.current = run;
+            },
+            onStop: () => {
+              setDuel('waiting');
+            },
+            onDone: (look) => {
+              setDuel('none');
+              // Skipped or without movement, the piece is simply there (US-IN-04 AK-2).
+              setSettle(
+                skippedRef.current || isReduced || stagedIndex === null
+                  ? null
+                  : { index: stagedIndex, look },
+              );
+              markStaged();
+            },
+          },
+        };
+  const startDuel = (): void => {
+    setDuel('running');
+    highlightRef.current?.duel();
+  };
   const skipMovement = (): void => {
+    skippedRef.current = true;
     // US-IN-04 AK-2: the movement jumps to its end; the step still has to be confirmed.
     if (runRef.current === null) {
       markStaged();
@@ -300,16 +367,7 @@ export function MatchView(): React.JSX.Element | null {
       if (forward === 'draw') {
         setDrawnFromPending(page.kind === 'pending');
         const drawn = await sessions.draw(revealed ?? null);
-        if (!drawn.ok) {
-          return false;
-        }
-        // A step without a movement of its own counts as shown at once (FA-AB-07).
-        const index = unstagedStepIndex(drawn.value.generation);
-        const record = index === undefined ? undefined : drawn.value.generation.steps[index];
-        if (index !== undefined && record !== undefined && !hasMovement(record.step)) {
-          await sessions.markStaged(index);
-        }
-        return drawn.value.generation.state === 'running';
+        return drawn.ok && drawn.value.generation.state === 'running';
       }
       if (revealed === undefined) {
         return false;
@@ -368,9 +426,18 @@ export function MatchView(): React.JSX.Element | null {
     dialog === 'repeat' && repeatAt !== null && isPlacement
       ? pieceMarking(session, repeatAt)
       : null;
+  // While a piece is highlighted the page still looks as before drawing; at the stop of the tension
+  // mode the forward button starts the duel (design D-2).
+  const forwardLabel =
+    highlighted === null
+      ? t(FORWARD_LABELS[forward])
+      : duel === 'none'
+        ? t(FORWARD_LABELS.draw)
+        : t('partie.duell');
   const actions = (
     <StepActions
-      forward={forward}
+      forwardLabel={forwardLabel}
+      isForwardOff={isPending || (isStaging && duel !== 'waiting')}
       isPending={isPending || isStaging}
       onSkip={isStaging ? skipMovement : null}
       canRepeat={page.kind === 'step'}
@@ -384,7 +451,7 @@ export function MatchView(): React.JSX.Element | null {
           askRepeat(isDrawnNow || shownEnd === null ? page.index : shownEnd);
         }
       }}
-      onForward={onForward}
+      onForward={duel === 'waiting' ? startDuel : onForward}
     />
   );
   // On the empty board; it lies over the board, so the board does not move when it goes.
@@ -436,17 +503,38 @@ export function MatchView(): React.JSX.Element | null {
             })}
           </div>
         </div>
-        <PressableButton
-          type="button"
-          className={shared.iconBtn}
-          aria-label={t('partie.beenden')}
-          title={t('partie.beenden')}
-          onClick={() => {
-            setDialog('end');
-          }}
-        >
-          <ExitDoorIcon size={20} />
-        </PressableButton>
+        <div className={styles.headBtns}>
+          {/* US-IN-02 AK-5: the tension mode on every page of the placement, locked while a
+              movement plays (design D-2, K4). */}
+          {isPlacement && (
+            <PressableButton
+              type="button"
+              className={cx(shared.iconBtn, isTension && styles.tensionOn)}
+              aria-label={t('partie.spannungsmodus')}
+              aria-pressed={isTension}
+              title={t('partie.spannungsmodus')}
+              disabled={isStaging}
+              {...greyedOut(isStaging, GREY)}
+              onClick={() => {
+                setTension(!isTension);
+                setSwitchHint({ count: (switchHint?.count ?? 0) + 1, isOn: !isTension });
+              }}
+            >
+              <DrumIcon size={22} />
+            </PressableButton>
+          )}
+          <PressableButton
+            type="button"
+            className={shared.iconBtn}
+            aria-label={t('partie.beenden')}
+            title={t('partie.beenden')}
+            onClick={() => {
+              setDialog('end');
+            }}
+          >
+            <ExitDoorIcon size={20} />
+          </PressableButton>
+        </div>
       </div>
       <div className={styles.progWrap}>
         <PhaseProgress session={session} page={page} />
@@ -493,16 +581,40 @@ export function MatchView(): React.JSX.Element | null {
         )}
         {isPlacement && (
           <PlacementStep
-            session={shown}
-            newest={
-              isDrawnNow && (step?.kind === 'building' || step?.kind === 'road') ? step : null
+            // While highlighted, the piece is not on the board yet (design D-2).
+            session={
+              highlighted === null || stagedIndex === null
+                ? shown
+                : sessionUpTo(shown, stagedIndex - 1)
             }
+            newest={highlighted === null && isDrawnNow && isPiece(step) ? step : null}
             announced={
-              page.kind === 'pending'
+              highlighted ??
+              (page.kind === 'pending'
                 ? page.slot
                 : following !== null && isSameView(slot.kind, following.kind)
                   ? following
-                  : null
+                  : null)
+            }
+            highlight={highlight}
+            settle={
+              highlighted === null &&
+              settle !== null &&
+              page.kind === 'step' &&
+              settle.index === page.index
+                ? settle.look
+                : null
+            }
+            hint={
+              duel === 'waiting'
+                ? { key: 'duel', text: t('partie.zweiUebrig'), isBrief: false }
+                : switchHint === null
+                  ? null
+                  : {
+                      key: `switch-${String(switchHint.count)}`,
+                      text: switchHint.isOn ? t('partie.spannungAn') : t('partie.spannungAus'),
+                      isBrief: true,
+                    }
             }
             nameOf={nameOf}
             skip={skip}
@@ -660,7 +772,10 @@ function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element
 }
 
 type StepActionsProps = {
-  readonly forward: ForwardAction;
+  readonly forwardLabel: string;
+  /** The forward button is greyed out, e.g. while a movement plays. */
+  readonly isForwardOff: boolean;
+  /** Something is being stored or a movement plays: "Wiederholen" is greyed out. */
   readonly isPending: boolean;
   /**
    * Set while a movement plays: "Wiederholen" gives way to "Überspringen" at the same place and
@@ -676,7 +791,8 @@ type StepActionsProps = {
 // "Wiederholen" and the forward button. "Wiederholen" is always there, so the forward button
 // keeps its width when a result appears (PO 09.11.2026).
 function StepActions({
-  forward,
+  forwardLabel,
+  isForwardOff,
   isPending,
   onSkip,
   canRepeat,
@@ -710,11 +826,11 @@ function StepActions({
         <PressableButton
           type="button"
           className={cx(shared.primary, styles.forward)}
-          disabled={isPending}
-          {...greyedOut(isPending, GREY_PRIMARY)}
+          disabled={isForwardOff}
+          {...greyedOut(isForwardOff, GREY_PRIMARY)}
           onClick={onForward}
         >
-          <ForwardLabel text={t(FORWARD_LABELS[forward])} />
+          <ForwardLabel text={forwardLabel} />
           <ChevronIcon size={18} />
         </PressableButton>
       </div>
