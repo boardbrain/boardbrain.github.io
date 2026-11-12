@@ -354,8 +354,12 @@ export function MatchView(): React.JSX.Element | null {
       go(nextPage(session, page));
       return;
     }
+    // Set before the transition: an update inside it only counts once the whole action is done,
+    // while the stored step is shown as soon as the database reports it. Under load the movement
+    // then played with the previous value and collected the cards after browsing (E1).
+    setTurningAll(forward === 'turn-all');
+    setDrawnFromPending(forward === 'draw' && page.kind === 'pending');
     act(async () => {
-      setTurningAll(forward === 'turn-all');
       if (forward === 'turn-all') {
         if (step?.kind === 'starting-resources') {
           await sessions.openResources(
@@ -366,7 +370,6 @@ export function MatchView(): React.JSX.Element | null {
         return false;
       }
       if (forward === 'draw') {
-        setDrawnFromPending(page.kind === 'pending');
         const drawn = await sessions.draw(revealed ?? null);
         return drawn.ok && drawn.value.generation.state === 'running';
       }
