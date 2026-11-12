@@ -1,4 +1,4 @@
-import { animate, type AnimationSequence } from 'motion/react';
+import { animate, cubicBezier, type AnimationSequence } from 'motion/react';
 import type { Pose, StagePlan, StageStep } from './stagePlan';
 
 /** A movement playing: "Animation überspringen" completes it at once (US-IN-04 AK-2). */
@@ -36,20 +36,44 @@ const poseTransform = (pose: Pose): string =>
 const turnTransform = (degrees: number): string => `rotateY(${String(degrees)}deg)`;
 const liftTransform = (y: number): string => `translateY(${String(y)}px)`;
 
-// The keyframes of a move; with a lift the card passes the middle `lift` pixels higher.
-function moveKeyframes(step: Extract<StageStep, { kind: 'move' }>): { transform: string[] } {
+// The curve of a move over its whole way (reference I2-D: one easing for the whole flight).
+const moveEase = cubicBezier(...MOVE_EASE);
+// A flight with a lift is laid out in this many even steps along its curve.
+const FLIGHT_STEPS = 24;
+
+type MoveKeyframes = { readonly transform: string[]; readonly times?: number[] };
+
+/**
+ * The keyframes of a move. With a lift the card passes the middle `lift` pixels higher, on one
+ * curve for the whole way as in the reference: Motion would ease each half on its own, and the
+ * card would almost stop above the middle (PO 12.11.2026: the flight looked like steps). The
+ * eased way is therefore sampled into even steps that are played linearly.
+ */
+function moveKeyframes(step: Extract<StageStep, { kind: 'move' }>): MoveKeyframes {
   const { from, to, lift } = step;
   if (lift === 0) {
     return { transform: [poseTransform(from), poseTransform(to)] };
   }
-  const mid = (a: number, b: number): number => (a + b) / 2;
-  const middle = {
-    x: mid(from.x, to.x),
-    y: mid(from.y, to.y) + lift,
-    rotate: mid(from.rotate, to.rotate),
-    scale: mid(from.scale, to.scale),
+  const middle: Pose = {
+    x: (from.x + to.x) / 2,
+    y: (from.y + to.y) / 2 + lift,
+    rotate: (from.rotate + to.rotate) / 2,
+    scale: (from.scale + to.scale) / 2,
   };
-  return { transform: [poseTransform(from), poseTransform(middle), poseTransform(to)] };
+  const between = (a: Pose, b: Pose, part: number): Pose => ({
+    x: a.x + (b.x - a.x) * part,
+    y: a.y + (b.y - a.y) * part,
+    rotate: a.rotate + (b.rotate - a.rotate) * part,
+    scale: a.scale + (b.scale - a.scale) * part,
+  });
+  const times = Array.from({ length: FLIGHT_STEPS + 1 }, (_, index) => index / FLIGHT_STEPS);
+  const transform = times.map((time) => {
+    const way = moveEase(time);
+    return poseTransform(
+      way <= 0.5 ? between(from, middle, way * 2) : between(middle, to, (way - 0.5) * 2),
+    );
+  });
+  return { transform, times };
 }
 
 function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): AnimationSequence {
@@ -67,13 +91,20 @@ function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): Anima
         step.from.y === step.to.y &&
         step.from.rotate === step.to.rotate &&
         step.from.scale === step.to.scale;
+      const flight = moveKeyframes(step);
       const segments: AnimationSequence = isStill
         ? []
         : [
             [
               card,
-              moveKeyframes(step),
-              { at, duration: Math.max(SWITCH, seconds(step.ms)), ease: [...MOVE_EASE] },
+              { transform: flight.transform },
+              {
+                at,
+                duration: Math.max(SWITCH, seconds(step.ms)),
+                ...(flight.times === undefined
+                  ? { ease: [...MOVE_EASE] }
+                  : { ease: 'linear', times: flight.times }),
+              },
             ],
           ];
       const z = tracked.z.get(step.card);
