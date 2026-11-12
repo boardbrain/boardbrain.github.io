@@ -335,6 +335,14 @@
   --color-backdrop: #000000b3;
   --color-shadow: #0000008c;
 
+  /* Home screen icon of the local acceptance app (build mode "acceptance", E-40): violet instead of
+     wood and amber, so it can be told apart from the published app; only read by npm run icons */
+  --color-acceptance-icon-surface: #211a2e;
+  --color-acceptance-icon-raised: #2c2340;
+  --color-acceptance-icon-overlay: #3a2e52;
+  --color-acceptance-icon-glow: #5a3a8c;
+  --color-acceptance-icon-accent: #c4a0ff;
+
   /* States */
   --color-status-ok: #4ade80;
   --color-status-error: #fc8585;

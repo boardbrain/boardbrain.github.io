@@ -210,6 +210,7 @@ const AREA_FILES = AREAS.flatMap((area) => area.files);
 export default defineConfig([
   globalIgnores([
     'dist/',
+    'dist-acceptance/',
     'coverage/',
     'playwright-report/',
     'test-results/',

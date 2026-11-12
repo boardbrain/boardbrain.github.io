@@ -2,9 +2,9 @@ import path from 'node:path';
 import { defineConfig, mergeConfig } from 'vitest/config';
 import viteConfig from './vite.config.ts';
 
-// ADR-005: Vitest uses the same configuration as the build.
+// ADR-005: Vitest uses the same configuration as the build (in the mode of the published app).
 export default mergeConfig(
-  viteConfig,
+  viteConfig({ command: 'serve', mode: 'test' }),
   defineConfig({
     // Test helpers such as the deterministic random sources (Architecture 14.2); production
     // code must not import them (dependency-cruiser rule production-not-to-tests).
