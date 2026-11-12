@@ -141,7 +141,7 @@ describe('US-AB-01 Prepare and start a match', () => {
 
     expect(session).toEqual({
       id: 'current',
-      schemaVersion: 2,
+      schemaVersion: 3,
       gameId: CATAN_GAME_ID,
       groupId: FOUR.id,
       setup: { participants: CATAN_TEST_PERSONS, options: ALL_ON, colors },
@@ -561,5 +561,39 @@ describe('US-VW-02 AK-5 The binding of a group in a match is locked', () => {
     });
 
     expect(result.ok).toBe(true);
+  });
+});
+
+describe('FA-AB-07 and US-IN-04 Animation played once (service)', () => {
+  it('stores that the animation of the step drawn last has played; after a restart it stays so', async () => {
+    const first = launch(17);
+    await startFour(first.service);
+    const drawn = await value(first.service.draw(null));
+    expect(drawn.generation.steps[0]?.isStaged).toBe(false);
+
+    const staged = await value(first.service.markStaged(0));
+
+    expect(staged.generation.steps[0]).toMatchObject({ status: 'revealed', isStaged: true });
+    expect(await launch(18).service.current()).toEqual({ ok: true, value: staged });
+  });
+
+  it('a step drawn after it is not staged yet', async () => {
+    const { service } = launch(17);
+    await startFour(service);
+    await value(service.draw(null));
+    await value(service.markStaged(0));
+
+    const next = await value(service.draw(0));
+
+    expect(next.generation.steps.map((record) => record.isStaged)).toEqual([true, false]);
+  });
+
+  it('reports a step that no longer exists, e.g. repeated meanwhile', async () => {
+    const { service } = launch(17);
+    await startFour(service);
+    await value(service.draw(null));
+    await value(service.repeatStep(0));
+
+    expect(await service.markStaged(0)).toEqual({ ok: false, error: 'no-such-step' });
   });
 });

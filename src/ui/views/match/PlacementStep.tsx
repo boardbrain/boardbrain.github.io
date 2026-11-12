@@ -12,7 +12,7 @@ import { Coin } from './Coin';
 import { colorOf } from './matchColors';
 import { orderOrSeats } from './matchFlow';
 import { pieceName } from './matchTexts';
-import { DoneBand, TurnBand } from './TurnBand';
+import { TurnBand } from './TurnBand';
 import styles from './MatchView.module.css';
 import { cx } from '@/ui/components/classNames';
 
@@ -104,14 +104,18 @@ export function PlacementStep({
         />
         {skip !== undefined && skip !== false && <div className={styles.skipOver}>{skip}</div>}
       </div>
+      {/* The band stays in its place and changes its content only (PO 10.11.2026); the name stays
+          at the bottom, the line above it is never empty (design I2-E, J1 and D1). */}
       {atTurn === null ? (
-        <DoneBand
-          text={t('partie.platzierungFertig')}
+        <TurnBand
           icon={<CheckIcon size={20} />}
+          name={t('partie.platzierungFertig')}
+          color={null}
           order={coins}
+          currentId={null}
+          note={t('partie.alleGesetzt')}
         />
       ) : (
-        // The band stays in its place and changes its content only (PO 10.11.2026).
         <TurnBand
           icon={
             <PieceMark
@@ -125,7 +129,7 @@ export function PlacementStep({
           color={colorOf(session, atTurn.personId)}
           order={coins}
           currentId={atTurn.personId}
-          note={newest === null ? undefined : t('partie.alsNaechstes')}
+          note={newest === null ? t('partie.jetzt') : t('partie.alsNaechstes')}
         />
       )}
       <div className={styles.wOrder}>

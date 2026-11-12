@@ -72,8 +72,23 @@ async function tapForward(user: User, name: string): Promise<void> {
   });
 }
 
+// The label as shown: the old one may still be fading out, hidden (design I2-E, A2).
 function forwardName(): string {
-  return screen.getByRole('button', { name: FORWARD }).textContent;
+  const label = screen.getByRole('button', { name: FORWARD }).cloneNode(true);
+  if (!(label instanceof HTMLElement)) {
+    return '';
+  }
+  for (const hidden of label.querySelectorAll('[aria-hidden="true"]')) {
+    hidden.remove();
+  }
+  return label.textContent;
+}
+
+// The filled part of each phase's bar, as set by the page.
+function barWidths(): string[] {
+  return within(screen.getByRole('list', { name: 'Fortschritt' }))
+    .getAllByRole('listitem')
+    .map((item) => item.querySelector('span')?.style.width ?? '');
 }
 
 function progress(): string[] {
@@ -90,7 +105,9 @@ describe('US-AB-02 Go through the generation', () => {
     expect(screen.getByText('Landschaftsfelder')).toBeInTheDocument();
     expect(screen.getByText('Wer?')).toBeInTheDocument();
     expect(screen.getByText('Freitagsrunde · Basisspiel')).toBeInTheDocument();
-    expect(progress()).toEqual(['Losen 0/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
+    // PO 12.11.2026: the label counts the step at hand.
+    expect(progress()).toEqual(['Losen 1/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
+    expect(barWidths()[0]).toBe(`${String(100 / 3)}%`);
     // PO 09.11.2026: the button stays in its place, but there is nothing to repeat yet.
     expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled();
@@ -106,7 +123,7 @@ describe('US-AB-02 Go through the generation', () => {
     await tapForward(user, 'Losen');
 
     expect(await screen.findByText('legt sie aus')).toBeInTheDocument();
-    expect(screen.queryByText('Wer?')).not.toBeInTheDocument();
+    expect(shownTexts('Wer?')).toHaveLength(0);
     expect(progress()[0]).toBe('Losen 1/3');
     expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeEnabled();
     await tapForward(user, 'Weiter');
@@ -125,18 +142,20 @@ describe('US-AB-02 Go through the generation', () => {
       startingResources: { count: 2, replacement: 'with' },
     });
     expect(await screen.findByRole('heading', { name: 'Startrohstoffe' })).toBeInTheDocument();
-    expect(progress()).toEqual(['Platzierung', 'Rohstoffe 0/4']);
+    expect(progress()).toEqual(['Platzierung', 'Rohstoffe 1/4']);
 
     await tapForward(user, 'Losen');
-    expect(await screen.findAllByText('Antippen')).toHaveLength(2);
+    await waitFor(() => {
+      expect(shownTexts('Antippen')).toHaveLength(2);
+    });
     await user.click(screen.getByRole('button', { name: 'Karte 1 umdrehen' }));
     await waitFor(() => {
-      expect(screen.getAllByText('Antippen')).toHaveLength(1);
+      expect(shownTexts('Antippen')).toHaveLength(1);
     });
     expect(forwardName()).toBe('Alle umdrehen');
     await tapForward(user, 'Alle umdrehen');
 
-    expect(screen.queryByText('Antippen')).not.toBeInTheDocument();
+    expect(shownTexts('Antippen')).toHaveLength(0);
     expect(forwardName()).toBe('Weiter');
     const [stored] = await db.session.toArray();
     expect(stored?.generation.gameState.openedResources).toEqual([
@@ -163,7 +182,9 @@ describe('US-AB-02 Go through the generation', () => {
     await tapForward(user, 'Zur Übersicht');
 
     expect(await screen.findByRole('heading', { name: 'overview page' })).toBeInTheDocument();
-  });
+    // Twelve taps through every person: with coverage and other test files running at the same
+    // time this takes longer than the default 5 s.
+  }, 15_000);
 });
 
 describe('US-AB-04 AK-3, AK-4 Look back', () => {
@@ -278,7 +299,7 @@ describe('US-PL-04 Buildings and roads on the board', () => {
     await tapForward(user, 'Weiter');
 
     expect(await screen.findByRole('heading', { name: 'Platzierung' })).toBeInTheDocument();
-    expect(progress()).toContain('Platzierung 0/16');
+    expect(progress()).toContain('Platzierung 1/16');
     expect(screen.queryAllByTestId('board-settlement')).toHaveLength(0);
     expect(screen.getByText('· Siedlung')).toBeInTheDocument();
     expect(screen.queryByText('Als Nächstes')).not.toBeInTheDocument();
@@ -325,3 +346,11 @@ describe('Architecture 13.2 match from the database', () => {
     expect(await db.session.count()).toBe(0);
   });
 });
+
+// Texts as shown: "Antippen" and the name of a resource lie on top of each other, as do "Wer?"
+// and the name drawn; the one hidden is marked on itself or on a parent.
+function shownTexts(text: string): HTMLElement[] {
+  return screen
+    .queryAllByText(text)
+    .filter((element) => element.closest('[aria-hidden="true"]') === null);
+}

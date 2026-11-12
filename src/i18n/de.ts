@@ -296,6 +296,8 @@ export const de = {
     fragezeichen: '?',
     wer: 'Wer?',
     alsNaechstes: 'Als Nächstes',
+    jetzt: 'Jetzt',
+    alleGesetzt: 'Alle gesetzt',
     platzierungFertig: 'Platzierung fertig',
     rueckblick: 'Rückblick',
     zumAktuellenSchritt: 'Zum aktuellen Schritt',
@@ -314,6 +316,7 @@ export const de = {
     ueberspringenFertig:
       'Ihr setzt Gebäude und Straßen selbst. Die Reihenfolge bleibt; danach ist die Generierung fertig.',
     ueberspringen: 'Überspringen',
+    animationUeberspringen: 'Animation überspringen',
     siedlung: 'Siedlung',
     stadt: 'Stadt',
     strasse: 'Straße',

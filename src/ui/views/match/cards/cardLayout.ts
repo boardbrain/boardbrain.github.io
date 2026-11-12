@@ -26,6 +26,8 @@ const RESOURCE_RATIO = 1.5;
 const RESOURCE_KINDS = 5;
 const MOST_KIND_WIDTH = 96;
 const MOST_PLACE_WIDTH = 180;
+// PO 12.11.2026: order cards filling the width of a tablet in portrait were too large.
+const MOST_ORDER_WIDTH = 120;
 
 // A row of `count` cards of width `width`, centred; the gap is at most `maxGap`.
 function rowXs(roomWidth: number, width: number, count: number, maxGap: number): number[] {
@@ -93,28 +95,37 @@ export type OrderLayout = {
 };
 
 /**
- * Layout of page 6 for `persons` persons (decision of the product owner 09.11.2026): one card
- * size for the whole page, the same with 2, 3 or 4 persons, as wide as in a row of four
+ * Layout of page 6 for `persons` persons (decision of the product owner 09.11.2026): the places
+ * have one size for the whole page, the same with 2, 3 or 4 persons, as wide as in a row of four
  * (narrower only with more persons) and low enough that the places and the cards still to be
- * drawn fit one above the other. The row of places stays centred where the room allows it (as
- * the order row of I2-C); otherwise both rows together are centred.
+ * drawn fit one above the other. The cards below, the stack among them, are at most as wide as
+ * the stack of the starting resources (PO 12.11.2026: on a tablet in portrait they only grow
+ * large on the places); on phones both have one size. The row of places stays centred where the
+ * room allows it (as the order row of I2-C); otherwise both rows together are centred. On
+ * tablets the places are at most 120 px wide (PO 12.11.2026).
  */
 export function orderLayout(width: number, height: number, persons: number): OrderLayout {
   const gap = 8;
   const rowGap = 12;
+  // In height, places and cards below share the room; once the cards below stop growing, the
+  // places take the rest.
+  const tall = (height - rowGap - 8) / CARD_RATIO;
   const w = Math.min(
+    MOST_ORDER_WIDTH,
     (width - 3 * gap) / 4,
     (width - (persons - 1) * gap) / persons,
-    (height - rowGap - 8) / 2 / CARD_RATIO,
+    tall / 2 <= MOST_KIND_WIDTH ? tall / 2 : tall - MOST_KIND_WIDTH,
   );
   const h = w * CARD_RATIO;
+  const rw = Math.min(w, MOST_KIND_WIDTH);
+  const rh = rw * CARD_RATIO;
   const centred = (height - h) / 2;
-  const y = centred - rowGap - 4 >= h ? centred : (height - (2 * h + rowGap)) / 2;
+  const y = centred - rowGap - 4 >= rh ? centred : (height - (h + rh + rowGap)) / 2;
   const x0 = (width - (persons * w + (persons - 1) * gap)) / 2;
-  const below = rowBelow(y + h + rowGap, height, h);
+  const below = rowBelow(y + h + rowGap, height, rh);
   return {
     slots: Array.from({ length: persons }, (_, index) => ({ x: x0 + index * (w + gap), y, w, h })),
-    row: (count) => rowXs(width, w, count, gap).map((x) => ({ x, y: below, w, h })),
+    row: (count) => rowXs(width, rw, count, gap).map((x) => ({ x, y: below, w: rw, h: rh })),
   };
 }
 

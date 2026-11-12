@@ -3,6 +3,10 @@ import { expect, test } from './fixtures';
 import { seedDatabase } from './seedDatabase';
 import { useSeededRandom } from './seededRandom';
 
+// The card movements of design I2-E jump to their end, as with "Bewegung reduzieren"; their tempo
+// is tested in cardDraw.spec.ts.
+test.use({ reducedMotion: 'reduce' });
+
 type Box = { x: number; y: number; width: number; height: number };
 
 async function boxesOf(locator: Locator): Promise<Box[]> {

@@ -172,6 +172,19 @@
   border-radius: 5px;
 }
 
+/* Pressed, a card to turn over only gets darker; it does not rise first (PO 12.11.2026), as
+   with "Bewegung reduzieren" (K-4). Doubled class: above the look of Pressable.module.css. */
+.cardSpot.cardSpot {
+  translate: none;
+  filter: brightness(calc(1 - var(--press) * var(--press-darken)));
+}
+
+/* An open card stays a locked button, but looks like the card itself. */
+.cardSpotLocked:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
 .cardName {
   position: absolute;
   text-align: center;
@@ -188,4 +201,42 @@
 .scaledFront > * {
   width: 100%;
   height: 100%;
+}
+
+/* Design I2-E: a card of a movement lies at the top left of the table and is moved by Motion. */
+.stageCard {
+  top: 0;
+  left: 0;
+}
+
+/* "Wer?" and the drawn name on top of each other while the card is drawn (design I2-E). */
+.whoStack {
+  display: grid;
+}
+
+.whoStack > * {
+  display: flex;
+  grid-area: 1 / 1;
+  justify-content: center;
+}
+
+/* The golden frame of the newest order card in a movement; the plan fades it (design I2-E). */
+.nowFrame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px var(--color-accent-text),
+    0 0 0 1px var(--color-accent-text),
+    0 10px 22px var(--color-shadow);
+}
+
+/* "Antippen" and the name of the resource on top of each other below a card (design I2-E). */
+.labelStack {
+  display: grid;
+}
+
+.labelStack > * {
+  grid-area: 1 / 1;
 }

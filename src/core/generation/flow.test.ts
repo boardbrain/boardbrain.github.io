@@ -5,10 +5,12 @@ import { uniformInt } from '@/core/random';
 import {
   confirmStep,
   drawNextStep,
+  markStaged,
   repeatStep,
   revealedStepIndex,
   startGeneration,
   stepsDiscardedBy,
+  unstagedStepIndex,
   withGameState,
 } from './flow';
 import type { Generation, GenerationDefinition } from './types';
@@ -76,7 +78,7 @@ describe('Architecture 5.5 flow control of a generation', () => {
       ok: true,
       value: {
         state: 'generation',
-        steps: [{ step: { slot: 0, value: 4 }, status: 'revealed' }],
+        steps: [{ step: { slot: 0, value: 4 }, status: 'revealed', isStaged: false }],
         gameState: 0,
       },
     });
@@ -167,8 +169,8 @@ describe('US-AB-03 Repeat a step (flow control)', () => {
     expect(repeated.value).toEqual({
       state: 'generation',
       steps: [
-        { step: { slot: 0, value: 1 }, status: 'confirmed' },
-        { step: { slot: 2, value: 3 }, status: 'confirmed' },
+        { step: { slot: 0, value: 1 }, status: 'confirmed', isStaged: false },
+        { step: { slot: 2, value: 3 }, status: 'confirmed', isStaged: false },
       ],
       gameState: 0,
     });
@@ -237,5 +239,57 @@ describe('US-AB-03 Repeat a step (flow control)', () => {
 
     expect(() => repeatStep(definition, setup, generation, 1)).toThrow(InvariantError);
     expect(() => stepsDiscardedBy(definition, setup, generation, -1)).toThrow(InvariantError);
+  });
+});
+
+describe('FA-AB-07 animation played once', () => {
+  it('a step drawn anew is not staged yet', () => {
+    const drawn = drawNextStep(
+      definition,
+      setup,
+      startGeneration(0),
+      new ScriptedRandomSource([4]),
+    );
+    if (!drawn.ok) throw new Error(drawn.error);
+
+    expect(unstagedStepIndex(drawn.value)).toBe(0);
+  });
+
+  it('marks only this step staged; it stays staged when confirmed', () => {
+    const drawn = drawNextStep(definition, setup, runConfirmed([1]), new ScriptedRandomSource([2]));
+    if (!drawn.ok) throw new Error(drawn.error);
+    const staged = markStaged(drawn.value, 1);
+    if (!staged.ok) throw new Error(staged.error);
+
+    expect(staged.value.steps.map((record) => record.isStaged)).toEqual([false, true]);
+    expect(staged.value.steps[1]?.status).toBe('revealed');
+    const confirmed = confirmStep(definition, setup, staged.value);
+    expect(confirmed.ok && confirmed.value.steps[1]?.isStaged).toBe(true);
+  });
+
+  it('a step staged already stays unchanged', () => {
+    const staged = markStaged(runConfirmed([1]), 0);
+    if (!staged.ok) throw new Error(staged.error);
+
+    expect(markStaged(staged.value, 0)).toEqual({ ok: true, value: staged.value });
+  });
+
+  it('reports a step that no longer exists, e.g. after a repetition', () => {
+    const generation = runConfirmed([1]);
+
+    expect(markStaged(generation, 3)).toEqual({ ok: false, error: 'no-such-step' });
+    expect(markStaged(generation, 0.5)).toEqual({ ok: false, error: 'no-such-step' });
+  });
+
+  it('a step drawn again after a repetition plays its animation again', () => {
+    const generation = runConfirmed([1, 2]);
+    const staged = markStaged(generation, 0);
+    if (!staged.ok) throw new Error(staged.error);
+    const repeated = repeatStep(definition, setup, staged.value, 0);
+    if (!repeated.ok) throw new Error(repeated.error);
+    const drawn = drawNextStep(definition, setup, repeated.value, new ScriptedRandomSource([7]));
+    if (!drawn.ok) throw new Error(drawn.error);
+
+    expect(drawn.value.steps.find((record) => record.step.slot === 0)?.isStaged).toBe(false);
   });
 });

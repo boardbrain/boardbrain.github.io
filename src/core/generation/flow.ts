@@ -26,6 +26,11 @@ export function startGeneration<S, G>(gameState: G): Generation<S, G> {
 }
 
 /**
+ * Error code when there is no step with this index any more, e.g. after a repetition.
+ */
+export type NoSuchStepError = 'no-such-step';
+
+/**
  * Index of the step that waits for confirmation, or `undefined`. There is at most one.
  */
 export function revealedStepIndex<S, G>(generation: Generation<S, G>): number | undefined {
@@ -67,7 +72,8 @@ export function drawNextStep<C, S, G>(
     return err('generation-complete');
   }
   assert(drawn.at >= 0 && drawn.at <= generation.steps.length, 'the step fits into the list');
-  const record: StepRecord<S> = { step: drawn.step, status: 'revealed' };
+  // FA-AB-07: its animation has not played yet.
+  const record: StepRecord<S> = { step: drawn.step, status: 'revealed', isStaged: false };
   const steps = [...generation.steps];
   steps.splice(drawn.at, 0, record);
   const next: Generation<S, G> = { state: 'generation', steps, gameState: drawn.gameState };
@@ -95,6 +101,37 @@ export function confirmStep<C, S, G>(
     recordIndex === index ? { ...record, status: 'confirmed' } : record,
   );
   return ok(withGameState(definition, setup, { ...generation, steps }, generation.gameState));
+}
+
+/**
+ * Index of a step whose animation has not played yet (FA-AB-07), or `undefined`. Only the step
+ * drawn last can be one.
+ */
+export function unstagedStepIndex<S, G>(generation: Generation<S, G>): number | undefined {
+  const index = generation.steps.findIndex((record) => !record.isStaged);
+  return index === -1 ? undefined : index;
+}
+
+/**
+ * Notes that the animation of step `index` has played or was skipped (FA-AB-07, US-IN-04): it
+ * does not play again, also not after a restart. Nothing else changes; a step staged already
+ * stays so. `no-such-step` if the step no longer exists.
+ */
+export function markStaged<S, G>(
+  generation: Generation<S, G>,
+  index: number,
+): Result<Generation<S, G>, NoSuchStepError> {
+  const record = generation.steps[index];
+  if (!Number.isInteger(index) || record === undefined) {
+    return err('no-such-step');
+  }
+  if (record.isStaged) {
+    return ok(generation);
+  }
+  const steps = generation.steps.map((other, otherIndex): StepRecord<S> =>
+    otherIndex === index ? { ...other, isStaged: true } : other,
+  );
+  return ok({ ...generation, steps });
 }
 
 /**

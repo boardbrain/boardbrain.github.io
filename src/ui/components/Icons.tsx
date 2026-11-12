@@ -213,6 +213,19 @@ export function AgainIcon({ size }: IconProps): React.JSX.Element {
 }
 
 /**
+ * Two triangles and a bar for "Animation überspringen" (design I2-E). Decorative: the button
+ * around it carries the label.
+ */
+export function SkipIcon({ size = ICON_SIZE }: IconProps): React.JSX.Element {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 6.5l7 5.5-7 5.5zM11.5 6.5l7 5.5-7 5.5z" fill="currentColor" />
+      <path d="M20.5 6.5v11" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/**
  * Letter i in a circle for more information. Decorative: the button around it carries the label.
  */
 export function InfoIcon({ size }: IconProps): React.JSX.Element {

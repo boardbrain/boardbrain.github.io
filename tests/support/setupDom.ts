@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/vitest';
 // browser it always exists. Each test still gets its own empty database (testDatabase.ts).
 import 'fake-indexeddb/auto';
 import { cleanup } from '@testing-library/react';
+import { MotionGlobalConfig } from 'motion/react';
 import { afterEach } from 'vitest';
 
 // jsdom has no matchMedia; component tests run as on a phone (no media query matches).
@@ -24,6 +25,10 @@ class NoResizeObserver {
   disconnect = (): undefined => undefined;
 }
 Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: NoResizeObserver });
+
+// jsdom draws no frames, so a movement would never end; component tests check states, the
+// movements are tested in the browser (Ende-zu-Ende-Tests) and by their plans.
+MotionGlobalConfig.skipAnimations = true;
 
 afterEach(() => {
   cleanup();

@@ -4,6 +4,18 @@ import { CATAN_DEFAULT_STARTING_RESOURCES } from '@/games/catan';
 import { seedDatabase, seedMatch, type SeedTable } from './seedDatabase';
 import { useSeededRandom } from './seededRandom';
 
+// The card movements of design I2-E jump to their end, as with "Bewegung reduzieren"; their tempo
+// is tested in cardDraw.spec.ts.
+test.use({ reducedMotion: 'reduce' });
+
+// Labels as shown: "Antippen" stays behind the name of a turned card, hidden, so it can fade back
+// in after a repetition (design I2-E).
+function shownLabels(page: Page, text: string): Locator {
+  return page
+    .getByText(text)
+    .and(page.locator(':not([aria-hidden="true"] *, [aria-hidden="true"])'));
+}
+
 // I2-C: every run draws the same steps (variant A); real randomness is checked in
 // tests/statistical.
 // Whole matches with every reveal take longer than the default timeout, above all in WebKit.
@@ -118,7 +130,7 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
 
     // US-AB-02 AK-3: the first step without a result.
     await expect(page.getByRole('heading', { name: 'Losen' })).toBeVisible();
-    await expect(progress(page)).toContainText('Losen 0/3');
+    await expect(progress(page)).toContainText('Losen 1/3');
     await expect(page.getByText('Wer?')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
     const { phases, taps } = await drawAll(page);
@@ -229,7 +241,7 @@ test.describe('US-AB-03, US-AB-04, US-PL-05, US-AB-06 repeat, look back, skip an
     await dialog.getByRole('button', { name: 'Wiederholen' }).click();
 
     await expect(dialog).toHaveCount(0);
-    await expect(progress(page)).toContainText('Reihenfolge 0/2');
+    await expect(progress(page)).toContainText('Reihenfolge 1/2');
     await expect(page.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
   });
 
@@ -297,7 +309,7 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await dialog.getByRole('button', { name: 'Wiederholen' }).click();
 
     await expect(page.getByText('Wer?')).toBeVisible();
-    await expect(progress(page)).toContainText('Losen 1/3');
+    await expect(progress(page)).toContainText('Losen 2/3');
     await tapForward(page, 'Losen');
     await tapForward(page, 'Blättern');
     await tapForward(page, 'Zur Übersicht');
@@ -382,15 +394,15 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await startGeneration(page);
 
     await tapForward(page, 'Losen');
-    await expect(page.getByText('Antippen')).toHaveCount(2);
+    await expect(shownLabels(page, 'Antippen')).toHaveCount(2);
     await tap(page.getByRole('button', { name: 'Karte 2 umdrehen' }));
-    await expect(page.getByText('Antippen')).toHaveCount(1);
+    await expect(shownLabels(page, 'Antippen')).toHaveCount(1);
 
     await page.reload();
-    await expect(page.getByText('Antippen')).toHaveCount(1);
+    await expect(shownLabels(page, 'Antippen')).toHaveCount(1);
     await expect(forward(page)).toHaveText('Alle umdrehen');
     await tapForward(page, 'Alle umdrehen');
-    await expect(page.getByText('Antippen')).toHaveCount(0);
+    await expect(shownLabels(page, 'Antippen')).toHaveCount(0);
     await expect(forward(page)).toHaveText('Weiter');
   });
 

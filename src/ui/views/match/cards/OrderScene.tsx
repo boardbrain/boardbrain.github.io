@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { m } from 'motion/react';
+import { useRef, useState } from 'react';
 import type { StoredSession } from '@/app/ports';
 import type { PersonId } from '@/core/model';
 import { catanPlacementOrder, type CatanOrderSpinStep } from '@/games/catan';
@@ -7,8 +8,9 @@ import { cx } from '@/ui/components/classNames';
 import { useElementSize } from '@/ui/components/useElementSize';
 import { Coin } from '../Coin';
 import { colorOf } from '../matchColors';
-import { Reveal } from '../Reveal';
-import { orderLayout } from './cardLayout';
+import { orderLayout, type OrderLayout } from './cardLayout';
+import { StagedCards, type StageHandle } from './StagedCards';
+import { placeTarget, planOrder, type OrderStageInput } from './stagePlan';
 import { Place, TableCard } from './TableCard';
 import { tableSize } from './tableSize';
 import shared from '../MatchView.module.css';
@@ -20,23 +22,32 @@ type OrderFrontProps = {
   /** The place of the card from 0, `null` while it is not drawn yet. */
   readonly place: number | null;
   readonly isNewest?: boolean;
+  /**
+   * In a movement the lift and the golden frame are moved by the plan (design I2-E): the front
+   * lies level and carries a frame of its own that fades.
+   */
+  readonly isStaged?: boolean;
 };
 
 /**
  * The front of an order card Q3 (design I2-C, page 6): band "Start" or "Platz n" once the card
  * lies on its place, coin, name and stripe; the newest one is lifted.
  */
-function OrderFront({ name, color, place, isNewest = false }: OrderFrontProps): React.JSX.Element {
-  return (
-    <span
-      className={cx(
-        shared.qCard,
-        styles.orderFace,
-        place === null && styles.noBand,
-        isNewest && shared.qNow,
-        isNewest && styles.lifted,
-      )}
-    >
+function OrderFront({
+  name,
+  color,
+  place,
+  isNewest = false,
+  isStaged = false,
+}: OrderFrontProps): React.JSX.Element {
+  const className = cx(
+    shared.qCard,
+    styles.orderFace,
+    place === null && styles.noBand,
+    isNewest && shared.qNow,
+  );
+  const content = (
+    <>
       {place !== null && (
         <span className={shared.qBand}>
           {place === 0 ? t('partie.start') : t('partie.platz', { platz: place + 1 })}
@@ -45,13 +56,40 @@ function OrderFront({ name, color, place, isNewest = false }: OrderFrontProps): 
       <Coin name={name} color={color} />
       <strong className={shared.qName}>{name}</strong>
       <span className={shared.stripe} style={{ background: `var(--color-catan-${color})` }} />
+      {isStaged && place !== null && <span data-stage-now="" className={styles.nowFrame} />}
+    </>
+  );
+  // In a movement the plan lifts the card; at rest it rises and sinks softly (0.26 s).
+  return isStaged ? (
+    <span data-stage-raise={place === null ? undefined : ''} className={className}>
+      {content}
     </span>
+  ) : (
+    <m.span
+      className={className}
+      initial={false}
+      animate={{ y: isNewest ? LIFT : 0 }}
+      transition={LIFT_MOVE}
+    >
+      {content}
+    </m.span>
   );
 }
+
+// The newest order card lies 10 px higher (design I2-D, Q3).
+const LIFT = -10;
+const LIFT_MOVE = { duration: 0.26, ease: 'easeOut' } as const;
 
 type OrderSceneProps = {
   readonly session: StoredSession;
   readonly nameOf: (personId: PersonId) => string;
+  /**
+   * Set while the spin just drawn is still to be shown with its movement (design I2-E,
+   * FA-AB-07); `null` shows the order at rest.
+   */
+  readonly stage?: StageHandle | null;
+  /** The spin was drawn on its page without a result after a repetition: collect first (E1). */
+  readonly isAfterRepeat?: boolean;
 };
 
 /**
@@ -61,9 +99,15 @@ type OrderSceneProps = {
  * follows by itself (FA-LS-02). The face-down cards only show the back: who lies there is not
  * drawn yet.
  */
-export function OrderScene({ session, nameOf }: OrderSceneProps): React.JSX.Element {
+export function OrderScene({
+  session,
+  nameOf,
+  stage = null,
+  isAfterRepeat = false,
+}: OrderSceneProps): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
-  const { width, height } = tableSize(useElementSize(ref));
+  const measured = useElementSize(ref);
+  const { width, height } = tableSize(measured);
   const persons = session.setup.participants;
   const layout = orderLayout(width, height, persons.length);
   const steps = session.generation.steps.map((record) => record.step);
@@ -74,6 +118,51 @@ export function OrderScene({ session, nameOf }: OrderSceneProps): React.JSX.Elem
   const isDealt = placed.length > 0;
   const isComplete = placed.length === persons.length;
   const row = layout.row(persons.length);
+  const unplaced = persons.filter((personId) => !placed.includes(personId));
+  // The spin just drawn: the places before it, the person drawn and, if it is the last spin, the
+  // last place that follows by itself.
+  const newest = spins[spins.length - 1];
+  if (stage !== null && newest !== undefined && measured !== null) {
+    const k = newest.position;
+    const before = placed.slice(0, k);
+    const last =
+      isComplete && k === persons.length - 2 ? (placed[persons.length - 1] ?? null) : null;
+    return (
+      <div ref={ref} className={styles.table} data-stage-root="">
+        {layout.slots.map((box, place) => (
+          <Place
+            key={`place-${String(place)}`}
+            box={box}
+            label={String(place + 1)}
+            isFilled={k > 0}
+            stageName={placeTarget(place)}
+          />
+        ))}
+        <OrderStage
+          layout={layout}
+          input={{
+            persons,
+            placed: before,
+            result: newest.result,
+            last,
+            mode: k === 0 ? 'deal' : isAfterRepeat ? 'regather' : 'turn',
+          }}
+          front={(key) => {
+            const [personId, place] = splitKey(key, persons);
+            return personId === undefined ? null : (
+              <OrderFront
+                name={nameOf(personId)}
+                color={colorOf(session, personId)}
+                place={place}
+                isStaged
+              />
+            );
+          }}
+          handle={stage}
+        />
+      </div>
+    );
+  }
   return (
     <div ref={ref} className={styles.table}>
       {layout.slots.map((box, place) => (
@@ -82,19 +171,36 @@ export function OrderScene({ session, nameOf }: OrderSceneProps): React.JSX.Elem
           box={box}
           label={String(place + 1)}
           isFilled={isDealt}
+          flipKey={`place:${String(place)}`}
         />
       ))}
       {layout.slots.map((box, place) => {
         const personId = placed[place];
+        // Cards keep their place across "Wiederholen": a card drawn again turns face down where
+        // it lies. A face-down card stands for one of the persons still to be drawn, so after
+        // repeating the whole order it glides back into the row (design I2-E).
         if (personId === undefined) {
-          return isDealt && <TableCard key={`down-${String(place)}`} box={box} z={5} isFaceDown />;
+          return (
+            isDealt && (
+              <TableCard
+                key={`place-${String(place)}`}
+                box={box}
+                z={5}
+                isBareFront
+                isFaceDown
+                flipKey={`person:${unplaced[place - placed.length] ?? ''}`}
+              />
+            )
+          );
         }
         const isNewest = !isComplete && place === placed.length - 1;
-        const card = (
+        return (
           <TableCard
+            key={`place-${String(place)}`}
             box={box}
             z={5}
             isBareFront
+            flipKey={`person:${personId}`}
             front={
               <OrderFront
                 name={nameOf(personId)}
@@ -104,14 +210,6 @@ export function OrderScene({ session, nameOf }: OrderSceneProps): React.JSX.Elem
               />
             }
           />
-        );
-        // The card just turned over fades in; with the last place, both do (FA-LS-02).
-        return place >= spins.length - 1 ? (
-          <Reveal key={personId} className={styles.layer}>
-            {card}
-          </Reveal>
-        ) : (
-          <div key={personId}>{card}</div>
         );
       })}
       {!isDealt &&
@@ -124,6 +222,7 @@ export function OrderScene({ session, nameOf }: OrderSceneProps): React.JSX.Elem
                 box={box}
                 z={10 + index}
                 isBareFront
+                flipKey={`person:${personId}`}
                 front={
                   <OrderFront
                     name={nameOf(personId)}
@@ -137,4 +236,34 @@ export function OrderScene({ session, nameOf }: OrderSceneProps): React.JSX.Elem
         })}
     </div>
   );
+}
+
+// A front key of the plan: a person in the row, or a person on a place (`orderKey`).
+function splitKey(
+  key: string,
+  persons: readonly PersonId[],
+): [PersonId | undefined, number | null] {
+  const [person, place] = key.split('@');
+  const personId = persons.find((candidate) => candidate === person);
+  return [personId, place === undefined ? null : Number(place)];
+}
+
+type OrderStageProps = {
+  readonly layout: OrderLayout;
+  readonly input: Omit<OrderStageInput, 'slots' | 'row' | 'rng'>;
+  readonly front: (key: string) => React.ReactNode;
+  readonly handle: StageHandle;
+};
+
+// The movement of a spin (US-IN-01 AK-3, design I2-E), planned once when it starts.
+function OrderStage({ layout, input, front, handle }: OrderStageProps): React.JSX.Element {
+  const [plan] = useState(() =>
+    planOrder({
+      ...input,
+      slots: layout.slots,
+      row: layout.row(input.persons.length),
+      rng: handle.rng,
+    }),
+  );
+  return <StagedCards plan={plan} front={front} isBareFront handle={handle} />;
 }

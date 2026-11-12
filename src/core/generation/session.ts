@@ -10,9 +10,10 @@ export const CURRENT_SESSION_ID = 'current';
 /**
  * Version of the stored form of a session. A session with a version the app does not know
  * leads to a message instead of a crash (Architecture 10.3). Version 2 (I2-D): the state of the
- * game module also holds what the flow shows, e.g. the starting resources turned over.
+ * game module also holds what the flow shows, e.g. the starting resources turned over. Version 3
+ * (I2-E): every step notes whether its animation has played (FA-AB-07).
  */
-export const SESSION_SCHEMA_VERSION = 2;
+export const SESSION_SCHEMA_VERSION = 3;
 
 /**
  * A match in generation or running (Architecture 10.2). The preparation is not stored

@@ -1,7 +1,8 @@
-import { useRef, useState, useTransition } from 'react';
+import { animate, m, useReducedMotion } from 'motion/react';
+import { useLayoutEffect, useRef, useState, useTransition } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router';
 import type { StoredSession } from '@/app/ports';
-import { revealedStepIndex } from '@/core/generation';
+import { revealedStepIndex, unstagedStepIndex } from '@/core/generation';
 import type { PersonId } from '@/core/model';
 import {
   catanOpenedResources,
@@ -13,12 +14,15 @@ import { t, type TextKey } from '@/i18n/t';
 import { useCurrentSession, useGroup, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { cx } from '@/ui/components/classNames';
-import { AgainIcon, BackIcon, ChevronIcon, ExitDoorIcon } from '@/ui/components/Icons';
+import { AgainIcon, BackIcon, ChevronIcon, ExitDoorIcon, SkipIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
 import { pieceMarking } from './boardPieces';
 import { DrawScene } from './cards/DrawScene';
+import { playGlide, snapshotGlide, type GlideSnapshot } from './cards/glide';
+import type { StageRun } from './cards/playStage';
+import type { StageHandle } from './cards/StagedCards';
 import { OrderScene } from './cards/OrderScene';
-import { ResourcesScene } from './cards/ResourcesScene';
+import { ResourcesScene, type ResourcesLeave } from './cards/ResourcesScene';
 import { EndMatchDialog } from './EndMatchDialog';
 import { LookBackNote, useLookBackFits } from './LookBackNote';
 import { MatchDialog } from './MatchDialog';
@@ -78,6 +82,33 @@ const FORWARD_LABELS: Readonly<Record<ForwardAction, TextKey>> = {
 
 type Dialog = 'repeat' | 'skip' | 'end' | null;
 
+// "Wiederholen" takes the place of "Überspringen" when a movement ends; for this long after it a
+// tap on the button does nothing.
+const REPEAT_AFTER_MOVEMENT_MS = 500;
+const SHOWN_MOVEMENT_MS = 300;
+
+// Pieces discarded by a repetition rise by 9 px and fade (design I2-E).
+const PIECE_RISE = -9;
+const PIECE_LEAVE_SECONDS = 0.3;
+// A movement before storing is decoration: it never holds up storing for longer than planned.
+const MOVEMENT_SLACK_SECONDS = 0.2;
+
+async function atMost(movement: Promise<unknown>, seconds: number): Promise<void> {
+  await Promise.race([
+    movement,
+    new Promise((resolve) => {
+      setTimeout(resolve, (seconds + MOVEMENT_SLACK_SECONDS) * 1000);
+    }),
+  ]);
+}
+
+// The steps shown with a movement of cards (design I2-E).
+function hasMovement(step: CatanSlot): boolean {
+  return (
+    step.kind === 'person-draw' || step.kind === 'order-spin' || step.kind === 'starting-resources'
+  );
+}
+
 // The address of a page: the current page has none, a look back names its step (US-AB-04 AK-3).
 function pathOf(page: FlowPage | null, session: StoredSession): string {
   if (page === null) {
@@ -107,7 +138,7 @@ function lookBackOf(value: string | null): number | null {
  * result is stored before it is shown (ADR-014).
  */
 export function MatchView(): React.JSX.Element | null {
-  const { db, session: sessions } = useAppDependencies();
+  const { db, session: sessions, rng } = useAppDependencies();
   const current = useCurrentSession(db);
   const persons = usePersons(db);
   const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
@@ -121,6 +152,20 @@ export function MatchView(): React.JSX.Element | null {
   const [isPending, startTransition] = useTransition();
   const noteRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  // The movement playing, so "Animation überspringen" can complete it (US-IN-04).
+  const runRef = useRef<StageRun | null>(null);
+  // When the last movement started and ended: a tap meant for "Überspringen" that comes just as
+  // the movement ends by itself, or a second tap on it, must not open "Wiederholen" (design I2-E).
+  // A movement that jumps to its end at once ("Bewegung reduzieren") showed no "Überspringen".
+  const movementStartRef = useRef(-Infinity);
+  const movementEndRef = useRef(-Infinity);
+  // The cards of the starting resources leave before the next person's page (design I2-E, W3).
+  const leaveRef = useRef<ResourcesLeave>(null);
+  // "Losen" was tapped on a page without a result: after a repetition of the order its face-down
+  // cards are collected first (design I2-E, E1).
+  const [isDrawnFromPending, setDrawnFromPending] = useState(false);
+  // "Alle umdrehen" turns the cards over one after another (design I2-D).
+  const [isTurningAll, setTurningAll] = useState(false);
 
   const session = current?.status === 'active' ? current.session : null;
   const page = session === null ? null : pageAt(session, lookBackOf(search.get('schritt')));
@@ -129,6 +174,17 @@ export function MatchView(): React.JSX.Element | null {
   const pageKey =
     page === null || group === undefined || group === null ? '' : JSON.stringify(page);
   const isNoteFloating = useLookBackFits(noteRef, bodyRef, pageKey);
+  // Design I2-E: after "Wiederholen" in the flow the cards glide from where they lay before. The
+  // snapshot is taken before storing; the glide plays once the stored match is shown.
+  const glideRef = useRef<{ readonly before: GlideSnapshot; readonly from: unknown } | null>(null);
+  const isReduced = useReducedMotion() === true;
+  useLayoutEffect(() => {
+    const glide = glideRef.current;
+    if (glide !== null && glide.from !== session && bodyRef.current !== null) {
+      glideRef.current = null;
+      playGlide(bodyRef.current, glide.before);
+    }
+  }, [session]);
 
   if (current === undefined || persons === undefined) {
     return null;
@@ -170,6 +226,45 @@ export function MatchView(): React.JSX.Element | null {
   const shown = shownEnd === null ? session : sessionUpTo(session, shownEnd);
   // Only the step just drawn is new; a look back or a kept view shows its whole view as it is.
   const isDrawnNow = page.kind === 'step' && page.index === revealed;
+  // FA-AB-07, design I2-E: the step drawn last plays its movement until it is staged, also again
+  // after a restart; meanwhile only "Animation überspringen" and "Partie beenden" can be used.
+  const unstaged = unstagedStepIndex(session.generation);
+  const stagedIndex =
+    page.kind === 'step' && page.index === unstaged && step !== undefined && hasMovement(step)
+      ? unstaged
+      : null;
+  const isStaging = stagedIndex !== null;
+  const markStaged = (): void => {
+    const now = performance.now();
+    if (now - movementStartRef.current > SHOWN_MOVEMENT_MS) {
+      movementEndRef.current = now;
+    }
+    if (stagedIndex !== null) {
+      startTransition(async () => {
+        await sessions.markStaged(stagedIndex);
+      });
+    }
+  };
+  const stage: StageHandle | null = isStaging
+    ? {
+        rng,
+        onRun: (run) => {
+          if (run !== null && runRef.current === null) {
+            movementStartRef.current = performance.now();
+          }
+          runRef.current = run;
+        },
+        onDone: markStaged,
+      }
+    : null;
+  const skipMovement = (): void => {
+    // US-IN-04 AK-2: the movement jumps to its end; the step still has to be confirmed.
+    if (runRef.current === null) {
+      markStaged();
+    } else {
+      runRef.current.complete();
+    }
+  };
 
   // The overview reached from here leads back into the flow (PO 10.11.2026: after "Blättern" to
   // the overview, its back button led to the start).
@@ -192,6 +287,7 @@ export function MatchView(): React.JSX.Element | null {
       return;
     }
     act(async () => {
+      setTurningAll(forward === 'turn-all');
       if (forward === 'turn-all') {
         if (step?.kind === 'starting-resources') {
           await sessions.openResources(
@@ -202,15 +298,61 @@ export function MatchView(): React.JSX.Element | null {
         return false;
       }
       if (forward === 'draw') {
+        setDrawnFromPending(page.kind === 'pending');
         const drawn = await sessions.draw(revealed ?? null);
-        return drawn.ok && drawn.value.generation.state === 'running';
+        if (!drawn.ok) {
+          return false;
+        }
+        // A step without a movement of its own counts as shown at once (FA-AB-07).
+        const index = unstagedStepIndex(drawn.value.generation);
+        const record = index === undefined ? undefined : drawn.value.generation.steps[index];
+        if (index !== undefined && record !== undefined && !hasMovement(record.step)) {
+          await sessions.markStaged(index);
+        }
+        return drawn.value.generation.state === 'running';
       }
       if (revealed === undefined) {
         return false;
       }
+      if (forward === 'next' && step?.kind === 'starting-resources' && isDrawnNow) {
+        await leaveRef.current?.leave();
+      }
       const confirmed = await sessions.confirm(revealed);
       return confirmed.ok && confirmed.value.generation.state === 'running';
     });
+  };
+
+  // Design I2-E: before a repetition is stored, the cards of starting resources turn face down and
+  // the pieces discarded on the board rise and fade (0.3 s); then the page glides into the state
+  // before drawing. From the overview a new page opens instead, without movement.
+  const repeatSoftly = async (index: number): Promise<void> => {
+    const body = bodyRef.current;
+    if (body === null || isReduced) {
+      return;
+    }
+    const marking = pieceMarking(session, index);
+    if (marking !== null) {
+      // Only the pieces on the board: the dialog shows them a second time and closes meanwhile,
+      // and a movement of a piece taken away would never end (PO 12.11.2026: everything stayed
+      // locked after repeating a building).
+      const pieces = [marking.main, ...marking.others].flatMap((key) => [
+        ...body.querySelectorAll<SVGElement>(`[data-piece="${key}"]`),
+      ]);
+      await atMost(
+        pieces.length === 0
+          ? Promise.resolve()
+          : animate(
+              pieces,
+              { opacity: [1, 0], y: [0, PIECE_RISE] },
+              { duration: PIECE_LEAVE_SECONDS, ease: 'easeIn' },
+            ).finished,
+        PIECE_LEAVE_SECONDS,
+      );
+    }
+    if (session.generation.steps[index]?.step.kind === 'starting-resources') {
+      await leaveRef.current?.turnBack();
+    }
+    glideRef.current = { before: snapshotGlide(body), from: session };
   };
 
   const askRepeat = (index: number): void => {
@@ -229,9 +371,13 @@ export function MatchView(): React.JSX.Element | null {
   const actions = (
     <StepActions
       forward={forward}
-      isPending={isPending}
+      isPending={isPending || isStaging}
+      onSkip={isStaging ? skipMovement : null}
       canRepeat={page.kind === 'step'}
       onRepeat={() => {
+        if (performance.now() - movementEndRef.current < REPEAT_AFTER_MOVEMENT_MS) {
+          return;
+        }
         // A whole view repeats its last step, the step just drawn itself (decision A of the PO,
         // I2-H); every other piece can be tapped on the board.
         if (page.kind === 'step') {
@@ -271,7 +417,8 @@ export function MatchView(): React.JSX.Element | null {
           type="button"
           className={shared.iconBtn}
           aria-label={t('allgemein.zurueck')}
-          disabled={back === null}
+          disabled={back === null || isStaging}
+          {...greyedOut(back === null || isStaging, GREY)}
           onClick={() => {
             if (back !== null) {
               go(back);
@@ -333,9 +480,17 @@ export function MatchView(): React.JSX.Element | null {
             draw={slot.draw}
             result={step?.kind === 'person-draw' ? step.result : null}
             nameOf={nameOf}
+            stage={stage}
           />
         )}
-        {slot.kind === 'order-spin' && <OrderScene session={shown} nameOf={nameOf} />}
+        {slot.kind === 'order-spin' && (
+          <OrderScene
+            session={shown}
+            nameOf={nameOf}
+            stage={stage}
+            isAfterRepeat={isDrawnFromPending}
+          />
+        )}
         {isPlacement && (
           <PlacementStep
             session={shown}
@@ -378,6 +533,9 @@ export function MatchView(): React.JSX.Element | null {
             }
             nameOf={nameOf}
             actions={actions}
+            stage={stage}
+            isTurningAll={isTurningAll}
+            leaveRef={leaveRef}
           />
         )}
       </div>
@@ -394,6 +552,7 @@ export function MatchView(): React.JSX.Element | null {
           }}
           onConfirm={() => {
             act(async () => {
+              await repeatSoftly(repeatAt);
               await sessions.repeatStep(repeatAt);
               return false;
             });
@@ -458,12 +617,15 @@ type PhaseProgressProps = {
 };
 
 // F2: four phases; each is as wide as its longest possible label, fixed for the whole match. On a
-// page without a result, its phase is the current one with the steps before it.
+// page without a result, its phase is the current one and already counts the step at hand, in
+// bar and label (PO 12.11.2026: "Losen 1/3" as soon as the page shows, before drawing).
 function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element {
   const phases = catanProgress(session.setup, session.generation, progressIndex(session, page)).map(
     (phase) =>
       page.kind === 'pending'
-        ? { ...phase, isCurrent: phase.phase === PHASE_OF[page.slot.kind] }
+        ? phase.phase === PHASE_OF[page.slot.kind]
+          ? { ...phase, isCurrent: true, done: Math.min(phase.total, phase.done + 1) }
+          : { ...phase, isCurrent: false }
         : phase,
   );
   return (
@@ -483,7 +645,11 @@ function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element
             </div>
             <span>
               {isCurrent
-                ? t('partie.phaseStand', { phase: name, erledigt: done, gesamt: total })
+                ? t('partie.phaseStand', {
+                    phase: name,
+                    erledigt: done,
+                    gesamt: total,
+                  })
                 : name}
             </span>
           </div>
@@ -496,6 +662,11 @@ function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element
 type StepActionsProps = {
   readonly forward: ForwardAction;
   readonly isPending: boolean;
+  /**
+   * Set while a movement plays: "Wiederholen" gives way to "Überspringen" at the same place and
+   * size (US-IN-04, design I2-E U1); `null` otherwise.
+   */
+  readonly onSkip: (() => void) | null;
   /** Without a result there is nothing to repeat (E-35); the button stays, but disabled. */
   readonly canRepeat: boolean;
   readonly onRepeat: () => void;
@@ -507,34 +678,122 @@ type StepActionsProps = {
 function StepActions({
   forward,
   isPending,
+  onSkip,
   canRepeat,
   onRepeat,
   onForward,
 }: StepActionsProps): React.JSX.Element {
+  const isRepeatOff = onSkip === null && (isPending || !canRepeat);
   return (
     // The buttons stay in place from page to page, without fading in again (PO 10.11.2026: they
     // twitched with every "Losen").
     <div className={styles.actionsCol}>
       <div className={styles.actions}>
+        {/* Both labels lie in the same room, so the button keeps its size (PO 11.11.2026). */}
         <PressableButton
           type="button"
-          className={shared.secondary}
-          disabled={isPending || !canRepeat}
-          onClick={onRepeat}
+          className={cx(shared.secondary, styles.swapBtn)}
+          disabled={isRepeatOff}
+          {...greyedOut(isRepeatOff, GREY)}
+          aria-label={onSkip === null ? undefined : t('partie.animationUeberspringen')}
+          onClick={onSkip ?? onRepeat}
         >
-          <AgainIcon size={18} />
-          {t('partie.wiederholen')}
+          <SwapLabel isShown={onSkip === null}>
+            <AgainIcon size={18} />
+            {t('partie.wiederholen')}
+          </SwapLabel>
+          <SwapLabel isShown={onSkip !== null}>
+            <SkipIcon size={18} />
+            {t('partie.ueberspringen')}
+          </SwapLabel>
         </PressableButton>
         <PressableButton
           type="button"
           className={cx(shared.primary, styles.forward)}
           disabled={isPending}
+          {...greyedOut(isPending, GREY_PRIMARY)}
           onClick={onForward}
         >
-          {t(FORWARD_LABELS[forward])}
+          <ForwardLabel text={t(FORWARD_LABELS[forward])} />
           <ChevronIcon size={18} />
         </PressableButton>
       </div>
     </div>
+  );
+}
+
+// Design I2-E A2: a label crossfades in 0.18 s; the old one stays a little longer and the new one
+// comes a little sooner, so the button never looks empty (PO 11.11.2026).
+const LABEL_IN = { duration: 0.18, ease: [0.1, 0.5, 0.5, 1] } as const;
+const LABEL_OUT = { duration: 0.18, ease: [0.5, 0, 0.9, 0.5] } as const;
+
+// Design I2-E: a button turns grey and back softly, in the 0.22 s of its release (PO 11.11.2026);
+// the opacities are those of the style sheets.
+const GREY = 0.5;
+const GREY_PRIMARY = 0.45;
+
+function greyedOut(isOff: boolean, grey: number): { initial: false; animate: { opacity: number } } {
+  return { initial: false, animate: { opacity: isOff ? grey : 1 } };
+}
+
+type ForwardLabelProps = {
+  readonly text: string;
+};
+
+// The label of the forward button: a new one crossfades with the old one (A2).
+function ForwardLabel({ text }: ForwardLabelProps): React.JSX.Element {
+  const [shown, setShown] = useState(text);
+  const [old, setOld] = useState<string | null>(null);
+  if (text !== shown) {
+    setShown(text);
+    setOld(shown);
+  }
+  return (
+    <span className={styles.swapBtn}>
+      <m.span
+        key={text}
+        className={styles.swapLabel}
+        initial={old === null ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={LABEL_IN}
+      >
+        {text}
+      </m.span>
+      {old !== null && (
+        <m.span
+          key={`old-${old}`}
+          className={styles.swapLabel}
+          aria-hidden="true"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={LABEL_OUT}
+          onAnimationComplete={() => {
+            setOld(null);
+          }}
+        >
+          {old}
+        </m.span>
+      )}
+    </span>
+  );
+}
+
+type SwapLabelProps = {
+  readonly isShown: boolean;
+  readonly children: React.ReactNode;
+};
+
+// One of the labels of a button that changes its label; both take the same room.
+function SwapLabel({ isShown, children }: SwapLabelProps): React.JSX.Element {
+  return (
+    <m.span
+      className={styles.swapLabel}
+      aria-hidden={isShown ? undefined : true}
+      initial={false}
+      animate={{ opacity: isShown ? 1 : 0 }}
+      transition={isShown ? LABEL_IN : LABEL_OUT}
+    >
+      {children}
+    </m.span>
   );
 }
