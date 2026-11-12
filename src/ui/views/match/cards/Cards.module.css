@@ -172,6 +172,13 @@
   border-radius: 5px;
 }
 
+/* Pressed, a card to turn over only gets darker; it does not rise first (PO 12.11.2026), as
+   with "Bewegung reduzieren" (K-4). Doubled class: above the look of Pressable.module.css. */
+.cardSpot.cardSpot {
+  translate: none;
+  filter: brightness(calc(1 - var(--press) * var(--press-darken)));
+}
+
 /* An open card stays a locked button, but looks like the card itself. */
 .cardSpotLocked:disabled {
   cursor: default;
