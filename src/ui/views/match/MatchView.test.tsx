@@ -84,6 +84,13 @@ function forwardName(): string {
   return label.textContent;
 }
 
+// The filled part of each phase's bar, as set by the page.
+function barWidths(): string[] {
+  return within(screen.getByRole('list', { name: 'Fortschritt' }))
+    .getAllByRole('listitem')
+    .map((item) => item.querySelector('span')?.style.width ?? '');
+}
+
 function progress(): string[] {
   return within(screen.getByRole('list', { name: 'Fortschritt' }))
     .getAllByRole('listitem')
@@ -100,6 +107,7 @@ describe('US-AB-02 Go through the generation', () => {
     expect(screen.getByText('Freitagsrunde · Basisspiel')).toBeInTheDocument();
     // PO 12.11.2026: the label counts the step at hand.
     expect(progress()).toEqual(['Losen 1/3', 'Reihenfolge', 'Platzierung', 'Rohstoffe']);
+    expect(barWidths()[0]).toBe(`${String(100 / 3)}%`);
     // PO 09.11.2026: the button stays in its place, but there is nothing to repeat yet.
     expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Zurück' })).toBeDisabled();

@@ -617,13 +617,15 @@ type PhaseProgressProps = {
 };
 
 // F2: four phases; each is as wide as its longest possible label, fixed for the whole match. On a
-// page without a result, its phase is the current one; the bar shows the steps before it, the
-// label already counts the step at hand (PO 12.11.2026: "Losen 1/3" before the first draw).
+// page without a result, its phase is the current one and already counts the step at hand, in
+// bar and label (PO 12.11.2026: "Losen 1/3" as soon as the page shows, before drawing).
 function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element {
   const phases = catanProgress(session.setup, session.generation, progressIndex(session, page)).map(
     (phase) =>
       page.kind === 'pending'
-        ? { ...phase, isCurrent: phase.phase === PHASE_OF[page.slot.kind] }
+        ? phase.phase === PHASE_OF[page.slot.kind]
+          ? { ...phase, isCurrent: true, done: Math.min(phase.total, phase.done + 1) }
+          : { ...phase, isCurrent: false }
         : phase,
   );
   return (
@@ -645,7 +647,7 @@ function PhaseProgress({ session, page }: PhaseProgressProps): React.JSX.Element
               {isCurrent
                 ? t('partie.phaseStand', {
                     phase: name,
-                    erledigt: page.kind === 'pending' ? Math.min(total, done + 1) : done,
+                    erledigt: done,
                     gesamt: total,
                   })
                 : name}
