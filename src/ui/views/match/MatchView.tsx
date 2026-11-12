@@ -82,6 +82,11 @@ const FORWARD_LABELS: Readonly<Record<ForwardAction, TextKey>> = {
 
 type Dialog = 'repeat' | 'skip' | 'end' | null;
 
+// "Wiederholen" takes the place of "Überspringen" when a movement ends; for this long after it a
+// tap on the button does nothing.
+const REPEAT_AFTER_MOVEMENT_MS = 500;
+const SHOWN_MOVEMENT_MS = 300;
+
 // Pieces discarded by a repetition rise by 9 px and fade (design I2-E).
 const PIECE_RISE = -9;
 const PIECE_LEAVE_SECONDS = 0.3;
@@ -138,6 +143,11 @@ export function MatchView(): React.JSX.Element | null {
   const bodyRef = useRef<HTMLDivElement>(null);
   // The movement playing, so "Animation überspringen" can complete it (US-IN-04).
   const runRef = useRef<StageRun | null>(null);
+  // When the last movement started and ended: a tap meant for "Überspringen" that comes just as
+  // the movement ends by itself, or a second tap on it, must not open "Wiederholen" (design I2-E).
+  // A movement that jumps to its end at once ("Bewegung reduzieren") showed no "Überspringen".
+  const movementStartRef = useRef(-Infinity);
+  const movementEndRef = useRef(-Infinity);
   // The cards of the starting resources leave before the next person's page (design I2-E, W3).
   const leaveRef = useRef<ResourcesLeave>(null);
   // "Losen" was tapped on a page without a result: after a repetition of the order its face-down
@@ -214,6 +224,10 @@ export function MatchView(): React.JSX.Element | null {
       : null;
   const isStaging = stagedIndex !== null;
   const markStaged = (): void => {
+    const now = performance.now();
+    if (now - movementStartRef.current > SHOWN_MOVEMENT_MS) {
+      movementEndRef.current = now;
+    }
     if (stagedIndex !== null) {
       startTransition(async () => {
         await sessions.markStaged(stagedIndex);
@@ -224,6 +238,9 @@ export function MatchView(): React.JSX.Element | null {
     ? {
         rng,
         onRun: (run) => {
+          if (run !== null && runRef.current === null) {
+            movementStartRef.current = performance.now();
+          }
           runRef.current = run;
         },
         onDone: markStaged,
@@ -342,6 +359,9 @@ export function MatchView(): React.JSX.Element | null {
       onSkip={isStaging ? skipMovement : null}
       canRepeat={page.kind === 'step'}
       onRepeat={() => {
+        if (performance.now() - movementEndRef.current < REPEAT_AFTER_MOVEMENT_MS) {
+          return;
+        }
         // A whole view repeats its last step, the step just drawn itself (decision A of the PO,
         // I2-H); every other piece can be tapped on the board.
         if (page.kind === 'step') {

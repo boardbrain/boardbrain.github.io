@@ -8,6 +8,14 @@ import { useSeededRandom } from './seededRandom';
 // is tested in cardDraw.spec.ts.
 test.use({ reducedMotion: 'reduce' });
 
+// Labels as shown: "Antippen" stays behind the name of a turned card, hidden, so it can fade back
+// in after a repetition (design I2-E).
+function shownLabels(page: Page, text: string): Locator {
+  return page
+    .getByText(text)
+    .and(page.locator(':not([aria-hidden="true"] *, [aria-hidden="true"])'));
+}
+
 // I2-C: every run draws the same steps (variant A); real randomness is checked in
 // tests/statistical.
 // Whole matches with every reveal take longer than the default timeout, above all in WebKit.
@@ -386,15 +394,15 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await startGeneration(page);
 
     await tapForward(page, 'Losen');
-    await expect(page.getByText('Antippen')).toHaveCount(2);
+    await expect(shownLabels(page, 'Antippen')).toHaveCount(2);
     await tap(page.getByRole('button', { name: 'Karte 2 umdrehen' }));
-    await expect(page.getByText('Antippen')).toHaveCount(1);
+    await expect(shownLabels(page, 'Antippen')).toHaveCount(1);
 
     await page.reload();
-    await expect(page.getByText('Antippen')).toHaveCount(1);
+    await expect(shownLabels(page, 'Antippen')).toHaveCount(1);
     await expect(forward(page)).toHaveText('Alle umdrehen');
     await tapForward(page, 'Alle umdrehen');
-    await expect(page.getByText('Antippen')).toHaveCount(0);
+    await expect(shownLabels(page, 'Antippen')).toHaveCount(0);
     await expect(forward(page)).toHaveText('Weiter');
   });
 

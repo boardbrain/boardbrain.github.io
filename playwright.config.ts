@@ -32,11 +32,11 @@ export default defineConfig({
   retries: 0,
   fullyParallel: true,
   // On GitHub four runs at once: the runner has four cores, Playwright's default would use only
-  // two. Locally six: WebKit on Windows draws without a graphics card, and with six parallel
-  // browsers a page now and then froze during the long match tests (1 in 96, 03.11.2026). Since
-  // K-6 most match tests start with a seeded match; three full runs with six were stable and
-  // about 15 % faster than with four (11.11.2026). If a page freezes again, go back to four.
-  workers: isCi ? 4 : 6,
+  // two. Locally four as well: WebKit on Windows draws without a graphics card, and with six
+  // parallel browsers a page now and then froze during the long match tests (1 in 96,
+  // 03.11.2026). Since K-6 six had been stable for three full runs (11.11.2026), but on
+  // 12.11.2026 a page froze again with six (I2-E).
+  workers: 4,
   reporter: isCi ? [['github'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL,

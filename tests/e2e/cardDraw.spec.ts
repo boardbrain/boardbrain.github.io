@@ -102,8 +102,13 @@ test.describe('US-IN-01 AK-3 The order with cards', () => {
     await drawFirstSpin(page);
     await main(page).getByRole('button', { name: 'Losen' }).click();
     await skipButton(page).click();
-    await repeatButton(page).click();
-    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    // Right after a movement "Wiederholen" ignores taps for a moment (a late tap on "Überspringen").
+    const dialog = page.getByRole('alertdialog');
+    await expect(async () => {
+      await repeatButton(page).click();
+      await expect(dialog).toBeVisible({ timeout: 300 });
+    }).toPass();
+    await dialog.getByRole('button', { name: 'Wiederholen' }).click();
     await expect(main(page)).toHaveAttribute('data-page', /^next-/);
 
     expect(await drawSpinAndMeasureSinking(page)).toBeGreaterThan(0);
