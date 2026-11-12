@@ -106,7 +106,7 @@ describe('US-AB-02 Go through the generation', () => {
     await tapForward(user, 'Losen');
 
     expect(await screen.findByText('legt sie aus')).toBeInTheDocument();
-    expect(screen.queryByText('Wer?')).not.toBeInTheDocument();
+    expect(shownTexts('Wer?')).toHaveLength(0);
     expect(progress()[0]).toBe('Losen 1/3');
     expect(screen.getByRole('button', { name: 'Wiederholen' })).toBeEnabled();
     await tapForward(user, 'Weiter');
@@ -328,9 +328,10 @@ describe('Architecture 13.2 match from the database', () => {
   });
 });
 
-// Texts as shown: "Antippen" and the name of a resource lie on top of each other, one hidden.
+// Texts as shown: "Antippen" and the name of a resource lie on top of each other, as do "Wer?"
+// and the name drawn; the one hidden is marked on itself or on a parent.
 function shownTexts(text: string): HTMLElement[] {
   return screen
     .queryAllByText(text)
-    .filter((element) => element.getAttribute('aria-hidden') !== 'true');
+    .filter((element) => element.closest('[aria-hidden="true"]') === null);
 }
