@@ -105,8 +105,10 @@ test.describe('US-IN-01 AK-3 The order with cards', () => {
     // Right after a movement "Wiederholen" ignores taps for a moment (a late tap on "Überspringen").
     const dialog = page.getByRole('alertdialog');
     await expect(async () => {
-      await repeatButton(page).click();
-      await expect(dialog).toBeVisible({ timeout: 300 });
+      if (!(await dialog.isVisible())) {
+        await repeatButton(page).click();
+      }
+      await expect(dialog).toBeVisible({ timeout: 1_000 });
     }).toPass();
     await dialog.getByRole('button', { name: 'Wiederholen' }).click();
     await expect(main(page)).toHaveAttribute('data-page', /^next-/);
