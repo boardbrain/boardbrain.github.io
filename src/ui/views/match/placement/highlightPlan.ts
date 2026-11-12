@@ -19,17 +19,20 @@ import { uniformInt, type RandomSource } from '@/core/random';
  */
 export const HIGHLIGHT_MS = {
   /**
-   * Running light A2: all hops of a building, of a road. Longer than the 2.0 s and 1.2 s of the
-   * reference, which felt too short (PO 12.11.2026).
+   * Running light A2: all hops of a building, of a road. Longer than the 2.0 s and 1.2 s chosen
+   * in D-2, which felt too short (PO 12.11.2026).
    */
   runBuilding: 3500,
-  runRoad: 2000,
+  runRoad: 2500,
   /** The ring left behind fades. */
   hopOut: 140,
   /** Rest on the result before the piece is set. */
   hold: 320,
-  /** Tension mode L2: about 5 s for a building, 2.9 s for a road (3.5 s and 2 s, × 1.45). */
-  tensionBuilding: 5075,
+  /**
+   * Tension mode: 7 s for a building (55 % going out before the stop, 40 % the duel), longer than
+   * the 5.1 s of L2 in D-2 (PO 12.11.2026); 2.9 s for a road (L2).
+   */
+  tensionBuilding: 7000,
   tensionRoad: 2900,
   /** The board darkens, the lights come up, then rest before the first goes out. */
   darkIn: 300,
@@ -51,8 +54,11 @@ export const HIGHLIGHT_MS = {
 
 /** Running light: the hops are 1.3 times as long as the one before. */
 const RUN_GROWTH = 1.3;
-/** Running light: 8 to 13 hops for a building, 3 to 5 for a road, before the landing. */
-const RUN_HOPS = { building: [8, 13], road: [3, 5] } as const;
+/**
+ * Running light: 8 to 13 hops for a building, 4 to 7 for a road (PO 12.11.2026, before 3 to 5),
+ * before the landing.
+ */
+const RUN_HOPS = { building: [8, 13], road: [4, 7] } as const;
 /** Tension mode: the gaps between places going out grow by 1.22. */
 const OUT_GROWTH = 1.22;
 /** Tension mode: going out takes 55 % of the time before a duel, 85 % for a road. */

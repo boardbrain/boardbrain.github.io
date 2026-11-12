@@ -334,9 +334,18 @@ function boardLayers(
   }
   return {
     overlay: (
-      <SettleUnder key={key} board={CATAN_BOARD} place={place} color={color} look={settle} />
+      // Own keys for both parts: they are siblings on the board, and React leaves one of two
+      // siblings with the same key behind (PO 12.11.2026: an old mark lit up again).
+      <SettleUnder
+        key={`under-${key}`}
+        pieceKey={key}
+        board={CATAN_BOARD}
+        place={place}
+        color={color}
+        look={settle}
+      />
     ),
     lifted: newest.kind === 'road' ? [key, `building-${String(newest.index)}`] : [key],
-    top: <SettleTop key={key} place={place} color={color} pieceKeys={[key]} />,
+    top: <SettleTop key={`top-${key}`} pieceKey={key} place={place} color={color} />,
   };
 }

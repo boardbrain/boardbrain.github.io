@@ -92,12 +92,12 @@ describe('US-IN-02 highlighting before a piece is fixed (design D-2)', () => {
     }
   });
 
-  it('AK-4: a road hops 3 to 5 times in 1.2 s', () => {
+  it('AK-4: a road hops 4 to 7 times in 2.5 s', () => {
     for (const plan of plans(300, (rng) =>
       planHighlight(['a', 'b', 'c'], 'b', 'road', false, rng),
     )) {
-      expect(plan.hops.length - 1).toBeGreaterThanOrEqual(3);
-      expect(plan.hops.length - 1).toBeLessThanOrEqual(5);
+      expect(plan.hops.length - 1).toBeGreaterThanOrEqual(4);
+      expect(plan.hops.length - 1).toBeLessThanOrEqual(7);
       expect(plan.lead.duration).toBe(HIGHLIGHT_MS.runRoad + HIGHLIGHT_MS.hold);
     }
   });

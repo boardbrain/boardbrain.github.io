@@ -14,6 +14,8 @@ const TABLE = { name: 'Freitagsrunde', members: ['Anna', 'Ben', 'Clara', 'David'
 // 7 its road.
 const FIRST_BUILDING = 6;
 const FIRST_ROAD = 7;
+// 4 persons set 8 buildings and 8 roads: step 21 is the last road.
+const LAST_ROAD = 21;
 
 function main(page: Page): Locator {
   return page.getByRole('main');
@@ -108,6 +110,31 @@ test.describe('US-IN-02 Highlighting at the placement (design D-2)', () => {
     await expect(main(page).getByTestId('board-road')).toHaveCount(1, { timeout: 10_000 });
     await expect(main(page).getByRole('button', { name: 'Duell' })).toHaveCount(0);
     await expect(main(page).getByText('Zwei übrig')).toHaveCount(0);
+  });
+});
+
+test.describe('US-IN-02 after repeating the whole placement (design D-2)', () => {
+  test('AK-4: only the mark of the new piece fades when it is set, no old one lights up', async ({
+    page,
+  }) => {
+    await openPlacement(page, LAST_ROAD);
+    await main(page).getByRole('button', { name: 'Losen' }).click();
+    await expect(main(page).getByTestId('settle-ring')).toHaveCount(1, { timeout: 10_000 });
+    // The road is set completely before the placement is repeated.
+    await expect(main(page).getByRole('button', { name: 'Wiederholen', exact: true })).toBeEnabled();
+
+    await main(page)
+      .getByRole('button', { name: /^Siedlung von .* wiederholen$/ })
+      .first()
+      .click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await expect(main(page)).toHaveAttribute('data-page', `next-${String(FIRST_BUILDING)}:draw`);
+    // PO 12.11.2026: the mark of the last road stayed on the board and lit up with the next piece.
+    await expect(main(page).locator('[data-settle]')).toHaveCount(0);
+
+    await main(page).getByRole('button', { name: 'Losen' }).click();
+    await expect(main(page).getByTestId('settle-ring')).toHaveCount(1, { timeout: 10_000 });
+    await expect(main(page).locator('[data-settle="mark"]')).toHaveCount(1);
   });
 });
 

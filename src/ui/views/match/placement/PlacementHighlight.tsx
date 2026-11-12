@@ -319,6 +319,8 @@ export function fallKeyframes(): {
 }
 
 type SettleProps = {
+  /** The piece being set, e.g. `building-3`: `SettleTop` plays only what `SettleUnder` draws for it. */
+  readonly pieceKey: string;
   readonly board: Board;
   readonly place: Place;
   readonly color: CatanColorKey;
@@ -345,35 +347,37 @@ export function settlePlace(
  * Below the piece being set (design D-2): the dark of the tension mode and the mark on the
  * result, both fading. `SettleTop` plays them.
  */
-export function SettleUnder({ board, place, color, look }: SettleProps): React.JSX.Element {
+export function SettleUnder({
+  pieceKey,
+  board,
+  place,
+  color,
+  look,
+}: SettleProps): React.JSX.Element {
   return (
-    <g>
+    <g data-settle-for={pieceKey}>
       {look.isDark && <Dark board={board} />}
       {look.hasMark && <Mark place={place} color={color} />}
     </g>
   );
 }
 
-type SettleTopProps = Omit<SettleProps, 'board' | 'look'> & {
-  /** The pieces that fall, e.g. a road; found on the board by `data-piece`. */
-  readonly pieceKeys: readonly string[];
-};
+type SettleTopProps = Omit<SettleProps, 'board' | 'look'>;
 
 /**
  * Sets a piece after its highlighting (US-IN-02 AK-4, design D-2, F2 and F4): it falls from above,
  * a ring runs outwards, the mark fades and a dark board brightens. Over everything on the board;
  * starting it is an effect, as it drives the animations of the browser.
  */
-export function SettleTop({ place, color, pieceKeys }: SettleTopProps): React.JSX.Element {
+export function SettleTop({ pieceKey, place, color }: SettleTopProps): React.JSX.Element {
   const ref = useRef<SVGCircleElement>(null);
   const play = useEffectEvent((ring: SVGCircleElement) => {
     const svg = ring.ownerSVGElement;
     if (svg === null) {
       return null;
     }
-    const pieces = pieceKeys.flatMap((key) => [
-      ...svg.querySelectorAll<SVGElement>(`[data-piece="${key}"]`),
-    ]);
+    // The piece that falls, found on the board by its key.
+    const pieces = [...svg.querySelectorAll<SVGElement>(`[data-piece="${pieceKey}"]`)];
     const fall = fallKeyframes();
     const sequence: AnimationSequence = [
       [
@@ -401,7 +405,9 @@ export function SettleTop({ place, color, pieceKeys }: SettleTopProps): React.JS
         { duration: HIGHLIGHT_MS.settle / 1000, ease: 'linear', times: fall.times, at: 0 },
       ]);
     }
-    for (const under of svg.querySelectorAll<SVGElement>('[data-settle]')) {
+    for (const under of svg.querySelectorAll<SVGElement>(
+      `[data-settle-for="${pieceKey}"] [data-settle]`,
+    )) {
       const ms = under.dataset.settle === 'dark' ? HIGHLIGHT_MS.darkOut : HIGHLIGHT_MS.markOut;
       sequence.push([under, { opacity: [1, 0] }, { duration: ms / 1000, ease: 'easeOut', at: 0 }]);
     }
