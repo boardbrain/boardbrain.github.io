@@ -13,6 +13,7 @@ Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBr
 | Befehl | Zweck |
 |---|---|
 | `npm run dev` | Entwicklungsserver (HTTPS mit mkcert, im WLAN erreichbar) |
+| `npm run build:acceptance` | Build der lokalen Abnahme-App „BoardBrain Dev“ mit lila Symbol nach `dist-acceptance/`; ausliefern mit `npm run preview:acceptance` (Port 4174) |
 | `npm run check` | Typen, ESLint, Stylelint, Prettier, dependency-cruiser, Unit-Tests mit Abdeckung |
 | `npm run test:e2e` | Playwright |
 | `npm run test:stat` | Statistische Suite |
@@ -75,7 +76,7 @@ Frage mit begründetem Vorschlag und Alternativen. Alles andere entscheidest du 
 **Git**
 - PR-Titel nach Conventional Commits, Beschreibung deutsch: `feat(placement): Gebäude zufällig platzieren`. Typen: feat, fix, refactor, test, docs, chore, build, ci, deps, release, revert.
 - Squash nach `develop`, Merge commit nach `main`. Nach `main` nur aus `develop` oder `hotfix/…`.
-- Release nach Richtlinien 3.8. `git tag` und `gh release` nur nach ausdrücklicher Zustimmung.
+- Release nach Richtlinien 3.8; vor 1.0 Vorabversionen 0.x je Inkrement, als Pre-release markiert (E-40). Das Release legt der Product Owner meist selbst auf GitHub an, Claude Code leitet an. `git tag` und `gh release` nur nach ausdrücklicher Zustimmung.
 - Kein Force-Push, kein Umschreiben veröffentlichter Geschichte.
 - Keine Hinweise auf Claude in Commits und PRs: kein `Co-Authored-By`, kein „Generated with Claude Code“ (Richtlinien 3.3).
 

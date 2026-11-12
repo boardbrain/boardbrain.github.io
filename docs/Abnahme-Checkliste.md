@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Manuelle Abnahme auf echten Geräten vor jedem Release |
-| Version | 0.6 |
+| Version | 0.7 |
 | Status | Angelegt mit Bündel I1-D; die Punkte späterer Inkremente gelten ab dem genannten Inkrement |
-| Stand | 11.11.2026 |
+| Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Architektur.md v0.19 (12.1, 13.1, 13.6, 14.6), BoardBrain_Spezifikation.md v0.12 (2.5, Kapitel 5), Entwicklungsrichtlinien.md v0.6 (3.8) |
 | Sprache | Deutsch |
 
@@ -20,6 +20,7 @@
 | 0.4 | 29.10.2026 | Zuschnitt von I2 (Spezifikation 0.12): K-13 (Ton) gilt ab I2, K-14 (Installationshinweis) ab I4 |
 | 0.5 | 09.11.2026 | I2-D: `#/brett` entfällt, K-4 und K-5 prüfen das Brett in der Platzierung; K-8 mit aufgedeckten Startrohstoffen |
 | 0.6 | 11.11.2026 | D-2: K-13 (Ton) zurückgestellt, Klänge nach Version 1 (Anforderungsdokumentation E-38) |
+| 0.7 | 12.11.2026 | OP-13: lokale Abnahme-App auf Port 4174 mit `npm run build:acceptance` und `npm run preview:acceptance` als „BoardBrain Dev“ mit lila Symbol (V-1, Anforderungsdokumentation E-40) |
 
 ## 1. Zweck
 
@@ -40,7 +41,7 @@ Ein Punkt gilt erst ab dem Inkrement in der Spalte „ab“. Ein Punkt, der sche
 
 | Nr. | Schritt |
 |---|---|
-| V-1 | Vor 1.0: auf dem PC `npm run build` und `npm run preview`; die Geräte öffnen `https://192.168.178.20:4173/`. Ab 1.0: `https://boardbrain.github.io/`. Der Entwicklungsserver (Port 5173) hat keinen Service Worker und eignet sich nicht für diese Liste (Architektur 11.4). |
+| V-1 | Vor 1.0: auf dem PC `npm run build:acceptance` und `npm run preview:acceptance`; die Geräte öffnen `https://192.168.178.20:4174/` und installieren „BoardBrain Dev“ mit lila Symbol (Architektur 16.6). Ab 1.0: `https://boardbrain.github.io/`. Der Entwicklungsserver (Port 5173) hat keinen Service Worker und eignet sich nicht für diese Liste (Architektur 11.4). |
 | V-2 | Auf jedem Gerät `#/diagnose` öffnen: Alle Prüfwerte sind „vorhanden“, die Version stimmt. |
 | V-3 | War BoardBrain unter derselben Adresse schon installiert, die alte App vorher entfernen, damit kein älterer Stand im Cache liegt. |
 

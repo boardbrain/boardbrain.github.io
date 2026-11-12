@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.34 |
+| Version | 0.35 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 12.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -48,6 +48,7 @@
 | 0.32 | 12.11.2026 | Bündel I2-E: Merker `isStaged` je Schritt für FA-AB-07, `markStaged` im Kern und im `SessionService`, Sitzung Version 3 (10.2, 10.3); Bewegungen der Karten als reiner Plan mit Abspieler, „Überspringen“ an der Stelle von „Wiederholen“, „Partie beenden“ auch während einer Bewegung, Gleiten nach „Wiederholen“, weiche Wechsel von Band und Knöpfen, Zeiten in `stagePlan.ts` (13.6); „Bewegung reduzieren“ in den übrigen Partie-Tests, Tempo in `cardDraw.spec.ts`, lokal wieder vier Tests gleichzeitig (14.5); Design-Referenz `docs/design/i2e-card-moves-final-preview.html`; nach der Abnahme: Vorderseiten skalieren auch nach oben, kleinere Karten unten auf der Reihenfolge, Band der Startrohstoffe bleibt stehen, Fortschritt zählt den anstehenden Schritt, „Tisch anlegen“ auf dem Handy nicht mehr angeheftet (13.1, 13.6) |
 | 0.33 | 12.11.2026 | Bündel I2-F: Aufblinken und Spannungsmodus umgesetzt; gültige Plätze aus `catanPlacementSpots`, Plan `planHighlight` mit Abspieler `playHighlight`, Ebenen des Bretts über den Steinen, Spannungsmodus als Zustand der Ansicht je Partie, „Bewegung reduzieren“ ohne Halt, Zeiten als Konstanten `HIGHLIGHT_MS` statt Tokens (13.6) |
 | 0.34 | 12.11.2026 | Kleine Aufgabe K-9: Diagnose überarbeitet (13.1): Werte bei jedem Öffnen frisch gelesen, Gerät und Darstellung, Daten als Anzahlen, Würfeltest `runDiceTest` in `core/random`, Build-Kennung `__BUILD_COMMIT__` und `__BUILD_TIME__` aus der Bauanleitung, Bericht teilen oder kopieren; die letzten fünf unerwarteten Fehler unter `errors` in `meta` (7.3), geschrieben über `ErrorLogService` aus der Fehleransicht der Routen und den globalen Fehlerhandlern |
+| 0.35 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation E-40): Vorabversionen 0.x unter der echten Adresse, GitHub-Release als Pre-release, das Release erzeugt der Product Owner oder Claude Code nach Zustimmung (16.3); Build-Modus `acceptance` mit `npm run build:acceptance` für die lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol auf Port 4174 neben der veröffentlichten App (12.1, 15, 16.2, 16.6); OP-13 in 18.2 und 19 erledigt |
 
 ## Inhaltsverzeichnis
 
@@ -979,6 +980,8 @@ Die Erkennung anderer Browser unter iOS ist nur näherungsweise möglich, weil m
 
 **Symbole und Manifest (I1-D):** App-Symbol D8 „Zwei Karten“ aus der Design-Referenz `docs/design/i1d-board-final-preview.html`. `npm run icons` (`scripts/generate-icons.mjs`) zeichnet es aus dem Logo und den Farben in `tokens.css` und rendert es mit Playwright als PNG nach `public/icons/`: `icon-192.png` und `icon-512.png` (Zweck `any`), `icon-maskable-512.png` (Karten in der sicheren Mitte, für den runden Zuschnitt unter Android) und `apple-touch-icon.png` (180 px, iOS und iPadOS). Das Manifest (`vite.config.ts`) nimmt Name und Beschreibung aus `de.ts` und Hintergrund- und Themenfarbe aus `--color-surface` des Designs „Holz“; es legt keine Ausrichtung fest (13.1, E-29). Für iOS kommen `apple-touch-icon`, `apple-mobile-web-app-title` und die Statusleiste `black-translucent` hinzu; der Rahmen hält mit `env(safe-area-inset-*)` Abstand. Der Browser-Tab behält `favicon.svg`. *(neu in 0.15)*
 
+**Symbole der lokalen Abnahme-App (E-40):** `npm run icons` zeichnet dasselbe Symbol zusätzlich in Lila (Tokens `--color-acceptance-icon-*`) nach `public-acceptance/icons/`, mit denselben Dateinamen. Nur der Build-Modus `acceptance` (16.6) liefert sie unter `/icons-acceptance/` aus und verweist im Manifest und in `apple-touch-icon` darauf; der Build für GitHub enthält sie nicht. *(neu in 0.35)*
+
 ### 12.2 Persistenter Speicher
 
 Beim Start ruft die App `navigator.storage.persisted()` und, falls nötig, `navigator.storage.persist()` auf. Der Status und `navigator.storage.estimate()` erscheinen im Bereich „Sicherung“. Ist der Speicher nicht geschützt, erscheint eine Warnung mit Ursachen und Abhilfen (US-IS-03), etwa die Ausnahme für BoardBrain in Braves Einstellung „Websitedaten beim Schließen löschen“.
@@ -1253,6 +1256,8 @@ boardbrain.github.io/                 Repository; lokal z. B. C:\dev\boardbrain
 │  ├─ art/                            Rohstoffkarten und Landschaft als WebP (aus npm run art, ADR-030)
 │  ├─ fonts/                          WOFF2-Schriften
 │  └─ sounds/                         Klänge und LICENSES.md
+├─ public-acceptance/
+│  └─ icons/                          lila App-Symbole nur für den Build-Modus acceptance (12.1)
 ├─ scripts/
 │  ├─ art/                            SVG-Quellen der großen Bilder einer Partie (ADR-030)
 │  ├─ generate-art.mjs                Bilder aus den SVG-Quellen und Tokens erzeugen (ADR-030)
@@ -1356,6 +1361,8 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 |---|---|
 | `npm run dev` | Entwicklungsserver, im WLAN erreichbar; über HTTPS, wenn das Zertifikat vorhanden ist (16.6); ohne Service Worker und ohne Content-Security-Policy |
 | `npm run build` | Typprüfung und Produktions-Build nach `dist/` |
+| `npm run build:acceptance` | wie `build`, im Modus `acceptance` nach `dist-acceptance/` für die lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol (16.6, E-40) |
+| `npm run preview:acceptance` | liefert `dist-acceptance/` auf Port 4174 aus, im WLAN erreichbar, über HTTPS wie `dev` |
 | `npm run preview` | Produktions-Build lokal ausliefern, im WLAN erreichbar, über HTTPS wie `dev` |
 | `npm test` | Unit-, Eigenschafts-, Datenbank- und Komponententests |
 | `npm run test:stat` | Statistische Suite |
@@ -1390,11 +1397,13 @@ Wird das Ziel eines offenen Pull Requests geändert (z. B. von `develop` auf `ma
 
 **Workflow `deploy.yml`** (bei Push eines Tags `v*`): `npm ci`, `npm run check`, `npm run build`, Hochladen und Veröffentlichen über die GitHub-eigenen Pages-Actions. Nur dieser Workflow erhält die Rechte `pages: write` und `id-token: write`. Die Umgebung `github-pages` erlaubt zusätzlich nur Tags `v*`, sodass GitHub die Regel „nur Releases werden veröffentlicht“ unabhängig vom Workflow durchsetzt (EP-03).
 
-**Release.** (1) Pull Request `chore/release-x.y.z` nach `develop` mit Versionsnummer und Eintrag in `CHANGELOG.md`; (2) Pull Request `develop` nach `main` mit Titel `release: x.y.z`; (3) nach dem Merge erzeugt Claude Code nach Zustimmung des Product Owners mit `gh release create vx.y.z --target main` das GitHub-Release mit Tag; der Tag löst die Veröffentlichung aus. Bei Hotfixes wird `main` danach per Pull Request nach `develop` zurückgeführt.
+**Release.** (1) Pull Request `chore/release-x.y.z` nach `develop` mit Versionsnummer und Eintrag in `CHANGELOG.md`; (2) Pull Request `develop` nach `main` mit Titel `release: x.y.z`; (3) nach dem Merge erzeugt der Product Owner auf GitHub (Releases, „Draft a new release“) oder Claude Code nach seiner Zustimmung mit `gh release create vx.y.z --target main` das GitHub-Release mit Tag; der Tag löst die Veröffentlichung aus. Vor 1.0 ist das Release als Vorabversion markiert (Häkchen „Set as a pre-release“, `--prerelease`) *(geändert in 0.35)*. Bei Hotfixes wird `main` danach per Pull Request nach `develop` zurückgeführt.
 
 **Erste Veröffentlichung.** Release 0.1.0 am Ende der Setup-Phase: der Stand des Setups mit der Diagnoseansicht (13.1), ohne Service Worker und ohne Datenspeicherung (EP-02, E-25). Er weist die gesamte Kette bis zur echten Adresse nach.
 
-**Keine öffentlichen Vorschauversionen.** Eine Vorschau unter derselben Herkunft würde dieselbe Datenbank wie die echte App sehen. Getestet wird lokal. Über Vorabversionen der echten App wird nach I2 entschieden (OP-13).
+**Vorabversionen (E-40).** Vor 1.0 erscheinen Vorabversionen 0.x der echten App unter der echten Adresse, jeweils nach einem abgeschlossenen Inkrement und nur nach Freigabe durch den Product Owner; die erste ist 0.2.0 nach I2. Für ihre Daten gibt es kein Versprechen: Eine Änderung des Datenbankschemas darf sie verwerfen, statt sie zu übernehmen. Bis zum Update-Weg aus I4 (ADR-015) übernimmt der minimale Service Worker eine neue Version erst, wenn alle Fenster der App geschlossen sind (11); Testpersonen schließen die App dafür ganz und öffnen sie neu. *(neu in 0.35)*
+
+**Keine öffentlichen Vorschauversionen einzelner Stände.** Eine Vorschau unter derselben Herkunft würde dieselbe Datenbank wie die echte App sehen; ein Unterordner wie `/test/` hätte dieselbe Herkunft. Zwischenstände werden lokal geprüft (16.6). *(geändert in 0.35)*
 
 **Sicherheit auf GitHub.** Erlaubt sind nur Actions von GitHub selbst, Workflows haben standardmäßig nur Leserechte; Secret scanning mit Push protection, Dependabot alerts und security updates, CodeQL (Default setup) und Private vulnerability reporting sind aktiv. Dependabot version updates laufen monatlich, gebündelt, mit Ziel `develop` und Titelpräfix `deps:`.
 
@@ -1423,6 +1432,8 @@ Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrich
 
 mkcert erzeugt eine lokale Zertifizierungsstelle, die in Windows sowie von Hand auf Android und dem iPad als vertrauenswürdig installiert wird (ein eigenes iPhone gibt es nicht, auf fremden Geräten wird sie nie installiert; Anforderungsdokumentation OP-13), und ein Serverzertifikat für `localhost`, `127.0.0.1`, `::1` und die feste IP-Adresse des PCs im Heimnetz (Adressreservierung in der FRITZ!Box). Das Serverzertifikat liegt unter `%USERPROFILE%\.boardbrain-certs\` (`cert.pem`, `key.pem`) und wird vom Product Owner erzeugt, nicht von Claude Code. `vite.config.ts` liest es von dort und schaltet HTTPS nur ein, wenn die Dateien vorhanden sind; ohne Zertifikat (z. B. auf GitHub) laufen `dev` und `preview` über `http://localhost`. Der Schlüssel der Zertifizierungsstelle verlässt den PC nie.
 
+
+**Lokale Abnahme-App (E-40).** Zur Abnahme baut Claude Code mit `npm run build:acceptance` nach `dist-acceptance/` und liefert mit `npm run preview:acceptance` auf Port 4174 aus (`https://192.168.178.20:4174/`). Der Modus `acceptance` gibt der App den Namen „BoardBrain Dev“ (`de.app.nameAbnahme`) und die lila Symbole (12.1). Weil sich die Herkunft von `https://boardbrain.github.io/` unterscheidet, ist sie ohnehin eine eigene App mit eigenen Daten; Name und Symbol machen sie auf dem Startbildschirm unterscheidbar. Eigener Ordner und eigener Port verhindern, dass die Ende-zu-Ende-Tests, die einen laufenden Server auf Port 4173 mitbenutzen, den Abnahme-Build prüfen. Ende-zu-Ende-Tests und Veröffentlichung bauen im Standardmodus nach `dist/`. *(neu in 0.35)*
 ---
 
 ## 17. Architekturentscheidungen (ADR)
@@ -1945,7 +1956,7 @@ In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betri
 | ID | Punkt | Phase |
 |---|---|---|
 | OP-12 | Dauerhafte Adresse der App | Setup – geklärt: ADR-022 |
-| OP-13 | Vorabversionen der echten App vor 1.0 | Umsetzung, nach I2 |
+| OP-13 | Vorabversionen der echten App vor 1.0 | Umsetzung – geklärt: 16.3, Anforderungsdokumentation E-40 |
 | OP-06 | Visuelle Gestaltung von Glücksrad, Aufblinken und Klängen | Design – geklärt: Karten ziehen statt Glücksrad (`docs/design/i2d-running-match-final-preview.html`); Aufblinken, Spannungsmodus und Tempo mit D-2 (`docs/design/d2-staging-final-preview.html`, 13.6); Klänge nach Version 1 (Anforderungsdokumentation E-38) |
 | OP-11 | Konkrete Farbwerte der Paletten | Design – geklärt: 13.4, Anforderungsdokumentation E-26 |
 
@@ -1956,4 +1967,4 @@ In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betri
 1. **Setup-Phase** mit Claude Code nach `docs/Setup-Anleitung.md`, bis alle Punkte der `docs/Setup-DoD.md` erfüllt sind; Abschluss mit Release 0.1.0. *Abgeschlossen am 07.10.2026.*
 2. **Umsetzung ab Inkrement I1** in Story-Bündeln (EP-10) nach `docs/Umsetzungsplan.md`: zuerst `core/random` mit dem Losbaustein, weil dort die strengsten Prüfkriterien gelten; `core/board` in I1, `core/placement` als erstes Bündel von I2; in I1 außerdem Manifest und minimaler Service Worker, um die Installation unter Brave für Android früh zu prüfen (18.1).
 3. **Design:** OP-11 parallel zu I1 (Farbwerte stehen nur in `tokens.css`), OP-06 innerhalb von I2, bevor Aufblinken und Klänge gebaut werden (Anforderungsdokumentation E-32); das Ziehen der Karten legt seit 0.25 die Referenz aus I2-D fest. *OP-11 erledigt am 07.10.2026 (13.4).* *OP-06 erledigt am 11.11.2026 mit D-2.*
-4. **Nach I2:** Entscheidung über Vorabversionen (OP-13).
+4. **Nach I2:** Entscheidung über Vorabversionen (OP-13). *Erledigt am 12.11.2026 (16.3, E-40); erste Vorabversion 0.2.0.*
