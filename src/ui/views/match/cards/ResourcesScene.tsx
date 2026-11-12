@@ -163,6 +163,12 @@ function ResourcesTable({
   const ref = useRef<HTMLDivElement>(null);
   const [isLeaving, setLeaving] = useState(false);
   const [isTurningBack, setTurningBack] = useState(false);
+  // Both only last until the step is stored: after "Wiederholen" the same person's table shows
+  // the page before drawing, and the cards dealt next turn over again (PO 12.11.2026).
+  if (result === null && (isLeaving || isTurningBack)) {
+    setLeaving(false);
+    setTurningBack(false);
+  }
   const isReduced = useReducedMotion() === true;
   useImperativeHandle(leaveRef, () => ({
     leave: async () => {

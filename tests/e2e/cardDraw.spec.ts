@@ -177,6 +177,47 @@ test.describe('US-AB-03 AK-8 Repeat a piece on the board (design I2-E)', () => {
   });
 });
 
+// Right after a movement "Wiederholen" ignores taps for a moment (a late tap on "Überspringen").
+async function repeatOnPage(page: Page): Promise<void> {
+  const dialog = page.getByRole('alertdialog');
+  await expect(async () => {
+    if (!(await dialog.isVisible())) {
+      await repeatButton(page).click();
+    }
+    await expect(dialog).toBeVisible({ timeout: 1_000 });
+  }).toPass();
+  await dialog.getByRole('button', { name: 'Wiederholen' }).click();
+}
+
+test.describe('US-SR-01 AK-6 Starting resources repeated on their page (design I2-E)', () => {
+  test('after repeating, the cards dealt again turn over and stay face up', async ({ page }) => {
+    await seedMatch(page, {
+      table: TABLE,
+      steps: 22,
+      options: { startingResources: { count: 2, replacement: 'with' } },
+    });
+    const forwardButton = main(page).getByRole('button', { name: /^(Losen|Alle umdrehen)$/ });
+    const turnButtons = main(page).getByRole('button', { name: /^Karte \d umdrehen$/ });
+    await main(page).getByRole('button', { name: 'Losen' }).click();
+    await skipButton(page).click();
+    await main(page).getByRole('button', { name: 'Karte 1 umdrehen' }).click();
+    await expect(turnButtons).toHaveCount(1);
+
+    // The card turned over turns face down before the page goes back to the state before drawing.
+    await repeatOnPage(page);
+    await expect(main(page)).toHaveAttribute('data-page', /^next-22:draw$/);
+    await expect(forwardButton).toHaveText('Losen');
+    await forwardButton.click();
+    await skipButton(page).click();
+    await expect(turnButtons).toHaveCount(2);
+
+    await main(page).getByRole('button', { name: 'Karte 2 umdrehen' }).click();
+    await expect(turnButtons).toHaveCount(1);
+    await main(page).getByRole('button', { name: 'Alle umdrehen' }).click();
+    await expect(turnButtons).toHaveCount(0);
+  });
+});
+
 test.describe('US-AB-05 AK-3 Restart during a movement', () => {
   test('FA-AB-07: an interrupted movement plays again with the same result, a finished one does not', async ({
     page,
