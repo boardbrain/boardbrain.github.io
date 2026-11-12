@@ -75,7 +75,7 @@ export function TurnBand({ className, ...face }: TurnBandProps): React.JSX.Eleme
       className={cx(styles.turnBand, lookOf(face), className)}
       style={styleOf(face)}
     >
-      <BandContent face={face} orderRef={orderRef} isRinged />
+      <BandContent face={face} orderRef={orderRef} isLive hasRing />
       {fading !== null && (
         <m.div
           key={fading.key}
@@ -89,7 +89,12 @@ export function TurnBand({ className, ...face }: TurnBandProps): React.JSX.Eleme
             setFading(null);
           }}
         >
-          <BandContent face={fading.face} isRinged={false} />
+          {/* The ring glides on to another person; for the same person it stays where it is. */}
+          <BandContent
+            face={fading.face}
+            isLive={false}
+            hasRing={fading.face.currentId === face.currentId}
+          />
         </m.div>
       )}
     </div>
@@ -113,11 +118,13 @@ function styleOf(face: BandFace): { color?: string; background?: string } {
 type BandContentProps = {
   readonly face: BandFace;
   readonly orderRef?: React.Ref<HTMLSpanElement>;
-  /** The coin at turn carries the ring; the band fading out shows none. */
-  readonly isRinged: boolean;
+  /** The band shown, not the one fading out: its coins can be found by the movements. */
+  readonly isLive: boolean;
+  /** The coin at turn carries the ring. */
+  readonly hasRing: boolean;
 };
 
-function BandContent({ face, orderRef, isRinged }: BandContentProps): React.JSX.Element {
+function BandContent({ face, orderRef, isLive, hasRing }: BandContentProps): React.JSX.Element {
   return (
     <>
       <span className={styles.tbPiece}>{face.icon}</span>
@@ -132,13 +139,15 @@ function BandContent({ face, orderRef, isRinged }: BandContentProps): React.JSX.
           return (
             <span
               key={person.personId}
-              data-band-coin={isRinged ? person.personId : undefined}
+              data-band-coin={isLive ? person.personId : undefined}
               className={cx(styles.mCoin, isNow && styles.mCoinNow)}
               style={{ background: `var(--color-catan-${person.color})` }}
               aria-hidden="true"
             >
               {person.name.slice(0, 1)}
-              {isNow && isRinged && <span data-band-ring="" className={styles.mRing} />}
+              {isNow && hasRing && (
+                <span data-band-ring={isLive ? '' : undefined} className={styles.mRing} />
+              )}
             </span>
           );
         })}

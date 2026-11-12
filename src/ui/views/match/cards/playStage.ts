@@ -28,31 +28,28 @@ function find(root: HTMLElement, selector: string): HTMLElement | null {
 const cardOf = (root: HTMLElement, id: string): HTMLElement | null =>
   find(root, `[data-stage-card="${id}"]`);
 
-const poseValues = (pose: Pose): { x: number; y: number; rotate: number; scale: number } => ({
-  x: pose.x,
-  y: pose.y,
-  rotate: pose.rotate,
-  scale: pose.scale,
-});
+// Every movement is one `transform` with the start value given: the browser then plays it on its
+// own (Web Animations), smooth also while the page is busy, and nothing is read from the page
+// before it starts (PO 12.11.2026: dealing lagged on the phone).
+const poseTransform = (pose: Pose): string =>
+  `translate(${String(pose.x)}px, ${String(pose.y)}px) rotate(${String(pose.rotate)}deg) scale(${String(pose.scale)})`;
+const turnTransform = (degrees: number): string => `rotateY(${String(degrees)}deg)`;
+const liftTransform = (y: number): string => `translateY(${String(y)}px)`;
 
 // The keyframes of a move; with a lift the card passes the middle `lift` pixels higher.
-function moveKeyframes(step: Extract<StageStep, { kind: 'move' }>): Record<string, number[]> {
+function moveKeyframes(step: Extract<StageStep, { kind: 'move' }>): { transform: string[] } {
   const { from, to, lift } = step;
   if (lift === 0) {
-    return {
-      x: [from.x, to.x],
-      y: [from.y, to.y],
-      rotate: [from.rotate, to.rotate],
-      scale: [from.scale, to.scale],
-    };
+    return { transform: [poseTransform(from), poseTransform(to)] };
   }
   const mid = (a: number, b: number): number => (a + b) / 2;
-  return {
-    x: [from.x, mid(from.x, to.x), to.x],
-    y: [from.y, mid(from.y, to.y) + lift, to.y],
-    rotate: [from.rotate, mid(from.rotate, to.rotate), to.rotate],
-    scale: [from.scale, mid(from.scale, to.scale), to.scale],
+  const middle = {
+    x: mid(from.x, to.x),
+    y: mid(from.y, to.y) + lift,
+    rotate: mid(from.rotate, to.rotate),
+    scale: mid(from.scale, to.scale),
   };
+  return { transform: [poseTransform(from), poseTransform(middle), poseTransform(to)] };
 }
 
 function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): AnimationSequence {
@@ -109,7 +106,11 @@ function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): Anima
       return [
         [
           inner,
-          { rotateY: step.toFaceDown ? [0, 180] : [180, 360] },
+          {
+            transform: step.toFaceDown
+              ? [turnTransform(0), turnTransform(180)]
+              : [turnTransform(180), turnTransform(360)],
+          },
           { at, duration: seconds(step.ms), ease: 'easeInOut' },
         ],
         ...faces,
@@ -123,7 +124,10 @@ function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): Anima
       const keyframes =
         step.rise === undefined
           ? { opacity: [step.from, step.to] }
-          : { opacity: [step.from, step.to], y: [step.rise, 0] };
+          : {
+              opacity: [step.from, step.to],
+              transform: [liftTransform(step.rise), liftTransform(0)],
+            };
       return [
         [target, keyframes, { at, duration: Math.max(SWITCH, seconds(step.ms)), ease: 'easeOut' }],
       ];
@@ -137,7 +141,15 @@ function segmentsOf(root: HTMLElement, step: StageStep, tracked: Tracked): Anima
       const options = { at, duration: seconds(step.ms), ease: 'easeOut' } as const;
       const ring = find(face, '[data-stage-now]');
       const segments: AnimationSequence = [
-        [face, { y: step.isUp ? [0, RAISE_PX] : [RAISE_PX, 0] }, options],
+        [
+          face,
+          {
+            transform: step.isUp
+              ? [liftTransform(0), liftTransform(RAISE_PX)]
+              : [liftTransform(RAISE_PX), liftTransform(0)],
+          },
+          options,
+        ],
       ];
       if (ring !== null) {
         segments.push([ring, { opacity: step.isUp ? [0, 1] : [1, 0] }, options]);
@@ -159,20 +171,22 @@ export function playStage(root: HTMLElement, plan: StagePlan): StageRun {
     if (element === null || inner === null) {
       continue;
     }
-    animate(element, { ...poseValues(card.start), zIndex: card.z }, { duration: 0 });
-    animate(inner, { rotateY: card.isFaceDown ? 180 : 0 }, { duration: 0 });
+    // The start is set as it is, without reading the page; the movement starts from it.
+    element.style.transform = poseTransform(card.start);
+    element.style.zIndex = String(card.z);
+    inner.style.transform = turnTransform(card.isFaceDown ? 180 : 0);
     // The newest order card lies lifted with its golden frame (design I2-D, Q3).
     for (const face of element.querySelectorAll<HTMLElement>('[data-stage-raise]')) {
-      animate(face, { y: card.isRaised === true ? RAISE_PX : 0 }, { duration: 0 });
+      face.style.transform = liftTransform(card.isRaised === true ? RAISE_PX : 0);
       const ring = find(face, '[data-stage-now]');
       if (ring !== null) {
-        animate(ring, { opacity: card.isRaised === true ? 1 : 0 }, { duration: 0 });
+        ring.style.opacity = card.isRaised === true ? '1' : '0';
       }
     }
     for (const face of element.querySelectorAll<HTMLElement>('[data-stage-face]')) {
       const name = face.dataset.stageFace;
       const isShown = card.isFaceDown ? name === 'back' : name === card.fronts[0];
-      animate(face, { opacity: isShown ? 1 : 0 }, { duration: 0 });
+      face.style.opacity = isShown ? '1' : '0';
     }
   }
   // Faded elements start as their first fade begins, e.g. the name on the development card hidden.
@@ -181,11 +195,10 @@ export function playStage(root: HTMLElement, plan: StagePlan): StageRun {
     const target = step.kind === 'fade' ? find(root, `[data-stage="${step.target}"]`) : null;
     if (step.kind === 'fade' && target !== null && !started.has(step.target)) {
       started.add(step.target);
-      animate(
-        target,
-        { opacity: step.from, ...(step.rise === undefined ? {} : { y: step.rise }) },
-        { duration: 0 },
-      );
+      target.style.opacity = String(step.from);
+      if (step.rise !== undefined) {
+        target.style.transform = liftTransform(step.rise);
+      }
     }
   }
   const tracked: Tracked = {

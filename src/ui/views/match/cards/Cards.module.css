@@ -172,6 +172,12 @@
   border-radius: 5px;
 }
 
+/* An open card stays a locked button, but looks like the card itself. */
+.cardSpotLocked:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
 .cardName {
   position: absolute;
   text-align: center;

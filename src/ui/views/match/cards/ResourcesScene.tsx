@@ -341,26 +341,26 @@ function DrawnResource({
     ? { duration: LABEL_IN_SECONDS, ease: 'easeOut' as const, delay: turnDelay + LABEL_OUT_SECONDS }
     : { duration: 0 };
   const placeStyle = { left: box.x, top: box.y, width: box.w, height: box.h };
+  const isLocked = isOpen || onTurn === undefined;
   return (
     <>
-      {isOpen || onTurn === undefined ? (
-        <div data-leave-card="" data-flip={flipKey} className={styles.cardSpot} style={placeStyle}>
-          {card}
-        </div>
-      ) : (
-        <PressableButton
-          type="button"
-          look="card"
-          data-leave-card=""
-          data-flip={flipKey}
-          className={styles.cardSpot}
-          style={placeStyle}
-          aria-label={t('partie.karteUmdrehen', { nummer: number })}
-          onClick={onTurn}
-        >
-          {card}
-        </PressableButton>
-      )}
+      {/* Always the same element, so the card stays the same and turns over when it is opened;
+          once open, or where it cannot be turned, it is locked and only shows the card. */}
+      <PressableButton
+        type="button"
+        look="card"
+        data-leave-card=""
+        data-flip={flipKey}
+        className={cx(styles.cardSpot, isLocked && styles.cardSpotLocked)}
+        style={placeStyle}
+        disabled={isLocked}
+        aria-hidden={isLocked ? true : undefined}
+        tabIndex={isLocked ? -1 : undefined}
+        aria-label={t('partie.karteUmdrehen', { nummer: number })}
+        onClick={onTurn}
+      >
+        {card}
+      </PressableButton>
       <span
         data-leave-label=""
         className={cx(shared.resName, styles.cardName, styles.labelStack)}
