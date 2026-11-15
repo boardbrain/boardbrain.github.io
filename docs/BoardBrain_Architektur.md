@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.35 |
+| Version | 0.36 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 12.11.2026 |
+| Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -49,6 +49,7 @@
 | 0.33 | 12.11.2026 | Bündel I2-F: Aufblinken und Spannungsmodus umgesetzt; gültige Plätze aus `catanPlacementSpots`, Plan `planHighlight` mit Abspieler `playHighlight`, Ebenen des Bretts über den Steinen, Spannungsmodus als Zustand der Ansicht je Partie, „Bewegung reduzieren“ ohne Halt, Zeiten als Konstanten `HIGHLIGHT_MS` statt Tokens (13.6) |
 | 0.34 | 12.11.2026 | Kleine Aufgabe K-9: Diagnose überarbeitet (13.1): Werte bei jedem Öffnen frisch gelesen, Gerät und Darstellung, Daten als Anzahlen, Würfeltest `runDiceTest` in `core/random`, Build-Kennung `__BUILD_COMMIT__` und `__BUILD_TIME__` aus der Bauanleitung, Bericht teilen oder kopieren; die letzten fünf unerwarteten Fehler unter `errors` in `meta` (7.3), geschrieben über `ErrorLogService` aus der Fehleransicht der Routen und den globalen Fehlerhandlern |
 | 0.35 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation E-40): Vorabversionen 0.x unter der echten Adresse, GitHub-Release als Pre-release, das Release erzeugt der Product Owner oder Claude Code nach Zustimmung (16.3); Build-Modus `acceptance` mit `npm run build:acceptance` für die lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol auf Port 4174 neben der veröffentlichten App (12.1, 15, 16.2, 16.6); OP-13 in 18.2 und 19 erledigt |
+| 0.36 | 15.11.2026 | Kleine Aufgabe K-8: Job `changes` in `ci.yml` erkennt reine Doku-Änderungen; `check` und `stat` überspringen dann ihre Schritte, die Läufe von `e2e` starten nicht, `e2e` besteht (16.3) |
 
 ## Inhaltsverzeichnis
 
@@ -1384,12 +1385,15 @@ Git-Einstellungen: `user.name` `Jonasss29`, `user.email` die noreply-Adresse von
 
 | Job | Inhalt | Erforderlich für |
 |---|---|---|
-| `check` | `npm ci`, `npm run check`, `npm audit --omit=dev --audit-level=high` | `develop`, `main` |
+| `changes` | stellt mit `git diff --name-only --no-renames` gegen die gemeinsame Basis mit dem Ziel fest, ob der Pull Request nur Dateien unter `docs/` sowie `README.md` oder `CLAUDE.md` ändert (reine Doku-Änderung, Entwicklungsrichtlinien 3.6); `--no-renames` nennt bei verschobenen Dateien beide Pfade, eine leere Liste gilt als Code *(neu in 0.36, K-8)* | – |
+| `check` | `npm ci`, `npm run check`, `npm audit --omit=dev --audit-level=high`; bei reiner Doku-Änderung werden die Schritte übersprungen | `develop`, `main` |
 | `e2e` | sammelt das Ergebnis der drei Läufe `e2e phone`, `e2e tablet` und `e2e tablet-landscape` und besteht nur, wenn alle bestanden haben. Die Läufe arbeiten gleichzeitig im offiziellen Playwright-Container (`mcr.microsoft.com/playwright`, Browser vorinstalliert); je `npm ci`, `npm run build`, `npm run test:e2e -- --project=chromium-‹Geräteart› --project=webkit-‹Geräteart›`. Jeder Lauf hat damit gleich viel Arbeit in Chromium und im langsameren WebKit; `--shard` verteilt nur nach der Anzahl der Tests in der Reihenfolge der Projekte und legte alle WebKit-Geräte in eine Hälfte (3,7 gegenüber 7,9 Minuten). Jeder Test läuft weiterhin auf jedem Gerät. Eine neue Geräteart braucht einen Eintrag in der Matrix von `ci.yml`, sonst läuft sie auf GitHub nicht. Der Tag des Containers wird im Vorjob `playwright-version` aus `package-lock.json` gelesen und passt so immer exakt zur installierten Playwright-Version *(geändert in 0.30)* | `develop`, `main` |
-| `stat` | `npm run test:stat` (nur bei Ziel `main`) | `main` |
+| `stat` | `npm run test:stat` (nur bei Ziel `main`); bei reiner Doku-Änderung werden die Schritte übersprungen | `main` |
 | `guard-main` | schlägt fehl, wenn ein Pull Request nach `main` nicht aus `develop` oder `hotfix/…` kommt (nur bei Ziel `main`) | `main` |
 
 Übersprungene Jobs gelten bei GitHub als bestanden; `stat` und `guard-main` blockieren Pull Requests nach `develop` daher nicht. Aus demselben Grund laufen die drei Läufe von `e2e` auch dann, wenn der Vorjob `playwright-version` scheitert, und schlagen in diesem Fall fehl, statt übersprungen zu werden; `e2e` läuft auch nach einem gescheiterten oder übersprungenen Lauf und schlägt dann fehl.
+
+**Reine Doku-Änderungen (K-8).** Meldet `changes` eine reine Doku-Änderung, überspringen `check` und `stat` ihre Schritte und bestehen; `playwright-version` und die drei Läufe starten nicht (der Container würde sonst vor jedem Schritt geladen), und `e2e` besteht ohne sie. Die Pflichtprüfungen selbst laufen immer, damit nicht ein übersprungener Job als bestanden gilt: Scheitert `changes`, fehlt sein Ergebnis, und alle Prüfungen laufen voll. Bewusst nicht über `paths-ignore`, weil der Workflow dann gar nicht startete und die Pflichtprüfungen den Merge auf Dauer blockierten. *(neu in 0.36)*
 
 **Workflow `pr-title.yml`** (bei jedem Pull Request nach `develop` oder `main`, nur Leserechte; beim Öffnen, bei neuen Commits und bei jeder Bearbeitung): Job `pr-title`, commitlint prüft den Titel des Pull Requests; erforderlich für `develop` und `main`. Er steht in einem eigenen Workflow, damit eine Bearbeitung des Pull Requests, etwa ein Haken in der Beschreibung, nur ihn neu startet und nicht alle Prüfungen. Bei neuen Commits läuft er trotzdem, weil GitHub erforderliche Prüfungen dem neuesten Commit zuordnet; ohne Ergebnis dort wartete der Merge auf ihn. Die Bedingung steht im Auslöser `on`, nicht in einem `if`, weil ein übersprungener erforderlicher Job als bestanden gälte. *(neu in 0.28)*
 
