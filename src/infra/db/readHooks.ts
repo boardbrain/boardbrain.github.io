@@ -12,11 +12,14 @@ import {
   type IsoTimestamp,
   type Group,
   type GroupId,
+  type Match,
+  type MatchId,
   type Person,
   type PersonId,
 } from '@/core/model';
 import type { BoardBrainDb } from './database';
 import { readErrorLog } from './errorLogStore';
+import { readMatch, readMatchesOfGroup } from './matchQueries';
 
 /**
  * All persons sorted by name; `undefined` while loading. The view updates itself on every
@@ -174,4 +177,23 @@ export function useDataSummary(db: BoardBrainDb): DataSummary | undefined {
  */
 export function useErrorLog(db: BoardBrainDb): readonly ErrorLogEntry[] | undefined {
   return useLiveQuery(() => readErrorLog(db), [db]);
+}
+
+/**
+ * All matches of a group, oldest first (Specification 3.7); `undefined` while loading. Lists,
+ * series and statistics update themselves on every change of a result (US-ER-05 AK-3).
+ */
+export function useMatchesOfGroup(
+  db: BoardBrainDb,
+  groupId: GroupId,
+): readonly Match[] | undefined {
+  return useLiveQuery(() => readMatchesOfGroup(db, groupId), [db, groupId]);
+}
+
+/**
+ * One match (US-ER-04 AK-2); `undefined` while loading, `null` if there is no such match or no
+ * valid id.
+ */
+export function useMatch(db: BoardBrainDb, id: MatchId | null): Match | null | undefined {
+  return useLiveQuery(async () => (id === null ? null : readMatch(db, id)), [db, id]);
 }

@@ -4,12 +4,14 @@ import { createHashRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { createErrorLogService } from '@/app/services/errorLogService';
 import { createMasterDataService } from '@/app/services/masterDataService';
+import { createResultService } from '@/app/services/resultService';
 import { createSessionService } from '@/app/services/sessionService';
 import { SUPPORTED_GAMES } from '@/games/registry';
 import { t } from '@/i18n/t';
 import { BoardBrainDb } from '@/infra/db/database';
 import { createDexieErrorLogStore } from '@/infra/db/errorLogStore';
 import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
+import { createDexieResultStore } from '@/infra/db/resultStore';
 import { createDexieSessionStore } from '@/infra/db/sessionStore';
 import { readDiagnostics } from '@/infra/platform/diagnostics';
 import { systemClock } from '@/infra/platform/systemClock';
@@ -89,6 +91,11 @@ const dependencies: AppDependencies = {
     store: createDexieSessionStore(db),
     clock: systemClock,
     rng,
+  }),
+  results: createResultService({
+    store: createDexieResultStore(db),
+    ids: uuidGenerator,
+    clock: systemClock,
   }),
   rng,
   errorLog,

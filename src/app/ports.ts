@@ -1,5 +1,13 @@
 import type { Session } from '@/core/generation';
-import type { CustomGame, Group, IsoTimestamp, LocalDateTime, Person } from '@/core/model';
+import type {
+  CustomGame,
+  Group,
+  IsoTimestamp,
+  LocalDateTime,
+  Match,
+  MatchId,
+  Person,
+} from '@/core/model';
 import type { CatanGameState, CatanSetup, CatanStep } from '@/games/catan';
 
 /**
@@ -99,6 +107,46 @@ export type MasterDataStore = {
    * back and the error is passed on. Inside `work`, only the repositories may be awaited.
    */
   transaction<T>(work: (repositories: MasterDataRepositories) => Promise<T>): Promise<T>;
+};
+
+/**
+ * Write and read access to matches with their result inside a transaction (Architecture 7.3,
+ * 7.4).
+ */
+export type MatchRepository = {
+  /** The match with this id, or `undefined`. */
+  get(id: MatchId): Promise<Match | undefined>;
+  /** Adds a new match and records the change of user data. */
+  add(match: Match): Promise<void>;
+  /** Replaces a stored match with the same id and records the change of user data. */
+  update(match: Match): Promise<void>;
+  /** Removes a stored match and records the change of user data at `at`. */
+  delete(id: MatchId, at: IsoTimestamp): Promise<void>;
+};
+
+/**
+ * Repositories available inside a result transaction.
+ */
+export type ResultRepositories = {
+  readonly matches: MatchRepository;
+  /** Groups are only read: the participants and whether the group is active (Specification 3.6). */
+  readonly groups: Pick<GroupRepository, 'listAll'>;
+  /** Custom games are only read: whether the game is active (Specification 3.6). */
+  readonly customGames: Pick<CustomGameRepository, 'listAll'>;
+  /** The running match: its result ends it in the same transaction (FA-AB-08, US-AB-06 AK-2). */
+  readonly session: Pick<SessionRepository, 'get' | 'delete'>;
+};
+
+/**
+ * Storage of results. The result service sets the transaction boundary (Architecture 4.4):
+ * storing the result of a running match and ending it happen completely or not at all.
+ */
+export type ResultStore = {
+  /**
+   * Runs `work` in one read-write transaction. If `work` throws, the transaction is rolled
+   * back and the error is passed on. Inside `work`, only the repositories may be awaited.
+   */
+  transaction<T>(work: (repositories: ResultRepositories) => Promise<T>): Promise<T>;
 };
 
 /**

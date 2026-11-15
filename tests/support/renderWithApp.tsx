@@ -9,10 +9,12 @@ import {
 import { onTestFinished } from 'vitest';
 import { createErrorLogService } from '@/app/services/errorLogService';
 import { createMasterDataService, type MasterDataService } from '@/app/services/masterDataService';
+import { createResultService } from '@/app/services/resultService';
 import { createSessionService, type SessionService } from '@/app/services/sessionService';
 import type { BoardBrainDb } from '@/infra/db/database';
 import { createDexieErrorLogStore } from '@/infra/db/errorLogStore';
 import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
+import { createDexieResultStore } from '@/infra/db/resultStore';
 import { createDexieSessionStore } from '@/infra/db/sessionStore';
 import { AppDependenciesProvider } from '@/ui/AppDependencies';
 import { fixedClock, sequentialIds } from './masterDataFakes';
@@ -65,6 +67,11 @@ export function renderWithApp(
         db,
         masterData,
         session,
+        results: createResultService({
+          store: createDexieResultStore(db),
+          ids: sequentialIds(),
+          clock: fixedClock(),
+        }),
         rng: new SeededRandomSource(seed + 1),
         errorLog: createErrorLogService({
           store: createDexieErrorLogStore(db),
