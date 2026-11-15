@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.36 |
+| Version | 0.37 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -50,6 +50,7 @@
 | 0.34 | 12.11.2026 | Kleine Aufgabe K-9: Diagnose überarbeitet (13.1): Werte bei jedem Öffnen frisch gelesen, Gerät und Darstellung, Daten als Anzahlen, Würfeltest `runDiceTest` in `core/random`, Build-Kennung `__BUILD_COMMIT__` und `__BUILD_TIME__` aus der Bauanleitung, Bericht teilen oder kopieren; die letzten fünf unerwarteten Fehler unter `errors` in `meta` (7.3), geschrieben über `ErrorLogService` aus der Fehleransicht der Routen und den globalen Fehlerhandlern |
 | 0.35 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation E-40): Vorabversionen 0.x unter der echten Adresse, GitHub-Release als Pre-release, das Release erzeugt der Product Owner oder Claude Code nach Zustimmung (16.3); Build-Modus `acceptance` mit `npm run build:acceptance` für die lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol auf Port 4174 neben der veröffentlichten App (12.1, 15, 16.2, 16.6); OP-13 in 18.2 und 19 erledigt |
 | 0.36 | 15.11.2026 | Kleine Aufgabe K-8: Job `changes` in `ci.yml` erkennt reine Doku-Änderungen; `check` und `stat` überspringen dann ihre Schritte, die Läufe von `e2e` starten nicht, `e2e` besteht (16.3) |
+| 0.37 | 15.11.2026 | Klärung I3-0 Daten und Statistik (Anforderungsdokumentation 0.23, E-41 bis E-44): `Match` mit `durationMinutes`, bei Catan genau ein Sieger, Plätze werden aus den Siegpunkten berechnet und nicht gespeichert, Beteiligte bleiben die Mitglieder der Gruppe (7.1); Timer der laufenden Partie als Zeitpunkte in der Sitzung (10.2); Aufgaben von `core/results` und `core/stats` ergänzt (4.3) |
 
 ## Inhaltsverzeichnis
 
@@ -240,8 +241,8 @@ Die Regeln prüft `dependency-cruiser` bei jedem `npm run check`. Die Zusammense
 | `core/model` | Entitäten, Kennungstypen, Invarianten (Gruppengröße, eindeutige Namen, Verträglichkeit) | FA-PG-*, FA-VW-*, 3.4 |
 | `core/draws` | Person losen, Reihenfolge losen | FA-LS-* |
 | `core/generation` | Schritte, Ablaufsteuerung, Wiederholung mit Abhängigkeiten, Sitzungsmodell | FA-AB-*, 3.1, 3.5 |
-| `core/results` | Ergebnisregeln, Plausibilitätswarnungen, Sortierung von Partien | FA-ER-*, 3.6, 3.7 |
-| `core/stats` | Kennzahlen, Siegesserien, Rangliste, Diagrammdaten, Filter | FA-ST-*, 3.8 |
+| `core/results` | Ergebnisregeln, Plausibilitätswarnungen, Plätze aus Siegpunkten, Sortierung von Partien | FA-ER-*, 3.6, 3.7 |
+| `core/stats` | Kennzahlen, Siegesserien, Durststrecke, Durchschnittswerte, Rangliste, Rekorde, Diagrammdaten, Filter | FA-ST-*, 3.8 |
 | `core/exchange` | Exportformat, Schema, Migrationskette, Teilumfang, Importanalyse (K1 bis K4), Prüfung von Optionen | FA-EI-*, 3.9 |
 | `core/backup` | Aufbewahrung (15, geschützte Importpunkte), Auslöser „Täglich“, Erinnerungslogik | FA-DS-*, FA-EI-05, 3.10, 3.11 |
 
@@ -580,9 +581,10 @@ export interface Match {
   time?: LocalTime;                          // 'HH:mm'
   recordedAt: IsoTimestamp;                  // Erfassungszeitpunkt, für Sortierung (3.7) und Erinnerung
   edition?: Edition; mode?: Mode;            // nur Catan
-  winnerIds: PersonId[];                     // ≥ 1; mehrere = Unentschieden
+  winnerIds: PersonId[];                     // ≥ 1; mehrere = Unentschieden; bei Catan genau 1 (E-42)
   victoryPoints?: Record<PersonId, number>;  // für alle Beteiligten oder fehlt
   catanColors?: Record<PersonId, CatanColorKey>;
+  durationMinutes?: number;                  // nur Catan; ganze Minuten ≥ 1 (FA-ER-10)
   notes?: string;
   updatedAt: IsoTimestamp;
 }
@@ -593,6 +595,7 @@ Grundsätze:
 - **Farben als Schlüssel:** Gespeichert werden Palettenschlüssel, nie Farbwerte. Die Werte stehen ausschließlich in den Design-Tokens (NFA-GB-05, OP-11).
 - **Datum und Uhrzeit:** Datum und Uhrzeit werden als lokale Werte ohne Zeitzone gespeichert, wie sie am Tisch gemeint sind. Zeitstempel für Erfassung und Änderung sind UTC.
 - **Archivstatus und Änderungszeit** gehören nicht zum Inhalt im Sinne der Konfliktprüfung (3.9, Regel 7).
+- **Beteiligte und Plätze** *(neu in 0.37)*: Ein `Match` speichert keine eigene Liste der Beteiligten; beteiligt sind stets alle Mitglieder der Gruppe, die nach dem Anlegen unveränderlich sind (E-41). Die Plätze bei Catan (FA-ER-11) werden nicht gespeichert, sondern in `core/results` aus `victoryPoints` und `winnerIds` berechnet; so können sie nie den Siegpunkten widersprechen, und eine spätere Änderung der Regel braucht keine Migration. Die Platzierungsreihenfolge der Generierung wird nicht übernommen (PP-23).
 - **Invarianten** prüft `core/model` zentral: 2 bis 12 Mitglieder, eindeutige Namen innerhalb einer Gruppe, Verträglichkeit von Gruppe und Spiel (3.4), eindeutige Farben je Farbart. Dieselben Prüfungen nutzen Formulare, Import und Wiederherstellung.
 
 ### 7.2 Kennungen
@@ -876,6 +879,7 @@ export interface StoredSession {
 ```
 
 **Umsetzung (I2-B):** Die gespeicherte Sitzung ist `Session<C, S, G>` aus `core/generation`, in `app/ports` als `StoredSession` für Catan festgelegt. Statt `options`, `matchColors` und `hiddenPlan` enthält sie die Einrichtung `setup` (Beteiligte, Optionen, Farben der Partie als Liste in der Reihenfolge der Gruppe) und die Generierung `generation` mit Zustand, Schritten und Zustand des Spielmoduls (verdeckter Plan, übersprungene Platzierung). So bleibt `core` frei von Catan (ADR-028). `SESSION_SCHEMA_VERSION` ist 1. Der Port `SessionStore` öffnet eine Transaktion über `session` und lesend über `groups`; das Schreiben der Sitzung zählt nicht als Änderung der Nutzerdaten (7.4). *(neu in 0.21)*
+**Timer (ab I3-B, FA-AB-11):** Mit dem Übergang in `running` erhält die Sitzung den Timer als Zeitpunkte, etwa `clock: { startedAt: IsoTimestamp; pausedAt?: IsoTimestamp; pausedMs: number }`. Die Dauer wird daraus berechnet (`jetzt` bzw. `pausedAt` minus `startedAt` minus `pausedMs`); gespeichert wird nur beim Anhalten und Fortsetzen, nie im Takt der Anzeige. Die Zeit liest der Dienst über den vorhandenen Port `Clock`, damit Tests ohne echte Zeit auskommen. Der Timer ist spielunabhängig und gehört deshalb zur Sitzung in `core/generation`. Beim Speichern des Ergebnisses werden `startedAt` (lokales Datum und Uhrzeit) und die Dauer als Vorbelegung übernommen. Die Änderung erhöht `SESSION_SCHEMA_VERSION`. *(neu in 0.37)*
 **Umsetzung (I2-E):** Jeder Schritt trägt den Merker `isStaged`: Seine Bewegung ist abgelaufen oder wurde übersprungen. Ein neu geloster Schritt beginnt mit `false`; die Oberfläche setzt ihn über `markStaged`, sobald die Bewegung endet. Deshalb ist `SESSION_SCHEMA_VERSION` jetzt 3; eine Sitzung der Version 2 meldet sich als unbekannt und lässt sich beenden. *(neu in 0.32)*
 
 ### 10.3 Verhalten
