@@ -1,15 +1,27 @@
 import type { Page } from '@playwright/test';
 import type { StoredSession } from '@/app/ports';
-import { CURRENT_SESSION_ID, SESSION_SCHEMA_VERSION, startGeneration } from '@/core/generation';
+import {
+  CURRENT_SESSION_ID,
+  SESSION_SCHEMA_VERSION,
+  startClock,
+  startGeneration,
+} from '@/core/generation';
 import {
   CATAN_COLOR_KEYS,
   GROUP_COLOR_KEYS,
   matchColorsOf,
+  toGameId,
   toGroupId,
+  toMatchId,
   toPersonId,
+  type CatanColorKey,
+  type CustomGame,
   type Group,
+  type Match,
   type Person,
+  type PersonId,
 } from '@/core/model';
+import { checkResult } from '@/core/results';
 import {
   CATAN_DEFAULT_OPTIONS,
   CATAN_GAME_ID,
@@ -19,6 +31,7 @@ import {
   type CatanOptions,
   type CatanSetup,
 } from '@/games/catan';
+import { gameCapabilities } from '@/games/registry';
 import { runCatanGeneration } from '@tests/support/catanGeneration';
 import { SeededRandomSource } from '@tests/support/seededRandomSource';
 
@@ -39,6 +52,8 @@ function uuid(number: number): string {
 type SeedRecords = {
   readonly persons: readonly Person[];
   readonly groups: readonly Group[];
+  readonly games?: readonly CustomGame[];
+  readonly matches?: readonly Match[];
   readonly session?: StoredSession;
 };
 
@@ -82,7 +97,7 @@ async function writeRecords(page: Page, data: SeedRecords): Promise<void> {
   // The app creates the database with its schema on the first start.
   await page.goto('/#/');
   await page.getByRole('navigation', { name: 'Karten' }).waitFor();
-  await page.evaluate(async ({ persons, groups, session }) => {
+  await page.evaluate(async ({ persons, groups, games = [], matches = [], session }) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('boardbrain');
       request.onsuccess = () => {
@@ -92,12 +107,21 @@ async function writeRecords(page: Page, data: SeedRecords): Promise<void> {
         reject(new Error(String(request.error)));
       };
     });
-    const transaction = db.transaction(['persons', 'groups', 'session'], 'readwrite');
+    const transaction = db.transaction(
+      ['persons', 'groups', 'games', 'matches', 'session'],
+      'readwrite',
+    );
     for (const person of persons) {
       transaction.objectStore('persons').put(person);
     }
     for (const group of groups) {
       transaction.objectStore('groups').put(group);
+    }
+    for (const game of games) {
+      transaction.objectStore('games').put(game);
+    }
+    for (const match of matches) {
+      transaction.objectStore('matches').put(match);
     }
     if (session !== undefined) {
       transaction.objectStore('session').put(session);
@@ -192,9 +216,109 @@ export async function seedMatch(page: Page, match: SeedMatch): Promise<void> {
       steps: generation.steps.map((record) => ({ ...record, isStaged: true })),
     }),
     startedAt: NOW,
+    // US-AB-07: a running match has its timer, started when the generation was completed.
+    ...(generation.state === 'running' ? { clock: startClock(NOW) } : {}),
   };
   await writeRecords(page, { persons, groups, session });
   await page.goto('/#/partie');
   const overview = page.getByRole('heading', { name: 'Laufende Partie' });
   await overview.or(page.locator('main[data-page]')).first().waitFor();
+}
+
+/**
+ * A result of the seeded data. Persons are given by name, victory points in seat order.
+ */
+export type SeedResult = {
+  /** `YYYY-MM-DD` */
+  readonly date: string;
+  /** `HH:mm` */
+  readonly time?: string;
+  /** Name of a custom game; without it the result is a Catan match in the base game. */
+  readonly game?: string;
+  readonly winners: readonly string[];
+  readonly victoryPoints?: readonly number[];
+  readonly durationMinutes?: number;
+  readonly notes?: string;
+};
+
+// A result checked with the rules of the app (Specification 3.6), so seeded data is always valid.
+function matchOf(
+  result: SeedResult,
+  index: number,
+  group: Group,
+  persons: readonly Person[],
+  games: readonly CustomGame[],
+): Match {
+  const participants = group.members.map((member) => member.personId);
+  const idOf = (name: string): PersonId => {
+    const person = persons.find((candidate) => candidate.name === name);
+    if (person === undefined) throw new Error(`no person ${name}`);
+    return person.id;
+  };
+  const gameId =
+    result.game === undefined ? CATAN_GAME_ID : games.find((game) => game.name === result.game)?.id;
+  if (gameId === undefined) throw new Error(`no game ${String(result.game)}`);
+  const isCatan = gameId === CATAN_GAME_ID;
+  const victoryPoints: Record<PersonId, number> = {};
+  const catanColors: Record<PersonId, CatanColorKey> = {};
+  participants.forEach((personId, seat) => {
+    const points = result.victoryPoints?.[seat];
+    if (points !== undefined) victoryPoints[personId] = points;
+  });
+  for (const { personId, catanColor } of isCatan ? matchColorsOf(group) : []) {
+    catanColors[personId] = catanColor;
+  }
+  const checked = checkResult(
+    {
+      date: result.date,
+      ...(result.time === undefined ? {} : { time: result.time }),
+      ...(isCatan ? { edition: 'base', catanColors } : {}),
+      winnerIds: result.winners.map(idOf),
+      ...(result.victoryPoints === undefined ? {} : { victoryPoints }),
+      ...(result.durationMinutes === undefined ? {} : { durationMinutes: result.durationMinutes }),
+      ...(result.notes === undefined ? {} : { notes: result.notes }),
+    },
+    participants,
+    gameCapabilities(gameId),
+  );
+  if (!checked.ok) throw new Error(`invalid seed result: ${checked.error}`);
+  // Recorded one minute apart in the given order (Specification 3.7).
+  const recordedAt = new Date(Date.parse(NOW) + index * 60_000).toISOString();
+  return {
+    id: toMatchId(uuid(1001 + index)),
+    groupId: group.id,
+    gameId,
+    ...checked.value,
+    recordedAt,
+    updatedAt: recordedAt,
+  };
+}
+
+/**
+ * Writes a table, its custom games and results straight into the database (Development
+ * Guidelines 8.3), so a test of lists and statistics does not first enter every result in the
+ * user interface; entering is tested by the tests of US-ER-01. The results are checked with the
+ * rules of the app, Catan matches get the edition "Basisspiel" and the colours of the table.
+ * Afterwards the page shows the start view.
+ */
+export async function seedResults(
+  page: Page,
+  table: SeedTable,
+  results: readonly SeedResult[],
+): Promise<void> {
+  const { persons, groups } = recordsOf([table]);
+  const [group] = groups;
+  if (group === undefined) {
+    throw new Error('no table for the results');
+  }
+  const names = [...new Set(results.flatMap((result) => result.game ?? []))];
+  const games: CustomGame[] = names.map((name, index) => ({
+    id: toGameId(uuid(201 + index)),
+    name,
+    archived: false,
+    createdAt: NOW,
+    updatedAt: NOW,
+  }));
+  const matches = results.map((result, index) => matchOf(result, index, group, persons, games));
+  await writeRecords(page, { persons, groups, games, matches });
 }

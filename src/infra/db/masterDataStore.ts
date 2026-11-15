@@ -1,21 +1,8 @@
 import type { MasterDataRepositories, MasterDataStore } from '@/app/ports';
 import { CURRENT_SESSION_ID } from '@/core/generation';
-import type { IsoTimestamp } from '@/core/model';
 import { assert } from '@/core/shared';
 import type { BoardBrainDb } from './database';
-
-/**
- * Records a change of user data in `meta.state` (Architecture 7.4). Called by every
- * repository write inside the same transaction, so no change can be forgotten.
- */
-async function recordUserDataChange(db: BoardBrainDb, at: IsoTimestamp): Promise<void> {
-  const entry = await db.meta.get('state');
-  const state = entry?.key === 'state' ? entry.value : {};
-  await db.meta.put({
-    key: 'state',
-    value: { ...state, lastUserDataChangeAt: at, firstDataAt: state.firstDataAt ?? at },
-  });
-}
+import { recordUserDataChange } from './userDataChange';
 
 function repositories(db: BoardBrainDb): MasterDataRepositories {
   return {

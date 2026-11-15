@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.37 |
+| Version | 0.38 |
 | Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
@@ -50,6 +50,7 @@
 | 0.35 | 13.11.2026 | Release 0.2.0 vorbereitet (#46): Version und `CHANGELOG.md` (4b) |
 | 0.36 | 15.11.2026 | Release 0.2.0 veröffentlicht (#47); K-8 umgesetzt (#48): Doku-PRs auf GitHub schnell grün; Zuschnitt von I3 (neu Kapitel 9): zuerst Klärung der Daten und Statistiken (I3-0), dann I3-A bis I3-E und Release 0.3.0; Löschen eines Ergebnisses in I3 ohne Sicherungspunkt, dieser folgt mit I4 (Entscheidungen des Product Owners 15.11.2026) (2, 3, 4.1, 6, 7, 9) |
 | 0.37 | 15.11.2026 | I3-0 umgesetzt (#49): Daten und Statistik geklärt (Anforderungsdokumentation 0.23, Spezifikation 0.19, Architektur 0.37); Inhalte von I3-A bis I3-E angepasst, neue Stories US-AB-07 und US-ST-05, offene Punkte für die Vorschauen je Bündel (2, 9) |
+| 0.38 | 15.11.2026 | I3-A umgesetzt (#50): Ergebnisregeln, Timer und `ResultService`; Entscheidungen des Product Owners zum Timer nach einer Wiederholung und zum Bearbeiten (Spezifikation 0.20), keine Prüfseite (2, 9) |
 
 ## 1. Zweck
 
@@ -75,7 +76,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 4 | Entscheidung über Vorabversionen (OP-13) und lokale Abnahme-App mit lila Symbol | nach I2 | umgesetzt (#45) |
 | 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | veröffentlicht: vorbereitet (#46), Release-PR nach `main` (#47), Tag `v0.2.0` |
 | 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | umgesetzt (#48) |
-| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-B, I3-C, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49) |
+| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-B, I3-C, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50) |
 | 5a | Release 0.3.0 als Vorabversion nach Richtlinien 3.8 | nach I3 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
 | 7 | Inkrement I5 Verwaltung und Archiv | nach I4 | offen |
@@ -396,7 +397,7 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 | Bündel | Stories | Modell, Aufwand | Branch | Status |
 |---|---|---|---|---|
 | I3-0 Daten und Statistik klären | FA-ER-*, FA-ST-*, Spezifikation 3.6 bis 3.8, US-ER-*, US-ST-*; Spielliste: US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3 | Opus, medium | `docs/i3-results-and-statistics-data` | umgesetzt (#49) |
-| I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 und US-AB-07 (Dienst) | Opus, high | `feat/us-er-01-results-service` | offen |
+| I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 und US-AB-07 (Dienst) | Opus, high | `feat/us-er-01-results-service` | umgesetzt (#50) |
 | I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-ER-01, US-ER-02, US-ER-03 AK-1, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | offen |
 | I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | Sonnet, medium | `feat/us-er-04-result-list` | offen |
 | I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
@@ -419,6 +420,11 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 
 - **Inhalt:** Entität `Match` in `core/model` (Architektur 7.1, mit `durationMinutes`); in `core/results` die Regeln aus Spezifikation 3.6 (Pflichtfelder, Verträglichkeit von Gruppe und Spiel, Sieger, bei Catan genau einer, Siegpunkte für alle oder keinen als ganze Zahlen ab 0, Spieldauer nur bei Catan), die Plausibilitätswarnungen, die Plätze aus den Siegpunkten und die Reihenfolge nach 3.7. Timer der laufenden Partie im `SessionService` (Beginn beim Übergang in „Laufend“, anhalten, fortsetzen; Architektur 10.2, neue `SESSION_SCHEMA_VERSION`). *(ergänzt in 0.37)* Repository für `matches` in `infra/db` (der Store besteht seit Schemaversion 1, keine Migration), Lesehooks. `ResultService` (Architektur 4.4): erfassen, bearbeiten, löschen; Ergebnis aus der laufenden Partie speichern und die Sitzung in derselben Transaktion beenden (US-AB-06 AK-2). Testhelfer für Ergebnisse in `tests/e2e/seedDatabase.ts`.
 - **Ohne Oberfläche:** Wie in I2-B bietet Claude Code zur Abnahme eine lokale Prüfseite an.
+- **Umgesetzt (#50), Entscheidungen des Product Owners 15.11.2026:**
+  - **Timer nach einer Wiederholung (US-AB-07 AK-5):** Wiederholt jemand nach Abschluss der Generierung einen Schritt, läuft der Timer weiter und beginnt nicht neu; eine falsche Dauer lässt sich im Formular korrigieren.
+  - **Bearbeiten (US-ER-05 AK-4):** Gruppe und Spiel eines Ergebnisses stehen fest, alles andere ist änderbar, auch bei einer inzwischen archivierten Gruppe. Wer die falsche Gruppe erwischt hat, löscht und trägt neu ein.
+  - **Keine Prüfseite:** Ohne das Design aus I3-B gäbe sie ein falsches Bild; die Abnahme stützt sich auf die Tests je Abnahmekriterium (PR #50).
+  - **Für I3-B bereit:** `draft` und `draftFromSession` liefern die Startwerte samt Beteiligten und Regeln des Spiels, `resultErrors` alle Fehler für die Prüfung beim Tippen, `plausibilityWarnings` die Warnungen vor dem Speichern, `placesOf` die Plätze; `pauseClock`/`resumeClock` im `SessionService`; `seedResults` für E2E-Tests (Architektur 4.4, 7.1, 10.2).
 
 ### I3-B Spielliste und Ergebnis eintragen
 

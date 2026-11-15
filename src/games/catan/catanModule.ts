@@ -1,5 +1,7 @@
 import { CATAN_COLOR_KEYS, toGameId } from '@/core/model';
 import type { GameModule } from '@/games/types';
+import { CATAN_MODES } from './generation/options';
+import { CATAN_EDITIONS } from './placement/rounds';
 
 /**
  * Built-in id of Catan, the same on every device and recognised automatically on import
@@ -9,7 +11,8 @@ export const CATAN_GAME_ID = toGameId('c47a0000-0000-4000-8000-000000000001');
 
 /**
  * Game module Catan for 2 to 4 persons with player colours and victory points (FA-SP-01,
- * FA-SP-05).
+ * FA-SP-05); a result has an edition, exactly one winner and may have a duration (FA-ER-03,
+ * FA-ER-07, FA-ER-10).
  */
 export const CATAN_MODULE = {
   id: CATAN_GAME_ID,
@@ -17,4 +20,8 @@ export const CATAN_MODULE = {
   playerCount: { min: 2, max: 4 },
   playerColors: CATAN_COLOR_KEYS,
   supportsVictoryPoints: true,
+  editions: CATAN_EDITIONS,
+  modes: CATAN_MODES,
+  hasSingleWinner: true,
+  tracksDuration: true,
 } as const satisfies GameModule;

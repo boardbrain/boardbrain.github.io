@@ -6,6 +6,8 @@ import type {
   Group,
   GroupId,
   IsoTimestamp,
+  Match,
+  MatchId,
   Person,
   PersonId,
 } from '@/core/model';
@@ -65,13 +67,13 @@ export const DATABASE_NAME = 'boardbrain';
 
 /**
  * The IndexedDB database of BoardBrain (Architecture 7.3, ADR-007). Only `infra/db` uses it;
- * writes go through the repositories. Tables of matches and snapshots get their types with
- * their increments.
+ * writes go through the repositories. The table of snapshots gets its type with its increment.
  */
 export class BoardBrainDb extends Dexie {
   readonly persons: Table<Person, PersonId>;
   readonly groups: Table<Group, GroupId>;
   readonly games: Table<CustomGame, GameId>;
+  readonly matches: Table<Match, MatchId>;
   readonly meta: Table<MetaEntry, MetaEntry['key']>;
   readonly session: Table<StoredSession, StoredSession['id']>;
 
@@ -95,6 +97,7 @@ export class BoardBrainDb extends Dexie {
     this.persons = this.table('persons');
     this.groups = this.table('groups');
     this.games = this.table('games');
+    this.matches = this.table('matches');
     this.meta = this.table('meta');
     this.session = this.table('session');
   }

@@ -1,8 +1,7 @@
 /**
  * Public interface of the module `core/model`: entities, identifier types and invariants (FA-PG-*, FA-VW-*).
  *
- * Other modules import only through this file (Architecture 4.3). Matches follow with their
- * increment.
+ * Other modules import only through this file (Architecture 4.3).
  */
 export {
   CATAN_COLOR_KEYS,
@@ -49,6 +48,16 @@ export {
 } from './groupColors';
 export { findGroups, type GroupMatch } from './groupSearch';
 export {
+  parseLocalDate,
+  parseLocalTime,
+  type DateInvalidError,
+  type LocalDate,
+  type LocalDateTime,
+  type LocalTime,
+  type TimeInvalidError,
+} from './localDateTime';
+export type { Match } from './match';
+export {
   areMatchColorsValid,
   matchColorsOf,
   setMatchColor,
@@ -59,13 +68,16 @@ export {
   isUuidV4,
   parseGameId,
   parseGroupId,
+  parseMatchId,
   parsePersonId,
   toGameId,
   toGroupId,
+  toMatchId,
   toPersonId,
   type GameId,
   type GroupId,
   type IdInvalidError,
+  type MatchId,
   type PersonId,
 } from './ids';
 export { countFellowPlayers, findPersons, tablesOfPerson, type PersonTable } from './overview';

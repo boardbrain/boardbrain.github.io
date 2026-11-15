@@ -6,11 +6,15 @@ import type {
   StoredSession,
 } from '@/app/ports';
 import {
+  parseLocalDate,
+  parseLocalTime,
   toGameId,
   toGroupId,
   toPersonId,
   type CustomGame,
   type Group,
+  type IsoTimestamp,
+  type LocalDateTime,
   type Person,
 } from '@/core/model';
 import { assert } from '@/core/shared';
@@ -21,10 +25,45 @@ import { assert } from '@/core/shared';
 export const TEST_NOW = '2026-10-07T18:30:00.000Z';
 
 /**
- * Clock that always returns the same time.
+ * Date and time of day of a moment as a test clock gives them: in UTC, so tests do not depend
+ * on the time zone of the machine.
+ */
+export function utcDateTime(at: IsoTimestamp): LocalDateTime {
+  const date = parseLocalDate(at.slice(0, 10));
+  const time = parseLocalTime(at.slice(11, 16));
+  assert(date.ok && time.ok, `the moment ${at} is a timestamp in ISO 8601 format`);
+  return { date: date.value, time: time.value };
+}
+
+/**
+ * Clock that always returns the same time; date and time of day in UTC.
  */
 export function fixedClock(now: string = TEST_NOW): Clock {
-  return { now: () => now };
+  return { now: () => now, localDateTime: utcDateTime };
+}
+
+/**
+ * Clock whose time a test sets, e.g. to let a timer run; date and time of day in UTC.
+ */
+export class SettableClock implements Clock {
+  current: IsoTimestamp;
+
+  constructor(now: IsoTimestamp = TEST_NOW) {
+    this.current = now;
+  }
+
+  now(): IsoTimestamp {
+    return this.current;
+  }
+
+  localDateTime(at: IsoTimestamp): LocalDateTime {
+    return utcDateTime(at);
+  }
+
+  /** Moves the time forward by `minutes`. */
+  advance(minutes: number): void {
+    this.current = new Date(Date.parse(this.current) + minutes * 60_000).toISOString();
+  }
 }
 
 /**

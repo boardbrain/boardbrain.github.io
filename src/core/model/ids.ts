@@ -105,3 +105,31 @@ export function parseGroupId(value: string): Result<GroupId, IdInvalidError> {
 export function parseGameId(value: string): Result<GameId, IdInvalidError> {
   return isGameId(value) ? ok(value) : err('id-invalid');
 }
+
+/**
+ * Identifier of a match with result: UUID version 4 (NFA-DH-05, ADR-011).
+ */
+export type MatchId = BrandedId<'MatchId'>;
+
+function isMatchId(value: string): value is MatchId {
+  return isUuidV4(value);
+}
+
+/**
+ * Turns a freshly generated UUID into a match id.
+ * @throws {InvariantError} if the value is not a UUID version 4.
+ */
+export function toMatchId(value: string): MatchId {
+  if (!isMatchId(value)) {
+    throw new InvariantError(`Not a UUID v4 match id: ${value}`);
+  }
+  return value;
+}
+
+/**
+ * Reads a match id from outside, e.g. from the address of a result (US-ER-04 AK-2). Unlike
+ * `toMatchId` a wrong value is an expected error.
+ */
+export function parseMatchId(value: string): Result<MatchId, IdInvalidError> {
+  return isMatchId(value) ? ok(value) : err('id-invalid');
+}

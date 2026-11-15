@@ -3,19 +3,26 @@ import {
   CURRENT_SESSION_ID,
   drawNextStep,
   markStaged,
+  pauseClock,
   repeatStep,
+  resumeClock,
   revealedStepIndex,
   SESSION_SCHEMA_VERSION,
+  startClock,
   startGeneration,
   withGameState,
+  type ClockPausedError,
+  type ClockRunningError,
   type GenerationCompleteError,
   type NoSuchStepError,
+  type SessionClock,
 } from '@/core/generation';
 import {
   areMatchColorsValid,
   matchColorsOf,
   type Group,
   type GroupId,
+  type IsoTimestamp,
   type MatchColor,
   type MatchColors,
   type PersonId,
@@ -72,6 +79,12 @@ export type StepChangedError = 'step-changed';
  * Error code when "Weiter" is tapped but no step waits for confirmation.
  */
 export type NothingToConfirmError = 'nothing-to-confirm';
+
+/**
+ * Error code when the timer is paused or resumed before the generation was completed
+ * (US-AB-07 AK-1).
+ */
+export type ClockNotStartedError = 'clock-not-started';
 
 /**
  * Why the stored session cannot be worked with.
@@ -178,6 +191,16 @@ export type SessionService = {
    */
   markStaged(index: number): Promise<Result<StoredSession, SessionAccessError | NoSuchStepError>>;
   /**
+   * Pauses the timer of the match (US-AB-07 AK-2); it stays paused after a restart (AK-3).
+   */
+  pauseClock(): Promise<
+    Result<StoredSession, SessionAccessError | ClockNotStartedError | ClockPausedError>
+  >;
+  /** Resumes the paused timer; the paused time does not count (US-AB-07 AK-2). */
+  resumeClock(): Promise<
+    Result<StoredSession, SessionAccessError | ClockNotStartedError | ClockRunningError>
+  >;
+  /**
    * Ends the match without a result: the generation is discarded and nothing is stored
    * (US-AB-06 AK-3, AK-4). Also possible for a session of unknown version.
    */
@@ -214,6 +237,16 @@ async function findGroup(repositories: SessionRepositories, groupId: GroupId): P
   return group;
 }
 
+// FA-AB-11, US-AB-07 AK-1: the timer starts when the generation is completed for the first time.
+// A step repeated afterwards keeps it running (US-AB-07 AK-5): the
+// group is playing already, and the duration can be corrected in the result form.
+function withClock(session: StoredSession, now: IsoTimestamp): StoredSession {
+  if (session.generation.state !== 'running' || session.clock !== undefined) {
+    return session;
+  }
+  return { ...session, clock: startClock(now) };
+}
+
 // Confirms the revealed step, if there is one (US-AB-02 AK-1).
 function confirmRevealed(setup: CatanSetup, generation: CatanGeneration): CatanGeneration {
   const confirmed = confirmStep(CATAN_GENERATION, setup, generation);
@@ -240,7 +273,29 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
       if (!changed.ok) {
         return changed;
       }
-      const session: StoredSession = { ...read.value, generation: changed.value };
+      const session = withClock({ ...read.value, generation: changed.value }, clock.now());
+      await repositories.session.put(session);
+      return ok(session);
+    });
+  }
+
+  // Pauses or resumes the timer; only these changes store it (Architecture 10.2).
+  function changeClock<E extends string>(
+    work: (timer: SessionClock, now: IsoTimestamp) => Result<SessionClock, E>,
+  ): Promise<Result<StoredSession, SessionAccessError | ClockNotStartedError | E>> {
+    return store.transaction(async (repositories) => {
+      const read = await readSession(repositories);
+      if (!read.ok) {
+        return read;
+      }
+      if (read.value.clock === undefined) {
+        return err('clock-not-started');
+      }
+      const changed = work(read.value.clock, clock.now());
+      if (!changed.ok) {
+        return changed;
+      }
+      const session: StoredSession = { ...read.value, clock: changed.value };
       await repositories.session.put(session);
       return ok(session);
     });
@@ -295,16 +350,19 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
         );
         const setup: CatanSetup = { participants, options, colors };
         const started = startGeneration<CatanStep, CatanGameState>(CATAN_INITIAL_GAME_STATE);
-        const session: StoredSession = {
-          id: CURRENT_SESSION_ID,
-          schemaVersion: SESSION_SCHEMA_VERSION,
-          gameId: CATAN_GAME_ID,
-          groupId,
-          setup,
-          // E-35: nothing is drawn yet; without any step the match is running at once.
-          generation: withGameState(CATAN_GENERATION, setup, started, started.gameState),
-          startedAt: clock.now(),
-        };
+        const session = withClock(
+          {
+            id: CURRENT_SESSION_ID,
+            schemaVersion: SESSION_SCHEMA_VERSION,
+            gameId: CATAN_GAME_ID,
+            groupId,
+            setup,
+            // E-35: nothing is drawn yet; without any step the match is running at once.
+            generation: withGameState(CATAN_GENERATION, setup, started, started.gameState),
+            startedAt: clock.now(),
+          },
+          clock.now(),
+        );
         await repositories.session.put(session);
         return ok(session);
       });
@@ -365,6 +423,14 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
 
     markStaged(index) {
       return change((session) => markStaged(session.generation, index));
+    },
+
+    pauseClock() {
+      return changeClock((timer, now) => pauseClock(timer, now));
+    },
+
+    resumeClock() {
+      return changeClock((timer, now) => resumeClock(timer, now));
     },
 
     endWithoutResult() {

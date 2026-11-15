@@ -1,5 +1,5 @@
-import type { CatanColorKey, GameId } from '@/core/model';
-import { CATAN_MODULE } from '@/games/catan';
+import type { CatanColorKey, GameId, Group } from '@/core/model';
+import { CATAN_GAME_ID, CATAN_MODULE, canPlayCatan } from '@/games/catan';
 import type { GameModule } from '@/games/types';
 
 /**
@@ -21,12 +21,24 @@ export type GameCapabilities = {
   readonly isSupported: boolean;
   readonly playerColors: readonly CatanColorKey[] | null;
   readonly supportsVictoryPoints: boolean;
+  /** Keys of the editions; empty for a game without editions (FA-ER-03). */
+  readonly editions: readonly string[];
+  /** Keys of the modes, the first is the default; empty for a game without modes (FA-ER-03). */
+  readonly modes: readonly string[];
+  /** Whether a match has exactly one winner (FA-ER-07, E-42). */
+  readonly hasSingleWinner: boolean;
+  /** Whether the duration of a match is recorded (FA-ER-10, E-43). */
+  readonly tracksDuration: boolean;
 };
 
 const CUSTOM_GAME_CAPABILITIES: GameCapabilities = {
   isSupported: false,
   playerColors: null,
   supportsVictoryPoints: false,
+  editions: [],
+  modes: [],
+  hasSingleWinner: false,
+  tracksDuration: false,
 };
 
 /**
@@ -38,7 +50,8 @@ export function findSupportedGame(gameId: GameId): SupportedGame | undefined {
 
 /**
  * Capabilities of a game, so the UI need not distinguish modules from custom games
- * (Architecture 5.1). FA-SP-05: custom games have no player colours and no victory points.
+ * (Architecture 5.1). FA-SP-05: custom games have no player colours and no victory points;
+ * FA-ER-03, FA-ER-07, FA-ER-10: no edition, no mode, draws possible and no duration.
  */
 export function gameCapabilities(gameId: GameId): GameCapabilities {
   const game = findSupportedGame(gameId);
@@ -49,5 +62,22 @@ export function gameCapabilities(gameId: GameId): GameCapabilities {
     isSupported: true,
     playerColors: game.playerColors,
     supportsVictoryPoints: game.supportsVictoryPoints,
+    editions: game.editions,
+    modes: game.modes,
+    hasSingleWinner: game.hasSingleWinner,
+    tracksDuration: game.tracksDuration,
   };
+}
+
+/**
+ * Whether a group can play a game (Specification 3.4, US-ER-01 AK-5): it is active, and a
+ * supported game accepts it, e.g. Catan only with 2 to 4 members; a custom game is open to global
+ * groups and to the groups bound to it. Whether the game itself is active is checked by the
+ * caller, which knows the custom games.
+ */
+export function canGroupPlay(group: Group, gameId: GameId): boolean {
+  if (gameId === CATAN_GAME_ID) {
+    return canPlayCatan(group);
+  }
+  return !group.archived && (group.binding.kind === 'global' || group.binding.gameId === gameId);
 }
