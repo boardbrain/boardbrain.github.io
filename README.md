@@ -6,7 +6,7 @@ BoardBrain ist eine Progressive Web App für den Spieleabend. Bei Catan übernim
 
 ## Stand
 
-BoardBrain befindet sich in der Entwicklung. Unter der Adresse läuft bis zu Release 1.0 nur ein technischer Platzhalter (Version 0.1.0).
+BoardBrain befindet sich in der Entwicklung. Bis zu Release 1.0 erscheinen unter der Adresse Vorabversionen (0.x) mit dem jeweils fertigen Stand. Für gespeicherte Daten gibt es bis dahin kein Versprechen: Eine neue Vorabversion kann sie verwerfen.
 
 ## Lizenz
 

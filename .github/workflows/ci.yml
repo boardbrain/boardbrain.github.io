@@ -1,6 +1,9 @@
 # Checks for every pull request into develop or main (Architecture 16.3), only for new commits
 # (opened, synchronize, reopened): editing a pull request runs only pr-title.yml.
 # The rulesets refer to the job names check, e2e, stat and guard-main; pr-title is in pr-title.yml.
+# K-8: a pull request that only changes documentation (docs/, README.md, CLAUDE.md) passes quickly:
+# check and stat skip their steps, the end-to-end runners do not start, e2e passes. No paths-ignore,
+# because required checks would then never report and the merge would wait forever.
 name: CI
 
 on:
@@ -15,24 +18,71 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Time limits per job: a hanging step (e.g. apt-get) fails quickly instead of after 6 hours.
-  check:
+  # K-8: decides whether the pull request only changes documentation. Compares with the merge base
+  # of the target branch, so new commits on develop do not count. --no-renames lists both paths of a
+  # moved file, so moving code into docs/ still counts as a code change. An empty list counts as code.
+  # Fail-safe: if this job fails, its output is empty and every other job runs in full.
+  changes:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
+    outputs:
+      docs-only: ${{ steps.diff.outputs.docs-only }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+        with:
+          fetch-depth: 0
+      - name: List changed files
+        id: diff
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          changed=$(git diff --name-only --no-renames "$BASE_SHA...$HEAD_SHA")
+          echo "Changed files:"
+          echo "$changed"
+          if [ -n "$changed" ] && ! grep -qvE '^(docs/.+|README\.md|CLAUDE\.md)$' <<< "$changed"; then
+            docs_only=true
+          else
+            docs_only=false
+          fi
+          echo "Only documentation: $docs_only"
+          echo "docs-only=$docs_only" >> "$GITHUB_OUTPUT"
+
+  # Time limits per job: a hanging step (e.g. apt-get) fails quickly instead of after 6 hours.
+  # K-8: the job always runs (also if changes failed) and skips its steps for documentation only;
+  # a skipped required job would count as passed even when changes failed.
+  check:
+    needs: changes
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOCS_ONLY: ${{ needs.changes.outputs.docs-only }}
+    steps:
+      - name: Only documentation changed, nothing to check
+        if: env.DOCS_ONLY == 'true'
+        run: echo "Only docs/, README.md or CLAUDE.md changed (K-8)."
+      - if: env.DOCS_ONLY != 'true'
+        uses: actions/checkout@v7
+      - if: env.DOCS_ONLY != 'true'
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
-      - run: npm run check
+      - if: env.DOCS_ONLY != 'true'
+        run: npm ci
+      - if: env.DOCS_ONLY != 'true'
+        run: npm run check
       - name: Vulnerabilities in production dependencies
+        if: env.DOCS_ONLY != 'true'
         run: npm audit --omit=dev --audit-level=high
 
   # Reads the installed Playwright version from the lock file, so the container image below
   # always matches it exactly and cannot drift after a dependency update.
+  # K-8: not needed for documentation only.
   playwright-version:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs-only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -60,10 +110,11 @@ jobs:
   # minutes). Every test still runs on every device.
   e2e-form:
     name: e2e ${{ matrix.form }}
-    needs: playwright-version
+    needs: [changes, playwright-version]
     # Run even if playwright-version failed: the job e2e below then fails as well, because a
-    # missing version yields an invalid image.
-    if: ${{ !cancelled() }}
+    # missing version yields an invalid image. K-8: do not start for documentation only; the
+    # container would be pulled before any step could be skipped.
+    if: ${{ !cancelled() && needs.changes.outputs.docs-only != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -96,34 +147,49 @@ jobs:
           retention-days: 7
 
   # The required check e2e: passes only if all runners passed. A skipped or failed runner fails it,
-  # because a skipped required check would count as passed.
+  # because a skipped required check would count as passed. K-8: for documentation only it passes
+  # without runners.
   e2e:
-    needs: e2e-form
+    needs: [changes, e2e-form]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: End-to-end tests passed on all device forms
         env:
+          DOCS_ONLY: ${{ needs.changes.outputs.docs-only }}
           RESULT: ${{ needs.e2e-form.result }}
         run: |
-          if [ "$RESULT" != "success" ]; then
+          if [ "$DOCS_ONLY" = "true" ]; then
+            echo "Only docs/, README.md or CLAUDE.md changed (K-8), no end-to-end tests needed."
+          elif [ "$RESULT" != "success" ]; then
             echo "::error::End-to-end tests: $RESULT"
             exit 1
           fi
 
+  # K-8: like check, runs always and skips its steps for documentation only.
   stat:
-    if: github.base_ref == 'main'
+    needs: changes
+    if: ${{ !cancelled() && github.base_ref == 'main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      DOCS_ONLY: ${{ needs.changes.outputs.docs-only }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - name: Only documentation changed, nothing to check
+        if: env.DOCS_ONLY == 'true'
+        run: echo "Only docs/, README.md or CLAUDE.md changed (K-8)."
+      - if: env.DOCS_ONLY != 'true'
+        uses: actions/checkout@v7
+      - if: env.DOCS_ONLY != 'true'
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
-      - run: npm run test:stat
+      - if: env.DOCS_ONLY != 'true'
+        run: npm ci
+      - if: env.DOCS_ONLY != 'true'
+        run: npm run test:stat
 
   guard-main:
     if: github.base_ref == 'main'

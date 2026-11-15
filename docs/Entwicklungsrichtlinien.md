@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.15 |
+| Version | 0.16 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 12.11.2026 |
+| Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -30,6 +30,7 @@
 | 0.13 | 11.11.2026 | Kleine Aufgabe K-6: Ende-zu-Ende-Tests nach dem Losen beginnen mit einer Partie aus `seedMatch` (8.3) |
 | 0.14 | 11.11.2026 | Kleine Aufgabe K-5: unerwartete Fehler einer Ansicht fängt die Fehleransicht der Routen statt einer eigenen Error Boundary je Ansicht; der Fehlerbildschirm nutzt `PressableButton` und bietet „Zum Start“ und „Details kopieren“ (6, 7.2) |
 | 0.15 | 12.11.2026 | OP-13 (Anforderungsdokumentation E-40): Vorabversionen 0.x je Inkrement (3.7); das Release erzeugt der Product Owner selbst auf GitHub oder Claude Code nach Zustimmung, vor 1.0 als Pre-release markiert (3.8) |
+| 0.16 | 15.11.2026 | Kleine Aufgabe K-8: Reine Doku-Änderungen sind auch auf GitHub schnell grün; `check` und `stat` überspringen ihre Schritte, die Ende-zu-Ende-Läufe entfallen (3.6) |
 
 ## Inhaltsverzeichnis
 
@@ -223,7 +224,7 @@ Automatisch geprüft: ja, die Schutzregeln (Rulesets) erlauben je Branch nur die
 | `develop` | `npm run check`, `npm run test:e2e` | `check`, `e2e`, `pr-title` |
 | `main` | zusätzlich `npm run test:stat` | zusätzlich `stat` und `guard-main` (nur aus `develop` oder `hotfix/…`) |
 
-**Reine Doku-Änderungen** *(neu in 0.9)*: Ändert ein Pull Request nur Dateien unter `docs/` sowie `README.md` oder `CLAUDE.md`, entfallen die lokalen Prüfungen. Keine von ihnen prüft diese Dateien (Prettier lässt Markdown aus, 4.2), und der Code ist derselbe, der auf `develop` schon bestanden hat. Claude Code belegt das vor dem Push mit `git diff --name-only origin/develop` und nennt es in der Beschreibung des Pull Requests. Ist auch nur eine andere Datei geändert, gelten die lokalen Prüfungen wie oben. Auf GitHub laufen alle Prüfungen unverändert.
+**Reine Doku-Änderungen** *(neu in 0.9)*: Ändert ein Pull Request nur Dateien unter `docs/` sowie `README.md` oder `CLAUDE.md`, entfallen die lokalen Prüfungen. Keine von ihnen prüft diese Dateien (Prettier lässt Markdown aus, 4.2), und der Code ist derselbe, der auf `develop` schon bestanden hat. Claude Code belegt das vor dem Push mit `git diff --name-only origin/develop` und nennt es in der Beschreibung des Pull Requests. Ist auch nur eine andere Datei geändert, gelten die lokalen Prüfungen wie oben. Auf GitHub erkennt der Job `changes` solche Pull Requests auf dieselbe Weise: `check` und `stat` überspringen ihre Schritte und melden „bestanden“, die drei Ende-zu-Ende-Läufe starten nicht, und `e2e` meldet „bestanden“. Ein gemischter Pull Request wird immer voll geprüft *(geändert in 0.16, K-8; bis 0.15 liefen auf GitHub alle Prüfungen unverändert)*.
 
 Details der Jobs: Architektur 16.3.
 
