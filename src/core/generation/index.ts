@@ -20,6 +20,15 @@ export {
   type NoSuchStepError,
   type StepPendingError,
 } from './flow';
+export {
+  elapsedMilliseconds,
+  pauseClock,
+  resumeClock,
+  startClock,
+  type ClockPausedError,
+  type ClockRunningError,
+  type SessionClock,
+} from './clock';
 export { CURRENT_SESSION_ID, SESSION_SCHEMA_VERSION, type Session } from './session';
 export type {
   DrawnStep,

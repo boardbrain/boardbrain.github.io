@@ -1,6 +1,11 @@
 import type { Page } from '@playwright/test';
 import type { StoredSession } from '@/app/ports';
-import { CURRENT_SESSION_ID, SESSION_SCHEMA_VERSION, startGeneration } from '@/core/generation';
+import {
+  CURRENT_SESSION_ID,
+  SESSION_SCHEMA_VERSION,
+  startClock,
+  startGeneration,
+} from '@/core/generation';
 import {
   CATAN_COLOR_KEYS,
   GROUP_COLOR_KEYS,
@@ -192,6 +197,8 @@ export async function seedMatch(page: Page, match: SeedMatch): Promise<void> {
       steps: generation.steps.map((record) => ({ ...record, isStaged: true })),
     }),
     startedAt: NOW,
+    // US-AB-07: a running match has its timer, started when the generation was completed.
+    ...(generation.state === 'running' ? { clock: startClock(NOW) } : {}),
   };
   await writeRecords(page, { persons, groups, session });
   await page.goto('/#/partie');

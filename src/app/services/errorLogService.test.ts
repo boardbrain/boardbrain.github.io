@@ -1,3 +1,4 @@
+import { utcDateTime } from '@tests/support/masterDataFakes';
 import { describe, expect, it, vi } from 'vitest';
 import type { Clock, ErrorLogEntry, ErrorLogStore } from '@/app/ports';
 import {
@@ -30,6 +31,7 @@ function clockAt(...times: string[]): Clock {
       index += 1;
       return time;
     },
+    localDateTime: utcDateTime,
   };
 }
 

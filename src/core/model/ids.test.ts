@@ -5,9 +5,11 @@ import {
   isUuidV4,
   parseGameId,
   parseGroupId,
+  parseMatchId,
   parsePersonId,
   toGameId,
   toGroupId,
+  toMatchId,
   toPersonId,
 } from './ids';
 
@@ -49,6 +51,13 @@ describe('NFA-DH-05 identifiers', () => {
     expect(toGroupId(uuid)).toBe(uuid);
   });
 
+  it('turns a UUID into a match id unchanged', () => {
+    const uuid = 'c47a0000-0000-4000-8000-000000000001';
+
+    expect(toMatchId(uuid)).toBe(uuid);
+    expect(() => toMatchId('42')).toThrow(InvariantError);
+  });
+
   it('throws an invariant error for a value that is not a group UUID', () => {
     expect(() => toGroupId('42')).toThrow(InvariantError);
   });
@@ -70,6 +79,10 @@ describe('US-VW-05 identifiers from an address', () => {
     expect(parseGroupId(uuid)).toEqual({ ok: true, value: uuid });
   });
 
+  it('US-ER-04 AK-2: reads a match id from a valid UUID', () => {
+    expect(parseMatchId(uuid)).toEqual({ ok: true, value: uuid });
+  });
+
   it('US-VW-07: reads a game id from a valid UUID', () => {
     expect(parseGameId(uuid)).toEqual({ ok: true, value: uuid });
   });
@@ -82,5 +95,6 @@ describe('US-VW-05 identifiers from an address', () => {
     expect(parsePersonId(value)).toEqual({ ok: false, error: 'id-invalid' });
     expect(parseGroupId(value)).toEqual({ ok: false, error: 'id-invalid' });
     expect(parseGameId(value)).toEqual({ ok: false, error: 'id-invalid' });
+    expect(parseMatchId(value)).toEqual({ ok: false, error: 'id-invalid' });
   });
 });

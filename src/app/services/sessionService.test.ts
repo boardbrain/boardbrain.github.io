@@ -5,13 +5,14 @@ import {
   fixedClock,
   InMemoryMasterDataStore,
   sequentialIds,
+  SettableClock,
   TEST_NOW,
 } from '@tests/support/masterDataFakes';
 import { SeededRandomSource } from '@tests/support/seededRandomSource';
-import { InMemorySessionStore } from '@tests/support/sessionFakes';
+import { aStoredSession, InMemorySessionStore } from '@tests/support/sessionFakes';
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { StoredSession } from '@/app/ports';
-import { revealedStepIndex, stepsDiscardedBy } from '@/core/generation';
+import type { Clock, StoredSession } from '@/app/ports';
+import { elapsedMilliseconds, revealedStepIndex, stepsDiscardedBy } from '@/core/generation';
 import { CATAN_COLOR_KEYS, toGroupId, type Group, type MemberColors } from '@/core/model';
 import { InvariantError, type Result } from '@/core/shared';
 import {
@@ -52,10 +53,13 @@ let store: InMemorySessionStore;
 
 // One "launch" of the app: a new service on the same storage, so nothing survives in memory.
 // Infra tests show that the Dexie storage itself survives reopening (sessionStore.test.ts).
-function launch(seed = 1): { service: SessionService; store: InMemorySessionStore } {
+function launch(
+  seed = 1,
+  clock: Clock = fixedClock(),
+): { service: SessionService; store: InMemorySessionStore } {
   const service = createSessionService({
     store,
-    clock: fixedClock(),
+    clock,
     rng: new SeededRandomSource(seed),
   });
   return { service, store };
@@ -141,7 +145,7 @@ describe('US-AB-01 Prepare and start a match', () => {
 
     expect(session).toEqual({
       id: 'current',
-      schemaVersion: 3,
+      schemaVersion: 4,
       gameId: CATAN_GAME_ID,
       groupId: FOUR.id,
       setup: { participants: CATAN_TEST_PERSONS, options: ALL_ON, colors },
@@ -595,5 +599,105 @@ describe('FA-AB-07 and US-IN-04 Animation played once (service)', () => {
     await value(service.repeatStep(0));
 
     expect(await service.markStaged(0)).toEqual({ ok: false, error: 'no-such-step' });
+  });
+});
+
+describe('US-AB-07 Measure the duration of a match (service)', () => {
+  // One draw (LS-01) and no placement: the match is running after one step.
+  const ONE_STEP: CatanOptions = {
+    ...CATAN_DEFAULT_OPTIONS,
+    personDraws: { landscapes: true, harbors: false, numbers: false },
+    order: { mode: 'none' },
+  };
+  const MINUTE = 60_000;
+
+  it('AK-1: the timer starts when the generation is completed, not when it starts', async () => {
+    const clock = new SettableClock();
+    const { service } = launch(1, clock);
+    const started = await startFour(service, ONE_STEP);
+    clock.advance(5);
+    await value(service.draw(null));
+
+    expect(started.clock).toBeUndefined();
+    expect(stored()?.clock).toBeUndefined();
+    expect(await service.pauseClock()).toEqual({ ok: false, error: 'clock-not-started' });
+
+    clock.advance(3);
+    const running = await value(service.confirm(0));
+
+    expect(running.clock).toEqual({ startedAt: clock.now(), pausedMs: 0 });
+    expect(running.startedAt).toBe(TEST_NOW);
+  });
+
+  it('AK-1: a match without any step has its timer at once', async () => {
+    const { service } = launch();
+
+    const session = await startFour(service, {
+      ...ONE_STEP,
+      personDraws: { landscapes: false, harbors: false, numbers: false },
+    });
+
+    expect(session.clock).toEqual({ startedAt: TEST_NOW, pausedMs: 0 });
+  });
+
+  it('AK-2: paused time does not count; pausing twice or resuming a running timer is rejected', async () => {
+    const clock = new SettableClock();
+    const { service } = launch(1, clock);
+    await startFour(service, ONE_STEP);
+    await value(service.draw(null));
+    const started = await value(service.confirm(0));
+    clock.advance(30);
+    await value(service.pauseClock());
+    clock.advance(10);
+
+    expect(await service.pauseClock()).toEqual({ ok: false, error: 'clock-paused' });
+    const resumed = await value(service.resumeClock());
+    clock.advance(20);
+
+    expect(await service.resumeClock()).toEqual({ ok: false, error: 'clock-running' });
+    expect(resumed.clock?.startedAt).toBe(started.clock?.startedAt);
+    expect(elapsedMilliseconds(defined(resumed.clock, 'clock'), clock.now())).toBe(50 * MINUTE);
+  });
+
+  it('AK-3: after a restart the timer shows the time since its start; a paused one stays paused', async () => {
+    const clock = new SettableClock();
+    const first = launch(1, clock);
+    await startFour(first.service, ONE_STEP);
+    await value(first.service.draw(null));
+    await value(first.service.confirm(0));
+    clock.advance(45);
+    await value(first.service.pauseClock());
+
+    clock.advance(120);
+    const after = await value(launch(1, clock).service.current());
+
+    expect(elapsedMilliseconds(defined(after?.clock, 'clock'), clock.now())).toBe(45 * MINUTE);
+  });
+
+  it('decision 15.11.2026: repeating a step of the running match keeps the timer running', async () => {
+    const clock = new SettableClock();
+    const { service } = launch(1, clock);
+    await startFour(service, ONE_STEP);
+    await value(service.draw(null));
+    const running = await value(service.confirm(0));
+    clock.advance(20);
+
+    const repeated = await value(service.repeatStep(0));
+    clock.advance(2);
+    await value(service.draw(null));
+    const again = await value(service.confirm(0));
+
+    expect(repeated.generation.state).toBe('generation');
+    expect(repeated.clock).toEqual(running.clock);
+    expect(again.clock).toEqual(running.clock);
+  });
+
+  it('a session of unknown version cannot pause its timer', async () => {
+    store.session = aStoredSession({ schemaVersion: 3 });
+
+    expect(await launch().service.pauseClock()).toEqual({
+      ok: false,
+      error: 'session-unsupported',
+    });
   });
 });

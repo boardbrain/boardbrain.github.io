@@ -1,5 +1,5 @@
 import type { Session } from '@/core/generation';
-import type { CustomGame, Group, IsoTimestamp, Person } from '@/core/model';
+import type { CustomGame, Group, IsoTimestamp, LocalDateTime, Person } from '@/core/model';
 import type { CatanGameState, CatanSetup, CatanStep } from '@/games/catan';
 
 /**
@@ -109,10 +109,13 @@ export type IdGenerator = {
 };
 
 /**
- * Current time as a UTC timestamp (Architecture 7.1).
+ * Current time as a UTC timestamp (Architecture 7.1) and the conversion of a moment into the
+ * date and time of day at the place of the device, as they are meant at the table.
  */
 export type Clock = {
   now(): IsoTimestamp;
+  /** Date and time of day of `at` in the time zone of the device, to the minute. */
+  localDateTime(at: IsoTimestamp): LocalDateTime;
 };
 
 /**
