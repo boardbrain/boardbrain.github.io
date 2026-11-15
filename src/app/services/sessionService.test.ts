@@ -674,7 +674,7 @@ describe('US-AB-07 Measure the duration of a match (service)', () => {
     expect(elapsedMilliseconds(defined(after?.clock, 'clock'), clock.now())).toBe(45 * MINUTE);
   });
 
-  it('decision 15.11.2026: repeating a step of the running match keeps the timer running', async () => {
+  it('AK-5: repeating a step of the running match keeps the timer running', async () => {
     const clock = new SettableClock();
     const { service } = launch(1, clock);
     await startFour(service, ONE_STEP);

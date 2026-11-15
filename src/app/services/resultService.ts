@@ -98,8 +98,8 @@ export type ResultService = {
     input: ResultInput,
   ): Promise<Result<Match, SessionAccessError | SessionNotRunningError | ResultError>>;
   /**
-   * Changes a result (US-ER-05, FA-ER-04). Group and game stay fixed (decision of the Product
-   * Owner, 15.11.2026), also for a group archived since; the time of recording is kept.
+   * Changes a result (US-ER-05, FA-ER-04). Group and game stay fixed (AK-4), also for a group
+   * archived since; the time of recording is kept.
    */
   edit(
     matchId: MatchId,

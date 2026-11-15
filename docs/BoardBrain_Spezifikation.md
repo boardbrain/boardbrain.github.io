@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.19 |
+| Version | 0.20 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
@@ -33,6 +33,7 @@
 | 0.17 | 12.11.2026 | Bündel I2-E: „Animation überspringen“ steht als gleich großer Knopf „Überspringen“ an der Stelle von „Wiederholen“, solange eine Bewegung läuft (US-IN-04 AK-1, Entscheidung des Product Owners 11.11.2026) |
 | 0.18 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation 0.22, E-40): Vorabversionen 0.x nach abgeschlossenen Inkrementen unter der echten Adresse, erste ist 0.2.0 nach I2 (2.3, 8) |
 | 0.19 | 15.11.2026 | Klärung I3-0 Daten und Statistik (Anforderungsdokumentation 0.23, E-41 bis E-44): gemeinsame Spielliste als Einstieg (US-SP-01 neu gefasst, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3; Entscheidung des Product Owners 02.11.2026); bei Catan genau ein Sieger und Plätze aus den Siegpunkten (3.6, US-ER-01 AK-4, neu US-ER-02 AK-5); Spieldauer bei Catan mit Timer (3.5, 3.6, neu US-AB-07, US-AB-06 AK-2, neu US-ER-01 AK-7); Kennzahlen, Rangliste und Rekorde neu gefasst (3.8, US-ST-01, US-ST-03 AK-4, neu US-ST-05); Umfang und Übersicht (2.3, 2.4, 2.5); Rückverfolgbarkeit (6) |
+| 0.20 | 15.11.2026 | Entscheidungen des Product Owners in I3-A: Der Timer läuft nach dem Wiederholen eines Schritts der laufenden Partie weiter (3.5, neu US-AB-07 AK-5); beim Bearbeiten eines Ergebnisses stehen Gruppe und Spiel fest (neu US-ER-05 AK-4) |
 
 ## Inhaltsverzeichnis
 
@@ -270,7 +271,7 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 - Generierung und Laufend überstehen das Schließen und Neustarten der App. Die Vorbereitung wird nicht gespeichert.
 - Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung. Eine schon abgeschlossene Animation läuft nicht noch einmal ab, aufgedeckte Startrohstoffe bleiben aufgedeckt. *(ergänzt in 0.14)*
 - „Beenden ohne Ergebnis“ ist ab Beginn der Generierung jederzeit möglich.
-- **Spieldauer:** Mit dem Übergang in „Laufend“ beginnt ein Timer. Er lässt sich anhalten und fortsetzen; gespeichert werden nur Zeitpunkte, deshalb läuft er auch weiter, während die App geschlossen ist, solange er nicht angehalten ist. Der Beginn und die gemessene Dauer gehen ins Ergebnis ein (3.6, US-AB-07). *(neu in 0.19, E-43)*
+- **Spieldauer:** Mit dem Übergang in „Laufend“ beginnt ein Timer. Er lässt sich anhalten und fortsetzen; gespeichert werden nur Zeitpunkte, deshalb läuft er auch weiter, während die App geschlossen ist, solange er nicht angehalten ist. Der Beginn und die gemessene Dauer gehen ins Ergebnis ein (3.6, US-AB-07). Wird danach ein Schritt wiederholt, läuft der Timer weiter. *(neu in 0.19, E-43, ergänzt in 0.20)*
 - **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. Im Tisch-Editor steht der Hinweis direkt bei der Spielbindung, die Auswahl ist gesperrt und nach dem Beenden sofort frei. *(ergänzt in 0.14)*
 
 ### 3.6 Ergebnis
@@ -625,6 +626,7 @@ Bezug: FA-AB-11, FA-ER-10, E-43 → 3.5
 - **AK-2:** Gegeben der Timer läuft, dann kann ich ihn anhalten und wieder fortsetzen; angehaltene Zeit zählt nicht mit.
 - **AK-3:** Gegeben die App wird geschlossen und neu gestartet, dann zeigt der Timer die seit dem Beginn vergangene Zeit ohne die angehaltene; ein angehaltener Timer bleibt angehalten.
 - **AK-4:** Gegeben ich trage aus der Partie ein Ergebnis ein, dann sind Spieldauer (auf ganze Minuten gerundet, mindestens 1) und Beginn übernommen und im Formular änderbar.
+- **AK-5:** Gegeben ich wiederhole nach Abschluss der Generierung einen Schritt (US-AB-03 AK-6), dann läuft der Timer weiter und beginnt nicht neu; eine falsche Dauer korrigiere ich im Formular. *(neu in 0.20)*
 
 ### 4.5 Losschritte (LS)
 
@@ -795,6 +797,7 @@ Bezug: FA-ER-04
 - **AK-1:** Gegeben ich habe ein Ergebnis bearbeitet, wenn ich speichere, dann erscheint vorher eine ausdrückliche Warnung, dass dies die Statistik verändert.
 - **AK-2:** Gegeben ich lösche ein Ergebnis und bestätige die Warnung, dann wird zuvor ein Sicherungspunkt angelegt und das Ergebnis entfernt.
 - **AK-3:** Gegeben eine Änderung oder Löschung, dann sind alle Statistiken sofort aktualisiert.
+- **AK-4:** Gegeben ich bearbeite ein Ergebnis, dann stehen Gruppe und Spiel fest, alle übrigen Felder sind änderbar, auch wenn die Gruppe inzwischen archiviert ist. Ein Ergebnis mit falscher Gruppe oder falschem Spiel lösche ich und trage es neu ein. *(neu in 0.20)*
 
 ### 4.10 Statistik (ST)
 

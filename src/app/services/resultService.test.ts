@@ -441,7 +441,7 @@ describe('US-ER-05 Change and delete a result (service)', () => {
     expect(store.matches).toEqual([stored]);
   });
 
-  it('decision 15.11.2026: a result of a group archived since can still be changed', async () => {
+  it('AK-4: a result of a group archived since can still be changed', async () => {
     const stored = aMatch();
     store.matches = [stored];
     store.groups = [aGroup({ archived: true })];

@@ -50,7 +50,7 @@
 | 0.35 | 13.11.2026 | Release 0.2.0 vorbereitet (#46): Version und `CHANGELOG.md` (4b) |
 | 0.36 | 15.11.2026 | Release 0.2.0 veröffentlicht (#47); K-8 umgesetzt (#48): Doku-PRs auf GitHub schnell grün; Zuschnitt von I3 (neu Kapitel 9): zuerst Klärung der Daten und Statistiken (I3-0), dann I3-A bis I3-E und Release 0.3.0; Löschen eines Ergebnisses in I3 ohne Sicherungspunkt, dieser folgt mit I4 (Entscheidungen des Product Owners 15.11.2026) (2, 3, 4.1, 6, 7, 9) |
 | 0.37 | 15.11.2026 | I3-0 umgesetzt (#49): Daten und Statistik geklärt (Anforderungsdokumentation 0.23, Spezifikation 0.19, Architektur 0.37); Inhalte von I3-A bis I3-E angepasst, neue Stories US-AB-07 und US-ST-05, offene Punkte für die Vorschauen je Bündel (2, 9) |
-| 0.38 | 15.11.2026 | I3-A umgesetzt (#50): Ergebnisregeln, Timer und `ResultService`; Entscheidungen des Product Owners zum Timer nach einer Wiederholung und zum Bearbeiten, keine Prüfseite (2, 9) |
+| 0.38 | 15.11.2026 | I3-A umgesetzt (#50): Ergebnisregeln, Timer und `ResultService`; Entscheidungen des Product Owners zum Timer nach einer Wiederholung und zum Bearbeiten (Spezifikation 0.20), keine Prüfseite (2, 9) |
 
 ## 1. Zweck
 
@@ -421,8 +421,8 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 - **Inhalt:** Entität `Match` in `core/model` (Architektur 7.1, mit `durationMinutes`); in `core/results` die Regeln aus Spezifikation 3.6 (Pflichtfelder, Verträglichkeit von Gruppe und Spiel, Sieger, bei Catan genau einer, Siegpunkte für alle oder keinen als ganze Zahlen ab 0, Spieldauer nur bei Catan), die Plausibilitätswarnungen, die Plätze aus den Siegpunkten und die Reihenfolge nach 3.7. Timer der laufenden Partie im `SessionService` (Beginn beim Übergang in „Laufend“, anhalten, fortsetzen; Architektur 10.2, neue `SESSION_SCHEMA_VERSION`). *(ergänzt in 0.37)* Repository für `matches` in `infra/db` (der Store besteht seit Schemaversion 1, keine Migration), Lesehooks. `ResultService` (Architektur 4.4): erfassen, bearbeiten, löschen; Ergebnis aus der laufenden Partie speichern und die Sitzung in derselben Transaktion beenden (US-AB-06 AK-2). Testhelfer für Ergebnisse in `tests/e2e/seedDatabase.ts`.
 - **Ohne Oberfläche:** Wie in I2-B bietet Claude Code zur Abnahme eine lokale Prüfseite an.
 - **Umgesetzt (#50), Entscheidungen des Product Owners 15.11.2026:**
-  - **Timer nach einer Wiederholung:** Wiederholt jemand nach Abschluss der Generierung einen Schritt, läuft der Timer weiter und beginnt nicht neu; eine falsche Dauer lässt sich im Formular korrigieren.
-  - **Bearbeiten:** Gruppe und Spiel eines Ergebnisses stehen fest, alles andere ist änderbar, auch bei einer inzwischen archivierten Gruppe. Wer die falsche Gruppe erwischt hat, löscht und trägt neu ein.
+  - **Timer nach einer Wiederholung (US-AB-07 AK-5):** Wiederholt jemand nach Abschluss der Generierung einen Schritt, läuft der Timer weiter und beginnt nicht neu; eine falsche Dauer lässt sich im Formular korrigieren.
+  - **Bearbeiten (US-ER-05 AK-4):** Gruppe und Spiel eines Ergebnisses stehen fest, alles andere ist änderbar, auch bei einer inzwischen archivierten Gruppe. Wer die falsche Gruppe erwischt hat, löscht und trägt neu ein.
   - **Keine Prüfseite:** Ohne das Design aus I3-B gäbe sie ein falsches Bild; die Abnahme stützt sich auf die Tests je Abnahmekriterium (PR #50).
   - **Für I3-B bereit:** `draft` und `draftFromSession` liefern die Startwerte samt Beteiligten und Regeln des Spiels, `resultErrors` alle Fehler für die Prüfung beim Tippen, `plausibilityWarnings` die Warnungen vor dem Speichern, `placesOf` die Plätze; `pauseClock`/`resumeClock` im `SessionService`; `seedResults` für E2E-Tests (Architektur 4.4, 7.1, 10.2).
 

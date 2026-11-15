@@ -238,7 +238,7 @@ async function findGroup(repositories: SessionRepositories, groupId: GroupId): P
 }
 
 // FA-AB-11, US-AB-07 AK-1: the timer starts when the generation is completed for the first time.
-// A step repeated afterwards keeps it running (decision of the Product Owner, 15.11.2026): the
+// A step repeated afterwards keeps it running (US-AB-07 AK-5): the
 // group is playing already, and the duration can be corrected in the result form.
 function withClock(session: StoredSession, now: IsoTimestamp): StoredSession {
   if (session.generation.state !== 'running' || session.clock !== undefined) {
