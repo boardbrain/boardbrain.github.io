@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.16 |
+| Version | 0.17 |
 | Status | Verbindlich ab der Setup-Phase |
 | Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
@@ -31,6 +31,7 @@
 | 0.14 | 11.11.2026 | Kleine Aufgabe K-5: unerwartete Fehler einer Ansicht fängt die Fehleransicht der Routen statt einer eigenen Error Boundary je Ansicht; der Fehlerbildschirm nutzt `PressableButton` und bietet „Zum Start“ und „Details kopieren“ (6, 7.2) |
 | 0.15 | 12.11.2026 | OP-13 (Anforderungsdokumentation E-40): Vorabversionen 0.x je Inkrement (3.7); das Release erzeugt der Product Owner selbst auf GitHub oder Claude Code nach Zustimmung, vor 1.0 als Pre-release markiert (3.8) |
 | 0.16 | 15.11.2026 | Kleine Aufgabe K-8: Reine Doku-Änderungen sind auch auf GitHub schnell grün; `check` und `stat` überspringen ihre Schritte, die Ende-zu-Ende-Läufe entfallen (3.6) |
+| 0.17 | 15.11.2026 | Vorabversionen 0.x als normales Release, „Latest“ statt Pre-release (3.8; Anforderungsdokumentation E-40) |
 
 ## Inhaltsverzeichnis
 
@@ -246,7 +247,7 @@ Bis zum Release 1.0 steht in `package.json` eine Version `0.x.y`. Vorabversionen
 2. Nach dem Merge eröffnet Claude Code den Pull Request `develop` → `main` mit Titel `release: x.y.z`.
 3. Alle Prüfungen einschließlich der statistischen Suite laufen; der Product Owner führt die manuelle Abnahme nach `docs/Abnahme-Checkliste.md` durch (ab 1.0; beim Platzhalter 0.1.0 entfällt sie).
 4. Der Product Owner mergt.
-5. Das Release mit Tag `vx.y.z` erzeugt der Product Owner selbst auf GitHub (Releases → „Draft a new release“, Tag neu anlegen, Ziel `main`, Titel `x.y.z`, Text aus `CHANGELOG.md`), wobei Claude Code ihn anleitet, oder Claude Code nach seiner Zustimmung mit `gh release create vx.y.z --target main --title "x.y.z" --notes-file ‹Auszug aus CHANGELOG›`. Vor 1.0 ist jedes Release als Vorabversion markiert (Häkchen „Set as a pre-release“ bzw. `--prerelease`, Anforderungsdokumentation E-40). Der Tag löst die Veröffentlichung aus. *(geändert in 0.15)*
+5. Das Release mit Tag `vx.y.z` erzeugt der Product Owner selbst auf GitHub (Releases → „Draft a new release“, Tag neu anlegen, Ziel `main`, Titel `x.y.z`, Text aus `CHANGELOG.md`), wobei Claude Code ihn anleitet, oder Claude Code nach seiner Zustimmung mit `gh release create vx.y.z --target main --title "x.y.z" --notes-file ‹Auszug aus CHANGELOG›`. Auch vor 1.0 ist das Release ein normales Release: Häkchen „Set as a pre-release“ aus, „Set as the latest release“ an (bzw. ohne `--prerelease`); die Nummer 0.x zeigt, dass es eine Vorabversion ist (Anforderungsdokumentation E-40). Der Tag löst die Veröffentlichung aus. *(geändert in 0.15 und 0.17)*
 6. Der Product Owner prüft die veröffentlichte App unter `https://boardbrain.github.io/`.
 
 `CHANGELOG.md` ist deutsch und folgt dem Aufbau von „Keep a Changelog“: je Version ein Abschnitt mit Datum und den Unterabschnitten *Neu*, *Geändert*, *Behoben*, *Entfernt*, *Sicherheit*. Claude Code erstellt die Einträge aus den Titeln der Pull Requests seit dem letzten Release und formuliert sie für Nutzer verständlich.

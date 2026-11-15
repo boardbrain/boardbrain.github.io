@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.38 |
+| Version | 0.39 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -52,6 +52,7 @@
 | 0.36 | 15.11.2026 | Kleine Aufgabe K-8: Job `changes` in `ci.yml` erkennt reine Doku-Änderungen; `check` und `stat` überspringen dann ihre Schritte, die Läufe von `e2e` starten nicht, `e2e` besteht (16.3) |
 | 0.37 | 15.11.2026 | Klärung I3-0 Daten und Statistik (Anforderungsdokumentation 0.23, E-41 bis E-44): `Match` mit `durationMinutes`, bei Catan genau ein Sieger, Plätze werden aus den Siegpunkten berechnet und nicht gespeichert, Beteiligte bleiben die Mitglieder der Gruppe (7.1); Timer der laufenden Partie als Zeitpunkte in der Sitzung (10.2); Aufgaben von `core/results` und `core/stats` ergänzt (4.3) |
 | 0.38 | 15.11.2026 | Bündel I3-A: `ResultService` mit Vorbelegung, Erfassen, Speichern aus der laufenden Partie, Bearbeiten und Löschen, Port `ResultStore`, Lesehooks; Dexie-Schreibmethoden mit Dexies eigenen Promises (4.4); `Match` mit `LocalDate`/`LocalTime`, Ergebnisregeln in `core/results` mit `ResultRules` aus dem Spielmodul, Verträglichkeit in `games/registry` (7.1); Timer umgesetzt, `SESSION_SCHEMA_VERSION` 4, Port `Clock` mit `localDateTime` (10.2) |
+| 0.39 | 15.11.2026 | Vorabversionen 0.x als normales GitHub-Release und damit „Latest“ statt Pre-release (16.3; Anforderungsdokumentation E-40) |
 
 ## Inhaltsverzeichnis
 
@@ -1411,7 +1412,7 @@ Wird das Ziel eines offenen Pull Requests geändert (z. B. von `develop` auf `ma
 
 **Workflow `deploy.yml`** (bei Push eines Tags `v*`): `npm ci`, `npm run check`, `npm run build`, Hochladen und Veröffentlichen über die GitHub-eigenen Pages-Actions. Nur dieser Workflow erhält die Rechte `pages: write` und `id-token: write`. Die Umgebung `github-pages` erlaubt zusätzlich nur Tags `v*`, sodass GitHub die Regel „nur Releases werden veröffentlicht“ unabhängig vom Workflow durchsetzt (EP-03).
 
-**Release.** (1) Pull Request `chore/release-x.y.z` nach `develop` mit Versionsnummer und Eintrag in `CHANGELOG.md`; (2) Pull Request `develop` nach `main` mit Titel `release: x.y.z`; (3) nach dem Merge erzeugt der Product Owner auf GitHub (Releases, „Draft a new release“) oder Claude Code nach seiner Zustimmung mit `gh release create vx.y.z --target main` das GitHub-Release mit Tag; der Tag löst die Veröffentlichung aus. Vor 1.0 ist das Release als Vorabversion markiert (Häkchen „Set as a pre-release“, `--prerelease`) *(geändert in 0.35)*. Bei Hotfixes wird `main` danach per Pull Request nach `develop` zurückgeführt.
+**Release.** (1) Pull Request `chore/release-x.y.z` nach `develop` mit Versionsnummer und Eintrag in `CHANGELOG.md`; (2) Pull Request `develop` nach `main` mit Titel `release: x.y.z`; (3) nach dem Merge erzeugt der Product Owner auf GitHub (Releases, „Draft a new release“) oder Claude Code nach seiner Zustimmung mit `gh release create vx.y.z --target main` das GitHub-Release mit Tag; der Tag löst die Veröffentlichung aus. Auch vor 1.0 ist es ein normales Release und damit „Latest“ (ohne Häkchen „Set as a pre-release“, ohne `--prerelease`); dass es eine Vorabversion ist, zeigt die Nummer 0.x *(geändert in 0.35 und 0.39)*. Bei Hotfixes wird `main` danach per Pull Request nach `develop` zurückgeführt.
 
 **Erste Veröffentlichung.** Release 0.1.0 am Ende der Setup-Phase: der Stand des Setups mit der Diagnoseansicht (13.1), ohne Service Worker und ohne Datenspeicherung (EP-02, E-25). Er weist die gesamte Kette bis zur echten Adresse nach.
 
