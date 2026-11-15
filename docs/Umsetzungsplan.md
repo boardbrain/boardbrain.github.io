@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.35 |
-| Stand | 13.11.2026 |
+| Version | 0.36 |
+| Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
 
@@ -48,6 +48,7 @@
 | 0.33 | 12.11.2026 | Inkrement I2 abgeschlossen (2); K-8 an den Anfang von I3 verschoben; neue kleine Aufgabe K-9 „Diagnose überarbeiten“ und umgesetzt: Zusammenfassung mit Hinweisen, App, Gerät, Daten, Würfeltest, Voraussetzungen, letzte Fehler, Bericht teilen oder kopieren; ohne Vorschau-Runde (Entscheidungen des Product Owners 12.11.2026) (2, 6) |
 | 0.34 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation E-40): Vorabversionen 0.x je Inkrement, erste 0.2.0 nach I2 (neue Zeile 4b); lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol auf Port 4174 (`npm run build:acceptance`, `npm run preview:acceptance`) |
 | 0.35 | 13.11.2026 | Release 0.2.0 vorbereitet (#46): Version und `CHANGELOG.md` (4b) |
+| 0.36 | 15.11.2026 | Release 0.2.0 veröffentlicht (#47); K-8 umgesetzt (#48): Doku-PRs auf GitHub schnell grün; Zuschnitt von I3 (neu Kapitel 9): zuerst Klärung der Daten und Statistiken (I3-0), dann I3-A bis I3-E und Release 0.3.0; Löschen eines Ergebnisses in I3 ohne Sicherungspunkt, dieser folgt mit I4 (Entscheidungen des Product Owners 15.11.2026) (2, 3, 4.1, 6, 7, 9) |
 
 ## 1. Zweck
 
@@ -71,9 +72,10 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 3c | Kleine Aufgabe K-7: Ende-zu-Ende-Hälften auf GitHub gleichmäßig verteilen | nach K-5, vor D-2 | umgesetzt (#40) |
 | 3d | Kleine Aufgabe K-9: Diagnose überarbeiten | nach I2, vor der Vorabversion (OP-13) | umgesetzt (#44) |
 | 4 | Entscheidung über Vorabversionen (OP-13) und lokale Abnahme-App mit lila Symbol | nach I2 | umgesetzt (#45) |
-| 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | vorbereitet (#46); veröffentlicht mit Release-PR nach `main` und Tag `v0.2.0` |
-| 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | offen |
-| 5 | Inkrement I3 Ergebnisse und Statistik | nach I2 | offen |
+| 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | veröffentlicht: vorbereitet (#46), Release-PR nach `main` (#47), Tag `v0.2.0` |
+| 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | umgesetzt (#48) |
+| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-B, I3-C, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | zugeschnitten (#48) |
+| 5a | Release 0.3.0 als Vorabversion nach Richtlinien 3.8 | nach I3 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
 | 7 | Inkrement I5 Verwaltung und Archiv | nach I4 | offen |
 | 8 | Inkrement I6 Einstellungen und Feinschliff | nach I5 | offen |
@@ -95,7 +97,7 @@ Grundlage ist Anforderungsdokumentation 9.3. Modell und Aufwand stellt der Produ
 | Übrige Bündel (Oberflächen, Verwaltung, Statistik) | Sonnet 5.5 | medium |
 | Kleine Aufgaben: Abhängigkeits-Updates, Fehlerbehebungen ohne kritischen Teil | Sonnet 5.5 | medium |
 | Reine Dokumentationspflege | Sonnet 5.5 | low |
-| Design (D-1, D-2, D-3), Zuschnitt eines neuen Inkrements | Opus 5.5 | medium |
+| Design (D-1, D-2, D-3), Zuschnitt eines neuen Inkrements, Klärung von Anforderungen (I3-0) | Opus 5.5 | medium |
 | Code-Review, schwierige Fehler | Opus 5.5 | high |
 
 **Wechselregel:** Liegt Sonnet zweimal hintereinander daneben (Tests scheitern wiederholt, Anforderung falsch verstanden), wechselt der Product Owner mit `/model` auf Opus und schreibt „mach weiter“. Der Arbeitsbranch bleibt erhalten.
@@ -104,7 +106,7 @@ Grundlage ist Anforderungsdokumentation 9.3. Modell und Aufwand stellt der Produ
 
 ### 4.1 Bündel
 
-1. **Product Owner:** neue Sitzung in VS Code beginnen (bzw. `/clear`), Modell und Aufwand nach dem Kapitel des Inkrements (I1: 5, I2: 8) bzw. Kapitel 6 (kleine Aufgaben) einstellen, Auftrag senden:
+1. **Product Owner:** neue Sitzung in VS Code beginnen (bzw. `/clear`), Modell und Aufwand nach dem Kapitel des Inkrements (I1: 5, I2: 8, I3: 9) bzw. Kapitel 6 (kleine Aufgaben) einstellen, Auftrag senden:
    > Setze Bündel ‹ID› aus docs/Umsetzungsplan.md um.
 2. **Claude Code:** liest diesen Plan, die genannten Stories und Kapitel. Antwortet mit einem **kurzen Umsetzungsplan**: Schritte, Tests je Abnahmekriterium, neue Pakete mit Version, Fragen zu Haltepunkten. Beginnt erst nach „los“.
    **Bei neuen oder geänderten Oberflächen** zeigt Claude Code danach zuerst Designvorschläge als lokale, klickbare HTML-Datei (Richtlinien 2.5) und baut erst nach der Wahl des Product Owners. *(neu in 0.8)*
@@ -246,19 +248,19 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 | K-5 | Fehlerbildschirm auch bei Fehlern in einer Ansicht, nach K-6 (Product Owner bei der Abnahme von I2-H, 10.11.2026): Ein unerwarteter Fehler beim Zeichnen einer Seite zeigt bisher die englische Entwicklerseite von React Router („Unexpected Application Error“), weil der Router ihn abfängt, bevor die globale `ErrorBoundary` ihn sieht; auch in der veröffentlichten App. Die Routen bekommen den eigenen Fehlerbildschirm (`ErrorScreen`) als Fehleransicht, mit Weg zurück zum Start und Fehlerdetails zum Kopieren, wie Architektur 4.6 (ADR-025) es vorsieht („je Ansicht und global“); dazu ein Test, der einen Fehler in einer Ansicht erzwingt. Keine neuen Pakete | Sonnet, medium | umgesetzt (#39): Ursache waren Fehler außerhalb der Error Boundary jeder Ansicht, vor allem das Nachladen der Partie-Ansichten nach einem Update und Fehler im Rahmen. Jetzt fängt `RouteErrorScreen` als Fehleransicht des Rahmens alle Fehler der Routen; die Error Boundary je Ansicht entfällt. In drei Runden (`error-screen-preview.html`) gewählt: ganzer Bildschirm ohne Kartenhand (O2), Karte in der Mitte (B, G1) mit Warnzeichen (S1), Überschrift (╯°□°)╯︵ ┻━┻ (U12), „Unerwarteter Fehler · gespeicherte Daten bleiben erhalten“ (T1), „Neu laden“, „Zum Start“ (lädt unter `#/` neu), aufklappbare Details mit „Details kopieren“ (D1). Verbindliche Referenz `docs/design/k5-error-screen-final-preview.html`; Unit-Tests für Zeichen- und Ladefehler, Ende-zu-Ende-Test mit blockiertem Nachladen |
 | K-6 | Ende-zu-Ende-Tests schneller, Prüfungen nicht bei jeder Bearbeitung eines PRs (Product Owner nach I2-H, 11.11.2026). Anlass: Die Ende-zu-Ende-Tests brauchen auf GitHub 14,2 Minuten (I2-D 10,3, I2-G 8,6), die Grenze des Jobs liegt bei 20 Minuten; lokal 8,6 Minuten. Die meisten langen Tests tippen erst eine ganze Partie durch, bevor sie prüfen, was danach kommt (Antippen, Rückblick, Übersicht), und laufen auf sechs Geräten. (1) Solche Tests starten mit einer fertig gelosten oder teilweise gelosten Partie, die ein Testhelfer wie `seedDatabase` direkt in die Datenbank schreibt; das Durchspielen über die Oberfläche bleibt nur in den Tests, die genau das prüfen (US-AB-02, US-AB-05). (2) Die Prüfungen laufen bisher bei jeder Bearbeitung eines PRs (`edited`) neu, auch bei einem Haken in der Beschreibung: Die Titelprüfung kommt in einen eigenen Workflow mit `edited`, `ci.yml` läuft nur bei neuen Commits. Nicht über `if` überspringen, weil übersprungene Pflichtprüfungen als bestanden zählen. Laufzeiten vorher und nachher im PR nennen. Keine neuen Pakete | Sonnet, medium | umgesetzt (#38): (1) Testhelfer `seedMatch` in `tests/e2e/seedDatabase.ts` rechnet eine Partie mit der Spiellogik und festem Startwert aus und schreibt sie direkt in die Datenbank; 16 Tests in `match.spec.ts` starten damit. Ganz durchgespielt werden weiter die vier Tests zu US-AB-01 und US-AB-02, weil Architektur 14.5 vollständige Generierungen mit 2, 3 und 4 Personen in beiden Spielversionen verlangt. (2) `ci.yml` nur bei neuen Commits, Titelprüfung in `pr-title.yml`. Zusätzlich mit Zustimmung des Product Owners: Ende-zu-Ende-Tests auf GitHub in zwei gleichzeitigen Hälften mit Sammeljob `e2e`; lokal sechs statt vier Tests gleichzeitig (drei volle Läufe fehlerfrei). Lokal 8,4 Minuten vorher, 5,9 nach (1), 5,0 mit sechs Läufen |
 | K-7 | Ende-zu-Ende-Hälften auf GitHub gleichmäßig verteilen (Product Owner nach K-5, 11.11.2026). Anlass: Seit K-6 laufen die Ende-zu-Ende-Tests auf GitHub in zwei gleichzeitigen Hälften, die aber ungleich lange brauchen (#38: 4,2 und 7,6 Minuten, #39: 3,7 und 7,9); gewartet wird immer auf die langsamere. Laufzeiten vorher und nachher im PR nennen. Keine neuen Pakete | Sonnet, medium | umgesetzt (#40): Ursache war `--shard`. Es verteilt nach der Anzahl der Tests in der Reihenfolge der Projekte und legte so alle drei Chromium-Geräte in die erste und alle drei WebKit-Geräte in die zweite Hälfte; WebKit läuft unter Linux etwa doppelt so lange. Jetzt drei gleichzeitige Läufe je Geräteart (Handy, Tablet hochkant, Tablet quer), jeder mit Chromium und WebKit und je 154 Tests (Variante A, Entscheidung des Product Owners). Verworfen: zwei Läufe mit fest verteilten Geräten (drei WebKit-Geräte lassen sich nicht gleichmäßig auf zwei Läufe teilen) und die interne, undokumentierte Gewichtung `PWTEST_SHARD_WEIGHTS`. Auf GitHub nachher 4,5, 4,7 und 4,9 Minuten statt 3,7 und 7,9; die Ende-zu-Ende-Tests sind damit drei Minuten früher fertig |
-| K-8 | Doku-PRs auf GitHub schnell grün (Product Owner nach K-7, 11.11.2026; am Anfang von I3, verschoben in 0.33). Anlass: Auch ein PR, der nur `docs/`, `README.md` oder `CLAUDE.md` ändert, wartet auf die vollen Prüfungen (Typen, Tests, drei Ende-zu-Ende-Läufe), obwohl lokal nichts geprüft wird (Richtlinien 3.6). Lösung: Ein erster Job vergleicht per `git diff` mit der Basis, ob nur diese Pfade geändert sind; dann überspringen die Pflichtprüfungen ihre Schritte und melden „bestanden“. Nicht über `paths-ignore`, weil Pflichtprüfungen dann auf „wartet“ hängen blieben; gemischte PRs werden immer voll geprüft. Keine neuen Pakete | Sonnet, medium | offen |
+| K-8 | Doku-PRs auf GitHub schnell grün (Product Owner nach K-7, 11.11.2026; am Anfang von I3, verschoben in 0.33). Anlass: Auch ein PR, der nur `docs/`, `README.md` oder `CLAUDE.md` ändert, wartet auf die vollen Prüfungen (Typen, Tests, drei Ende-zu-Ende-Läufe), obwohl lokal nichts geprüft wird (Richtlinien 3.6). Lösung: Ein erster Job vergleicht per `git diff` mit der Basis, ob nur diese Pfade geändert sind; dann überspringen die Pflichtprüfungen ihre Schritte und melden „bestanden“. Nicht über `paths-ignore`, weil Pflichtprüfungen dann auf „wartet“ hängen blieben; gemischte PRs werden immer voll geprüft. Keine neuen Pakete | Sonnet, medium | umgesetzt (#48), zusammen mit dem Zuschnitt von I3 (Wunsch des Product Owners): Job `changes` in `ci.yml` vergleicht mit `git diff --name-only --no-renames` gegen die gemeinsame Basis; `check` und `stat` überspringen bei reinen Doku-Änderungen ihre Schritte, `playwright-version` und die drei Ende-zu-Ende-Läufe starten nicht, `e2e` besteht. Scheitert `changes`, laufen alle Prüfungen voll. Lokal mit den Dateilisten früherer PRs geprüft (#37 nur Doku, #45 und #46 gemischt); der schnelle Weg auf GitHub zeigt sich am ersten reinen Doku-PR (I3-0) |
 | K-9 | Diagnose überarbeiten (Product Owner nach I2, 12.11.2026). Anlass: Mit der Vorabversion nach I2 (OP-13) ist die Diagnose das einzige Fenster in die Geräte der Testenden, auch auf dem iPhone ohne Entwicklerwerkzeuge. Inhalt: Zusammenfassung mit Hinweisen (fehlende Voraussetzung, aufgezeichnete Fehler, Partie aus anderer Version, nicht installiert, Speicher nicht geschützt, nicht offline bereit); App mit Version und Build-Kennung (kurzer Commit und Bauzeit); Gerät mit Browser, System, Bildschirm, Ausrichtung, sicheren Zonen, Schriftgröße, „Bewegung reduzieren“, Bedienung, Sprache und User-Agent; Daten mit Speicherschutz, Speicherbelegung, Datenbankversion, Anzahlen (keine Namen), laufender Partie und letzter Änderung; Würfeltest mit 60.000 Würfen und Chi-Quadrat-Prüfung (α = 0,1 %); Voraussetzungen; die letzten fünf unerwarteten Fehler, lokal gespeichert; Bericht teilen oder kopieren. Bewusst nicht: Ziehungen (E-02, PP-13), Namen, Netzwerk und Update-Suche (I4), Knöpfe zum Zurücksetzen (bis 1.0 genügt es, die App zurückzusetzen). Ohne Vorschau-Runde (Entscheidung des Product Owners). Keine neuen Pakete | Opus, high | umgesetzt (#44) |
 
 Dependabot öffnet monatlich weitere Pull Requests nach `develop`. Für jeden gilt der Auftrag „Prüfe Dependabot-PR #‹Nummer›“ (Sonnet, medium); Hauptversionssprünge prüft Claude Code wie K-1.
 
 ## 7. Weitere Inkremente
 
-Die Stories je Inkrement stehen in Spezifikation 2.5. Die Inkremente sind nach fachlichen Blöcken grob zugeschnitten (E-32, seit 0.18); den genauen Zuschnitt in Bündel legt Claude Code zu Beginn des jeweiligen Inkrements vor (4.3). I2 steht in Kapitel 8. Vorgaben schon jetzt:
+Die Stories je Inkrement stehen in Spezifikation 2.5. Die Inkremente sind nach fachlichen Blöcken grob zugeschnitten (E-32, seit 0.18); den genauen Zuschnitt in Bündel legt Claude Code zu Beginn des jeweiligen Inkrements vor (4.3). I2 steht in Kapitel 8, I3 in Kapitel 9. Vorgaben schon jetzt:
 
 | Inkrement | Block | Stories | Kritische Teile (Opus, high) |
 |---|---|---|---|
 | I2 Generierung | gesamter Ablauf einer Partie mit Inszenierung | siehe Kapitel 8 | Platzierung und Sackgassen (Architektur 5.3, 5.4), Ablauf und Wiederaufnahme der laufenden Partie, Karten ziehen mit Motion, Startrohstoffe (Zufall) |
-| I3 Ergebnisse und Statistik | Ergebnisse erfassen und ansehen, Statistik | US-ER-01, -04, -05, US-ST-01, -02 (M); US-ER-02, US-ST-03, -04 (S); US-ER-03 (C) | keine; Kennzahlen mit Eigenschaftstests |
+| I3 Ergebnisse und Statistik | Ergebnisse erfassen und ansehen, Statistik | siehe Kapitel 9 | Ergebnisdienst (Datenbank, Ende der laufenden Partie mit Ergebnis); Kennzahlen mit Eigenschaftstests |
 | I4 Daten und Updates | Export, Import, Sicherungspunkte, Updates, Installation, Speicherschutz | US-EI-01, -03 bis -06, US-DS-01, -02, US-UP-01, -02, US-IS-01, -03 (M); US-EI-02, -07, US-DS-04, US-IS-02 (S); US-DS-03 (C) | Import mit Konflikten, Sicherungspunkte, Service Worker und Updates, Speicherschutz; Paket `valibot` (aus I1-B zurückgestellt) |
 | I5 Verwaltung und Archiv | Archivieren, Wiederbeleben, Löschen; Spieleliste getrennt | US-VW-01, -03, -04, US-SP-03 (S) | Löschen mit Sicherungspunkt „Vor Löschen“ (Datenbank) |
 | I6 Einstellungen und Feinschliff | Einstellungen, offene Punkte aus K-3 und K-4 | US-SP-05 (M); US-GB-01 (C) | keine |
@@ -383,3 +385,57 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 - **„Ergebnis eintragen“** aus der Übersicht (US-AB-06 AK-1 und AK-2) wird mit US-ER-01 in I3 nachgewiesen, weil das Ergebnisformular zum Block „Ergebnisse“ gehört. In I2 endet eine Partie mit „Partie beenden ohne Ergebnis“, und der Stapel „Partie“ führt direkt zur neuen Partie; der Einstieg über die gemeinsame Spielliste (Kapitel 7) kommt mit I3.
 - **US-VW-02 AK-5** aus I1-F wird hier nachgewiesen: im Dienst mit I2-B, die Meldung in der Oberfläche mit I2-D.
 - **Animationen bis I2-E:** In I2-C und I2-D erscheinen Ergebnisse mit schlichtem Einblenden; damit sind US-AB-02 AK-2 (eigene Animation je Schritt) und US-AB-05 AK-3 (erneutes Abspielen) schon nachweisbar. I2-E und I2-F ersetzen das Einblenden durch die Bewegungen der Karten und das Aufblinken.
+
+## 9. Inkrement I3 Ergebnisse und Statistik *(neu in 0.36)*
+
+Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Block nach E-32 umfasst I3 das Erfassen, Ansehen, Korrigieren und Auswerten von Ergebnissen, dazu den Einstieg über die gemeinsame Spielliste (Kapitel 7, Zeile I3). Stories: US-ER-01, -04, -05, US-ST-01, -02 (M); US-ER-02, US-ST-03, -04 (S); US-ER-03 (C); dazu der Nachweis von US-AB-06 AK-1 und AK-2 aus I2 und die geänderte US-SP-01.
+
+**Vorbehalt:** Welche Daten ein Ergebnis enthält und welche Statistiken es gibt, ist noch nicht endgültig (Product Owner 15.11.2026). Das klärt I3-0 zuerst. Ändert die Klärung Stories oder Abnahmekriterien, passt der Pull Request von I3-0 Inhalt und Stories der folgenden Bündel in diesem Kapitel an. Neue Pakete sind ein Haltepunkt (Richtlinien 10.1); vorgesehen ist bisher keines.
+
+| Bündel | Stories | Modell, Aufwand | Branch | Status |
+|---|---|---|---|---|
+| I3-0 Daten und Statistik klären | FA-ER-*, FA-ST-*, Spezifikation 3.6 bis 3.8, US-ER-*, US-ST-*; Spielliste: US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3 | Opus, medium | `docs/i3-results-and-statistics-data` | offen |
+| I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 (Dienst) | Opus, high | `feat/us-er-01-results-service` | offen |
+| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-ER-01, US-ER-02, US-ER-03 AK-1, US-AB-06 AK-1 und AK-2 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | offen |
+| I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | Sonnet, medium | `feat/us-er-04-result-list` | offen |
+| I3-D Statistik | US-ST-01, US-ST-02, US-ST-03 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
+| I3-E Diagramme | US-ST-04 | Sonnet, medium | `feat/us-st-04-charts` | offen |
+
+**Warum diese Reihenfolge:** Zuerst die Klärung, weil die Daten eines Ergebnisses ins Exportformat (I4) eingehen und ein später ergänztes Feld eine Migration bräuchte, ohne Werte für ältere Partien. Dann wie in I2 die Fachlogik ohne Oberfläche (A), weil die Statistik nur mit gespeicherten Ergebnissen rechnet und Fehler dort die Langzeitstatistik verfälschen. Danach Erfassen (B), Ansehen und Korrigieren (C), Auswerten (D) und Diagramme (E); jedes Bündel baut auf den Daten des vorigen auf.
+
+**Warum I3-A mit Opus, high:** I3 hat nach Kapitel 7 keine kritischen Teile im Sinne von Zufall oder Platzierung. Der Ergebnisdienst schreibt aber die wichtigsten Nutzerdaten und beendet in derselben Transaktion die laufende Partie; beides gehört zu „Datenbank“ und „laufende Partie“ aus Kapitel 3.
+
+### I3-0 Daten und Statistik klären
+
+- **Inhalt:** Gespräch mit dem Product Owner in einer eigenen Sitzung: was ein Ergebnis erfasst, welche Statistiken es gibt und welche Daten diese brauchen. Grundlage sind die heutigen Festlegungen (Spezifikation 3.6 bis 3.8) und mögliche Erweiterungen, etwa Platzierungen statt nur Sieger, Punkte auch für eigene Spiele, nicht immer alle Mitglieder beteiligt, Startspieler oder Platzierungsreihenfolge aus der Generierung, Spieldauer (PP-08); bei den Statistiken etwa Siegquote nach Startposition oder Farbe (PP-15), direkter Vergleich, Form der letzten Partien, Durststrecke, Rekorde, Filter nach Zeitraum.
+- **Ergebnis:** Anpassungen in Anforderungsdokumentation, Spezifikation (3.6 bis 3.8, Stories ER und ST, Übersicht 2.5) und Datenmodell (Architektur 7.1, `Match`) sowie in diesem Kapitel. Dazu die Änderungen für die gemeinsame Spielliste (Kapitel 7, Entscheidung aus 0.21): US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5 (vom Spiel aus nur verträgliche Gruppen), US-SP-05 AK-3. Reiner Doku-PR.
+
+### I3-A Ergebnisse: Fachlogik und Dienst
+
+- **Inhalt:** Entität `Match` in `core/model`; in `core/results` die Regeln aus Spezifikation 3.6 (Pflichtfelder, Verträglichkeit von Gruppe und Spiel, Sieger, Siegpunkte für alle oder keinen als ganze Zahlen ab 0), die Plausibilitätswarnungen und die Reihenfolge nach 3.7. Repository für `matches` in `infra/db` (der Store besteht seit Schemaversion 1, keine Migration), Lesehooks. `ResultService` (Architektur 4.4): erfassen, bearbeiten, löschen; Ergebnis aus der laufenden Partie speichern und die Sitzung in derselben Transaktion beenden (US-AB-06 AK-2). Testhelfer für Ergebnisse in `tests/e2e/seedDatabase.ts`.
+- **Ohne Oberfläche:** Wie in I2-B bietet Claude Code zur Abnahme eine lokale Prüfseite an.
+
+### I3-B Spielliste und Ergebnis eintragen
+
+- **Inhalt:** „Partie“ führt zur gemeinsamen Spielliste mit allen aktiven Spielen; eigene Spiele öffnen das Ergebnisformular, Catan fragt „Neue Partie“ oder „Ergebnis eintragen“; läuft eine Partie, führt „Partie“ zu ihr (Kapitel 7). Ergebnisformular in der Reihenfolge Spiel, Gruppe, Sieger, Datum und Uhrzeit mit „Jetzt“; bei Catan Spielversion, Modus, Farben und Siegpunkte; Notizen; Warnungen vor dem Speichern. Einstieg auch aus der Übersicht der laufenden Partie, vorbelegt aus der Partie (US-AB-06 AK-1 und AK-2).
+- **Design:** Zu Beginn eine Prinzip-Runde für alle Ansichten von I3 (wo Ergebnisse und Statistik liegen, was die Karte „Statistik“ öffnet, Reiter am Tisch nach `docs/design/i1e-persons-tables-final-preview.html`), danach das Aussehen Seite für Seite je Bündel. Hier entschieden: der offene Punkt aus Kapitel 7, Sortierung der Spielliste und Hervorhebung von Catan.
+
+### I3-C Ergebnisliste und Korrektur
+
+- **Inhalt:** Tischseite mit den Reitern „Am Tisch | Ergebnisse | Statistik“ (Referenz aus I1-E); Ergebnisliste nach 3.7, Detailansicht mit allen Daten und den Catan-Farben, „Ergebnis eintragen“ vom Tisch, Bearbeiten mit Warnung, Löschen mit Bestätigung; Statistiken sofort aktuell (Lesehooks).
+- **Löschen ohne Sicherungspunkt:** siehe Hinweise.
+
+### I3-D Statistik
+
+- **Inhalt:** In `core/stats` Kennzahlen, Siegesserien, Rangliste mit Folgekriterien und geteilten Rängen sowie die Filter nach Spiel und Spielversion (3.8); Eigenschaftstests mit `fast-check` (vorhanden). Karte „Statistik“ in der Kartenhand (D-3) und Reiter „Statistik“ am Tisch.
+
+### I3-E Diagramme
+
+- **Inhalt:** Diagramme nach US-ST-04 im Stil der App, Daten fertig aus `core/stats`, Farben aus den Gruppenfarben, der Filter wirkt.
+- **Pakete:** ADR-021 sieht eigene SVG-Diagramme vor. Kleine Hilfspakete für die Rechnung (etwa `d3-scale`, `d3-shape`) sind für den Product Owner denkbar, solange die Diagramme im Stil der App bleiben. Claude Code zeigt dazu Vorschauen mit und ohne Pakete und stellt den Antrag nach Richtlinien 10.1; eine Entscheidung für ein Paket ändert ADR-021.
+
+### Hinweise
+
+- **Sicherungspunkt vor dem Löschen (US-ER-05 AK-2):** Sicherungspunkte kommen mit I4 (US-DS-01, Architektur 9). In I3 löscht „Löschen“ nach Warnung und Bestätigung ohne Sicherungspunkt; der Sicherungspunkt „Vor Löschen“ kommt mit I4 dazu, und AK-2 wird dort nachgewiesen (Entscheidung des Product Owners 15.11.2026, Variante A). In 0.3.0 ist ein gelöschtes Ergebnis damit endgültig weg; das passt zu den Vorabversionen ohne Versprechen für ihre Daten (E-40). Verworfen: ein vereinfachter Sicherungspunkt schon in I3 (zöge Exportformat und Aufbewahrung aus I4 vor) und Löschen erst mit I4 (der Block „Ergebnisse“ bliebe offen).
+- **US-AB-06 AK-1 und AK-2** aus I2 werden hier nachgewiesen: im Dienst mit I3-A, in der Oberfläche mit I3-B.
+- **Release 0.3.0** folgt nach I3 wie 0.2.0 (Kapitel 2, Zeile 5a); das Release legt der Product Owner selbst an.
