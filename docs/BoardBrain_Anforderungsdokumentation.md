@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.22 |
+| Version | 0.23 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 12.11.2026 |
+| Stand | 15.11.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -36,6 +36,7 @@
 | 0.20 | 09.11.2026 | Design I2-D (Entscheidungen des Product Owners): Schritt zuerst ohne Ergebnis, wenn die Ansicht wechselt, Knopf „Weiter“ (FA-AB-03, E-35); Personen werden mit Karten gelost statt mit einem Glücksrad (Begriff „Schritt“, FA-AB-03, FA-LS-02, FA-IN-02, E-36, OP-06); Startrohstoffe liegen verdeckt und werden von Hand aufgedeckt (neu FA-SR-05, E-37); nach einem Neustart läuft nur eine unterbrochene Animation erneut ab (FA-AB-07) |
 | 0.21 | 11.11.2026 | Design D-2 (Entscheidungen des Product Owners): Klänge nach Version 1 verschoben (FA-IN-03, FA-IN-05, FA-IN-07, E-38, PP-20); Aufblinken verrät bis zur Festlegung nichts über das Ergebnis (FA-IN-01, E-39); neuer Spannungsmodus der Platzierung (neu FA-IN-08, FA-IN-06, E-39); OP-06 geklärt (13) |
 | 0.22 | 12.11.2026 | OP-13 geklärt: Vorabversionen 0.x der echten App unter der echten Adresse nach abgeschlossenen Inkrementen, Daten ohne Versprechen, Update durch Schließen und Neuöffnen bis I4, kein Hinweis „Testversion“ (E-40, EP-02, 13) |
+| 0.23 | 15.11.2026 | Klärung I3-0 Daten und Statistik (Entscheidungen des Product Owners): feste Tische, an denen stets alle Mitglieder spielen (E-41); bei Catan genau ein Sieger und Plätze aus den Siegpunkten (FA-ER-07, neu FA-ER-11, E-42); Spieldauer bei Catan mit Timer in der laufenden Partie (neu FA-AB-11, FA-ER-10, E-43, PP-08 erledigt); Uhrzeit aus dem Beginn der Partie (FA-ER-02); Kennzahlen um Durststrecke, Ø Platz und Ø Dauer ergänzt, Rangliste ohne Unentschieden als Kriterium, Rekorde (FA-ST-02, FA-ST-03, neu FA-ST-08, E-44); Punkte bei eigenen Spielen offen (neu OP-14); neu PP-21 bis PP-23 (3, 5.3, 5.8, 5.9, 10, 11, 12) |
 
 ## Inhaltsverzeichnis
 
@@ -108,7 +109,7 @@ BoardBrain ist eine plattformunabhängige, vollständig offline nutzbare App, di
 | Archivieren | Ausblenden einer Person, einer Gruppe oder eines eigenen Spiels aus allen Auswahllisten, ohne Daten oder Statistiken zu verändern. Rückgängig machbar. |
 | Partie | Eine einzelne gespielte Runde eines Spiels durch eine Gruppe an einem bestimmten Datum. Eine Partie hat keinen eigenen Namen. Gespeichert wird eine Partie nur mit ihrem Ergebnis. |
 | Laufende Partie | Eine Partie, deren Vorbereitung oder Generierung begonnen hat und die noch nicht beendet ist. Es gibt höchstens eine. |
-| Ergebnis | Die zu einer Partie erfassten Daten: Datum, optional Uhrzeit, Sieger bzw. Unentschieden, optional Siegpunkte aller Beteiligten und Notizen; bei Catan zusätzlich Spielversion, Modus und Catan-Farben. |
+| Ergebnis | Die zu einer Partie erfassten Daten: Datum, optional Uhrzeit, Sieger bzw. Unentschieden und Notizen; bei Catan zusätzlich Spielversion, Modus, Catan-Farben, optional Siegpunkte aller Beteiligten und die Spieldauer. *(ergänzt in 0.23)* |
 | Generierung | Der von der App gesteuerte, schrittweise Ablauf aller Zufallsentscheidungen beim Aufbau einer Partie. |
 | Losschritt | Ein einzelner Zufallsentscheid innerhalb der Generierung, z. B. „Wer legt die Häfen?“. |
 | Schritt | Kleinste Einheit der Generierung, die einzeln dargestellt, bestätigt und wiederholt wird: das Losen einer Person (Losschritt oder ein Platz der Reihenfolge), ein Gebäude, eine Straße oder die Startrohstoffe einer Person. |
@@ -173,7 +174,7 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 
 | ID | Anforderung |
 |---|---|
-| FA-AB-01 | Der Ablauf beginnt mit der Auswahl von Spiel und Gruppe. Alle Mitglieder der Gruppe gelten als beteiligt. |
+| FA-AB-01 | Der Ablauf beginnt mit der Auswahl von Spiel und Gruppe. Alle Mitglieder der Gruppe gelten als beteiligt (E-41). |
 | FA-AB-02 | Vor der Generierung werden Spielversion, Modus und Optionen festgelegt, insbesondere welche Losschritte aktiv sind, ob die Platzierungsreihenfolge gelost, selbst festgelegt oder ohne Platzierung gespielt wird und ob Startrohstoffe gezogen werden. *(ergänzt in 0.19)* |
 | FA-AB-03 | Jeder Schritt der Generierung muss vom Nutzer ausdrücklich bestätigt werden, bevor der nächste beginnt. Es gibt keinen automatischen Durchlauf. Ein Schritt ist das Losen einer Person (Losschritt oder ein Platz der Reihenfolge), ein Gebäude, eine Straße oder die Startrohstoffe einer Person; jedes Gebäude und jede Straße hat eine eigene Animation. Wechselt die Ansicht (jeder Losschritt, Beginn der Reihenfolge, Beginn der Platzierung, Startrohstoffe jeder Person), zeigt die App den Schritt zuerst ohne Ergebnis; gelost wird erst auf Wunsch. Der Knopf zum Bestätigen nennt, was er tut: „Losen“, wenn er lost, „Weiter“, wenn er ohne zu losen zur nächsten Ansicht führt, „Zur Übersicht“ nach dem letzten Schritt. *(präzisiert in 0.4, ergänzt in 0.19 und 0.20)* |
 | FA-AB-04 | Jeder Schritt kann wiederholt werden, solange die Partie läuft. Vor der Wiederholung erscheint eine Warnung. Verworfen werden nur die vom wiederholten Schritt abhängigen Folgeschritte: bei einem Gebäude die zugehörige Straße und alle späteren Gebäude und Straßen, bei der Platzierungsreihenfolge die Platzierung; bei LS-01, LS-03, LS-04, einer Straße oder Startrohstoffen keine. Wiederholungen werden nicht protokolliert. *(präzisiert in 0.4)* |
@@ -183,6 +184,7 @@ Die Anforderungen sind mit eindeutigen IDs versehen. Die Priorisierung nach MoSC
 | FA-AB-08 | Eine laufende Partie endet mit dem Speichern eines Ergebnisses oder mit „Beenden ohne Ergebnis“. Danach wird die Generierung verworfen; gespeichert bleibt nur ein ggf. erfasstes Ergebnis. *(neu in 0.4)* |
 | FA-AB-09 | Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. *(neu in 0.7)* |
 | FA-AB-10 | Während der Generierung lassen sich frühere Schritte mit ihrem gespeicherten Ergebnis ansehen (Rückblick), ohne dass etwas gelost wird. *(neu in 0.19)* |
+| FA-AB-11 | In der Übersicht einer laufenden Catan-Partie misst ein Timer die Spieldauer, beginnend mit dem Abschluss der Generierung. Er lässt sich anhalten und fortsetzen und übersteht das Schließen und Neustarten der App. Beim Eintragen des Ergebnisses werden die gemessene Dauer und der Beginn übernommen (FA-ER-02, FA-ER-10). *(neu in 0.23, E-43)* |
 
 ### 5.4 Losschritte (Catan, Modus „Standard“)
 
@@ -240,26 +242,29 @@ Die Losschritte werden in der Reihenfolge LS-01, LS-03, LS-04, LS-02 ausgeführt
 | ID | Anforderung |
 |---|---|
 | FA-ER-01 | Ein Ergebnis kann jederzeit eingetragen werden, auch ohne vorherige Generierung, als Nachtrag oder für eigene Spiele. |
-| FA-ER-02 | Ein Ergebnis enthält Datum (Standard: heute), Gruppe, Spiel und den Sieger. Ein Unentschieden zwischen mehreren Personen ist möglich. Optional kann eine Uhrzeit erfasst werden, die sich mit „Jetzt“ auf die aktuelle Uhrzeit setzen lässt. *(präzisiert in 0.4)* |
+| FA-ER-02 | Ein Ergebnis enthält Datum (Standard: heute), Gruppe, Spiel und den Sieger. Ein Unentschieden zwischen mehreren Personen ist möglich. Optional kann eine Uhrzeit erfasst werden, die sich mit „Jetzt“ auf die aktuelle Uhrzeit setzen lässt. Wird das Ergebnis aus einer laufenden Partie eingetragen, ist die Uhrzeit mit dem Beginn der Partie (FA-AB-11) vorbelegt; sie bleibt bei allen Spielen änderbar. *(präzisiert in 0.4, ergänzt in 0.23)* |
 | FA-ER-03 | Bei Catan ist die Spielversion Pflicht, der Modus optional. Notizen sind optional. Bei Spielen mit Siegpunkten (FA-SP-05) können zusätzlich die Siegpunkte aller beteiligten Personen erfasst werden. *(geändert in 0.4)* |
 | FA-ER-04 | Ergebnisse können nachträglich bearbeitet und gelöscht werden. Zuvor erscheint eine ausdrückliche Warnung, dass dies die Statistik verändert. |
 | FA-ER-05 | Kooperative Spiele werden in Version 1 nicht unterstützt. |
 | FA-ER-06 | Siegpunkte werden für alle Beteiligten oder für keinen erfasst, als ganze Zahlen ab 0. Hat ein Sieger nicht die höchste Punktzahl oder haben Unentschieden-Sieger unterschiedliche Punktzahlen, erscheint eine Warnung; das Speichern bleibt nach Bestätigung möglich. *(neu in 0.4)* |
-| FA-ER-07 | Ein Unentschieden umfasst zwei bis alle Beteiligten. Abgebrochene Partien ohne Sieger werden nicht erfasst. *(neu in 0.4)* |
+| FA-ER-07 | Bei Catan gibt es genau einen Sieger. Bei anderen Spielen ist ein Unentschieden möglich; es umfasst zwei bis alle Beteiligten. Abgebrochene Partien ohne Sieger werden nicht erfasst. *(neu in 0.4, geändert in 0.23, E-42)* |
 | FA-ER-08 | Partien werden nach Datum, innerhalb eines Tages nach Uhrzeit sortiert; Partien ohne Uhrzeit folgen denen mit Uhrzeit, untereinander in Erfassungsreihenfolge. *(neu in 0.4)* |
 | FA-ER-09 | Bei Catan werden die in der Partie verwendeten Catan-Farben mit dem Ergebnis gespeichert. Sie gehen nicht in die Statistik ein. *(neu in 0.4)* |
+| FA-ER-10 | Bei Catan kann die Spieldauer in ganzen Minuten erfasst werden (optional). Aus einer laufenden Partie ist sie mit der gemessenen Dauer vorbelegt (FA-AB-11) und änderbar; bei einem Nachtrag wird sie von Hand eingetragen. Andere Spiele haben keine Spieldauer. *(neu in 0.23, E-43)* |
+| FA-ER-11 | Sind bei Catan Siegpunkte erfasst, ergeben sich daraus die Plätze: Der Sieger hat Platz 1, die übrigen Beteiligten folgen nach Siegpunkten absteigend; gleiche Punktzahl ergibt denselben Platz, der folgende Platz wird übersprungen (z. B. 10, 8, 8, 6 Punkte ergeben die Plätze 1, 2, 2, 4). Die Plätze werden nicht eigens eingegeben; ohne Siegpunkte gibt es keine Plätze. *(neu in 0.23, E-42)* |
 
 ### 5.9 Statistik
 
 | ID | Anforderung |
 |---|---|
 | FA-ST-01 | Statistiken werden ausschließlich pro Gruppe geführt. Gruppenübergreifende Auswertungen sind in Version 1 nicht vorgesehen. |
-| FA-ST-02 | Folgende Kennzahlen werden je Person bereitgestellt: Anzahl Partien, Siege, Siegquote, Unentschieden sowie aktuelle und längste Siegesserie; Niederlagen und Unentschieden beenden eine Serie. Bei Spielen mit Siegpunkten (FA-SP-05) zusätzlich die Durchschnittssiegpunkte, gebildet nur über Partien mit erfassten Siegpunkten. *(präzisiert in 0.4)* |
-| FA-ST-03 | Es gibt eine Rangliste innerhalb der Gruppe. Das Sortierkriterium ist manuell wählbar; Standard sind die Siege. *(präzisiert in 0.4)* |
+| FA-ST-02 | Die Anzahl der Partien wird für die Gruppe angegeben, weil an jeder Partie alle Mitglieder beteiligt sind. Folgende Kennzahlen werden je Person bereitgestellt: Siege, Siegquote, Unentschieden (nur wenn im Filter Unentschieden vorkommen), aktuelle und längste Siegesserie sowie die aktuelle Durststrecke (Partien seit dem letzten Sieg); Niederlagen und Unentschieden beenden eine Serie. Bei Catan zusätzlich die Durchschnittssiegpunkte und der Durchschnittsplatz (FA-ER-11), jeweils nur über Partien mit erfassten Siegpunkten, sowie für die Gruppe die durchschnittliche Spieldauer über Partien mit erfasster Dauer. *(präzisiert in 0.4, ergänzt in 0.23)* |
+| FA-ST-03 | Es gibt eine Rangliste innerhalb der Gruppe. Das Sortierkriterium ist manuell wählbar; Standard sind die Siege. Unentschieden sind kein eigenes Kriterium. *(präzisiert in 0.4, ergänzt in 0.23)* |
 | FA-ST-04 | Es gibt eine grafische Darstellung des Verlaufs über die Zeit (kumulierte Siege je Person) sowie der Verteilung der Siege (je Person und Anteil der Unentschieden). *(präzisiert in 0.4)* |
 | FA-ST-05 | Unentschieden werden als eigene Kategorie gezählt, nicht als Sieg. |
 | FA-ST-06 | Bei globalen Gruppen lässt sich die Statistik nach Spiel filtern. |
 | FA-ST-07 | Bei Catan lässt sich die Statistik nach Spielversion (Basisspiel, Städte & Ritter) filtern und zusätzlich als Gesamtauswertung über alle Catan-Partien anzeigen. |
+| FA-ST-08 | Rekorde der Gruppe im gewählten Filter: die längste Siegesserie aller Zeiten mit Person und Zeitraum sowie bei Catan die längste und die kürzeste Partie nach Spieldauer, jeweils mit Datum und Verweis auf die Partie. *(neu in 0.23, E-44)* |
 
 ### 5.10 Export und Import
 
@@ -519,6 +524,10 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-38 | Klänge (FA-IN-03, FA-IN-05, FA-IN-07, US-IN-03) sind nicht Teil von Version 1; sie stehen als Idee nach dem ersten Release im Parkplatz (PP-20). Ausnahme zu E-10 *(neu in 0.21)* | Ton ist unter iOS und iPadOS der heikelste Teil der Inszenierung (Stummschalter, Musik anderer Apps, Freischaltung) und nur von Hand prüfbar; die Einstellungsseite für den Tonschalter gehört ohnehin zu I6; die Spannung entsteht schon durch Karten und Aufblinken. Entscheidung des Product Owners im Design D-2 (11.11.2026) |
 | E-39 | Aufblinken und Spannungsmodus der Platzierung nach `docs/design/d2-staging-final-preview.html`: Standard ist ein Lauflicht in der Farbe der Person, danach wird der Stein von oben gesetzt; der Spannungsmodus (FA-IN-08) zeigt bei Gebäuden Ausschluss, Halt bei zwei und ein Duell auf Knopfdruck mit rein zufälligem Gegner. Die Darstellung entsteht ohne Kenntnis des Ergebnisses (Start, Reihenfolge, Länge zufällig), erst die Landung zeigt es *(neu in 0.21)* | Am Tisch soll die Platzierung spannend sein, wenn man will, und schnell, wenn nicht. Fairness ist das Kernversprechen der App: Wer die Darstellung kennt und oft spielt, darf daraus nichts ablesen; eine Wahl des Gegners nach Abstand hätte das Ergebnis teilweise verraten und wurde deshalb verworfen. Entscheidung des Product Owners im Design D-2 (11.11.2026) |
 | E-40 | Vorabversionen der echten App erscheinen vor Release 1.0 unter der echten Adresse `https://boardbrain.github.io/`, jeweils nach einem abgeschlossenen Inkrement und nur nach Freigabe durch den Product Owner; die erste ist 0.2.0 nach I2. Die Versionsnummer folgt Semantic Versioning wie bisher (EP-05, je Inkrement eine neue MINOR-Version); das GitHub-Release ist als Vorabversion (Pre-release) markiert. Für Daten aus Vorabversionen gilt kein Versprechen: Sie dürfen bei einer Änderung des Datenbankschemas verloren gehen; ob Release 1.0 mit leerer Datenbank beginnt oder die Daten übernimmt, wird vor 1.0 entschieden. Bis zum Update-Weg aus I4 (US-UP-01) wird eine neue Version erst aktiv, wenn die App ganz geschlossen und neu geöffnet wurde. Die App zeigt keinen Hinweis „Testversion“; die Versionsnummer steht in der Diagnose *(neu in 0.22)* | Freunde sollen den bisherigen Stand am Spieleabend ausprobieren können, auch auf dem iPhone und ohne lokales Zertifikat (OP-13, NFA-PL-01). Eine getrennte Testadresse hätte eine zweite GitHub-Organisation erfordert, weil ein Unterordner dieselbe Herkunft und damit dieselbe Datenbank hat. Datenverlust ist vor 1.0 hinnehmbar; Übergangsregeln für Testdaten wären Aufwand ohne Nutzen. Entscheidung des Product Owners (12.11.2026) |
+| E-41 | Eine Gruppe ist ein fester Tisch: An jeder Partie sind alle Mitglieder beteiligt, auch bei der Ergebniserfassung. Fehlt jemand, wird für die kleinere Runde eine eigene Gruppe angelegt *(neu in 0.23)* | Eine Siegquote aus Partien mit unterschiedlich vielen Beteiligten vergleicht Ungleiches: Zu dritt gewinnt man im Schnitt jede dritte Partie, zu viert jede vierte, und wer öfter fehlt, hat kleine, wenig aussagekräftige Zahlen. Feste Tische halten jede Statistik in sich vergleichbar und das Datenmodell einfach. Entscheidung des Product Owners in I3-0 (15.11.2026) |
+| E-42 | Bei Catan gibt es genau einen Sieger; die Plätze ergeben sich aus den Siegpunkten (FA-ER-11) und werden nicht eigens erfasst. Bei anderen Spielen wird nur der Sieger erfasst, Unentschieden bleiben möglich *(neu in 0.23)* | Nach den Catan-Regeln gewinnt, wer in seinem Zug die Zielpunkte erreicht; ein Gleichstand an der Spitze kommt nicht vor. Am Ende einer Partie liegen alle Siegpunkte offen, deshalb kosten die Plätze keine zusätzliche Eingabe. Entscheidung des Product Owners in I3-0 (15.11.2026) |
+| E-43 | Die Spieldauer wird nur bei Catan erfasst: gemessen mit einem anhaltbaren Timer in der laufenden Partie oder von Hand nachgetragen; ihr Beginn liefert die Uhrzeit des Ergebnisses *(neu in 0.23)* | Der Timer erfasst die Dauer ohne Aufwand am Tisch; anhalten und nachträglich ändern fängt Pausen und ein spätes Eintragen ab. Die Uhrzeit vom Beginn ordnet mehrere Partien eines Abends richtig, auch wenn das Ergebnis später eingetragen wird. Entscheidung des Product Owners in I3-0 (15.11.2026) |
+| E-44 | Statistik in Version 1 nach FA-ST-02, FA-ST-03 und FA-ST-08. Nicht aufgenommen: Siegquote nach Catan-Farbe, direkter Vergleich zweier Personen, Siegquote nach Startplatz, Abendsieger (PP-15, PP-22, PP-23) *(neu in 0.23)* | An einem festen Tisch hat meist jede Person immer dieselbe Farbe, die Farbe stünde also nur für die Person; ein direkter Vergleich zeigt dasselbe wie die Rangliste, weil stets alle mitspielen. Startplatz und Abendsieger sind erst bei vielen Partien aussagekräftig. Entscheidung des Product Owners in I3-0 (15.11.2026) |
 
 ---
 
@@ -539,6 +548,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | OP-11 | Konkrete Farbwerte der Catan-Farben, der Gruppenfarben-Palette und der Akzentfarben unter Berücksichtigung der Lesbarkeit im Dunkelmodus | Design | geklärt: E-26, NFA-GB-03, Architektur 13.4 |
 | OP-12 | Dauerhafte Adresse (Herkunft) der App: eigene GitHub-Organisation mit eigener Herkunft (Empfehlung) oder Projektseite unter dem persönlichen Konto. Ein späterer Wechsel trennt die Nutzer von ihren Daten. | Setup | geklärt: E-21, Architektur ADR-022 |
 | OP-13 | Veröffentlichung von Vorabversionen der echten App (0.x) vor Release 1.0, etwa für Test-Spieleabende außerhalb des Heimnetzes. Erfordert eine Festlegung zum Umgang mit Daten aus Vorabversionen und einen funktionierenden Update-Mechanismus. Zusätzlich gilt: Der Product Owner besitzt kein eigenes iPhone; die Abnahme auf dem iPhone (NFA-PL-01) ist nur über Geräte von Freunden möglich. Vorabversionen unter der echten Adresse würden das erleichtern, weil dafür kein lokales Zertifikat auf fremden Geräten nötig ist. *(neu in 0.8, präzisiert in 0.10)* | Umsetzung (nach I2) | geklärt: E-40, EP-02 |
+| OP-14 | Punkte bei eigenen Spielen: ob ein eigenes Spiel Punkte zählen kann und ob dabei die meisten oder die wenigsten Punkte gewinnen (z. B. Skyjo). Heute unterstützt nur Catan Siegpunkte (FA-SP-05). Das Datenmodell bleibt in beiden Fällen verträglich: Ein eigenes Spiel ohne diese Einstellung hat keine Punkte. *(neu in 0.23)* | Design (I3-B) | offen |
 
 ---
 
@@ -555,19 +565,22 @@ Die folgenden Ideen sind ausdrücklich nicht Teil von Version 1, werden aber bei
 | PP-05 | Weitere unterstützte Spiele mit eigener Generierung |
 | PP-06 | Synchronisation zwischen Geräten |
 | PP-07 | Gruppenübergreifende Statistik pro Person |
-| PP-08 | Erfassung der Spieldauer |
+| PP-08 | Erfassung der Spieldauer – *für Catan aufgenommen in 0.23 (FA-ER-10, E-43)* |
 | PP-09 | Hellmodus |
 | PP-10 | Englische Sprachversion |
 | PP-11 | Abweichende Brettformen, z. B. Seefahrer |
 | PP-12 | Kooperative Spiele in der Ergebniserfassung |
 | PP-13 | Nachprüfbares Protokoll aller Ziehungen einer Partie |
 | PP-14 | Vorausschauende Gültigkeit bei der Platzierung: Eine Kreuzung gilt nur als gültig, wenn danach alle restlichen Gebäude noch platzierbar sind (Variante A zu E-09) |
-| PP-15 | Statistik nach Farbe (z. B. Siegquote je Catan-Farbe) |
+| PP-15 | Statistik nach Farbe (z. B. Siegquote je Catan-Farbe); an festen Tischen wenig aussagekräftig (E-44) |
 | PP-16 | Weitere Diagramme und Auswertungen |
 | PP-17 | Eigene Spielfarben-Paletten für weitere Spiele |
 | PP-18 | Sammelentscheidung für gleichartige Konflikte beim Import |
 | PP-19 | Gruppenübergreifende Auswahl einzelner Partien beim Export |
 | PP-20 | Soundeffekte mit Tonschalter (FA-IN-03, FA-IN-05, FA-IN-07, US-IN-03), etwa ein Trommelwirbel im Spannungsmodus; nach dem ersten Release (E-38) *(neu in 0.21)* |
+| PP-21 | Brett einer Partie mit dem Ergebnis speichern (Gebäude, Straßen, Startrohstoffe) für einen Rückblick in der Detailansicht; eine Auswertung des Startvorteils bräuchte zusätzlich die Zahlenchips, die die App nicht kennt *(neu in 0.23)* |
+| PP-22 | Abendsieger: wer an einem Spieleabend die meisten Partien gewonnen hat *(neu in 0.23)* |
+| PP-23 | Siegquote nach Startplatz bei Catan; setzt voraus, dass die Platzierungsreihenfolge mit dem Ergebnis gespeichert wird *(neu in 0.23)* |
 
 ---
 

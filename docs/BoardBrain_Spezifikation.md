@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.18 |
+| Version | 0.19 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 12.11.2026 |
+| Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -32,6 +32,7 @@
 | 0.16 | 11.11.2026 | Design D-2 (Anforderungsdokumentation 0.21, E-38, E-39): Klänge nach Version 1 (US-IN-03, 2.1, 2.3, 3.9, Rückverfolgung); Aufblinken nach der Referenz `docs/design/d2-staging-final-preview.html`, verrät nichts über das Ergebnis, mit Spannungsmodus (US-IN-02 neu AK-3 bis AK-7, FA-IN-08) |
 | 0.17 | 12.11.2026 | Bündel I2-E: „Animation überspringen“ steht als gleich großer Knopf „Überspringen“ an der Stelle von „Wiederholen“, solange eine Bewegung läuft (US-IN-04 AK-1, Entscheidung des Product Owners 11.11.2026) |
 | 0.18 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation 0.22, E-40): Vorabversionen 0.x nach abgeschlossenen Inkrementen unter der echten Adresse, erste ist 0.2.0 nach I2 (2.3, 8) |
+| 0.19 | 15.11.2026 | Klärung I3-0 Daten und Statistik (Anforderungsdokumentation 0.23, E-41 bis E-44): gemeinsame Spielliste als Einstieg (US-SP-01 neu gefasst, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3; Entscheidung des Product Owners 02.11.2026); bei Catan genau ein Sieger und Plätze aus den Siegpunkten (3.6, US-ER-01 AK-4, neu US-ER-02 AK-5); Spieldauer bei Catan mit Timer (3.5, 3.6, neu US-AB-07, US-AB-06 AK-2, neu US-ER-01 AK-7); Kennzahlen, Rangliste und Rekorde neu gefasst (3.8, US-ST-01, US-ST-03 AK-4, neu US-ST-05); Umfang und Übersicht (2.3, 2.4, 2.5); Rückverfolgbarkeit (6) |
 
 ## Inhaltsverzeichnis
 
@@ -91,7 +92,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 |---|---|---|
 | I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Umbenennen und Gruppen bearbeiten, Brettdarstellung, Losbaustein *(ergänzt in 0.8)* | Stammdaten anlegbar und korrigierbar, Brett sichtbar |
 | I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Karten, Aufblinken, Spannungsmodus und Überspringen der Animation *(geändert in 0.12, 0.14 und 0.16; Klänge nach Version 1)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
-| I3 Ergebnisse und Statistik | Ergebniserfassung mit Siegpunkten und Catan-Farben, Ergebnisliste, Kennzahlen, Rangliste, Filter, Diagramme *(geändert in 0.12)* | Langzeitstatistik nutzbar |
+| I3 Ergebnisse und Statistik | Gemeinsame Spielliste als Einstieg, Ergebniserfassung mit Siegpunkten, Catan-Farben und Spieldauer, Ergebnisliste, Kennzahlen, Rangliste, Rekorde, Filter, Diagramme *(geändert in 0.12 und 0.19)* | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung, Teilexport und Export-Erinnerung, Import mit Konflikten und Zuordnung, automatische und manuelle Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS und Hinweis unter Android und Windows, Speicherschutz und Hinweis zum Schutz vor Datenverlust *(geändert in 0.12)* | Daten sicher und teilbar |
 | I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen; unterstützte und eigene Spiele getrennt *(geändert in 0.12)* | Stammdaten vollständig pflegbar |
 | I6 Einstellungen und Feinschliff | US-SP-05 „Ich hasse Catan!“, Design und Akzentfarbe *(geändert in 0.12)* | Kandidat für Release 1.0 |
@@ -100,13 +101,13 @@ Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwic
 
 ### 2.4 Abgrenzung: nicht in Version 1
 
-Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumentation, PP-01 bis PP-19), insbesondere: weitere Catan-Modi und die vorausschauende Gültigkeit bei der Platzierung, Landschaften und Zahlenchips in der App, weitere Spiele mit Generierung, Synchronisation, gruppenübergreifende Statistik, Statistik nach Farbe, Spieldauer, Hellmodus, Englisch, kooperative Spiele, ein Protokoll der Ziehungen sowie die gruppenübergreifende Auswahl einzelner Partien beim Export. Ein Austausch per QR-Code ist nicht vorgesehen, auch nicht in späteren Versionen.
+Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumentation, PP-01 bis PP-23; von PP-08 ist die Spieldauer bei Catan seit 0.19 Teil von Version 1), insbesondere: weitere Catan-Modi und die vorausschauende Gültigkeit bei der Platzierung, Landschaften und Zahlenchips in der App, weitere Spiele mit Generierung, Synchronisation, gruppenübergreifende Statistik, Statistik nach Farbe oder Startplatz, Abendsieger, das Brett einer Partie im Ergebnis, Spieldauer bei anderen Spielen als Catan, Hellmodus, Englisch, kooperative Spiele, ein Protokoll der Ziehungen sowie die gruppenübergreifende Auswahl einzelner Partien beim Export. Ein Austausch per QR-Code ist nicht vorgesehen, auch nicht in späteren Versionen.
 
 ### 2.5 Übersicht aller User Stories
 
 | ID | Titel | Prio | Inkrement |
 |---|---|---|---|
-| US-SP-01 | Spiel für die Generierung wählen | M | I2 |
+| US-SP-01 | Spiel aus der Spielliste wählen | M | I2, I3 |
 | US-SP-02 | Eigenes Spiel anlegen | M | I1 |
 | US-SP-03 | Unterstützte und eigene Spiele unterscheiden | S | I5 |
 | US-SP-04 | Spielversion und Modus wählen | M | I2 |
@@ -128,6 +129,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-AB-04 | Laufende Partie einsehen | M | I2 |
 | US-AB-05 | Laufende Partie übersteht einen Neustart | M | I2 |
 | US-AB-06 | Partie beenden | M | I2 |
+| US-AB-07 | Spieldauer messen | S | I3 |
 | US-LS-01 | Person losen (wiederverwendbarer Baustein) | M | I1 |
 | US-LS-02 | Landschaften, Häfen und Zahlenchips verlosen | M | I2 |
 | US-LS-03 | Platzierungsreihenfolge losen | M | I2 |
@@ -150,6 +152,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-ST-02 | Rangliste | M | I3 |
 | US-ST-03 | Statistik filtern | S | I3 |
 | US-ST-04 | Diagramme | S | I3 |
+| US-ST-05 | Rekorde | C | I3 |
 | US-EI-01 | Vollsicherung exportieren | M | I4 |
 | US-EI-02 | Teilumfang exportieren | S | I4 |
 | US-EI-03 | Daten importieren | M | I4 |
@@ -168,7 +171,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-IS-03 | Persistenten Speicher sicherstellen | M | I4 |
 | US-GB-01 | Design und Akzentfarbe wählen | C | I6 |
 
-Summe: 61 User Stories (40 Must, 17 Should, 4 Could). *(berichtigt in 0.12)*
+Summe: 63 User Stories (40 Must, 18 Should, 5 Could). *(berichtigt in 0.12, ergänzt in 0.19)*
 
 ---
 
@@ -267,6 +270,7 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 - Generierung und Laufend überstehen das Schließen und Neustarten der App. Die Vorbereitung wird nicht gespeichert.
 - Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung. Eine schon abgeschlossene Animation läuft nicht noch einmal ab, aufgedeckte Startrohstoffe bleiben aufgedeckt. *(ergänzt in 0.14)*
 - „Beenden ohne Ergebnis“ ist ab Beginn der Generierung jederzeit möglich.
+- **Spieldauer:** Mit dem Übergang in „Laufend“ beginnt ein Timer. Er lässt sich anhalten und fortsetzen; gespeichert werden nur Zeitpunkte, deshalb läuft er auch weiter, während die App geschlossen ist, solange er nicht angehalten ist. Der Beginn und die gemessene Dauer gehen ins Ergebnis ein (3.6, US-AB-07). *(neu in 0.19, E-43)*
 - **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. Im Tisch-Editor steht der Hinweis direkt bei der Spielbindung, die Auswahl ist gesperrt und nach dem Beenden sofort frei. *(ergänzt in 0.14)*
 
 ### 3.6 Ergebnis
@@ -274,39 +278,53 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 | Feld | Pflicht | Regel |
 |---|---|---|
 | Datum | ja | Standard: heute |
-| Uhrzeit | nein | Mit „Jetzt“ auf die aktuelle Uhrzeit setzbar |
+| Uhrzeit | nein | Mit „Jetzt“ auf die aktuelle Uhrzeit setzbar; aus einer laufenden Partie mit dem Beginn vorbelegt (3.5) und änderbar *(ergänzt in 0.19)* |
 | Gruppe | ja | Nur aktive Gruppen (nicht archiviert) |
 | Spiel | ja | Nur mit der Gruppe verträgliche, aktive Spiele (→ 3.4) |
 | Spielversion | bei Catan ja | Basisspiel oder Städte & Ritter |
 | Modus | nein | Nur bei Catan; Standard „Standard“ |
-| Sieger | ja | Mindestens eine Person; zwei oder mehr Personen bedeuten Unentschieden zwischen diesen |
+| Sieger | ja | Bei Catan genau eine Person. Bei anderen Spielen mindestens eine Person; zwei oder mehr Personen bedeuten Unentschieden zwischen diesen *(geändert in 0.19, E-42)* |
 | Catan-Farben | – | Nur bei Catan; vorbelegt aus der Partie bzw. den Standardfarben |
 | Siegpunkte | nein | Nur bei Catan; für alle Beteiligten oder für keinen; ganze Zahlen ab 0 |
+| Spieldauer | nein | Nur bei Catan; ganze Minuten ab 1; aus einer laufenden Partie mit der gemessenen Dauer vorbelegt (3.5) und änderbar *(neu in 0.19, E-43)* |
 | Notizen | nein | Freitext |
 
 Plausibilitätswarnungen (Speichern nach Bestätigung möglich): Ein Sieger hat nicht die höchste Punktzahl; bei Unentschieden haben die Sieger unterschiedliche Punktzahlen. Abgebrochene Partien ohne Sieger werden nicht erfasst.
+
+**Plätze bei Catan** *(neu in 0.19, FA-ER-11)*: Sind Siegpunkte erfasst, ergeben sich daraus die Plätze. Der Sieger hat Platz 1, die übrigen Beteiligten folgen nach Siegpunkten absteigend; gleiche Punktzahl ergibt denselben Platz, der folgende Platz wird übersprungen (10, 8, 8, 6 Punkte ergeben 1, 2, 2, 4). Das gilt auch, wenn nach der Plausibilitätswarnung ein Sieger mit weniger Punkten gespeichert wurde. Die Plätze werden nicht gespeichert, sondern bei Bedarf berechnet; ohne Siegpunkte gibt es keine Plätze. Bei anderen Spielen wird nur der Sieger erfasst.
 
 ### 3.7 Reihenfolge von Partien
 
 Partien werden sortiert nach (1) Datum, (2) innerhalb eines Tages nach Uhrzeit, (3) Partien ohne Uhrzeit nach denen mit Uhrzeit, untereinander nach dem Zeitpunkt der Erfassung. Diese Reihenfolge bestimmt Ergebnislisten, Siegesserien und den Verlauf in Diagrammen.
 
-### 3.8 Statistik-Kennzahlen
+### 3.8 Statistik-Kennzahlen *(neu gefasst in 0.19, E-44)*
 
-Alle Kennzahlen beziehen sich auf eine Gruppe und den aktuell gewählten Filter (→ US-ST-03).
+Alle Kennzahlen beziehen sich auf eine Gruppe und den aktuell gewählten Filter (→ US-ST-03). An jeder Partie sind alle Mitglieder beteiligt (E-41).
 
-| Kennzahl | Definition |
+| Kennzahl | Bezug | Definition |
+|---|---|---|
+| Partien | Gruppe | Anzahl der Partien im Filter. Sie ist für alle Mitglieder gleich und wird deshalb einmal für die Gruppe angegeben. |
+| Siege | Person | Anzahl der Partien, in denen die Person alleiniger Sieger ist |
+| Siegquote | Person | Siege ÷ Partien, in Prozent |
+| Unentschieden | Person | Anzahl der Partien, in denen die Person zu mehreren Siegern gehört; nur angezeigt, wenn im Filter Unentschieden vorkommen (bei Catan nie, 3.6) |
+| Aktuelle Siegesserie | Person | Anzahl aufeinanderfolgender Siege bis einschließlich der letzten Partie |
+| Längste Siegesserie | Person | Größte Anzahl aufeinanderfolgender Siege |
+| Aktuelle Durststrecke | Person | Anzahl der Partien seit dem letzten Sieg der Person; ohne Sieg im Filter alle Partien. Ein Unentschieden ist kein Sieg. |
+| Durchschnittssiegpunkte | Person | Mittelwert der Siegpunkte über alle Partien mit erfassten Siegpunkten; nur bei Catan; ohne Daten „–“ |
+| Durchschnittsplatz | Person | Mittelwert der Plätze (3.6) über alle Partien mit erfassten Siegpunkten; nur bei Catan; ohne Daten „–“ |
+| Durchschnittliche Spieldauer | Gruppe | Mittelwert der Spieldauer über alle Partien mit erfasster Dauer, in Minuten; nur bei Catan; ohne Daten „–“ |
+
+Niederlagen und Unentschieden beenden eine Siegesserie. Mit einem Sieg endet die Durststrecke; ist die aktuelle Siegesserie größer als 0, ist die aktuelle Durststrecke 0.
+
+**Rangliste:** Das Sortierkriterium ist manuell wählbar: Siege (Standard), Durchschnittsplatz und Durchschnittssiegpunkte (beide nur bei Catan-Filter), aktuelle Siegesserie, längste Siegesserie. Bei Gleichstand im gewählten Kriterium entscheiden nacheinander Siege, Unentschieden, Durchschnittsplatz und Durchschnittssiegpunkte (die letzten beiden nur bei Catan-Filter). Ein kleinerer Durchschnittsplatz ist besser; Personen ohne Wert („–“) stehen hinter denen mit Wert. Bei vollständigem Gleichstand teilen sich Personen einen Rang. Siegquote und Siege ergeben in einer Gruppe stets dieselbe Reihenfolge und sind deshalb kein eigenes Kriterium; Unentschieden sind kein Sortierkriterium.
+
+**Rekorde** (→ US-ST-05):
+
+| Rekord | Definition |
 |---|---|
-| Partien | Anzahl der Partien im Filter. Da stets alle Mitglieder beteiligt sind, ist sie für alle Personen gleich. |
-| Siege | Anzahl der Partien, in denen die Person alleiniger Sieger ist |
-| Siegquote | Siege ÷ Partien, in Prozent |
-| Unentschieden | Anzahl der Partien, in denen die Person zu mehreren Siegern gehört |
-| Aktuelle Siegesserie | Anzahl aufeinanderfolgender Siege bis einschließlich der letzten Partie |
-| Längste Siegesserie | Größte Anzahl aufeinanderfolgender Siege |
-| Durchschnittssiegpunkte | Mittelwert der Siegpunkte über alle Partien mit erfassten Siegpunkten; nur bei Catan; ohne Daten „–“ |
-
-Niederlagen und Unentschieden beenden eine Siegesserie.
-
-**Rangliste:** Das Sortierkriterium ist manuell wählbar: Siege (Standard), Unentschieden, Durchschnittssiegpunkte (nur bei Catan-Filter), aktuelle Siegesserie, längste Siegesserie. Bei Gleichstand im gewählten Kriterium entscheiden nacheinander Siege, Unentschieden und Durchschnittssiegpunkte. Bei vollständigem Gleichstand teilen sich Personen einen Rang. Siegquote und Siege ergeben in einer Gruppe stets dieselbe Reihenfolge und sind deshalb kein eigenes Kriterium.
+| Ewige Serie | Die längste Siegesserie im Filter mit Person sowie Datum der ersten und der letzten Partie der Serie; bei Gleichstand die zuerst erreichte |
+| Längste Partie | Die Partie mit der größten Spieldauer; nur bei Catan; bei Gleichstand die frühere nach 3.7 |
+| Kürzeste Partie | Die Partie mit der kleinsten Spieldauer; nur bei Catan; bei Gleichstand die frühere nach 3.7 |
 
 ### 3.9 Kennungen, Export und Import
 
@@ -389,12 +407,13 @@ Die App fordert beim Start persistenten Speicher an. Der Status erscheint im Ber
 
 ### 4.1 Spiele (SP)
 
-#### US-SP-01 Spiel für die Generierung wählen · M
-Als bedienende Person möchte ich zu Beginn einer Partie das Spiel auswählen, damit die passende Generierung startet.
-Bezug: FA-SP-01, FA-AB-01
+#### US-SP-01 Spiel aus der Spielliste wählen · M *(geändert in 0.19)*
+Als bedienende Person möchte ich zu Beginn das Spiel aus einer Liste aller Spiele wählen, damit mich die App zur passenden Generierung oder direkt zum Ergebnis führt.
+Bezug: FA-SP-01, FA-AB-01, FA-ER-01
 
-- **AK-1:** Gegeben die Startansicht, wenn ich „Neue Partie“ wähle, dann zeigt die App alle unterstützten Spiele zur Auswahl; in Version 1 ist das Catan.
-- **AK-2:** Gegeben die Spielauswahl für eine neue Partie, dann erscheinen eigene Spiele dort nicht.
+- **AK-1:** Gegeben die Startansicht und keine laufende Partie, wenn ich „Partie“ wähle, dann zeigt die App eine gemeinsame Spielliste mit allen aktiven Spielen, unterstützten (in Version 1 Catan) wie eigenen. *(geändert in 0.19)*
+- **AK-2:** Gegeben die Spielliste, wenn ich ein eigenes Spiel wähle, dann öffnet sich direkt „Ergebnis eintragen“ mit diesem Spiel; wenn ich Catan wähle, dann fragt die App „Neue Partie“ (Hauptaktion) oder „Ergebnis eintragen“. *(geändert in 0.19)*
+- **AK-3:** Gegeben eine Partie in Generierung oder laufend, wenn ich „Partie“ wähle, dann führt die App zu dieser Partie statt zur Spielliste. *(neu in 0.19)*
 
 #### US-SP-02 Eigenes Spiel anlegen · M
 Als Nutzer möchte ich eigene Spiele wie Uno anlegen, damit ich auch deren Ergebnisse erfassen kann.
@@ -423,7 +442,7 @@ Bezug: FA-SP-06, E-30
 
 - **AK-1:** Gegeben die Einstellungen, dann gibt es den Schalter „Ich hasse Catan!“ mit dem Untertitel „Die Catan-Funktionen werden ausgeblendet.“; Standard ist aus.
 - **AK-2:** Gegeben ich schalte ihn ein, dann erklärt eine Warnung, was ausgeblendet wird, und die Einstellung wird erst nach Bestätigung aktiv; Abbrechen lässt alles unverändert. Das Ausschalten wirkt ohne Rückfrage.
-- **AK-3:** Gegeben die Einstellung ist an, dann bietet die Startansicht keine neue Partie an, sondern direkt „Ergebnis eintragen“, und Catan erscheint weder in einer Spielauswahl noch in der Spieleverwaltung.
+- **AK-3:** Gegeben die Einstellung ist an, dann erscheint Catan weder in der Spielliste (US-SP-01) noch in einer anderen Spielauswahl oder der Spieleverwaltung; jedes Spiel der Spielliste führt damit direkt zu „Ergebnis eintragen“. *(geändert in 0.19)*
 - **AK-4:** Gegeben die Einstellung ist an, wenn ich eine Gruppe anlege oder bearbeite, dann ist „Catan ausschließen“ eingeschaltet und nicht änderbar und die Bindung „Nur Catan“ ausgegraut und nicht wählbar; neu angelegte Gruppen werden mit „Catan ausschließen“ gespeichert.
 - **AK-5:** Gegeben die Einstellung ist an, dann erscheinen bestehende Gruppen ohne Catan-Farben und Gruppen mit der Bindung „Nur Catan“ ausgegraut; ihre bisherigen Ergebnisse bleiben erreichbar, neue Partien und Ergebnisse sind für sie nicht möglich.
 - **AK-6:** Gegeben bisherige Catan-Ergebnisse, dann bleiben sie in Ergebnislisten und Statistik sichtbar; neue Catan-Ergebnisse kommen nicht hinzu.
@@ -594,9 +613,18 @@ Als bedienende Person möchte ich eine Partie mit oder ohne Ergebnis beenden, da
 Bezug: FA-AB-06, FA-AB-08 → 3.5
 
 - **AK-1:** Gegeben die Übersicht der laufenden Partie, dann gibt es „Ergebnis eintragen“ und „Partie beenden ohne Ergebnis“.
-- **AK-2:** Gegeben ich wähle „Ergebnis eintragen“, dann ist das Formular mit Spiel, Gruppe, Spielversion, Modus, den Catan-Farben der Partie und dem heutigen Datum vorbelegt; nach dem Speichern ist die Partie beendet.
+- **AK-2:** Gegeben ich wähle „Ergebnis eintragen“, dann ist das Formular mit Spiel, Gruppe, Spielversion, Modus, den Catan-Farben der Partie, Datum und Uhrzeit des Beginns sowie der gemessenen Spieldauer vorbelegt (US-AB-07); nach dem Speichern ist die Partie beendet. *(ergänzt in 0.19)*
 - **AK-3:** Gegeben die Generierung läuft oder ist abgeschlossen, wenn ich „Partie beenden ohne Ergebnis“ wähle und bestätige, dann wird die Generierung verworfen und nichts gespeichert.
 - **AK-4:** Gegeben eine Partie ist beendet, dann ist ihre Generierung nicht mehr abrufbar.
+
+#### US-AB-07 Spieldauer messen · S *(neu in 0.19)*
+Als bedienende Person möchte ich, dass die App die Dauer einer Partie misst, damit wir sie nicht selbst stoppen müssen.
+Bezug: FA-AB-11, FA-ER-10, E-43 → 3.5
+
+- **AK-1:** Gegeben die Generierung ist abgeschlossen, dann beginnt ein Timer, und die Übersicht der laufenden Partie zeigt die bisherige Dauer.
+- **AK-2:** Gegeben der Timer läuft, dann kann ich ihn anhalten und wieder fortsetzen; angehaltene Zeit zählt nicht mit.
+- **AK-3:** Gegeben die App wird geschlossen und neu gestartet, dann zeigt der Timer die seit dem Beginn vergangene Zeit ohne die angehaltene; ein angehaltener Timer bleibt angehalten.
+- **AK-4:** Gegeben ich trage aus der Partie ein Ergebnis ein, dann sind Spieldauer (auf ganze Minuten gerundet, mindestens 1) und Beginn übernommen und im Formular änderbar.
 
 ### 4.5 Losschritte (LS)
 
@@ -726,23 +754,25 @@ Bezug: FA-IN-06
 
 #### US-ER-01 Ergebnis erfassen · M
 Als Nutzer möchte ich jederzeit ein Ergebnis eintragen können, auch ohne Generierung, damit alle Partien in die Statistik eingehen.
-Bezug: FA-ER-01, FA-ER-02, FA-ER-03, FA-ER-07 → 3.4, 3.6
+Bezug: FA-ER-01, FA-ER-02, FA-ER-03, FA-ER-07, FA-ER-10 → 3.4, 3.6
 
-- **AK-1:** Gegeben die Startansicht oder eine Gruppe, wenn ich „Ergebnis eintragen“ wähle, dann öffnet sich das Formular, ohne dass eine Generierung nötig ist.
+- **AK-1:** Gegeben die Spielliste (US-SP-01) oder eine Gruppe, wenn ich „Ergebnis eintragen“ wähle bzw. in der Spielliste ein eigenes Spiel, dann öffnet sich das Formular, ohne dass eine Generierung nötig ist. Aus der Spielliste steht das Spiel fest, danach folgt die Gruppe; von einer Gruppe aus steht die Gruppe fest, danach folgt das Spiel. *(geändert in 0.19)*
 - **AK-2:** Gegeben das Formular, dann sind Datum (Standard: heute), Gruppe, Spiel und Sieger Pflicht, bei Catan zusätzlich die Spielversion.
 - **AK-3:** Gegeben das Feld Uhrzeit, dann ist es optional, und „Jetzt“ setzt die aktuelle Uhrzeit.
-- **AK-4:** Gegeben ich wähle mehrere Sieger, dann wird das Ergebnis als Unentschieden zwischen diesen Personen gespeichert; alle Beteiligten können gleichzeitig Sieger sein.
-- **AK-5:** Gegeben eine gewählte Gruppe, dann stehen nur mit ihr verträgliche, aktive Spiele zur Wahl, und die Mitglieder sind die Beteiligten.
+- **AK-4:** Gegeben ein anderes Spiel als Catan und ich wähle mehrere Sieger, dann wird das Ergebnis als Unentschieden zwischen diesen Personen gespeichert; alle Beteiligten können gleichzeitig Sieger sein. Bei Catan ist genau ein Sieger wählbar. *(geändert in 0.19, E-42)*
+- **AK-5:** Gegeben ein feststehendes Spiel, dann stehen nur damit verträgliche, aktive Gruppen zur Wahl; gegeben eine feststehende Gruppe, dann stehen nur mit ihr verträgliche, aktive Spiele zur Wahl. Die Mitglieder der Gruppe sind die Beteiligten (E-41). *(geändert in 0.19)*
 - **AK-6:** Gegeben Catan, dann ist der Modus optional und mit „Standard“ vorbelegt; Notizen sind bei allen Spielen optional.
+- **AK-7:** Gegeben Catan, dann kann ich optional die Spieldauer in ganzen Minuten ab 1 eintragen; bei anderen Spielen gibt es kein Feld für die Spieldauer. *(neu in 0.19, E-43)*
 
 #### US-ER-02 Siegpunkte erfassen · S
 Als Nutzer möchte ich bei Catan die Siegpunkte aller Beteiligten erfassen, damit Durchschnittswerte möglich werden.
-Bezug: FA-ER-03, FA-ER-06 → 3.6
+Bezug: FA-ER-03, FA-ER-06, FA-ER-11 → 3.6
 
 - **AK-1:** Gegeben ein Spiel ohne Siegpunkte, dann gibt es keine Siegpunktfelder.
 - **AK-2:** Gegeben Siegpunkte sind nur für einen Teil der Beteiligten eingetragen, wenn ich speichern will, dann ist das erst möglich, wenn alle oder keine Felder ausgefüllt sind.
 - **AK-3:** Gegeben eine Eingabe, dann sind nur ganze Zahlen ab 0 zulässig.
 - **AK-4:** Gegeben ein Sieger hat nicht die höchste Punktzahl oder Unentschieden-Sieger haben unterschiedliche Punktzahlen, wenn ich speichere, dann erscheint eine Warnung; nach Bestätigung wird gespeichert.
+- **AK-5:** Gegeben Siegpunkte sind erfasst, dann zeigen Formular und Detailansicht die daraus berechneten Plätze nach 3.6 (z. B. 1, 2, 2, 4). *(neu in 0.19, E-42)*
 
 #### US-ER-03 Catan-Farben im Ergebnis · C
 Als Nutzer möchte ich sehen, wer in einer Partie welche Farbe hatte, damit ich mich an die Partie erinnern kann.
@@ -772,9 +802,9 @@ Bezug: FA-ER-04
 Als Spielende möchten wir Kennzahlen je Person sehen, damit wir wissen, wer wie erfolgreich ist.
 Bezug: FA-ST-01, FA-ST-02, FA-ST-05 → 3.8
 
-- **AK-1:** Gegeben eine Gruppe, dann zeigt die Statistik für jedes Mitglied Partien, Siege, Siegquote, Unentschieden, aktuelle und längste Siegesserie; bei Catan zusätzlich die Durchschnittssiegpunkte.
+- **AK-1:** Gegeben eine Gruppe, dann zeigt die Statistik die Anzahl der Partien einmal für die Gruppe und für jedes Mitglied Siege, Siegquote, aktuelle und längste Siegesserie und die aktuelle Durststrecke, Unentschieden nur, wenn es im Filter welche gibt; bei Catan zusätzlich Durchschnittssiegpunkte und Durchschnittsplatz je Person sowie die durchschnittliche Spieldauer der Gruppe. *(geändert in 0.19)*
 - **AK-2:** Gegeben ein Unentschieden, dann zählt es für die beteiligten Sieger als Unentschieden, nicht als Sieg, und beendet ihre Siegesserie.
-- **AK-3:** Gegeben Partien teils mit, teils ohne Siegpunkte, dann wird der Durchschnitt nur über Partien mit Siegpunkten gebildet; ohne solche Partien wird „–“ angezeigt.
+- **AK-3:** Gegeben Partien teils mit, teils ohne Siegpunkte bzw. Spieldauer, dann werden Durchschnittssiegpunkte und Durchschnittsplatz nur über Partien mit Siegpunkten und die durchschnittliche Spieldauer nur über Partien mit Dauer gebildet; ohne solche Partien wird „–“ angezeigt. *(ergänzt in 0.19)*
 - **AK-4:** Gegeben eine Gruppe ohne Partien im Filter, dann erscheint ein verständlicher Hinweis statt leerer Zahlen.
 - **AK-5:** Gegeben die App, dann gibt es keine gruppenübergreifende Statistik.
 
@@ -793,7 +823,7 @@ Bezug: FA-ST-06, FA-ST-07
 - **AK-1:** Gegeben eine globale Gruppe, dann kann ich zwischen „Alle Spiele“ und einem einzelnen Spiel filtern.
 - **AK-2:** Gegeben der Filter steht auf Catan (oder die Gruppe ist an Catan gebunden), dann kann ich zusätzlich zwischen „Gesamt“, „Basisspiel“ und „Städte & Ritter“ wählen.
 - **AK-3:** Gegeben ein Filter, dann gilt er für Kennzahlen, Rangliste und Diagramme gleichermaßen.
-- **AK-4:** Gegeben der Filter umfasst nicht ausschließlich Catan, dann werden keine Durchschnittssiegpunkte angezeigt.
+- **AK-4:** Gegeben der Filter umfasst nicht ausschließlich Catan, dann werden keine Catan-Kennzahlen (Durchschnittssiegpunkte, Durchschnittsplatz, durchschnittliche Spieldauer) und keine Catan-Rekorde angezeigt. *(ergänzt in 0.19)*
 
 #### US-ST-04 Diagramme · S
 Als Spielende möchten wir Verlauf und Verteilung der Siege grafisch sehen, damit Entwicklungen auf einen Blick erkennbar sind.
@@ -802,6 +832,15 @@ Bezug: FA-ST-04 → 3.7, 3.8
 - **AK-1:** Gegeben eine Gruppe mit Partien, dann zeigt ein Liniendiagramm die kumulierten Siege je Person über die Partien in der Reihenfolge aus 3.7.
 - **AK-2:** Gegeben eine Gruppe mit Partien, dann zeigt ein Diagramm die Verteilung der Siege je Person sowie den Anteil der Unentschieden.
 - **AK-3:** Gegeben die Diagramme, dann werden die Gruppenfarben verwendet und der aktive Filter berücksichtigt.
+
+#### US-ST-05 Rekorde · C *(neu in 0.19)*
+Als Spielende möchten wir die Rekorde unseres Tisches sehen, damit besondere Partien und Serien in Erinnerung bleiben.
+Bezug: FA-ST-08, E-44 → 3.7, 3.8
+
+- **AK-1:** Gegeben eine Gruppe mit Partien, dann zeigt die Statistik die ewige Serie mit Person, Länge sowie Datum der ersten und der letzten Partie der Serie.
+- **AK-2:** Gegeben der Filter steht auf Catan und es gibt Partien mit Spieldauer, dann zeigt die Statistik die längste und die kürzeste Partie mit Dauer und Datum.
+- **AK-3:** Gegeben ein Rekord, der zu einer Partie gehört, wenn ich ihn antippe, dann öffnet sich die Detailansicht dieser Partie.
+- **AK-4:** Gegeben Gleichstand, dann gilt die Regel aus 3.8; gegeben keine passenden Partien, dann entfällt der Rekord.
 
 ### 4.11 Export und Import (EI)
 
@@ -1032,6 +1071,7 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-AB-07 | US-AB-05 |
 | FA-AB-08 | US-AB-06 |
 | FA-AB-09 | US-VW-02, US-VW-03, US-EI-03, US-DS-02 |
+| FA-AB-11 | US-AB-07 |
 | FA-LS-01, FA-LS-03, FA-LS-04 | US-LS-02 |
 | FA-LS-02 | US-LS-03 |
 | FA-LS-07 | US-AB-01, US-LS-03, US-PL-05, US-SR-01 |
@@ -1047,17 +1087,20 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-IN-03 bis FA-IN-05 | US-IN-03 (nach Version 1) |
 | FA-IN-06 | US-IN-04 |
 | FA-IN-07 | US-IN-03 (nach Version 1) |
-| FA-ER-01, FA-ER-02, FA-ER-07 | US-ER-01 |
+| FA-ER-01, FA-ER-02, FA-ER-07 | US-SP-01, US-ER-01 |
 | FA-ER-03 | US-ER-01, US-ER-02 |
 | FA-ER-04 | US-ER-05 |
 | FA-ER-05 | Abgrenzung, keine Story |
 | FA-ER-06 | US-ER-02 |
 | FA-ER-08 | US-ER-04 |
 | FA-ER-09 | US-ER-03 |
+| FA-ER-10 | US-ER-01, US-AB-06, US-AB-07 |
+| FA-ER-11 | US-ER-02 |
 | FA-ST-01, FA-ST-02, FA-ST-05 | US-ST-01 |
 | FA-ST-03 | US-ST-02 |
 | FA-ST-04 | US-ST-04 |
 | FA-ST-06, FA-ST-07 | US-ST-03 |
+| FA-ST-08 | US-ST-05 |
 | FA-EI-01 | US-EI-01, US-EI-03 |
 | FA-EI-02 | US-EI-02 |
 | FA-EI-03 | US-EI-04 |

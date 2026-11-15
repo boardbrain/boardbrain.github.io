@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.36 |
+| Version | 0.37 |
 | Stand | 15.11.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
@@ -49,6 +49,7 @@
 | 0.34 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation E-40): Vorabversionen 0.x je Inkrement, erste 0.2.0 nach I2 (neue Zeile 4b); lokale Abnahme-App „BoardBrain Dev“ mit lila Symbol auf Port 4174 (`npm run build:acceptance`, `npm run preview:acceptance`) |
 | 0.35 | 13.11.2026 | Release 0.2.0 vorbereitet (#46): Version und `CHANGELOG.md` (4b) |
 | 0.36 | 15.11.2026 | Release 0.2.0 veröffentlicht (#47); K-8 umgesetzt (#48): Doku-PRs auf GitHub schnell grün; Zuschnitt von I3 (neu Kapitel 9): zuerst Klärung der Daten und Statistiken (I3-0), dann I3-A bis I3-E und Release 0.3.0; Löschen eines Ergebnisses in I3 ohne Sicherungspunkt, dieser folgt mit I4 (Entscheidungen des Product Owners 15.11.2026) (2, 3, 4.1, 6, 7, 9) |
+| 0.37 | 15.11.2026 | I3-0 umgesetzt (#49): Daten und Statistik geklärt (Anforderungsdokumentation 0.23, Spezifikation 0.19, Architektur 0.37); Inhalte von I3-A bis I3-E angepasst, neue Stories US-AB-07 und US-ST-05, offene Punkte für die Vorschauen je Bündel (2, 9) |
 
 ## 1. Zweck
 
@@ -74,7 +75,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 4 | Entscheidung über Vorabversionen (OP-13) und lokale Abnahme-App mit lila Symbol | nach I2 | umgesetzt (#45) |
 | 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | veröffentlicht: vorbereitet (#46), Release-PR nach `main` (#47), Tag `v0.2.0` |
 | 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | umgesetzt (#48) |
-| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-B, I3-C, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | zugeschnitten (#48) |
+| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-B, I3-C, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49) |
 | 5a | Release 0.3.0 als Vorabversion nach Richtlinien 3.8 | nach I3 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
 | 7 | Inkrement I5 Verwaltung und Archiv | nach I4 | offen |
@@ -388,17 +389,17 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 
 ## 9. Inkrement I3 Ergebnisse und Statistik *(neu in 0.36)*
 
-Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Block nach E-32 umfasst I3 das Erfassen, Ansehen, Korrigieren und Auswerten von Ergebnissen, dazu den Einstieg über die gemeinsame Spielliste (Kapitel 7, Zeile I3). Stories: US-ER-01, -04, -05, US-ST-01, -02 (M); US-ER-02, US-ST-03, -04 (S); US-ER-03 (C); dazu der Nachweis von US-AB-06 AK-1 und AK-2 aus I2 und die geänderte US-SP-01.
+Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Block nach E-32 umfasst I3 das Erfassen, Ansehen, Korrigieren und Auswerten von Ergebnissen, dazu den Einstieg über die gemeinsame Spielliste (Kapitel 7, Zeile I3). Stories: US-ER-01, -04, -05, US-ST-01, -02 (M); US-ER-02, US-AB-07, US-ST-03, -04 (S); US-ER-03, US-ST-05 (C); dazu der Nachweis von US-AB-06 AK-1 und AK-2 aus I2 und die geänderte US-SP-01. *(ergänzt in 0.37)*
 
-**Vorbehalt:** Welche Daten ein Ergebnis enthält und welche Statistiken es gibt, ist noch nicht endgültig (Product Owner 15.11.2026). Das klärt I3-0 zuerst. Ändert die Klärung Stories oder Abnahmekriterien, passt der Pull Request von I3-0 Inhalt und Stories der folgenden Bündel in diesem Kapitel an. Neue Pakete sind ein Haltepunkt (Richtlinien 10.1); vorgesehen ist bisher keines.
+**Vorbehalt geklärt (0.37):** Welche Daten ein Ergebnis enthält und welche Statistiken es gibt, hat I3-0 festgelegt (Anforderungsdokumentation E-41 bis E-44); die Bündel unten sind entsprechend angepasst. Neue Pakete sind ein Haltepunkt (Richtlinien 10.1); vorgesehen ist bisher keines.
 
 | Bündel | Stories | Modell, Aufwand | Branch | Status |
 |---|---|---|---|---|
-| I3-0 Daten und Statistik klären | FA-ER-*, FA-ST-*, Spezifikation 3.6 bis 3.8, US-ER-*, US-ST-*; Spielliste: US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3 | Opus, medium | `docs/i3-results-and-statistics-data` | offen |
-| I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 (Dienst) | Opus, high | `feat/us-er-01-results-service` | offen |
-| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-ER-01, US-ER-02, US-ER-03 AK-1, US-AB-06 AK-1 und AK-2 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | offen |
+| I3-0 Daten und Statistik klären | FA-ER-*, FA-ST-*, Spezifikation 3.6 bis 3.8, US-ER-*, US-ST-*; Spielliste: US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3 | Opus, medium | `docs/i3-results-and-statistics-data` | umgesetzt (#49) |
+| I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 und US-AB-07 (Dienst) | Opus, high | `feat/us-er-01-results-service` | offen |
+| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-ER-01, US-ER-02, US-ER-03 AK-1, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | offen |
 | I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | Sonnet, medium | `feat/us-er-04-result-list` | offen |
-| I3-D Statistik | US-ST-01, US-ST-02, US-ST-03 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
+| I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
 | I3-E Diagramme | US-ST-04 | Sonnet, medium | `feat/us-st-04-charts` | offen |
 
 **Warum diese Reihenfolge:** Zuerst die Klärung, weil die Daten eines Ergebnisses ins Exportformat (I4) eingehen und ein später ergänztes Feld eine Migration bräuchte, ohne Werte für ältere Partien. Dann wie in I2 die Fachlogik ohne Oberfläche (A), weil die Statistik nur mit gespeicherten Ergebnissen rechnet und Fehler dort die Langzeitstatistik verfälschen. Danach Erfassen (B), Ansehen und Korrigieren (C), Auswerten (D) und Diagramme (E); jedes Bündel baut auf den Daten des vorigen auf.
@@ -409,16 +410,22 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 
 - **Inhalt:** Gespräch mit dem Product Owner in einer eigenen Sitzung: was ein Ergebnis erfasst, welche Statistiken es gibt und welche Daten diese brauchen. Grundlage sind die heutigen Festlegungen (Spezifikation 3.6 bis 3.8) und mögliche Erweiterungen, etwa Platzierungen statt nur Sieger, Punkte auch für eigene Spiele, nicht immer alle Mitglieder beteiligt, Startspieler oder Platzierungsreihenfolge aus der Generierung, Spieldauer (PP-08); bei den Statistiken etwa Siegquote nach Startposition oder Farbe (PP-15), direkter Vergleich, Form der letzten Partien, Durststrecke, Rekorde, Filter nach Zeitraum.
 - **Ergebnis:** Anpassungen in Anforderungsdokumentation, Spezifikation (3.6 bis 3.8, Stories ER und ST, Übersicht 2.5) und Datenmodell (Architektur 7.1, `Match`) sowie in diesem Kapitel. Dazu die Änderungen für die gemeinsame Spielliste (Kapitel 7, Entscheidung aus 0.21): US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5 (vom Spiel aus nur verträgliche Gruppen), US-SP-05 AK-3. Reiner Doku-PR.
+- **Umgesetzt (#49), Entscheidungen des Product Owners 15.11.2026:**
+  - **Ergebnis:** Eine Gruppe bleibt ein fester Tisch, an jeder Partie sind alle Mitglieder beteiligt (E-41). Bei Catan gibt es genau einen Sieger; die Plätze ergeben sich aus den Siegpunkten (1, 2, 2, 4) und werden nicht gespeichert, andere Spiele erfassen nur den Sieger (E-42). Neu ist die Spieldauer bei Catan: ein anhaltbarer Timer in der Übersicht der laufenden Partie, im Formular änderbar oder von Hand nachgetragen; sein Beginn belegt Datum und Uhrzeit vor (E-43, US-AB-07). Die Platzierungsreihenfolge wird nicht gespeichert.
+  - **Statistik:** Partien einmal für die Gruppe, Unentschieden nur bei Bedarf, neu die aktuelle Durststrecke, bei Catan Durchschnittsplatz und durchschnittliche Spieldauer; Rangliste ohne Unentschieden als Kriterium, dafür mit Durchschnittsplatz; Rekorde: ewige Serie, längste und kürzeste Partie (US-ST-05). Verworfen: Siegquote nach Farbe oder Startplatz, direkter Vergleich, Abendsieger, Brett im Ergebnis (E-44, PP-15, PP-21 bis PP-23).
+  - **Verworfen beim Ergebnis:** Beteiligte abwählen (verfälscht die Siegquote), Platzierungen bei anderen Spielen, „Revanche“-Knopf nach dem Speichern.
 
 ### I3-A Ergebnisse: Fachlogik und Dienst
 
-- **Inhalt:** Entität `Match` in `core/model`; in `core/results` die Regeln aus Spezifikation 3.6 (Pflichtfelder, Verträglichkeit von Gruppe und Spiel, Sieger, Siegpunkte für alle oder keinen als ganze Zahlen ab 0), die Plausibilitätswarnungen und die Reihenfolge nach 3.7. Repository für `matches` in `infra/db` (der Store besteht seit Schemaversion 1, keine Migration), Lesehooks. `ResultService` (Architektur 4.4): erfassen, bearbeiten, löschen; Ergebnis aus der laufenden Partie speichern und die Sitzung in derselben Transaktion beenden (US-AB-06 AK-2). Testhelfer für Ergebnisse in `tests/e2e/seedDatabase.ts`.
+- **Inhalt:** Entität `Match` in `core/model` (Architektur 7.1, mit `durationMinutes`); in `core/results` die Regeln aus Spezifikation 3.6 (Pflichtfelder, Verträglichkeit von Gruppe und Spiel, Sieger, bei Catan genau einer, Siegpunkte für alle oder keinen als ganze Zahlen ab 0, Spieldauer nur bei Catan), die Plausibilitätswarnungen, die Plätze aus den Siegpunkten und die Reihenfolge nach 3.7. Timer der laufenden Partie im `SessionService` (Beginn beim Übergang in „Laufend“, anhalten, fortsetzen; Architektur 10.2, neue `SESSION_SCHEMA_VERSION`). *(ergänzt in 0.37)* Repository für `matches` in `infra/db` (der Store besteht seit Schemaversion 1, keine Migration), Lesehooks. `ResultService` (Architektur 4.4): erfassen, bearbeiten, löschen; Ergebnis aus der laufenden Partie speichern und die Sitzung in derselben Transaktion beenden (US-AB-06 AK-2). Testhelfer für Ergebnisse in `tests/e2e/seedDatabase.ts`.
 - **Ohne Oberfläche:** Wie in I2-B bietet Claude Code zur Abnahme eine lokale Prüfseite an.
 
 ### I3-B Spielliste und Ergebnis eintragen
 
 - **Inhalt:** „Partie“ führt zur gemeinsamen Spielliste mit allen aktiven Spielen; eigene Spiele öffnen das Ergebnisformular, Catan fragt „Neue Partie“ oder „Ergebnis eintragen“; läuft eine Partie, führt „Partie“ zu ihr (Kapitel 7). Ergebnisformular in der Reihenfolge Spiel, Gruppe, Sieger, Datum und Uhrzeit mit „Jetzt“; bei Catan Spielversion, Modus, Farben und Siegpunkte; Notizen; Warnungen vor dem Speichern. Einstieg auch aus der Übersicht der laufenden Partie, vorbelegt aus der Partie (US-AB-06 AK-1 und AK-2).
 - **Design:** Zu Beginn eine Prinzip-Runde für alle Ansichten von I3 (wo Ergebnisse und Statistik liegen, was die Karte „Statistik“ öffnet, Reiter am Tisch nach `docs/design/i1e-persons-tables-final-preview.html`), danach das Aussehen Seite für Seite je Bündel. Hier entschieden: der offene Punkt aus Kapitel 7, Sortierung der Spielliste und Hervorhebung von Catan.
+- **Timer (US-AB-07):** Anzeige der Spieldauer in der Übersicht der laufenden Partie mit Anhalten und Fortsetzen; Übernahme von Dauer, Datum und Uhrzeit ins Formular. *(neu in 0.37)*
+- **Offene Punkte für die Vorschau (I3-0):** Punkte bei eigenen Spielen mit der Wahl „meiste“ oder „wenigste Punkte gewinnen“, etwa für Skyjo (OP-14; ändert bei Zustimmung FA-SP-05, Spezifikation 3.6 und US-ER-02); Anzeige der Plätze aus den Siegpunkten im Formular und in der Detailansicht. *(neu in 0.37)*
 
 ### I3-C Ergebnisliste und Korrektur
 
@@ -427,11 +434,13 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 
 ### I3-D Statistik
 
-- **Inhalt:** In `core/stats` Kennzahlen, Siegesserien, Rangliste mit Folgekriterien und geteilten Rängen sowie die Filter nach Spiel und Spielversion (3.8); Eigenschaftstests mit `fast-check` (vorhanden). Karte „Statistik“ in der Kartenhand (D-3) und Reiter „Statistik“ am Tisch.
+- **Inhalt:** In `core/stats` Kennzahlen, Siegesserien, Durststrecke, Durchschnittsplatz und -dauer, Rangliste mit Folgekriterien und geteilten Rängen, Rekorde sowie die Filter nach Spiel und Spielversion (3.8); Eigenschaftstests mit `fast-check` (vorhanden). Karte „Statistik“ in der Kartenhand (D-3) und Reiter „Statistik“ am Tisch. *(ergänzt in 0.37)*
+- **Offene Punkte für die Vorschau (I3-0):** Aufbau bei globalen Tischen („Alle Spiele“ als Startansicht mit Filter oder ein Abschnitt je Spiel); längste Durststrecke als Kennzahl, als Rekord oder gar nicht; Form der letzten fünf Partien (eher weglassen); Filter nach Zeitraum (Gesamt oder je Jahr). Was gewählt wird, ergänzt die Spezifikation im PR des Bündels. *(neu in 0.37)*
 
 ### I3-E Diagramme
 
 - **Inhalt:** Diagramme nach US-ST-04 im Stil der App, Daten fertig aus `core/stats`, Farben aus den Gruppenfarben, der Filter wirkt.
+- **Offener Punkt für die Vorschau (I3-0):** Welche Diagramme es gibt, bespricht der Product Owner anhand der Vorschau. Der Verlauf der kumulierten Siege gilt als sinnvoll; die Verteilung der Siege zeigt dasselbe wie die Siegquote und bleibt nur, wenn sie in der Vorschau überzeugt. *(neu in 0.37)*
 - **Pakete:** ADR-021 sieht eigene SVG-Diagramme vor. Kleine Hilfspakete für die Rechnung (etwa `d3-scale`, `d3-shape`) sind für den Product Owner denkbar, solange die Diagramme im Stil der App bleiben. Claude Code zeigt dazu Vorschauen mit und ohne Pakete und stellt den Antrag nach Richtlinien 10.1; eine Entscheidung für ein Paket ändert ADR-021.
 
 ### Hinweise
