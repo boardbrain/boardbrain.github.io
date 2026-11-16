@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.38 |
-| Stand | 15.11.2026 |
+| Version | 0.39 |
+| Stand | 16.11.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
 
@@ -51,6 +51,7 @@
 | 0.36 | 15.11.2026 | Release 0.2.0 veröffentlicht (#47); K-8 umgesetzt (#48): Doku-PRs auf GitHub schnell grün; Zuschnitt von I3 (neu Kapitel 9): zuerst Klärung der Daten und Statistiken (I3-0), dann I3-A bis I3-E und Release 0.3.0; Löschen eines Ergebnisses in I3 ohne Sicherungspunkt, dieser folgt mit I4 (Entscheidungen des Product Owners 15.11.2026) (2, 3, 4.1, 6, 7, 9) |
 | 0.37 | 15.11.2026 | I3-0 umgesetzt (#49): Daten und Statistik geklärt (Anforderungsdokumentation 0.23, Spezifikation 0.19, Architektur 0.37); Inhalte von I3-A bis I3-E angepasst, neue Stories US-AB-07 und US-ST-05, offene Punkte für die Vorschauen je Bündel (2, 9) |
 | 0.38 | 15.11.2026 | I3-A umgesetzt (#50): Ergebnisregeln, Timer und `ResultService`; Entscheidungen des Product Owners zum Timer nach einer Wiederholung und zum Bearbeiten (Spezifikation 0.20), keine Prüfseite (2, 9) |
+| 0.39 | 16.11.2026 | Neues Bündel I3-A2 vor I3-B (Entscheidung des Product Owners): Punkte und Rangfolge bei eigenen Spielen im Datenmodell, OP-14 geklärt (Anforderungsdokumentation 0.25, Spezifikation 0.21, Architektur 0.40); Inhalte von I3-B, I3-C und I3-D ergänzt, offener Punkt OP-15 für I3-D (2, 9) |
 
 ## 1. Zweck
 
@@ -76,7 +77,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 4 | Entscheidung über Vorabversionen (OP-13) und lokale Abnahme-App mit lila Symbol | nach I2 | umgesetzt (#45) |
 | 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | veröffentlicht: vorbereitet (#46), Release-PR nach `main` (#47), Tag `v0.2.0` |
 | 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | umgesetzt (#48) |
-| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-B, I3-C, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50) |
+| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-B, I3-C, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50), I3-A2 umgesetzt (#52) |
 | 5a | Release 0.3.0 als Vorabversion nach Richtlinien 3.8 | nach I3 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
 | 7 | Inkrement I5 Verwaltung und Archiv | nach I4 | offen |
@@ -390,7 +391,7 @@ Ergebnis: Die Generierung ist vollständig, wie sie in Version 1 sein soll, und 
 
 ## 9. Inkrement I3 Ergebnisse und Statistik *(neu in 0.36)*
 
-Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Block nach E-32 umfasst I3 das Erfassen, Ansehen, Korrigieren und Auswerten von Ergebnissen, dazu den Einstieg über die gemeinsame Spielliste (Kapitel 7, Zeile I3). Stories: US-ER-01, -04, -05, US-ST-01, -02 (M); US-ER-02, US-AB-07, US-ST-03, -04 (S); US-ER-03, US-ST-05 (C); dazu der Nachweis von US-AB-06 AK-1 und AK-2 aus I2 und die geänderte US-SP-01. *(ergänzt in 0.37)*
+Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Block nach E-32 umfasst I3 das Erfassen, Ansehen, Korrigieren und Auswerten von Ergebnissen, dazu den Einstieg über die gemeinsame Spielliste (Kapitel 7, Zeile I3). Stories: US-ER-01, -04, -05, US-ST-01, -02 (M); US-ER-02, US-ER-06, US-AB-07, US-ST-03, -04 (S); US-ER-03, US-ST-05, US-ST-06 (C); dazu der Nachweis von US-AB-06 AK-1 und AK-2 aus I2, die geänderte US-SP-01 sowie US-SP-02 AK-4 und US-VW-07 AK-3 und AK-4. *(ergänzt in 0.37 und 0.39)*
 
 **Vorbehalt geklärt (0.37):** Welche Daten ein Ergebnis enthält und welche Statistiken es gibt, hat I3-0 festgelegt (Anforderungsdokumentation E-41 bis E-44); die Bündel unten sind entsprechend angepasst. Neue Pakete sind ein Haltepunkt (Richtlinien 10.1); vorgesehen ist bisher keines.
 
@@ -398,9 +399,10 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 |---|---|---|---|---|
 | I3-0 Daten und Statistik klären | FA-ER-*, FA-ST-*, Spezifikation 3.6 bis 3.8, US-ER-*, US-ST-*; Spielliste: US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3 | Opus, medium | `docs/i3-results-and-statistics-data` | umgesetzt (#49) |
 | I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 und US-AB-07 (Dienst) | Opus, high | `feat/us-er-01-results-service` | umgesetzt (#50) |
-| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-ER-01, US-ER-02, US-ER-03 AK-1, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | offen |
+| I3-A2 Punkte und Rangfolge bei eigenen Spielen *(neu in 0.39)* | US-SP-02 AK-4, US-VW-07 AK-3 und AK-4, US-ER-02, US-ER-06 (Fachlogik und Dienst) | Opus, high | `feat/op-14-scores-and-ranking` | umgesetzt (#52) |
+| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-ER-01, US-ER-02, US-ER-03 AK-1, US-ER-06, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche); US-SP-02 AK-4 und US-VW-07 AK-3 und AK-4 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | offen |
 | I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | Sonnet, medium | `feat/us-er-04-result-list` | offen |
-| I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
+| I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05, US-ST-06 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
 | I3-E Diagramme | US-ST-04 | Sonnet, medium | `feat/us-st-04-charts` | offen |
 
 **Warum diese Reihenfolge:** Zuerst die Klärung, weil die Daten eines Ergebnisses ins Exportformat (I4) eingehen und ein später ergänztes Feld eine Migration bräuchte, ohne Werte für ältere Partien. Dann wie in I2 die Fachlogik ohne Oberfläche (A), weil die Statistik nur mit gespeicherten Ergebnissen rechnet und Fehler dort die Langzeitstatistik verfälschen. Danach Erfassen (B), Ansehen und Korrigieren (C), Auswerten (D) und Diagramme (E); jedes Bündel baut auf den Daten des vorigen auf.
@@ -426,22 +428,36 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
   - **Keine Prüfseite:** Ohne das Design aus I3-B gäbe sie ein falsches Bild; die Abnahme stützt sich auf die Tests je Abnahmekriterium (PR #50).
   - **Für I3-B bereit:** `draft` und `draftFromSession` liefern die Startwerte samt Beteiligten und Regeln des Spiels, `resultErrors` alle Fehler für die Prüfung beim Tippen, `plausibilityWarnings` die Warnungen vor dem Speichern, `placesOf` die Plätze; `pauseClock`/`resumeClock` im `SessionService`; `seedResults` für E2E-Tests (Architektur 4.4, 7.1, 10.2).
 
+### I3-A2 Punkte und Rangfolge bei eigenen Spielen *(neu in 0.39)*
+
+- **Anlass:** Vor I3-B wünschte der Product Owner, dass eigene Spiele Punkte und eine Rangfolge erfassen können (OP-14), und dass das Datenmodell vorher angepasst wird. Ein eigener PR ohne Oberfläche, weil sich die gespeicherten Felder jetzt noch ohne Migration ändern lassen: Keine veröffentlichte Version speichert bisher Ergebnisse.
+- **Entscheidungen des Product Owners 16.11.2026:**
+  - **Punkte am Spiel:** Ein eigenes Spiel hat die Einstellung „Punkte“: „Keine“, „Meiste Punkte gewinnen“ oder „Wenigste Punkte gewinnen“ (FA-SP-07). Die Richtung ist nach einer Warnung änderbar; „Keine“ nur, solange kein Ergebnis Punkte hat.
+  - **Punkte oder Rangfolge:** Bei eigenen Spielen gibt es je Ergebnis Punkte, eine Rangfolge von Hand oder nichts; die Rangfolge auch dann, wenn das Spiel Punkte zählt, aber niemand mitgeschrieben hat. Bei Catan keine Rangfolge von Hand (FA-ER-12, E-45).
+  - **Sieger:** Aus vollständigen Punkten schlägt das Formular die beste Punktzahl als Sieger vor, änderbar; bei einer Rangfolge sind die Personen auf Platz 1 fest die Sieger.
+  - **Negative Punkte** sind bei eigenen Spielen erlaubt.
+  - **Statistik:** Ø Platz für alle Spiele mit Plätzen, Ø Punkte je Spiel; neu Platzverteilung, Rote Laterne, Paradespiel, Partien je Spiel, Bestwert je Spiel als Rekord und Ø Abstand zum Sieger (FA-ST-08, FA-ST-09); Letzteres mit Vorbehalt (OP-15).
+  - **Verworfen:** Teamsiege (am Tisch werden keine Teamspiele gespielt), Rangfolge von Hand bei Catan.
+- **Umgesetzt (#52):** `CustomGame.scoring`, `Match.scores` (bisher `victoryPoints`) und `Match.places`; `ResultRules` mit Richtung, negativen Punkten und Rangfolge; Plätze nach Richtung, `suggestedWinners`, `winnersOfRanking`; `ResultService` liest die Einstellung des eigenen Spiels; `MasterDataService.createCustomGame(name, scoring?)` und `changeCustomGameScoring`; `seedResults` mit Punkten, Plätzen und Richtung (Architektur 7.1).
+
 ### I3-B Spielliste und Ergebnis eintragen
 
 - **Inhalt:** „Partie“ führt zur gemeinsamen Spielliste mit allen aktiven Spielen; eigene Spiele öffnen das Ergebnisformular, Catan fragt „Neue Partie“ oder „Ergebnis eintragen“; läuft eine Partie, führt „Partie“ zu ihr (Kapitel 7). Ergebnisformular in der Reihenfolge Spiel, Gruppe, Sieger, Datum und Uhrzeit mit „Jetzt“; bei Catan Spielversion, Modus, Farben und Siegpunkte; Notizen; Warnungen vor dem Speichern. Einstieg auch aus der Übersicht der laufenden Partie, vorbelegt aus der Partie (US-AB-06 AK-1 und AK-2).
 - **Design:** Zu Beginn eine Prinzip-Runde für alle Ansichten von I3 (wo Ergebnisse und Statistik liegen, was die Karte „Statistik“ öffnet, Reiter am Tisch nach `docs/design/i1e-persons-tables-final-preview.html`), danach das Aussehen Seite für Seite je Bündel. Hier entschieden: der offene Punkt aus Kapitel 7, Sortierung der Spielliste und Hervorhebung von Catan.
 - **Timer (US-AB-07):** Anzeige der Spieldauer in der Übersicht der laufenden Partie mit Anhalten und Fortsetzen; Übernahme von Dauer, Datum und Uhrzeit ins Formular. *(neu in 0.37)*
-- **Offene Punkte für die Vorschau (I3-0):** Punkte bei eigenen Spielen mit der Wahl „meiste“ oder „wenigste Punkte gewinnen“, etwa für Skyjo (OP-14; ändert bei Zustimmung FA-SP-05, Spezifikation 3.6 und US-ER-02); Anzeige der Plätze aus den Siegpunkten im Formular und in der Detailansicht. *(neu in 0.37)*
+- **Punkte und Rangfolge (I3-A2):** Einstellung „Punkte“ beim Anlegen und Bearbeiten eines eigenen Spiels samt Warnung beim Wechsel der Richtung (US-SP-02 AK-4, US-VW-07 AK-3 und AK-4); im Formular Punkte oder Rangfolge mit Siegervorschlag bzw. Sieger aus Platz 1 (US-ER-02, US-ER-06). *(neu in 0.39)*
+- **Offene Punkte für die Vorschau:** Eingabe der Rangfolge (etwa Personen in Reihenfolge antippen, Gleichstand zusammenlegen) und der Wechsel zwischen Punkten und Rangfolge; Anzeige der Plätze im Formular. *(geändert in 0.39; OP-14 geklärt mit I3-A2)*
 
 ### I3-C Ergebnisliste und Korrektur
 
-- **Inhalt:** Tischseite mit den Reitern „Am Tisch | Ergebnisse | Statistik“ (Referenz aus I1-E); Ergebnisliste nach 3.7, Detailansicht mit allen Daten und den Catan-Farben, „Ergebnis eintragen“ vom Tisch, Bearbeiten mit Warnung, Löschen mit Bestätigung; Statistiken sofort aktuell (Lesehooks).
+- **Inhalt:** Tischseite mit den Reitern „Am Tisch | Ergebnisse | Statistik“ (Referenz aus I1-E); Ergebnisliste nach 3.7, Detailansicht mit allen Daten, den Plätzen (US-ER-02 AK-5, US-ER-06 AK-5) und den Catan-Farben, „Ergebnis eintragen“ vom Tisch, Bearbeiten mit Warnung, Löschen mit Bestätigung; Statistiken sofort aktuell (Lesehooks).
 - **Löschen ohne Sicherungspunkt:** siehe Hinweise.
 
 ### I3-D Statistik
 
-- **Inhalt:** In `core/stats` Kennzahlen, Siegesserien, Durststrecke, Durchschnittsplatz und -dauer, Rangliste mit Folgekriterien und geteilten Rängen, Rekorde sowie die Filter nach Spiel und Spielversion (3.8); Eigenschaftstests mit `fast-check` (vorhanden). Karte „Statistik“ in der Kartenhand (D-3) und Reiter „Statistik“ am Tisch. *(ergänzt in 0.37)*
-- **Offene Punkte für die Vorschau (I3-0):** Aufbau bei globalen Tischen („Alle Spiele“ als Startansicht mit Filter oder ein Abschnitt je Spiel); längste Durststrecke als Kennzahl, als Rekord oder gar nicht; Form der letzten fünf Partien (eher weglassen); Filter nach Zeitraum (Gesamt oder je Jahr). Was gewählt wird, ergänzt die Spezifikation im PR des Bündels. *(neu in 0.37)*
+- **Inhalt:** In `core/stats` Kennzahlen, Siegesserien, Durststrecke, Durchschnittsplatz und -dauer, Rangliste mit Folgekriterien und geteilten Rängen, Rekorde, Platzverteilung, Rote Laterne, Paradespiel und Partien je Spiel (US-ST-06) sowie die Filter nach Spiel und Spielversion (3.8); Eigenschaftstests mit `fast-check` (vorhanden). Karte „Statistik“ in der Kartenhand (D-3) und Reiter „Statistik“ am Tisch. *(ergänzt in 0.37)*
+- **Offene Punkte für die Vorschau (I3-0):** Aufbau bei globalen Tischen („Alle Spiele“ als Startansicht mit Filter oder ein Abschnitt je Spiel); längste Durststrecke als Kennzahl, als Rekord oder gar nicht; Form der letzten fünf Partien (eher weglassen); Filter nach Zeitraum (Gesamt oder je Jahr); Mindestzahl an Partien für das Paradespiel. Was gewählt wird, ergänzt die Spezifikation im PR des Bündels. *(neu in 0.37, ergänzt in 0.39)*
+- **Ø Abstand zum Sieger (OP-15):** Der Product Owner ist skeptisch. Claude Code fragt vor dem Bau ausdrücklich, ob die Kennzahl gestrichen wird. *(neu in 0.39)*
 
 ### I3-E Diagramme
 
