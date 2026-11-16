@@ -1,6 +1,7 @@
 import type { Session } from '@/core/generation';
 import type {
   CustomGame,
+  GameId,
   Group,
   IsoTimestamp,
   LocalDateTime,
@@ -87,12 +88,22 @@ export type SessionStore = {
 };
 
 /**
+ * What the master data need to know about matches, read inside their transaction.
+ */
+export type MatchFacts = {
+  /** Whether a match of this game has points (US-VW-07 AK-4, FA-SP-07). */
+  hasScores(gameId: GameId): Promise<boolean>;
+};
+
+/**
  * Repositories available inside a master data transaction.
  */
 export type MasterDataRepositories = {
   readonly persons: PersonRepository;
   readonly customGames: CustomGameRepository;
   readonly groups: GroupRepository;
+  /** Matches are only read: whether points of a game may be switched off (FA-SP-07). */
+  readonly matches: MatchFacts;
   /** The session is only read, to check the locks during a match (FA-AB-09, Architecture 10.4). */
   readonly session: Pick<SessionRepository, 'get'>;
 };

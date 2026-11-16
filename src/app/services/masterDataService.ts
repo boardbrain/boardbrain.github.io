@@ -1,4 +1,5 @@
 import {
+  changeCustomGameScoring,
   containsName,
   createCustomGame,
   createGroup,
@@ -22,8 +23,9 @@ import {
   type NameEmptyError,
   type Person,
   type PersonId,
+  type ScoringDirection,
 } from '@/core/model';
-import { assert, err, type Result } from '@/core/shared';
+import { assert, err, ok, type Result } from '@/core/shared';
 import type { Clock, IdGenerator, MasterDataStore } from '@/app/ports';
 import { findSupportedGame, gameCapabilities } from '@/games/registry';
 
@@ -39,6 +41,12 @@ export type NameDuplicateError = 'name-duplicate';
  * generation or running (US-VW-02 AK-5, Specification 3.5, FA-AB-09).
  */
 export type GroupInSessionError = 'group-in-session';
+
+/**
+ * Error code when points of a custom game are switched off although results of the game have
+ * points (US-VW-07 AK-4, FA-SP-07).
+ */
+export type ScoringInUseError = 'scoring-in-use';
 
 /**
  * Input for creating a person.
@@ -74,6 +82,14 @@ export type RenameCustomGameInput = {
 };
 
 /**
+ * Input for changing whether a custom game counts points: the direction, or `null` for none.
+ */
+export type ChangeCustomGameScoringInput = {
+  readonly gameId: GameId;
+  readonly scoring: ScoringDirection | null;
+};
+
+/**
  * Input for creating a group. `colors` has one entry per person, in the same order.
  */
 export type CreateGroupInput = {
@@ -103,10 +119,14 @@ export type MasterDataService = {
    */
   createGroup(input: CreateGroupInput): Promise<Result<Group, GroupError | NameDuplicateError>>;
   /**
-   * Creates a custom game (US-SP-02). Same-named games, including supported ones such as
-   * Catan, are rejected with `name-duplicate`.
+   * Creates a custom game (US-SP-02), counting points in the given direction or, without one,
+   * none (AK-4, FA-SP-07). Same-named games, including supported ones such as Catan, are
+   * rejected with `name-duplicate`.
    */
-  createCustomGame(name: string): Promise<Result<CustomGame, NameEmptyError | NameDuplicateError>>;
+  createCustomGame(
+    name: string,
+    scoring?: ScoringDirection,
+  ): Promise<Result<CustomGame, NameEmptyError | NameDuplicateError>>;
   /**
    * Renames a person (US-VW-06). A name that another person has, archived ones included, is
    * rejected with `name-duplicate` (AK-2). A person that does not exist throws.
@@ -131,6 +151,15 @@ export type MasterDataService = {
   renameCustomGame(
     input: RenameCustomGameInput,
   ): Promise<Result<CustomGame, NameEmptyError | NameDuplicateError>>;
+  /**
+   * Changes whether a custom game counts points and which score wins (US-VW-07 AK-3, FA-SP-07).
+   * Changing the direction is allowed; it changes the places and statistics of stored results,
+   * which the form warns about. Switching points off is rejected with `scoring-in-use` while a
+   * result of the game has points (AK-4). Supported games and unknown ids throw.
+   */
+  changeCustomGameScoring(
+    input: ChangeCustomGameScoringInput,
+  ): Promise<Result<CustomGame, ScoringInUseError>>;
 };
 
 /**
@@ -203,8 +232,13 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
       });
     },
 
-    async createCustomGame(name) {
-      const created = createCustomGame({ id: toGameId(ids.newId()), name, now: clock.now() });
+    async createCustomGame(name, scoring) {
+      const created = createCustomGame({
+        id: toGameId(ids.newId()),
+        name,
+        now: clock.now(),
+        ...(scoring === undefined ? {} : { scoring }),
+      });
       if (!created.ok) {
         return created;
       }
@@ -292,6 +326,20 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
         }
         await customGames.update(renamed.value);
         return renamed;
+      });
+    },
+
+    async changeCustomGameScoring({ gameId, scoring }) {
+      return store.transaction(async ({ customGames, matches }) => {
+        const game = (await customGames.listAll()).find((candidate) => candidate.id === gameId);
+        assert(game !== undefined, `custom game ${gameId} exists`);
+        // US-VW-07 AK-4: stored points would lose their meaning without the setting.
+        if (scoring === null && game.scoring !== undefined && (await matches.hasScores(gameId))) {
+          return err('scoring-in-use');
+        }
+        const changed = changeCustomGameScoring(game, scoring, clock.now());
+        await customGames.update(changed);
+        return ok(changed);
       });
     },
   };

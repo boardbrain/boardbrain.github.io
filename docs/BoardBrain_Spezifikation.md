@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.20 |
+| Version | 0.21 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 15.11.2026 |
+| Stand | 16.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -34,6 +34,7 @@
 | 0.18 | 12.11.2026 | OP-13 geklärt (Anforderungsdokumentation 0.22, E-40): Vorabversionen 0.x nach abgeschlossenen Inkrementen unter der echten Adresse, erste ist 0.2.0 nach I2 (2.3, 8) |
 | 0.19 | 15.11.2026 | Klärung I3-0 Daten und Statistik (Anforderungsdokumentation 0.23, E-41 bis E-44): gemeinsame Spielliste als Einstieg (US-SP-01 neu gefasst, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3; Entscheidung des Product Owners 02.11.2026); bei Catan genau ein Sieger und Plätze aus den Siegpunkten (3.6, US-ER-01 AK-4, neu US-ER-02 AK-5); Spieldauer bei Catan mit Timer (3.5, 3.6, neu US-AB-07, US-AB-06 AK-2, neu US-ER-01 AK-7); Kennzahlen, Rangliste und Rekorde neu gefasst (3.8, US-ST-01, US-ST-03 AK-4, neu US-ST-05); Umfang und Übersicht (2.3, 2.4, 2.5); Rückverfolgbarkeit (6) |
 | 0.20 | 15.11.2026 | Entscheidungen des Product Owners in I3-A: Der Timer läuft nach dem Wiederholen eines Schritts der laufenden Partie weiter (3.5, neu US-AB-07 AK-5); beim Bearbeiten eines Ergebnisses stehen Gruppe und Spiel fest (neu US-ER-05 AK-4) |
+| 0.21 | 16.11.2026 | Punkte und Rangfolge bei eigenen Spielen (Anforderungsdokumentation 0.25, E-45, OP-14 geklärt): Einstellung „Punkte“ am eigenen Spiel (neu US-SP-02 AK-4, US-SP-02 AK-3, US-VW-07 neu „Eigenes Spiel bearbeiten“ mit AK-3 und AK-4); Ergebnis mit Punkten oder Rangfolge (3.6, US-ER-02 neu gefasst als „Punkte erfassen“ mit neu AK-6, neu US-ER-06 „Rangfolge erfassen“); Kennzahlen, Rangliste und Rekorde für Plätze und Punkte aller Spiele, neu Platzverteilung, Rote Laterne, Paradespiel, Partien je Spiel und Ø Abstand zum Sieger (3.8, US-ST-01, US-ST-03 AK-4, neu US-ST-05 AK-5, neu US-ST-06); Umfang und Übersicht (2.3, 2.5); Rückverfolgbarkeit (6) |
 
 ## Inhaltsverzeichnis
 
@@ -93,7 +94,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 |---|---|---|
 | I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Umbenennen und Gruppen bearbeiten, Brettdarstellung, Losbaustein *(ergänzt in 0.8)* | Stammdaten anlegbar und korrigierbar, Brett sichtbar |
 | I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Karten, Aufblinken, Spannungsmodus und Überspringen der Animation *(geändert in 0.12, 0.14 und 0.16; Klänge nach Version 1)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
-| I3 Ergebnisse und Statistik | Gemeinsame Spielliste als Einstieg, Ergebniserfassung mit Siegpunkten, Catan-Farben und Spieldauer, Ergebnisliste, Kennzahlen, Rangliste, Rekorde, Filter, Diagramme *(geändert in 0.12 und 0.19)* | Langzeitstatistik nutzbar |
+| I3 Ergebnisse und Statistik | Gemeinsame Spielliste als Einstieg, Ergebniserfassung mit Siegpunkten, Catan-Farben und Spieldauer, Punkte und Rangfolge bei eigenen Spielen, Ergebnisliste, Kennzahlen, Rangliste, Rekorde, Platzverteilung und Spielvergleich, Filter, Diagramme *(geändert in 0.12, 0.19 und 0.21)* | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung, Teilexport und Export-Erinnerung, Import mit Konflikten und Zuordnung, automatische und manuelle Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS und Hinweis unter Android und Windows, Speicherschutz und Hinweis zum Schutz vor Datenverlust *(geändert in 0.12)* | Daten sicher und teilbar |
 | I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen; unterstützte und eigene Spiele getrennt *(geändert in 0.12)* | Stammdaten vollständig pflegbar |
 | I6 Einstellungen und Feinschliff | US-SP-05 „Ich hasse Catan!“, Design und Akzentfarbe *(geändert in 0.12)* | Kandidat für Release 1.0 |
@@ -109,7 +110,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | ID | Titel | Prio | Inkrement |
 |---|---|---|---|
 | US-SP-01 | Spiel aus der Spielliste wählen | M | I2, I3 |
-| US-SP-02 | Eigenes Spiel anlegen | M | I1 |
+| US-SP-02 | Eigenes Spiel anlegen | M | I1, I3 |
 | US-SP-03 | Unterstützte und eigene Spiele unterscheiden | S | I5 |
 | US-SP-04 | Spielversion und Modus wählen | M | I2 |
 | US-SP-05 | Catan app-weit ausblenden („Ich hasse Catan!“) | M | I6 |
@@ -123,7 +124,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-VW-04 | Eigenes Spiel archivieren und löschen | S | I5 |
 | US-VW-05 | Personen und Gruppen im Überblick | M | I1 |
 | US-VW-06 | Person umbenennen | M | I1 |
-| US-VW-07 | Eigenes Spiel umbenennen | M | I1 |
+| US-VW-07 | Eigenes Spiel bearbeiten | M | I1, I3 |
 | US-AB-01 | Partie vorbereiten | M | I2 |
 | US-AB-02 | Schritte einzeln bestätigen | M | I2 |
 | US-AB-03 | Schritt wiederholen | M | I2 |
@@ -145,15 +146,17 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-IN-03 | Soundeffekte und Tonschalter *(nach Version 1, E-38)* | S | – |
 | US-IN-04 | Animation überspringen | S | I2 |
 | US-ER-01 | Ergebnis erfassen | M | I3 |
-| US-ER-02 | Siegpunkte erfassen | S | I3 |
+| US-ER-02 | Punkte erfassen | S | I3 |
 | US-ER-03 | Catan-Farben im Ergebnis | C | I3 |
 | US-ER-04 | Ergebnisse einer Gruppe ansehen | M | I3 |
 | US-ER-05 | Ergebnis bearbeiten und löschen | M | I3 |
+| US-ER-06 | Rangfolge erfassen | S | I3 |
 | US-ST-01 | Kennzahlen je Person | M | I3 |
 | US-ST-02 | Rangliste | M | I3 |
 | US-ST-03 | Statistik filtern | S | I3 |
 | US-ST-04 | Diagramme | S | I3 |
 | US-ST-05 | Rekorde | C | I3 |
+| US-ST-06 | Platzverteilung und Spielvergleich | C | I3 |
 | US-EI-01 | Vollsicherung exportieren | M | I4 |
 | US-EI-02 | Teilumfang exportieren | S | I4 |
 | US-EI-03 | Daten importieren | M | I4 |
@@ -172,7 +175,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-IS-03 | Persistenten Speicher sicherstellen | M | I4 |
 | US-GB-01 | Design und Akzentfarbe wählen | C | I6 |
 
-Summe: 63 User Stories (40 Must, 18 Should, 5 Could). *(berichtigt in 0.12, ergänzt in 0.19)*
+Summe: 65 User Stories (40 Must, 19 Should, 6 Could). *(berichtigt in 0.12, ergänzt in 0.19 und 0.21)*
 
 ---
 
@@ -284,15 +287,18 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 | Spiel | ja | Nur mit der Gruppe verträgliche, aktive Spiele (→ 3.4) |
 | Spielversion | bei Catan ja | Basisspiel oder Städte & Ritter |
 | Modus | nein | Nur bei Catan; Standard „Standard“ |
-| Sieger | ja | Bei Catan genau eine Person. Bei anderen Spielen mindestens eine Person; zwei oder mehr Personen bedeuten Unentschieden zwischen diesen *(geändert in 0.19, E-42)* |
+| Sieger | ja | Bei Catan genau eine Person. Bei anderen Spielen mindestens eine Person; zwei oder mehr Personen bedeuten Unentschieden zwischen diesen. Aus vollständigen Punkten vorgeschlagen; bei einer Rangfolge die Personen auf Platz 1 *(geändert in 0.19, E-42, und 0.21)* |
 | Catan-Farben | – | Nur bei Catan; vorbelegt aus der Partie bzw. den Standardfarben |
-| Siegpunkte | nein | Nur bei Catan; für alle Beteiligten oder für keinen; ganze Zahlen ab 0 |
+| Punkte | nein | Bei Catan die Siegpunkte, bei eigenen Spielen nur mit der Einstellung „Meiste“ oder „Wenigste Punkte gewinnen“ (FA-SP-07); für alle Beteiligten oder für keinen; ganze Zahlen, bei Catan ab 0, bei eigenen Spielen auch negativ *(geändert in 0.21)* |
+| Rangfolge | nein | Nur bei eigenen Spielen und nur ohne Punkte, auch wenn das Spiel Punkte zählt; ein Platz je Beteiligtem, für alle oder für keinen; gleiche Plätze möglich, der folgende Platz wird übersprungen (1, 2, 2, 4) *(neu in 0.21, FA-ER-12)* |
 | Spieldauer | nein | Nur bei Catan; ganze Minuten ab 1; aus einer laufenden Partie mit der gemessenen Dauer vorbelegt (3.5) und änderbar *(neu in 0.19, E-43)* |
 | Notizen | nein | Freitext |
 
-Plausibilitätswarnungen (Speichern nach Bestätigung möglich): Ein Sieger hat nicht die höchste Punktzahl; bei Unentschieden haben die Sieger unterschiedliche Punktzahlen. Abgebrochene Partien ohne Sieger werden nicht erfasst.
+**Siegervorschlag** *(neu in 0.21)*: Sind alle Punkte eingetragen, setzt das Formular die Personen mit der besten Punktzahl als Sieger (bei „Wenigste Punkte gewinnen“ die niedrigste, sonst die höchste); bei Gleichstand an der Spitze sind das mehrere, also ein Unentschieden, bei Catan dann niemand. Der Vorschlag ist änderbar, etwa wenn ein Spiel einen Gleichstand mit einer eigenen Regel auflöst. Bei einer Rangfolge sind die Personen auf Platz 1 die Sieger; sie werden nicht eigens gewählt.
 
-**Plätze bei Catan** *(neu in 0.19, FA-ER-11)*: Sind Siegpunkte erfasst, ergeben sich daraus die Plätze. Der Sieger hat Platz 1, die übrigen Beteiligten folgen nach Siegpunkten absteigend; gleiche Punktzahl ergibt denselben Platz, der folgende Platz wird übersprungen (10, 8, 8, 6 Punkte ergeben 1, 2, 2, 4). Das gilt auch, wenn nach der Plausibilitätswarnung ein Sieger mit weniger Punkten gespeichert wurde. Die Plätze werden nicht gespeichert, sondern bei Bedarf berechnet; ohne Siegpunkte gibt es keine Plätze. Bei anderen Spielen wird nur der Sieger erfasst.
+Plausibilitätswarnungen (Speichern nach Bestätigung möglich): Ein Sieger hat nicht die beste Punktzahl; bei Unentschieden haben die Sieger unterschiedliche Punktzahlen. Abgebrochene Partien ohne Sieger werden nicht erfasst. *(präzisiert in 0.21)*
+
+**Plätze** *(neu in 0.19, FA-ER-11; verallgemeinert in 0.21, FA-ER-12)*: Sind Punkte erfasst, ergeben sich daraus die Plätze. Die Sieger haben Platz 1, die übrigen Beteiligten folgen nach ihrer Punktzahl, die beste zuerst (bei „Wenigste Punkte gewinnen“ aufsteigend, sonst absteigend); gleiche Punktzahl ergibt denselben Platz, der folgende Platz wird übersprungen (10, 8, 8, 6 Punkte ergeben 1, 2, 2, 4). Das gilt auch, wenn nach der Plausibilitätswarnung ein Sieger ohne die beste Punktzahl gespeichert wurde. Diese Plätze werden nicht gespeichert, sondern bei Bedarf berechnet; ändert sich die Richtung eines Spiels (FA-SP-07), ändern sich mit ihr die Plätze. Eine Rangfolge von Hand wird so gespeichert, wie sie eingetragen ist. Ohne Punkte und ohne Rangfolge gibt es keine Plätze.
 
 ### 3.7 Reihenfolge von Partien
 
@@ -311,13 +317,18 @@ Alle Kennzahlen beziehen sich auf eine Gruppe und den aktuell gewählten Filter 
 | Aktuelle Siegesserie | Person | Anzahl aufeinanderfolgender Siege bis einschließlich der letzten Partie |
 | Längste Siegesserie | Person | Größte Anzahl aufeinanderfolgender Siege |
 | Aktuelle Durststrecke | Person | Anzahl der Partien seit dem letzten Sieg der Person; ohne Sieg im Filter alle Partien. Ein Unentschieden ist kein Sieg. |
-| Durchschnittssiegpunkte | Person | Mittelwert der Siegpunkte über alle Partien mit erfassten Siegpunkten; nur bei Catan; ohne Daten „–“ |
-| Durchschnittsplatz | Person | Mittelwert der Plätze (3.6) über alle Partien mit erfassten Siegpunkten; nur bei Catan; ohne Daten „–“ |
+| Durchschnittspunkte | Person | Mittelwert der Punkte über alle Partien mit erfassten Punkten; nur wenn der Filter ein einzelnes Spiel mit Punkten zeigt, bei Catan als „Durchschnittssiegpunkte“; ohne Daten „–“ *(geändert in 0.21)* |
+| Durchschnittsplatz | Person | Mittelwert der Plätze (3.6) über alle Partien mit Plätzen, aus Punkten oder aus einer Rangfolge, auch über mehrere Spiele; ohne Daten „–“ *(geändert in 0.21)* |
 | Durchschnittliche Spieldauer | Gruppe | Mittelwert der Spieldauer über alle Partien mit erfasster Dauer, in Minuten; nur bei Catan; ohne Daten „–“ |
+| Platzverteilung | Person | Wie oft die Person Platz 1, 2, 3 usw. belegt hat, über alle Partien mit Plätzen *(neu in 0.21)* |
+| Rote Laterne | Person | Wie oft die Person Letzter war, also den größten Platz einer Partie hatte, über alle Partien mit Plätzen; stehen alle auf Platz 1, ist niemand Letzter *(neu in 0.21)* |
+| Paradespiel | Person | Das Spiel mit der höchsten Siegquote der Person; nur im Filter „Alle Spiele“ und nur über Spiele mit einer Mindestzahl an Partien (Wert in der Vorschau von I3-D); bei Gleichstand das Spiel mit mehr Partien *(neu in 0.21)* |
+| Partien je Spiel | Gruppe | Anzahl der Partien je Spiel, das meistgespielte zuerst; nur im Filter „Alle Spiele“ *(neu in 0.21)* |
+| Ø Abstand zum Sieger | Person | Mittelwert des Abstands der eigenen Punkte zur Punktzahl der Sieger, über Partien mit Punkten, in denen die Person nicht gewonnen hat; nur bei einem einzelnen Spiel mit Punkten; ohne Daten „–“. Offen, ob die Kennzahl bleibt (OP-15) *(neu in 0.21)* |
 
 Niederlagen und Unentschieden beenden eine Siegesserie. Mit einem Sieg endet die Durststrecke; ist die aktuelle Siegesserie größer als 0, ist die aktuelle Durststrecke 0.
 
-**Rangliste:** Das Sortierkriterium ist manuell wählbar: Siege (Standard), Durchschnittsplatz und Durchschnittssiegpunkte (beide nur bei Catan-Filter), aktuelle Siegesserie, längste Siegesserie. Bei Gleichstand im gewählten Kriterium entscheiden nacheinander Siege, Unentschieden, Durchschnittsplatz und Durchschnittssiegpunkte (die letzten beiden nur bei Catan-Filter). Ein kleinerer Durchschnittsplatz ist besser; Personen ohne Wert („–“) stehen hinter denen mit Wert. Bei vollständigem Gleichstand teilen sich Personen einen Rang. Siegquote und Siege ergeben in einer Gruppe stets dieselbe Reihenfolge und sind deshalb kein eigenes Kriterium; Unentschieden sind kein Sortierkriterium.
+**Rangliste:** Das Sortierkriterium ist manuell wählbar: Siege (Standard), Durchschnittsplatz (wenn im Filter Partien mit Plätzen liegen), Durchschnittspunkte (nur bei einem einzelnen Spiel mit Punkten), aktuelle Siegesserie, längste Siegesserie. Bei Gleichstand im gewählten Kriterium entscheiden nacheinander Siege, Unentschieden, Durchschnittsplatz und Durchschnittspunkte, soweit sie im Filter vorkommen. Ein kleinerer Durchschnittsplatz ist besser, ebenso kleinere Durchschnittspunkte bei „Wenigste Punkte gewinnen“; Personen ohne Wert („–“) stehen hinter denen mit Wert. *(geändert in 0.21)* Bei vollständigem Gleichstand teilen sich Personen einen Rang. Siegquote und Siege ergeben in einer Gruppe stets dieselbe Reihenfolge und sind deshalb kein eigenes Kriterium; Unentschieden sind kein Sortierkriterium.
 
 **Rekorde** (→ US-ST-05):
 
@@ -418,11 +429,12 @@ Bezug: FA-SP-01, FA-AB-01, FA-ER-01
 
 #### US-SP-02 Eigenes Spiel anlegen · M
 Als Nutzer möchte ich eigene Spiele wie Uno anlegen, damit ich auch deren Ergebnisse erfassen kann.
-Bezug: FA-SP-02, FA-SP-05
+Bezug: FA-SP-02, FA-SP-05, FA-SP-07
 
 - **AK-1:** Gegeben die Spieleverwaltung, wenn ich einen Namen eingebe und speichere, dann erscheint das Spiel im Bereich „Eigene Spiele“.
 - **AK-2:** Gegeben ein Spiel mit gleichem Namen existiert bereits (ohne Beachtung der Groß- und Kleinschreibung, einschließlich Catan), wenn ich speichere, dann weist die App darauf hin und speichert nicht.
-- **AK-3:** Gegeben ein eigenes Spiel, wenn ich dafür ein Ergebnis erfasse, dann gibt es keine Felder für Spielversion, Modus, Farben oder Siegpunkte.
+- **AK-3:** Gegeben ein eigenes Spiel, wenn ich dafür ein Ergebnis erfasse, dann gibt es keine Felder für Spielversion, Modus, Farben oder Spieldauer; Punktfelder nur, wenn das Spiel Punkte zählt (AK-4). *(geändert in 0.21)*
+- **AK-4:** Gegeben ich lege ein eigenes Spiel an, dann wähle ich bei „Punkte“ zwischen „Keine“ (vorausgewählt), „Meiste Punkte gewinnen“ und „Wenigste Punkte gewinnen“. *(neu in 0.21, FA-SP-07)*
 
 #### US-SP-03 Unterstützte und eigene Spiele unterscheiden · S
 Als Nutzer möchte ich unterstützte und eigene Spiele klar getrennt sehen, damit ich weiß, wofür die App eine Generierung anbietet.
@@ -552,12 +564,14 @@ Bezug: FA-VW-01, FA-PG-09
 - **AK-1:** Gegeben eine Person, wenn ich sie umbenenne, dann erscheint der neue Name überall, auch in bestehenden Ergebnissen und Statistiken. *(bisher US-VW-01 AK-1; Ergebnisse und Statistiken werden mit I3 nachgewiesen)*
 - **AK-2:** Gegeben der neue Name gleicht dem Namen einer anderen Person (auch archiviert), wenn ich ihn eingebe, dann zeigt die App das sofort an und lässt das Umbenennen nicht zu (→ 3.4). *(bisher US-VW-01 AK-5, geändert in 0.11)*
 
-#### US-VW-07 Eigenes Spiel umbenennen · M
-Als Nutzer möchte ich eigene Spiele umbenennen, damit ich Tippfehler korrigieren kann. *(neu in 0.8, aus US-VW-04)*
-Bezug: FA-VW-04
+#### US-VW-07 Eigenes Spiel bearbeiten · M
+Als Nutzer möchte ich eigene Spiele umbenennen und ihre Punkte einstellen, damit ich Tippfehler korrigieren und die Wertung anpassen kann. *(neu in 0.8, aus US-VW-04; erweitert in 0.21, bis dahin „Eigenes Spiel umbenennen“)*
+Bezug: FA-VW-04, FA-SP-07
 
 - **AK-1:** Gegeben ein eigenes Spiel, dann kann ich es umbenennen (eindeutiger Name wie in US-SP-02). *(bisher US-VW-04 AK-1)*
 - **AK-2:** Gegeben Catan, dann gibt es kein Umbenennen. *(bisher Teil von US-VW-04 AK-5)*
+- **AK-3:** Gegeben ein eigenes Spiel, dann kann ich die Einstellung „Punkte“ ändern (US-SP-02 AK-4). Haben Ergebnisse des Spiels Punkte, warnt die App vor dem Wechsel der Richtung, dass sich Plätze und Statistik dieser Ergebnisse ändern; nach Bestätigung wird gespeichert. *(neu in 0.21)*
+- **AK-4:** Gegeben ein Ergebnis des Spiels hat Punkte, dann ist „Keine“ nicht wählbar, und die App nennt den Grund. *(neu in 0.21)*
 
 ### 4.4 Ablauf einer Partie (AB)
 
@@ -766,15 +780,16 @@ Bezug: FA-ER-01, FA-ER-02, FA-ER-03, FA-ER-07, FA-ER-10 → 3.4, 3.6
 - **AK-6:** Gegeben Catan, dann ist der Modus optional und mit „Standard“ vorbelegt; Notizen sind bei allen Spielen optional.
 - **AK-7:** Gegeben Catan, dann kann ich optional die Spieldauer in ganzen Minuten ab 1 eintragen; bei anderen Spielen gibt es kein Feld für die Spieldauer. *(neu in 0.19, E-43)*
 
-#### US-ER-02 Siegpunkte erfassen · S
-Als Nutzer möchte ich bei Catan die Siegpunkte aller Beteiligten erfassen, damit Durchschnittswerte möglich werden.
-Bezug: FA-ER-03, FA-ER-06, FA-ER-11 → 3.6
+#### US-ER-02 Punkte erfassen · S *(neu gefasst in 0.21, bis dahin „Siegpunkte erfassen“)*
+Als Nutzer möchte ich bei Catan die Siegpunkte und bei eigenen Spielen mit Punkten die Punkte aller Beteiligten erfassen, damit Plätze und Durchschnittswerte möglich werden.
+Bezug: FA-ER-03, FA-ER-06, FA-ER-11, FA-SP-07 → 3.6
 
-- **AK-1:** Gegeben ein Spiel ohne Siegpunkte, dann gibt es keine Siegpunktfelder.
-- **AK-2:** Gegeben Siegpunkte sind nur für einen Teil der Beteiligten eingetragen, wenn ich speichern will, dann ist das erst möglich, wenn alle oder keine Felder ausgefüllt sind.
-- **AK-3:** Gegeben eine Eingabe, dann sind nur ganze Zahlen ab 0 zulässig.
-- **AK-4:** Gegeben ein Sieger hat nicht die höchste Punktzahl oder Unentschieden-Sieger haben unterschiedliche Punktzahlen, wenn ich speichere, dann erscheint eine Warnung; nach Bestätigung wird gespeichert.
-- **AK-5:** Gegeben Siegpunkte sind erfasst, dann zeigen Formular und Detailansicht die daraus berechneten Plätze nach 3.6 (z. B. 1, 2, 2, 4). *(neu in 0.19, E-42)*
+- **AK-1:** Gegeben ein Spiel ohne Punkte (ein eigenes Spiel mit der Einstellung „Keine“), dann gibt es keine Punktfelder. *(geändert in 0.21)*
+- **AK-2:** Gegeben Punkte sind nur für einen Teil der Beteiligten eingetragen, wenn ich speichern will, dann ist das erst möglich, wenn alle oder keine Felder ausgefüllt sind.
+- **AK-3:** Gegeben eine Eingabe, dann sind nur ganze Zahlen zulässig, bei Catan ab 0, bei eigenen Spielen auch negative. *(geändert in 0.21)*
+- **AK-4:** Gegeben ein Sieger hat nicht die beste Punktzahl (bei „Wenigste Punkte gewinnen“ die niedrigste) oder Unentschieden-Sieger haben unterschiedliche Punktzahlen, wenn ich speichere, dann erscheint eine Warnung; nach Bestätigung wird gespeichert. *(präzisiert in 0.21)*
+- **AK-5:** Gegeben Punkte sind erfasst, dann zeigen Formular und Detailansicht die daraus berechneten Plätze nach 3.6 (z. B. 1, 2, 2, 4), bei „Wenigste Punkte gewinnen“ mit der niedrigsten Punktzahl vorn. *(neu in 0.19, E-42, ergänzt in 0.21)*
+- **AK-6:** Gegeben alle Punkte sind eingetragen, dann schlägt das Formular die Personen mit der besten Punktzahl als Sieger vor (bei Gleichstand an der Spitze ein Unentschieden, bei Catan dann niemanden); ich kann den Vorschlag ändern. *(neu in 0.21)*
 
 #### US-ER-03 Catan-Farben im Ergebnis · C
 Als Nutzer möchte ich sehen, wer in einer Partie welche Farbe hatte, damit ich mich an die Partie erinnern kann.
@@ -799,15 +814,25 @@ Bezug: FA-ER-04
 - **AK-3:** Gegeben eine Änderung oder Löschung, dann sind alle Statistiken sofort aktualisiert.
 - **AK-4:** Gegeben ich bearbeite ein Ergebnis, dann stehen Gruppe und Spiel fest, alle übrigen Felder sind änderbar, auch wenn die Gruppe inzwischen archiviert ist. Ein Ergebnis mit falscher Gruppe oder falschem Spiel lösche ich und trage es neu ein. *(neu in 0.20)*
 
+#### US-ER-06 Rangfolge erfassen · S *(neu in 0.21)*
+Als Nutzer möchte ich bei eigenen Spielen die Plätze eintragen, auch ohne Punkte, damit Plätze in die Statistik eingehen, wenn niemand mitgeschrieben hat.
+Bezug: FA-ER-12, E-45 → 3.6
+
+- **AK-1:** Gegeben ein eigenes Spiel und keine Punkte eingetragen, dann kann ich optional für alle Beteiligten die Plätze eintragen, auch wenn das Spiel Punkte zählt. Bei Catan gibt es keine Rangfolge von Hand.
+- **AK-2:** Gegeben eine Rangfolge, dann ist sie nur für alle Beteiligten oder für keinen speicherbar; gleiche Plätze sind möglich, der folgende Platz wird übersprungen (1, 2, 2, 4).
+- **AK-3:** Gegeben eine Rangfolge, dann sind die Personen auf Platz 1 die Sieger, mehrere auf Platz 1 ein Unentschieden; einen Sieger wähle ich dann nicht eigens.
+- **AK-4:** Gegeben Punkte sind eingetragen, dann ergibt sich die Rangfolge aus den Punkten (US-ER-02 AK-5) und lässt sich nicht zusätzlich eintragen.
+- **AK-5:** Gegeben eine Rangfolge ist gespeichert, dann zeigt die Detailansicht die Plätze.
+
 ### 4.10 Statistik (ST)
 
 #### US-ST-01 Kennzahlen je Person · M
 Als Spielende möchten wir Kennzahlen je Person sehen, damit wir wissen, wer wie erfolgreich ist.
 Bezug: FA-ST-01, FA-ST-02, FA-ST-05 → 3.8
 
-- **AK-1:** Gegeben eine Gruppe, dann zeigt die Statistik die Anzahl der Partien einmal für die Gruppe und für jedes Mitglied Siege, Siegquote, aktuelle und längste Siegesserie und die aktuelle Durststrecke, Unentschieden nur, wenn es im Filter welche gibt; bei Catan zusätzlich Durchschnittssiegpunkte und Durchschnittsplatz je Person sowie die durchschnittliche Spieldauer der Gruppe. *(geändert in 0.19)*
+- **AK-1:** Gegeben eine Gruppe, dann zeigt die Statistik die Anzahl der Partien einmal für die Gruppe und für jedes Mitglied Siege, Siegquote, aktuelle und längste Siegesserie und die aktuelle Durststrecke, Unentschieden nur, wenn es im Filter welche gibt; den Durchschnittsplatz, wenn im Filter Partien mit Plätzen liegen; die Durchschnittspunkte bei einem einzelnen Spiel mit Punkten (bei Catan Durchschnittssiegpunkte); bei Catan die durchschnittliche Spieldauer der Gruppe. *(geändert in 0.19 und 0.21)*
 - **AK-2:** Gegeben ein Unentschieden, dann zählt es für die beteiligten Sieger als Unentschieden, nicht als Sieg, und beendet ihre Siegesserie.
-- **AK-3:** Gegeben Partien teils mit, teils ohne Siegpunkte bzw. Spieldauer, dann werden Durchschnittssiegpunkte und Durchschnittsplatz nur über Partien mit Siegpunkten und die durchschnittliche Spieldauer nur über Partien mit Dauer gebildet; ohne solche Partien wird „–“ angezeigt. *(ergänzt in 0.19)*
+- **AK-3:** Gegeben Partien teils mit, teils ohne Punkte, Plätze bzw. Spieldauer, dann werden Durchschnittspunkte nur über Partien mit Punkten, der Durchschnittsplatz nur über Partien mit Plätzen und die durchschnittliche Spieldauer nur über Partien mit Dauer gebildet; ohne solche Partien wird „–“ angezeigt. *(ergänzt in 0.19 und 0.21)*
 - **AK-4:** Gegeben eine Gruppe ohne Partien im Filter, dann erscheint ein verständlicher Hinweis statt leerer Zahlen.
 - **AK-5:** Gegeben die App, dann gibt es keine gruppenübergreifende Statistik.
 
@@ -826,7 +851,7 @@ Bezug: FA-ST-06, FA-ST-07
 - **AK-1:** Gegeben eine globale Gruppe, dann kann ich zwischen „Alle Spiele“ und einem einzelnen Spiel filtern.
 - **AK-2:** Gegeben der Filter steht auf Catan (oder die Gruppe ist an Catan gebunden), dann kann ich zusätzlich zwischen „Gesamt“, „Basisspiel“ und „Städte & Ritter“ wählen.
 - **AK-3:** Gegeben ein Filter, dann gilt er für Kennzahlen, Rangliste und Diagramme gleichermaßen.
-- **AK-4:** Gegeben der Filter umfasst nicht ausschließlich Catan, dann werden keine Catan-Kennzahlen (Durchschnittssiegpunkte, Durchschnittsplatz, durchschnittliche Spieldauer) und keine Catan-Rekorde angezeigt. *(ergänzt in 0.19)*
+- **AK-4:** Gegeben der Filter umfasst mehrere Spiele, dann werden keine Durchschnittspunkte, kein Ø Abstand zum Sieger, keine durchschnittliche Spieldauer und keine Rekorde einzelner Spiele angezeigt; der Durchschnittsplatz bleibt, weil an einem festen Tisch stets gleich viele Personen spielen (E-45). *(ergänzt in 0.19, geändert in 0.21)*
 
 #### US-ST-04 Diagramme · S
 Als Spielende möchten wir Verlauf und Verteilung der Siege grafisch sehen, damit Entwicklungen auf einen Blick erkennbar sind.
@@ -844,6 +869,17 @@ Bezug: FA-ST-08, E-44 → 3.7, 3.8
 - **AK-2:** Gegeben der Filter steht auf Catan und es gibt Partien mit Spieldauer, dann zeigt die Statistik die längste und die kürzeste Partie mit Dauer und Datum.
 - **AK-3:** Gegeben ein Rekord, der zu einer Partie gehört, wenn ich ihn antippe, dann öffnet sich die Detailansicht dieser Partie.
 - **AK-4:** Gegeben Gleichstand, dann gilt die Regel aus 3.8; gegeben keine passenden Partien, dann entfällt der Rekord.
+- **AK-5:** Gegeben der Filter steht auf ein eigenes Spiel mit Punkten und es gibt Partien mit Punkten, dann zeigt die Statistik den Bestwert (die höchste bzw. bei „Wenigste Punkte gewinnen“ die niedrigste Punktzahl) mit Person und Datum. *(neu in 0.21)*
+
+#### US-ST-06 Platzverteilung und Spielvergleich · C *(neu in 0.21)*
+Als Spielende möchten wir sehen, wer wie oft welchen Platz belegt und in welchem Spiel wer am stärksten ist, damit die Statistik mehr zeigt als die Siege.
+Bezug: FA-ST-09, E-45 → 3.8
+
+- **AK-1:** Gegeben Partien mit Plätzen im Filter, dann zeigt die Statistik je Person, wie oft sie welchen Platz belegt hat.
+- **AK-2:** Gegeben Partien mit Plätzen im Filter, dann zeigt die Statistik je Person die Rote Laterne, also wie oft sie Letzter war, nach 3.8.
+- **AK-3:** Gegeben der Filter „Alle Spiele“, dann zeigt die Statistik je Person ihr Paradespiel nach 3.8; erreicht kein Spiel die Mindestzahl an Partien, entfällt es.
+- **AK-4:** Gegeben der Filter „Alle Spiele“, dann zeigt die Statistik die Anzahl der Partien je Spiel, das meistgespielte zuerst.
+- **AK-5:** Gegeben ein einzelnes Spiel mit Punkten, dann zeigt die Statistik je Person den Ø Abstand zum Sieger nach 3.8. Vor dem Bau wird geklärt, ob die Kennzahl bleibt (OP-15).
 
 ### 4.11 Export und Import (EI)
 
@@ -1052,6 +1088,7 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-SP-04 | US-SP-04 |
 | FA-SP-05 | US-SP-02, US-PG-03 |
 | FA-SP-06 | US-SP-05, US-VW-02 |
+| FA-SP-07 | US-SP-02, US-VW-07, US-ER-02 |
 | FA-PG-01 | US-PG-01 |
 | FA-PG-02 bis FA-PG-04 | US-PG-02; FA-PG-04 auch US-PG-03, US-VW-02 |
 | FA-PG-05 | US-PG-03 |
@@ -1099,11 +1136,13 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-ER-09 | US-ER-03 |
 | FA-ER-10 | US-ER-01, US-AB-06, US-AB-07 |
 | FA-ER-11 | US-ER-02 |
+| FA-ER-12 | US-ER-06 |
 | FA-ST-01, FA-ST-02, FA-ST-05 | US-ST-01 |
 | FA-ST-03 | US-ST-02 |
 | FA-ST-04 | US-ST-04 |
 | FA-ST-06, FA-ST-07 | US-ST-03 |
 | FA-ST-08 | US-ST-05 |
+| FA-ST-09 | US-ST-06 |
 | FA-EI-01 | US-EI-01, US-EI-03 |
 | FA-EI-02 | US-EI-02 |
 | FA-EI-03 | US-EI-04 |

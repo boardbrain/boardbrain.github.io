@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.39 |
+| Version | 0.40 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 15.11.2026 |
+| Stand | 16.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -53,6 +53,7 @@
 | 0.37 | 15.11.2026 | Klärung I3-0 Daten und Statistik (Anforderungsdokumentation 0.23, E-41 bis E-44): `Match` mit `durationMinutes`, bei Catan genau ein Sieger, Plätze werden aus den Siegpunkten berechnet und nicht gespeichert, Beteiligte bleiben die Mitglieder der Gruppe (7.1); Timer der laufenden Partie als Zeitpunkte in der Sitzung (10.2); Aufgaben von `core/results` und `core/stats` ergänzt (4.3) |
 | 0.38 | 15.11.2026 | Bündel I3-A: `ResultService` mit Vorbelegung, Erfassen, Speichern aus der laufenden Partie, Bearbeiten und Löschen, Port `ResultStore`, Lesehooks; Dexie-Schreibmethoden mit Dexies eigenen Promises (4.4); `Match` mit `LocalDate`/`LocalTime`, Ergebnisregeln in `core/results` mit `ResultRules` aus dem Spielmodul, Verträglichkeit in `games/registry` (7.1); Timer umgesetzt, `SESSION_SCHEMA_VERSION` 4, Port `Clock` mit `localDateTime` (10.2) |
 | 0.39 | 15.11.2026 | Vorabversionen 0.x als normales GitHub-Release und damit „Latest“ statt Pre-release (16.3; Anforderungsdokumentation E-40) |
+| 0.40 | 16.11.2026 | Punkte und Rangfolge bei eigenen Spielen (Anforderungsdokumentation 0.25, E-45): `CustomGame.scoring`, `Match.victoryPoints` heißt `scores`, neu `Match.places` für eine Rangfolge von Hand; `ResultRules` und `GameModule` mit `scoring`, `allowsNegativeScores` und `supportsRanking` statt `supportsVictoryPoints`; `gameCapabilities` erhält bei eigenen Spielen den Datensatz; Plätze nach Richtung, `suggestedWinners`, `winnersOfRanking`; `MasterDataService.changeCustomGameScoring` mit Lesezugriff auf Partien (4.3, 4.5, 5.1, 7.1) |
 
 ## Inhaltsverzeichnis
 
@@ -243,7 +244,7 @@ Die Regeln prüft `dependency-cruiser` bei jedem `npm run check`. Die Zusammense
 | `core/model` | Entitäten, Kennungstypen, Invarianten (Gruppengröße, eindeutige Namen, Verträglichkeit) | FA-PG-*, FA-VW-*, 3.4 |
 | `core/draws` | Person losen, Reihenfolge losen | FA-LS-* |
 | `core/generation` | Schritte, Ablaufsteuerung, Wiederholung mit Abhängigkeiten, Sitzungsmodell | FA-AB-*, 3.1, 3.5 |
-| `core/results` | Ergebnisregeln, Plausibilitätswarnungen, Plätze aus Siegpunkten, Sortierung von Partien | FA-ER-*, 3.6, 3.7 |
+| `core/results` | Ergebnisregeln, Plausibilitätswarnungen, Plätze aus Punkten oder einer Rangfolge, Siegervorschlag, Sortierung von Partien | FA-ER-*, 3.6, 3.7 |
 | `core/stats` | Kennzahlen, Siegesserien, Durststrecke, Durchschnittswerte, Rangliste, Rekorde, Diagrammdaten, Filter | FA-ST-*, 3.8 |
 | `core/exchange` | Exportformat, Schema, Migrationskette, Teilumfang, Importanalyse (K1 bis K4), Prüfung von Optionen | FA-EI-*, 3.9 |
 | `core/backup` | Aufbewahrung (15, geschützte Importpunkte), Auslöser „Täglich“, Erinnerungslogik | FA-DS-*, FA-EI-05, 3.10, 3.11 |
@@ -282,7 +283,8 @@ Code ist durchgehend englisch, auch Kommentare und Testnamen; Texte der Oberflä
 | Spielversion (Basisspiel, Städte & Ritter) | `edition` (`'base'`, `'cities-and-knights'`) |
 | Modus | `mode` (`'standard'`) |
 | Partie (mit Ergebnis) | `Match` |
-| Sieger, Siegpunkte, Notizen | `winnerIds`, `victoryPoints`, `notes` |
+| Sieger, Siegpunkte bzw. Punkte, Rangfolge, Notizen | `winnerIds`, `scores`, `places`, `notes` |
+| Punkte-Einstellung, meiste bzw. wenigste Punkte gewinnen | `scoring`, `ScoringDirection` (`'highest-wins'`, `'lowest-wins'`) |
 | Gruppenfarbe, Catan-Farbe | `groupColor`, `catanColor` |
 | Archiviert | `archived` |
 | Laufende Partie, Vorbereitung | `Session`, `Preparation` |
@@ -333,14 +335,16 @@ export type GameModule = {
   editions: EditionDef[];           // leer, wenn das Spiel keine Versionen kennt (ab US-SP-04)
   modes: ModeDef[];                 // ab US-SP-04
   playerColors: readonly CatanColorKey[] | null;   // Catan: Rot, Blau, Weiß, Orange (FA-SP-05)
-  supportsVictoryPoints: boolean;
+  scoring: ScoringDirection | null;  // Catan: 'highest-wins' (FA-SP-05)
+  allowsNegativeScores: boolean;     // Catan: false (FA-ER-06)
+  supportsRanking: boolean;          // Rangfolge von Hand; Catan: false (E-42, FA-ER-12)
   generation: GenerationDefinition | null;   // null: nur Ergebniserfassung (ab I2)
 };
 ```
 
 `games` darf nur `core` verwenden und kennt daher den Typ der Textschlüssel aus `src/i18n` nicht. `nameKey` ist deshalb in der Schnittstelle ein einfacher String; `SUPPORTED_GAMES` wird mit `as const satisfies` angelegt und behält so den genauen Schlüssel. Die Oberfläche ruft `t(game.nameKey)` auf, und der Compiler prüft den Schlüssel dort. Die Namen der unterstützten Spiele erhält der `MasterDataService` in `src/main.tsx`, damit eigene Spiele nicht „Catan“ heißen können (US-SP-02 AK-2).
 
-Eigene Spiele sind keine Module, sondern Datensätze (`CustomGame`). Sie haben keine Versionen, Modi, Spielfarben, Siegpunkte oder Generierung. Die Oberfläche fragt Fähigkeiten immer über eine gemeinsame Funktion ab (`gameCapabilities(gameId)`), damit sie nicht zwischen „Modul“ und „eigenem Spiel“ unterscheiden muss.
+Eigene Spiele sind keine Module, sondern Datensätze (`CustomGame`). Sie haben keine Versionen, Modi, Spielfarben oder Generierung. Ob sie Punkte zählen, ist ihre eigene Einstellung (`scoring`, FA-SP-07); negative Punkte und eine Rangfolge von Hand sind bei ihnen immer möglich. Die Oberfläche fragt Fähigkeiten immer über eine gemeinsame Funktion ab (`gameCapabilities(gameId, customGame?)`), damit sie nicht zwischen „Modul“ und „eigenem Spiel“ unterscheiden muss; für ein eigenes Spiel gibt sie den Datensatz mit, sonst zählt es keine Punkte. *(geändert in 0.40)*
 
 Catan hat die fest eingebaute Kennung
 
@@ -576,6 +580,7 @@ export interface GroupMember {
 
 export interface CustomGame {
   id: GameId; name: string; archived: boolean;
+  scoring?: 'highest-wins' | 'lowest-wins';  // fehlt: keine Punkte (FA-SP-07)
   createdAt: IsoTimestamp; updatedAt: IsoTimestamp;
 }
 
@@ -586,7 +591,8 @@ export interface Match {
   recordedAt: IsoTimestamp;                  // Erfassungszeitpunkt, für Sortierung (3.7) und Erinnerung
   edition?: Edition; mode?: Mode;            // nur Catan
   winnerIds: PersonId[];                     // ≥ 1; mehrere = Unentschieden; bei Catan genau 1 (E-42)
-  victoryPoints?: Record<PersonId, number>;  // für alle Beteiligten oder fehlt
+  scores?: Record<PersonId, number>;         // Punkte bzw. Siegpunkte; für alle Beteiligten oder fehlt
+  places?: Record<PersonId, number>;         // Rangfolge von Hand, nur eigene Spiele, nie mit scores (FA-ER-12)
   catanColors?: Record<PersonId, CatanColorKey>;
   durationMinutes?: number;                  // nur Catan; ganze Minuten ≥ 1 (FA-ER-10)
   notes?: string;
@@ -599,10 +605,12 @@ Grundsätze:
 - **Farben als Schlüssel:** Gespeichert werden Palettenschlüssel, nie Farbwerte. Die Werte stehen ausschließlich in den Design-Tokens (NFA-GB-05, OP-11).
 - **Datum und Uhrzeit:** Datum und Uhrzeit werden als lokale Werte ohne Zeitzone gespeichert, wie sie am Tisch gemeint sind. Zeitstempel für Erfassung und Änderung sind UTC.
 - **Archivstatus und Änderungszeit** gehören nicht zum Inhalt im Sinne der Konfliktprüfung (3.9, Regel 7).
-- **Beteiligte und Plätze** *(neu in 0.37)*: Ein `Match` speichert keine eigene Liste der Beteiligten; beteiligt sind stets alle Mitglieder der Gruppe, die nach dem Anlegen unveränderlich sind (E-41). Die Plätze bei Catan (FA-ER-11) werden nicht gespeichert, sondern in `core/results` aus `victoryPoints` und `winnerIds` berechnet; so können sie nie den Siegpunkten widersprechen, und eine spätere Änderung der Regel braucht keine Migration. Die Platzierungsreihenfolge der Generierung wird nicht übernommen (PP-23).
+- **Beteiligte und Plätze** *(neu in 0.37)*: Ein `Match` speichert keine eigene Liste der Beteiligten; beteiligt sind stets alle Mitglieder der Gruppe, die nach dem Anlegen unveränderlich sind (E-41). Plätze aus Punkten (FA-ER-11) werden nicht gespeichert, sondern in `core/results` aus `scores`, `winnerIds` und der Richtung des Spiels berechnet; so können sie nie den Punkten widersprechen, ein Wechsel der Richtung (FA-SP-07) wirkt sofort, und eine spätere Änderung der Regel braucht keine Migration. Nur eine Rangfolge von Hand (FA-ER-12) wird als `places` gespeichert, weil es dann keine Punkte gibt, aus denen sie folgt. *(ergänzt in 0.40)* Die Platzierungsreihenfolge der Generierung wird nicht übernommen (PP-23).
 - **Invarianten** prüft `core/model` zentral: 2 bis 12 Mitglieder, eindeutige Namen innerhalb einer Gruppe, Verträglichkeit von Gruppe und Spiel (3.4), eindeutige Farben je Farbart. Dieselben Prüfungen nutzen Formulare, Import und Wiederherstellung.
 
 **Umsetzung (I3-A):** `Match` liegt in `core/model/match.ts`, mit `MatchId` und den gebrandeten Typen `LocalDate` (`YYYY-MM-DD`, nur echte Kalendertage) und `LocalTime` (`HH:mm`) samt `parseLocalDate` und `parseLocalTime`. `edition` und `mode` sind Schlüssel des Spielmoduls (`string`), denn `core` kennt Catan nicht (ADR-028). Die Regeln eines Ergebnisses liegen in `core/results` (`resultErrors` liefert alle erwartbaren Fehler in der Reihenfolge des Formulars, `checkResult` den ersten oder den gespeicherten Inhalt); was ein Spiel erlaubt, erhalten sie als `ResultRules`: Spielversionen, Modi, genau ein Sieger, Siegpunkte, Spielfarben, Spieldauer. Diese Angaben stehen im `GameModule` und kommen über `gameCapabilities` aus `games/registry`; eigene Spiele haben keine davon. Eingaben, die das Formular nicht erzeugen kann (ein Sieger, der nicht Mitglied ist, Siegpunkte bei einem eigenen Spiel), sind Programmierfehler und werfen. Die Verträglichkeit von Gruppe und Spiel (3.4) prüft `canGroupPlay` in `games/registry`, weil sie für Catan die Regeln des Catan-Moduls braucht (`canPlayCatan`). Dazu kommen `plausibilityWarnings`, `placesOf` (FA-ER-11), `compareMatches`/`sortMatches` (3.7) und `durationMinutesOf` (auf ganze Minuten gerundet, mindestens 1). *(neu in 0.38)*
+
+**Umsetzung Punkte und Rangfolge (vor I3-B):** `victoryPoints` heißt allgemein `scores`; die Oberfläche nennt sie bei Catan weiter „Siegpunkte“. Der Umbau kam, bevor eine veröffentlichte Version Ergebnisse speicherte, und braucht deshalb keine Migration. `ResultRules` enthält statt `supportsVictoryPoints` die Richtung `scoring` (`null` ohne Punkte), `allowsNegativeScores` und `supportsRanking`; `resultErrors` kennt dazu `scores-incomplete`, `scores-invalid`, `places-incomplete` und `places-invalid` (Plätze müssen eine Rangfolge wie 1, 2, 2, 4 bilden). Punkte und Rangfolge zusammen sowie Sieger, die bei einer vollständigen Rangfolge nicht genau auf Platz 1 stehen, sind Programmierfehler, weil das Formular die Sieger aus der Rangfolge setzt. `placesOf` und `plausibilityWarnings` erhalten die Richtung; neu sind `suggestedWinners` (beste Punktzahl, bei Spielen mit genau einem Sieger nur ohne Gleichstand) und `winnersOfRanking`. Der `ResultService` liest für ein eigenes Spiel dessen Datensatz, damit die Regeln die aktuelle Einstellung kennen, auch beim Bearbeiten. Der `MasterDataService` legt eigene Spiele mit Richtung an (`createCustomGame(name, scoring?)`) und ändert sie mit `changeCustomGameScoring`; „Keine“ lehnt er mit `scoring-in-use` ab, solange eine Partie des Spiels Punkte hat. Dafür lesen Stammdaten-Transaktionen die Partien (`MasterDataRepositories.matches.hasScores`). *(neu in 0.40)*
 
 ### 7.2 Kennungen
 

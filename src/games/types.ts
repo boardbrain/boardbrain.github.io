@@ -1,4 +1,4 @@
-import type { CatanColorKey, GameId } from '@/core/model';
+import type { CatanColorKey, GameId, ScoringDirection } from '@/core/model';
 
 /**
  * Supported game with its own generation (NFA-EW-01, Architecture 5.1). New games are added
@@ -17,8 +17,12 @@ export type GameModule = {
   readonly playerCount: { readonly min: number; readonly max: number };
   /** Player colours of the game, or `null` if it has none (FA-SP-05). */
   readonly playerColors: readonly CatanColorKey[] | null;
-  /** Whether victory points can be recorded (FA-SP-05). */
-  readonly supportsVictoryPoints: boolean;
+  /** Whether points can be recorded and which score wins, or `null` (FA-SP-05). */
+  readonly scoring: ScoringDirection | null;
+  /** Whether points may be below 0 (FA-ER-06). */
+  readonly allowsNegativeScores: boolean;
+  /** Whether a ranking can be entered by hand when no points are recorded (FA-ER-12). */
+  readonly supportsRanking: boolean;
   /** Keys of the editions; one of them is required in a result (FA-ER-03). */
   readonly editions: readonly string[];
   /** Keys of the modes; the first is the default (FA-ER-03, US-ER-01 AK-6). */

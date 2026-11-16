@@ -15,6 +15,7 @@ import {
   type Group,
   type IsoTimestamp,
   type LocalDateTime,
+  type Match,
   type Person,
 } from '@/core/model';
 import { assert } from '@/core/shared';
@@ -90,6 +91,8 @@ export class InMemoryMasterDataStore implements MasterDataStore {
   groups: readonly Group[] = [];
   /** The running match, only read by the master data service (Architecture 10.4). */
   session: StoredSession | undefined = undefined;
+  /** Stored matches, only read: whether points of a game may be switched off (FA-SP-07). */
+  matches: readonly Match[] = [];
 
   async transaction<T>(work: (repositories: MasterDataRepositories) => Promise<T>): Promise<T> {
     const persons = [...this.persons];
@@ -121,6 +124,12 @@ export class InMemoryMasterDataStore implements MasterDataStore {
           groups[index] = group;
           return Promise.resolve();
         },
+      },
+      matches: {
+        hasScores: (gameId) =>
+          Promise.resolve(
+            this.matches.some((match) => match.gameId === gameId && match.scores !== undefined),
+          ),
       },
       customGames: {
         listAll: () => Promise.resolve([...customGames]),

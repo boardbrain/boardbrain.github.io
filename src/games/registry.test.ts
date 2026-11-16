@@ -1,5 +1,6 @@
 import { aGroup } from '@tests/support/masterDataFakes';
 import { isUuidV4, toGameId, toPersonId } from '@/core/model';
+import { InvariantError } from '@/core/shared';
 import { CATAN_GAME_ID, CATAN_MODULE } from '@/games/catan';
 import { describe, expect, it } from 'vitest';
 import { canGroupPlay, findSupportedGame, gameCapabilities, SUPPORTED_GAMES } from './registry';
@@ -29,7 +30,9 @@ describe('Architecture 5.1 game registry', () => {
     expect(gameCapabilities(CATAN_GAME_ID)).toEqual({
       isSupported: true,
       playerColors: ['red', 'blue', 'white', 'orange'],
-      supportsVictoryPoints: true,
+      scoring: 'highest-wins',
+      allowsNegativeScores: false,
+      supportsRanking: false,
       editions: ['base', 'cities-and-knights'],
       modes: ['standard'],
       hasSingleWinner: true,
@@ -37,16 +40,30 @@ describe('Architecture 5.1 game registry', () => {
     });
   });
 
-  it('FA-SP-05: a custom game has no player colours and no victory points', () => {
+  it('FA-SP-05, FA-SP-07: a custom game has no player colours and counts points only if set', () => {
     expect(gameCapabilities(CUSTOM_GAME_ID)).toEqual({
       isSupported: false,
       playerColors: null,
-      supportsVictoryPoints: false,
+      scoring: null,
+      allowsNegativeScores: true,
+      supportsRanking: true,
       editions: [],
       modes: [],
       hasSingleWinner: false,
       tracksDuration: false,
     });
+    expect(gameCapabilities(CUSTOM_GAME_ID, { id: CUSTOM_GAME_ID })).toMatchObject({
+      scoring: null,
+    });
+    expect(
+      gameCapabilities(CUSTOM_GAME_ID, { id: CUSTOM_GAME_ID, scoring: 'lowest-wins' }),
+    ).toMatchObject({ scoring: 'lowest-wins', allowsNegativeScores: true, supportsRanking: true });
+  });
+
+  it('FA-SP-07: the record of another game is a programming error', () => {
+    expect(() =>
+      gameCapabilities(CUSTOM_GAME_ID, { id: toGameId('0b7e0000-0000-4000-8000-000000000009') }),
+    ).toThrow(InvariantError);
   });
 });
 

@@ -1,7 +1,9 @@
 import { aCustomGame, aGroup, aPerson } from '@tests/support/masterDataFakes';
+import { aMatch } from '@tests/support/resultFakes';
 import { createTestDb } from '@tests/support/testDatabase';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { MasterDataStore } from '@/app/ports';
+import { toGameId, toMatchId, toPersonId } from '@/core/model';
 import { InvariantError } from '@/core/shared';
 import type { BoardBrainDb } from './database';
 import { createDexieMasterDataStore } from './masterDataStore';
@@ -146,4 +148,27 @@ describe('US-VW-02, US-VW-06, US-VW-07 updating master data', () => {
       expect(await db.meta.get('state')).toBeUndefined();
     },
   );
+});
+
+describe('US-VW-07 AK-4 matches with points of a game', () => {
+  const unoId = toGameId('00000000-0000-4000-8000-0000000000b1');
+  const otherId = toGameId('00000000-0000-4000-8000-0000000000b2');
+  const anna = toPersonId('00000000-0000-4000-8000-0000000000a1');
+  const ben = toPersonId('00000000-0000-4000-8000-0000000000a2');
+
+  it('tells whether a match of the game has points', async () => {
+    await db.matches.bulkAdd([
+      aMatch({ gameId: unoId, winnerIds: [ben], places: { [anna]: 2, [ben]: 1 } }),
+      aMatch({
+        id: toMatchId('00000000-0000-4000-8000-0000000000d2'),
+        gameId: otherId,
+        scores: { [anna]: 3, [ben]: 5 },
+      }),
+    ]);
+    const hasScores = (gameId: typeof unoId): Promise<boolean> =>
+      store.transaction(({ matches }) => matches.hasScores(gameId));
+
+    expect(await hasScores(unoId)).toBe(false);
+    expect(await hasScores(otherId)).toBe(true);
+  });
 });
