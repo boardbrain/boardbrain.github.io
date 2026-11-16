@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.17 |
+| Version | 0.18 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 15.11.2026 |
+| Stand | 16.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -32,6 +32,7 @@
 | 0.15 | 12.11.2026 | OP-13 (Anforderungsdokumentation E-40): Vorabversionen 0.x je Inkrement (3.7); das Release erzeugt der Product Owner selbst auf GitHub oder Claude Code nach Zustimmung, vor 1.0 als Pre-release markiert (3.8) |
 | 0.16 | 15.11.2026 | Kleine Aufgabe K-8: Reine Doku-Änderungen sind auch auf GitHub schnell grün; `check` und `stat` überspringen ihre Schritte, die Ende-zu-Ende-Läufe entfallen (3.6) |
 | 0.17 | 15.11.2026 | Vorabversionen 0.x als normales Release, „Latest“ statt Pre-release (3.8; Anforderungsdokumentation E-40) |
+| 0.18 | 16.11.2026 | Unterordner `test-reports/analyse/` für Berichte von Prüfungen des Codes und der Fachlogik, erstmals mit der erweiterten Codeanalyse durch Fable (11.2) |
 
 ## Inhaltsverzeichnis
 
@@ -532,7 +533,7 @@ Dependabot-Pull-Requests zielen auf `develop` und tragen das Präfix `deps:`. Ak
 | `Entwicklungsrichtlinien.md` | Dieses Dokument |
 | `Setup-Anleitung.md`, `Setup-DoD.md` | Einrichtung und deren Nachweis |
 | `Abnahme-Checkliste.md` | Manuelle Abnahme vor jedem Release (ab I1) |
-| `test-reports/` | Ergebnisse von Messungen, z. B. Sackgassenquote |
+| `test-reports/` | Ergebnisse von Messungen, z. B. Sackgassenquote; im Unterordner `analyse/` Berichte von Prüfungen des Codes und der Fachlogik, Dateiname mit Datum (`2026-11-16-code-pruefung.md`) |
 | `README.md` (Wurzel) | Kurzbeschreibung, Adresse der App, Stand, Lizenz; keine Verweise auf `docs/` |
 | `CHANGELOG.md` (Wurzel) | Änderungen je Release |
 | `CLAUDE.md` (Wurzel) | Kurzfassung dieser Richtlinien für Claude Code |
