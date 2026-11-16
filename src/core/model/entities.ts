@@ -19,12 +19,20 @@ export type Person = {
 };
 
 /**
+ * Which score wins in a game that counts points (FA-SP-07): the most points, as in Catan, or the
+ * fewest, as in Skyjo.
+ */
+export type ScoringDirection = 'highest-wins' | 'lowest-wins';
+
+/**
  * Game created by the user, only for recording results (FA-SP-02, Architecture 5.1, 7.1).
  */
 export type CustomGame = {
   readonly id: GameId;
   readonly name: string;
   readonly archived: boolean;
+  /** Whether results can record points and which score wins; missing means no points (FA-SP-07). */
+  readonly scoring?: ScoringDirection;
   readonly createdAt: IsoTimestamp;
   readonly updatedAt: IsoTimestamp;
 };
@@ -61,11 +69,18 @@ export function createPerson(fields: NewRecordFields<PersonId>): Result<Person, 
 }
 
 /**
- * Creates a new, active custom game with the cleaned name (US-SP-02 AK-1).
+ * Fields a new custom game is created from: a name and, if it counts points, the scoring
+ * (FA-SP-07).
  */
-export function createCustomGame(
-  fields: NewRecordFields<GameId>,
-): Result<CustomGame, NameEmptyError> {
+export type NewCustomGameFields = NewRecordFields<GameId> & {
+  readonly scoring?: ScoringDirection;
+};
+
+/**
+ * Creates a new, active custom game with the cleaned name (US-SP-02 AK-1) and, if given, its
+ * scoring (US-SP-02 AK-4, FA-SP-07).
+ */
+export function createCustomGame(fields: NewCustomGameFields): Result<CustomGame, NameEmptyError> {
   const name = cleanName(fields.name);
   if (name === '') {
     return err('name-empty');
@@ -74,9 +89,30 @@ export function createCustomGame(
     id: fields.id,
     name,
     archived: false,
+    ...(fields.scoring === undefined ? {} : { scoring: fields.scoring }),
     createdAt: fields.now,
     updatedAt: fields.now,
   });
+}
+
+/**
+ * Sets whether a custom game counts points and which score wins, or `null` for no points
+ * (US-VW-07 AK-3, FA-SP-07). Whether points may be switched off is checked by the caller, which
+ * knows the results.
+ */
+export function changeCustomGameScoring(
+  game: CustomGame,
+  scoring: ScoringDirection | null,
+  now: IsoTimestamp,
+): CustomGame {
+  return {
+    id: game.id,
+    name: game.name,
+    archived: game.archived,
+    ...(scoring === null ? {} : { scoring }),
+    createdAt: game.createdAt,
+    updatedAt: now,
+  };
 }
 
 // Renaming keeps everything but the name and moves `updatedAt` forward.

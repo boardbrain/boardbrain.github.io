@@ -10,13 +10,16 @@ export {
   type GroupColorKey,
 } from './colors';
 export {
+  changeCustomGameScoring,
   createCustomGame,
   createPerson,
   type CustomGame,
   type IsoTimestamp,
   type NameEmptyError,
+  type NewCustomGameFields,
   type NewRecordFields,
   type Person,
+  type ScoringDirection,
   renameCustomGame,
   renamePerson,
 } from './entities';

@@ -215,7 +215,7 @@ describe('US-ER-01 Record a result (service)', () => {
 
   it('AK-6, AK-7, US-ER-02, US-ER-03: stores mode, points, colours, duration and notes of Catan', async () => {
     const service = launch();
-    const victoryPoints = { [ANNA]: 10, [BEN]: 8, [CLARA]: 8, [DAVID]: 6 };
+    const scores = { [ANNA]: 10, [BEN]: 8, [CLARA]: 8, [DAVID]: 6 };
     const catanColors = {
       [ANNA]: 'red',
       [BEN]: 'blue',
@@ -231,7 +231,7 @@ describe('US-ER-01 Record a result (service)', () => {
         time: '19:30',
         edition: 'base',
         winnerIds: [ANNA],
-        victoryPoints,
+        scores,
         catanColors,
         durationMinutes: 95,
         notes: 'Räuber vergessen',
@@ -242,7 +242,7 @@ describe('US-ER-01 Record a result (service)', () => {
       time: '19:30',
       edition: 'base',
       mode: 'standard',
-      victoryPoints,
+      scores,
       catanColors,
       durationMinutes: 95,
       notes: 'Räuber vergessen',
@@ -258,6 +258,91 @@ describe('US-ER-01 Record a result (service)', () => {
         winnerIds: [ANNA],
       }),
     ).rejects.toThrow(InvariantError);
+  });
+});
+
+describe('US-ER-02 and US-ER-06 Points and ranking of custom games (service)', () => {
+  const SKYJO = aCustomGame({
+    id: toGameId('00000000-0000-4000-8000-0000000000b3'),
+    name: 'Skyjo',
+    scoring: 'lowest-wins',
+  });
+
+  beforeEach(() => {
+    store.customGames = [UNO, ARCHIVED_GAME, SKYJO];
+  });
+
+  it('FA-SP-07: the rules of a custom game follow its setting for points', async () => {
+    const skyjo = await value(launch().draft(aGroup().id, SKYJO.id));
+    const uno = await value(launch().draft(aGroup().id, UNO.id));
+
+    expect(skyjo.rules).toMatchObject({
+      scoring: 'lowest-wins',
+      allowsNegativeScores: true,
+      supportsRanking: true,
+    });
+    expect(uno.rules).toMatchObject({ scoring: null, supportsRanking: true });
+  });
+
+  it('US-ER-02 AK-1, AK-3: records points of a custom game that counts them, also below 0', async () => {
+    const scores = { [ANNA]: -4, [BEN]: 31 };
+
+    const match = await value(
+      launch().record({
+        groupId: aGroup().id,
+        gameId: SKYJO.id,
+        date: '2026-10-07',
+        winnerIds: [ANNA],
+        scores,
+      }),
+    );
+
+    expect(match.scores).toEqual(scores);
+  });
+
+  it('US-ER-02 AK-1: points for a custom game without points are a programming error', async () => {
+    await expect(
+      launch().record({
+        groupId: aGroup().id,
+        gameId: UNO.id,
+        date: '2026-10-07',
+        winnerIds: [ANNA],
+        scores: { [ANNA]: 3, [BEN]: 1 },
+      }),
+    ).rejects.toThrow(InvariantError);
+    expect(store.matches).toEqual([]);
+  });
+
+  it('US-ER-06 AK-1: records a ranking by hand, also for a game that counts points', async () => {
+    const service = launch();
+    for (const game of [UNO, SKYJO]) {
+      const match = await value(
+        service.record({
+          groupId: aGroup().id,
+          gameId: game.id,
+          date: '2026-10-07',
+          winnerIds: [BEN],
+          places: { [ANNA]: 2, [BEN]: 1 },
+        }),
+      );
+
+      expect(match.places).toEqual({ [ANNA]: 2, [BEN]: 1 });
+    }
+  });
+
+  it('US-ER-05 AK-1: a change is checked with the current setting of the game', async () => {
+    const stored = aMatch({ gameId: SKYJO.id });
+    store.matches = [stored];
+
+    const changed = await value(
+      launch().edit(stored.id, {
+        date: '2026-10-07',
+        winnerIds: [BEN],
+        scores: { [ANNA]: 40, [BEN]: 12 },
+      }),
+    );
+
+    expect(changed.scores).toEqual({ [ANNA]: 40, [BEN]: 12 });
   });
 });
 

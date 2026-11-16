@@ -7,6 +7,7 @@ import {
   sequentialIds,
   TEST_NOW,
 } from '@tests/support/masterDataFakes';
+import { aMatch } from '@tests/support/resultFakes';
 import { aCatanSetup } from '@tests/support/catanGeneration';
 import { describe, expect, it } from 'vitest';
 import type { MasterDataStore, StoredSession } from '@/app/ports';
@@ -157,6 +158,18 @@ describe('US-SP-02 Create a custom game', () => {
 
     expect(result).toEqual({ ok: false, error: 'name-duplicate' });
     expect(store.customGames).toEqual([]);
+  });
+});
+
+describe('US-SP-02 AK-4 Create a custom game that counts points', () => {
+  it('FA-SP-07: saves the direction of the points', async () => {
+    const store = new InMemoryMasterDataStore();
+    const { service } = setUp(store);
+
+    const result = await service.createCustomGame('Skyjo', 'lowest-wins');
+
+    expect(result.ok && result.value.scoring).toBe('lowest-wins');
+    expect(store.customGames[0]?.scoring).toBe('lowest-wins');
   });
 });
 
@@ -718,6 +731,82 @@ describe('US-VW-07 Rename a custom game', () => {
       service.renameCustomGame({
         gameId: toGameId('c47a0000-0000-4000-8000-000000000001'),
         name: 'Siedler',
+      }),
+    ).rejects.toThrow(InvariantError);
+  });
+});
+
+describe('US-VW-07 Change the points of a custom game', () => {
+  const unoId = toGameId('00000000-0000-4000-8000-0000000000b1');
+  const anna = toPersonId('00000000-0000-4000-8000-0000000000a1');
+  const ben = toPersonId('00000000-0000-4000-8000-0000000000a2');
+
+  function storeWith(scoring?: 'highest-wins' | 'lowest-wins'): InMemoryMasterDataStore {
+    const store = new InMemoryMasterDataStore();
+    store.customGames = [aCustomGame({ id: unoId, ...(scoring === undefined ? {} : { scoring }) })];
+    return store;
+  }
+
+  it('AK-3: switches points on with a new change time', async () => {
+    const store = storeWith();
+    const service = editSetUp(store);
+
+    const result = await service.changeCustomGameScoring({
+      gameId: unoId,
+      scoring: 'highest-wins',
+    });
+
+    const counting = aCustomGame({ id: unoId, scoring: 'highest-wins', updatedAt: LATER });
+    expect(result).toEqual({ ok: true, value: counting });
+    expect(store.customGames).toEqual([counting]);
+  });
+
+  it('AK-3: changes the direction even if results have points (the form warns, FA-SP-07)', async () => {
+    const store = storeWith('highest-wins');
+    store.matches = [aMatch({ gameId: unoId, scores: { [anna]: 3, [ben]: 5 } })];
+    const service = editSetUp(store);
+
+    const result = await service.changeCustomGameScoring({ gameId: unoId, scoring: 'lowest-wins' });
+
+    expect(result.ok && result.value.scoring).toBe('lowest-wins');
+  });
+
+  it('AK-4: switches points off only while no result of the game has points', async () => {
+    const store = storeWith('highest-wins');
+    // A ranking by hand of this game and points of another game do not count.
+    store.matches = [
+      aMatch({ gameId: unoId, winnerIds: [ben], places: { [anna]: 2, [ben]: 1 } }),
+      aMatch({
+        gameId: toGameId('00000000-0000-4000-8000-0000000000b9'),
+        scores: { [anna]: 3, [ben]: 5 },
+      }),
+    ];
+    const service = editSetUp(store);
+
+    const off = await service.changeCustomGameScoring({ gameId: unoId, scoring: null });
+
+    expect(off.ok && 'scoring' in off.value).toBe(false);
+  });
+
+  it('AK-4: refuses to switch points off while a result of the game has points', async () => {
+    const store = storeWith('highest-wins');
+    store.matches = [aMatch({ gameId: unoId, scores: { [anna]: 3, [ben]: 5 } })];
+    const service = editSetUp(store);
+
+    expect(await service.changeCustomGameScoring({ gameId: unoId, scoring: null })).toEqual({
+      ok: false,
+      error: 'scoring-in-use',
+    });
+    expect(store.customGames[0]?.scoring).toBe('highest-wins');
+  });
+
+  it('throws for Catan, which is not a custom game', async () => {
+    const service = editSetUp(storeWith());
+
+    await expect(
+      service.changeCustomGameScoring({
+        gameId: toGameId('c47a0000-0000-4000-8000-000000000001'),
+        scoring: null,
       }),
     ).rejects.toThrow(InvariantError);
   });

@@ -3,6 +3,7 @@ import {
   matchColorsOf,
   toMatchId,
   type CatanColorKey,
+  type CustomGame,
   type GameId,
   type Group,
   type GroupId,
@@ -19,7 +20,7 @@ import {
   type ResultRules,
 } from '@/core/results';
 import { assert, err, ok, type Result } from '@/core/shared';
-import { canGroupPlay, gameCapabilities } from '@/games/registry';
+import { canGroupPlay, findSupportedGame, gameCapabilities } from '@/games/registry';
 import type {
   Clock,
   IdGenerator,
@@ -144,20 +145,33 @@ function colorRecord(colors: MatchColors): Record<PersonId, CatanColorKey> {
   return record;
 }
 
+async function findCustomGame(
+  repositories: ResultRepositories,
+  gameId: GameId,
+): Promise<CustomGame | undefined> {
+  return (await repositories.customGames.listAll()).find((candidate) => candidate.id === gameId);
+}
+
+// FA-SP-07: a custom game brings its own setting for points, so its record is read.
+async function rulesOf(repositories: ResultRepositories, gameId: GameId): Promise<ResultRules> {
+  return findSupportedGame(gameId) === undefined
+    ? gameCapabilities(gameId, await findCustomGame(repositories, gameId))
+    : gameCapabilities(gameId);
+}
+
 // Specification 3.6: only active groups and games, and they must fit together (3.4).
 async function checkTarget(
   repositories: ResultRepositories,
   group: Group,
   gameId: GameId,
 ): Promise<Result<ResultRules, ResultTargetError>> {
-  const rules = gameCapabilities(gameId);
+  let rules = gameCapabilities(gameId);
   if (!rules.isSupported) {
-    const game = (await repositories.customGames.listAll()).find(
-      (candidate) => candidate.id === gameId,
-    );
+    const game = await findCustomGame(repositories, gameId);
     if (game === undefined || game.archived) {
       return err('game-not-eligible');
     }
+    rules = gameCapabilities(gameId, game);
   }
   return canGroupPlay(group, gameId) ? ok(rules) : err('group-not-eligible');
 }
@@ -253,7 +267,7 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
           groupId: session.groupId,
           gameId: session.gameId,
           participants: participantsOf(group),
-          rules: gameCapabilities(session.gameId),
+          rules: await rulesOf(repositories, session.gameId),
           values: {
             date: begin.date,
             time: begin.time,
@@ -291,12 +305,13 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
         }
         // The group cannot be archived or rebound while its match runs (FA-AB-09).
         const { session, group } = running.value;
+        const rules = await rulesOf(repositories, session.gameId);
         const match = newMatch(
           session.groupId,
           session.gameId,
           input,
           participantsOf(group),
-          gameCapabilities(session.gameId),
+          rules,
         );
         if (!match.ok) {
           return match;
@@ -315,7 +330,8 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
           return err('match-not-found');
         }
         const group = await findGroup(repositories, stored.groupId);
-        const checked = checkResult(input, participantsOf(group), gameCapabilities(stored.gameId));
+        const rules = await rulesOf(repositories, stored.gameId);
+        const checked = checkResult(input, participantsOf(group), rules);
         if (!checked.ok) {
           return checked;
         }

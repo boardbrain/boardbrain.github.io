@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createCustomGame, createPerson, renameCustomGame, renamePerson } from './entities';
+import {
+  changeCustomGameScoring,
+  createCustomGame,
+  createPerson,
+  renameCustomGame,
+  renamePerson,
+} from './entities';
 import { toGameId, toPersonId } from './ids';
 
 const ID = 'c47a0000-0000-4000-8000-0000000000aa';
@@ -55,6 +61,38 @@ describe('US-VW-06 Rename a person', () => {
 
   it('rejects a blank name', () => {
     expect(renamePerson(anna, '   ', LATER)).toEqual({ ok: false, error: 'name-empty' });
+  });
+});
+
+describe('US-SP-02 AK-4 Create a custom game that counts points', () => {
+  it('FA-SP-07: keeps the direction of the points; without one the game counts none', () => {
+    const skyjo = createCustomGame({
+      id: toGameId(ID),
+      name: 'Skyjo',
+      now: NOW,
+      scoring: 'lowest-wins',
+    });
+
+    expect(skyjo.ok && skyjo.value.scoring).toBe('lowest-wins');
+    const uno = createCustomGame({ id: toGameId(ID), name: 'Uno', now: NOW });
+    expect(uno.ok && 'scoring' in uno.value).toBe(false);
+  });
+});
+
+describe('US-VW-07 AK-3 Change the points of a custom game', () => {
+  const uno = { id: toGameId(ID), name: 'Uno', archived: false, createdAt: NOW, updatedAt: NOW };
+
+  it('sets and changes the direction and moves updatedAt', () => {
+    const counting = changeCustomGameScoring(uno, 'highest-wins', LATER);
+
+    expect(counting).toEqual({ ...uno, scoring: 'highest-wins', updatedAt: LATER });
+    expect(changeCustomGameScoring(counting, 'lowest-wins', LATER).scoring).toBe('lowest-wins');
+  });
+
+  it('switches points off by leaving the setting out', () => {
+    const counting = { ...uno, scoring: 'highest-wins' } as const;
+
+    expect(changeCustomGameScoring(counting, null, LATER)).toEqual({ ...uno, updatedAt: LATER });
   });
 });
 

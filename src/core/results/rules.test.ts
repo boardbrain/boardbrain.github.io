@@ -14,18 +14,24 @@ const CATAN_LIKE: ResultRules = {
   editions: ['base', 'cities-and-knights'],
   modes: ['standard'],
   hasSingleWinner: true,
-  supportsVictoryPoints: true,
+  scoring: 'highest-wins',
+  allowsNegativeScores: false,
+  supportsRanking: false,
   playerColors: ['red', 'blue', 'white', 'orange'],
   tracksDuration: true,
 };
+// A custom game without points (FA-SP-07: setting "Keine") and one where the fewest points win.
 const CUSTOM: ResultRules = {
   editions: [],
   modes: [],
   hasSingleWinner: false,
-  supportsVictoryPoints: false,
+  scoring: null,
+  allowsNegativeScores: true,
+  supportsRanking: true,
   playerColors: null,
   tracksDuration: false,
 };
+const SKYJO_LIKE: ResultRules = { ...CUSTOM, scoring: 'lowest-wins' };
 
 const CATAN_INPUT: ResultInput = { date: '2026-11-15', edition: 'base', winnerIds: [ANNA] };
 const CUSTOM_INPUT: ResultInput = { date: '2026-11-15', winnerIds: [BEN] };
@@ -136,46 +142,68 @@ describe('US-ER-01 Record a result', () => {
   });
 });
 
-describe('US-ER-02 Record victory points', () => {
-  it('AK-1: a game without victory points takes none', () => {
-    expect(() =>
-      checkResult({ ...CUSTOM_INPUT, victoryPoints: { [BEN]: 3 } }, TABLE, CUSTOM),
-    ).toThrow(InvariantError);
+describe('US-ER-02 Record points', () => {
+  it('AK-1: a game without points takes none', () => {
+    expect(() => checkResult({ ...CUSTOM_INPUT, scores: { [BEN]: 3 } }, TABLE, CUSTOM)).toThrow(
+      InvariantError,
+    );
+  });
+
+  it('AK-1: a custom game that counts points takes them (FA-SP-07)', () => {
+    const all = { [ANNA]: 40, [BEN]: 12, [CLARA]: 25 };
+    expect(checkResult({ ...CUSTOM_INPUT, scores: all }, TABLE, SKYJO_LIKE)).toEqual({
+      ok: true,
+      value: { date: '2026-11-15', winnerIds: [BEN], scores: all },
+    });
   });
 
   it('AK-2: points for all participants or for none', () => {
     const all = { [ANNA]: 10, [BEN]: 8, [CLARA]: 0 };
-    expect(checkResult({ ...CATAN_INPUT, victoryPoints: all }, TABLE, CATAN_LIKE)).toMatchObject({
+    expect(checkResult({ ...CATAN_INPUT, scores: all }, TABLE, CATAN_LIKE)).toMatchObject({
       ok: true,
-      value: { victoryPoints: all },
+      value: { scores: all },
     });
     expect(
-      checkResult({ ...CATAN_INPUT, victoryPoints: { [ANNA]: 10, [BEN]: 8 } }, TABLE, CATAN_LIKE),
-    ).toEqual({ ok: false, error: 'victory-points-incomplete' });
+      checkResult({ ...CATAN_INPUT, scores: { [ANNA]: 10, [BEN]: 8 } }, TABLE, CATAN_LIKE),
+    ).toEqual({ ok: false, error: 'scores-incomplete' });
   });
 
-  it('AK-2: no point entered means no victory points', () => {
-    const result = checkResult({ ...CATAN_INPUT, victoryPoints: {} }, TABLE, CATAN_LIKE);
+  it('AK-2: no point entered means no points', () => {
+    const result = checkResult({ ...CATAN_INPUT, scores: {} }, TABLE, CATAN_LIKE);
 
-    expect(result.ok && 'victoryPoints' in result.value).toBe(false);
+    expect(result.ok && 'scores' in result.value).toBe(false);
   });
 
-  it('AK-3: only whole numbers from 0', () => {
+  it('AK-3: with Catan only whole numbers from 0', () => {
     for (const wrong of [-1, 7.5, Number.POSITIVE_INFINITY]) {
       expect(
         resultErrors(
-          { ...CATAN_INPUT, victoryPoints: { [ANNA]: 10, [BEN]: wrong, [CLARA]: 4 } },
+          { ...CATAN_INPUT, scores: { [ANNA]: 10, [BEN]: wrong, [CLARA]: 4 } },
           TABLE,
           CATAN_LIKE,
         ),
-      ).toEqual(['victory-points-invalid']);
+      ).toEqual(['scores-invalid']);
+    }
+  });
+
+  it('AK-3: with a custom game also negative whole numbers', () => {
+    const negative = { [ANNA]: -3, [BEN]: -12, [CLARA]: 0 };
+    expect(checkResult({ ...CUSTOM_INPUT, scores: negative }, TABLE, SKYJO_LIKE).ok).toBe(true);
+    for (const wrong of [-1.5, Number.NEGATIVE_INFINITY, Number.NaN]) {
+      expect(
+        resultErrors(
+          { ...CUSTOM_INPUT, scores: { [ANNA]: 3, [BEN]: wrong, [CLARA]: 4 } },
+          TABLE,
+          SKYJO_LIKE,
+        ),
+      ).toEqual(['scores-invalid']);
     }
   });
 
   it('AK-2: points for someone who did not take part are a programming error', () => {
     expect(() =>
       checkResult(
-        { ...CATAN_INPUT, victoryPoints: { [ANNA]: 10, [BEN]: 8, [CLARA]: 4, [STRANGER]: 2 } },
+        { ...CATAN_INPUT, scores: { [ANNA]: 10, [BEN]: 8, [CLARA]: 4, [STRANGER]: 2 } },
         TABLE,
         CATAN_LIKE,
       ),
@@ -189,7 +217,7 @@ describe('US-ER-02 Record victory points', () => {
           date: '',
           time: 'abends',
           winnerIds: [ANNA, BEN],
-          victoryPoints: { [ANNA]: -1 },
+          scores: { [ANNA]: -1 },
           durationMinutes: 0,
         },
         TABLE,
@@ -200,10 +228,103 @@ describe('US-ER-02 Record victory points', () => {
       'time-invalid',
       'edition-missing',
       'winner-not-single',
-      'victory-points-incomplete',
-      'victory-points-invalid',
+      'scores-incomplete',
+      'scores-invalid',
       'duration-invalid',
     ]);
+  });
+});
+
+describe('US-ER-06 Record a ranking', () => {
+  const ranking = { [ANNA]: 2, [BEN]: 1, [CLARA]: 3 };
+
+  it('AK-1: a custom game takes a ranking by hand, also if it counts points', () => {
+    expect(checkResult({ ...CUSTOM_INPUT, places: ranking }, TABLE, CUSTOM)).toEqual({
+      ok: true,
+      value: { date: '2026-11-15', winnerIds: [BEN], places: ranking },
+    });
+    expect(checkResult({ ...CUSTOM_INPUT, places: ranking }, TABLE, SKYJO_LIKE).ok).toBe(true);
+  });
+
+  it('AK-1: Catan takes no ranking by hand (E-42)', () => {
+    expect(() =>
+      checkResult(
+        { ...CATAN_INPUT, places: { [ANNA]: 1, [BEN]: 2, [CLARA]: 3 } },
+        TABLE,
+        CATAN_LIKE,
+      ),
+    ).toThrow(InvariantError);
+  });
+
+  it('AK-2: places for all participants or for none', () => {
+    expect(
+      resultErrors({ ...CUSTOM_INPUT, places: { [ANNA]: 2, [BEN]: 1 } }, TABLE, CUSTOM),
+    ).toEqual(['places-incomplete']);
+    const result = checkResult({ ...CUSTOM_INPUT, places: {} }, TABLE, CUSTOM);
+    expect(result.ok && 'places' in result.value).toBe(false);
+  });
+
+  it('AK-2: the same place is shared and the following places are skipped', () => {
+    const shared = { [ANNA]: 1, [BEN]: 2, [CLARA]: 2 };
+    expect(
+      checkResult({ ...CUSTOM_INPUT, winnerIds: [ANNA], places: shared }, TABLE, CUSTOM),
+    ).toEqual({ ok: true, value: { date: '2026-11-15', winnerIds: [ANNA], places: shared } });
+    const sharedFirst = { [ANNA]: 1, [BEN]: 1, [CLARA]: 3 };
+    expect(
+      checkResult({ ...CUSTOM_INPUT, winnerIds: [ANNA, BEN], places: sharedFirst }, TABLE, CUSTOM)
+        .ok,
+    ).toBe(true);
+  });
+
+  it('AK-2: places that form no ranking are errors', () => {
+    const wrong = [
+      { [ANNA]: 1, [BEN]: 1, [CLARA]: 2 },
+      { [ANNA]: 1, [BEN]: 3, [CLARA]: 3 },
+      { [ANNA]: 1, [BEN]: 2, [CLARA]: 4 },
+      { [ANNA]: 1, [BEN]: 2.5, [CLARA]: 3 },
+      { [ANNA]: 1, [BEN]: 0, [CLARA]: 2 },
+    ];
+    for (const places of wrong) {
+      const winnerIds = TABLE.filter((personId) => places[personId] === 1);
+      expect(resultErrors({ ...CUSTOM_INPUT, winnerIds, places }, TABLE, CUSTOM)).toEqual([
+        'places-invalid',
+      ]);
+    }
+    expect(
+      resultErrors({ ...CUSTOM_INPUT, places: { [ANNA]: 2, [BEN]: 1 } }, TABLE, CUSTOM),
+    ).toEqual(['places-incomplete']);
+    expect(
+      resultErrors({ ...CUSTOM_INPUT, places: { [ANNA]: 7, [BEN]: 1 } }, TABLE, CUSTOM),
+    ).toEqual(['places-incomplete', 'places-invalid']);
+  });
+
+  it('AK-3: the winners are exactly the persons on place 1', () => {
+    expect(() =>
+      checkResult({ ...CUSTOM_INPUT, winnerIds: [ANNA], places: ranking }, TABLE, CUSTOM),
+    ).toThrow(InvariantError);
+    expect(() =>
+      checkResult(
+        { ...CUSTOM_INPUT, winnerIds: [BEN], places: { [ANNA]: 1, [BEN]: 1, [CLARA]: 3 } },
+        TABLE,
+        CUSTOM,
+      ),
+    ).toThrow(InvariantError);
+  });
+
+  it('AK-4: points and a ranking by hand together are a programming error', () => {
+    expect(() =>
+      checkResult(
+        { ...CUSTOM_INPUT, scores: { [ANNA]: 5, [BEN]: 2, [CLARA]: 9 }, places: ranking },
+        TABLE,
+        SKYJO_LIKE,
+      ),
+    ).toThrow(InvariantError);
+  });
+
+  it('AK-1: places for someone who did not take part are a programming error', () => {
+    expect(() =>
+      checkResult({ ...CUSTOM_INPUT, places: { ...ranking, [STRANGER]: 4 } }, TABLE, CUSTOM),
+    ).toThrow(InvariantError);
   });
 });
 

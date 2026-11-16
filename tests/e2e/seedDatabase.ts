@@ -20,6 +20,7 @@ import {
   type Match,
   type Person,
   type PersonId,
+  type ScoringDirection,
 } from '@/core/model';
 import { checkResult } from '@/core/results';
 import {
@@ -226,7 +227,7 @@ export async function seedMatch(page: Page, match: SeedMatch): Promise<void> {
 }
 
 /**
- * A result of the seeded data. Persons are given by name, victory points in seat order.
+ * A result of the seeded data. Persons are given by name, points and places in seat order.
  */
 export type SeedResult = {
   /** `YYYY-MM-DD` */
@@ -236,7 +237,10 @@ export type SeedResult = {
   /** Name of a custom game; without it the result is a Catan match in the base game. */
   readonly game?: string;
   readonly winners: readonly string[];
-  readonly victoryPoints?: readonly number[];
+  /** Victory points in Catan or points of a custom game that counts them (FA-ER-06). */
+  readonly scores?: readonly number[];
+  /** Ranking entered by hand in a custom game (FA-ER-12). */
+  readonly places?: readonly number[];
   readonly durationMinutes?: number;
   readonly notes?: string;
 };
@@ -259,11 +263,14 @@ function matchOf(
     result.game === undefined ? CATAN_GAME_ID : games.find((game) => game.name === result.game)?.id;
   if (gameId === undefined) throw new Error(`no game ${String(result.game)}`);
   const isCatan = gameId === CATAN_GAME_ID;
-  const victoryPoints: Record<PersonId, number> = {};
+  const scores: Record<PersonId, number> = {};
+  const places: Record<PersonId, number> = {};
   const catanColors: Record<PersonId, CatanColorKey> = {};
   participants.forEach((personId, seat) => {
-    const points = result.victoryPoints?.[seat];
-    if (points !== undefined) victoryPoints[personId] = points;
+    const score = result.scores?.[seat];
+    if (score !== undefined) scores[personId] = score;
+    const place = result.places?.[seat];
+    if (place !== undefined) places[personId] = place;
   });
   for (const { personId, catanColor } of isCatan ? matchColorsOf(group) : []) {
     catanColors[personId] = catanColor;
@@ -274,12 +281,16 @@ function matchOf(
       ...(result.time === undefined ? {} : { time: result.time }),
       ...(isCatan ? { edition: 'base', catanColors } : {}),
       winnerIds: result.winners.map(idOf),
-      ...(result.victoryPoints === undefined ? {} : { victoryPoints }),
+      ...(result.scores === undefined ? {} : { scores }),
+      ...(result.places === undefined ? {} : { places }),
       ...(result.durationMinutes === undefined ? {} : { durationMinutes: result.durationMinutes }),
       ...(result.notes === undefined ? {} : { notes: result.notes }),
     },
     participants,
-    gameCapabilities(gameId),
+    gameCapabilities(
+      gameId,
+      games.find((game) => game.id === gameId),
+    ),
   );
   if (!checked.ok) throw new Error(`invalid seed result: ${checked.error}`);
   // Recorded one minute apart in the given order (Specification 3.7).
@@ -305,6 +316,8 @@ export async function seedResults(
   page: Page,
   table: SeedTable,
   results: readonly SeedResult[],
+  /** Custom games that count points, by name (FA-SP-07); the others count none. */
+  scoring: Readonly<Record<string, ScoringDirection>> = {},
 ): Promise<void> {
   const { persons, groups } = recordsOf([table]);
   const [group] = groups;
@@ -316,6 +329,7 @@ export async function seedResults(
     id: toGameId(uuid(201 + index)),
     name,
     archived: false,
+    ...(scoring[name] === undefined ? {} : { scoring: scoring[name] }),
     createdAt: NOW,
     updatedAt: NOW,
   }));

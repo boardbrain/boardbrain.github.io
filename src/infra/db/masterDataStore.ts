@@ -45,6 +45,16 @@ function repositories(db: BoardBrainDb): MasterDataRepositories {
         await recordUserDataChange(db, game.updatedAt);
       },
     },
+    matches: {
+      // A Dexie promise, so the transaction stays open (Architecture 7.3).
+      hasScores: (gameId) =>
+        db.matches
+          .where('gameId')
+          .equals(gameId)
+          .filter((match) => match.scores !== undefined)
+          .count()
+          .then((count) => count > 0),
+    },
     session: {
       get: () => db.session.get(CURRENT_SESSION_ID),
     },
@@ -53,14 +63,14 @@ function repositories(db: BoardBrainDb): MasterDataRepositories {
 
 /**
  * Master data storage on IndexedDB (Architecture 7.3). A transaction spans persons, groups, custom
- * games, `meta` and, for the locks during a match, the session; Dexie rolls it back completely
- * if `work` throws.
+ * games, `meta`, the matches (only read, FA-SP-07) and, for the locks during a match, the
+ * session; Dexie rolls it back completely if `work` throws.
  */
 export function createDexieMasterDataStore(db: BoardBrainDb): MasterDataStore {
   const repos = repositories(db);
   return {
     transaction: (work) =>
-      db.transaction('rw', [db.persons, db.groups, db.games, db.meta, db.session], () =>
+      db.transaction('rw', [db.persons, db.groups, db.games, db.matches, db.meta, db.session], () =>
         work(repos),
       ),
   };
