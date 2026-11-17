@@ -5337,6 +5337,18 @@
       .pcard.newPcard .ngPlus {
         display: grid;
       }
+      /* A person in the group colour, as on the table page (GroupView.module.css .seat) */
+      .seatDot {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--bg);
+        border-radius: 50%;
+      }
       /* ---------- I3-B round 3 ---------- */
       .gl5 .pcard .note.last {
         font-size: 0.82rem;
@@ -9205,7 +9217,10 @@
       }
       const dot = (p, color) => (r2CoinTap()
         ? h('button', { class: 'coin coinTap', style: { background: color }, 'aria-label': `Farbe von ${nameOf(p)}`, onclick: () => openColorDialog(p) }, nameOf(p)[0], h('span', { class: 'coinPen' }, icon('pen', 9)))
-        : h('span', { class: 'coin', style: { background: color } }, nameOf(p)[0]));
+        // PO 17.11.: group colours as on the table page (GroupView .seat), Catan colours as the coin of the match
+        : res3.gameId !== 'catan' && app.screen === 'rForm'
+          ? h('span', { class: 'seatDot', style: { background: color } }, nameOf(p)[0])
+          : h('span', { class: 'coin', style: { background: color } }, nameOf(p)[0]));
 
       // ---------- start: fourth card "Statistik" (D-3 reserved it for I3) ----------
       function startScreen() {
