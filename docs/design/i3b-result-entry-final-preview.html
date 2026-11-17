@@ -5303,6 +5303,106 @@
         max-width: 38rem;
         border-radius: 12px;
       }
+      /* ---------- I3-B round 3 ---------- */
+      .gl5 .pcard .note.last {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .sortMenuWrap {
+        position: relative;
+        display: flex;
+        justify-content: flex-end;
+        margin-top: -8px;
+      }
+      .sortMenu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        z-index: 20;
+        display: grid;
+        min-width: 12rem;
+        padding: 6px;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px var(--shadow);
+      }
+      .sortMenu button {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 10px;
+        text-align: left;
+        border-radius: 8px;
+      }
+      .sortMenu button[aria-checked='true'] {
+        color: var(--accent-text);
+      }
+      .sortMenu .sp {
+        width: 14px;
+      }
+      .emptyNote,
+      .emptyBox {
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+        text-align: center;
+      }
+      .clockTap {
+        padding: 0;
+        font: inherit;
+        font-weight: 700;
+        color: inherit;
+        text-decoration: underline dotted var(--muted);
+        text-underline-offset: 4px;
+      }
+      .clockBig {
+        font-size: 3rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.1;
+        color: var(--accent-text);
+      }
+      .clockBig.paused {
+        opacity: 0.55;
+      }
+      .optRow.stepLine {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .stepRow {
+        display: flex;
+        flex: 1 0 100%;
+        gap: 6px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .stepBtn {
+        min-width: 38px;
+        min-height: 38px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--accent-text);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .stepBtn:disabled {
+        opacity: 0.4;
+      }
+      .stepVal {
+        min-width: 4.2rem;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+      .emptyBox {
+        padding: 28px 16px;
+        background: var(--raised);
+        border: 1px dashed var(--border);
+        border-radius: 14px;
+      }
       .e6 {
         display: grid;
         gap: 20px;
@@ -9647,7 +9747,7 @@
           const val = (p) => (c.points[p] === undefined || c.points[p] === '' || d.badPoints.includes(p) ? null : Number(c.points[p]));
           const sorted = [...d.ms.filter((p) => val(p) !== null).sort((a, b) => bestFirst(val(a), val(b))), ...d.ms.filter((p) => val(p) === null)];
           rows = sorted.map((p) => h('div', { class: 'pRow', 'data-p': p }, dot(p, personColor(p)), h('span', { class: 'nm' }, nameOf(p)),
-            ptsVisible && h('input', { class: 'num' + (d.badPoints.includes(p) ? ' missing' : '') + (hint === 'P1' || hint === 'P2' ? ' optPh' : ''), inputmode: 'numeric', placeholder: hint === 'P1' || hint === 'P2' ? 'optional' : '–', value: c.points[p] ?? '', 'aria-label': 'Punkte ' + nameOf(p), onchange: (e) => cSetPoints(p, e.target.value) }),
+            ptsVisible && h('input', { class: 'num' + (d.badPoints.includes(p) ? ' missing' : '') + (hint === 'P1' || hint === 'P2' ? ' optPh' : ''), inputmode: 'numeric', placeholder: r3Placeholder(), value: c.points[p] ?? '', 'aria-label': 'Punkte ' + nameOf(p), onchange: (e) => cSetPoints(p, e.target.value) }),
             trophyBtn(p)));
         } else if (ui.placeInput === 'nums') {
           rows = d.ms.map((p) => h('div', { class: 'pRow', 'data-p': p }, dot(p, personColor(p)), h('span', { class: 'nm' }, nameOf(p)),
@@ -9668,7 +9768,7 @@
         const look = g.supported ? 'none' : ui.wayLook || 'O4';
         let ways = null;
         let waysBelow = null;
-        let heading = 'Ergebnis';
+        let heading = r3Heading();
         if (look === 'O0') ways = seg([['points', leftName], ['places', 'Rangfolge']], c.mode6, (k) => switchTo(k));
         if (look === 'O1')
           ways = h('div', { class: 'group', role: 'radiogroup' },
@@ -10331,9 +10431,10 @@
         return [
           h('section', { class: 'section' }, h('h2', {}, 'Partie'),
             seg([['base', 'Basisspiel'], ['ck', 'Städte & Ritter']], res3.edition, (k) => (res3.edition = k)),
-            h('div', { class: 'group' },
-              h('div', { class: 'optRow' }, h('span', { class: 'txt' }, 'Modus'), seg([['standard', 'Standard']], 'standard', () => {}, 'single inRow')),
-              durationRow())),
+            // PO 17.11.: the mode cannot be changed yet; an info line as in the preparation, no setting
+            h('div', { class: 'modeLine small' }, h('span', { class: 'muted' }, 'Modus:'), h('span', {}, 'Standard'),
+              h('button', { class: 'infoBtn', 'aria-label': 'Regeln im Modus Standard', onclick: showModeRules }, icon('info', 18))),
+            h('div', { class: 'group' }, durationRow())),
           colorSec,
         ];
       }
@@ -10372,7 +10473,7 @@
 
       // ---------- 5: "Punkte" of a custom game (V), new game and game page ----------
       const R2_PTS = Object.fromEntries(I3_GAMES.filter((g) => !g.supported).map((g) => [g.id, g.scoring !== 'none' ? g.count : 0]));
-      const SCORING_ROWS = [['none', 'Keine Punkte', 'nur Sieger oder Rangfolge · z. B. Uno'], ['most', 'Meiste Punkte gewinnen', 'z. B. Wizard'], ['least', 'Wenigste Punkte gewinnen', 'z. B. Skyjo']];
+      const SCORING_ROWS = [['none', 'Keine Punkte', 'nur Sieger oder Rangfolge · z. B. Uno'], ['most', 'Meiste Punkte gewinnen', 'z. B. Wizard · auch negative Punkte'], ['least', 'Wenigste Punkte gewinnen', 'z. B. Skyjo · auch negative Punkte']];
       function scoringControl(value, onPick, lockNone) {
         const v = ui.V || 'V2';
         const reason = lockNone && h('p', { class: 'formHint' }, `„Keine“ gesperrt · ${lockNone}`);
@@ -10584,9 +10685,177 @@
         render();
       }
 
+      // ================= I3-B round 3: open points (PO 17.11.2026) =================
+      // Rounds 1 and 2 are fixed; round 3 asks the last open points of I3-B.
+      Object.assign(ui, { B: 'B2', D: 'D1', C: 'C3', H: 'H3', V: 'V2', R: 'R3', Y: 'Y1', arrows: 'Pf2', clearIcon: 'trash', gl: 'GL5', gl5Catan: 'dev', rim: 'F2', tabCols: '4', toastAt: 'top' });
+      ICONS.sort = 'M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5';
+      // "A–Z": A above Z with an arrow down; "zuletzt gespielt": a clock turning back (history)
+      ICONS.sortAz = 'M3.5 10.5 6 4l2.5 6.5M4.4 8.3h3.2M3.5 14h5l-5 6h5M17 4v16M13.5 16.5 17 20l3.5-3.5';
+      ICONS.sortRecent = 'M3.6 12a8.4 8.4 0 1 0 2.5-6M3.6 4v4.2h4.2M12 7.5V12l3 2';
+      const r3 = { empty: null, sortOpen: false };
+      const R3_QUESTIONS = [
+        { key: 'SK', title: 'Gleiche Spielkarten', rec: 'SA', chosen: 'SA', options: {
+          SA: ['Spielkarten wie auf „Spiele“', 'Eigene Spiele überall als Spielkarte mit den Partien in den Ecken, darunter „zuletzt …“ und die Wertung; Catan überall die Entwicklungskarte.'],
+          SB: ['Entwicklungskarten wie in „Partie“', 'Alle Spiele überall als Entwicklungskarte mit Band und Buchstaben; auf „Spiele“ ohne Partien in den Ecken.'],
+        } },
+        { key: 'SO', title: 'Sortierung', rec: 'SO3', chosen: 'SO3', options: {
+          SO1: ['Umschalter oben rechts', 'Wie bisher: „Zuletzt gespielt | A–Z“ als Umschalter über den Karten.'],
+          SO2: ['Klappmenü', 'Ein Knopf „Zuletzt gespielt ▾“ über den Karten; antippen öffnet die Auswahl.'],
+          SO3: ['Knopf im Kopf', 'Ein runder Knopf oben rechts wie die Suche bei „Tische“; die Unterzeile sagt, wie sortiert ist („Welches Spiel? · zuletzt gespielt“). Antippen wechselt.'],
+        } },
+        { key: 'LB', title: 'Beschriftung Ergebnis', rec: 'LB1', chosen: 'LB1', options: {
+          LB0: ['Bisher', 'Überschrift „Ergebnis“, leere Punktfelder mit „–“.'],
+          LB1: ['„Punkte“ im leeren Feld', 'Überschrift bleibt „Ergebnis“; die leeren Felder zeigen „Punkte“.'],
+          LB2: ['Überschrift als Aufgabe', '„Punkte eintragen oder Sieger festlegen“ (Uno: „Sieger festlegen“, Catan: „Siegpunkte eintragen oder Sieger festlegen“); Felder mit „–“.'],
+          LB3: ['Beides', 'Überschrift als Aufgabe und „Punkte“ in den leeren Feldern.'],
+        } },
+        { key: 'LZ', title: 'Leere Seiten', rec: 'LZ2', chosen: 'LZ2', options: {
+          LZ1: ['Kurzer Hinweis', 'Ein Satz in Stichworten, wo man etwas anlegt.'],
+          LZ2: ['Hinweis mit Knopf', 'Derselbe Hinweis und ein Knopf, der gleich zum Anlegen führt („+ Neues Spiel“, „+ Neuer Tisch“).'],
+        } },
+        { key: 'UZ', title: 'Uhr bearbeiten', rec: 'UZ1', chosen: 'UZ3', options: {
+          UZ1: ['Dauer korrigieren', 'Die Zeit antippen öffnet die Details wie bei der Tischwahl: große Zeit, Beginn, Anhalten; die Dauer lässt sich mit −5, −1, +1, +5 Minuten korrigieren.'],
+          UZ2: ['Beginn ändern', 'Wie UZ1, aber man stellt den Beginn der Partie um (Uhrzeit wählen); die Dauer rechnet sich daraus.'],
+          UZ3: ['Beides', 'Dauer korrigieren und Beginn ändern in einem Fenster.'],
+        } },
+      ];
+      // ---------- 5: the clock of a running match can be tapped and changed (PO 17.11.) ----------
+      Object.assign(r3, { minutes: 83, start: '19:42' });
+      const fmtClock = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+      const toMin = (hm) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5));
+      function clockPill() {
+        const paused = res3.paused;
+        return h('span', { class: 'headClock' },
+          h('button', { class: 'clock clockTap' + (paused ? ' paused' : ''), 'aria-label': `Spieldauer ${fmtClock(r3.minutes)} – Details`, onclick: openClock }, fmtClock(r3.minutes)),
+          h('button', { 'aria-label': paused ? 'Fortsetzen' : 'Anhalten', onclick: () => { res3.paused = !res3.paused; render(); } }, icon(paused ? 'play' : 'pause', 16)));
+      }
+      function openClock() {
+        const edit = { minutes: r3.minutes, start: r3.start, paused: res3.paused };
+        const uz = ui.UZ || 'UZ3';
+        const step = (n) => h('button', { class: 'stepBtn', 'aria-label': `${n > 0 ? 'plus' : 'minus'} ${Math.abs(n)} Minuten`, disabled: edit.minutes + n < 1 ? true : null, onclick: () => { edit.minutes = Math.max(1, edit.minutes + n); render(); } }, `${n > 0 ? '+' : '−'}${Math.abs(n)}`);
+        app.dialog = {
+          get content() {
+            const rows = [];
+            if (uz !== 'UZ2') rows.push(h('div', { class: 'optRow stepLine' }, h('span', { class: 'txt' }, 'Dauer korrigieren'), h('span', { class: 'stepRow' }, step(-5), step(-1), h('b', { class: 'stepVal' }, `${edit.minutes} min`), step(1), step(5))));
+            if (uz !== 'UZ1') rows.push(h('div', { class: 'optRow' }, h('span', { class: 'txt' }, 'Beginn', h('small', {}, 'Dauer rechnet sich daraus')),
+              h('label', { class: 'pickWrap' }, h('span', { class: 'valPill' }, edit.start),
+                h('input', { type: 'time', class: 'pickNative', value: edit.start, 'aria-label': 'Beginn der Partie', onclick: (e) => openPicker(e.currentTarget), onchange: (e) => { if (!e.target.value) return; edit.minutes = Math.max(1, edit.minutes + toMin(edit.start) - toMin(e.target.value)); edit.start = e.target.value; render(); } }))));
+            return [
+              h('div', { class: 'detailHead' }, h('span', { class: 'clockBig' + (edit.paused ? ' paused' : '') }, fmtClock(edit.minutes)), h('h2', {}, 'Spieldauer'),
+                h('span', { class: 'small muted' }, edit.paused ? `angehalten · Beginn ${edit.start}` : `läuft · Beginn ${edit.start}`)),
+              h('div', { class: 'group' }, rows,
+                h('div', { class: 'optRow' }, h('span', { class: 'txt' }, edit.paused ? 'Angehalten' : 'Läuft'), h('button', { class: 'pill', onclick: () => { edit.paused = !edit.paused; render(); } }, icon(edit.paused ? 'play' : 'pause', 14), edit.paused ? 'Fortsetzen' : 'Anhalten'))),
+            ];
+          },
+          cancel: 'Schließen',
+          confirm: 'Übernehmen',
+          onConfirm: () => { Object.assign(r3, { minutes: edit.minutes, start: edit.start }); res3.paused = edit.paused; app.dialog = null; render(); },
+        };
+        render();
+      }
+      // ---------- 1: the same cards on "Partie" and "Spiele" ----------
+      function sameCard(g, onclick) {
+        return h('button', { class: 'pcard', 'aria-label': g.name, onclick },
+          h('span', { class: 'corner' }, g.count), h('span', { class: 'gcArt small' }, h('span', { class: 'ownArt small' }, g.name[0])),
+          h('strong', { class: 'gname' }, g.name), h('span', { class: 'note last' }, g.last ? `zuletzt ${g.last}` : 'noch nie gespielt'), h('span', { class: 'note' }, SCORING_SHORT[g.scoring]),
+          h('span', { class: 'corner br' }, g.count));
+      }
+      function mgOwnDev(g, onclick) {
+        const [a, b] = cardText(g);
+        return h('button', { class: 'pcard devCard k2', 'aria-label': g.name, onclick },
+          h('span', { class: 'dcHead' }, h('span', { class: 'dcRibbon' }, h('strong', {}, g.name))),
+          h('span', { class: 'dcArt' }, h('span', { class: 'ownArt' }, g.name[0])),
+          h('span', { class: 'dcText' }, h('strong', {}, a), b && h('span', {}, b)));
+      }
+      const gridClass = () => 'devGrid' + ((ui.SK || 'SA') === 'SA' ? ' playGrid gl5' : '');
+      const listGames = () => (r3.empty === 'noOwn' ? I3_GAMES.filter((g) => g.supported) : sortedGames());
+      function sortControl() {
+        const so = ui.SO || 'SO3';
+        const label = ui.S === 'S2' ? 'A–Z' : 'Zuletzt gespielt';
+        if (so === 'SO1') return h('div', { style: { display: 'flex', justifyContent: 'flex-end', marginTop: '-8px' } }, seg([['S1', 'Zuletzt gespielt'], ['S2', 'A–Z']], ui.S, (k) => (ui.S = k), 'inRow sortSeg'));
+        if (so === 'SO2')
+          return h('div', { class: 'sortMenuWrap' },
+            h('button', { class: 'pill', 'aria-expanded': String(r3.sortOpen), onclick: () => { r3.sortOpen = !r3.sortOpen; render(); } }, icon('sort', 14), label, ' ▾'),
+            r3.sortOpen && h('div', { class: 'sortMenu', role: 'menu' }, [['S1', 'Zuletzt gespielt'], ['S2', 'A–Z']].map(([k, l]) =>
+              h('button', { role: 'menuitemradio', 'aria-checked': String(ui.S === k), onclick: () => { ui.S = k; r3.sortOpen = false; render(); } }, ui.S === k ? icon('check', 14) : h('span', { class: 'sp' }), l))));
+        return null;
+      }
+      function gameListScreen() {
+        pid = 0;
+        const so = ui.SO || 'SO3';
+        const sortWord = ui.S === 'S2' ? 'A–Z' : 'zuletzt gespielt';
+        const head = pageHead('Partie', {
+          back: () => go('start'),
+          sub: so === 'SO3' ? `Welches Spiel? · ${sortWord}` : 'Welches Spiel?',
+          actions: so === 'SO3' && h('button', { class: 'iconBtn', 'aria-label': `Sortiert nach ${sortWord}, wechseln zu ${ui.S === 'S2' ? 'zuletzt gespielt' : 'A–Z'}`, onclick: () => { ui.S = ui.S === 'S2' ? 'S1' : 'S2'; render(); } }, icon(ui.S === 'S2' ? 'sortAz' : 'sortRecent', 22)),
+        });
+        const same = (ui.SK || 'SA') === 'SA';
+        const cards = listGames().map((g) => (g.supported ? catanDev(null, () => openGame('catan')) : same ? sameCard(g, () => openGame(g.id)) : ownDev(g)));
+        const lz = ui.LZ || 'LZ2';
+        const emptyNote = r3.empty === 'noOwn' && h('div', { class: 'emptyNote' }, h('span', { class: 'muted small' }, 'Eigene Spiele wie Wizard oder Uno unter „Spiele“ anlegen'),
+          lz === 'LZ2' && h('button', { class: 'pill', onclick: () => { r2.fromList = true; r2.editId = null; r2.newName = ''; r2.newScoring = 'none'; go('mgGameEdit'); } }, icon('plus', 14), 'Neues Spiel'));
+        return h('main', { class: 'main' }, head, sortControl(), h('div', { class: gridClass() }, cards),
+          emptyNote || h('p', { class: 'muted small', style: { textAlign: 'center' } }, 'Neues Spiel unter „Spiele“'));
+      }
+      function mgGamesScreen() {
+        const openNew = () => { r2.editId = null; r2.newName = ''; r2.newScoring = 'none'; go('mgGameEdit'); };
+        const openMg = (g) => { r2.gameId = g.id; go('mgGame'); };
+        const games = r3.empty === 'noOwnMg' ? I3_GAMES.filter((g) => g.supported) : I3_GAMES;
+        const same = (ui.SK || 'SA') === 'SA';
+        return h('main', { class: 'main' },
+          pageHead('Spiele', { back: () => go('start') }),
+          h('div', { class: gridClass() },
+            same ? h('button', { class: 'pcard newPcard', onclick: openNew }, h('span', { class: 'ngPlus' }, icon('plus', 28)), h('strong', {}, 'Neues Spiel')) : newDevCard(openNew),
+            games.map((g) => (g.supported ? catanDev(null, null) : same ? sameCard(g, () => openMg(g)) : mgOwnDev(g, () => openMg(g))))),
+          r3.empty === 'noOwnMg' && h('p', { class: 'muted small', style: { textAlign: 'center' } }, 'Noch keine eigenen Spiele'),
+          same && r3.empty !== 'noOwnMg' && h('p', { class: 'muted small', style: { textAlign: 'center' } }, 'Zahl in der Ecke: Partien'));
+      }
+      // ---------- 3: wording of the result ----------
+      function r3Heading() {
+        const lb = ui.LB || 'LB1';
+        if (lb === 'LB0' || lb === 'LB1') return 'Ergebnis';
+        const g = i3Game(res3.gameId);
+        if (g.supported) return 'Siegpunkte eintragen oder Sieger festlegen';
+        return g.scoring === 'none' ? 'Sieger festlegen' : 'Punkte eintragen oder Sieger festlegen';
+      }
+      const r3Placeholder = () => (['LB1', 'LB3'].includes(ui.LB || 'LB1') ? 'Punkte' : '–');
+      // ---------- 4: empty pages ----------
+      function noTableScreen() {
+        const g = i3Game(res3.gameId);
+        return h('main', { class: 'main' },
+          pageHead('Welcher Tisch?', { back: () => go('gameList'), sub: `${g.name} · Ergebnis` }),
+          h('div', { class: 'emptyBox' }, h('strong', {}, `Kein Tisch für ${g.name}`), h('span', { class: 'muted small' }, 'Tische unter „Tische“ anlegen'),
+            (ui.LZ || 'LZ2') === 'LZ2' && h('button', { class: 'pill' }, icon('plus', 14), 'Neuer Tisch')));
+      }
+      function appView() {
+        const screens = { start: startScreen, gameList: gameListScreen, catanAsk: catanAskScreen, rTable: rTableScreen, rForm: rFormScreen, rSaved: rSavedScreen, tablePage: tablePageScreen, stats: statsScreen, prep: prepScreen, prepTable: prepTableScreen, prepColors: prepColorsScreen, match: matchScreen, overview: overviewScreen, games: gameListScreen, newMatch: newMatchScreen, editor: editorScreen, mgGames: mgGamesScreen, mgPersons: mgPersonsScreen, mgGame: mgGameScreen, mgGameEdit: mgGameEditScreen, noTable: noTableScreen };
+        const isStart = app.screen === 'start';
+        const [handEl, handH] = app.screen === 'mgGameEdit' ? [null, 0] : hand(isStart);
+        const content = screens[app.screen]();
+        return h('div', { class: 'app uniform u2 scr-' + app.screen + ' propCards', style: { '--hand': handH + 'px', '--tabCols': '4' } },
+          h('div', { class: 'scroll', style: { paddingBottom: 'var(--hand)' } }, content),
+          handEl, catanSheet(), conceptSheet(), dialog());
+      }
+      const R3_PAGES = {
+        cards: () => { r3.empty = null; return 'gameList'; },
+        sort: () => { r3.empty = null; ui.S = 'S1'; return 'gameList'; },
+        label: () => { res3.gameId = 'wizard'; newResult('wizard', 't1', false); return 'rForm'; },
+        empty: () => { r3.empty = 'noOwn'; return 'gameList'; },
+        clock: () => { Object.assign(r3, { minutes: 83, start: '19:42' }); res3.paused = false; const s = prepare('t1', 'ck', true); runUntil(s, () => false); app.overTab = 'board'; return 'overview'; },
+      };
+      function jumpTo(key) {
+        app.dialog = null;
+        res3.toast = null;
+        res3.sheet = false;
+        res3.fixedTable = null;
+        r3.sortOpen = false;
+        resetR2();
+        app.screen = R3_PAGES[key]();
+        render();
+      }
       // ================= I3-B final reference (PO 17.11.2026) =================
       // Every choice of round 1 and round 2 is fixed; the picker only chooses page, example and device.
-      Object.assign(ui, { B: 'B2', D: 'D1', C: 'C3', H: 'H3', V: 'V2', R: 'R3', Y: 'Y1', arrows: 'Pf2', clearIcon: 'trash', gl: 'GL5', gl5Catan: 'dev', rim: 'F2', tabCols: '4', toastAt: 'top' });
+      Object.assign(ui, { B: 'B2', D: 'D1', C: 'C3', H: 'H3', V: 'V2', R: 'R3', Y: 'Y1', arrows: 'Pf2', clearIcon: 'trash', gl: 'GL5', gl5Catan: 'dev', rim: 'F2', tabCols: '4', toastAt: 'top', SK: 'SA', SO: 'SO3', LB: 'LB1', LZ: 'LZ2', UZ: 'UZ3' });
       const formOf = (gameId, fromRunning) => () => {
         app.session = null;
         res3.gameId = gameId;
@@ -10602,16 +10871,19 @@
       const I3B_PAGES = [
         ['start', 'Start', () => { app.session = null; return 'start'; }],
         ['gameList', 'Partie: Spielliste', () => { app.session = null; return 'gameList'; }],
+        ['noOwn', 'Partie ohne eigene Spiele', () => { app.session = null; r3.empty = 'noOwn'; return 'gameList'; }],
         ['catanAsk', 'Catan-Frage', () => { app.session = null; res3.sheet = true; return 'gameList'; }],
         ['rTable', 'Tischwahl', () => { app.session = null; res3.gameId = 'skyjo'; newResult('skyjo', null, false); return 'rTable'; }],
+        ['noTable', 'Kein passender Tisch', () => { app.session = null; res3.gameId = 'skyjo'; return 'noTable'; }],
         ['skyjo', 'Ergebnis: Skyjo', formOf('skyjo')],
         ['wizard', 'Ergebnis: Wizard', formOf('wizard')],
         ['uno', 'Ergebnis: Uno', formOf('uno')],
         ['catan', 'Ergebnis: Catan', formOf('catan')],
         ['fromRun', 'Ergebnis aus der Partie', formOf('catan', true)],
-        ['overview', 'Laufende Partie', () => { const s = prepare('t1', 'ck', true); runUntil(s, () => false); app.overTab = 'board'; return 'overview'; }],
+        ['overview', 'Laufende Partie', () => { Object.assign(r3, { minutes: 83, start: '19:42' }); res3.paused = false; const s = prepare('t1', 'ck', true); runUntil(s, () => false); app.overTab = 'board'; return 'overview'; }],
         ['saved', 'Nach dem Speichern', () => { app.session = null; newResult('skyjo', 't1', false); r2.savedKey = 'one'; res3.last = SAVED_EXAMPLES.one[1]; res3.toast = 'Ergebnis gespeichert'; return 'start'; }],
         ['mgGames', 'Spiele', () => 'mgGames'],
+        ['noOwnMg', 'Spiele ohne eigene Spiele', () => { r3.empty = 'noOwnMg'; return 'mgGames'; }],
         ['mgNew', 'Neues Spiel', () => { r2.editId = null; r2.newName = ''; r2.newScoring = 'none'; return 'mgGameEdit'; }],
         ['mgGame', 'Spielseite', () => { r2.gameId = 'skyjo'; return 'mgGame'; }],
         ['mgEdit', 'Spiel bearbeiten', () => { const g = i3Game('skyjo'); r2.editId = g.id; r2.newName = g.name; r2.newScoring = g.scoring; return 'mgGameEdit'; }],
@@ -10623,6 +10895,8 @@
         res3.toast = null;
         res3.sheet = false;
         res3.fixedTable = null;
+        r3.empty = null;
+        r3.sortOpen = false;
         resetR2();
         app.screen = I3B_PAGES.find(([k]) => k === key)[2]();
         render();
@@ -10631,20 +10905,24 @@
         const spec = (title, rows) => h('div', { class: 'card' }, h('h2', {}, title), h('ul', {}, rows.map((r) => h('li', { class: 'small' }, r))));
         return h('div', { class: 'notes' },
           spec('Spielliste und Spiele', [
-            'Partie → alle Spiele als Entwicklungskarten, unten „zuletzt …“ und Wertung (B2); Sortierung „Zuletzt gespielt“, Umschalter A–Z (S1); Hinweis „Neues Spiel unter „Spiele““ (Y1).',
+            'Partie und Spiele zeigen dieselben Karten (SA): eigene Spiele als Spielkarte mit Partien in den Ecken, Name, „zuletzt …“ (etwas größer) und Wertung; Catan als Entwicklungskarte. Hinweis „Neues Spiel unter „Spiele““ (Y1).',
+            'Sortierung „zuletzt gespielt“ oder „A–Z“ über einen runden Knopf oben rechts (SO3): sein Symbol zeigt die aktuelle Sortierung (Uhr mit Pfeil bzw. A–Z), die Unterzeile sagt sie in Worten; antippen wechselt.',
+            'Leere Seiten mit Hinweis und Knopf zum Anlegen (LZ2): Partie ohne eigene Spiele, kein passender Tisch.',
             'Handy 2 Karten nebeneinander, ab 600 px (Tablet hoch) 4. Kleine Entwicklungskarten maßstäblich wie die große unter „Neue Partie“ (F2), Text nie kleiner als lesbar.',
             'Catan fragt mit zwei aufgefächerten Karten (Q5); dann Tischwahl, entfällt bei nur einem passenden Tisch (F2).',
-            'Spieleseite wie Tische: Spielkarten mit Partien in den Ecken (GL5), Catan wie in „Partie“, vorn „Neues Spiel“. „Neues Spiel“ und „Bearbeiten“ als eigene Seite mit Name und „Punkte“ als Liste (V2); „Keine“ gesperrt mit Grund, Richtungswechsel fragt beim Speichern.',
+            'Spieleseite wie Tische, vorn „Neues Spiel“. „Neues Spiel“ und „Bearbeiten“ als eigene Seite mit Name und „Punkte“ als Liste (V2), mit dem Hinweis „auch negative Punkte“; „Keine“ gesperrt mit Grund, Richtungswechsel fragt beim Speichern.',
           ]),
           spec('Ergebnis eintragen', [
             'Punkte für alle Pflicht, Sieger ergibt sich, Pokal nur bei Gleichstand vorn; vorläufiger Platz im gestrichelten Kreis (A2, G3). Schalter „Sieger oder Rangfolge“: Sieger allein oder alle Plätze, Plätze 2 bis n gestrichelt (M3). Eingaben je Weg bleiben beim Umschalten.',
             'Unvollständig: kein Rot, Knopf wirkt gesperrt, Antippen lässt Fehlendes golden aufleuchten.',
             'Wann: Datum mit ‹ › je einen Tag (vor ist heute gesperrt), Wochentag, Jahr nur bei anderem Jahr; Uhrzeit optional, Papierkorb links löscht sie, „Jetzt“ setzt sie (D1, Pf2).',
-            'Catan: Spielversion, Modus, Spieldauer (über 8 Stunden: goldener Hinweis und Rückfrage beim Speichern, H3); Farben zugeklappt mit „Ändern“ (C3).',
+            'Leere Punktfelder zeigen „Punkte“, Überschrift bleibt „Ergebnis“ (LB1).',
+            'Catan: Spielversion, darunter nur die Info-Zeile „Modus: Standard ⓘ“ wie in der Vorbereitung (nicht änderbar); Spieldauer (über 8 Stunden: goldener Hinweis und Rückfrage beim Speichern, H3); Farben zugeklappt mit „Ändern“ (C3).',
             'Nach dem Speichern zum Start; Meldung als Karte oben, schwebt über der Seite und deckt das Banner einer laufenden Partie ab (R3). Sprung zur Tischseite (N2) folgt mit I3-C.',
           ]),
           spec('Laufende Partie', [
             'Uhr mit Anhalten rechts unter den Reitern, auf dem Brett in der freien Ecke, bei „Ergebnisse“ als eigene Zeile (T4); unten „Ergebnis eintragen“ ohne Symbol und „Partie beenden ohne Ergebnis“.',
+            'Die Zeit antippen öffnet Details wie bei der Tischwahl (UZ3): große Zeit, Dauer mit −5 / −1 / +1 / +5 korrigieren, Beginn umstellen (Dauer rechnet sich daraus), Anhalten / Fortsetzen; „Schließen“ verwirft, „Übernehmen“ speichert.',
           ]),
           spec('Nicht in I3-B', [
             'Karte „Statistik“ auf dem Start (führt zu den Tischen, K1) und die Statistik selbst: I3-D.',
