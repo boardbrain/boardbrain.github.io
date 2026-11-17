@@ -5206,44 +5206,46 @@
       .gl5.three .newPcard {
         font-size: 0.85rem;
       }
-      /* F2: every measure of the card relative to its width (design size 240 px, as in "Neue Partie"; cqi is the content box, about 91.7 % of the card),
-         so a small card looks like the big one; the text never gets smaller than readable. */
+      /* F2: every measure relative to the card's own width (design size 240 px, as in "Neue Partie"), so a
+         small card looks like the big one. The card has no padding (a % padding would refer to the parent,
+         e.g. the wider fan of the Catan question); its parts keep their distance with margins in cqi of the
+         card. The text never gets smaller than readable. */
       .propCards .devCard {
         container-type: inline-size;
       }
-      /* The card's own rim: padding in % of the grid cell (= card width), radius in % of the card. */
       .propCards .devCard,
       .propCards .devGrid.three .devCard {
-        padding: 4.17% 4.17% 3.75%;
-        border-radius: 5.83% / 3.94%;
-        box-shadow: 0 6px 18px var(--shadow), inset 0 0 0 max(2px, 1.67%) #ffffff22;
+        padding: 0;
+        border-radius: 5.83cqi;
+        box-shadow: 0 6px 18px var(--shadow), inset 0 0 0 max(2px, 1.67cqi) #ffffff22;
       }
       .propCards .devCard .dcHead,
       .propCards .devGrid.three .dcHead {
-        height: 14.55cqi;
+        height: 13.33cqi;
+        margin: 4.17cqi 4.17cqi 0;
       }
       .propCards .devCard .dcRibbon,
       .propCards .devGrid .devCard .dcRibbon,
       .propCards .devGrid.three .devCard .dcRibbon {
-        font-size: 8.37cqi;
+        font-size: 7.67cqi;
         letter-spacing: 0.05em;
       }
       .propCards .devCard .dcArt {
-        margin: 0 1.82cqi;
-        border-width: 0 max(2px, 1.36cqi) max(2px, 1.36cqi);
+        margin: 0 5.84cqi;
+        border-width: 0 max(2px, 1.25cqi) max(2px, 1.25cqi);
       }
       .propCards .devCard .dcText,
       .propCards .devGrid.three .dcText {
-        margin-top: -5.45cqi;
-        padding: 5.45cqi 2.73cqi 1.82cqi;
-        font-size: max(0.62rem, 5.82cqi);
-        border-top-width: max(1px, 0.91cqi);
-        border-radius: 50% 50% 2.73cqi 2.73cqi / 7.28cqi 7.28cqi 2.73cqi 2.73cqi;
+        margin: -5cqi 4.17cqi 3.75cqi;
+        padding: 5cqi 2.5cqi 1.67cqi;
+        font-size: max(0.62rem, 5.33cqi);
+        border-top-width: max(1px, 0.83cqi);
+        border-radius: 50% 50% 2.5cqi 2.5cqi / 6.67cqi 6.67cqi 2.5cqi 2.5cqi;
       }
       .propCards .devCard .dcText strong,
       .propCards .devGrid .dcText strong,
       .propCards .devGrid.three .dcText strong {
-        font-size: max(0.7rem, 6.69cqi);
+        font-size: max(0.7rem, 6.13cqi);
         white-space: nowrap;
       }
       /* Three side by side: one line each, cut with "…" rather than spilling out */
@@ -5267,7 +5269,7 @@
         }
       }
       .propCards .devCard .ownArt {
-        font-size: 23.3cqi;
+        font-size: 21.3cqi;
       }
       /* R3 with long names: wraps inside the screen, winner at most two lines, the rest cut with "…" */
       .toast.toastCard {
@@ -5302,6 +5304,24 @@
         width: calc(100% - 32px);
         max-width: 38rem;
         border-radius: 12px;
+      }
+      /* PO 17.11.: "Neues Spiel" like "Neue Person" (PersonsView.module.css .newCard): transparent, thin dashed gold rim */
+      .pcard.newPcard,
+      .gl5 .pcard.newPcard {
+        gap: 3px;
+        color: var(--accent-text);
+        background: transparent;
+        border: 1px dashed var(--accent-text);
+        box-shadow: none;
+      }
+      .pcard.newPcard strong {
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--accent-text);
+      }
+      .pcard.newPcard .ngPlus {
+        display: grid;
       }
       /* ---------- I3-B round 3 ---------- */
       .gl5 .pcard .note.last {
@@ -10378,7 +10398,7 @@
         // PO 17.11.: an optional time can be deleted again
         // PO 17.11.: delete sits left of the time and keeps its place when hidden, so nothing moves
         const clear = h('button', { class: 'clearTime', 'aria-label': 'Uhrzeit löschen', hidden: shownTime() ? null : true, onclick: () => { r2.time = ''; render(); } }, icon((ui.clearIcon || 'trash') === 'trash' ? 'trash' : 'erase', 18));
-        const timeRow = h('div', { class: 'optRow' }, h('span', { class: 'txt' }, 'Uhrzeit', h('small', {}, res3.fromRunning && r2.time === null ? 'Beginn der Partie' : 'optional')), h('span', { class: 'timeCtl' }, clear, timeInput()), h('button', { class: 'pill', onclick: () => { r2.time = nowTime(); render(); } }, 'Jetzt'));
+        const timeRow = h('div', { class: 'optRow' }, h('span', { class: 'txt' }, 'Uhrzeit', h('small', {}, 'optional')), h('span', { class: 'timeCtl' }, clear, timeInput()), h('button', { class: 'pill', onclick: () => { r2.time = nowTime(); render(); } }, 'Jetzt'));
         const wrap = (...rows) => h('section', { class: 'section' }, h('h2', {}, 'Wann'), h('div', { class: 'group' }, rows));
         if (d === 'D2') {
           const k = r2.date === TODAY_ISO ? 'today' : r2.date === YESTERDAY_ISO ? 'yest' : 'other';
@@ -10415,7 +10435,7 @@
       function durationRow() {
         const hv = ui.H || 'H3';
         const v = r2.duration !== '' ? r2.duration : res3.fromRunning ? '83' : '';
-        const sub = res3.fromRunning ? 'gemessen, änderbar' : 'optional';
+        const sub = 'optional';
         const long = (x) => hv !== 'H1' && Number(x) > 480;
         const note = h('small', { class: long(v) ? 'durWarn' : '' }, long(v) ? 'über 8 Stunden' : sub);
         return h('div', { class: 'optRow' }, h('span', { class: 'txt' }, 'Spieldauer', note),
@@ -10747,14 +10767,14 @@
           get content() {
             const rows = [];
             if (uz !== 'UZ2') rows.push(h('div', { class: 'optRow stepLine' }, h('span', { class: 'txt' }, 'Dauer korrigieren'), h('span', { class: 'stepRow' }, step(-5), step(-1), h('b', { class: 'stepVal' }, `${edit.minutes} min`), step(1), step(5))));
-            if (uz !== 'UZ1') rows.push(h('div', { class: 'optRow' }, h('span', { class: 'txt' }, 'Beginn', h('small', {}, 'Dauer rechnet sich daraus')),
+            if (uz !== 'UZ1') rows.push(h('div', { class: 'optRow' }, h('span', { class: 'txt' }, 'Beginn'),
               h('label', { class: 'pickWrap' }, h('span', { class: 'valPill' }, edit.start),
                 h('input', { type: 'time', class: 'pickNative', value: edit.start, 'aria-label': 'Beginn der Partie', onclick: (e) => openPicker(e.currentTarget), onchange: (e) => { if (!e.target.value) return; edit.minutes = Math.max(1, edit.minutes + toMin(edit.start) - toMin(e.target.value)); edit.start = e.target.value; render(); } }))));
             return [
               h('div', { class: 'detailHead' }, h('span', { class: 'clockBig' + (edit.paused ? ' paused' : '') }, fmtClock(edit.minutes)), h('h2', {}, 'Spieldauer'),
-                h('span', { class: 'small muted' }, edit.paused ? `angehalten · Beginn ${edit.start}` : `läuft · Beginn ${edit.start}`)),
+                edit.paused && h('span', { class: 'small muted' }, 'angehalten')),
               h('div', { class: 'group' }, rows,
-                h('div', { class: 'optRow' }, h('span', { class: 'txt' }, edit.paused ? 'Angehalten' : 'Läuft'), h('button', { class: 'pill', onclick: () => { edit.paused = !edit.paused; render(); } }, icon(edit.paused ? 'play' : 'pause', 14), edit.paused ? 'Fortsetzen' : 'Anhalten'))),
+                h('div', { class: 'optRow' }, h('span', { class: 'txt' }, 'Uhr'), h('button', { class: 'pill', onclick: () => { edit.paused = !edit.paused; render(); } }, icon(edit.paused ? 'play' : 'pause', 14), edit.paused ? 'Fortsetzen' : 'Anhalten'))),
             ];
           },
           cancel: 'Schließen',
@@ -10933,6 +10953,7 @@
           spec('Laufende Partie', [
             'Uhr mit Anhalten rechts unter den Reitern, auf dem Brett in der freien Ecke, bei „Ergebnisse“ als eigene Zeile (T4); unten „Ergebnis eintragen“ ohne Symbol und „Partie beenden ohne Ergebnis“.',
             'Die Zeit antippen öffnet Details wie bei der Tischwahl (UZ3): große Zeit, Dauer mit −5 / −1 / +1 / +5 korrigieren, Beginn umstellen (Dauer rechnet sich daraus), Anhalten / Fortsetzen; „Schließen“ verwirft, „Übernehmen“ speichert.',
+            'Keine Untertitel, die Offensichtliches sagen (PO 17.11.): kein „gemessen, änderbar“, kein „Beginn der Partie“, kein „Dauer rechnet sich daraus“; „optional“ bleibt, wo ein Feld leer bleiben darf.',
           ]),
           spec('Nicht in I3-B', [
             'Karte „Statistik“ auf dem Start (führt zu den Tischen, K1) und die Statistik selbst: I3-D.',
