@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.40 |
-| Stand | 16.11.2026 |
+| Version | 0.41 |
+| Stand | 17.11.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
 
@@ -53,6 +53,7 @@
 | 0.38 | 15.11.2026 | I3-A umgesetzt (#50): Ergebnisregeln, Timer und `ResultService`; Entscheidungen des Product Owners zum Timer nach einer Wiederholung und zum Bearbeiten (Spezifikation 0.20), keine Prüfseite (2, 9) |
 | 0.39 | 16.11.2026 | Neues Bündel I3-A2 vor I3-B (Entscheidung des Product Owners): Punkte und Rangfolge bei eigenen Spielen im Datenmodell, OP-14 geklärt (Anforderungsdokumentation 0.25, Spezifikation 0.21, Architektur 0.40); Inhalte von I3-B, I3-C und I3-D ergänzt, offener Punkt OP-15 für I3-D (2, 9) |
 | 0.40 | 16.11.2026 | Ergebnisse der erweiterten Codeanalyse durch Fable (Claude Fable 5.2, Berichte in `docs/test-reports/analyse/`): neue kleine Aufgaben K-10 bis K-16, davon K-10 und K-11 vor Release 0.3.0 (neu Zeile 5b); Punkte für I3-B und I3-C, darunter die Prüfung der Spielbindung gegen bestehende Partien (US-VW-02 AK-3); Hinweis zum Update während einer laufenden Partie für 0.3.0; Punkte für I4; offene Entscheidung zum verdeckten Plan der Platzierung (2, 6, 9) |
+| 0.41 | 17.11.2026 | Grafik-Runde der erweiterten Codeanalyse durch Fable: neue Rohstoffkarten und neues Catan-Vorschaubild als Entwurf in `docs/design/art-draft/` aufbewahrt, Bericht `docs/test-reports/analyse/2026-11-16-grafiken.md`; Einbau als neue kleine Aufgabe K-17, Zeitpunkt offen (6) |
 
 ## 1. Zweck
 
@@ -262,12 +263,14 @@ Ergebnis: Stammdaten anlegbar, Brett sichtbar (Spezifikation 2.3). Neue Pakete s
 | K-14 | *Aus der erweiterten Codeanalyse durch Fable (16.11.2026).* Beschreibung der Fairness bei der Platzierung berichtigen: Innerhalb eines Durchlaufs ist jede Ziehung gleichverteilt; durch das verdeckte Neulosen ist die gezeigte Ziehung bei 4 Personen um höchstens 0,073 % verschoben, die Sackgassenquote ist exakt 1/4096, und die sechs B-Kreuzungen sind die einzige Sackgassen-Stellung (Z-G-1, Z-G-2 Weg A, Z-W-8, Z-W-10). Betrifft Anforderungsdokumentation 6.2.3 bis 6.2.6, Spezifikation US-PL-02 AK-3, Architektur 5, `docs/test-reports/sackgassen.md` und den Kommentar in `planner.ts`; dazu Kommentar im Würfeltest (Z-B-2) und Grenzen der statistischen Suite in Architektur 14.4 (Z-S-6). Haltepunkt: ändert die Anforderungsdokumentation, vorher Zustimmung des Product Owners. Nach I3 | Sonnet, low | offen |
 | K-15 | *Aus der erweiterten Codeanalyse durch Fable (16.11.2026).* Tests zu Zufall und Inszenierung schärfen: exakter Test der Sackgassen ohne Zufall (Z-S-1), Grenzen für die Sackgassen-Messung (Z-S-2), Strukturtest für Lauflicht und Spannungsmodus (gleicher Startwert, anderes Ergebnis, gleicher Weg bis zur Landung) samt Station vor der Landung (Z-G-4, Z-G-5), Kandidaten der Reihenfolge über `remainingForOrder` (Z-G-7), Straße an allen drei Arten von Kreuzungen (Z-S-4), Wiederholungen der Suite zählen (Z-S-5). Nach I3 | Opus, high | offen |
 | K-16 | *Aus der erweiterten Codeanalyse durch Fable (16.11.2026).* Verteilungsprüfung ganzer Generierungen in der statistischen Suite: erstes Gebäude, Belegung je Kreuzungsart gegen die exakten Werte, Reihenfolgen, Straße (Z-G-3, Z-S-3). Nach I3 | Opus, high | offen |
+| K-17 | *Aus der Grafik-Runde der erweiterten Codeanalyse durch Fable (16. und 17.11.2026).* Neue Grafiken einbauen: fünf Rohstoffkarten in der Richtung „V3 gemalt mit dünner Kontur, Rand R2 weicher Lichthof“ und ein neues Catan-Vorschaubild. Entwurf mit Bildern und Generator in `docs/design/art-draft/`, Bericht `docs/test-reports/analyse/2026-11-16-grafiken.md`. Vorher Abnahme durch den Product Owner (Fragen F-6 bis F-8) und die übrigen Grafiken der Partie (Landschaftsfelder, Häfen, Zahlenchips, kleine Symbole; Bericht 5.4). Beim Einbau Generator nach `scripts/art`, ADR-030 ergänzen, benannte Farb-Tokens je Rohstoff. Zeitpunkt offen (Entscheidung des Product Owners 17.11.2026: vorerst nicht einbauen) | Opus, medium | offen |
 
 **Erweiterte Codeanalyse durch Fable (16.11.2026):** *(neu in 0.40)* Auf Wunsch des Product Owners hat Claude Fable 5.2 in zwei Sitzungen den ganzen Code und alles zu Zufall und Fairness geprüft. Die Berichte liegen in `docs/test-reports/analyse/`: `2026-11-16-code-pruefung.md` (Fundnummern hier mit „C-“) und `2026-11-16-zufall-und-fairness.md` (hier mit „Z-“). Ergebnis: kein kritischer Fund, kein Datenverlust, jeder Losbaustein fair oder fair mit Einschränkungen im Bereich von Hundertstelprozent. Nichts musste vor I3-B geändert werden. Daraus folgen:
 - **vor Release 0.3.0:** K-10 und K-11; die Punkte für I3-B und I3-C in Kapitel 9; der Hinweis zum Update in den Hinweisen zu Kapitel 9 (C-M-3).
 - **nach I3:** K-12 bis K-16.
 - **in I4:** Der Service Worker lädt Dateien ohne Hash im Namen mit `cache: 'reload'` (C-G-2); die Repositories in `infra/db` bekommen eine einheitliche Bauweise, bevor Sicherungspunkte und Import mehrere Schritte in einer Transaktion brauchen (C-W-3); der Lesehook der Partie liefert auch bei unbekannter Version den Tisch (C-W-5).
 - **offene Entscheidung des Product Owners:** Den verdeckten Plan der Platzierung nicht mehr speichern, sondern je Gebäude neu planen (Z-G-6), oder ihn durch eine vorausschauende Gültigkeit ganz ersetzen (Z-G-2 Weg B, PP-14). Beides ändert ADR-010; die Umsetzung bräuchte Opus, high, und eine neue ADR. Nicht eilig.
+- **Grafiken:** *(neu in 0.41)* Eine dritte Sitzung hat die Rohstoffkarten und das Catan-Vorschaubild neu gezeichnet (Bericht `2026-11-16-grafiken.md`). Der Product Owner baut sie vorerst nicht ein; der Entwurf liegt in `docs/design/art-draft/`, der Einbau ist K-17.
 - Die übrigen „weiteren Auffälligkeiten“ der Berichte (C-W, Z-W) haben keine eigene Aufgabe; sie werden mitgenommen, wenn die betroffenen Dateien ohnehin geändert werden.
 
 Dependabot öffnet monatlich weitere Pull Requests nach `develop`. Für jeden gilt der Auftrag „Prüfe Dependabot-PR #‹Nummer›“ (Sonnet, medium); Hauptversionssprünge prüft Claude Code wie K-1.
