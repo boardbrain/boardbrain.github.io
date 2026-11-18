@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.21 |
+| Version | 0.22 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 16.11.2026 |
+| Stand | 18.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -35,6 +35,7 @@
 | 0.19 | 15.11.2026 | Klärung I3-0 Daten und Statistik (Anforderungsdokumentation 0.23, E-41 bis E-44): gemeinsame Spielliste als Einstieg (US-SP-01 neu gefasst, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3; Entscheidung des Product Owners 02.11.2026); bei Catan genau ein Sieger und Plätze aus den Siegpunkten (3.6, US-ER-01 AK-4, neu US-ER-02 AK-5); Spieldauer bei Catan mit Timer (3.5, 3.6, neu US-AB-07, US-AB-06 AK-2, neu US-ER-01 AK-7); Kennzahlen, Rangliste und Rekorde neu gefasst (3.8, US-ST-01, US-ST-03 AK-4, neu US-ST-05); Umfang und Übersicht (2.3, 2.4, 2.5); Rückverfolgbarkeit (6) |
 | 0.20 | 15.11.2026 | Entscheidungen des Product Owners in I3-A: Der Timer läuft nach dem Wiederholen eines Schritts der laufenden Partie weiter (3.5, neu US-AB-07 AK-5); beim Bearbeiten eines Ergebnisses stehen Gruppe und Spiel fest (neu US-ER-05 AK-4) |
 | 0.21 | 16.11.2026 | Punkte und Rangfolge bei eigenen Spielen (Anforderungsdokumentation 0.25, E-45, OP-14 geklärt): Einstellung „Punkte“ am eigenen Spiel (neu US-SP-02 AK-4, US-SP-02 AK-3, US-VW-07 neu „Eigenes Spiel bearbeiten“ mit AK-3 und AK-4); Ergebnis mit Punkten oder Rangfolge (3.6, US-ER-02 neu gefasst als „Punkte erfassen“ mit neu AK-6, neu US-ER-06 „Rangfolge erfassen“); Kennzahlen, Rangliste und Rekorde für Plätze und Punkte aller Spiele, neu Platzverteilung, Rote Laterne, Paradespiel, Partien je Spiel und Ø Abstand zum Sieger (3.8, US-ST-01, US-ST-03 AK-4, neu US-ST-05 AK-5, neu US-ST-06); Umfang und Übersicht (2.3, 2.5); Rückverfolgbarkeit (6) |
+| 0.22 | 18.11.2026 | Design I3-B (Anforderungsdokumentation 0.26, E-46 bis E-48): Spiele in einer gemeinsamen Liste, unterscheidbar am Aussehen (US-SP-03 AK-1, nach I3 vorgezogen); „Neues Spiel“ als eigene Seite (US-SP-02 AK-1); Sieger aus der besten Punktzahl, gewählt nur bei Gleichstand an der Spitze, Punkte oder „Sieger oder Rangfolge“ (3.6, US-ER-02 AK-4 entfällt, AK-6 neu gefasst); Grenzen im Formular: Datum nicht in der Zukunft, Punkte bis 99 999 im Betrag, Notizen bis 1000 Zeichen, Warnung bei mehr als 8 Stunden Spieldauer (3.6, US-ER-01 AK-8 neu); Spielbindung frei, nur die Mitgliederzahl wird geprüft (US-VW-02 AK-3); Spieldauer in der laufenden Partie korrigieren (3.5, US-AB-07 AK-6 neu); Umfang (2.3, 2.5) |
 
 ## Inhaltsverzeichnis
 
@@ -96,7 +97,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 | I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Karten, Aufblinken, Spannungsmodus und Überspringen der Animation *(geändert in 0.12, 0.14 und 0.16; Klänge nach Version 1)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
 | I3 Ergebnisse und Statistik | Gemeinsame Spielliste als Einstieg, Ergebniserfassung mit Siegpunkten, Catan-Farben und Spieldauer, Punkte und Rangfolge bei eigenen Spielen, Ergebnisliste, Kennzahlen, Rangliste, Rekorde, Platzverteilung und Spielvergleich, Filter, Diagramme *(geändert in 0.12, 0.19 und 0.21)* | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung, Teilexport und Export-Erinnerung, Import mit Konflikten und Zuordnung, automatische und manuelle Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS und Hinweis unter Android und Windows, Speicherschutz und Hinweis zum Schutz vor Datenverlust *(geändert in 0.12)* | Daten sicher und teilbar |
-| I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen; unterstützte und eigene Spiele getrennt *(geändert in 0.12)* | Stammdaten vollständig pflegbar |
+| I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen *(geändert in 0.12 und 0.22; die Unterscheidung der Spiele kam mit I3)* | Stammdaten vollständig pflegbar |
 | I6 Einstellungen und Feinschliff | US-SP-05 „Ich hasse Catan!“, Design und Akzentfarbe *(geändert in 0.12)* | Kandidat für Release 1.0 |
 
 Jedes Inkrement wird gemäß EP-03 bis EP-06 und EP-10 in Arbeitsbranches entwickelt, die jeweils ein Bündel zusammengehöriger User Stories enthalten (etwa zwei bis vier Bündel je Inkrement, bei einem großen Block wie I2 mehr; der Zuschnitt wird zu Beginn eines Inkrements festgelegt), und vom Product Owner im Pull Request abgenommen (EP-11). Nach `main` gelangte zuerst der Platzhalter aus der Setup-Phase (Release 0.1.0, EP-02). Vor Release 1.0 folgen Vorabversionen (0.x) nach abgeschlossenen Inkrementen, nur nach Freigabe durch den Product Owner und ohne Versprechen für ihre Daten, beginnend mit 0.2.0 nach I2 (E-40); I6 ist Kandidat für Release 1.0. *(präzisiert in 0.5 und 0.18)*
@@ -111,7 +112,7 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 |---|---|---|---|
 | US-SP-01 | Spiel aus der Spielliste wählen | M | I2, I3 |
 | US-SP-02 | Eigenes Spiel anlegen | M | I1, I3 |
-| US-SP-03 | Unterstützte und eigene Spiele unterscheiden | S | I5 |
+| US-SP-03 | Unterstützte und eigene Spiele unterscheiden | S | I3 |
 | US-SP-04 | Spielversion und Modus wählen | M | I2 |
 | US-SP-05 | Catan app-weit ausblenden („Ich hasse Catan!“) | M | I6 |
 | US-PG-01 | Person anlegen | M | I1 |
@@ -274,29 +275,31 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 - Generierung und Laufend überstehen das Schließen und Neustarten der App. Die Vorbereitung wird nicht gespeichert.
 - Das Ergebnis eines Schritts wird gespeichert, bevor seine Animation beginnt. Wird die App während einer Animation beendet, wird diese nach dem Neustart mit demselben Ergebnis erneut abgespielt; danach wartet die App auf die Bestätigung. Eine schon abgeschlossene Animation läuft nicht noch einmal ab, aufgedeckte Startrohstoffe bleiben aufgedeckt. *(ergänzt in 0.14)*
 - „Beenden ohne Ergebnis“ ist ab Beginn der Generierung jederzeit möglich.
-- **Spieldauer:** Mit dem Übergang in „Laufend“ beginnt ein Timer. Er lässt sich anhalten und fortsetzen; gespeichert werden nur Zeitpunkte, deshalb läuft er auch weiter, während die App geschlossen ist, solange er nicht angehalten ist. Der Beginn und die gemessene Dauer gehen ins Ergebnis ein (3.6, US-AB-07). Wird danach ein Schritt wiederholt, läuft der Timer weiter. *(neu in 0.19, E-43, ergänzt in 0.20)*
+- **Spieldauer:** Mit dem Übergang in „Laufend“ beginnt ein Timer. Er lässt sich anhalten und fortsetzen; gespeichert werden nur Zeitpunkte, deshalb läuft er auch weiter, während die App geschlossen ist, solange er nicht angehalten ist. Der Beginn und die gemessene Dauer gehen ins Ergebnis ein (3.6, US-AB-07). Wird danach ein Schritt wiederholt, läuft der Timer weiter. In der Übersicht lassen sich die Dauer in Schritten von 1 und 5 Minuten und der Beginn korrigieren (US-AB-07 AK-6). *(neu in 0.19, E-43, ergänzt in 0.20 und 0.22)*
 - **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. Im Tisch-Editor steht der Hinweis direkt bei der Spielbindung, die Auswahl ist gesperrt und nach dem Beenden sofort frei. *(ergänzt in 0.14)*
 
 ### 3.6 Ergebnis
 
 | Feld | Pflicht | Regel |
 |---|---|---|
-| Datum | ja | Standard: heute |
+| Datum | ja | Standard: heute; nicht in der Zukunft *(ergänzt in 0.22)* |
 | Uhrzeit | nein | Mit „Jetzt“ auf die aktuelle Uhrzeit setzbar; aus einer laufenden Partie mit dem Beginn vorbelegt (3.5) und änderbar *(ergänzt in 0.19)* |
 | Gruppe | ja | Nur aktive Gruppen (nicht archiviert) |
 | Spiel | ja | Nur mit der Gruppe verträgliche, aktive Spiele (→ 3.4) |
 | Spielversion | bei Catan ja | Basisspiel oder Städte & Ritter |
 | Modus | nein | Nur bei Catan; Standard „Standard“ |
-| Sieger | ja | Bei Catan genau eine Person. Bei anderen Spielen mindestens eine Person; zwei oder mehr Personen bedeuten Unentschieden zwischen diesen. Aus vollständigen Punkten vorgeschlagen; bei einer Rangfolge die Personen auf Platz 1 *(geändert in 0.19, E-42, und 0.21)* |
+| Sieger | ja | Bei Catan genau eine Person. Bei anderen Spielen mindestens eine Person; zwei oder mehr Personen bedeuten Unentschieden zwischen diesen. Bei vollständigen Punkten die beste Punktzahl, gewählt nur bei Gleichstand an der Spitze; bei einer Rangfolge die Personen auf Platz 1 *(geändert in 0.19, E-42, 0.21 und 0.22, E-47)* |
 | Catan-Farben | – | Nur bei Catan; vorbelegt aus der Partie bzw. den Standardfarben |
-| Punkte | nein | Bei Catan die Siegpunkte, bei eigenen Spielen nur mit der Einstellung „Meiste“ oder „Wenigste Punkte gewinnen“ (FA-SP-07); für alle Beteiligten oder für keinen; ganze Zahlen, bei Catan ab 0, bei eigenen Spielen auch negativ *(geändert in 0.21)* |
-| Rangfolge | nein | Nur bei eigenen Spielen und nur ohne Punkte, auch wenn das Spiel Punkte zählt; ein Platz je Beteiligtem, für alle oder für keinen; gleiche Plätze möglich, der folgende Platz wird übersprungen (1, 2, 2, 4) *(neu in 0.21, FA-ER-12)* |
+| Punkte | nein | Bei Catan die Siegpunkte, bei eigenen Spielen nur mit der Einstellung „Meiste“ oder „Wenigste Punkte gewinnen“ (FA-SP-07); für alle Beteiligten oder für keinen; ganze Zahlen bis 99 999, bei Catan ab 0, bei eigenen Spielen auch negativ bis −99 999. Bei eigenen Spielen mit Punkten entweder Punkte für alle oder „Sieger oder Rangfolge“ *(geändert in 0.21 und 0.22)* |
+| Rangfolge | nein | Nur bei eigenen Spielen und nur ohne Punkte, auch wenn das Spiel Punkte zählt; ein Platz je Beteiligtem, für alle oder für keinen (nur die Sieger auf Platz 1 heißt: keine Rangfolge); gleiche Plätze möglich, der folgende Platz wird übersprungen (1, 2, 2, 4) *(neu in 0.21, FA-ER-12)* |
 | Spieldauer | nein | Nur bei Catan; ganze Minuten ab 1; aus einer laufenden Partie mit der gemessenen Dauer vorbelegt (3.5) und änderbar *(neu in 0.19, E-43)* |
-| Notizen | nein | Freitext |
+| Notizen | nein | Freitext bis 1000 Zeichen *(ergänzt in 0.22)* |
 
-**Siegervorschlag** *(neu in 0.21)*: Sind alle Punkte eingetragen, setzt das Formular die Personen mit der besten Punktzahl als Sieger (bei „Wenigste Punkte gewinnen“ die niedrigste, sonst die höchste); bei Gleichstand an der Spitze sind das mehrere, also ein Unentschieden, bei Catan dann niemand. Der Vorschlag ist änderbar, etwa wenn ein Spiel einen Gleichstand mit einer eigenen Regel auflöst. Bei einer Rangfolge sind die Personen auf Platz 1 die Sieger; sie werden nicht eigens gewählt.
+**Sieger aus Punkten** *(neu in 0.21, geändert in 0.22, E-47)*: Sind alle Punkte eingetragen, sind die Personen mit der besten Punktzahl die Sieger (bei „Wenigste Punkte gewinnen“ die niedrigste, sonst die höchste). Gewählt wird nur bei Gleichstand an der Spitze, und nur unter den Besten: bei eigenen Spielen sind zunächst alle Besten Sieger, also ein Unentschieden, und ich kann es auf einen Teil von ihnen verkleinern, etwa wenn ein Spiel den Gleichstand mit einer eigenen Regel auflöst; bei Catan wähle ich genau eine Person. Bei einer Rangfolge sind die Personen auf Platz 1 die Sieger; sie werden nicht eigens gewählt.
 
-Plausibilitätswarnungen (Speichern nach Bestätigung möglich): Ein Sieger hat nicht die beste Punktzahl; bei Unentschieden haben die Sieger unterschiedliche Punktzahlen. Abgebrochene Partien ohne Sieger werden nicht erfasst. *(präzisiert in 0.21)*
+**Punkte oder „Sieger oder Rangfolge“** *(neu in 0.22)*: Bei einem eigenen Spiel mit Punkten trage ich entweder die Punkte aller Beteiligten ein, oder ich schalte auf „Sieger oder Rangfolge“ und trage nur den Sieger oder alle Plätze ein. Gespeichert wird nur der gewählte Weg. Bei einem eigenen Spiel ohne Punkte gibt es nur den zweiten Weg, bei Catan nur den ersten mit optionalen Siegpunkten; ohne Siegpunkte wähle ich den Sieger.
+
+Plausibilitätswarnung (Speichern nach Bestätigung möglich): Die Spieldauer ist länger als 8 Stunden, etwa nach einem Tippfehler wie 1200 statt 120 Minuten. Abgebrochene Partien ohne Sieger werden nicht erfasst. *(geändert in 0.22: Die Warnungen zu einem Sieger ohne beste Punktzahl entfallen, weil sich der Sieger aus den Punkten ergibt)*
 
 **Plätze** *(neu in 0.19, FA-ER-11; verallgemeinert in 0.21, FA-ER-12)*: Sind Punkte erfasst, ergeben sich daraus die Plätze. Die Sieger haben Platz 1, die übrigen Beteiligten folgen nach ihrer Punktzahl, die beste zuerst (bei „Wenigste Punkte gewinnen“ aufsteigend, sonst absteigend); gleiche Punktzahl ergibt denselben Platz, der folgende Platz wird übersprungen (10, 8, 8, 6 Punkte ergeben 1, 2, 2, 4). Das gilt auch, wenn nach der Plausibilitätswarnung ein Sieger ohne die beste Punktzahl gespeichert wurde. Diese Plätze werden nicht gespeichert, sondern bei Bedarf berechnet; ändert sich die Richtung eines Spiels (FA-SP-07), ändern sich mit ihr die Plätze. Eine Rangfolge von Hand wird so gespeichert, wie sie eingetragen ist. Ohne Punkte und ohne Rangfolge gibt es keine Plätze.
 
@@ -431,16 +434,16 @@ Bezug: FA-SP-01, FA-AB-01, FA-ER-01
 Als Nutzer möchte ich eigene Spiele wie Uno anlegen, damit ich auch deren Ergebnisse erfassen kann.
 Bezug: FA-SP-02, FA-SP-05, FA-SP-07
 
-- **AK-1:** Gegeben die Spieleverwaltung, wenn ich einen Namen eingebe und speichere, dann erscheint das Spiel im Bereich „Eigene Spiele“.
+- **AK-1:** Gegeben die Seite „Spiele“, wenn ich „Neues Spiel“ wähle, auf der eigenen Seite „Neues Spiel“ einen Namen eingebe und „Spiel anlegen“ wähle, dann erscheint das Spiel unter „Spiele“ und in der Spielliste. *(geändert in 0.22)*
 - **AK-2:** Gegeben ein Spiel mit gleichem Namen existiert bereits (ohne Beachtung der Groß- und Kleinschreibung, einschließlich Catan), wenn ich speichere, dann weist die App darauf hin und speichert nicht.
 - **AK-3:** Gegeben ein eigenes Spiel, wenn ich dafür ein Ergebnis erfasse, dann gibt es keine Felder für Spielversion, Modus, Farben oder Spieldauer; Punktfelder nur, wenn das Spiel Punkte zählt (AK-4). *(geändert in 0.21)*
 - **AK-4:** Gegeben ich lege ein eigenes Spiel an, dann wähle ich bei „Punkte“ zwischen „Keine“ (vorausgewählt), „Meiste Punkte gewinnen“ und „Wenigste Punkte gewinnen“. *(neu in 0.21, FA-SP-07)*
 
 #### US-SP-03 Unterstützte und eigene Spiele unterscheiden · S
-Als Nutzer möchte ich unterstützte und eigene Spiele klar getrennt sehen, damit ich weiß, wofür die App eine Generierung anbietet.
+Als Nutzer möchte ich unterstützte und eigene Spiele klar unterscheiden können, damit ich weiß, wofür die App eine Generierung anbietet. *(geändert in 0.22)*
 Bezug: FA-SP-03
 
-- **AK-1:** Gegeben die Spieleliste, dann sind die Bereiche „Unterstützte Spiele“ und „Eigene Spiele“ getrennt dargestellt und beschriftet.
+- **AK-1:** Gegeben die Spielliste der Partie oder die Seite „Spiele“, dann stehen alle Spiele in einem gemeinsamen Raster; unterstützte Spiele erscheinen als Entwicklungskarte mit Bild, eigene als Spielkarte mit ihrem Anfangsbuchstaben, auf beiden Seiten gleich. *(geändert in 0.22, E-46; bis dahin getrennte Bereiche)*
 
 #### US-SP-04 Spielversion und Modus wählen · M
 Als bedienende Person möchte ich Spielversion und Modus festlegen, damit die Generierung den passenden Regeln folgt.
@@ -519,13 +522,13 @@ Bezug: FA-VW-02 → 3.3, 3.4
 
 - **AK-1:** Gegeben eine Gruppe, dann kann ich Namen und Farben ändern; der Name muss eindeutig sein wie in US-PG-02 AK-8. *(ergänzt in 0.11)*
 - **AK-2:** Gegeben eine Gruppe, dann bietet die App keine Möglichkeit, Mitglieder hinzuzufügen oder zu entfernen.
-- **AK-3:** Gegeben ich ändere die Spielbindung, wenn alle bestehenden Partien und die Mitgliederzahl zur neuen Bindung passen, dann wird die Änderung übernommen; andernfalls verhindert die App sie und nennt den Grund.
+- **AK-3:** Gegeben ich ändere die Spielbindung, wenn die Mitgliederzahl zur neuen Bindung passt, dann wird die Änderung übernommen; andernfalls verhindert die App sie und nennt den Grund. Bestehende Ergebnisse bleiben am Tisch, auch wenn ihr Spiel nicht mehr zur Bindung passt. *(geändert in 0.22, E-48)*
 - **AK-4:** Gegeben die neue Bindung erfordert zusätzliche Farben, dann werden diese gemäß 3.3 automatisch belegt und sind änderbar.
 - **AK-5:** Gegeben die Gruppe ist an einer Partie in Generierung oder laufend beteiligt, dann ist die Änderung der Spielbindung gesperrt (→ 3.5); der Editor nennt den Grund bei der Spielbindung und bietet „Partie beenden“ an. *(ergänzt in 0.14)*
 - **AK-6:** Gegeben eine globale Gruppe, wenn ich Catan ausschließe oder wieder zulasse, dann entfallen die Catan-Farben bzw. werden gemäß 3.3 automatisch belegt; für das Zulassen gilt AK-3. *(neu in 0.8)*
 - **AK-7:** Gegeben die Einstellung „Ich hasse Catan!“ ist an, dann kann ich Catan nicht wieder zulassen und keine Bindung „Nur Catan“ wählen (→ US-SP-05). *(neu in 0.10)*
 
-*Hinweis (0.8):* Die Story ist nach Wunsch des Product Owners von Should (I5) nach Must (I1) vorgezogen. Bis I2 gibt es keine Partien; AK-3 wird deshalb in I1 für die Mitgliederzahl nachgewiesen und mit der Ergebniserfassung (I3) für bestehende Partien, AK-5 mit dem Ablauf einer Partie (I2).
+*Hinweis (0.8):* Die Story ist nach Wunsch des Product Owners von Should (I5) nach Must (I1) vorgezogen. Bis I2 gibt es keine Partien; AK-3 wird deshalb in I1 für die Mitgliederzahl nachgewiesen, AK-5 mit dem Ablauf einer Partie (I2). Seit 0.22 prüft AK-3 bestehende Partien nicht mehr (E-48).
 
 #### US-VW-03 Gruppe archivieren, wiederbeleben und löschen · S
 Als Nutzer möchte ich nicht mehr aktive Gruppen archivieren und bei Bedarf wiederbeleben oder endgültig löschen, damit die Übersicht aufgeräumt bleibt, ohne Statistik zu verlieren.
@@ -641,6 +644,7 @@ Bezug: FA-AB-11, FA-ER-10, E-43 → 3.5
 - **AK-3:** Gegeben die App wird geschlossen und neu gestartet, dann zeigt der Timer die seit dem Beginn vergangene Zeit ohne die angehaltene; ein angehaltener Timer bleibt angehalten.
 - **AK-4:** Gegeben ich trage aus der Partie ein Ergebnis ein, dann sind Spieldauer (auf ganze Minuten gerundet, mindestens 1) und Beginn übernommen und im Formular änderbar.
 - **AK-5:** Gegeben ich wiederhole nach Abschluss der Generierung einen Schritt (US-AB-03 AK-6), dann läuft der Timer weiter und beginnt nicht neu; eine falsche Dauer korrigiere ich im Formular. *(neu in 0.20)*
+- **AK-6:** Gegeben die Übersicht der laufenden Partie, wenn ich die Spieldauer antippe, dann kann ich die Dauer in Schritten von 1 und 5 Minuten und den Beginn korrigieren und den Timer anhalten oder fortsetzen; „Übernehmen“ speichert, „Schließen“ verwirft. *(neu in 0.22)*
 
 ### 4.5 Losschritte (LS)
 
@@ -779,6 +783,7 @@ Bezug: FA-ER-01, FA-ER-02, FA-ER-03, FA-ER-07, FA-ER-10 → 3.4, 3.6
 - **AK-5:** Gegeben ein feststehendes Spiel, dann stehen nur damit verträgliche, aktive Gruppen zur Wahl; gegeben eine feststehende Gruppe, dann stehen nur mit ihr verträgliche, aktive Spiele zur Wahl. Die Mitglieder der Gruppe sind die Beteiligten (E-41). *(geändert in 0.19)*
 - **AK-6:** Gegeben Catan, dann ist der Modus optional und mit „Standard“ vorbelegt; Notizen sind bei allen Spielen optional.
 - **AK-7:** Gegeben Catan, dann kann ich optional die Spieldauer in ganzen Minuten ab 1 eintragen; bei anderen Spielen gibt es kein Feld für die Spieldauer. *(neu in 0.19, E-43)*
+- **AK-8:** Gegeben das Formular, dann lässt sich kein Datum in der Zukunft wählen, Punkte sind auf 99 999 im Betrag und Notizen auf 1000 Zeichen begrenzt; bei einer Spieldauer über 8 Stunden weist die App vor dem Speichern darauf hin, nach Bestätigung wird gespeichert. *(neu in 0.22)*
 
 #### US-ER-02 Punkte erfassen · S *(neu gefasst in 0.21, bis dahin „Siegpunkte erfassen“)*
 Als Nutzer möchte ich bei Catan die Siegpunkte und bei eigenen Spielen mit Punkten die Punkte aller Beteiligten erfassen, damit Plätze und Durchschnittswerte möglich werden.
@@ -787,9 +792,9 @@ Bezug: FA-ER-03, FA-ER-06, FA-ER-11, FA-SP-07 → 3.6
 - **AK-1:** Gegeben ein Spiel ohne Punkte (ein eigenes Spiel mit der Einstellung „Keine“), dann gibt es keine Punktfelder. *(geändert in 0.21)*
 - **AK-2:** Gegeben Punkte sind nur für einen Teil der Beteiligten eingetragen, wenn ich speichern will, dann ist das erst möglich, wenn alle oder keine Felder ausgefüllt sind.
 - **AK-3:** Gegeben eine Eingabe, dann sind nur ganze Zahlen zulässig, bei Catan ab 0, bei eigenen Spielen auch negative. *(geändert in 0.21)*
-- **AK-4:** Gegeben ein Sieger hat nicht die beste Punktzahl (bei „Wenigste Punkte gewinnen“ die niedrigste) oder Unentschieden-Sieger haben unterschiedliche Punktzahlen, wenn ich speichere, dann erscheint eine Warnung; nach Bestätigung wird gespeichert. *(präzisiert in 0.21)*
+- **AK-4:** *entfällt seit 0.22 (E-47): Der Sieger ergibt sich aus den Punkten, deshalb gibt es keinen Sieger ohne beste Punktzahl mehr, vor dem gewarnt werden müsste.*
 - **AK-5:** Gegeben Punkte sind erfasst, dann zeigen Formular und Detailansicht die daraus berechneten Plätze nach 3.6 (z. B. 1, 2, 2, 4), bei „Wenigste Punkte gewinnen“ mit der niedrigsten Punktzahl vorn. *(neu in 0.19, E-42, ergänzt in 0.21)*
-- **AK-6:** Gegeben alle Punkte sind eingetragen, dann schlägt das Formular die Personen mit der besten Punktzahl als Sieger vor (bei Gleichstand an der Spitze ein Unentschieden, bei Catan dann niemanden); ich kann den Vorschlag ändern. *(neu in 0.21)*
+- **AK-6:** Gegeben alle Punkte sind eingetragen, dann sind die Personen mit der besten Punktzahl die Sieger; nur bei Gleichstand an der Spitze wähle ich unter ihnen (bei eigenen Spielen zunächst alle als Unentschieden, bei Catan genau eine Person). Bei einem eigenen Spiel mit Punkten sind die Punkte aller Beteiligten Pflicht, solange ich nicht auf „Sieger oder Rangfolge“ schalte. *(neu in 0.21, geändert in 0.22, E-47)*
 
 #### US-ER-03 Catan-Farben im Ergebnis · C
 Als Nutzer möchte ich sehen, wer in einer Partie welche Farbe hatte, damit ich mich an die Partie erinnern kann.
@@ -819,7 +824,7 @@ Als Nutzer möchte ich bei eigenen Spielen die Plätze eintragen, auch ohne Punk
 Bezug: FA-ER-12, E-45 → 3.6
 
 - **AK-1:** Gegeben ein eigenes Spiel und keine Punkte eingetragen, dann kann ich optional für alle Beteiligten die Plätze eintragen, auch wenn das Spiel Punkte zählt. Bei Catan gibt es keine Rangfolge von Hand.
-- **AK-2:** Gegeben eine Rangfolge, dann ist sie nur für alle Beteiligten oder für keinen speicherbar; gleiche Plätze sind möglich, der folgende Platz wird übersprungen (1, 2, 2, 4).
+- **AK-2:** Gegeben eine Rangfolge, dann ist sie nur für alle Beteiligten oder für keinen speicherbar; gleiche Plätze sind möglich, der folgende Platz wird übersprungen (1, 2, 2, 4). Nur den Sieger einzutragen ist ein Ergebnis ohne Rangfolge. *(ergänzt in 0.22)*
 - **AK-3:** Gegeben eine Rangfolge, dann sind die Personen auf Platz 1 die Sieger, mehrere auf Platz 1 ein Unentschieden; einen Sieger wähle ich dann nicht eigens.
 - **AK-4:** Gegeben Punkte sind eingetragen, dann ergibt sich die Rangfolge aus den Punkten (US-ER-02 AK-5) und lässt sich nicht zusätzlich eintragen.
 - **AK-5:** Gegeben eine Rangfolge ist gespeichert, dann zeigt die Detailansicht die Plätze.
