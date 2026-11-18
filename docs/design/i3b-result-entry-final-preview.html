@@ -9345,7 +9345,7 @@
             h('span', { class: 'dcHead' }, h('span', { class: 'dcRibbon' }, h('strong', {}, 'Neue Partie'))),
             h('span', { class: 'dcArt' }, landscape()),
             h('span', { class: 'dcText' }, h('strong', {}, 'Mit Generierung'), h('span', {}, 'Brett, Reihenfolge, Startrohstoffe'))),
-          h('button', { class: 'askCard', onclick: () => startResult('catan') }, h('span', { class: 'ic' }, resultIcon(40)), h('strong', {}, 'Ergebnis eintragen'), h('small', {}, 'ohne Generierung')));
+          h('button', { class: 'askCard', onclick: () => startResult('catan') }, h('span', { class: 'ic' }, resultIcon(40)), h('strong', {}, 'Ergebnis eintragen')));
       }
       function catanAskScreen() {
         pid = 0;
@@ -9362,7 +9362,7 @@
                 h('span', { class: 'dcHead' }, h('span', { class: 'dcRibbon' }, h('strong', {}, 'Neue Partie'))),
                 h('span', { class: 'dcArt' }, landscape()),
                 h('span', { class: 'dcText' }, h('strong', {}, 'Mit Generierung'), h('span', {}, 'Brett, Reihenfolge, Startrohstoffe'))),
-              h('button', { class: 'askCard r-right', onclick: () => startResult('catan') }, h('span', { class: 'ic' }, resultIcon(40)), h('strong', {}, 'Ergebnis eintragen'), h('small', {}, 'ohne Generierung'))));
+              h('button', { class: 'askCard r-right', onclick: () => startResult('catan') }, h('span', { class: 'ic' }, resultIcon(40)), h('strong', {}, 'Ergebnis eintragen'))));
         }
         if (ui.Q === 'Q4')
           return h('div', { class: 'r-dim', onclick: (e) => { if (e.target === e.currentTarget || e.target.classList.contains('r-fanOut')) { res3.sheet = false; render(); } } },
