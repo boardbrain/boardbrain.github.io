@@ -2,6 +2,7 @@ import {
   parseLocalDate,
   parseLocalTime,
   type CatanColorKey,
+  type LocalDate,
   type LocalTime,
   type Match,
   type PersonId,
@@ -63,22 +64,37 @@ export type ResultContent = Omit<Match, 'id' | 'groupId' | 'gameId' | 'recordedA
 /**
  * Expected errors of a result, in the order of the form (Specification 3.6): a date that is no
  * calendar day, a time that is no time of day, a missing edition (US-ER-01 AK-2), no winner,
- * more than one winner where only one is allowed (AK-4), points for only some participants
- * (US-ER-02 AK-2) or not whole numbers in the allowed range (AK-3), places for only some
- * participants or places that form no ranking (US-ER-06 AK-2), a duration that is not whole
- * minutes from 1 (US-ER-01 AK-7).
+ * a date in the future (US-ER-01 AK-8), more than one winner where only one is allowed (AK-4),
+ * points for only some participants (US-ER-02 AK-2) or not whole numbers in the allowed range
+ * (AK-3, US-ER-01 AK-8), a winner without the best score although every participant has points
+ * (US-ER-02 AK-6, E-47), places for only some participants or places that form no ranking
+ * (US-ER-06 AK-2), a duration that is not whole minutes from 1 (US-ER-01 AK-7), notes longer
+ * than 1000 characters (US-ER-01 AK-8).
  */
 export type ResultError =
   | 'date-invalid'
+  | 'date-in-future'
   | 'time-invalid'
   | 'edition-missing'
   | 'winner-missing'
   | 'winner-not-single'
   | 'scores-incomplete'
   | 'scores-invalid'
+  | 'winner-not-best'
   | 'places-incomplete'
   | 'places-invalid'
-  | 'duration-invalid';
+  | 'duration-invalid'
+  | 'notes-too-long';
+
+/**
+ * Largest amount of points in a result, also below 0 (Specification 3.6, US-ER-01 AK-8).
+ */
+export const MAX_SCORE = 99_999;
+
+/**
+ * Longest notes in characters (Specification 3.6, US-ER-01 AK-8).
+ */
+export const MAX_NOTES_LENGTH = 1000;
 
 function entered(
   values: Readonly<Record<PersonId, number>> | undefined,
@@ -157,9 +173,15 @@ function assertFitsGame(
   }
 }
 
+// FA-SP-07: the best score is the highest or, if the fewest points win, the lowest.
+function bestScore(scores: readonly number[], rules: ResultRules): number {
+  return rules.scoring === 'lowest-wins' ? Math.min(...scores) : Math.max(...scores);
+}
+
 /**
  * All expected errors of a result, in the order of the form, so the form can show them while
- * typing (Specification 3.6). Empty if the result can be stored; plausibility warnings are
+ * typing (Specification 3.6). `today` is the local date of the device: a result cannot lie in
+ * the future (US-ER-01 AK-8). Empty if the result can be stored; plausibility warnings are
  * separate (`plausibilityWarnings`).
  * @throws {InvariantError} for an input the form cannot produce, e.g. a winner who did not take
  * part or points for a game without them.
@@ -168,11 +190,16 @@ export function resultErrors(
   input: ResultInput,
   participants: readonly PersonId[],
   rules: ResultRules,
+  today: LocalDate,
 ): ResultError[] {
   assertFitsGame(input, participants, rules);
   const errors: ResultError[] = [];
-  if (!parseLocalDate(input.date).ok) {
+  const date = parseLocalDate(input.date);
+  if (!date.ok) {
     errors.push('date-invalid');
+  } else if (date.value > today) {
+    // US-ER-01 AK-8: `YYYY-MM-DD` compares like the days it names.
+    errors.push('date-in-future');
   }
   if (input.time !== undefined && !parseLocalTime(input.time).ok) {
     errors.push('time-invalid');
@@ -193,9 +220,19 @@ export function resultErrors(
   if (scores.length > 0 && scores.length < participants.length) {
     errors.push('scores-incomplete');
   }
-  const lowest = rules.allowsNegativeScores ? -Infinity : 0;
-  if (scores.some((value) => !Number.isInteger(value) || value < lowest)) {
+  const lowest = rules.allowsNegativeScores ? -MAX_SCORE : 0;
+  const isValidScore = (value: number): boolean =>
+    Number.isInteger(value) && value >= lowest && value <= MAX_SCORE;
+  if (!scores.every(isValidScore)) {
     errors.push('scores-invalid');
+  } else if (scores.length === participants.length && scores.length > 0) {
+    // US-ER-02 AK-6, E-47: with every score the winners are among the best; at a tie at the top
+    // some of the best may win.
+    const best = bestScore(scores, rules);
+    const scoreOf = (personId: PersonId): number | undefined => input.scores?.[personId];
+    if (input.winnerIds.some((personId) => scoreOf(personId) !== best)) {
+      errors.push('winner-not-best');
+    }
   }
   // FA-ER-12: places for all participants or for none, forming a ranking (US-ER-06 AK-2).
   const places = entered(input.places, participants);
@@ -213,6 +250,10 @@ export function resultErrors(
   if (duration !== undefined && (!Number.isInteger(duration) || duration < 1)) {
     errors.push('duration-invalid');
   }
+  // US-ER-01 AK-8: notes up to 1000 characters, counted as typed (before trimming).
+  if (input.notes !== undefined && [...input.notes].length > MAX_NOTES_LENGTH) {
+    errors.push('notes-too-long');
+  }
   return errors;
 }
 
@@ -226,8 +267,9 @@ export function checkResult(
   input: ResultInput,
   participants: readonly PersonId[],
   rules: ResultRules,
+  today: LocalDate,
 ): Result<ResultContent, ResultError> {
-  const [error] = resultErrors(input, participants, rules);
+  const [error] = resultErrors(input, participants, rules, today);
   if (error !== undefined) {
     return err(error);
   }

@@ -692,6 +692,30 @@ describe('US-AB-07 Measure the duration of a match (service)', () => {
     expect(again.clock).toEqual(running.clock);
   });
 
+  it('AK-6: the overview corrects beginning and duration and stores them', async () => {
+    const clock = new SettableClock();
+    const { service } = launch(1, clock);
+    await startFour(service, ONE_STEP);
+    await value(service.draw(null));
+    const running = await value(service.confirm(0));
+    clock.advance(30);
+    const startedAt = new Date(
+      Date.parse(defined(running.clock, 'clock').startedAt) - 10 * MINUTE,
+    ).toISOString();
+
+    const corrected = await value(
+      service.correctClock({ startedAt, elapsedMs: 35 * MINUTE, paused: true }),
+    );
+    clock.advance(15);
+
+    expect(stored()?.clock).toEqual(corrected.clock);
+    expect(corrected.clock?.startedAt).toBe(startedAt);
+    expect(elapsedMilliseconds(defined(stored()?.clock, 'clock'), clock.now())).toBe(35 * MINUTE);
+    expect(
+      await service.correctClock({ startedAt, elapsedMs: 120 * MINUTE, paused: false }),
+    ).toEqual({ ok: false, error: 'clock-correction-invalid' });
+  });
+
   it('a session of unknown version cannot pause its timer', async () => {
     store.session = aStoredSession({ schemaVersion: 3 });
 

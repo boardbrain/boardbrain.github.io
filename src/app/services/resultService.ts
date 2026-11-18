@@ -7,6 +7,7 @@ import {
   type GameId,
   type Group,
   type GroupId,
+  type LocalDate,
   type Match,
   type MatchColors,
   type MatchId,
@@ -72,7 +73,7 @@ export type RecordResultInput = ResultInput & {
  * Recording, changing and deleting results (Architecture 4.4); storing the result of a running
  * match ends it in the same transaction (FA-AB-08). The service rejects what is invalid
  * (Specification 3.6); plausibility warnings are asked by the form before storing, with
- * `plausibilityWarnings` from `core/results` (US-ER-02 AK-4), and so is the warning before a
+ * `plausibilityWarnings` from `core/results` (US-ER-01 AK-8), and so is the warning before a
  * change (US-ER-05 AK-1).
  */
 export type ResultService = {
@@ -201,6 +202,11 @@ async function readRunning(
 export function createResultService(deps: ResultServiceDependencies): ResultService {
   const { store, ids, clock } = deps;
 
+  // US-ER-01 AK-8: no result in the future of the device's local day.
+  function today(): LocalDate {
+    return clock.localDateTime(clock.now()).date;
+  }
+
   function newMatch(
     groupId: GroupId,
     gameId: GameId,
@@ -208,7 +214,7 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
     participants: readonly PersonId[],
     rules: ResultRules,
   ): Result<Match, ResultError> {
-    const checked = checkResult(input, participants, rules);
+    const checked = checkResult(input, participants, rules, today());
     if (!checked.ok) {
       return checked;
     }
@@ -331,7 +337,7 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
         }
         const group = await findGroup(repositories, stored.groupId);
         const rules = await rulesOf(repositories, stored.gameId);
-        const checked = checkResult(input, participantsOf(group), rules);
+        const checked = checkResult(input, participantsOf(group), rules, today());
         if (!checked.ok) {
           return checked;
         }

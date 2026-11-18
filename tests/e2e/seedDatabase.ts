@@ -10,6 +10,7 @@ import {
   CATAN_COLOR_KEYS,
   GROUP_COLOR_KEYS,
   matchColorsOf,
+  parseLocalDate,
   toGameId,
   toGroupId,
   toMatchId,
@@ -17,6 +18,7 @@ import {
   type CatanColorKey,
   type CustomGame,
   type Group,
+  type LocalDate,
   type Match,
   type Person,
   type PersonId,
@@ -245,6 +247,17 @@ export type SeedResult = {
   readonly notes?: string;
 };
 
+// The local day of the machine that runs the tests, like the browser it drives (US-ER-01 AK-8).
+function today(): LocalDate {
+  const now = new Date();
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  const day = parseLocalDate(
+    `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`,
+  );
+  if (!day.ok) throw new Error('no local date');
+  return day.value;
+}
+
 // A result checked with the rules of the app (Specification 3.6), so seeded data is always valid.
 function matchOf(
   result: SeedResult,
@@ -291,6 +304,7 @@ function matchOf(
       gameId,
       games.find((game) => game.id === gameId),
     ),
+    today(),
   );
   if (!checked.ok) throw new Error(`invalid seed result: ${checked.error}`);
   // Recorded one minute apart in the given order (Specification 3.7).

@@ -3,6 +3,7 @@ import {
   CURRENT_SESSION_ID,
   drawNextStep,
   markStaged,
+  correctClock,
   pauseClock,
   repeatStep,
   resumeClock,
@@ -11,6 +12,8 @@ import {
   startClock,
   startGeneration,
   withGameState,
+  type ClockCorrection,
+  type ClockCorrectionInvalidError,
   type ClockPausedError,
   type ClockRunningError,
   type GenerationCompleteError,
@@ -199,6 +202,16 @@ export type SessionService = {
   /** Resumes the paused timer; the paused time does not count (US-AB-07 AK-2). */
   resumeClock(): Promise<
     Result<StoredSession, SessionAccessError | ClockNotStartedError | ClockRunningError>
+  >;
+  /**
+   * Corrects the timer from the overview (US-AB-07 AK-6): beginning, measured time and whether
+   * it is paused. `clock-correction-invalid` for a beginning in the future or more time than has
+   * passed since then.
+   */
+  correctClock(
+    correction: ClockCorrection,
+  ): Promise<
+    Result<StoredSession, SessionAccessError | ClockNotStartedError | ClockCorrectionInvalidError>
   >;
   /**
    * Ends the match without a result: the generation is discarded and nothing is stored
@@ -431,6 +444,10 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
 
     resumeClock() {
       return changeClock((timer, now) => resumeClock(timer, now));
+    },
+
+    correctClock(correction) {
+      return changeClock((_timer, now) => correctClock(correction, now));
     },
 
     endWithoutResult() {

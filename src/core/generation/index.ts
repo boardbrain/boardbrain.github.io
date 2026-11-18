@@ -21,10 +21,13 @@ export {
   type StepPendingError,
 } from './flow';
 export {
+  correctClock,
   elapsedMilliseconds,
   pauseClock,
   resumeClock,
   startClock,
+  type ClockCorrection,
+  type ClockCorrectionInvalidError,
   type ClockPausedError,
   type ClockRunningError,
   type SessionClock,

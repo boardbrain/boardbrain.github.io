@@ -66,6 +66,45 @@ export function resumeClock(
 }
 
 /**
+ * Error code when a corrected timer is impossible: its beginning lies in the future, or it
+ * measures more time than has passed since its beginning or less than a minute.
+ */
+export type ClockCorrectionInvalidError = 'clock-correction-invalid';
+
+/**
+ * A correction of the timer from the overview (US-AB-07 AK-6): the beginning of the match, the
+ * time measured so far and whether the timer is paused.
+ */
+export type ClockCorrection = {
+  readonly startedAt: IsoTimestamp;
+  readonly elapsedMs: number;
+  readonly paused: boolean;
+};
+
+/**
+ * Corrects the timer (US-AB-07 AK-6): afterwards it starts at `startedAt` and has measured
+ * `elapsedMs` by `now`; the rest of the time since the beginning counts as paused. Paused, it
+ * stays at that time until it is resumed.
+ */
+export function correctClock(
+  correction: ClockCorrection,
+  now: IsoTimestamp,
+): Result<SessionClock, ClockCorrectionInvalidError> {
+  const { startedAt, elapsedMs, paused } = correction;
+  const sinceStart = Date.parse(now) - Date.parse(startedAt);
+  if (
+    !Number.isFinite(sinceStart) ||
+    !Number.isFinite(elapsedMs) ||
+    elapsedMs < 60_000 ||
+    elapsedMs > sinceStart
+  ) {
+    return err('clock-correction-invalid');
+  }
+  const pausedMs = sinceStart - elapsedMs;
+  return ok(paused ? { startedAt, pausedAt: now, pausedMs } : { startedAt, pausedMs });
+}
+
+/**
  * Time measured so far in milliseconds, without paused time (US-AB-07 AK-1 to AK-3). Never
  * negative, even if the clock of the device was set back.
  */
