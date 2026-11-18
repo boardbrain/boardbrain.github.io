@@ -128,8 +128,15 @@ export type ResultServiceDependencies = {
   readonly clock: Clock;
 };
 
-async function findGroup(repositories: ResultRepositories, groupId: GroupId): Promise<Group> {
-  const group = (await repositories.groups.listAll()).find((candidate) => candidate.id === groupId);
+// C-T-1: Dexie keeps its transaction through one level of native async function, not through
+// helpers that call further async helpers; a write after them would run outside the transaction
+// and end it early (PrematureCommitError). So every transaction first reads what it needs
+// directly and then decides with the plain functions below.
+
+type Stored = { readonly groups: readonly Group[]; readonly customGames: readonly CustomGame[] };
+
+function findGroup(stored: Stored, groupId: GroupId): Group {
+  const group = stored.groups.find((candidate) => candidate.id === groupId);
   assert(group !== undefined, `group ${groupId} exists`);
   return group;
 }
@@ -146,29 +153,26 @@ function colorRecord(colors: MatchColors): Record<PersonId, CatanColorKey> {
   return record;
 }
 
-async function findCustomGame(
-  repositories: ResultRepositories,
-  gameId: GameId,
-): Promise<CustomGame | undefined> {
-  return (await repositories.customGames.listAll()).find((candidate) => candidate.id === gameId);
+function findCustomGame(stored: Stored, gameId: GameId): CustomGame | undefined {
+  return stored.customGames.find((candidate) => candidate.id === gameId);
 }
 
 // FA-SP-07: a custom game brings its own setting for points, so its record is read.
-async function rulesOf(repositories: ResultRepositories, gameId: GameId): Promise<ResultRules> {
+function rulesOf(stored: Stored, gameId: GameId): ResultRules {
   return findSupportedGame(gameId) === undefined
-    ? gameCapabilities(gameId, await findCustomGame(repositories, gameId))
+    ? gameCapabilities(gameId, findCustomGame(stored, gameId))
     : gameCapabilities(gameId);
 }
 
 // Specification 3.6: only active groups and games, and they must fit together (3.4).
-async function checkTarget(
-  repositories: ResultRepositories,
+function checkTarget(
+  stored: Stored,
   group: Group,
   gameId: GameId,
-): Promise<Result<ResultRules, ResultTargetError>> {
+): Result<ResultRules, ResultTargetError> {
   let rules = gameCapabilities(gameId);
   if (!rules.isSupported) {
-    const game = await findCustomGame(repositories, gameId);
+    const game = findCustomGame(stored, gameId);
     if (game === undefined || game.archived) {
       return err('game-not-eligible');
     }
@@ -180,10 +184,10 @@ async function checkTarget(
 type RunningSession = { readonly session: StoredSession; readonly group: Group };
 
 // Architecture 10.3: a session of unknown version leads to a message, not a crash.
-async function readRunning(
-  repositories: ResultRepositories,
-): Promise<Result<RunningSession, SessionAccessError | SessionNotRunningError>> {
-  const session = await repositories.session.get();
+function checkRunning(
+  session: StoredSession | undefined,
+  stored: Stored,
+): Result<RunningSession, SessionAccessError | SessionNotRunningError> {
   if (session === undefined) {
     return err('no-session');
   }
@@ -193,7 +197,7 @@ async function readRunning(
   if (session.generation.state !== 'running') {
     return err('session-not-running');
   }
-  return ok({ session, group: await findGroup(repositories, session.groupId) });
+  return ok({ session, group: findGroup(stored, session.groupId) });
 }
 
 /**
@@ -201,6 +205,13 @@ async function readRunning(
  */
 export function createResultService(deps: ResultServiceDependencies): ResultService {
   const { store, ids, clock } = deps;
+
+  // C-T-1: read directly in the transaction, see above.
+  async function readStored(repositories: ResultRepositories): Promise<Stored> {
+    const groups = await repositories.groups.listAll();
+    const customGames = await repositories.customGames.listAll();
+    return { groups, customGames };
+  }
 
   // US-ER-01 AK-8: no result in the future of the device's local day.
   function today(): LocalDate {
@@ -232,8 +243,9 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
   return {
     draft(groupId, gameId) {
       return store.transaction(async (repositories) => {
-        const group = await findGroup(repositories, groupId);
-        const target = await checkTarget(repositories, group, gameId);
+        const stored = await readStored(repositories);
+        const group = findGroup(stored, groupId);
+        const target = checkTarget(stored, group, gameId);
         if (!target.ok) {
           return target;
         }
@@ -259,7 +271,9 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
 
     draftFromSession() {
       return store.transaction(async (repositories) => {
-        const running = await readRunning(repositories);
+        const current = await repositories.session.get();
+        const stored = await readStored(repositories);
+        const running = checkRunning(current, stored);
         if (!running.ok) {
           return running;
         }
@@ -273,7 +287,7 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
           groupId: session.groupId,
           gameId: session.gameId,
           participants: participantsOf(group),
-          rules: await rulesOf(repositories, session.gameId),
+          rules: rulesOf(stored, session.gameId),
           values: {
             date: begin.date,
             time: begin.time,
@@ -290,8 +304,9 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
     record(input) {
       return store.transaction(async (repositories) => {
         const { groupId, gameId, ...values } = input;
-        const group = await findGroup(repositories, groupId);
-        const target = await checkTarget(repositories, group, gameId);
+        const stored = await readStored(repositories);
+        const group = findGroup(stored, groupId);
+        const target = checkTarget(stored, group, gameId);
         if (!target.ok) {
           return target;
         }
@@ -305,13 +320,15 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
 
     recordFromSession(input) {
       return store.transaction(async (repositories) => {
-        const running = await readRunning(repositories);
+        const current = await repositories.session.get();
+        const stored = await readStored(repositories);
+        const running = checkRunning(current, stored);
         if (!running.ok) {
           return running;
         }
         // The group cannot be archived or rebound while its match runs (FA-AB-09).
         const { session, group } = running.value;
-        const rules = await rulesOf(repositories, session.gameId);
+        const rules = rulesOf(stored, session.gameId);
         const match = newMatch(
           session.groupId,
           session.gameId,
@@ -331,22 +348,23 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
 
     edit(matchId, input) {
       return store.transaction(async (repositories) => {
-        const stored = await repositories.matches.get(matchId);
-        if (stored === undefined) {
+        const previous = await repositories.matches.get(matchId);
+        if (previous === undefined) {
           return err('match-not-found');
         }
-        const group = await findGroup(repositories, stored.groupId);
-        const rules = await rulesOf(repositories, stored.gameId);
+        const stored = await readStored(repositories);
+        const group = findGroup(stored, previous.groupId);
+        const rules = rulesOf(stored, previous.gameId);
         const checked = checkResult(input, participantsOf(group), rules, today());
         if (!checked.ok) {
           return checked;
         }
         const match: Match = {
-          id: stored.id,
-          groupId: stored.groupId,
-          gameId: stored.gameId,
+          id: previous.id,
+          groupId: previous.groupId,
+          gameId: previous.gameId,
           ...checked.value,
-          recordedAt: stored.recordedAt,
+          recordedAt: previous.recordedAt,
           updatedAt: clock.now(),
         };
         await repositories.matches.update(match);
