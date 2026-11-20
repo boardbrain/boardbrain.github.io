@@ -182,6 +182,14 @@ export function ResultForm({
     <form
       ref={formRef}
       className={styles.form}
+      onKeyDown={(event) => {
+        // The key at the bottom right of the phone keyboard only closes the keyboard, so the
+        // next field can be tapped; storing is the button's job (Product Owner 20.11.2026).
+        if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+          event.preventDefault();
+          event.target.blur();
+        }
+      }}
       onSubmit={(event) => {
         event.preventDefault();
         if (!canSave) {
@@ -296,6 +304,7 @@ export function ResultForm({
               </span>
               <input
                 ref={durationRef}
+                enterKeyHint="done"
                 className={cx(styles.num, isDurationBad && styles.bad)}
                 inputMode="numeric"
                 autoComplete="off"

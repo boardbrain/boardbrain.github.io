@@ -201,7 +201,7 @@ export const de = {
     bearbeitenTitel: 'Spiel bearbeiten',
     bearbeiten: 'Bearbeiten',
     nameFeld: 'Name des Spiels',
-    nameBeispiel: 'z. B. Skyjo',
+    nameBeispiel: 'z. B. Uno',
     nameGibtEs: 'Name gibt es schon',
     punkte: 'Punkte',
     wertung: {

@@ -131,7 +131,7 @@ export function PointsRows({
             <input
               className={cx(styles.num, isBad && styles.bad)}
               inputMode="numeric"
-              enterKeyHint="next"
+              enterKeyHint="done"
               autoComplete="off"
               placeholder={t('ergebnis.punkte')}
               aria-label={t('ergebnis.punkteVon', { name: person.name })}

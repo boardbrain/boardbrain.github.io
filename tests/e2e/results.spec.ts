@@ -53,6 +53,10 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
     ] as const) {
       await page.getByRole('textbox', { name: `Punkte ${name}` }).fill(points);
     }
+    // Enter on the phone keyboard only leaves the field, it does not store.
+    await page.getByRole('textbox', { name: 'Punkte David' }).press('Enter');
+    await expect(page.getByRole('textbox', { name: 'Punkte David' })).not.toBeFocused();
+    await expect(page.getByText('Skyjo · Freitagsrunde')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sieger Ben' })).toHaveAttribute(
       'aria-pressed',
       'true',
