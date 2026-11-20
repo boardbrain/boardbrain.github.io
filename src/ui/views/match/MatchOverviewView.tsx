@@ -85,9 +85,8 @@ export function MatchOverviewView(): React.JSX.Element | null {
   const steps = session.generation.steps;
   const lastStep = steps.length - 1;
 
-  // T4: the timer at the top right below the tabs (US-AB-07 AK-1, AK-2, AK-6).
+  // The timer of the match (US-AB-07 AK-1, AK-2, AK-6).
   const clock = session.clock === undefined ? null : <MatchClock clock={session.clock} />;
-  const clockRow = clock === null ? null : <div className={clockStyles.clockRow}>{clock}</div>;
   const board = summary.placementSkipped ? (
     <div className={styles.skippedBox}>
       <strong>
@@ -113,7 +112,6 @@ export function MatchOverviewView(): React.JSX.Element | null {
           setRepeating(pieces.stepOf.get(key) ?? null);
         }}
       />
-      {clock !== null && <div className={clockStyles.corner}>{clock}</div>}
       {/* H1: in the free room below the board, nothing moves (design I2-H). */}
       {pieces.buildings.length > 0 && (
         <div className={styles.tapHint}>
@@ -298,31 +296,35 @@ export function MatchOverviewView(): React.JSX.Element | null {
           </div>
         </div>
       </div>
-      <div className={styles.tabs} role="tablist">
-        <PressableButton
-          type="button"
-          role="tab"
-          aria-selected={tab === 'board'}
-          onClick={() => {
-            setTab('board');
-          }}
-        >
-          {t('partie.reiterBrett')}
-        </PressableButton>
-        <PressableButton
-          type="button"
-          role="tab"
-          aria-selected={tab === 'list'}
-          onClick={() => {
-            setTab('list');
-          }}
-        >
-          {t('partie.reiterErgebnisse')}
-        </PressableButton>
+      {/* The timer beside the tabs (Product Owner 20.11.2026, instead of T4 below them): no row
+          of its own, nothing overlaps the board, the same place in both tabs. */}
+      <div className={clockStyles.tabRow}>
+        <div className={styles.tabs} role="tablist">
+          <PressableButton
+            type="button"
+            role="tab"
+            aria-selected={tab === 'board'}
+            onClick={() => {
+              setTab('board');
+            }}
+          >
+            {t('partie.reiterBrett')}
+          </PressableButton>
+          <PressableButton
+            type="button"
+            role="tab"
+            aria-selected={tab === 'list'}
+            onClick={() => {
+              setTab('list');
+            }}
+          >
+            {t('partie.reiterErgebnisse')}
+          </PressableButton>
+        </div>
+        {clock}
       </div>
       {tab === 'board' ? (
         <>
-          {summary.placementSkipped && clockRow}
           {board}
           {!summary.placementSkipped && (
             <div className={styles.ovNames}>
@@ -341,10 +343,7 @@ export function MatchOverviewView(): React.JSX.Element | null {
           )}
         </>
       ) : (
-        <>
-          {clockRow}
-          {results}
-        </>
+        results
       )}
       <div className={styles.ovEnd}>
         {/* US-AB-06 AK-1, AK-2: the result of the match, filled in from it. */}
