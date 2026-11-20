@@ -106,8 +106,8 @@ function deriveFromPoints(
     // E-47: the best score wins; only at a tie at the top a choice among the best.
     winners = best.length === 1 ? [...best] : entries.winners.filter((p) => best.includes(p));
   } else {
-    // Catan without points: the winner is chosen by hand.
-    winners = filled === 0 && rules.hasSingleWinner ? [...entries.winners] : [];
+    // A game without a ranking by hand and without points: the winner is chosen by hand.
+    winners = filled === 0 && !rules.supportsRanking ? [...entries.winners] : [];
   }
   const places = isPointsComplete
     ? (placesOf(
@@ -119,8 +119,8 @@ function deriveFromPoints(
   let missing: Missing = null;
   if (filled > 0 && !isPointsComplete) {
     missing = 'points';
-  } else if (filled === 0 && !rules.hasSingleWinner) {
-    // A2: in the way of points every score is required.
+  } else if (filled === 0 && rules.supportsRanking) {
+    // A2: in the way of points every score is required; without them "Sieger oder Rangfolge".
     missing = 'points';
   } else if (winners.length === 0 || (rules.hasSingleWinner && winners.length > 1)) {
     missing = 'winner';
@@ -231,11 +231,20 @@ export function toggleWinner(
 
 /**
  * Taps a place of a person in "Sieger oder Rangfolge"; tapping the chosen place again removes it.
+ * With exactly one winner (Catan, E-42) a new person on place 1 takes it from the previous one.
  */
-export function setPlace(entries: WayEntries, personId: PersonId, place: number): WayEntries {
+export function setPlace(
+  entries: WayEntries,
+  personId: PersonId,
+  place: number,
+  rules: ResultRules,
+): WayEntries {
   const isRemoved = entries.places[personId] === place;
+  const isTakenOver = rules.hasSingleWinner && place === 1;
   const places = Object.fromEntries(
-    Object.entries(entries.places).filter(([other]) => other !== personId),
+    Object.entries(entries.places).filter(
+      ([other, value]) => other !== personId && !(isTakenOver && value === 1),
+    ),
   );
   return { ...entries, places: isRemoved ? places : { ...places, [personId]: place } };
 }

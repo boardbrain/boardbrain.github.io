@@ -235,7 +235,7 @@ export function ResultForm({
               entries={entries}
               derived={derived}
               rules={rules}
-              isPointsRequired={!isCatan}
+              isPointsRequired={hasBothWays}
               missing={derived.missing}
               onPoints={(personId, text) => {
                 change(setPoints(entries, personId, text, participants, rules));
@@ -253,7 +253,7 @@ export function ResultForm({
               derived={derived}
               missing={derived.missing}
               onPlace={(personId, place) => {
-                change(setPlace(entries, personId, place));
+                change(setPlace(entries, personId, place, rules));
               }}
             />
           )}

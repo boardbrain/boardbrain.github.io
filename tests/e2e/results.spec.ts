@@ -89,7 +89,9 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
     await expect(saved(page)).toContainText('Unentschieden: Clara und David');
   });
 
-  test('AK-2: Catan asks first, then the table; the winner is chosen by hand', async ({ page }) => {
+  test('AK-2: Catan asks first, then the table; a winner without victory points (E-49)', async ({
+    page,
+  }) => {
     await seedDatabase(page, [TABLE, { name: 'Zu zweit', members: ['Anna', 'Ben'] }]);
     await page.goto('/#/partie/neu');
     await page.getByRole('button', { name: 'Catan' }).click();
@@ -105,7 +107,15 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
     );
     // The mode cannot be changed: an info line as in the preparation.
     await expect(page.getByRole('button', { name: 'Regeln im Modus Standard' })).toBeVisible();
-    await page.getByRole('button', { name: 'Sieger Clara' }).click();
+    // E-49: without victory points the winner or a ranking, chosen by the person entering.
+    await page.getByRole('switch', { name: /Sieger oder Rangfolge/ }).click();
+    await page.getByRole('button', { name: 'Anna Platz 1' }).click();
+    // Exactly one winner in Catan: Clara takes place 1 from Anna.
+    await page.getByRole('button', { name: 'Clara Platz 1' }).click();
+    await expect(page.getByRole('button', { name: 'Anna Platz 1' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
     await page.getByRole('button', { name: 'Ergebnis speichern' }).click();
 
     await expect(saved(page)).toContainText('Clara gewinnt');
@@ -121,7 +131,8 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
     await expect(page.getByRole('button', { name: 'Einen Tag später' })).toBeDisabled();
     await page.getByRole('button', { name: 'Einen Tag früher' }).click();
     await expect(page.getByText(/^gestern, /)).toBeVisible();
-    await page.getByRole('button', { name: 'Sieger Anna' }).click();
+    await page.getByRole('switch', { name: /Sieger oder Rangfolge/ }).click();
+    await page.getByRole('button', { name: 'Anna Platz 1' }).click();
     await page.getByRole('textbox', { name: 'Spieldauer in Minuten' }).fill('1200');
     await expect(page.getByText('über 8 Stunden')).toBeVisible();
     await page.getByRole('button', { name: 'Ergebnis speichern' }).click();

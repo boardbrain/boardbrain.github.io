@@ -354,7 +354,7 @@ describe('US-ER-06 Record a ranking', () => {
     );
   });
 
-  it('AK-1: Catan takes no ranking by hand (E-42)', () => {
+  it('AK-1: a game without a ranking by hand takes none', () => {
     expect(() =>
       checkResult(
         { ...CATAN_INPUT, places: { [ANNA]: 1, [BEN]: 2, [CLARA]: 3 } },
@@ -363,6 +363,20 @@ describe('US-ER-06 Record a ranking', () => {
         TODAY,
       ),
     ).toThrow(InvariantError);
+  });
+
+  it('AK-1, AK-3: a game with exactly one winner takes a ranking with one person on place 1 (E-49)', () => {
+    const catan = { ...CATAN_LIKE, supportsRanking: true };
+    const ranking = { [ANNA]: 1, [BEN]: 2, [CLARA]: 2 };
+    expect(checkResult({ ...CATAN_INPUT, places: ranking }, TABLE, catan, TODAY).ok).toBe(true);
+    expect(
+      resultErrors(
+        { ...CATAN_INPUT, winnerIds: [ANNA, BEN], places: { [ANNA]: 1, [BEN]: 1, [CLARA]: 3 } },
+        TABLE,
+        catan,
+        TODAY,
+      ),
+    ).toEqual(['winner-not-single']);
   });
 
   it('AK-2: places for all participants or for none', () => {

@@ -32,7 +32,7 @@ describe('Architecture 5.1 game registry', () => {
       playerColors: ['red', 'blue', 'white', 'orange'],
       scoring: 'highest-wins',
       allowsNegativeScores: false,
-      supportsRanking: false,
+      supportsRanking: true,
       editions: ['base', 'cities-and-knights'],
       modes: ['standard'],
       hasSingleWinner: true,

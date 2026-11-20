@@ -26,7 +26,7 @@ const CATAN: ResultRules = {
   hasSingleWinner: true,
   scoring: 'highest-wins',
   allowsNegativeScores: false,
-  supportsRanking: false,
+  supportsRanking: true,
   playerColors: ['red', 'blue', 'white', 'orange'],
   tracksDuration: true,
 };
@@ -113,19 +113,21 @@ describe('US-ER-02 points in the result form (design I3-B A2)', () => {
     expect(deriveEntry('points', some, TABLE, SKYJO).missing).toBe('points');
   });
 
-  it('Catan without points: the winner is chosen by hand (US-ER-01 AK-4)', () => {
-    const chosen = toggleWinner(NO_ENTRIES, CLARA, CATAN);
-    const derived = deriveEntry('points', chosen, TABLE, CATAN);
+  it('E-49: Catan needs every victory point in the way of points, like a custom game', () => {
+    expect(deriveEntry('points', NO_ENTRIES, TABLE, CATAN).missing).toBe('points');
+  });
+
+  it('a game without a ranking by hand chooses the winner by hand without points', () => {
+    const noRanking = { ...CATAN, supportsRanking: false };
+    const chosen = toggleWinner(NO_ENTRIES, CLARA, noRanking);
+    const derived = deriveEntry('points', chosen, TABLE, noRanking);
 
     expect(derived.winners).toEqual([CLARA]);
     expect(outcomeOf('points', derived, TABLE)).toEqual({ winnerIds: [CLARA] });
-    expect(deriveEntry('points', toggleWinner(chosen, ANNA, CATAN), TABLE, CATAN).winners).toEqual([
-      ANNA,
-    ]);
   });
 
   it('AK-2: points for only some are missing points (US-ER-02 AK-2)', () => {
-    const entries = typed(CATAN, [[ANNA, '10']], toggleWinner(NO_ENTRIES, ANNA, CATAN));
+    const entries = typed(CATAN, [[ANNA, '10']]);
 
     expect(deriveEntry('points', entries, TABLE, CATAN).missing).toBe('points');
   });
@@ -164,7 +166,7 @@ describe('US-ER-02 points in the result form (design I3-B A2)', () => {
 
 describe('US-ER-06 "Sieger oder Rangfolge" in the result form (design I3-B M3)', () => {
   it('AK-3: the winners alone are enough, stored without places', () => {
-    const entries = setPlace(NO_ENTRIES, BEN, 1);
+    const entries = setPlace(NO_ENTRIES, BEN, 1, SKYJO);
     const derived = deriveEntry('places', entries, TABLE, SKYJO);
 
     expect(isEntryComplete(derived)).toBe(true);
@@ -172,10 +174,10 @@ describe('US-ER-06 "Sieger oder Rangfolge" in the result form (design I3-B M3)',
   });
 
   it('AK-2: further places for everyone or for nobody', () => {
-    const partly = setPlace(setPlace(NO_ENTRIES, BEN, 1), ANNA, 2);
+    const partly = setPlace(setPlace(NO_ENTRIES, BEN, 1, SKYJO), ANNA, 2, SKYJO);
     expect(deriveEntry('places', partly, TABLE, SKYJO).missing).toBe('places');
 
-    const all = setPlace(partly, CLARA, 3);
+    const all = setPlace(partly, CLARA, 3, SKYJO);
     const derived = deriveEntry('places', all, TABLE, SKYJO);
     expect(isEntryComplete(derived)).toBe(true);
     expect(outcomeOf('places', derived, TABLE)).toEqual({
@@ -185,18 +187,48 @@ describe('US-ER-06 "Sieger oder Rangfolge" in the result form (design I3-B M3)',
   });
 
   it('AK-2: shared places skip the next (1, 1, 3); a wrong skip is marked', () => {
-    const shared = setPlace(setPlace(NO_ENTRIES, ANNA, 1), BEN, 1);
+    const shared = setPlace(setPlace(NO_ENTRIES, ANNA, 1, SKYJO), BEN, 1, SKYJO);
     const places = deriveEntry('places', shared, TABLE, SKYJO).places;
 
     expect(isPlaceSkipped(places, CLARA, 2)).toBe(true);
     expect(isPlaceSkipped(places, CLARA, 3)).toBe(false);
-    const wrong = setPlace(shared, CLARA, 2);
+    const wrong = setPlace(shared, CLARA, 2, SKYJO);
     expect(deriveEntry('places', wrong, TABLE, SKYJO).isRankingWrong).toBe(true);
   });
 
   it('without a winner the winner is missing; tapping a place again removes it', () => {
     expect(deriveEntry('places', NO_ENTRIES, TABLE, SKYJO).missing).toBe('winner');
-    const again = setPlace(setPlace(NO_ENTRIES, ANNA, 1), ANNA, 1);
+    const again = setPlace(setPlace(NO_ENTRIES, ANNA, 1, SKYJO), ANNA, 1, SKYJO);
     expect(again.places).toEqual({});
+  });
+});
+
+describe('E-49 Catan with "Sieger oder Rangfolge"', () => {
+  it('a new person on place 1 takes it, so there is exactly one winner', () => {
+    const first = setPlace(NO_ENTRIES, ANNA, 1, CATAN);
+    const taken = setPlace(first, BEN, 1, CATAN);
+    const derived = deriveEntry('places', taken, TABLE, CATAN);
+
+    expect(derived.winners).toEqual([BEN]);
+    expect(outcomeOf('places', derived, TABLE)).toEqual({ winnerIds: [BEN] });
+  });
+
+  it('a whole ranking with shared second places', () => {
+    const ranked = [
+      [BEN, 1],
+      [ANNA, 2],
+      [CLARA, 2],
+    ] as const;
+    const entries = ranked.reduce(
+      (current, [personId, place]) => setPlace(current, personId, place, CATAN),
+      NO_ENTRIES,
+    );
+    const derived = deriveEntry('places', entries, TABLE, CATAN);
+
+    expect(isEntryComplete(derived)).toBe(true);
+    expect(outcomeOf('places', derived, TABLE)).toEqual({
+      winnerIds: [BEN],
+      places: { [ANNA]: 2, [BEN]: 1, [CLARA]: 2 },
+    });
   });
 });
