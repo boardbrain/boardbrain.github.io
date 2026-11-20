@@ -1,0 +1,159 @@
+/* Design I3-B T4 and UZ3: the timer of the match and its details. */
+.pill {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+  align-items: center;
+  padding: 3px 3px 3px 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+/* The time is tappable without a circle of its own: the dotted underline is enough; an invisible
+   margin makes the target 44 px high. */
+.time {
+  min-height: 0;
+  padding: 10px 6px;
+  margin: -10px -6px;
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: underline dotted var(--color-text-muted);
+  text-underline-offset: 4px;
+  background: none;
+  border-radius: 0;
+}
+
+.paused {
+  color: var(--color-text-muted);
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  min-height: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--color-accent-text);
+  background: var(--color-surface-overlay);
+  border-radius: 50%;
+}
+
+.head {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  text-align: center;
+}
+
+.big {
+  font-size: 3rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--color-accent-text);
+}
+
+.bigPaused {
+  opacity: 0.55;
+}
+
+.title {
+  margin: 6px 0 0;
+  font-size: 1.15rem;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 52px;
+  padding: 8px 14px;
+}
+
+.stepLine {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.txt {
+  flex: 1;
+  min-width: 0;
+}
+
+.steps {
+  display: flex;
+  flex: 1 0 100%;
+  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.step {
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-accent-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.step:disabled {
+  opacity: 0.4;
+}
+
+.value {
+  min-width: 4.2rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.pickWrap {
+  position: relative;
+  display: inline-grid;
+  cursor: pointer;
+}
+
+.valPill {
+  display: block;
+  padding: 6px 12px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.pickNative {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  opacity: 0;
+}
+
+/* T4: in the free corner at the top right of the board, or as a row of its own. */
+.corner {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  z-index: 2;
+}
+
+.clockRow {
+  display: flex;
+  justify-content: flex-end;
+  margin: -8px 0;
+}

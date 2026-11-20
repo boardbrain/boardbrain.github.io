@@ -106,6 +106,10 @@
   padding-top: 6px;
 }
 
+.enterResult {
+  width: 100%;
+}
+
 .boardTab .ovEnd {
   margin-top: auto;
 }
