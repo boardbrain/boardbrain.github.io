@@ -140,9 +140,7 @@ describe('US-AB-01 choose the table', () => {
   it('leads to the table choice when the options are opened without a table', async () => {
     await setUp('/partie/neu/optionen');
 
-    expect(
-      await screen.findByRole('heading', { name: 'Welcher Tisch spielt?' }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Welcher Tisch?' })).toBeInTheDocument();
   });
 });
 

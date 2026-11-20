@@ -7,11 +7,13 @@ import { PressableButton } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 import { MatchDialog } from './MatchDialog';
 import shared from './Match.module.css';
+import { addMinutes, draftMinutes, setBeginning, toggleDraftPause } from './clockDraft';
 import styles from './MatchClock.module.css';
 
 const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
-const TICK_MS = 15_000;
+// Every second, so a new minute shows at once, in the overview and in the details.
+const TICK_MS = 1000;
 const PILL_ICON_SIZE = 16;
 const STEP_ICON_SIZE = 14;
 
@@ -64,7 +66,7 @@ export function MatchClock({ clock }: { readonly clock: SessionClock }): React.J
   const [isOpen, setIsOpen] = useState(false);
   const [, startTransition] = useTransition();
   const isPaused = clock.pausedAt !== undefined;
-  const minutes = Math.floor(elapsedMilliseconds(clock, new Date(now).toISOString()) / MINUTE);
+  const minutes = draftMinutes(clock, now);
   const text = clockText(minutes);
   return (
     <>
@@ -95,7 +97,6 @@ export function MatchClock({ clock }: { readonly clock: SessionClock }): React.J
       {isOpen && (
         <ClockDetails
           clock={clock}
-          minutes={Math.max(1, minutes)}
           now={now}
           onClose={() => {
             setIsOpen(false);
@@ -108,40 +109,34 @@ export function MatchClock({ clock }: { readonly clock: SessionClock }): React.J
 
 type ClockDetailsProps = {
   readonly clock: SessionClock;
-  readonly minutes: number;
   readonly now: number;
   readonly onClose: () => void;
 };
 
-// UZ3: the time large, the duration in steps of 1 and 5 minutes, the beginning and pausing;
-// "Schließen" discards, "Übernehmen" stores (US-AB-07 AK-6).
-function ClockDetails({ clock, minutes, now, onClose }: ClockDetailsProps): React.JSX.Element {
+// UZ3: the time large and running on, the duration in steps of 1 and 5 minutes, the beginning
+// and pausing; "Schließen" discards, "Übernehmen" stores (US-AB-07 AK-6). The window edits a
+// draft of the timer, so it keeps counting like the overview while it is open.
+function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Element {
   const { session } = useAppDependencies();
   const [, startTransition] = useTransition();
-  const [edit, setEdit] = useState({
-    minutes,
-    startedAt: clock.startedAt,
-    isPaused: clock.pausedAt !== undefined,
-  });
-  const sinceStart = Math.floor((now - Date.parse(edit.startedAt)) / MINUTE);
-  const stepButton = (step: number): React.JSX.Element => {
-    const next = edit.minutes + step;
-    return (
-      <PressableButton
-        type="button"
-        className={styles.step}
-        aria-label={t(step < 0 ? 'partie.minutenWeniger' : 'partie.minutenMehr', {
-          anzahl: Math.abs(step),
-        })}
-        disabled={next < 1 || next > sinceStart}
-        onClick={() => {
-          setEdit({ ...edit, minutes: next });
-        }}
-      >
-        {t(step < 0 ? 'partie.schrittWeniger' : 'partie.schrittMehr', { anzahl: Math.abs(step) })}
-      </PressableButton>
-    );
-  };
+  const [draft, setDraft] = useState<SessionClock>(clock);
+  const isPaused = draft.pausedAt !== undefined;
+  const minutes = draftMinutes(draft, now);
+  const stepButton = (step: number): React.JSX.Element => (
+    <PressableButton
+      type="button"
+      className={styles.step}
+      aria-label={t(step < 0 ? 'partie.minutenWeniger' : 'partie.minutenMehr', {
+        anzahl: Math.abs(step),
+      })}
+      disabled={minutes + step < 0}
+      onClick={() => {
+        setDraft(addMinutes(draft, step, Date.now()));
+      }}
+    >
+      {t(step < 0 ? 'partie.schrittWeniger' : 'partie.schrittMehr', { anzahl: Math.abs(step) })}
+    </PressableButton>
+  );
   return (
     <MatchDialog
       cancelLabel={t('partie.schliessen')}
@@ -149,21 +144,20 @@ function ClockDetails({ clock, minutes, now, onClose }: ClockDetailsProps): Reac
       confirmLabel={t('partie.uebernehmen')}
       onConfirm={() => {
         onClose();
+        const at = Date.now();
         startTransition(async () => {
           await session.correctClock({
-            startedAt: edit.startedAt,
-            elapsedMs: edit.minutes * MINUTE,
-            isPaused: edit.isPaused,
+            startedAt: draft.startedAt,
+            elapsedMs: elapsedMilliseconds(draft, new Date(at).toISOString()),
+            isPaused,
           });
         });
       }}
     >
       <div className={styles.head}>
-        <span className={cx(styles.big, edit.isPaused && styles.bigPaused)}>
-          {clockText(edit.minutes)}
-        </span>
+        <span className={cx(styles.big, isPaused && styles.bigPaused)}>{clockText(minutes)}</span>
         <h2 className={styles.title}>{t('partie.spieldauer')}</h2>
-        {edit.isPaused && (
+        {isPaused && (
           <span className={cx(shared.small, shared.muted)}>{t('partie.angehalten')}</span>
         )}
       </div>
@@ -173,7 +167,7 @@ function ClockDetails({ clock, minutes, now, onClose }: ClockDetailsProps): Reac
           <span className={styles.steps}>
             {stepButton(-5)}
             {stepButton(-1)}
-            <b className={styles.value}>{t('partie.minutenWert', { anzahl: edit.minutes })}</b>
+            <b className={styles.value}>{t('partie.minutenWert', { anzahl: minutes })}</b>
             {stepButton(1)}
             {stepButton(5)}
           </span>
@@ -181,22 +175,20 @@ function ClockDetails({ clock, minutes, now, onClose }: ClockDetailsProps): Reac
         <div className={styles.row}>
           <span className={styles.txt}>{t('partie.beginn')}</span>
           <label className={styles.pickWrap}>
-            <span className={styles.valPill}>{timeOfDay(edit.startedAt)}</span>
+            <span className={styles.valPill}>{timeOfDay(draft.startedAt)}</span>
             <input
               type="time"
               className={styles.pickNative}
-              value={timeOfDay(edit.startedAt)}
+              value={timeOfDay(draft.startedAt)}
               aria-label={t('partie.beginnFeld')}
               onChange={(event) => {
                 if (event.target.value === '') {
                   return;
                 }
-                const startedAt = beginningAt(event.target.value, edit.startedAt, now);
-                // The duration grows by as much as the beginning moves earlier.
-                const shift = Math.round(
-                  (Date.parse(edit.startedAt) - Date.parse(startedAt)) / MINUTE,
+                const at = Date.now();
+                setDraft(
+                  setBeginning(draft, beginningAt(event.target.value, draft.startedAt, at), at),
                 );
-                setEdit({ ...edit, startedAt, minutes: Math.max(1, edit.minutes + shift) });
               }}
             />
           </label>
@@ -207,15 +199,11 @@ function ClockDetails({ clock, minutes, now, onClose }: ClockDetailsProps): Reac
             type="button"
             className={shared.pill}
             onClick={() => {
-              setEdit({ ...edit, isPaused: !edit.isPaused });
+              setDraft(toggleDraftPause(draft, Date.now()));
             }}
           >
-            {edit.isPaused ? (
-              <PlayIcon size={STEP_ICON_SIZE} />
-            ) : (
-              <PauseIcon size={STEP_ICON_SIZE} />
-            )}
-            {t(edit.isPaused ? 'partie.fortsetzen' : 'partie.anhalten')}
+            {isPaused ? <PlayIcon size={STEP_ICON_SIZE} /> : <PauseIcon size={STEP_ICON_SIZE} />}
+            {t(isPaused ? 'partie.fortsetzen' : 'partie.anhalten')}
           </PressableButton>
         </div>
       </div>

@@ -7,12 +7,18 @@ import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { EditorDialog } from '@/ui/components/EditorDialog';
 import { Page } from '@/ui/components/Page';
+import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
 import { useGoBack } from '@/ui/components/useGoBack';
 import { GameEditor } from '@/ui/views/games/GameEditor';
 import { CatanGameCard, CustomGameCard, GameGrid, NewGameCard } from '@/ui/views/games/GameCards';
 import { localToday } from '@/ui/views/games/dates';
-import { SearchButton, SearchRow } from '@/ui/views/games/GameSearch';
 import persons from './PersonsView.module.css';
+
+const SEARCH_LABELS = {
+  open: t('spiele.suchen'),
+  field: t('spiele.suchfeld'),
+  close: t('spiele.suchfeldSchliessen'),
+};
 
 /**
  * Names of all games except `except`, Catan included (US-SP-02 AK-2, US-VW-07 AK-1).
@@ -56,6 +62,7 @@ export function GamesView({
       backFallback="/verwaltung"
       actions={
         <SearchButton
+          labels={SEARCH_LABELS}
           isOpen={isSearchOpen}
           className={persons.iconButton}
           onToggle={toggleSearch}
@@ -64,6 +71,7 @@ export function GamesView({
     >
       {isSearchOpen && (
         <SearchRow
+          labels={SEARCH_LABELS}
           query={query}
           closeClassName={persons.iconButton}
           onQuery={setQuery}

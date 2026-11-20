@@ -9,17 +9,22 @@ import { useAppDependencies } from '@/ui/AppDependencies';
 import { LandscapePicture } from '@/ui/art/Pictures';
 import { BackButton } from '@/ui/components/BackButton';
 import { cx } from '@/ui/components/classNames';
+import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
 import { PlusIcon, SortAzIcon, SortRecentIcon, TrophyIcon } from '@/ui/components/Icons';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 import { CatanGameCard, CustomGameCard, GameGrid } from '@/ui/views/games/GameCards';
 import { localToday } from '@/ui/views/games/dates';
-import { SearchButton, SearchRow } from '@/ui/views/games/GameSearch';
 import gameStyles from '@/ui/views/games/GameCards.module.css';
 import { DevCard } from './DevCard';
 import shared from './Match.module.css';
 import styles from './GameChoiceView.module.css';
 
 const SORT_ICON_SIZE = 22;
+const SEARCH_LABELS = {
+  open: t('spiele.suchen'),
+  field: t('spiele.suchfeld'),
+  close: t('spiele.suchfeldSchliessen'),
+};
 const PLUS_SIZE = 14;
 const TROPHY_SIZE = 40;
 
@@ -89,10 +94,15 @@ export function GameChoiceView(): React.JSX.Element {
         <BackButton fallback="/" />
         <div className={shared.titles}>
           <h1 className={shared.title}>{t('spielliste.titel')}</h1>
-          <div className={shared.sub}>{t('spielliste.unterzeile', { sortierung: orderWord })}</div>
+          <div className={shared.sub}>{orderWord}</div>
         </div>
         <span className={gameStyles.headActions}>
-          <SearchButton isOpen={isSearchOpen} className={shared.iconBtn} onToggle={toggleSearch} />
+          <SearchButton
+            labels={SEARCH_LABELS}
+            isOpen={isSearchOpen}
+            className={shared.iconBtn}
+            onToggle={toggleSearch}
+          />
           <PressableButton
             type="button"
             className={shared.iconBtn}
@@ -111,6 +121,7 @@ export function GameChoiceView(): React.JSX.Element {
       </div>
       {isSearchOpen && (
         <SearchRow
+          labels={SEARCH_LABELS}
           query={query}
           closeClassName={shared.iconBtn}
           onQuery={setQuery}

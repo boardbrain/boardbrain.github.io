@@ -1,16 +1,26 @@
-import { t } from '@/i18n/t';
-import { CloseIcon, SearchIcon } from '@/ui/components/Icons';
-import { PressableButton } from '@/ui/components/Pressable';
-import styles from './GameCards.module.css';
+import { CloseIcon, SearchIcon } from './Icons';
+import { PressableButton } from './Pressable';
+import styles from './SearchControls.module.css';
 
 /**
- * The round magnifier that opens the search, as on "Personen" and "Tische" (design I1-E).
+ * Texts of a search: the magnifier, the field and the cross.
+ */
+export type SearchLabels = {
+  readonly open: string;
+  readonly field: string;
+  readonly close: string;
+};
+
+/**
+ * The round magnifier that opens a search, as on "Personen" and "Tische" (design I1-E).
  */
 export function SearchButton({
+  labels,
   isOpen,
   className,
   onToggle,
 }: {
+  readonly labels: SearchLabels;
   readonly isOpen: boolean;
   readonly className: string | undefined;
   readonly onToggle: () => void;
@@ -19,7 +29,7 @@ export function SearchButton({
     <PressableButton
       type="button"
       className={className}
-      aria-label={t('spiele.suchen')}
+      aria-label={labels.open}
       aria-expanded={isOpen}
       onClick={onToggle}
     >
@@ -29,15 +39,17 @@ export function SearchButton({
 }
 
 /**
- * The search row below the head: a field that filters the games while typing and a cross that
- * empties and closes it, as on "Personen" and "Tische".
+ * The search row below the head: a field that filters while typing and a cross that empties and
+ * closes it.
  */
 export function SearchRow({
+  labels,
   query,
   closeClassName,
   onQuery,
   onClose,
 }: {
+  readonly labels: SearchLabels;
   readonly query: string;
   readonly closeClassName: string | undefined;
   readonly onQuery: (query: string) => void;
@@ -51,8 +63,8 @@ export function SearchRow({
         autoComplete="off"
         autoFocus
         enterKeyHint="search"
-        aria-label={t('spiele.suchfeld')}
-        placeholder={t('spiele.suchfeld')}
+        aria-label={labels.field}
+        placeholder={labels.field}
         value={query}
         onChange={(event) => {
           onQuery(event.target.value);
@@ -61,7 +73,7 @@ export function SearchRow({
       <PressableButton
         type="button"
         className={closeClassName}
-        aria-label={t('spiele.suchfeldSchliessen')}
+        aria-label={labels.close}
         onClick={onClose}
       >
         <CloseIcon />

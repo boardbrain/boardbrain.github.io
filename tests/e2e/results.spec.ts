@@ -100,6 +100,13 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
     await question.getByRole('button', { name: 'Ergebnis eintragen' }).click();
 
     await expect(page.getByRole('heading', { name: 'Welcher Tisch?' })).toBeVisible();
+    // A search by table or person, as on "Tische".
+    await page.getByRole('button', { name: 'Tische suchen' }).click();
+    await page.getByRole('searchbox', { name: 'Tisch oder Person suchen' }).fill('clara');
+    await expect(page.getByRole('button', { name: /^Zu zweit:/ })).toHaveCount(0);
+    await page.getByRole('searchbox', { name: 'Tisch oder Person suchen' }).fill('Schach');
+    await expect(page.getByText('Kein Tisch gefunden für „Schach“.')).toBeVisible();
+    await page.getByRole('button', { name: 'Suche leeren und schließen' }).click();
     await page.getByRole('button', { name: /^Freitagsrunde:/ }).click();
     await expect(page.getByRole('button', { name: 'Basisspiel' })).toHaveAttribute(
       'aria-pressed',
@@ -156,7 +163,7 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
       .click();
 
     await expect.poll(() => gameNames(page)).toEqual(['Catan', 'Uno', 'Wizard']);
-    await expect(page.getByText('Welches Spiel? · A–Z')).toBeVisible();
+    await expect(page.getByText('A–Z', { exact: true })).toBeVisible();
 
     // A search as on "Personen" and "Tische".
     await page.getByRole('button', { name: 'Spiele suchen' }).click();
@@ -176,8 +183,21 @@ test.describe('US-AB-06 AK-2 and US-AB-07 the result of the running match', () =
     await seedMatch(page, { table: TABLE, options: { edition: 'cities-and-knights' } });
     await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
 
-    await page.getByRole('button', { name: /^Spieldauer .* – Details$/ }).click();
+    const time = page.getByRole('button', { name: /^Spieldauer .* – Details$/ });
+    const shown = await time.innerText();
+    await time.click();
     const details = page.getByRole('alertdialog');
+    // The details show the same time as the overview (no minute added) and add 5 minutes.
+    const minutesOf = (text: string): number => {
+      const [hours = 0, rest = 0] = text.split(':').map(Number);
+      return hours * 60 + rest;
+    };
+    const big = details
+      .getByRole('heading', { name: 'Spieldauer' })
+      .locator('xpath=preceding-sibling::span[1]');
+    expect(minutesOf(await big.innerText())).toBe(minutesOf(shown));
+    await details.getByRole('button', { name: 'plus 5 Minuten' }).click();
+    expect(minutesOf(await big.innerText())).toBe(minutesOf(shown) + 5);
     await details.getByRole('button', { name: 'Anhalten' }).click();
     await details.getByRole('button', { name: 'Übernehmen' }).click();
     await expect(page.getByRole('button', { name: 'Fortsetzen' })).toBeVisible();

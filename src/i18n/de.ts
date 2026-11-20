@@ -253,7 +253,6 @@ export const de = {
   },
   spielliste: {
     titel: 'Partie',
-    unterzeile: 'Welches Spiel? · {sortierung}',
     zuletztGespielt: 'zuletzt gespielt',
     alphabetisch: 'A–Z',
     sortieren: 'Sortiert nach {jetzt}, wechseln zu {dann}',
@@ -273,6 +272,10 @@ export const de = {
     tischTitel: 'Welcher Tisch?',
     tischUnterzeile: '{spiel} · Ergebnis',
     tischHinweis: 'Gedrückt halten für Details',
+    tischeSuchen: 'Tische suchen',
+    tischSuchfeld: 'Tisch oder Person suchen',
+    suchfeldSchliessen: 'Suche leeren und schließen',
+    keinTischGefunden: 'Kein Tisch gefunden für „{suche}“.',
     ohneSpielEiner: ' · 1 Tisch ohne {spiel} nicht dabei',
     ohneSpielMehrere: ' · {anzahl} Tische ohne {spiel} nicht dabei',
     keinTisch: 'Kein Tisch für {spiel}',
@@ -320,7 +323,7 @@ export const de = {
   partie: {
     neu: 'Neue Partie',
     schritt: '{spiel} · Schritt {nummer} von 3',
-    tischTitel: 'Welcher Tisch spielt?',
+    tischTitel: 'Welcher Tisch?',
     tischHinweis: 'Gedrückt halten für Details',
     tischBeschriftung: '{tisch}: {namen}',
     nurSpiel: 'nur {spiel}',

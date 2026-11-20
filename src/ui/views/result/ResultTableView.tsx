@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
-import { parseGameId, type GameId, type Group } from '@/core/model';
+import { findGroups, parseGameId, type GameId, type Group } from '@/core/model';
 import { CATAN_GAME_ID } from '@/games/catan';
 import { canGroupPlay } from '@/games/registry';
 import { t } from '@/i18n/t';
@@ -9,8 +9,15 @@ import { useAppDependencies } from '@/ui/AppDependencies';
 import { BackButton } from '@/ui/components/BackButton';
 import { PlusIcon } from '@/ui/components/Icons';
 import { PressableLink } from '@/ui/components/Pressable';
+import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
+import { cx } from '@/ui/components/classNames';
 import { MatchDialog } from '@/ui/views/match/MatchDialog';
-import { namesOf, TableCard, TableDetails } from '@/ui/views/match/TableChoiceView';
+import {
+  namesOf,
+  TABLE_SEARCH_LABELS,
+  TableCard,
+  TableDetails,
+} from '@/ui/views/match/TableChoiceView';
 import shared from '@/ui/views/match/Match.module.css';
 import tables from '@/ui/views/match/TableChoiceView.module.css';
 import styles from './Result.module.css';
@@ -53,6 +60,8 @@ export function ResultTableView(): React.JSX.Element | null {
   const persons = usePersons(db);
   const navigate = useNavigate();
   const [details, setDetails] = useState<Group | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
   if (game === null || name === null) {
     return <Navigate to="/partie/neu" replace />;
   }
@@ -66,6 +75,12 @@ export function ResultTableView(): React.JSX.Element | null {
   }
   const byId = new Map(persons.map((person) => [person.id, person]));
   const left = active.length - fitting.length;
+  const shown = findGroups(fitting, persons, query).map((match) => match.group);
+  const trimmedQuery = query.trim();
+  const toggleSearch = (): void => {
+    setIsSearchOpen(!isSearchOpen);
+    setQuery('');
+  };
   const choose = (group: Group): void => {
     setDetails(null);
     void navigate(`/ergebnis/neu/${game}/${group.id}`);
@@ -78,7 +93,29 @@ export function ResultTableView(): React.JSX.Element | null {
           <h1 className={shared.title}>{t('ergebnis.tischTitel')}</h1>
           <div className={shared.sub}>{t('ergebnis.tischUnterzeile', { spiel: name })}</div>
         </div>
+        {fitting.length > 0 && (
+          <SearchButton
+            labels={TABLE_SEARCH_LABELS}
+            isOpen={isSearchOpen}
+            className={shared.iconBtn}
+            onToggle={toggleSearch}
+          />
+        )}
       </div>
+      {isSearchOpen && (
+        <SearchRow
+          labels={TABLE_SEARCH_LABELS}
+          query={query}
+          closeClassName={shared.iconBtn}
+          onQuery={setQuery}
+          onClose={toggleSearch}
+        />
+      )}
+      {trimmedQuery !== '' && shown.length === 0 && (
+        <p className={cx(shared.small, shared.muted)}>
+          {t('ergebnis.keinTischGefunden', { suche: trimmedQuery })}
+        </p>
+      )}
       {fitting.length === 0 ? (
         <div className={styles.emptyBox}>
           <strong>{t('ergebnis.keinTisch', { spiel: name })}</strong>
@@ -91,7 +128,7 @@ export function ResultTableView(): React.JSX.Element | null {
       ) : (
         <>
           <div className={tables.roomGrid}>
-            {fitting.map((group) => (
+            {shown.map((group) => (
               <TableCard
                 key={group.id}
                 group={group}

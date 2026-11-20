@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import type { Group, Person, PersonId } from '@/core/model';
+import { findGroups, type Group, type Person, type PersonId } from '@/core/model';
 import { CATAN_GAME_ID, canPlayCatan } from '@/games/catan';
 import { t } from '@/i18n/t';
 import { useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { BackButton } from '@/ui/components/BackButton';
 import { MiniTable } from '@/ui/components/MiniTable';
+import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 import { useLongPress } from '@/ui/components/useLongPress';
 import { MatchDialog } from './MatchDialog';
@@ -18,6 +19,14 @@ import styles from './TableChoiceView.module.css';
 import { cx } from '@/ui/components/classNames';
 
 const FULL_CIRCLE_DEGREES = 360;
+/**
+ * Texts of the search in a table choice (Product Owner 20.11.2026, as on "Tische").
+ */
+export const TABLE_SEARCH_LABELS = {
+  open: t('ergebnis.tischeSuchen'),
+  field: t('ergebnis.tischSuchfeld'),
+  close: t('ergebnis.suchfeldSchliessen'),
+};
 const DETAIL_SEAT_RADIUS = 41;
 // From this many seats they get smaller so they still fit around the table.
 const DENSE_FROM = 7;
@@ -46,11 +55,19 @@ export function TableChoiceView(): React.JSX.Element | null {
   const { preparation, setPreparation } = usePreparationContext();
   const navigate = useNavigate();
   const [details, setDetails] = useState<Group | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
   if (groups === undefined || persons === undefined) {
     return null;
   }
   const byId = new Map(persons.map((person) => [person.id, person]));
-  const tables = groups.filter(canPlayCatan);
+  const playable = groups.filter(canPlayCatan);
+  const tables = findGroups(playable, persons, query).map((match) => match.group);
+  const trimmedQuery = query.trim();
+  const toggleSearch = (): void => {
+    setIsSearchOpen(!isSearchOpen);
+    setQuery('');
+  };
 
   const choose = async (group: Group): Promise<void> => {
     setDetails(null);
@@ -74,9 +91,31 @@ export function TableChoiceView(): React.JSX.Element | null {
             {t('partie.schritt', { spiel: t('spiele.namen.catan'), nummer: 1 })}
           </div>
         </div>
+        {playable.length > 0 && (
+          <SearchButton
+            labels={TABLE_SEARCH_LABELS}
+            isOpen={isSearchOpen}
+            className={shared.iconBtn}
+            onToggle={toggleSearch}
+          />
+        )}
       </div>
       <WizardDots done={1} />
-      {tables.length === 0 ? (
+      {isSearchOpen && (
+        <SearchRow
+          labels={TABLE_SEARCH_LABELS}
+          query={query}
+          closeClassName={shared.iconBtn}
+          onQuery={setQuery}
+          onClose={toggleSearch}
+        />
+      )}
+      {trimmedQuery !== '' && tables.length === 0 && (
+        <p className={cx(shared.small, shared.muted)}>
+          {t('ergebnis.keinTischGefunden', { suche: trimmedQuery })}
+        </p>
+      )}
+      {playable.length === 0 ? (
         <div className={cx(shared.card, styles.emptyTables)}>
           <strong>{t('partie.keinTischTitel')}</strong>
           <span className={cx(shared.small, shared.muted)}>{t('partie.keinTischText')}</span>

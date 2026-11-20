@@ -67,7 +67,7 @@ export function resumeClock(
 
 /**
  * Error code when a corrected timer is impossible: its beginning lies in the future, or it
- * measures more time than has passed since its beginning or less than a minute.
+ * measures more time than has passed since its beginning or less than nothing.
  */
 export type ClockCorrectionInvalidError = 'clock-correction-invalid';
 
@@ -95,7 +95,7 @@ export function correctClock(
   if (
     !Number.isFinite(sinceStart) ||
     !Number.isFinite(elapsedMs) ||
-    elapsedMs < 60_000 ||
+    elapsedMs < 0 ||
     elapsedMs > sinceStart
   ) {
     return err('clock-correction-invalid');

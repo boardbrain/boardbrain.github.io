@@ -103,7 +103,7 @@ describe('US-AB-07 AK-6 correct the timer', () => {
     expect(elapsedMilliseconds(resumed, at(95))).toBe(45 * MINUTE);
   });
 
-  it('rejects a beginning in the future, more time than has passed and less than a minute', () => {
+  it('rejects a beginning in the future, more time than has passed and a negative time', () => {
     const invalid = { ok: false, error: 'clock-correction-invalid' };
 
     expect(correctClock({ startedAt: at(61), elapsedMs: MINUTE, isPaused: false }, at(60))).toEqual(
@@ -112,7 +112,7 @@ describe('US-AB-07 AK-6 correct the timer', () => {
     expect(
       correctClock({ startedAt: START, elapsedMs: 61 * MINUTE, isPaused: false }, at(60)),
     ).toEqual(invalid);
-    expect(correctClock({ startedAt: START, elapsedMs: 59_999, isPaused: false }, at(60))).toEqual(
+    expect(correctClock({ startedAt: START, elapsedMs: -1, isPaused: false }, at(60))).toEqual(
       invalid,
     );
     expect(
