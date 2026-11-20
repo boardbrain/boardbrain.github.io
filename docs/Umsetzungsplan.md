@@ -81,7 +81,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 4 | Entscheidung über Vorabversionen (OP-13) und lokale Abnahme-App mit lila Symbol | nach I2 | umgesetzt (#45) |
 | 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | veröffentlicht: vorbereitet (#46), Release-PR nach `main` (#47), Tag `v0.2.0` |
 | 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | umgesetzt (#48) |
-| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-A2, I3-B, I3-C, I3-C2, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50), I3-A2 umgesetzt (#52) |
+| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-A2, I3-B, I3-C, I3-C2, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50), I3-A2 umgesetzt (#52), I3-B in Abnahme |
 | 5b | Kleine Aufgaben K-10 und K-11 aus der erweiterten Codeanalyse durch Fable (Kapitel 6) *(neu in 0.40)* | in I3, vor Release 0.3.0 | offen |
 | 5a | Release 0.3.0 als Vorabversion nach Richtlinien 3.8 | nach I3, K-10 und K-11 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
@@ -421,7 +421,7 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 | I3-0 Daten und Statistik klären | FA-ER-*, FA-ST-*, Spezifikation 3.6 bis 3.8, US-ER-*, US-ST-*; Spielliste: US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3 | Opus, medium | `docs/i3-results-and-statistics-data` | umgesetzt (#49) |
 | I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 und US-AB-07 (Dienst) | Opus, high | `feat/us-er-01-results-service` | umgesetzt (#50) |
 | I3-A2 Punkte und Rangfolge bei eigenen Spielen *(neu in 0.39)* | US-SP-02 AK-4, US-VW-07 AK-3 und AK-4, US-ER-02, US-ER-06 (Fachlogik und Dienst) | Opus, high | `feat/op-14-scores-and-ranking` | umgesetzt (#52) |
-| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-SP-03, US-ER-01, US-ER-02, US-ER-03 AK-1, US-ER-06, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche); US-SP-02 AK-1 und AK-4, US-VW-07 AK-3 und AK-4 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | in Arbeit: Design entschieden, Referenz `docs/design/i3b-result-entry-final-preview.html` |
+| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-SP-03, US-ER-01, US-ER-02, US-ER-03 AK-1, US-ER-06, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche); US-SP-02 AK-1 und AK-4, US-VW-07 AK-3 und AK-4 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | umgesetzt, in Abnahme; Referenz `docs/design/i3b-result-entry-final-preview.html` |
 | I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | Sonnet, medium | `feat/us-er-04-result-list` | offen |
 | I3-C2 Notizblock für eigene Spiele *(neu in 0.42)* | neue Anforderung, Stories folgen aus der Klärung | Klärung: Opus, medium; Umsetzung: nach der Klärung | nach der Klärung | offen |
 | I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05, US-ST-06 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
