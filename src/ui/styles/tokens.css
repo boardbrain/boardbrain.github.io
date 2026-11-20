@@ -84,6 +84,8 @@
   --color-card-frame: #b98a3e;
   --color-card-art-shadow: #00000070;
   --color-card-glow: #fff2;
+  /* Design I3-B: the light centre behind the first letter of a custom game. */
+  --color-game-letter-glow: #5a4636;
 
   /* Card back R1 (design I2-D): dark wood, lozenge pattern, golden frame, medallion with the logo */
   --color-card-back-gold: #e0b25a;

@@ -4,7 +4,7 @@ import { createTestDb } from '@tests/support/testDatabase';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { parseLocalDate, toGroupId, toMatchId, type LocalDate } from '@/core/model';
 import type { BoardBrainDb } from './database';
-import { readMatch, readMatchesOfGroup } from './matchQueries';
+import { readMatch, readMatchesOfGroup, readPlayedGames } from './matchQueries';
 
 let db: BoardBrainDb;
 
@@ -47,5 +47,22 @@ describe('US-ER-04 Results of a group (queries)', () => {
 
     expect(await readMatch(db, match.id)).toEqual(match);
     expect(await readMatch(db, toMatchId('00000000-0000-4000-8000-0000000000d9'))).toBeNull();
+  });
+});
+
+describe('US-SP-01 played games over all tables (query)', () => {
+  it('counts the matches of every game and keeps its latest day', async () => {
+    await db.matches.bulkAdd([
+      aMatch({ id: toMatchId('00000000-0000-4000-8000-0000000000d1'), date: day('2026-11-15') }),
+      aMatch({
+        id: toMatchId('00000000-0000-4000-8000-0000000000d2'),
+        groupId: toGroupId('00000000-0000-4000-8000-0000000000c9'),
+        date: day('2026-11-17'),
+      }),
+    ]);
+
+    expect([...(await readPlayedGames(db)).values()]).toEqual([
+      { matches: 2, lastDate: '2026-11-17' },
+    ]);
   });
 });

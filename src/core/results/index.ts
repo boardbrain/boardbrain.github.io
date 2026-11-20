@@ -18,6 +18,7 @@ export {
   type ResultOutcome,
 } from './evaluation';
 export { compareMatches, sortMatches, type MatchMoment } from './order';
+export { playedGames, type PlayedGame } from './played';
 export {
   checkResult,
   MAX_NOTES_LENGTH,

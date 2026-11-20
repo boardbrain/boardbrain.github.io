@@ -1,0 +1,149 @@
+/* Design I3-B (docs/design/i3b-result-entry-final-preview.html): the same game cards on "Partie"
+   and "Spiele" (SA, GL5), two side by side on phones, four from 600 px. */
+.frame {
+  container-type: inline-size;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+@container (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.item {
+  display: flex;
+  min-width: 0;
+}
+
+/* A custom game: a playing card as tall as the development card next to it. */
+.card {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  align-content: center;
+  width: 100%;
+  min-height: 150px;
+  aspect-ratio: 5 / 7.4;
+  padding: 16px 6px 22px;
+  color: var(--color-text);
+  text-align: center;
+  text-decoration: none;
+  background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px var(--color-shadow);
+}
+
+.corner,
+.cornerBottom {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-accent-text);
+}
+
+.cornerBottom {
+  inset: auto 10px 8px auto;
+  transform: rotate(180deg);
+}
+
+.art {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.letter {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font:
+    700 1.6rem Georgia,
+    'Times New Roman',
+    serif;
+  color: var(--color-accent-text);
+  background: radial-gradient(
+    circle at 50% 42%,
+    var(--color-game-letter-glow) 0%,
+    var(--color-card-paper-low) 72%
+  );
+}
+
+.name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.last {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.note {
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--color-text-muted);
+}
+
+/* Catan: the development card of "Neue Partie", scaled (F2). */
+.devLink {
+  display: block;
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 5.83% / 3.94%;
+}
+
+.devLink > * {
+  display: flex;
+  width: 100%;
+}
+
+.devNote {
+  color: var(--color-text-muted);
+}
+
+/* "Neues Spiel" like "Neue Person" (PersonsView.module.css). */
+.newCard {
+  display: grid;
+  gap: 3px;
+  place-items: center;
+  align-content: center;
+  width: 100%;
+  aspect-ratio: 5 / 7.4;
+  padding: 16px 6px 22px;
+  color: var(--color-accent-text);
+  text-decoration: none;
+  background: transparent;
+  border: 1px dashed var(--color-accent-text);
+  border-radius: 14px;
+}
+
+.newLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+}

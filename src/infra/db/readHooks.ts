@@ -19,7 +19,8 @@ import {
 } from '@/core/model';
 import type { BoardBrainDb } from './database';
 import { readErrorLog } from './errorLogStore';
-import { readMatch, readMatchesOfGroup } from './matchQueries';
+import type { PlayedGame } from '@/core/results';
+import { readMatch, readMatchesOfGroup, readPlayedGames } from './matchQueries';
 
 /**
  * All persons sorted by name; `undefined` while loading. The view updates itself on every
@@ -196,4 +197,12 @@ export function useMatchesOfGroup(
  */
 export function useMatch(db: BoardBrainDb, id: MatchId | null): Match | null | undefined {
   return useLiveQuery(async () => (id === null ? null : readMatch(db, id)), [db, id]);
+}
+
+/**
+ * Number of matches and the latest day of every played game (design I3-B); `undefined` while
+ * loading. Updates itself when a result is stored, changed or deleted.
+ */
+export function usePlayedGames(db: BoardBrainDb): ReadonlyMap<GameId, PlayedGame> | undefined {
+  return useLiveQuery(() => readPlayedGames(db), [db]);
 }

@@ -338,3 +338,58 @@ export function ShareIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Trophy for the winner and for "Ergebnis eintragen" (design I3-B). Decorative.
+ */
+export function TrophyIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 21h7M10 17h4" />
+    </Outline>
+  );
+}
+
+/**
+ * The game list sorted A–Z: A above Z with an arrow down (design I3-B SO3). Decorative.
+ */
+export function SortAzIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M3.5 10.5 6 4l2.5 6.5M4.4 8.3h3.2M3.5 14h5l-5 6h5M17 4v16M13.5 16.5 17 20l3.5-3.5" />
+    </Outline>
+  );
+}
+
+/**
+ * The game list sorted by the last match: a clock turning back (design I3-B SO3). Decorative.
+ */
+export function SortRecentIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M3.6 12a8.4 8.4 0 1 0 2.5-6M3.6 4v4.2h4.2M12 7.5V12l3 2" />
+    </Outline>
+  );
+}
+
+/**
+ * Two bars for "Anhalten" (US-AB-07 AK-2). Decorative.
+ */
+export function PauseIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M8 5v14M16 5v14" />
+    </Outline>
+  );
+}
+
+/**
+ * Bin for removing the time of a result (design I3-B D1). Decorative.
+ */
+export function TrashIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5" />
+    </Outline>
+  );
+}
