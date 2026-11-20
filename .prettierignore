@@ -11,3 +11,6 @@ playwright-report/
 test-results/
 blob-report/
 package-lock.json
+
+# Local design previews, not in the repository (.gitignore)
+previews/

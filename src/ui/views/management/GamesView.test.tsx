@@ -1,7 +1,7 @@
 import { aCustomGame } from '@tests/support/masterDataFakes';
 import { OverviewRoutes } from '@tests/support/overviewRoutes';
 import { renderWithApp } from '@tests/support/renderWithApp';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
@@ -45,7 +45,9 @@ describe('US-SP-02 Create a custom game (design I3-B V2)', () => {
     await user.click(within(editor).getByRole('button', { name: 'Spiel anlegen' }));
 
     expect(await screen.findByText('Skyjo')).toBeInTheDocument();
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
     const [game] = await db.games.toArray();
     expect(game).toMatchObject({ name: 'Skyjo', scoring: 'lowest-wins' });
   });

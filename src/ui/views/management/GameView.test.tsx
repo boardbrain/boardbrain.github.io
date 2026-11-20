@@ -2,7 +2,7 @@ import { aCustomGame, aGroup } from '@tests/support/masterDataFakes';
 import { aMatch } from '@tests/support/resultFakes';
 import { OverviewRoutes } from '@tests/support/overviewRoutes';
 import { renderWithApp } from '@tests/support/renderWithApp';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { toGameId, toGroupId } from '@/core/model';
@@ -56,7 +56,9 @@ describe('US-VW-07 Edit a custom game (game page)', () => {
     await user.click(within(editor).getByRole('button', { name: 'Änderungen speichern' }));
 
     expect(await screen.findByRole('heading', { name: 'Uno', level: 1 })).toBeInTheDocument();
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
     expect((await db.games.get(UNO))?.name).toBe('Uno');
   });
 

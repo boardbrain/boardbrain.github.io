@@ -55,8 +55,10 @@ export function GameEditor({
   const [scoring, setScoring] = useState<Scoring>(game?.scoring ?? null);
   const [isAsking, setIsAsking] = useState(false);
   const [isTakenOnSave, setIsTakenOnSave] = useState(false);
+  // Once stored, the new name is among the taken ones until the page closes; no hint then.
+  const [isSaved, setIsSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const isTaken = containsName(otherNames, name) || isTakenOnSave;
+  const isTaken = !isSaved && (containsName(otherNames, name) || isTakenOnSave);
   const isNoneLocked = scoredCount > 0;
   const isChanged = cleanName(name) !== game?.name || scoring !== (game.scoring ?? null);
   const canSave = cleanName(name) !== '' && !isTaken && isChanged && !isPending;
@@ -68,6 +70,7 @@ export function GameEditor({
       if (game === undefined) {
         const created = await masterData.createCustomGame(name, scoring ?? undefined);
         if (created.ok) {
+          setIsSaved(true);
           onSaved(created.value.id);
         } else {
           // Only if a game of this name was created meanwhile; empty names cannot be saved.
@@ -86,6 +89,7 @@ export function GameEditor({
         // "Keine" cannot be chosen while results have points, so this succeeds.
         await masterData.changeCustomGameScoring({ gameId: game.id, scoring });
       }
+      setIsSaved(true);
       onSaved(game.id);
     });
   }

@@ -13,6 +13,8 @@ export default {
     'coverage/**',
     'playwright-report/**',
     'test-results/**',
+    // Local design previews, not in the repository (.gitignore)
+    'previews/**',
   ],
   rules: {
     'color-no-hex': [true, { message: COLOR_MESSAGE }],
