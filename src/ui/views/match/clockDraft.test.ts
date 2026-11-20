@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { startClock } from '@/core/generation';
-import { addMinutes, draftMinutes, setBeginning, toggleDraftPause } from './clockDraft';
+import {
+  addMinutes,
+  draftMinutes,
+  lastTimeOfDay,
+  setBeginning,
+  toggleDraftPause,
+} from './clockDraft';
 
 const MINUTE = 60_000;
 const START = Date.parse('2026-11-20T19:00:00.000Z');
@@ -70,5 +76,29 @@ describe('US-AB-07 AK-6 correcting the timer in its details', () => {
     const resumed = toggleDraftPause(paused, at(40));
     expect(draftMinutes(resumed, at(45))).toBe(15);
     expect(draftMinutes(addMinutes(paused, 3, at(40)), at(50))).toBe(13);
+  });
+});
+
+describe('US-AB-07 AK-6 the beginning as a time of day', () => {
+  // Local times, as the device shows them.
+  const local = (day: number, hours: number, minutes: number): number =>
+    new Date(2026, 10, day, hours, minutes).getTime();
+
+  it('is today, or yesterday if the time is still to come today', () => {
+    const now = local(20, 21, 30);
+
+    expect(lastTimeOfDay('19:45', now)).toBe(iso(local(20, 19, 45)));
+    expect(lastTimeOfDay('22:00', now)).toBe(iso(local(19, 22, 0)));
+  });
+
+  it('a time in the future and then one in the past ends up today again', () => {
+    const now = local(20, 21, 30);
+    lastTimeOfDay('23:00', now);
+
+    expect(lastTimeOfDay('20:00', now)).toBe(iso(local(20, 20, 0)));
+  });
+
+  it('after midnight a beginning before midnight is yesterday', () => {
+    expect(lastTimeOfDay('23:30', local(21, 0, 40))).toBe(iso(local(20, 23, 30)));
   });
 });

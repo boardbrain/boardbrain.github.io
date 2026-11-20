@@ -7,11 +7,15 @@ import { PressableButton } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 import { MatchDialog } from './MatchDialog';
 import shared from './Match.module.css';
-import { addMinutes, draftMinutes, setBeginning, toggleDraftPause } from './clockDraft';
+import {
+  addMinutes,
+  draftMinutes,
+  lastTimeOfDay,
+  setBeginning,
+  toggleDraftPause,
+} from './clockDraft';
 import styles from './MatchClock.module.css';
 
-const MINUTE = 60_000;
-const DAY = 24 * 60 * MINUTE;
 // Every second, so a new minute shows at once, in the overview and in the details.
 const TICK_MS = 1000;
 const PILL_ICON_SIZE = 16;
@@ -31,16 +35,6 @@ export function clockText(minutes: number): string {
 function timeOfDay(iso: string): string {
   const date = new Date(iso);
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-}
-
-// The beginning at a time of day: on the day of the old beginning, a day earlier if that would
-// lie in the future (a match over midnight).
-function beginningAt(time: string, previous: string, now: number): string {
-  const [hours = 0, minutes = 0] = time.split(':').map(Number);
-  const date = new Date(previous);
-  date.setHours(hours, minutes, 0, 0);
-  const at = date.getTime() > now ? date.getTime() - DAY : date.getTime();
-  return new Date(at).toISOString();
 }
 
 // External system: the time goes on while the page is open.
@@ -194,11 +188,7 @@ function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Ele
                   return;
                 }
                 const at = Date.now();
-                const changed = setBeginning(
-                  draft,
-                  beginningAt(event.target.value, draft.startedAt, at),
-                  at,
-                );
+                const changed = setBeginning(draft, lastTimeOfDay(event.target.value, at), at);
                 setDraft(changed);
                 // A beginning set by hand is the new anchor of the steps (see `addMinutes`).
                 setAnchor(changed.startedAt);

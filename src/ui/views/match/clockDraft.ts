@@ -7,6 +7,7 @@ import {
 } from '@/core/generation';
 
 const MINUTE = 60_000;
+const DAY = 24 * 60 * MINUTE;
 
 function iso(ms: number): string {
   return new Date(ms).toISOString();
@@ -70,4 +71,16 @@ export function toggleDraftPause(draft: SessionClock, now: number): SessionClock
   const changed =
     draft.pausedAt === undefined ? pauseClock(draft, iso(now)) : resumeClock(draft, iso(now));
   return changed.ok ? changed.value : draft;
+}
+
+/**
+ * The last moment with this time of day (`HH:mm`) at the place of the device: today, or yesterday
+ * if it is still to come today (a match over midnight). It does not depend on the beginning
+ * before, so choosing a time in the future and then one in the past ends up today again.
+ */
+export function lastTimeOfDay(time: string, now: number): string {
+  const [hours = 0, minutes = 0] = time.split(':').map(Number);
+  const date = new Date(now);
+  date.setHours(hours, minutes, 0, 0);
+  return iso(date.getTime() > now ? date.getTime() - DAY : date.getTime());
 }
