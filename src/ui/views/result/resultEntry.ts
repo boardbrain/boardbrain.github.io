@@ -8,9 +8,9 @@ import {
 } from '@/core/results';
 
 /**
- * The two ways of entering a result of a custom game that counts points (design I3-B A2): points
- * for everyone, or "Sieger oder Rangfolge". A game without points only has the second, Catan only
- * the first.
+ * The two ways of entering a result of a game that counts points (design I3-B A2, Catan too since
+ * E-49): points for everyone, or "Sieger oder Rangfolge". A custom game without points only has
+ * the second.
  */
 export type Way = 'points' | 'places';
 
@@ -190,8 +190,9 @@ export function isEntryComplete(derived: DerivedEntry): boolean {
 }
 
 /**
- * Sets the points of a person. When the last score completes a tie at the top, a custom game
- * starts with a draw of all the best, Catan with nobody (US-ER-02 AK-6).
+ * Sets the points of a person. When a tie at the top appears or its persons change, a custom game
+ * starts with a draw of all the best, Catan with nobody (US-ER-02 AK-6); a winner chosen at the
+ * tie stays while the best stay the same, e.g. when a lower score is corrected.
  */
 export function setPoints(
   entries: WayEntries,
@@ -201,11 +202,19 @@ export function setPoints(
   rules: ResultRules,
 ): WayEntries {
   const next = { ...entries, points: { ...entries.points, [personId]: text } };
-  const derived = deriveFromPoints({ ...next, winners: [] }, participants, rules);
-  if (!derived.isPointsComplete || derived.best.length < 2) {
-    return { ...next, winners: rules.hasSingleWinner ? entries.winners : [] };
+  const before = deriveFromPoints(entries, participants, rules);
+  const after = deriveFromPoints({ ...next, winners: [] }, participants, rules);
+  if (!after.isPointsComplete || after.best.length < 2) {
+    return { ...next, winners: rules.supportsRanking ? [] : entries.winners };
   }
-  return { ...next, winners: rules.hasSingleWinner ? [] : [...derived.best] };
+  const isSameTie =
+    before.isPointsComplete &&
+    before.best.length === after.best.length &&
+    before.best.every((best) => after.best.includes(best));
+  if (isSameTie) {
+    return next;
+  }
+  return { ...next, winners: rules.hasSingleWinner ? [] : [...after.best] };
 }
 
 /**

@@ -92,6 +92,21 @@ describe('US-ER-02 points in the result form (design I3-B A2)', () => {
     expect(deriveEntry('points', wrong, TABLE, WIZARD).winners).toEqual([ANNA]);
   });
 
+  it('AK-6: a winner chosen at a tie stays when a lower score is corrected', () => {
+    const tie = typed(WIZARD, [
+      [ANNA, '80'],
+      [BEN, '80'],
+      [CLARA, '20'],
+    ]);
+    const chosen = toggleWinner(tie, BEN, WIZARD);
+    const corrected = setPoints(chosen, CLARA, '25', TABLE, WIZARD);
+
+    expect(deriveEntry('points', corrected, TABLE, WIZARD).winners).toEqual([ANNA]);
+    // A new tie starts again with all of the best.
+    const newTie = setPoints(corrected, CLARA, '80', TABLE, WIZARD);
+    expect(deriveEntry('points', newTie, TABLE, WIZARD).winners).toEqual([ANNA, BEN, CLARA]);
+  });
+
   it('AK-6: a tie at the top in Catan asks for one winner', () => {
     const entries = typed(CATAN, [
       [ANNA, '10'],

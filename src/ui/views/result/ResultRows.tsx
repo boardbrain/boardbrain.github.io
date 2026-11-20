@@ -15,6 +15,14 @@ import {
 import styles from './Result.module.css';
 
 const TROPHY_SIZE = 20;
+
+// iOS and iPadOS show no minus on the numeric keypad; an iPad reports itself as a Mac with touch.
+function hasNoMinusOnKeypad(): boolean {
+  const { userAgent, maxTouchPoints } = navigator;
+  return (
+    /iPhone|iPad|iPod/u.test(userAgent) || (userAgent.includes('Macintosh') && maxTouchPoints > 1)
+  );
+}
 const PLACE_TROPHY_SIZE = 16;
 
 /**
@@ -52,7 +60,10 @@ type PointsRowsProps = {
   readonly entries: WayEntries;
   readonly derived: DerivedEntry;
   readonly rules: ResultRules;
-  /** A custom game: every score is required in this way (A2); in Catan points are optional. */
+  /**
+   * Every score is required in this way, since the game also has "Sieger oder Rangfolge" (A2, all
+   * games since E-49). A game without a ranking by hand would choose the winner without points.
+   */
   readonly isPointsRequired: boolean;
   readonly missing: Missing;
   readonly onPoints: (personId: PersonId, text: string) => void;
@@ -110,7 +121,7 @@ export function PointsRows({
             </span>
           );
         } else if (!isPointsRequired) {
-          // Catan with some points: the trophy waits for the others.
+          // A game without a ranking by hand, with some points: the trophy waits for the rest.
           trailing = (
             <span className={cx(styles.crown, styles.locked)} aria-hidden="true">
               <TrophyIcon size={TROPHY_SIZE} />
@@ -130,7 +141,8 @@ export function PointsRows({
             <span className={styles.name}>{person.name}</span>
             <input
               className={cx(styles.num, isBad && styles.bad)}
-              inputMode="numeric"
+              // US-ER-02 AK-3: negative points must be typeable, also where the keypad has no minus.
+              inputMode={rules.allowsNegativeScores && hasNoMinusOnKeypad() ? 'text' : 'numeric'}
               enterKeyHint="done"
               autoComplete="off"
               placeholder={t('ergebnis.punkte')}

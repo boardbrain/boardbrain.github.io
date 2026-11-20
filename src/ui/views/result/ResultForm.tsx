@@ -17,6 +17,7 @@ import {
 } from '@/core/results';
 import { t } from '@/i18n/t';
 import { CheckIcon, InfoIcon } from '@/ui/components/Icons';
+import { Notice } from '@/ui/components/Notice';
 import { PressableButton } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 import { MatchDialog } from '@/ui/views/match/MatchDialog';
@@ -55,8 +56,8 @@ type ResultFormProps = {
   readonly gameName: string;
   readonly tableName: string;
   readonly today: LocalDate;
-  /** Stores the result; `false` if it could not be stored (e.g. the match was ended meanwhile). */
-  readonly save: (input: ResultInput) => Promise<boolean>;
+  /** Stores the result; `null` when stored, otherwise why not, as a text shown above the button. */
+  readonly save: (input: ResultInput) => Promise<string | null>;
   readonly onSaved: (note: SavedNote) => void;
 };
 
@@ -122,6 +123,7 @@ export function ResultForm({
   const [notes, setNotes] = useState('');
   const [isAskingLong, setIsAskingLong] = useState(false);
   const [isShowingRules, setIsShowingRules] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const entries = byWay[way];
@@ -165,7 +167,9 @@ export function ResultForm({
     const result = input();
     // Unexpected errors in the transition reach the error view of the routes (ADR-025).
     startTransition(async () => {
-      if (await save(result)) {
+      const problem = await save(result);
+      setFailure(problem);
+      if (problem === null) {
         const names = derived.winners.map((personId) => byId.get(personId)?.name ?? '');
         onSaved({
           who:
@@ -408,6 +412,11 @@ export function ResultForm({
       </section>
 
       <div className={styles.footer}>
+        {failure !== null && (
+          <Notice tone="error">
+            <p>{failure}</p>
+          </Notice>
+        )}
         <PressableButton
           type="submit"
           className={cx(shared.primary, !canSave && styles.looksOff)}

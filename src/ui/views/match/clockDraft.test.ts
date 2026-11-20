@@ -98,6 +98,11 @@ describe('US-AB-07 AK-6 the beginning as a time of day', () => {
     expect(lastTimeOfDay('20:00', now)).toBe(iso(local(20, 20, 0)));
   });
 
+  it('yesterday is the calendar day before, also when the clocks change (25 Oct 2026)', () => {
+    // In zones without a change of the clocks this is the same as 24 hours.
+    expect(lastTimeOfDay('23:00', local(25, 10, 0))).toBe(iso(local(24, 23, 0)));
+  });
+
   it('after midnight a beginning before midnight is yesterday', () => {
     expect(lastTimeOfDay('23:30', local(21, 0, 40))).toBe(iso(local(20, 23, 30)));
   });

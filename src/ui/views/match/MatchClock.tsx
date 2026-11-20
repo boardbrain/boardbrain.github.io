@@ -117,6 +117,7 @@ function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Ele
   const [draft, setDraft] = useState<SessionClock>(clock);
   // The beginning the window opened with or that was set by hand (see `addMinutes`).
   const [anchor, setAnchor] = useState(clock.startedAt);
+  const [isRefused, setIsRefused] = useState(false);
   const isPaused = draft.pausedAt !== undefined;
   const minutes = draftMinutes(draft, now);
   const stepButton = (step: number): React.JSX.Element => (
@@ -140,14 +141,19 @@ function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Ele
       onCancel={onClose}
       confirmLabel={t('partie.uebernehmen')}
       onConfirm={() => {
-        onClose();
         const at = Date.now();
         startTransition(async () => {
-          await session.correctClock({
+          const corrected = await session.correctClock({
             startedAt: draft.startedAt,
             elapsedMs: elapsedMilliseconds(draft, new Date(at).toISOString()),
             isPaused,
           });
+          if (corrected.ok) {
+            onClose();
+          } else {
+            // E.g. the clock of the device was set back or the match ended meanwhile.
+            setIsRefused(true);
+          }
         });
       }}
     >
@@ -162,6 +168,11 @@ function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Ele
           )}
         </span>
         <h2 className={styles.title}>{t('partie.spieldauer')}</h2>
+        {isRefused && (
+          <span className={cx(shared.small, shared.dangerText)} role="alert">
+            {t('partie.uhrNichtUebernommen')}
+          </span>
+        )}
       </div>
       <div className={shared.group}>
         <div className={cx(styles.row, styles.stepLine)}>

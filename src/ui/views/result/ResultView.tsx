@@ -14,27 +14,43 @@ import { ResultForm, type SavedNote } from './ResultForm';
 import type { ResultPerson } from './ResultRows';
 import { useGameName } from './ResultTableView';
 
-type Loaded = { readonly draft: ResultDraft } | { readonly failed: true };
+type Loaded =
+  { readonly draft: ResultDraft } | { readonly failed: true } | { readonly error: unknown };
 
 // External system: the starting values come from the result service (Architecture 4.4), read
 // again when group or game change.
-function useDraft(load: () => Promise<Result<ResultDraft, string>>, key: string): Loaded | null {
+function useDraft(
+  load: () => Promise<Result<ResultDraft, string>>,
+  key: string,
+): Exclude<Loaded, { readonly error: unknown }> | null {
   const [loaded, setLoaded] = useState<{ readonly key: string; readonly value: Loaded } | null>(
     null,
   );
   const read = useEffectEvent(load);
   useEffect(() => {
     let isCurrent = true;
-    void read().then((result) => {
-      if (isCurrent) {
-        setLoaded({ key, value: result.ok ? { draft: result.value } : { failed: true } });
-      }
-    });
+    read().then(
+      (result) => {
+        if (isCurrent) {
+          setLoaded({ key, value: result.ok ? { draft: result.value } : { failed: true } });
+        }
+      },
+      (error: unknown) => {
+        if (isCurrent) {
+          setLoaded({ key, value: { error } });
+        }
+      },
+    );
     return () => {
       isCurrent = false;
     };
   }, [key]);
-  return loaded?.key === key ? loaded.value : null;
+  const value = loaded?.key === key ? loaded.value : null;
+  // ADR-025: an unexpected error is thrown while drawing, so the error view of the routes shows it.
+  if (value !== null && 'error' in value) {
+    throw value.error;
+  }
+  return value;
 }
 
 function personsOf(
@@ -55,7 +71,8 @@ type FormPageProps = {
   readonly draft: ResultDraft;
   readonly gameName: string;
   readonly isFromMatch: boolean;
-  readonly save: (input: ResultInput) => Promise<boolean>;
+  /** Stores the result; `null` when stored, otherwise why not, as a text. */
+  readonly save: (input: ResultInput) => Promise<string | null>;
   readonly backFallback: string;
 };
 
@@ -134,7 +151,13 @@ export function ResultView(): React.JSX.Element | null {
       backFallback={`/ergebnis/neu/${gameId}`}
       save={async (input) => {
         const stored = await results.record({ ...input, groupId: group.value, gameId: game.value });
-        return stored.ok;
+        if (stored.ok) {
+          return null;
+        }
+        // The table was archived or rebound, or the game archived, while the form was open.
+        return stored.error === 'group-not-eligible' || stored.error === 'game-not-eligible'
+          ? t('ergebnis.tischNichtMehr')
+          : t('ergebnis.nichtGespeichert');
       }}
     />
   );
@@ -163,7 +186,18 @@ export function MatchResultView(): React.JSX.Element | null {
       gameName={name}
       isFromMatch
       backFallback="/partie/uebersicht"
-      save={async (input) => (await results.recordFromSession(input)).ok}
+      save={async (input) => {
+        const stored = await results.recordFromSession(input);
+        if (stored.ok) {
+          return null;
+        }
+        // The match was ended meanwhile, e.g. on another device or tab.
+        return stored.error === 'no-session' ||
+          stored.error === 'session-not-running' ||
+          stored.error === 'session-unsupported'
+          ? t('ergebnis.partieBeendet')
+          : t('ergebnis.nichtGespeichert');
+      }}
     />
   );
 }

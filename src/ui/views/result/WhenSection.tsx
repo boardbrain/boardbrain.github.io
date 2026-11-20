@@ -16,7 +16,8 @@ function openPicker(input: HTMLInputElement): void {
     try {
       input.showPicker();
     } catch {
-      // The picker is already open or needs a user gesture; the field still works by typing.
+      // The picker is already open or needs a user gesture: the field takes the input instead.
+      input.focus();
     }
   }
 }

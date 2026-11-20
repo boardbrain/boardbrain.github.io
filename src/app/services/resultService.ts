@@ -80,8 +80,8 @@ export type ResultService = {
   /**
    * Starting values of a new result of this group in this game (US-ER-01): today's date, the
    * default mode, the Catan colours of the group (US-ER-03 AK-1). Rejected for a group or game
-   * that is not active or a group that cannot play the game (AK-5). A group that does not exist
-   * throws.
+   * that is not active or a group that cannot play the game (AK-5), also for a group that no
+   * longer exists: its id may come from an old address.
    */
   draft(groupId: GroupId, gameId: GameId): Promise<Result<ResultDraft, ResultTargetError>>;
   /**
@@ -244,7 +244,10 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
     draft(groupId, gameId) {
       return store.transaction(async (repositories) => {
         const stored = await readStored(repositories);
-        const group = findGroup(stored, groupId);
+        const group = stored.groups.find((candidate) => candidate.id === groupId);
+        if (group === undefined) {
+          return err('group-not-eligible');
+        }
         const target = checkTarget(stored, group, gameId);
         if (!target.ok) {
           return target;
@@ -305,7 +308,10 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
       return store.transaction(async (repositories) => {
         const { groupId, gameId, ...values } = input;
         const stored = await readStored(repositories);
-        const group = findGroup(stored, groupId);
+        const group = stored.groups.find((candidate) => candidate.id === groupId);
+        if (group === undefined) {
+          return err('group-not-eligible');
+        }
         const target = checkTarget(stored, group, gameId);
         if (!target.ok) {
           return target;

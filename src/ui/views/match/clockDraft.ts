@@ -7,7 +7,6 @@ import {
 } from '@/core/generation';
 
 const MINUTE = 60_000;
-const DAY = 24 * 60 * MINUTE;
 
 function iso(ms: number): string {
   return new Date(ms).toISOString();
@@ -82,5 +81,10 @@ export function lastTimeOfDay(time: string, now: number): string {
   const [hours = 0, minutes = 0] = time.split(':').map(Number);
   const date = new Date(now);
   date.setHours(hours, minutes, 0, 0);
-  return iso(date.getTime() > now ? date.getTime() - DAY : date.getTime());
+  if (date.getTime() > now) {
+    // A calendar day back, not 24 hours: a day with a change of the clocks has 23 or 25.
+    date.setDate(date.getDate() - 1);
+    date.setHours(hours, minutes, 0, 0);
+  }
+  return iso(date.getTime());
 }

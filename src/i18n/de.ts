@@ -233,6 +233,7 @@ export const de = {
     einemErgebnis: '1 Ergebnis',
     ergebnissen: '{anzahl} Ergebnissen',
     umkehren: 'Umkehren',
+    keineNichtMehr: '„Keine“ nicht mehr möglich · Ergebnisse mit Punkten',
     namen: {
       catan: 'Catan',
     },
@@ -319,6 +320,9 @@ export const de = {
     und: ' und ',
     komma: ', ',
     gespeichert: '{spiel} · {tisch} · gespeichert',
+    nichtGespeichert: 'Ergebnis nicht gespeichert',
+    tischNichtMehr: 'Ergebnis nicht gespeichert · Tisch oder Spiel nicht mehr verfügbar',
+    partieBeendet: 'Ergebnis nicht gespeichert · Partie inzwischen beendet',
   },
   partie: {
     neu: 'Neue Partie',
@@ -486,6 +490,7 @@ export const de = {
     beginnFeld: 'Beginn der Partie',
     uhr: 'Uhr',
     uebernehmen: 'Übernehmen',
+    uhrNichtUebernommen: 'Nicht übernommen · Uhr inzwischen geändert',
     uebersichtUnterzeile: '{tisch} · {version} · {modus}',
     reiterBrett: 'Brett',
     reiterErgebnisse: 'Ergebnisse',

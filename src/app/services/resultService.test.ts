@@ -249,15 +249,20 @@ describe('US-ER-01 Record a result (service)', () => {
     });
   });
 
-  it('throws for a group that does not exist', async () => {
-    await expect(
-      launch().record({
-        groupId: toGroupId('00000000-0000-4000-8000-0000000000cf'),
+  it('rejects a group that no longer exists, e.g. from an old address', async () => {
+    const gone = toGroupId('00000000-0000-4000-8000-0000000000cf');
+    expect(
+      await launch().record({
+        groupId: gone,
         gameId: TEST_CUSTOM_GAME_ID,
         date: '2026-10-07',
         winnerIds: [ANNA],
       }),
-    ).rejects.toThrow(InvariantError);
+    ).toEqual({ ok: false, error: 'group-not-eligible' });
+    expect(await launch().draft(gone, TEST_CUSTOM_GAME_ID)).toEqual({
+      ok: false,
+      error: 'group-not-eligible',
+    });
   });
 });
 

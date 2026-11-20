@@ -57,6 +57,7 @@ export function GameEditor({
   const [isTakenOnSave, setIsTakenOnSave] = useState(false);
   // Once stored, the new name is among the taken ones until the page closes; no hint then.
   const [isSaved, setIsSaved] = useState(false);
+  const [isNoneRefused, setIsNoneRefused] = useState(false);
   const [isPending, startTransition] = useTransition();
   const isTaken = !isSaved && (containsName(otherNames, name) || isTakenOnSave);
   const isNoneLocked = scoredCount > 0;
@@ -86,8 +87,12 @@ export function GameEditor({
         }
       }
       if (scoring !== (game.scoring ?? null)) {
-        // "Keine" cannot be chosen while results have points, so this succeeds.
-        await masterData.changeCustomGameScoring({ gameId: game.id, scoring });
+        const changed = await masterData.changeCustomGameScoring({ gameId: game.id, scoring });
+        if (!changed.ok) {
+          // US-VW-07 AK-4: a result with points was stored meanwhile; the editor stays open.
+          setIsNoneRefused(true);
+          return;
+        }
       }
       setIsSaved(true);
       onSaved(game.id);
@@ -148,6 +153,7 @@ export function GameEditor({
               disabled={row.value === null && isNoneLocked}
               onClick={() => {
                 setScoring(row.value);
+                setIsNoneRefused(false);
               }}
             >
               <span className={styles.radio} aria-hidden="true" />
@@ -158,6 +164,7 @@ export function GameEditor({
             </PressableButton>
           ))}
         </div>
+        {isNoneRefused && <p className={styles.error}>{t('spiele.keineNichtMehr')}</p>}
         {isNoneLocked && game?.scoring !== undefined && (
           <p className={styles.hint}>
             {t('spiele.keineGesperrt', { ergebnisse: resultsText(scoredCount) })}

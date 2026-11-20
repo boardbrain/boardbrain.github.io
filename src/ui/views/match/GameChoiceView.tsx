@@ -44,11 +44,13 @@ function readOrder(): Order {
   }
 }
 
-function storeOrder(order: Order): void {
+// `false` when the storage is blocked: the order then holds until the page is left.
+function storeOrder(order: Order): boolean {
   try {
     localStorage.setItem(ORDER_KEY, order);
+    return true;
   } catch {
-    // Storage blocked: the order holds until the page is left, which is all that is lost.
+    return false;
   }
 }
 
