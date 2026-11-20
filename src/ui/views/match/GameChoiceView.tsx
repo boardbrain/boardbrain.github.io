@@ -8,6 +8,7 @@ import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { LandscapePicture } from '@/ui/art/Pictures';
 import { BackButton } from '@/ui/components/BackButton';
+import { cx } from '@/ui/components/classNames';
 import { PlusIcon, SortAzIcon, SortRecentIcon, TrophyIcon } from '@/ui/components/Icons';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 import { CatanGameCard, CustomGameCard, GameGrid } from '@/ui/views/games/GameCards';
@@ -127,7 +128,7 @@ export function GameChoiceView(): React.JSX.Element {
           {active.length === 0 && (
             // LZ2: what is missing and the way to it.
             <div className={styles.empty}>
-              <p className={shared.muted}>{t('spielliste.leer')}</p>
+              <p className={cx(shared.muted, shared.small)}>{t('spielliste.leer')}</p>
               <PressableLink to="/verwaltung/spiele/neu" className={shared.pill}>
                 <PlusIcon size={PLUS_SIZE} />
                 {t('spiele.neuesSpiel')}
