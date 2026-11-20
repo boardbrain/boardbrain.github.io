@@ -66,8 +66,9 @@ test.describe('Design I2-G more room', () => {
 
     await page.goto('/');
     await page.getByRole('link', { name: 'Partie' }).click();
-    await visit('Neue Partie');
-    await page.getByRole('link', { name: 'Catan' }).click();
+    await visit('Partie');
+    await page.getByRole('button', { name: 'Catan' }).click();
+    await page.getByRole('button', { name: 'Neue Partie' }).click();
     await visit('Welcher Tisch spielt?');
     await page.getByRole('button', { name: /Spieleabend/ }).click();
     await visit('Wie spielt ihr?');

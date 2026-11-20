@@ -191,32 +191,30 @@ test.describe('US-VW-02 Edit a table', () => {
   });
 });
 
-test.describe('US-VW-07 Rename a custom game', () => {
+test.describe('US-VW-07 Edit a custom game', () => {
   test('AK-1, AK-2: unique among all games, Catan is built in', async ({ page }) => {
-    await page.goto('/#/verwaltung/spiele');
     for (const name of ['Uno', 'Skyjo']) {
-      await page.getByLabel('Name').fill(name);
-      await page.getByRole('button', { name: 'Speichern' }).click();
-      await expect(page.getByRole('link', { name: new RegExp(`^${name}`) })).toBeVisible();
+      await page.goto('/#/verwaltung/spiele/neu');
+      await page.getByRole('textbox', { name: 'Name des Spiels' }).fill(name);
+      await page.getByRole('button', { name: 'Spiel anlegen' }).click();
+      await expect(page.getByRole('link', { name })).toBeVisible();
     }
     // AK-2: Catan has no page.
-    const supported = page.getByRole('list', { name: 'Unterstützte Spiele' });
-    await expect(supported).toContainText('fest eingebaut');
-    await expect(supported.getByRole('link')).toHaveCount(0);
+    await expect(page.getByRole('group', { name: 'Catan' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Catan' })).toHaveCount(0);
 
-    await page.getByRole('link', { name: /^Uno/ }).click();
+    await page.getByRole('link', { name: 'Uno' }).click();
     await expect(page.getByRole('heading', { name: 'Uno', level: 1 })).toBeVisible();
-    await page.getByRole('button', { name: 'Umbenennen' }).click();
-    const field = page.getByLabel('Neuer Spielname');
+    await page.getByRole('link', { name: 'Bearbeiten' }).click();
+    const editor = page.getByRole('dialog', { name: 'Spiel bearbeiten' });
+    const field = editor.getByRole('textbox', { name: 'Name des Spiels' });
     for (const taken of ['skyjo', 'CATAN']) {
       await field.fill(taken);
-      await expect(page.getByRole('alert')).toContainText(
-        `Es gibt bereits ein Spiel namens „${taken}“.`,
-      );
-      await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+      await expect(editor.getByText('Name gibt es schon')).toBeVisible();
+      await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
     }
     await field.fill('UNO');
-    await page.getByRole('button', { name: 'Speichern' }).click();
+    await editor.getByRole('button', { name: 'Änderungen speichern' }).click();
 
     await expect(page.getByRole('heading', { name: 'UNO', level: 1 })).toBeVisible();
   });

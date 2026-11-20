@@ -86,12 +86,10 @@ test.describe('US-PG-02 and US-PG-03 The room and the editor', () => {
   });
 
   test('AK-4: a table can be bound to an own game from the folded-out list', async ({ page }) => {
-    await page.goto('/#/verwaltung/spiele');
-    await page.getByLabel('Name').fill('Uno');
-    await page.getByRole('button', { name: 'Speichern' }).click();
-    await expect(
-      page.getByRole('region', { name: 'Eigene Spiele' }).getByRole('listitem'),
-    ).toHaveText([/^Uno/]);
+    await page.goto('/#/verwaltung/spiele/neu');
+    await page.getByRole('textbox', { name: 'Name des Spiels' }).fill('Uno');
+    await page.getByRole('button', { name: 'Spiel anlegen' }).click();
+    await expect(page.getByRole('link', { name: 'Uno' })).toBeVisible();
     await createPersons(page, 'Anna', 'Ben');
     await openRoom(page);
     await openEditor(page);

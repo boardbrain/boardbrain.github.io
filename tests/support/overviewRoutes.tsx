@@ -15,7 +15,9 @@ export function OverviewRoutes(): React.JSX.Element {
       <Route path="/verwaltung/gruppen/:groupId" element={<GroupView />} />
       <Route path="/verwaltung/gruppen/:groupId/bearbeiten" element={<GroupView isEditing />} />
       <Route path="/verwaltung/spiele" element={<GamesView />} />
+      <Route path="/verwaltung/spiele/neu" element={<GamesView isCreating />} />
       <Route path="/verwaltung/spiele/:gameId" element={<GameView />} />
+      <Route path="/verwaltung/spiele/:gameId/bearbeiten" element={<GameView isEditing />} />
     </Routes>
   );
 }

@@ -38,7 +38,8 @@ async function openEmptyBoard(page: Page): Promise<void> {
   await useSeededRandom(page, 7);
   await seedDatabase(page, [{ name: 'Zu zweit', members: ['Anna', 'Ben'] }]);
   await page.getByRole('link', { name: 'Partie' }).click();
-  await page.getByRole('link', { name: 'Catan' }).click();
+  await page.getByRole('button', { name: 'Catan' }).click();
+  await page.getByRole('button', { name: 'Neue Partie' }).click();
   await page.getByRole('button', { name: /^Zu zweit:/ }).click();
   for (const draw of ['Landschaftsfelder', 'Häfen', 'Zahlenchips']) {
     await page.getByRole('switch', { name: draw }).click();
