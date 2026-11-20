@@ -144,16 +144,17 @@
   opacity: 0;
 }
 
-/* T4: in the free corner at the top right of the board, or as a row of its own. */
-.corner {
-  position: absolute;
-  top: 0;
-  right: 8px;
-  z-index: 2;
+/* Below the board: "Partie beenden ohne Ergebnis" on the left, the timer on the right. */
+.endRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
-.clockRow {
-  display: flex;
-  justify-content: flex-end;
-  margin: -8px 0;
+/* The pill keeps one line; with too little room the timer moves below it. */
+.endRow > :first-child {
+  white-space: nowrap;
 }

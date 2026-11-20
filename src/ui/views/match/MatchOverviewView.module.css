@@ -110,6 +110,35 @@
   width: 100%;
 }
 
+/* Wide screens in landscape: the board is limited by the height, so the end of the page is one
+   row: "Partie beenden ohne Ergebnis", "Ergebnis eintragen", the timer (Product Owner
+   20.11.2026). Portrait keeps two rows. */
+@media (orientation: landscape) and (width >= 48rem) {
+  .ovEnd {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .ovEnd > :first-child {
+    display: contents;
+  }
+
+  .ovEnd > :first-child > :first-child {
+    order: 1;
+  }
+
+  .enterResult {
+    flex: 1;
+    order: 2;
+    width: auto;
+  }
+
+  .ovEnd > :first-child > :last-child {
+    order: 3;
+  }
+}
+
 .boardTab .ovEnd {
   margin-top: auto;
 }

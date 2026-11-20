@@ -85,9 +85,8 @@ export function MatchOverviewView(): React.JSX.Element | null {
   const steps = session.generation.steps;
   const lastStep = steps.length - 1;
 
-  // T4: the timer at the top right below the tabs (US-AB-07 AK-1, AK-2, AK-6).
+  // The timer of the match (US-AB-07 AK-1, AK-2, AK-6).
   const clock = session.clock === undefined ? null : <MatchClock clock={session.clock} />;
-  const clockRow = clock === null ? null : <div className={clockStyles.clockRow}>{clock}</div>;
   const board = summary.placementSkipped ? (
     <div className={styles.skippedBox}>
       <strong>
@@ -113,7 +112,6 @@ export function MatchOverviewView(): React.JSX.Element | null {
           setRepeating(pieces.stepOf.get(key) ?? null);
         }}
       />
-      {clock !== null && <div className={clockStyles.corner}>{clock}</div>}
       {/* H1: in the free room below the board, nothing moves (design I2-H). */}
       {pieces.buildings.length > 0 && (
         <div className={styles.tapHint}>
@@ -322,7 +320,6 @@ export function MatchOverviewView(): React.JSX.Element | null {
       </div>
       {tab === 'board' ? (
         <>
-          {summary.placementSkipped && clockRow}
           {board}
           {!summary.placementSkipped && (
             <div className={styles.ovNames}>
@@ -341,26 +338,28 @@ export function MatchOverviewView(): React.JSX.Element | null {
           )}
         </>
       ) : (
-        <>
-          {clockRow}
-          {results}
-        </>
+        results
       )}
+      {/* Product Owner 20.11.2026: "Partie beenden ohne Ergebnis" with the timer beside it, then
+          "Ergebnis eintragen" at the very bottom; the timer takes no room from the board. */}
       <div className={styles.ovEnd}>
+        <div className={clockStyles.endRow}>
+          <PressableButton
+            type="button"
+            className={shared.pill}
+            onClick={() => {
+              setAskingEnd(true);
+            }}
+          >
+            <ExitDoorIcon size={14} />
+            {t('partie.beenden')}
+          </PressableButton>
+          {clock}
+        </div>
         {/* US-AB-06 AK-1, AK-2: the result of the match, filled in from it. */}
         <PressableLink to="/partie/ergebnis" className={cx(shared.primary, styles.enterResult)}>
           {t('partie.ergebnisEintragen')}
         </PressableLink>
-        <PressableButton
-          type="button"
-          className={shared.pill}
-          onClick={() => {
-            setAskingEnd(true);
-          }}
-        >
-          <ExitDoorIcon size={14} />
-          {t('partie.beenden')}
-        </PressableButton>
       </div>
       {repeating !== null && repeatStep !== undefined && (
         <MatchDialog
