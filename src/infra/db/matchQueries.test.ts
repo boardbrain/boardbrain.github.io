@@ -4,7 +4,12 @@ import { createTestDb } from '@tests/support/testDatabase';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { parseLocalDate, toGroupId, toMatchId, type LocalDate } from '@/core/model';
 import type { BoardBrainDb } from './database';
-import { readMatch, readMatchesOfGroup, readPlayedGames } from './matchQueries';
+import {
+  readMatch,
+  readMatchesOfGroup,
+  readPlayedGames,
+  readScoredMatchCount,
+} from './matchQueries';
 
 let db: BoardBrainDb;
 
@@ -64,5 +69,20 @@ describe('US-SP-01 played games over all tables (query)', () => {
     expect([...(await readPlayedGames(db)).values()]).toEqual([
       { matches: 2, lastDate: '2026-11-17' },
     ]);
+  });
+});
+
+describe('US-VW-07 AK-4 results with points (query)', () => {
+  it('counts only the results of the game that have points', async () => {
+    const game = aMatch().gameId;
+    await db.matches.bulkAdd([
+      aMatch({ id: toMatchId('00000000-0000-4000-8000-0000000000d1') }),
+      aMatch({
+        id: toMatchId('00000000-0000-4000-8000-0000000000d2'),
+        scores: { [aGroup().members[0]?.personId ?? '']: 3 },
+      }),
+    ]);
+
+    expect(await readScoredMatchCount(db, game)).toBe(1);
   });
 });

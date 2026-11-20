@@ -76,7 +76,7 @@ describe('US-AB-07 Measure the duration of a match', () => {
 describe('US-AB-07 AK-6 correct the timer', () => {
   it('a longer or shorter duration counts on from the correction', () => {
     const corrected = value(
-      correctClock({ startedAt: START, elapsedMs: 50 * MINUTE, paused: false }, at(60)),
+      correctClock({ startedAt: START, elapsedMs: 50 * MINUTE, isPaused: false }, at(60)),
     );
 
     expect(elapsedMilliseconds(corrected, at(60))).toBe(50 * MINUTE);
@@ -86,7 +86,7 @@ describe('US-AB-07 AK-6 correct the timer', () => {
   it('an earlier beginning with the duration grown by the same time', () => {
     const earlier = at(-12);
     const corrected = value(
-      correctClock({ startedAt: earlier, elapsedMs: 72 * MINUTE, paused: false }, at(60)),
+      correctClock({ startedAt: earlier, elapsedMs: 72 * MINUTE, isPaused: false }, at(60)),
     );
 
     expect(corrected).toEqual({ startedAt: earlier, pausedMs: 0 });
@@ -95,7 +95,7 @@ describe('US-AB-07 AK-6 correct the timer', () => {
 
   it('a paused correction stands still until it is resumed', () => {
     const corrected = value(
-      correctClock({ startedAt: START, elapsedMs: 40 * MINUTE, paused: true }, at(60)),
+      correctClock({ startedAt: START, elapsedMs: 40 * MINUTE, isPaused: true }, at(60)),
     );
 
     expect(elapsedMilliseconds(corrected, at(90))).toBe(40 * MINUTE);
@@ -106,17 +106,17 @@ describe('US-AB-07 AK-6 correct the timer', () => {
   it('rejects a beginning in the future, more time than has passed and less than a minute', () => {
     const invalid = { ok: false, error: 'clock-correction-invalid' };
 
-    expect(correctClock({ startedAt: at(61), elapsedMs: MINUTE, paused: false }, at(60))).toEqual(
+    expect(correctClock({ startedAt: at(61), elapsedMs: MINUTE, isPaused: false }, at(60))).toEqual(
       invalid,
     );
     expect(
-      correctClock({ startedAt: START, elapsedMs: 61 * MINUTE, paused: false }, at(60)),
+      correctClock({ startedAt: START, elapsedMs: 61 * MINUTE, isPaused: false }, at(60)),
     ).toEqual(invalid);
-    expect(correctClock({ startedAt: START, elapsedMs: 59_999, paused: false }, at(60))).toEqual(
+    expect(correctClock({ startedAt: START, elapsedMs: 59_999, isPaused: false }, at(60))).toEqual(
       invalid,
     );
     expect(
-      correctClock({ startedAt: 'gestern', elapsedMs: MINUTE, paused: false }, at(60)),
+      correctClock({ startedAt: 'gestern', elapsedMs: MINUTE, isPaused: false }, at(60)),
     ).toEqual(invalid);
   });
 });

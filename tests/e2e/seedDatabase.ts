@@ -252,7 +252,7 @@ function today(): LocalDate {
   const now = new Date();
   const pad = (value: number): string => String(value).padStart(2, '0');
   const day = parseLocalDate(
-    `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`,
+    `${String(now.getFullYear())}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`,
   );
   if (!day.ok) throw new Error('no local date');
   return day.value;

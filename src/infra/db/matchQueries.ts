@@ -26,3 +26,15 @@ export async function readMatch(db: BoardBrainDb, id: MatchId): Promise<Match | 
 export async function readPlayedGames(db: BoardBrainDb): Promise<ReadonlyMap<GameId, PlayedGame>> {
   return playedGames(await db.matches.toArray());
 }
+
+/**
+ * How many results of a game have points (US-VW-07 AK-3, AK-4): they keep "Keine" locked and make
+ * a change of the direction ask first.
+ */
+export async function readScoredMatchCount(db: BoardBrainDb, gameId: GameId): Promise<number> {
+  return db.matches
+    .where('gameId')
+    .equals(gameId)
+    .filter((match) => match.scores !== undefined)
+    .count();
+}

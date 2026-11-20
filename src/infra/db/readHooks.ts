@@ -20,7 +20,12 @@ import {
 import type { BoardBrainDb } from './database';
 import { readErrorLog } from './errorLogStore';
 import type { PlayedGame } from '@/core/results';
-import { readMatch, readMatchesOfGroup, readPlayedGames } from './matchQueries';
+import {
+  readMatch,
+  readMatchesOfGroup,
+  readPlayedGames,
+  readScoredMatchCount,
+} from './matchQueries';
 
 /**
  * All persons sorted by name; `undefined` while loading. The view updates itself on every
@@ -205,4 +210,15 @@ export function useMatch(db: BoardBrainDb, id: MatchId | null): Match | null | u
  */
 export function usePlayedGames(db: BoardBrainDb): ReadonlyMap<GameId, PlayedGame> | undefined {
   return useLiveQuery(() => readPlayedGames(db), [db]);
+}
+
+/**
+ * How many results of a game have points (US-VW-07 AK-3, AK-4); `undefined` while loading, 0
+ * without a game.
+ */
+export function useScoredMatchCount(db: BoardBrainDb, gameId: GameId | null): number | undefined {
+  return useLiveQuery(
+    async () => (gameId === null ? 0 : readScoredMatchCount(db, gameId)),
+    [db, gameId],
+  );
 }

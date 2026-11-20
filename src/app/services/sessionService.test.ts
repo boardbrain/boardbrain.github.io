@@ -704,7 +704,7 @@ describe('US-AB-07 Measure the duration of a match (service)', () => {
     ).toISOString();
 
     const corrected = await value(
-      service.correctClock({ startedAt, elapsedMs: 35 * MINUTE, paused: true }),
+      service.correctClock({ startedAt, elapsedMs: 35 * MINUTE, isPaused: true }),
     );
     clock.advance(15);
 
@@ -712,7 +712,7 @@ describe('US-AB-07 Measure the duration of a match (service)', () => {
     expect(corrected.clock?.startedAt).toBe(startedAt);
     expect(elapsedMilliseconds(defined(stored()?.clock, 'clock'), clock.now())).toBe(35 * MINUTE);
     expect(
-      await service.correctClock({ startedAt, elapsedMs: 120 * MINUTE, paused: false }),
+      await service.correctClock({ startedAt, elapsedMs: 120 * MINUTE, isPaused: false }),
     ).toEqual({ ok: false, error: 'clock-correction-invalid' });
   });
 

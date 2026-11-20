@@ -50,9 +50,12 @@ export function scoringShort(game: CustomGame): string {
  */
 export function GameGrid({
   label,
+  hint,
   children,
 }: {
   readonly label: string;
+  /** A short line below the cards. */
+  readonly hint?: string | undefined;
   readonly children: ReactNode;
 }): React.JSX.Element {
   return (
@@ -60,6 +63,7 @@ export function GameGrid({
       <ul className={styles.grid} aria-label={label}>
         {children}
       </ul>
+      {hint !== undefined && <p className={styles.hint}>{hint}</p>}
     </div>
   );
 }
@@ -94,6 +98,27 @@ function CardPress({
   );
 }
 
+const LETTERS = new Intl.Segmenter('de', { granularity: 'grapheme' });
+
+// The first character as a person sees it, also for an emoji or an accented letter.
+function firstLetter(name: string): string {
+  for (const { segment } of LETTERS.segment(name)) {
+    return segment;
+  }
+  return '';
+}
+
+/**
+ * The picture of a custom game: its first letter in a round frame (design I3-B). Decorative.
+ */
+export function GameLetter({ name }: { readonly name: string }): React.JSX.Element {
+  return (
+    <span className={styles.art} aria-hidden="true">
+      <span className={styles.letter}>{firstLetter(name)}</span>
+    </span>
+  );
+}
+
 /**
  * A custom game as a playing card (design I3-B GL5, SA): the number of matches in the corners,
  * its first letter as the picture, name, when it was played last and how it scores. The same card
@@ -117,9 +142,7 @@ export function CustomGameCard({
         <span className={styles.corner} aria-hidden="true">
           {count}
         </span>
-        <span className={styles.art} aria-hidden="true">
-          <span className={styles.letter}>{[...game.name][0]}</span>
-        </span>
+        <GameLetter name={game.name} />
         <strong className={styles.name}>{game.name}</strong>
         <span className={styles.last}>{lastPlayedText(played, today)}</span>
         <span className={styles.note}>{scoringShort(game)}</span>
@@ -142,16 +165,26 @@ export function CatanGameCard({
 }: {
   readonly played: PlayedGame | undefined;
   readonly today: LocalDate;
-  readonly target: Target;
+  /** Without a target the card only shows (Catan has no page under "Spiele"). */
+  readonly target?: Target;
 }): React.JSX.Element {
+  const card = (
+    <DevCard title={t('spiele.namen.catan')} art={<LandscapePicture />} isScaled>
+      <strong>{lastPlayedText(played, today)}</strong>
+      <span className={styles.devNote}>{t('spiele.mitGenerierung')}</span>
+    </DevCard>
+  );
   return (
     <li className={styles.item}>
-      <CardPress target={target} label={t('spiele.namen.catan')} className={styles.devLink}>
-        <DevCard title={t('spiele.namen.catan')} art={<LandscapePicture />} isScaled>
-          <strong>{lastPlayedText(played, today)}</strong>
-          <span className={styles.devNote}>{t('spiele.mitGenerierung')}</span>
-        </DevCard>
-      </CardPress>
+      {target === undefined ? (
+        <div className={styles.devLink} aria-label={t('spiele.namen.catan')} role="group">
+          {card}
+        </div>
+      ) : (
+        <CardPress target={target} label={t('spiele.namen.catan')} className={styles.devLink}>
+          {card}
+        </CardPress>
+      )}
     </li>
   );
 }

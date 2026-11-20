@@ -1,12 +1,5 @@
 /* Design I3-B (docs/design/i3b-result-entry-final-preview.html): game list, empty page (LZ2) and
    the Catan question (Q5). */
-.hint {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  text-align: center;
-}
-
 .empty {
   display: grid;
   gap: 10px;

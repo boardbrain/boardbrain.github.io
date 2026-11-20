@@ -96,6 +96,9 @@ export const MAX_SCORE = 99_999;
  */
 export const MAX_NOTES_LENGTH = 1000;
 
+// Characters as a person counts them, an emoji or an accented letter as one.
+const CHARACTERS = new Intl.Segmenter('de', { granularity: 'grapheme' });
+
 function entered(
   values: Readonly<Record<PersonId, number>> | undefined,
   participants: readonly PersonId[],
@@ -250,8 +253,8 @@ export function resultErrors(
   if (duration !== undefined && (!Number.isInteger(duration) || duration < 1)) {
     errors.push('duration-invalid');
   }
-  // US-ER-01 AK-8: notes up to 1000 characters, counted as typed (before trimming).
-  if (input.notes !== undefined && [...input.notes].length > MAX_NOTES_LENGTH) {
+  // US-ER-01 AK-8: notes up to 1000 characters as a person counts them, before trimming.
+  if (input.notes !== undefined && [...CHARACTERS.segment(input.notes)].length > MAX_NOTES_LENGTH) {
     errors.push('notes-too-long');
   }
   return errors;

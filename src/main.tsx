@@ -122,7 +122,9 @@ const router = createHashRouter([
       { path: '/verwaltung/gruppen/:groupId', element: view(<GroupView />) },
       { path: '/verwaltung/gruppen/:groupId/bearbeiten', element: view(<GroupView isEditing />) },
       { path: '/verwaltung/spiele', element: view(<GamesView />) },
+      { path: '/verwaltung/spiele/neu', element: view(<GamesView isCreating />) },
       { path: '/verwaltung/spiele/:gameId', element: view(<GameView />) },
+      { path: '/verwaltung/spiele/:gameId/bearbeiten', element: view(<GameView isEditing />) },
       {
         path: '/partie/neu',
         lazy: matchRoute((match) => view(<match.PreparationLayout />)),

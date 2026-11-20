@@ -1,21 +1,27 @@
-import { useState } from 'react';
 import { useParams } from 'react-router';
-import { cleanName, containsName, parseGameId, type CustomGame, type Group } from '@/core/model';
-import { SUPPORTED_GAMES } from '@/games/registry';
+import { parseGameId, type CustomGame, type Group } from '@/core/model';
 import { formatDate } from '@/i18n/format';
 import { t } from '@/i18n/t';
-import { useCustomGame, useCustomGames, useGroups } from '@/infra/db/readHooks';
+import {
+  useCustomGame,
+  useCustomGames,
+  useGroups,
+  useScoredMatchCount,
+} from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
-import { ChevronIcon, DiceIcon, PenIcon } from '@/ui/components/Icons';
+import { EditorDialog } from '@/ui/components/EditorDialog';
+import { ChevronIcon, PenIcon } from '@/ui/components/Icons';
 import { MiniTable } from '@/ui/components/MiniTable';
 import { Page } from '@/ui/components/Page';
 import { PillButton } from '@/ui/components/PillButton';
+import { PressableLink } from '@/ui/components/Pressable';
+import { useGoBack } from '@/ui/components/useGoBack';
+import { GameLetter } from '@/ui/views/games/GameCards';
+import { GameEditor } from '@/ui/views/games/GameEditor';
+import { otherGameNames } from './GamesView';
 import overview from './Overview.module.css';
 import styles from './Profile.module.css';
-import { useRenameForm } from './RenameForm';
-import { PressableLink } from '@/ui/components/Pressable';
 
-const DICE_SIZE = 28;
 const PILL_ICON_SIZE = 15;
 const ROW_TABLE_DIAMETER = 44;
 const CHEVRON_SIZE = 18;
@@ -29,61 +35,48 @@ function tablesOfGame(groups: readonly Group[], game: CustomGame): Group[] {
   );
 }
 
-type GameRenameProps = {
-  readonly game: CustomGame;
-  /** Names of all other games, the supported ones included. */
-  readonly otherNames: readonly string[];
-  readonly card: React.JSX.Element;
-  readonly actions: React.JSX.Element;
-  readonly onClose: () => void;
-};
-
-// US-VW-07 AK-1: renamed in place like a person; the name must stay unique among all games.
-function GameRename({
-  game,
-  otherNames,
-  card,
-  actions,
-  onClose,
-}: GameRenameProps): React.JSX.Element {
-  const { masterData } = useAppDependencies();
-  const { form, notices } = useRenameForm({
-    initialName: game.name,
-    fieldLabel: t('spiele.neuerName'),
-    // AK-1: checked while typing against Catan and the other custom games.
-    liveError: (name) =>
-      containsName(otherNames, name) ? t('spiele.gleicherName', { name: cleanName(name) }) : null,
-    save: (name) => masterData.renameCustomGame({ gameId: game.id, name }),
-    // Only if a game was created in the meantime; the live check shows it right after.
-    messageFor: (error, name) =>
-      error === 'name-duplicate' ? t('spiele.gleicherName', { name }) : t('verwaltung.nameLeer'),
-    onClose,
-  });
+function ScoringFact({ game }: { readonly game: CustomGame }): React.JSX.Element {
+  if (game.scoring === undefined) {
+    return (
+      <span className={overview.fact}>
+        <b>{t('spiele.wertungPille.keine')}</b>
+        <span className={overview.factLabel}>{t('spiele.wertungPille.punkte')}</span>
+      </span>
+    );
+  }
   return (
-    <>
-      <div className={styles.profile}>
-        {card}
-        <div className={styles.facts}>{form}</div>
-      </div>
-      {actions}
-      {notices}
-    </>
+    <span className={overview.fact}>
+      <b>
+        {t(
+          game.scoring === 'highest-wins'
+            ? 'spiele.wertungPille.meiste'
+            : 'spiele.wertungPille.wenigste',
+        )}
+      </b>
+      <span className={overview.factLabel}>{t('spiele.wertungPille.gewinnen')}</span>
+    </span>
   );
 }
 
 /**
- * Page of a custom game `#/verwaltung/spiele/‹id›` (US-VW-07, design I1-F): a small playing
- * card with a die, name and date, renaming in place and the tables that play only this game.
- * Supported games such as Catan have no page (AK-2: they cannot be renamed).
+ * Page of a custom game `#/verwaltung/spiele/‹id›` (US-VW-07, design I3-B): a small playing card
+ * with its letter, name, date, scoring and tables, "Bearbeiten" and the tables that play only
+ * this game. Under `…/bearbeiten` the editor lies over the page, as for tables (AK-1, AK-3).
+ * Supported games such as Catan have no page (AK-2).
  */
-export function GameView(): React.JSX.Element | null {
+export function GameView({
+  isEditing = false,
+}: {
+  readonly isEditing?: boolean;
+}): React.JSX.Element | null {
   const { db } = useAppDependencies();
   const { gameId = '' } = useParams();
   const parsed = parseGameId(gameId);
   const game = useCustomGame(db, parsed.ok ? parsed.value : null);
   const groups = useGroups(db);
   const customGames = useCustomGames(db);
-  const [isRenaming, setIsRenaming] = useState(false);
+  const scoredCount = useScoredMatchCount(db, parsed.ok ? parsed.value : null);
+  const closeEditor = useGoBack(`/verwaltung/spiele/${gameId}`);
 
   if (game === undefined || groups === undefined) {
     return null;
@@ -97,67 +90,37 @@ export function GameView(): React.JSX.Element | null {
   }
 
   const tables = tablesOfGame(groups, game);
-  const card = (
-    <div className={styles.card} aria-hidden="true">
-      <span className={styles.corner}>{tables.length}</span>
-      <span className={styles.gameIcon}>
-        <DiceIcon size={DICE_SIZE} />
-      </span>
-      <strong className={styles.cardName}>{game.name}</strong>
-      <span className={styles.cornerBottom}>{tables.length}</span>
-    </div>
-  );
-  const actions = (
-    <div className={styles.actions}>
-      <PillButton
-        icon={<PenIcon size={PILL_ICON_SIZE} />}
-        onClick={() => {
-          setIsRenaming(true);
-        }}
-      >
-        {t('spiele.umbenennen')}
-      </PillButton>
-    </div>
-  );
   return (
     <Page title={game.name} backFallback="/verwaltung/spiele">
-      {isRenaming ? (
-        <GameRename
-          game={game}
-          otherNames={[
-            ...SUPPORTED_GAMES.map((supported) => t(supported.nameKey)),
-            ...(customGames ?? [])
-              .filter((other) => other.id !== game.id)
-              .map((other) => other.name),
-          ]}
-          card={card}
-          actions={actions}
-          onClose={() => {
-            setIsRenaming(false);
-          }}
-        />
-      ) : (
-        <>
-          <div className={styles.profile}>
-            {card}
-            <div className={styles.facts}>
-              <strong className={styles.name}>{game.name}</strong>
-              <span className={styles.since}>
-                {t('spiele.angelegtAm', { datum: formatDate(game.createdAt) })}
+      <div className={styles.profile}>
+        <div className={styles.card} aria-hidden="true">
+          <GameLetter name={game.name} />
+          <strong className={styles.gameName}>{game.name}</strong>
+        </div>
+        <div className={styles.facts}>
+          <strong className={styles.name}>{game.name}</strong>
+          <span className={styles.since}>
+            {t('spiele.angelegtAm', { datum: formatDate(game.createdAt) })}
+          </span>
+          <div className={overview.facts}>
+            <ScoringFact game={game} />
+            <span className={overview.fact}>
+              <b>{tables.length}</b>
+              <span className={overview.factLabel}>
+                {t(tables.length === 1 ? 'spiele.tisch' : 'spiele.tische')}
               </span>
-              <div className={overview.facts}>
-                <span className={overview.fact}>
-                  <b>{tables.length}</b>
-                  <span className={overview.factLabel}>
-                    {t(tables.length === 1 ? 'spiele.tisch' : 'spiele.tische')}
-                  </span>
-                </span>
-              </div>
-            </div>
+            </span>
           </div>
-          {actions}
-        </>
-      )}
+        </div>
+      </div>
+      <div className={styles.actions}>
+        <PillButton
+          icon={<PenIcon size={PILL_ICON_SIZE} />}
+          to={`/verwaltung/spiele/${game.id}/bearbeiten`}
+        >
+          {t('spiele.bearbeiten')}
+        </PillButton>
+      </div>
       <section className={overview.section}>
         <h2 className={overview.sectionTitle}>
           {t('spiele.tischeUeberschrift', { spiel: game.name, anzahl: tables.length })}
@@ -185,6 +148,16 @@ export function GameView(): React.JSX.Element | null {
           </ul>
         )}
       </section>
+      {isEditing && customGames !== undefined && scoredCount !== undefined && (
+        <EditorDialog title={t('spiele.bearbeitenTitel')} isNarrow onClose={closeEditor}>
+          <GameEditor
+            game={game}
+            otherNames={otherGameNames(customGames, game)}
+            scoredCount={scoredCount}
+            onSaved={closeEditor}
+          />
+        </EditorDialog>
+      )}
     </Page>
   );
 }

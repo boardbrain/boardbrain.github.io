@@ -78,7 +78,7 @@ export type ClockCorrectionInvalidError = 'clock-correction-invalid';
 export type ClockCorrection = {
   readonly startedAt: IsoTimestamp;
   readonly elapsedMs: number;
-  readonly paused: boolean;
+  readonly isPaused: boolean;
 };
 
 /**
@@ -90,7 +90,7 @@ export function correctClock(
   correction: ClockCorrection,
   now: IsoTimestamp,
 ): Result<SessionClock, ClockCorrectionInvalidError> {
-  const { startedAt, elapsedMs, paused } = correction;
+  const { startedAt, elapsedMs, isPaused } = correction;
   const sinceStart = Date.parse(now) - Date.parse(startedAt);
   if (
     !Number.isFinite(sinceStart) ||
@@ -101,7 +101,7 @@ export function correctClock(
     return err('clock-correction-invalid');
   }
   const pausedMs = sinceStart - elapsedMs;
-  return ok(paused ? { startedAt, pausedAt: now, pausedMs } : { startedAt, pausedMs });
+  return ok(isPaused ? { startedAt, pausedAt: now, pausedMs } : { startedAt, pausedMs });
 }
 
 /**

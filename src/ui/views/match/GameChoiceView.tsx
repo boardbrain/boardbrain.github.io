@@ -97,7 +97,10 @@ export function GameChoiceView(): React.JSX.Element {
       </div>
       {customGames !== undefined && played !== undefined && (
         <>
-          <GameGrid label={t('spiele.karten')}>
+          <GameGrid
+            label={t('spiele.karten')}
+            hint={active.length === 0 ? undefined : t('spielliste.hinweis')}
+          >
             {games.map((listed) =>
               listed.kind === 'catan' ? (
                 <CatanGameCard
@@ -121,7 +124,7 @@ export function GameChoiceView(): React.JSX.Element {
               ),
             )}
           </GameGrid>
-          {active.length === 0 ? (
+          {active.length === 0 && (
             // LZ2: what is missing and the way to it.
             <div className={styles.empty}>
               <p className={shared.muted}>{t('spielliste.leer')}</p>
@@ -130,8 +133,6 @@ export function GameChoiceView(): React.JSX.Element {
                 {t('spiele.neuesSpiel')}
               </PressableLink>
             </div>
-          ) : (
-            <p className={styles.hint}>{t('spielliste.hinweis')}</p>
           )}
         </>
       )}
