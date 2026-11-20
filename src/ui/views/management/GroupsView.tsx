@@ -4,13 +4,14 @@ import { t } from '@/i18n/t';
 import { useCustomGames, useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { EditorDialog } from '@/ui/components/EditorDialog';
-import { CloseIcon, SearchIcon } from '@/ui/components/Icons';
+import { CloseIcon, PlusIcon, SearchIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
 import { Page } from '@/ui/components/Page';
 import { GroupEditor } from './GroupEditor';
 import { bindingLabel } from './groupBinding';
 import { GroupTable, type TableSeat } from './GroupTable';
 import styles from './GroupsView.module.css';
+import personStyles from './PersonsView.module.css';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 
 const MIN_PERSONS_FOR_GROUP = 2;
@@ -56,15 +57,29 @@ export function GroupsView(): React.JSX.Element {
       title={t('gruppen.titel')}
       backFallback="/verwaltung"
       actions={
-        <PressableButton
-          type="button"
-          className={styles.iconButton}
-          aria-label={t('gruppen.suchen')}
-          aria-expanded={isSearchOpen}
-          onClick={toggleSearch}
-        >
-          <SearchIcon />
-        </PressableButton>
+        <div className={personStyles.actions}>
+          <PressableButton
+            type="button"
+            className={styles.iconButton}
+            aria-label={t('gruppen.suchen')}
+            aria-expanded={isSearchOpen}
+            onClick={toggleSearch}
+          >
+            <SearchIcon />
+          </PressableButton>
+          {/* As on "Personen": a new table without scrolling to the dashed card. */}
+          <PressableButton
+            type="button"
+            className={personStyles.addButton}
+            aria-label={t('gruppen.neu')}
+            disabled={!canCreate}
+            onClick={() => {
+              setIsEditing(true);
+            }}
+          >
+            <PlusIcon />
+          </PressableButton>
+        </div>
       }
     >
       {persons !== undefined && !canCreate && (

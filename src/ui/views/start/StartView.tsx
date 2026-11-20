@@ -1,5 +1,5 @@
-import { m } from 'motion/react';
-import { useId } from 'react';
+import { AnimatePresence, m } from 'motion/react';
+import { useEffect, useId } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { t } from '@/i18n/t';
 import { useCurrentSession, useGroup } from '@/infra/db/readHooks';
@@ -15,6 +15,9 @@ import styles from './StartView.module.css';
 const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
 const LOGO_SIZE = 44;
 const TROPHY_SIZE = 24;
+// Long enough to read (Product Owner 20.11.2026): at least 5 s, longer for long names.
+const NOTE_MIN_MS = 5000;
+const NOTE_MS_PER_CHARACTER = 70;
 
 type SavedNote = { readonly who: string; readonly where: string };
 
@@ -54,35 +57,57 @@ export function StartView(): React.JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
   const saved = savedNoteOf(location.state);
+  const hideNote = (): void => {
+    void navigate('.', { replace: true, state: null });
+  };
+  const noteMs =
+    saved === null
+      ? 0
+      : Math.max(NOTE_MIN_MS, (saved.who.length + saved.where.length) * NOTE_MS_PER_CHARACTER);
+  // External system: the clock. The note disappears on its own once it could be read.
+  useEffect(() => {
+    if (noteMs === 0) {
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      void navigate('.', { replace: true, state: null });
+    }, noteMs);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [noteMs, navigate, location.key]);
   return (
     <main className={styles.start}>
       {/* R3: after storing a result a card floats at the top, over the banner of a match, and
-          moves nothing; a tap closes it (the jump to the table page follows with I3-C). */}
-      {saved !== null && (
-        <m.div
-          className={styles.savedNote}
-          role="status"
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <PressableButton
-            type="button"
-            look="card"
-            className={styles.savedButton}
-            onClick={() => {
-              void navigate('.', { replace: true, state: null });
-            }}
+          moves nothing; it disappears once it could be read, a tap closes it at once (the jump
+          to the table page follows with I3-C). */}
+      <AnimatePresence>
+        {saved !== null && (
+          <m.div
+            key="saved"
+            className={styles.savedNote}
+            role="status"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
           >
-            <span className={styles.savedIcon}>
-              <TrophyIcon size={TROPHY_SIZE} />
-            </span>
-            <span className={styles.savedText}>
-              <strong>{saved.who}</strong>
-              <small>{saved.where}</small>
-            </span>
-          </PressableButton>
-        </m.div>
-      )}
+            <PressableButton
+              type="button"
+              look="card"
+              className={styles.savedButton}
+              onClick={hideNote}
+            >
+              <span className={styles.savedIcon}>
+                <TrophyIcon size={TROPHY_SIZE} />
+              </span>
+              <span className={styles.savedText}>
+                <strong>{saved.who}</strong>
+                <small>{saved.where}</small>
+              </span>
+            </PressableButton>
+          </m.div>
+        )}
+      </AnimatePresence>
       <h1 className={styles.hiddenTitle}>{t('start.titel')}</h1>
       <p className={styles.brand}>
         <Logo size={LOGO_SIZE} />

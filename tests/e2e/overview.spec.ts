@@ -14,7 +14,7 @@ async function createPersons(page: Page, ...names: string[]): Promise<void> {
 
 async function createTable(page: Page, ...names: string[]): Promise<void> {
   await page.goto('/#/verwaltung/gruppen');
-  await page.getByRole('button', { name: 'Neuer Tisch' }).click();
+  await page.getByRole('button', { name: 'Neuer Tisch' }).first().click();
   const editor = page.getByRole('dialog', { name: 'Neuer Tisch' });
   for (const name of names) {
     await editor.getByRole('button', { name, exact: true }).click();

@@ -6,7 +6,9 @@ import { useCustomGames, usePlayedGames } from '@/infra/db/readHooks';
 import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { EditorDialog } from '@/ui/components/EditorDialog';
+import { PlusIcon } from '@/ui/components/Icons';
 import { Page } from '@/ui/components/Page';
+import { PressableLink } from '@/ui/components/Pressable';
 import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
 import { useGoBack } from '@/ui/components/useGoBack';
 import { GameEditor } from '@/ui/views/games/GameEditor';
@@ -61,12 +63,22 @@ export function GamesView({
       title={t('spiele.titel')}
       backFallback="/verwaltung"
       actions={
-        <SearchButton
-          labels={SEARCH_LABELS}
-          isOpen={isSearchOpen}
-          className={persons.iconButton}
-          onToggle={toggleSearch}
-        />
+        <div className={persons.actions}>
+          <SearchButton
+            labels={SEARCH_LABELS}
+            isOpen={isSearchOpen}
+            className={persons.iconButton}
+            onToggle={toggleSearch}
+          />
+          {/* As on "Personen": a new game without scrolling to the dashed card. */}
+          <PressableLink
+            to="/verwaltung/spiele/neu"
+            className={persons.addButton}
+            aria-label={t('spiele.neuesSpiel')}
+          >
+            <PlusIcon />
+          </PressableLink>
+        </div>
       }
     >
       {isSearchOpen && (

@@ -17,7 +17,7 @@ async function openRoom(page: Page): Promise<void> {
 }
 
 async function openEditor(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Neuer Tisch' }).click();
+  await page.getByRole('button', { name: 'Neuer Tisch' }).first().click();
   await expect(page.getByRole('dialog', { name: 'Neuer Tisch' })).toBeVisible();
 }
 

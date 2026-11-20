@@ -168,8 +168,9 @@ export function PersonsView(): React.JSX.Element {
                 type="button"
                 look="card"
                 className={styles.newCard}
+                aria-expanded={isFormOpen}
                 onClick={() => {
-                  setIsAdding(true);
+                  setIsAdding(!isAdding);
                 }}
               >
                 <PlusIcon size={PLUS_CARD_ICON_SIZE} />

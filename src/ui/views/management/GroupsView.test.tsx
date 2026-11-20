@@ -1,3 +1,4 @@
+import { defined } from '@tests/support/defined';
 import { aCustomGame, aGroup, aPerson } from '@tests/support/masterDataFakes';
 import { renderWithApp } from '@tests/support/renderWithApp';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -21,7 +22,11 @@ async function addPersons(db: BoardBrainDb, count: number): Promise<void> {
 }
 
 async function openEditor(user: User): Promise<void> {
-  const button = await screen.findByRole('button', { name: 'Neuer Tisch' });
+  // The plus in the head comes first; the dashed card opens the same editor.
+  const button = defined(
+    (await screen.findAllByRole('button', { name: 'Neuer Tisch' }))[0],
+    'plus',
+  );
   await waitFor(() => {
     expect(button).toBeEnabled();
   });
@@ -59,7 +64,9 @@ describe('US-PG-02 The room with all tables', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Lege zuerst mindestens zwei Personen an',
     );
-    expect(screen.getByRole('button', { name: 'Neuer Tisch' })).toBeDisabled();
+    for (const button of screen.getAllByRole('button', { name: 'Neuer Tisch' })) {
+      expect(button).toBeDisabled();
+    }
   });
 
   it('shows a hint while there are no groups', async () => {

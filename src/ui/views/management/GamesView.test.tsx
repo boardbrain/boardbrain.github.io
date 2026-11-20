@@ -1,3 +1,4 @@
+import { defined } from '@tests/support/defined';
 import { aCustomGame } from '@tests/support/masterDataFakes';
 import { OverviewRoutes } from '@tests/support/overviewRoutes';
 import { renderWithApp } from '@tests/support/renderWithApp';
@@ -37,7 +38,13 @@ describe('US-SP-02 Create a custom game (design I3-B V2)', () => {
     const user = userEvent.setup();
     const { db } = renderWithApp(<OverviewRoutes />, { path: '/verwaltung/spiele' });
 
-    await user.click(await screen.findByRole('link', { name: 'Neues Spiel' }));
+    // The plus in the head and the dashed card both open the page.
+    await waitFor(() => {
+      expect(screen.getAllByRole('link', { name: 'Neues Spiel' })).toHaveLength(2);
+    });
+    const [plus, card] = screen.getAllByRole('link', { name: 'Neues Spiel' });
+    expect(card).toHaveAttribute('href', defined(plus, 'plus').getAttribute('href'));
+    await user.click(defined(plus, 'plus'));
     const editor = await screen.findByRole('dialog', { name: 'Neues Spiel' });
     expect(within(editor).getByRole('radio', { name: /Keine Punkte/ })).toBeChecked();
     await user.type(within(editor).getByRole('textbox', { name: 'Name des Spiels' }), 'Skyjo');

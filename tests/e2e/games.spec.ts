@@ -3,7 +3,7 @@ import { expect, test } from './fixtures';
 
 // US-SP-02 AK-1: "Neues Spiel" on the games page opens its own page (design I3-B).
 async function createGame(page: Page, name: string, points?: RegExp): Promise<void> {
-  await page.getByRole('link', { name: 'Neues Spiel' }).click();
+  await page.getByRole('link', { name: 'Neues Spiel' }).first().click();
   const editor = page.getByRole('dialog', { name: 'Neues Spiel' });
   await editor.getByRole('textbox', { name: 'Name des Spiels' }).fill(name);
   if (points !== undefined) {
@@ -45,7 +45,7 @@ test.describe('US-SP-02 Create a custom game', () => {
     await createGame(page, 'Uno');
 
     // Checked while typing; saving stays blocked.
-    await page.getByRole('link', { name: 'Neues Spiel' }).click();
+    await page.getByRole('link', { name: 'Neues Spiel' }).first().click();
     const editor = page.getByRole('dialog', { name: 'Neues Spiel' });
     for (const taken of ['uno', 'CATAN']) {
       await editor.getByRole('textbox', { name: 'Name des Spiels' }).fill(taken);

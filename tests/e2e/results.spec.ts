@@ -87,6 +87,8 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
     await page.getByRole('button', { name: 'Ergebnis speichern' }).click();
 
     await expect(saved(page)).toContainText('Unentschieden: Clara und David');
+    // R3: the note disappears on its own once it could be read.
+    await expect(saved(page)).toHaveCount(0, { timeout: 12_000 });
   });
 
   test('AK-2: Catan asks first, then the table; a winner without victory points (E-49)', async ({
