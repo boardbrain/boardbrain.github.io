@@ -16,6 +16,7 @@ const DAY = 24 * 60 * MINUTE;
 const TICK_MS = 1000;
 const PILL_ICON_SIZE = 16;
 const STEP_ICON_SIZE = 14;
+const PAUSED_ICON_SIZE = 22;
 
 /**
  * "1:23": hours and minutes of a duration in whole minutes.
@@ -155,11 +156,16 @@ function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Ele
       }}
     >
       <div className={styles.head}>
-        <span className={cx(styles.big, isPaused && styles.bigPaused)}>{clockText(minutes)}</span>
+        <span className={styles.bigRow}>
+          <span className={cx(styles.big, isPaused && styles.bigPaused)}>{clockText(minutes)}</span>
+          {/* Paused as a symbol beside the time: no line of its own that moves everything. */}
+          {isPaused && (
+            <span className={styles.pausedMark} role="img" aria-label={t('partie.angehalten')}>
+              <PauseIcon size={PAUSED_ICON_SIZE} />
+            </span>
+          )}
+        </span>
         <h2 className={styles.title}>{t('partie.spieldauer')}</h2>
-        {isPaused && (
-          <span className={cx(shared.small, shared.muted)}>{t('partie.angehalten')}</span>
-        )}
       </div>
       <div className={shared.group}>
         <div className={cx(styles.row, styles.stepLine)}>

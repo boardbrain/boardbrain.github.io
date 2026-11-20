@@ -58,6 +58,11 @@ type BoardProps = {
   readonly lifted?: readonly string[] | undefined;
   /** Drawn over everything, e.g. the ring when a piece is set (design D-2, F4). */
   readonly top?: ReactNode;
+  /**
+   * Attached to the board outside its SVG and positioned by the caller, e.g. the hint below the
+   * board of the overview (Product Owner 20.11.2026).
+   */
+  readonly attached?: ReactNode;
   /** Makes every piece with a label a button (US-AB-03 AK-8); it gets the key of the piece. */
   readonly onPieceTap?: ((key: string) => void) | undefined;
   readonly marked?: PieceMarking | null | undefined;
@@ -102,6 +107,7 @@ export function Board({
   overlay,
   lifted = [],
   top,
+  attached,
   onPieceTap,
   marked,
   ref,
@@ -200,6 +206,7 @@ export function Board({
             onPieceTap={onPieceTap}
           />
         )}
+        {attached}
       </div>
     </div>
   );

@@ -111,13 +111,16 @@ export function MatchOverviewView(): React.JSX.Element | null {
         onPieceTap={(key) => {
           setRepeating(pieces.stepOf.get(key) ?? null);
         }}
+        attached={
+          // H1: at the board, nothing moves (design I2-H); in portrait right below it, so board
+          // and hint sit together in the middle of the free room (Product Owner 20.11.2026).
+          pieces.buildings.length > 0 && (
+            <div className={styles.tapHint}>
+              <span>{t('partie.steinAntippen')}</span>
+            </div>
+          )
+        }
       />
-      {/* H1: in the free room below the board, nothing moves (design I2-H). */}
-      {pieces.buildings.length > 0 && (
-        <div className={styles.tapHint}>
-          <span>{t('partie.steinAntippen')}</span>
-        </div>
-      )}
     </div>
   );
 

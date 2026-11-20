@@ -32,6 +32,9 @@
 }
 
 .ovBoard {
+  /* Room for the hint below the board in portrait. */
+  --board-hint-room: 36px;
+
   position: relative;
   display: grid;
   flex: none;
@@ -54,6 +57,15 @@
 @container (width <= 719px) {
   .boardTab .ovBoard {
     margin: 0 -8px;
+  }
+}
+
+/* Portrait: the board fills the width and leaves room above and below. The hint hangs right below
+   the board, and the room below it is kept free, so board and hint together are centred between
+   the tabs and the coins (Product Owner 20.11.2026). */
+@media (orientation: portrait) {
+  .boardTab .ovBoard {
+    padding-bottom: var(--board-hint-room);
   }
 }
 
@@ -268,6 +280,7 @@
   right: 0;
   bottom: 2px;
   left: 0;
+  white-space: nowrap;
   z-index: 1;
   display: flex;
   justify-content: center;
@@ -280,4 +293,13 @@
   color: var(--color-text);
   background: var(--color-board-hint);
   border-radius: 999px;
+}
+
+/* Portrait: the hint right below the board (see `.boardTab .ovBoard` above). After the rule of
+   the hint, so it wins. */
+@media (orientation: portrait) {
+  .tapHint {
+    top: calc(100% + 8px);
+    bottom: auto;
+  }
 }

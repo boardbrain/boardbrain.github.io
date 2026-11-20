@@ -63,6 +63,22 @@
   opacity: 0.55;
 }
 
+/* The time stays in the middle; the symbol for "paused" hangs beside it. */
+.bigRow {
+  position: relative;
+  display: inline-grid;
+}
+
+.pausedMark {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  display: grid;
+  margin-left: 8px;
+  color: var(--color-text-muted);
+  translate: 0 -50%;
+}
+
 .title {
   margin: 6px 0 0;
   font-size: 1.15rem;
@@ -154,7 +170,8 @@
   width: 100%;
 }
 
-/* The pill keeps one line; with too little room the timer moves below it. */
+/* The pill keeps one line, as high as the timer; with too little room the timer moves below. */
 .endRow > :first-child {
+  min-height: 44px;
   white-space: nowrap;
 }
