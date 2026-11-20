@@ -1071,6 +1071,7 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: die Ansicht (nur sie scrollt) un
 | Laufende Partie | Lesehook `useCurrentSession(db)` (`infra/db/readHooks.ts`) über `useLiveQuery`: `none`, `unsupported` (unbekannte `schemaVersion`) oder `active` mit der Sitzung; Änderungen nur über `SessionService`, jede Ansicht zeigt danach den gespeicherten Stand (ADR-014, ADR-029) *(geändert in 0.22)* |
 | Vorbereitung | Zustand der Layout-Route `#/partie/neu` (`PreparationLayout`), an Spielwahl, Tisch, Optionen und Farben über den Outlet-Kontext gereicht; nur im Arbeitsspeicher (ADR-029) *(geändert in 0.22)* |
 | Formulare | Lokaler Komponentenzustand; Speichern über `useTransition`, damit unerwartete Fehler die Fehleransicht der Routen erreichen |
+| Wahl einer Ansicht | Kleine Vorlieben einer Ansicht auf diesem Gerät, z. B. die Sortierung der Spielliste (I3-B): `localStorage`, gelesen beim Öffnen, geschrieben beim Wechsel; ohne Speicher (privates Fenster) gilt der Standard. Keine Daten, deshalb nicht in Datenbank und Sicherung *(neu in 0.41)* |
 | Datenbank und Dienste | `AppDependenciesProvider` (`ui/AppDependencies.tsx`) reicht die in `src/main.tsx` zusammengesetzte Datenbank und die Anwendungsdienste an die Ansichten weiter; Lesehooks wie `usePersons(db)` aus `infra/db/readHooks.ts` erhalten die Datenbank als Parameter |
 
 ### 13.3 Texte (ADR-018)

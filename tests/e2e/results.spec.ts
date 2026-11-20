@@ -166,6 +166,9 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
 
     await expect.poll(() => gameNames(page)).toEqual(['Catan', 'Uno', 'Wizard']);
     await expect(page.getByText('A–Z', { exact: true })).toBeVisible();
+    // The order chosen last comes back.
+    await page.reload();
+    await expect.poll(() => gameNames(page)).toEqual(['Catan', 'Uno', 'Wizard']);
 
     // A search as on "Personen" and "Tische".
     await page.getByRole('button', { name: 'Spiele suchen' }).click();

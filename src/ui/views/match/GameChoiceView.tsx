@@ -30,6 +30,28 @@ const TROPHY_SIZE = 40;
 
 type Order = 'recent' | 'name';
 
+// The order chosen last comes back (Product Owner 20.11.2026). A choice of this view on this
+// device, not data: it lives in the browser's storage, not in the database or a backup
+// (Architecture 13.2).
+const ORDER_KEY = 'boardbrain.gameListOrder';
+
+function readOrder(): Order {
+  try {
+    return localStorage.getItem(ORDER_KEY) === 'name' ? 'name' : 'recent';
+  } catch {
+    // Storage blocked, e.g. in a private window: the list starts with the last played.
+    return 'recent';
+  }
+}
+
+function storeOrder(order: Order): void {
+  try {
+    localStorage.setItem(ORDER_KEY, order);
+  } catch {
+    // Storage blocked: the order holds until the page is left, which is all that is lost.
+  }
+}
+
 type ListedGame =
   | { readonly kind: 'catan'; readonly id: GameId; readonly name: string }
   | {
@@ -64,7 +86,7 @@ export function GameChoiceView(): React.JSX.Element {
   const customGames = useCustomGames(db);
   const played = usePlayedGames(db);
   const navigate = useNavigate();
-  const [order, setOrder] = useState<Order>('recent');
+  const [order, setOrder] = useState<Order>(readOrder);
   const [isAsking, setIsAsking] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -108,7 +130,9 @@ export function GameChoiceView(): React.JSX.Element {
             className={shared.iconBtn}
             aria-label={t('spielliste.sortieren', { jetzt: orderWord, dann: otherWord })}
             onClick={() => {
-              setOrder(order === 'recent' ? 'name' : 'recent');
+              const next = order === 'recent' ? 'name' : 'recent';
+              setOrder(next);
+              storeOrder(next);
             }}
           >
             {order === 'recent' ? (
