@@ -1,0 +1,340 @@
+/* Design I3-B (docs/design/i3b-result-entry-final-preview.html): table choice and result form. */
+.emptyBox {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 28px 16px;
+  text-align: center;
+  background: var(--color-surface-raised);
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+}
+
+.emptyText {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.optRow,
+.switchRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 14px;
+  color: var(--color-text);
+  text-align: left;
+  background: none;
+  border-radius: 0;
+}
+
+.txt {
+  flex: 1;
+  min-width: 0;
+}
+
+.sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+/* "optional" on the line of its label, so the label stays where the others are. */
+.optTag {
+  margin-left: 6px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.durWarn {
+  font-weight: 600;
+  color: var(--color-accent-text);
+}
+
+/* D1, Pf2: the day between two arrows, the time with a bin that keeps its place. */
+.dateCtl,
+.timeCtl {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.dateCtl {
+  gap: 6px;
+}
+
+.dayArrow,
+.clearTime {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  min-height: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--color-accent-text);
+  background: none;
+  border-radius: 8px;
+}
+
+.dayArrow:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+  opacity: 0.35;
+}
+
+.clearTime {
+  color: var(--color-text-muted);
+}
+
+.hiddenKeepPlace {
+  visibility: hidden;
+}
+
+.pickWrap {
+  position: relative;
+  display: inline-grid;
+  cursor: pointer;
+}
+
+.valPill {
+  display: block;
+  padding: 6px 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  pointer-events: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.datePill {
+  min-width: 8.4rem;
+}
+
+.timePill {
+  min-width: 4.4rem;
+}
+
+.empty {
+  color: var(--color-text-muted);
+}
+
+.pickNative {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  opacity: 0;
+}
+
+/* E6: one row per person. */
+.rows {
+  display: grid;
+}
+
+.rows > * + * {
+  border-top: 1px solid var(--color-border);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  min-height: 58px;
+  padding: 8px 14px;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A person in the group colour, as on the table page (GroupView.module.css .seat). */
+.seat {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-surface);
+  border-radius: 50%;
+}
+
+.num {
+  width: 74px;
+  min-height: 44px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: max(1rem, 16px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.num::placeholder {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.bad {
+  border-color: var(--color-danger-text);
+  box-shadow: inset 0 0 0 1px var(--color-danger-text);
+}
+
+.crown,
+.slot {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  height: 44px;
+  padding: 0;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  border-radius: 50%;
+}
+
+.crown {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.crown:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.crownOn {
+  color: var(--color-surface);
+  background: var(--color-accent-text);
+  border-color: var(--color-accent-text);
+}
+
+.placeNo {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.locked {
+  opacity: 0.55;
+}
+
+/* G3: the provisional place in a dashed circle. */
+.slot {
+  border: 1px dashed var(--color-border);
+}
+
+/* M3: places as numbers; 2 to n dashed because they are optional. */
+.placeNums {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  padding: 2px;
+  border-radius: 10px;
+}
+
+.badPlaces {
+  box-shadow: inset 0 0 0 1px var(--color-danger-text);
+}
+
+.pn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  min-height: 40px;
+  height: 40px;
+  padding: 0;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.pnFirst {
+  margin-right: 6px;
+  color: var(--color-accent-text);
+}
+
+.pnOn {
+  color: var(--color-surface);
+  background: var(--color-accent-text);
+  border-color: var(--color-accent-text);
+}
+
+.pnOptional {
+  border-style: dashed;
+}
+
+.pn:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+  background: transparent;
+  border-color: transparent;
+  opacity: 1;
+}
+
+.coins {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+}
+
+.notes {
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: max(1rem, 16px);
+  color: var(--color-text);
+  resize: vertical;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+/* The button stays above the card hand while the form scrolls below it. */
+.footer {
+  position: sticky;
+  bottom: calc(-1 * var(--hand-height, 0px));
+  z-index: 2;
+  display: grid;
+  padding: 14px var(--page-padding-side) calc(16px + var(--hand-height, 0px));
+  margin: auto calc(-1 * var(--page-padding-side)) calc(-24px - var(--hand-height, 0px));
+  background: linear-gradient(180deg, transparent, var(--color-surface) 18px);
+}
+
+.footer > * {
+  width: 100%;
+}
+
+/* E6: incomplete looks disabled, but tapping lights up what is missing. */
+.looksOff {
+  opacity: 0.45;
+}

@@ -24,7 +24,10 @@ const DENSE_FROM = 7;
 // Catan colours appear in the details only where Catan is possible.
 const CATAN_MAX_SEATS = 4;
 
-function namesOf(group: Group, persons: ReadonlyMap<PersonId, Person>): string[] {
+/**
+ * The names of the members in seat order.
+ */
+export function namesOf(group: Group, persons: ReadonlyMap<PersonId, Person>): string[] {
   return group.members.map((member) => persons.get(member.personId)?.name ?? '');
 }
 
@@ -89,6 +92,11 @@ export function TableChoiceView(): React.JSX.Element | null {
                 key={group.id}
                 group={group}
                 names={namesOf(group, byId)}
+                boundTag={
+                  isCatanOnly(group)
+                    ? t('partie.nurSpiel', { spiel: t('spiele.namen.catan') })
+                    : undefined
+                }
                 isSelected={preparation?.base.groupId === group.id}
                 onChoose={() => void choose(group)}
                 onHold={() => {
@@ -109,7 +117,15 @@ export function TableChoiceView(): React.JSX.Element | null {
           }}
           onConfirm={() => void choose(details)}
         >
-          <TableDetails group={details} persons={byId} />
+          <TableDetails
+            group={details}
+            persons={byId}
+            binding={
+              isCatanOnly(details)
+                ? t('partie.nurSpiel', { spiel: t('spiele.namen.catan') })
+                : t('partie.alleSpiele')
+            }
+          />
         </MatchDialog>
       )}
     </main>
@@ -119,15 +135,21 @@ export function TableChoiceView(): React.JSX.Element | null {
 type TableCardProps = {
   readonly group: Group;
   readonly names: readonly string[];
+  /** "nur Catan" on a table bound to the game. */
+  readonly boundTag?: string | undefined;
   readonly isSelected: boolean;
   readonly onChoose: () => void;
   readonly onHold: () => void;
 };
 
-// One table of the room with fixed rows: table, name and names, number of persons (T2).
-function TableCard({
+/**
+ * One table of the room with fixed rows: table, name and names, number of persons (design I2-C
+ * T2); a tap chooses, holding shows the details. Also the table choice of a result (I3-B).
+ */
+export function TableCard({
   group,
   names,
+  boundTag,
   isSelected,
   onChoose,
   onHold,
@@ -142,11 +164,7 @@ function TableCard({
       aria-label={t('partie.tischBeschriftung', { tisch: group.name, namen: names.join(', ') })}
       {...press}
     >
-      {isCatanOnly(group) && (
-        <span className={styles.boundTag}>
-          {t('partie.nurSpiel', { spiel: t('spiele.namen.catan') })}
-        </span>
-      )}
+      {boundTag !== undefined && <span className={styles.boundTag}>{boundTag}</span>}
       <span className={styles.mini}>
         <MiniTable
           seats={group.members.map(({ personId, groupColor }) => ({ personId, groupColor }))}
@@ -168,14 +186,15 @@ function TableCard({
 type TableDetailsProps = {
   readonly group: Group;
   readonly persons: ReadonlyMap<PersonId, Person>;
+  /** What the table plays, e.g. "alle Spiele". */
+  readonly binding: string;
 };
 
-// Details after holding a table: the large table with initials, full name, binding, everyone.
-function TableDetails({ group, persons }: TableDetailsProps): React.JSX.Element {
+/**
+ * Details after holding a table: the large table with initials, full name, binding, everyone.
+ */
+export function TableDetails({ group, persons, binding }: TableDetailsProps): React.JSX.Element {
   const count = group.members.length;
-  const binding = isCatanOnly(group)
-    ? t('partie.nurSpiel', { spiel: t('spiele.namen.catan') })
-    : t('partie.alleSpiele');
   return (
     <>
       <div className={styles.detailHead}>

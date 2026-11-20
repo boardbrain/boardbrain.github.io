@@ -1,8 +1,11 @@
+import { m } from 'motion/react';
 import { useId } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { t } from '@/i18n/t';
 import { useCurrentSession, useGroup } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
-import { ChevronIcon, PlayIcon } from '@/ui/components/Icons';
+import { ChevronIcon, PlayIcon, TrophyIcon } from '@/ui/components/Icons';
+import { PressableButton } from '@/ui/components/Pressable';
 import { Logo } from '@/ui/components/Logo';
 import { PlayingCard } from '@/ui/components/PlayingCard';
 import { PressableLink } from '@/ui/components/Pressable';
@@ -11,6 +14,28 @@ import styles from './StartView.module.css';
 
 const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
 const LOGO_SIZE = 44;
+const TROPHY_SIZE = 24;
+
+type SavedNote = { readonly who: string; readonly where: string };
+
+// The note the result form passes along (design I3-B R3); anything else in the history is ignored.
+function savedNoteOf(state: unknown): SavedNote | null {
+  if (typeof state !== 'object' || state === null || !('saved' in state)) {
+    return null;
+  }
+  const { saved } = state;
+  if (
+    typeof saved === 'object' &&
+    saved !== null &&
+    'who' in saved &&
+    'where' in saved &&
+    typeof saved.who === 'string' &&
+    typeof saved.where === 'string'
+  ) {
+    return { who: saved.who, where: saved.where };
+  }
+  return null;
+}
 
 /**
  * Start view `#/` (Architecture 13.1, design D-3): persons, tables and games as a fan of
@@ -26,8 +51,38 @@ export function StartView(): React.JSX.Element {
   const current = useCurrentSession(db);
   const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
   const headingId = useId();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const saved = savedNoteOf(location.state);
   return (
     <main className={styles.start}>
+      {/* R3: after storing a result a card floats at the top, over the banner of a match, and
+          moves nothing; a tap closes it (the jump to the table page follows with I3-C). */}
+      {saved !== null && (
+        <m.div
+          className={styles.savedNote}
+          role="status"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <PressableButton
+            type="button"
+            look="card"
+            className={styles.savedButton}
+            onClick={() => {
+              void navigate('.', { replace: true, state: null });
+            }}
+          >
+            <span className={styles.savedIcon}>
+              <TrophyIcon size={TROPHY_SIZE} />
+            </span>
+            <span className={styles.savedText}>
+              <strong>{saved.who}</strong>
+              <small>{saved.where}</small>
+            </span>
+          </PressableButton>
+        </m.div>
+      )}
       <h1 className={styles.hiddenTitle}>{t('start.titel')}</h1>
       <p className={styles.brand}>
         <Logo size={LOGO_SIZE} />

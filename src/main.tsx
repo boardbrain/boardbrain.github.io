@@ -137,6 +137,18 @@ const router = createHashRouter([
       },
       { path: '/partie', lazy: matchRoute((match) => view(<match.MatchView />)) },
       {
+        path: '/partie/ergebnis',
+        lazy: matchRoute((match) => view(<match.MatchResultView />)),
+      },
+      {
+        path: '/ergebnis/neu/:gameId',
+        lazy: matchRoute((match) => view(<match.ResultTableView />)),
+      },
+      {
+        path: '/ergebnis/neu/:gameId/:groupId',
+        lazy: matchRoute((match) => view(<match.ResultView />)),
+      },
+      {
         path: '/partie/uebersicht',
         lazy: matchRoute((match) => view(<match.MatchOverviewView />)),
       },
