@@ -24,6 +24,31 @@ describe('US-AB-07 AK-6 correcting the timer in its details', () => {
     expect(draftMinutes(draft, at(3))).toBe(8);
   });
 
+  it('+5 and −5 give the timer back as it was: the beginning returns, no pause appears', () => {
+    const opened = startClock(iso(START));
+    const anchor = opened.startedAt;
+    const longer = addMinutes(opened, 5, at(1), anchor);
+    const back = addMinutes(longer, -5, at(1), anchor);
+
+    expect(longer.startedAt).toBe(iso(at(-5)));
+    expect(back.startedAt).toBe(anchor);
+    expect(back.pausedMs).toBe(0);
+    expect(draftMinutes(back, at(1))).toBe(1);
+  });
+
+  it('more minutes first use up a pause, then move the beginning', () => {
+    const paused = toggleDraftPause(startClock(iso(START)), at(10));
+    const withBreak = toggleDraftPause(paused, at(20));
+    const anchor = withBreak.startedAt;
+
+    const shorterBreak = addMinutes(withBreak, 5, at(30), anchor);
+    expect(shorterBreak.startedAt).toBe(anchor);
+    expect(draftMinutes(shorterBreak, at(30))).toBe(25);
+    const earlier = addMinutes(shorterBreak, 10, at(30), anchor);
+    expect(earlier.startedAt).toBe(iso(at(-5)));
+    expect(draftMinutes(earlier, at(30))).toBe(35);
+  });
+
   it('fewer minutes count the rest as paused, never below 0', () => {
     const draft = addMinutes(startClock(iso(START)), -5, at(30));
 

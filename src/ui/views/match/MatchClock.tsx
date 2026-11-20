@@ -121,6 +121,8 @@ function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Ele
   const { session } = useAppDependencies();
   const [, startTransition] = useTransition();
   const [draft, setDraft] = useState<SessionClock>(clock);
+  // The beginning the window opened with or that was set by hand (see `addMinutes`).
+  const [anchor, setAnchor] = useState(clock.startedAt);
   const isPaused = draft.pausedAt !== undefined;
   const minutes = draftMinutes(draft, now);
   const stepButton = (step: number): React.JSX.Element => (
@@ -132,7 +134,7 @@ function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Ele
       })}
       disabled={minutes + step < 0}
       onClick={() => {
-        setDraft(addMinutes(draft, step, Date.now()));
+        setDraft(addMinutes(draft, step, Date.now(), anchor));
       }}
     >
       {t(step < 0 ? 'partie.schrittWeniger' : 'partie.schrittMehr', { anzahl: Math.abs(step) })}
@@ -192,9 +194,14 @@ function ClockDetails({ clock, now, onClose }: ClockDetailsProps): React.JSX.Ele
                   return;
                 }
                 const at = Date.now();
-                setDraft(
-                  setBeginning(draft, beginningAt(event.target.value, draft.startedAt, at), at),
+                const changed = setBeginning(
+                  draft,
+                  beginningAt(event.target.value, draft.startedAt, at),
+                  at,
                 );
+                setDraft(changed);
+                // A beginning set by hand is the new anchor of the steps (see `addMinutes`).
+                setAnchor(changed.startedAt);
               }}
             />
           </label>

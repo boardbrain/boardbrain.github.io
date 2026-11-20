@@ -13,7 +13,8 @@ function iso(ms: number): string {
 }
 
 // A draft with this beginning and this measured time at `now`, paused or not. The beginning moves
-// earlier when more time is measured than has passed since it (Product Owner 20.11.2026).
+// earlier when more time is measured than has passed since it (Product Owner 20.11.2026); the
+// rest of the time since the beginning counts as paused.
 function redraft(
   draft: SessionClock,
   startedAt: string,
@@ -37,12 +38,19 @@ export function draftMinutes(draft: SessionClock, now: number): number {
 }
 
 /**
- * The draft with `minutes` more or fewer measured (US-AB-07 AK-6), never below 0. More than has
- * passed since the beginning moves the beginning earlier.
+ * The draft with `minutes` more or fewer measured (US-AB-07 AK-6), never below 0. `anchor` is the
+ * beginning the window opened with or that was set by hand: more time first uses up a pause, then
+ * moves the beginning earlier; less time moves it back, never later than `anchor`, and only then
+ * counts as paused. So +5 and −5 give the timer back as it was (Product Owner 20.11.2026).
  */
-export function addMinutes(draft: SessionClock, minutes: number, now: number): SessionClock {
+export function addMinutes(
+  draft: SessionClock,
+  minutes: number,
+  now: number,
+  anchor: string = draft.startedAt,
+): SessionClock {
   const elapsed = elapsedMilliseconds(draft, iso(now));
-  return redraft(draft, draft.startedAt, elapsed + minutes * MINUTE, now);
+  return redraft(draft, anchor, elapsed + minutes * MINUTE, now);
 }
 
 /**

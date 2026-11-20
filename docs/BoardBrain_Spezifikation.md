@@ -644,7 +644,7 @@ Bezug: FA-AB-11, FA-ER-10, E-43 → 3.5
 - **AK-3:** Gegeben die App wird geschlossen und neu gestartet, dann zeigt der Timer die seit dem Beginn vergangene Zeit ohne die angehaltene; ein angehaltener Timer bleibt angehalten.
 - **AK-4:** Gegeben ich trage aus der Partie ein Ergebnis ein, dann sind Spieldauer (auf ganze Minuten gerundet, mindestens 1) und Beginn übernommen und im Formular änderbar.
 - **AK-5:** Gegeben ich wiederhole nach Abschluss der Generierung einen Schritt (US-AB-03 AK-6), dann läuft der Timer weiter und beginnt nicht neu; eine falsche Dauer korrigiere ich im Formular. *(neu in 0.20)*
-- **AK-6:** Gegeben die Übersicht der laufenden Partie, wenn ich die Spieldauer antippe, dann kann ich die Dauer in Schritten von 1 und 5 Minuten und den Beginn korrigieren und den Timer anhalten oder fortsetzen; geht die Dauer über die Zeit seit dem Beginn hinaus, rückt der Beginn entsprechend nach vorn. Das Fenster zeigt dieselbe Zeit wie die Übersicht und zählt weiter, solange der Timer läuft; „Übernehmen“ speichert, „Schließen“ verwirft. *(neu in 0.22)*
+- **AK-6:** Gegeben die Übersicht der laufenden Partie, wenn ich die Spieldauer antippe, dann kann ich die Dauer in Schritten von 1 und 5 Minuten und den Beginn korrigieren und den Timer anhalten oder fortsetzen; geht die Dauer über die Zeit seit dem Beginn hinaus, rückt der Beginn entsprechend nach vorn; wird sie wieder kürzer, rückt er zurück, höchstens bis zum Beginn beim Öffnen, und erst darunter zählt die Differenz als Pause. Das Fenster zeigt dieselbe Zeit wie die Übersicht und zählt weiter, solange der Timer läuft; „Übernehmen“ speichert, „Schließen“ verwirft. *(neu in 0.22)*
 
 ### 4.5 Losschritte (LS)
 
