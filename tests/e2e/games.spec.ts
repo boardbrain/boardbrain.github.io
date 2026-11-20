@@ -31,6 +31,11 @@ test.describe('US-SP-02 Create a custom game', () => {
     await expect(cards(page)).toHaveText(['Neues Spiel', /^Catan/, /Skyjo.*wenigste gewinnen/]);
     await page.reload();
     await expect(cards(page)).toHaveText(['Neues Spiel', /^Catan/, /Skyjo/]);
+
+    // A search as on "Personen" and "Tische"; "Neues Spiel" steps aside while searching.
+    await page.getByRole('button', { name: 'Spiele suchen' }).click();
+    await page.getByRole('searchbox', { name: 'Spiel suchen' }).fill('sky');
+    await expect(cards(page)).toHaveText([/Skyjo/]);
   });
 
   test('AK-2: a game with the same name, including Catan, is pointed out and not saved', async ({

@@ -1,4 +1,5 @@
-import { sortByName, type CustomGame } from '@/core/model';
+import { useState } from 'react';
+import { findByName, sortByName, type CustomGame } from '@/core/model';
 import { CATAN_GAME_ID } from '@/games/catan';
 import { SUPPORTED_GAMES } from '@/games/registry';
 import { useCustomGames, usePlayedGames } from '@/infra/db/readHooks';
@@ -10,6 +11,8 @@ import { useGoBack } from '@/ui/components/useGoBack';
 import { GameEditor } from '@/ui/views/games/GameEditor';
 import { CatanGameCard, CustomGameCard, GameGrid, NewGameCard } from '@/ui/views/games/GameCards';
 import { localToday } from '@/ui/views/games/dates';
+import { SearchButton, SearchRow } from '@/ui/views/games/GameSearch';
+import persons from './PersonsView.module.css';
 
 /**
  * Names of all games except `except`, Catan included (US-SP-02 AK-2, US-VW-07 AK-1).
@@ -38,17 +41,47 @@ export function GamesView({
   const closeEditor = useGoBack('/verwaltung/spiele');
   const today = localToday();
   const active = sortByName((customGames ?? []).filter((game) => !game.archived));
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const trimmedQuery = query.trim();
+  const isCatanFound = findByName([{ name: t('spiele.namen.catan') }], query).length > 0;
+  const found = findByName(active, query);
+  const toggleSearch = (): void => {
+    setIsSearchOpen(!isSearchOpen);
+    setQuery('');
+  };
   return (
-    <Page title={t('spiele.titel')} backFallback="/verwaltung">
+    <Page
+      title={t('spiele.titel')}
+      backFallback="/verwaltung"
+      actions={
+        <SearchButton
+          isOpen={isSearchOpen}
+          className={persons.iconButton}
+          onToggle={toggleSearch}
+        />
+      }
+    >
+      {isSearchOpen && (
+        <SearchRow
+          query={query}
+          closeClassName={persons.iconButton}
+          onQuery={setQuery}
+          onClose={toggleSearch}
+        />
+      )}
+      {trimmedQuery !== '' && found.length === 0 && !isCatanFound && (
+        <p className={persons.hint}>{t('spiele.keinTreffer', { suche: trimmedQuery })}</p>
+      )}
       {customGames !== undefined && played !== undefined && (
         <>
           <GameGrid
             label={t('spiele.karten')}
             hint={t(active.length === 0 ? 'spiele.keineEigenen' : 'spiele.eckeHinweis')}
           >
-            <NewGameCard to="/verwaltung/spiele/neu" />
-            <CatanGameCard played={played.get(CATAN_GAME_ID)} today={today} />
-            {active.map((game) => (
+            {trimmedQuery === '' && <NewGameCard to="/verwaltung/spiele/neu" />}
+            {isCatanFound && <CatanGameCard played={played.get(CATAN_GAME_ID)} today={today} />}
+            {found.map((game) => (
               <CustomGameCard
                 key={game.id}
                 game={game}

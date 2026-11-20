@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { sortByName, type CustomGame, type GameId } from '@/core/model';
+import { findByName, sortByName, type CustomGame, type GameId } from '@/core/model';
 import type { PlayedGame } from '@/core/results';
 import { CATAN_GAME_ID } from '@/games/catan';
 import { useCustomGames, usePlayedGames } from '@/infra/db/readHooks';
@@ -13,6 +13,8 @@ import { PlusIcon, SortAzIcon, SortRecentIcon, TrophyIcon } from '@/ui/component
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 import { CatanGameCard, CustomGameCard, GameGrid } from '@/ui/views/games/GameCards';
 import { localToday } from '@/ui/views/games/dates';
+import { SearchButton, SearchRow } from '@/ui/views/games/GameSearch';
+import gameStyles from '@/ui/views/games/GameCards.module.css';
 import { DevCard } from './DevCard';
 import shared from './Match.module.css';
 import styles from './GameChoiceView.module.css';
@@ -59,9 +61,11 @@ export function GameChoiceView(): React.JSX.Element {
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order>('recent');
   const [isAsking, setIsAsking] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const today = localToday();
   const active = (customGames ?? []).filter((game) => !game.archived);
-  const games = sortGames(
+  const sorted = sortGames(
     [
       { kind: 'catan', id: CATAN_GAME_ID, name: t('spiele.namen.catan') },
       ...active.map((game) => ({ kind: 'custom' as const, id: game.id, name: game.name, game })),
@@ -69,6 +73,12 @@ export function GameChoiceView(): React.JSX.Element {
     played ?? new Map(),
     order,
   );
+  const games = findByName(sorted, query);
+  const trimmedQuery = query.trim();
+  const toggleSearch = (): void => {
+    setIsSearchOpen(!isSearchOpen);
+    setQuery('');
+  };
   const orderWord =
     order === 'recent' ? t('spielliste.zuletztGespielt') : t('spielliste.alphabetisch');
   const otherWord =
@@ -81,21 +91,37 @@ export function GameChoiceView(): React.JSX.Element {
           <h1 className={shared.title}>{t('spielliste.titel')}</h1>
           <div className={shared.sub}>{t('spielliste.unterzeile', { sortierung: orderWord })}</div>
         </div>
-        <PressableButton
-          type="button"
-          className={shared.iconBtn}
-          aria-label={t('spielliste.sortieren', { jetzt: orderWord, dann: otherWord })}
-          onClick={() => {
-            setOrder(order === 'recent' ? 'name' : 'recent');
-          }}
-        >
-          {order === 'recent' ? (
-            <SortRecentIcon size={SORT_ICON_SIZE} />
-          ) : (
-            <SortAzIcon size={SORT_ICON_SIZE} />
-          )}
-        </PressableButton>
+        <span className={gameStyles.headActions}>
+          <SearchButton isOpen={isSearchOpen} className={shared.iconBtn} onToggle={toggleSearch} />
+          <PressableButton
+            type="button"
+            className={shared.iconBtn}
+            aria-label={t('spielliste.sortieren', { jetzt: orderWord, dann: otherWord })}
+            onClick={() => {
+              setOrder(order === 'recent' ? 'name' : 'recent');
+            }}
+          >
+            {order === 'recent' ? (
+              <SortRecentIcon size={SORT_ICON_SIZE} />
+            ) : (
+              <SortAzIcon size={SORT_ICON_SIZE} />
+            )}
+          </PressableButton>
+        </span>
       </div>
+      {isSearchOpen && (
+        <SearchRow
+          query={query}
+          closeClassName={shared.iconBtn}
+          onQuery={setQuery}
+          onClose={toggleSearch}
+        />
+      )}
+      {trimmedQuery !== '' && games.length === 0 && (
+        <p className={cx(shared.muted, shared.small)}>
+          {t('spiele.keinTreffer', { suche: trimmedQuery })}
+        </p>
+      )}
       {customGames !== undefined && played !== undefined && (
         <>
           <GameGrid

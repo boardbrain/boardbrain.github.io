@@ -143,7 +143,7 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
     await expect(page.getByRole('textbox', { name: 'Spieldauer in Minuten' })).toBeFocused();
   });
 
-  test('the list sorts by the last match or A–Z', async ({ page }) => {
+  test('the list sorts by the last match or A–Z and can be searched', async ({ page }) => {
     await seedResults(page, TABLE, [
       { date: day(5), game: 'Wizard', winners: ['Anna'] },
       { date: day(0), game: 'Uno', winners: ['Anna'] },
@@ -157,6 +157,15 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
 
     await expect.poll(() => gameNames(page)).toEqual(['Catan', 'Uno', 'Wizard']);
     await expect(page.getByText('Welches Spiel? · A–Z')).toBeVisible();
+
+    // A search as on "Personen" and "Tische".
+    await page.getByRole('button', { name: 'Spiele suchen' }).click();
+    await page.getByRole('searchbox', { name: 'Spiel suchen' }).fill('wiz');
+    await expect.poll(() => gameNames(page)).toEqual(['Wizard']);
+    await page.getByRole('searchbox', { name: 'Spiel suchen' }).fill('Schach');
+    await expect(page.getByText('Kein Spiel gefunden für „Schach“.')).toBeVisible();
+    await page.getByRole('button', { name: 'Suche leeren und schließen' }).click();
+    await expect.poll(() => gameNames(page)).toEqual(['Catan', 'Uno', 'Wizard']);
   });
 });
 

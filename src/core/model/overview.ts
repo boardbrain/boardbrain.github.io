@@ -39,15 +39,26 @@ export function countFellowPlayers(groups: readonly Group[], personId: PersonId)
 }
 
 /**
- * Filters persons by a search text: a person matches if the name contains the text, ignoring
- * case and surrounding spaces. Without a text, all persons match; the order is kept.
+ * Filters by a search text: an entry matches if its name contains the text, ignoring case and
+ * surrounding spaces. Without a text, all entries match; the order is kept. Used for persons,
+ * tables and games.
  */
-export function findPersons(persons: readonly Person[], query: string): Person[] {
+export function findByName<T extends { readonly name: string }>(
+  entries: readonly T[],
+  query: string,
+): T[] {
   const needle = cleanName(query).toLocaleLowerCase('de-DE');
   if (needle === '') {
-    return [...persons];
+    return [...entries];
   }
-  return persons.filter((person) =>
-    cleanName(person.name).toLocaleLowerCase('de-DE').includes(needle),
+  return entries.filter((entry) =>
+    cleanName(entry.name).toLocaleLowerCase('de-DE').includes(needle),
   );
+}
+
+/**
+ * Filters persons by a search text (US-VW-05), see `findByName`.
+ */
+export function findPersons(persons: readonly Person[], query: string): Person[] {
+  return findByName(persons, query);
 }

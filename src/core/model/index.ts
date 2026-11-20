@@ -83,5 +83,11 @@ export {
   type MatchId,
   type PersonId,
 } from './ids';
-export { countFellowPlayers, findPersons, tablesOfPerson, type PersonTable } from './overview';
+export {
+  countFellowPlayers,
+  findByName,
+  findPersons,
+  tablesOfPerson,
+  type PersonTable,
+} from './overview';
 export { cleanName, containsName, isBlankName, isSameName, sortByName } from './names';
