@@ -63,3 +63,29 @@
   min-height: 44px;
   white-space: nowrap;
 }
+
+/* Narrow phones (360 px): a tighter timer, so it still fits beside the pill (PO 21.11.). */
+@media (width < 384px) {
+  .endRow {
+    gap: 6px;
+  }
+
+  .pill {
+    gap: 4px;
+    padding-left: 8px;
+  }
+
+  .time {
+    font-size: 1rem;
+  }
+
+  .time span span {
+    font-size: 0.55em;
+  }
+
+  .toggle {
+    width: 32px;
+    min-height: 32px;
+    height: 32px;
+  }
+}
