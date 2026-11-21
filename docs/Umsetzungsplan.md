@@ -55,7 +55,7 @@
 | 0.40 | 16.11.2026 | Ergebnisse der erweiterten Codeanalyse durch Fable (Claude Fable 5.2, Berichte in `docs/test-reports/analyse/`): neue kleine Aufgaben K-10 bis K-16, davon K-10 und K-11 vor Release 0.3.0 (neu Zeile 5b); Punkte für I3-B und I3-C, darunter die Prüfung der Spielbindung gegen bestehende Partien (US-VW-02 AK-3); Hinweis zum Update während einer laufenden Partie für 0.3.0; Punkte für I4; offene Entscheidung zum verdeckten Plan der Platzierung (2, 6, 9) |
 | 0.41 | 17.11.2026 | Grafik-Runde der erweiterten Codeanalyse durch Fable: neue Rohstoffkarten und neues Catan-Vorschaubild als Entwurf in `docs/design/art-draft/` aufbewahrt, Bericht `docs/test-reports/analyse/2026-11-16-grafiken.md`; Einbau als neue kleine Aufgabe K-17, Zeitpunkt offen (6) |
 | 0.42 | 17.11.2026 | Neues Bündel I3-C2 „Notizblock für eigene Spiele“ nach I3-C und vor I3-D (Idee und Entscheidung des Product Owners): Punkte während des Spiels Runde für Runde mitschreiben, zuerst Klärung im Gespräch; als I3-C2 eingeschoben, damit I3-D und I3-E ihre Namen behalten (Entwicklungsrichtlinien 11.1, wie I3-A2); in der Reihenfolge auch I3-A2 nachgetragen (2, 9) |
-| 0.43 | 18.11.2026 | Planung und Design I3-B: US-SP-03 von I5 nach I3-B (gemeinsames Raster statt getrennter Bereiche, E-46); der Sprung zur Tischseite nach dem Speichern kommt mit I3-C; die Prüfung der Spielbindung gegen bestehende Partien (C-H-1) entfällt (E-48); Grenzen im Formular entschieden (C-G-8); Uhr der laufenden Partie korrigierbar (US-AB-07 AK-6) (2, 9) |
+| 0.43 | 18.11.2026 | Planung und Design I3-B: US-SP-03 von I5 nach I3-B (gemeinsames Raster statt getrennter Bereiche, E-46); der Sprung zur Tischseite nach dem Speichern kommt mit I3-C; die Prüfung der Spielbindung gegen bestehende Partien (C-H-1) entfällt (E-48); Grenzen im Formular entschieden (C-G-8); Uhr der laufenden Partie korrigierbar (US-AB-07 AK-6) (2, 9); Uhr nach der Abnahme neu gefasst: Verlauf mit einzelnen Pausen, Pause nachtragen in Minuten, „Fertig“ speichert (US-AB-07 AK-6, AK-7, ADR-031) |
 
 ## 1. Zweck
 
@@ -479,7 +479,7 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
   - **Spiele gemeinsam (US-SP-03):** Spielliste und Spieleseite zeigen alle Spiele in einem Raster mit denselben Karten; die getrennten Bereiche aus I5 entfallen (E-46). „Neues Spiel“ und „Bearbeiten“ als eigene Seiten.
   - **Sieger aus Punkten:** gewählt nur bei Gleichstand an der Spitze; die Warnung bei einem Sieger ohne beste Punktzahl entfällt (E-47, US-ER-02 AK-4 und AK-6).
   - **Nach dem Speichern:** zum Start mit einer Meldung; der Sprung zur Tischseite mit Reiter „Ergebnisse“ kommt mit I3-C, weil es Tischreiter und Ergebnisliste erst dort gibt. Die Karte „Statistik“ auf dem Start kommt mit I3-D.
-  - **Uhr korrigieren:** Die Spieldauer in der Übersicht öffnet ein Fenster mit Dauer ±1 und ±5 Minuten, Beginn, Anhalten und Fortsetzen (US-AB-07 AK-6).
+  - **Uhr korrigieren:** Die Spieldauer in der Übersicht öffnet ein Blatt mit dem Verlauf: Beginn und jede Pause mit Uhrzeit, änderbar, Pausen löschen und in Minuten nachtragen, „Fertig“ speichert (US-AB-07 AK-6, AK-7; nach der Abnahme statt Dauer ±1 und ±5, Referenz `docs/design/i3b-clock-final-preview.html`, ADR-031).
 
 ### I3-C Ergebnisliste und Korrektur
 
