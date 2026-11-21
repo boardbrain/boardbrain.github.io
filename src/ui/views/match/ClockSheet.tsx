@@ -209,7 +209,8 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
   const isFull = useRef(false);
   const isReduced = useReducedMotion() === true;
   // Entries that come with an added pause, pausing or resuming open; changed times do not move.
-  const opensNew = useRef(false);
+  // Pausing and resuming change the end of the history, so it scrolls there (PO 21.11.).
+  const opensNew = useRef<'in-place' | 'at-end' | null>(null);
   const shownKeys = useRef<readonly string[] | null>(null);
   const isRemoving = useRef(false);
   const nowIso = iso(now);
@@ -223,13 +224,22 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
     const current = keys.split(' ');
     const before = shownKeys.current;
     shownKeys.current = current;
-    const shouldOpen = opensNew.current;
-    opensNew.current = false;
-    if (shouldOpen && before !== null && !isReduced) {
-      const added = current.filter((key) => !before.includes(key));
-      for (const item of historyItems(sheetRef.current, added)) {
-        void unfoldItem(item, true);
-      }
+    const opening = opensNew.current;
+    opensNew.current = null;
+    if (opening === null || before === null) {
+      return;
+    }
+    const added = current.filter((key) => !before.includes(key));
+    const opened = isReduced
+      ? []
+      : historyItems(sheetRef.current, added).map((item) => unfoldItem(item, true));
+    if (opening === 'at-end') {
+      const [now] = historyItems(sheetRef.current, ['now']);
+      const toEnd = (): void => {
+        now?.scrollIntoView({ block: 'nearest', behavior: isReduced ? 'auto' : 'smooth' });
+      };
+      toEnd();
+      void Promise.all(opened).then(toEnd);
     }
   }, [keys, isReduced]);
 
@@ -416,7 +426,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
       const changed = await (isClockPaused(before) ? session.resumeClock() : session.pauseClock());
       const after = changed.ok ? changed.value.clock : undefined;
       if (after !== undefined) {
-        opensNew.current = true;
+        opensNew.current = 'at-end';
         setDraft((current) => mirrorToggle(current, before, after));
         setExpected(after);
       }
@@ -503,7 +513,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
             disabled={!result.ok}
             onClick={() => {
               if (result.ok) {
-                opensNew.current = true;
+                opensNew.current = 'in-place';
                 setDraft(result.value);
                 setAdding(null);
               }

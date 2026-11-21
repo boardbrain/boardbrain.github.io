@@ -32,6 +32,12 @@ Object.defineProperty(Element.prototype, 'setPointerCapture', {
   value: () => undefined,
 });
 
+// jsdom does not scroll; the timer sheet scrolls its history to "jetzt" after pausing.
+Object.defineProperty(Element.prototype, 'scrollIntoView', {
+  configurable: true,
+  value: () => undefined,
+});
+
 // jsdom draws no frames, so a movement would never end; component tests check states, the
 // movements are tested in the browser (Ende-zu-Ende-Tests) and by their plans.
 MotionGlobalConfig.skipAnimations = true;
