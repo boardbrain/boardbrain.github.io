@@ -47,6 +47,10 @@ const TRASH_SIZE = 16;
 const CLOSE_DISTANCE = 90;
 const FLICK_DISTANCE = 40;
 const FLICK_SPEED = 0.6;
+// Pulled up this far, the sheet grows from three quarters to nearly the whole screen (PO 21.11.).
+const EXPAND_DISTANCE = 24;
+const SHEET_HEIGHT = '75%';
+const FULL_HEIGHT = '94%';
 const ENTER = { type: 'spring', bounce: 0.18, duration: 0.45 } as const;
 const SNAP_BACK = { type: 'spring', bounce: 0.3, duration: 0.4 } as const;
 const LEAVE = { duration: 0.2 } as const;
@@ -201,6 +205,8 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
   const sheetRef = useRef<HTMLDivElement>(null);
   const drag = useRef<Drag | null>(null);
   const y = useMotionValue(0);
+  const maxHeight = useMotionValue(SHEET_HEIGHT);
+  const isFull = useRef(false);
   const isReduced = useReducedMotion() === true;
   // Entries that come with an added pause, pausing or resuming open; changed times do not move.
   const opensNew = useRef(false);
@@ -244,10 +250,23 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
     void animate(y, height, LEAVE).then(onClose);
   };
 
-  // Drag ends: far or quick enough closes, otherwise the sheet springs back.
+  const expand = (): void => {
+    if (!isFull.current) {
+      isFull.current = true;
+      void animate(maxHeight, FULL_HEIGHT, ENTER);
+    }
+  };
+
+  // Drag ends: far or quick enough closes, from the whole screen it returns to three quarters;
+  // otherwise the sheet springs back.
   const release = (distance: number, milliseconds: number): void => {
     const speed = distance / Math.max(1, milliseconds);
-    if (distance > CLOSE_DISTANCE || (distance > FLICK_DISTANCE && speed > FLICK_SPEED)) {
+    const isFar = distance > CLOSE_DISTANCE || (distance > FLICK_DISTANCE && speed > FLICK_SPEED);
+    if (isFar && isFull.current) {
+      isFull.current = false;
+      void animate(maxHeight, SHEET_HEIGHT, SNAP_BACK);
+      void animate(y, 0, SNAP_BACK);
+    } else if (isFar) {
       close();
     } else {
       void animate(y, 0, SNAP_BACK);
@@ -256,6 +275,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
   const releaseTouch = useEffectEvent((distance: number, milliseconds: number) => {
     release(distance, milliseconds);
   });
+  const expandTouch = useEffectEvent(expand);
 
   // Motion (external system): the sheet comes up from below. Touch on the sheet itself, scrolled
   // to the top, pulls it down like the handle; the listener must be able to stop scrolling.
@@ -289,6 +309,14 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
       }
       const distance = touch.clientY - start.y;
       if (!isPulling) {
+        // Pushed up outside the history: the sheet grows; inside it, the history scrolls.
+        if (distance < 0 && scroller === null && sheet.scrollTop === 0) {
+          if (distance < -EXPAND_DISTANCE) {
+            expandTouch();
+            start = null;
+          }
+          return;
+        }
         if (sheet.scrollTop > 0 || (scroller?.scrollTop ?? 0) > 0 || distance < 0) {
           start = null;
           return;
@@ -556,7 +584,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
       <m.div
         ref={sheetRef}
         className={styles.sheet}
-        style={{ y }}
+        style={{ y, maxHeight }}
         role="dialog"
         aria-modal="true"
         aria-label={t('partie.spieldauer')}
@@ -571,15 +599,19 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
           }}
           onPointerMove={(event) => {
             if (drag.current !== null) {
-              y.set(Math.max(0, event.clientY - drag.current.y));
+              const distance = event.clientY - drag.current.y;
+              if (distance < -EXPAND_DISTANCE) {
+                expand();
+              }
+              y.set(Math.max(0, distance));
             }
           }}
-          onPointerUp={() => {
+          onPointerUp={(event) => {
             const started = drag.current;
             drag.current = null;
             if (started !== null) {
               const distance = y.get();
-              if (distance < 4) {
+              if (Math.abs(event.clientY - started.y) < 4) {
                 close();
               } else {
                 release(distance, Date.now() - started.at);
