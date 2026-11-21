@@ -202,11 +202,13 @@
   padding: 8px 0;
 }
 
+/* As high as with the bin, also while the pause lasts: ending it moves nothing (PO 21.11.). */
 .range {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  min-height: 44px;
 }
 
 .spacer {
