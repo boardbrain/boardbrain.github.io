@@ -134,29 +134,33 @@ export function PersonsView(): React.JSX.Element {
           </PressableButton>
         </div>
       </Unfold>
-      <Unfold isOpen={isFormOpen}>
-        <NameForm
-          title={t('personen.neu')}
-          value={name}
-          isPending={isPending}
-          isFocused={isAdding}
-          onValueChange={handleNameChange}
-          onSubmit={save}
-          error={isTaken ? t('personen.gleicherName', { name: cleanName(name) }) : null}
-        >
-          {/* Only if a person was created in the meantime; the live check shows it right after. */}
-          {visibleMessage?.error === 'name-duplicate' && !isTaken && (
-            <Notice tone="error">
-              <p>{t('personen.gleicherName', { name: cleanName(visibleMessage.submitted) })}</p>
-            </Notice>
-          )}
-          {visibleMessage?.error === 'name-empty' && (
-            <Notice tone="error">
-              <p>{t('verwaltung.nameLeer')}</p>
-            </Notice>
-          )}
-        </NameForm>
-      </Unfold>
+      {/* Only once the persons are known: on an empty page the form is there from the start
+          instead of opening while the page loads (a tap on "Speichern" could miss it). */}
+      {persons !== undefined && (
+        <Unfold isOpen={isFormOpen}>
+          <NameForm
+            title={t('personen.neu')}
+            value={name}
+            isPending={isPending}
+            isFocused={isAdding}
+            onValueChange={handleNameChange}
+            onSubmit={save}
+            error={isTaken ? t('personen.gleicherName', { name: cleanName(name) }) : null}
+          >
+            {/* Only if a person was created in the meantime; the live check shows it right after. */}
+            {visibleMessage?.error === 'name-duplicate' && !isTaken && (
+              <Notice tone="error">
+                <p>{t('personen.gleicherName', { name: cleanName(visibleMessage.submitted) })}</p>
+              </Notice>
+            )}
+            {visibleMessage?.error === 'name-empty' && (
+              <Notice tone="error">
+                <p>{t('verwaltung.nameLeer')}</p>
+              </Notice>
+            )}
+          </NameForm>
+        </Unfold>
+      )}
       {persons?.length === 0 && <p className={styles.hint}>{t('personen.leer')}</p>}
       {trimmedQuery !== '' && matches.length === 0 && (
         <p className={styles.hint}>{t('personen.keinTreffer', { suche: trimmedQuery })}</p>
