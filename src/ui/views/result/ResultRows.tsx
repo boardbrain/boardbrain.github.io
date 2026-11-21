@@ -64,12 +64,10 @@ function Trophy({
   );
 }
 
-// iOS and iPadOS show no minus on the numeric keypad; an iPad reports itself as a Mac with touch.
+// The numeric keypad of the iPhone has no minus; the iPad shows its number row with one
+// (Product Owner 21.11.2026).
 function hasNoMinusOnKeypad(): boolean {
-  const { userAgent, maxTouchPoints } = navigator;
-  return (
-    /iPhone|iPad|iPod/u.test(userAgent) || (userAgent.includes('Macintosh') && maxTouchPoints > 1)
-  );
+  return /iPhone|iPod/u.test(navigator.userAgent);
 }
 const PLACE_TROPHY_SIZE = 16;
 

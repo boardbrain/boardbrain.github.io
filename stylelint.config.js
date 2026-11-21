@@ -31,6 +31,11 @@ export default {
       { message: 'Class names in CSS Modules use camelCase.' },
     ],
     'selector-pseudo-class-no-unknown': [true, { ignorePseudoClasses: ['global', 'local'] }],
+    // Safari on iOS ignores text-decoration with style and colour as one shorthand (PO 21.11.).
+    'declaration-block-no-redundant-longhand-properties': [
+      true,
+      { ignoreShorthands: ['text-decoration'] },
+    ],
   },
   overrides: [
     {

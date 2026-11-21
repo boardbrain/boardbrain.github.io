@@ -25,7 +25,13 @@
   font-size: 1.1rem;
   font-weight: 700;
   color: color-mix(in srgb, var(--color-text-muted) calc(var(--paused) * 100%), var(--color-text));
-  text-decoration: underline dotted var(--color-text-muted);
+
+  /* Longhands and a fixed thickness: Safari on iOS ignores a shorthand with style and colour and
+     draws an automatic dotted line almost invisibly thin (PO 21.11.). */
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--color-text-muted);
+  text-decoration-thickness: 2px;
   text-underline-offset: 4px;
   background: none;
   border-radius: 0;
