@@ -122,7 +122,9 @@ const router = createHashRouter([
       { path: '/verwaltung/gruppen/:groupId', element: view(<GroupView />) },
       { path: '/verwaltung/gruppen/:groupId/bearbeiten', element: view(<GroupView isEditing />) },
       { path: '/verwaltung/spiele', element: view(<GamesView />) },
+      { path: '/verwaltung/spiele/neu', element: view(<GamesView isCreating />) },
       { path: '/verwaltung/spiele/:gameId', element: view(<GameView />) },
+      { path: '/verwaltung/spiele/:gameId/bearbeiten', element: view(<GameView isEditing />) },
       {
         path: '/partie/neu',
         lazy: matchRoute((match) => view(<match.PreparationLayout />)),
@@ -134,6 +136,18 @@ const router = createHashRouter([
         ],
       },
       { path: '/partie', lazy: matchRoute((match) => view(<match.MatchView />)) },
+      {
+        path: '/partie/ergebnis',
+        lazy: matchRoute((match) => view(<match.MatchResultView />)),
+      },
+      {
+        path: '/ergebnis/neu/:gameId',
+        lazy: matchRoute((match) => view(<match.ResultTableView />)),
+      },
+      {
+        path: '/ergebnis/neu/:gameId/:groupId',
+        lazy: matchRoute((match) => view(<match.ResultView />)),
+      },
       {
         path: '/partie/uebersicht',
         lazy: matchRoute((match) => view(<match.MatchOverviewView />)),

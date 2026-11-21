@@ -17,6 +17,7 @@ import { Page } from '@/ui/components/Page';
 import { PersonCard } from './PersonCard';
 import styles from './PersonsView.module.css';
 import { PressableButton } from '@/ui/components/Pressable';
+import { Unfold } from '@/ui/components/Unfold';
 
 const PLUS_CARD_ICON_SIZE = 28;
 
@@ -109,7 +110,7 @@ export function PersonsView(): React.JSX.Element {
         </div>
       }
     >
-      {isSearchOpen && (
+      <Unfold isOpen={isSearchOpen}>
         <div className={styles.searchRow}>
           <input
             className={styles.searchInput}
@@ -132,29 +133,33 @@ export function PersonsView(): React.JSX.Element {
             <CloseIcon />
           </PressableButton>
         </div>
-      )}
-      {isFormOpen && (
-        <NameForm
-          title={t('personen.neu')}
-          value={name}
-          isPending={isPending}
-          isFocused={isAdding}
-          onValueChange={handleNameChange}
-          onSubmit={save}
-          error={isTaken ? t('personen.gleicherName', { name: cleanName(name) }) : null}
-        >
-          {/* Only if a person was created in the meantime; the live check shows it right after. */}
-          {visibleMessage?.error === 'name-duplicate' && !isTaken && (
-            <Notice tone="error">
-              <p>{t('personen.gleicherName', { name: cleanName(visibleMessage.submitted) })}</p>
-            </Notice>
-          )}
-          {visibleMessage?.error === 'name-empty' && (
-            <Notice tone="error">
-              <p>{t('verwaltung.nameLeer')}</p>
-            </Notice>
-          )}
-        </NameForm>
+      </Unfold>
+      {/* Only once the persons are known: on an empty page the form is there from the start
+          instead of opening while the page loads (a tap on "Speichern" could miss it). */}
+      {persons !== undefined && (
+        <Unfold isOpen={isFormOpen}>
+          <NameForm
+            title={t('personen.neu')}
+            value={name}
+            isPending={isPending}
+            isFocused={isAdding}
+            onValueChange={handleNameChange}
+            onSubmit={save}
+            error={isTaken ? t('personen.gleicherName', { name: cleanName(name) }) : null}
+          >
+            {/* Only if a person was created in the meantime; the live check shows it right after. */}
+            {visibleMessage?.error === 'name-duplicate' && !isTaken && (
+              <Notice tone="error">
+                <p>{t('personen.gleicherName', { name: cleanName(visibleMessage.submitted) })}</p>
+              </Notice>
+            )}
+            {visibleMessage?.error === 'name-empty' && (
+              <Notice tone="error">
+                <p>{t('verwaltung.nameLeer')}</p>
+              </Notice>
+            )}
+          </NameForm>
+        </Unfold>
       )}
       {persons?.length === 0 && <p className={styles.hint}>{t('personen.leer')}</p>}
       {trimmedQuery !== '' && matches.length === 0 && (
@@ -168,8 +173,9 @@ export function PersonsView(): React.JSX.Element {
                 type="button"
                 look="card"
                 className={styles.newCard}
+                aria-expanded={isFormOpen}
                 onClick={() => {
-                  setIsAdding(true);
+                  setIsAdding(!isAdding);
                 }}
               >
                 <PlusIcon size={PLUS_CARD_ICON_SIZE} />

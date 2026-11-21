@@ -1,5 +1,5 @@
-import type { GroupId, Match, MatchId } from '@/core/model';
-import { sortMatches } from '@/core/results';
+import type { GameId, GroupId, Match, MatchId } from '@/core/model';
+import { playedGames, sortMatches, type PlayedGame } from '@/core/results';
 import type { BoardBrainDb } from './database';
 
 /**
@@ -18,4 +18,23 @@ export async function readMatchesOfGroup(
  */
 export async function readMatch(db: BoardBrainDb, id: MatchId): Promise<Match | null> {
   return (await db.matches.get(id)) ?? null;
+}
+
+/**
+ * Number of matches and the latest day of every played game, over all tables (design I3-B).
+ */
+export async function readPlayedGames(db: BoardBrainDb): Promise<ReadonlyMap<GameId, PlayedGame>> {
+  return playedGames(await db.matches.toArray());
+}
+
+/**
+ * How many results of a game have points (US-VW-07 AK-3, AK-4): they keep "Keine" locked and make
+ * a change of the direction ask first.
+ */
+export async function readScoredMatchCount(db: BoardBrainDb, gameId: GameId): Promise<number> {
+  return db.matches
+    .where('gameId')
+    .equals(gameId)
+    .filter((match) => match.scores !== undefined)
+    .count();
 }

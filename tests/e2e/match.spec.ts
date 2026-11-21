@@ -44,7 +44,9 @@ async function seedTable(page: Page, name: string, ...members: string[]): Promis
 // From the start view: "Partie" → Catan → the table, up to the options.
 async function openOptions(page: Page, table: RegExp): Promise<void> {
   await tap(page.getByRole('link', { name: 'Partie' }));
-  await tap(page.getByRole('link', { name: 'Catan' }));
+  // US-SP-01 AK-2: Catan asks "Neue Partie" or "Ergebnis eintragen" (design I3-B Q5).
+  await tap(page.getByRole('button', { name: 'Catan' }));
+  await tap(page.getByRole('button', { name: 'Neue Partie' }));
   await tap(page.getByRole('button', { name: table }));
   await expect(page.getByRole('heading', { name: 'Wie spielt ihr?' })).toBeVisible();
 }
@@ -292,7 +294,7 @@ test.describe('US-AB-03, US-AB-04, US-PL-05, US-AB-06 repeat, look back, skip an
 
     await expect(page.getByRole('navigation', { name: 'Karten' })).toBeVisible();
     await tap(page.getByRole('link', { name: 'Partie' }));
-    await expect(page.getByRole('heading', { name: 'Neue Partie' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Partie', level: 1 })).toBeVisible();
   });
 });
 
@@ -649,7 +651,7 @@ test.describe('US-AB-03 AK-8 tapping pieces on the board (design I2-H)', () => {
 test.describe('Architecture ADR-030 pictures of a match', () => {
   test('the Catan card and all resource cards are pictures that load', async ({ page }) => {
     await page.goto('/#/partie/neu');
-    const landscape = page.getByRole('link', { name: 'Catan' }).locator('img');
+    const landscape = page.getByRole('button', { name: 'Catan' }).locator('img');
     await expect(landscape).toBeVisible();
     // Visible does not mean loaded: under load the picture may still be on its way (K-5 run,
     // 11.11.2026), so the test waits until it is complete.

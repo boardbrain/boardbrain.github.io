@@ -6,11 +6,11 @@ import type { Match, PersonId, ScoringDirection } from '@/core/model';
 export type ResultOutcome = Pick<Match, 'winnerIds' | 'scores' | 'places'>;
 
 /**
- * A plausibility warning before storing (FA-ER-06, US-ER-02 AK-4): a winner does not have the
- * best score, or winners of a draw have different scores. Storing stays possible after
- * confirming.
+ * A plausibility warning before storing (Specification 3.6, US-ER-01 AK-8): the duration is
+ * longer than 8 hours, e.g. after a typo like 1200 instead of 120 minutes. Storing stays possible
+ * after confirming.
  */
-export type PlausibilityWarning = 'winner-not-best' | 'winners-differ';
+export type PlausibilityWarning = 'duration-long';
 
 function scoreOf(outcome: ResultOutcome, personId: PersonId): number | undefined {
   return outcome.scores?.[personId];
@@ -26,43 +26,29 @@ function isBetter(a: number, b: number, scoring: ScoringDirection): boolean {
 }
 
 /**
- * The plausibility warnings of a result (FA-ER-06, US-ER-02 AK-4); empty without points or for
- * a game without points (`scoring` is `null`). The participants are those with points.
+ * Durations above this many minutes ask before storing (Specification 3.6, US-ER-01 AK-8).
+ */
+export const LONG_DURATION_MINUTES = 8 * 60;
+
+/**
+ * The plausibility warnings of a result (Specification 3.6, US-ER-01 AK-8). A winner without the
+ * best score no longer needs a warning: with points the winners follow from them (E-47).
  */
 export function plausibilityWarnings(
-  outcome: ResultOutcome,
-  participants: readonly PersonId[],
-  scoring: ScoringDirection | null,
+  input: Readonly<{ durationMinutes?: number }>,
 ): PlausibilityWarning[] {
-  const scores = participants.flatMap((personId) => {
-    const score = scoreOf(outcome, personId);
-    return score === undefined ? [] : [score];
-  });
-  if (scoring === null || scores.length === 0) {
-    return [];
-  }
-  const best = bestOf(scores, scoring);
-  const winnerScores = outcome.winnerIds.map((personId) => scoreOf(outcome, personId));
-  const warnings: PlausibilityWarning[] = [];
-  if (winnerScores.some((score) => score !== undefined && score !== best)) {
-    warnings.push('winner-not-best');
-  }
-  if (new Set(winnerScores).size > 1) {
-    warnings.push('winners-differ');
-  }
-  return warnings;
+  const duration = input.durationMinutes;
+  return duration !== undefined && duration > LONG_DURATION_MINUTES ? ['duration-long'] : [];
 }
 
 /**
- * The winners the form suggests once every participant has points (FA-ER-06, US-ER-02 AK-6): the
- * persons with the best score, several for a draw. For a game with exactly one winner a tie at
- * the top suggests nobody. Empty while points are missing.
+ * The persons with the best score once every participant has points (FA-ER-06, US-ER-02 AK-6);
+ * empty while points are missing. Only among them a winner can be chosen (E-47).
  */
-export function suggestedWinners(
+export function bestScorers(
   scores: Readonly<Record<PersonId, number>>,
   participants: readonly PersonId[],
   scoring: ScoringDirection,
-  hasSingleWinner: boolean,
 ): PersonId[] {
   const entered = participants.flatMap((personId) => {
     const score = scores[personId];
@@ -72,7 +58,21 @@ export function suggestedWinners(
     return [];
   }
   const best = bestOf(entered, scoring);
-  const winners = participants.filter((personId) => scores[personId] === best);
+  return participants.filter((personId) => scores[personId] === best);
+}
+
+/**
+ * The winners once every participant has points (FA-ER-06, US-ER-02 AK-6): the persons with the
+ * best score, several for a draw. For a game with exactly one winner a tie at the top gives
+ * nobody, the form asks to choose among the best. Empty while points are missing.
+ */
+export function suggestedWinners(
+  scores: Readonly<Record<PersonId, number>>,
+  participants: readonly PersonId[],
+  scoring: ScoringDirection,
+  hasSingleWinner: boolean,
+): PersonId[] {
+  const winners = bestScorers(scores, participants, scoring);
   return hasSingleWinner && winners.length > 1 ? [] : winners;
 }
 
@@ -91,7 +91,8 @@ export function winnersOfRanking(
  * taken as it is. From points, the winners have place 1 and the other participants follow by
  * their score, the best first (the highest, or the lowest if the fewest points win); the same
  * score gives the same place and the following place is skipped (10, 8, 8, 6 points give
- * 1, 2, 2, 4). This holds also if a winner without the best score was stored after the warning.
+ * 1, 2, 2, 4). A tie at the top resolved by choosing some of the best puts the others behind
+ * the winners (E-47).
  * Without points and ranking, or for a game without points, there are no places: `null`.
  */
 export function placesOf(

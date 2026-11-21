@@ -2,6 +2,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { toPersonId, type PersonId, type ScoringDirection } from '@/core/model';
 import {
+  bestScorers,
   durationMinutesOf,
   placesOf,
   plausibilityWarnings,
@@ -20,69 +21,28 @@ function points(anna: number, ben: number, clara: number, david: number): Record
   return { [ANNA]: anna, [BEN]: ben, [CLARA]: clara, [DAVID]: david };
 }
 
-describe('US-ER-02 AK-4 plausibility warnings', () => {
-  it('warns nothing for a winner with the highest score', () => {
-    expect(
-      plausibilityWarnings(
-        { winnerIds: [ANNA], scores: points(10, 8, 8, 6) },
-        TABLE,
-        'highest-wins',
-      ),
-    ).toEqual([]);
+describe('US-ER-01 AK-8 plausibility warning', () => {
+  it('warns about a duration of more than 8 hours', () => {
+    expect(plausibilityWarnings({ durationMinutes: 481 })).toEqual(['duration-long']);
+    expect(plausibilityWarnings({ durationMinutes: 1200 })).toEqual(['duration-long']);
   });
 
-  it('warns nothing without points or for a game without points', () => {
-    expect(plausibilityWarnings({ winnerIds: [BEN] }, TABLE, 'highest-wins')).toEqual([]);
-    expect(
-      plausibilityWarnings({ winnerIds: [BEN], scores: points(10, 8, 8, 6) }, TABLE, null),
-    ).toEqual([]);
+  it('warns nothing up to 8 hours or without a duration', () => {
+    expect(plausibilityWarnings({ durationMinutes: 480 })).toEqual([]);
+    expect(plausibilityWarnings({ durationMinutes: 95 })).toEqual([]);
+    expect(plausibilityWarnings({})).toEqual([]);
+  });
+});
+
+describe('US-ER-02 AK-6 best scorers (E-47)', () => {
+  it('are the persons with the best score once every participant has points', () => {
+    expect(bestScorers(points(10, 8, 8, 6), TABLE, 'highest-wins')).toEqual([ANNA]);
+    expect(bestScorers(points(10, 8, 8, 6), TABLE, 'lowest-wins')).toEqual([DAVID]);
+    expect(bestScorers(points(9, 9, 8, 6), TABLE, 'highest-wins')).toEqual([ANNA, BEN]);
   });
 
-  it('warns if a winner does not have the highest score', () => {
-    expect(
-      plausibilityWarnings(
-        { winnerIds: [BEN], scores: points(10, 8, 8, 6) },
-        TABLE,
-        'highest-wins',
-      ),
-    ).toEqual(['winner-not-best']);
-  });
-
-  it('warns if a winner does not have the lowest score when the fewest points win (FA-SP-07)', () => {
-    expect(
-      plausibilityWarnings(
-        { winnerIds: [DAVID], scores: points(10, 8, 8, 6) },
-        TABLE,
-        'lowest-wins',
-      ),
-    ).toEqual([]);
-    expect(
-      plausibilityWarnings(
-        { winnerIds: [ANNA], scores: points(10, 8, 8, 6) },
-        TABLE,
-        'lowest-wins',
-      ),
-    ).toEqual(['winner-not-best']);
-  });
-
-  it('warns nothing for a draw of winners with the same, best score', () => {
-    expect(
-      plausibilityWarnings(
-        { winnerIds: [ANNA, BEN], scores: points(9, 9, 8, 6) },
-        TABLE,
-        'highest-wins',
-      ),
-    ).toEqual([]);
-  });
-
-  it('warns if winners of a draw have different scores', () => {
-    expect(
-      plausibilityWarnings(
-        { winnerIds: [ANNA, BEN], scores: points(10, 8, 8, 6) },
-        TABLE,
-        'highest-wins',
-      ),
-    ).toEqual(['winner-not-best', 'winners-differ']);
+  it('are nobody while points are missing', () => {
+    expect(bestScorers({ [ANNA]: 10 }, TABLE, 'highest-wins')).toEqual([]);
   });
 });
 
@@ -154,7 +114,24 @@ describe('US-ER-02 AK-5 places from points (FA-ER-11)', () => {
     );
   });
 
-  it('the winner keeps place 1 even without the best score after the warning', () => {
+  it('a tie at the top resolved for one of the best puts the other behind (E-47)', () => {
+    const places = placesOf(
+      { winnerIds: [BEN], scores: points(10, 10, 8, 6) },
+      TABLE,
+      'highest-wins',
+    );
+
+    expect(places).toEqual(
+      new Map([
+        [ANNA, 2],
+        [BEN, 1],
+        [CLARA, 3],
+        [DAVID, 4],
+      ]),
+    );
+  });
+
+  it('the winner keeps place 1 after the direction of the game changed (FA-SP-07)', () => {
     const places = placesOf(
       { winnerIds: [DAVID], scores: points(10, 8, 8, 6) },
       TABLE,

@@ -1,0 +1,364 @@
+/* Design I3-B, reference i3b-clock-final-preview.html: the history of the timer as a sheet. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  background: var(--color-backdrop);
+}
+
+.sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 16;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(100%, 32rem);
+  max-height: 75%;
+  padding: 8px 18px calc(18px + env(safe-area-inset-bottom));
+  margin: 0 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-surface-overlay);
+  border-top: 1px solid var(--color-border);
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -10px 30px var(--color-shadow);
+}
+
+.sheet > :not(.history) {
+  flex-shrink: 0;
+}
+
+/* The handle: tap or pull down to close. */
+.grab {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 26px;
+  height: 26px;
+  padding: 0;
+  touch-action: none;
+  background: none;
+  border-radius: 0;
+}
+
+.grab::before {
+  width: 42px;
+  height: 5px;
+  content: '';
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* A duration with small seconds; also the timer in the overview. */
+.time {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Dimmed by colour, not opacity, so the dotted line below keeps one colour (PO 21.11.). */
+.seconds {
+  font-size: 0.62em;
+  color: color-mix(in srgb, currentcolor 65%, transparent);
+}
+
+.big {
+  display: block;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-accent-text);
+}
+
+.bigPaused {
+  opacity: 0.55;
+}
+
+.sub {
+  margin: 0;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+/* Motion moves --resume from 0 to 1 when the timer is paused: the button turns green. */
+.round {
+  --resume: 0;
+
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  padding: 0;
+  color: var(--color-on-accent);
+  background: color-mix(
+    in srgb,
+    var(--color-resume) calc(var(--resume) * 100%),
+    var(--color-accent)
+  );
+  border-radius: 50%;
+}
+
+.roundIcon {
+  display: grid;
+}
+
+/* D1: from the top, a rail of dots and lines on the left. At most three quarters of the screen
+   (PO 21.11.): only the history scrolls, the head and "Fertig" stay in view; on very low screens
+   the whole sheet scrolls. */
+.history {
+  display: grid;
+  flex: 0 1 auto;
+  align-content: start;
+  min-height: 96px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  column-gap: 10px;
+}
+
+.rail {
+  display: grid;
+  justify-items: center;
+}
+
+.dot {
+  align-self: center;
+  width: 16px;
+  height: 16px;
+  background: var(--color-accent-text);
+  border-radius: 50%;
+}
+
+/* "jetzt": Motion moves --paused from 0 to 1 while the timer is paused, the dot turns grey. */
+.dotNow {
+  --paused: 0;
+
+  background: color-mix(
+    in srgb,
+    var(--color-text-muted) calc(var(--paused) * 100%),
+    var(--color-accent-text)
+  );
+  box-shadow: 0 0 0 5px
+    color-mix(in srgb, var(--color-border) calc(var(--paused) * 100%), var(--color-clock-now));
+}
+
+.line {
+  width: 4px;
+  height: 100%;
+  min-height: 44px;
+  background: var(--color-clock-played);
+  border-radius: 2px;
+}
+
+.linePause {
+  width: 3px;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--color-text-muted) 0 5px,
+    transparent 5px 10px
+  );
+}
+
+.event {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: center;
+  min-height: 48px;
+}
+
+.stretchBody {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 4px;
+}
+
+.stretch {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 52px;
+  font-size: 0.9rem;
+}
+
+.pause {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+}
+
+/* As high as with the bin, also while the pause lasts: ending it moves nothing (PO 21.11.). */
+.range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 44px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.muted {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.live {
+  font-weight: 700;
+  color: var(--color-accent-text);
+}
+
+/* A2: a time to tap, as text with a dotted line; the native picker lies on top. */
+.pickWrap {
+  position: relative;
+  display: inline-grid;
+  cursor: pointer;
+}
+
+.tap {
+  padding: 4px 2px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+
+  /* Longhands and a fixed thickness: Safari on iOS ignores a shorthand with style and colour and
+     draws an automatic dotted line almost invisibly thin (PO 21.11.). */
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--color-text-muted);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.pickNative {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  font-size: 16px;
+  cursor: pointer;
+  border: 0;
+  opacity: 0;
+}
+
+.bad {
+  color: var(--color-danger-text);
+  text-decoration-color: var(--color-danger-text);
+}
+
+/* P4: "+ Pause" as quiet text at the end of the line. */
+.textButton {
+  min-height: 44px;
+  padding: 4px 6px;
+  font-weight: 600;
+  color: var(--color-accent-text);
+  background: none;
+}
+
+/* C2: the bin without a box. */
+.trash {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  color: var(--color-text-muted);
+  background: none;
+}
+
+/* N6: only minutes, three quick choices in the same line. */
+.adder {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-accent-text);
+  border-radius: 14px;
+}
+
+.adderHead {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  white-space: nowrap;
+}
+
+.quickRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.chip {
+  flex: none;
+  width: 44px;
+  min-height: 40px;
+  padding: 0;
+  font-weight: 700;
+  color: var(--color-accent-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.chipOn {
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-color: transparent;
+}
+
+.minutes {
+  width: 56px;
+  min-height: 40px;
+  padding: 0 8px;
+  font-weight: 700;
+  text-align: center;
+  background: var(--color-surface);
+}
+
+.minutes.bad {
+  border-color: var(--color-danger-text);
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.buttons > * {
+  flex: 1 1 0;
+}
+
+/* A message below the beginning takes a line of its own. */
+.errorLine {
+  flex-basis: 100%;
+}
+
+.error {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--color-danger-text);
+}
+
+.done {
+  width: 100%;
+}

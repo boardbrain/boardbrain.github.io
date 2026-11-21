@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.42 |
-| Stand | 17.11.2026 |
+| Version | 0.43 |
+| Stand | 18.11.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
 
@@ -55,6 +55,7 @@
 | 0.40 | 16.11.2026 | Ergebnisse der erweiterten Codeanalyse durch Fable (Claude Fable 5.2, Berichte in `docs/test-reports/analyse/`): neue kleine Aufgaben K-10 bis K-16, davon K-10 und K-11 vor Release 0.3.0 (neu Zeile 5b); Punkte für I3-B und I3-C, darunter die Prüfung der Spielbindung gegen bestehende Partien (US-VW-02 AK-3); Hinweis zum Update während einer laufenden Partie für 0.3.0; Punkte für I4; offene Entscheidung zum verdeckten Plan der Platzierung (2, 6, 9) |
 | 0.41 | 17.11.2026 | Grafik-Runde der erweiterten Codeanalyse durch Fable: neue Rohstoffkarten und neues Catan-Vorschaubild als Entwurf in `docs/design/art-draft/` aufbewahrt, Bericht `docs/test-reports/analyse/2026-11-16-grafiken.md`; Einbau als neue kleine Aufgabe K-17, Zeitpunkt offen (6) |
 | 0.42 | 17.11.2026 | Neues Bündel I3-C2 „Notizblock für eigene Spiele“ nach I3-C und vor I3-D (Idee und Entscheidung des Product Owners): Punkte während des Spiels Runde für Runde mitschreiben, zuerst Klärung im Gespräch; als I3-C2 eingeschoben, damit I3-D und I3-E ihre Namen behalten (Entwicklungsrichtlinien 11.1, wie I3-A2); in der Reihenfolge auch I3-A2 nachgetragen (2, 9) |
+| 0.43 | 18.11.2026 | Planung und Design I3-B: US-SP-03 von I5 nach I3-B (gemeinsames Raster statt getrennter Bereiche, E-46); der Sprung zur Tischseite nach dem Speichern kommt mit I3-C; die Prüfung der Spielbindung gegen bestehende Partien (C-H-1) entfällt (E-48); Grenzen im Formular entschieden (C-G-8); Uhr der laufenden Partie korrigierbar (US-AB-07 AK-6) (2, 9); Uhr nach der Abnahme neu gefasst: Verlauf mit einzelnen Pausen, Pause nachtragen in Minuten, „Fertig“ speichert (US-AB-07 AK-6, AK-7, ADR-031) |
 
 ## 1. Zweck
 
@@ -80,7 +81,7 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 4 | Entscheidung über Vorabversionen (OP-13) und lokale Abnahme-App mit lila Symbol | nach I2 | umgesetzt (#45) |
 | 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | veröffentlicht: vorbereitet (#46), Release-PR nach `main` (#47), Tag `v0.2.0` |
 | 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | umgesetzt (#48) |
-| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-A2, I3-B, I3-C, I3-C2, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50), I3-A2 umgesetzt (#52) |
+| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-A2, I3-B, I3-C, I3-C2, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50), I3-A2 umgesetzt (#52), I3-B in Abnahme |
 | 5b | Kleine Aufgaben K-10 und K-11 aus der erweiterten Codeanalyse durch Fable (Kapitel 6) *(neu in 0.40)* | in I3, vor Release 0.3.0 | offen |
 | 5a | Release 0.3.0 als Vorabversion nach Richtlinien 3.8 | nach I3, K-10 und K-11 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
@@ -285,7 +286,7 @@ Die Stories je Inkrement stehen in Spezifikation 2.5. Die Inkremente sind nach f
 | I2 Generierung | gesamter Ablauf einer Partie mit Inszenierung | siehe Kapitel 8 | Platzierung und Sackgassen (Architektur 5.3, 5.4), Ablauf und Wiederaufnahme der laufenden Partie, Karten ziehen mit Motion, Startrohstoffe (Zufall) |
 | I3 Ergebnisse und Statistik | Ergebnisse erfassen und ansehen, Statistik | siehe Kapitel 9 | Ergebnisdienst (Datenbank, Ende der laufenden Partie mit Ergebnis); Kennzahlen mit Eigenschaftstests |
 | I4 Daten und Updates | Export, Import, Sicherungspunkte, Updates, Installation, Speicherschutz | US-EI-01, -03 bis -06, US-DS-01, -02, US-UP-01, -02, US-IS-01, -03 (M); US-EI-02, -07, US-DS-04, US-IS-02 (S); US-DS-03 (C) | Import mit Konflikten, Sicherungspunkte, Service Worker und Updates, Speicherschutz; Paket `valibot` (aus I1-B zurückgestellt) |
-| I5 Verwaltung und Archiv | Archivieren, Wiederbeleben, Löschen; Spieleliste getrennt | US-VW-01, -03, -04, US-SP-03 (S) | Löschen mit Sicherungspunkt „Vor Löschen“ (Datenbank) |
+| I5 Verwaltung und Archiv | Archivieren, Wiederbeleben, Löschen | US-VW-01, -03, -04 (S); US-SP-03 kam mit I3-B *(geändert in 0.43)* | Löschen mit Sicherungspunkt „Vor Löschen“ (Datenbank) |
 | I6 Einstellungen und Feinschliff | Einstellungen, offene Punkte aus K-3 und K-4 | US-SP-05 (M); US-GB-01 (C) | keine |
 
 Archivieren und Löschen (I5) brauchen Partien (I3) und Sicherungspunkte (I4); „Ich hasse Catan!“ (I6) blendet Catan in allen Ansichten aus und kommt deshalb, wenn alle Ansichten stehen.
@@ -420,7 +421,7 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 | I3-0 Daten und Statistik klären | FA-ER-*, FA-ST-*, Spezifikation 3.6 bis 3.8, US-ER-*, US-ST-*; Spielliste: US-SP-01 AK-1 und AK-2, US-ER-01 AK-1 und AK-5, US-SP-05 AK-3 | Opus, medium | `docs/i3-results-and-statistics-data` | umgesetzt (#49) |
 | I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 und US-AB-07 (Dienst) | Opus, high | `feat/us-er-01-results-service` | umgesetzt (#50) |
 | I3-A2 Punkte und Rangfolge bei eigenen Spielen *(neu in 0.39)* | US-SP-02 AK-4, US-VW-07 AK-3 und AK-4, US-ER-02, US-ER-06 (Fachlogik und Dienst) | Opus, high | `feat/op-14-scores-and-ranking` | umgesetzt (#52) |
-| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-ER-01, US-ER-02, US-ER-03 AK-1, US-ER-06, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche); US-SP-02 AK-4 und US-VW-07 AK-3 und AK-4 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | offen |
+| I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-SP-03, US-ER-01, US-ER-02, US-ER-03 AK-1, US-ER-06, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche); US-SP-02 AK-1 und AK-4, US-VW-07 AK-3 und AK-4 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | umgesetzt, in Abnahme; Referenz `docs/design/i3b-result-entry-final-preview.html` |
 | I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | Sonnet, medium | `feat/us-er-04-result-list` | offen |
 | I3-C2 Notizblock für eigene Spiele *(neu in 0.42)* | neue Anforderung, Stories folgen aus der Klärung | Klärung: Opus, medium; Umsetzung: nach der Klärung | nach der Klärung | offen |
 | I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05, US-ST-06 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
@@ -472,13 +473,20 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
   - **Grenzen im Formular (C-G-8):** Punkte, Spieldauer und Notizen haben keine Obergrenze, das Datum darf in der Zukunft liegen; ein Tippfehler wie 1200 statt 120 Minuten verfälscht Durchschnitt und Rekorde. In der Planung entscheiden: Plausibilitätswarnung bei sehr langer Dauer und Datum in der Zukunft, Längengrenze für Notizen. Haltepunkt, weil die Spezifikation 3.6 keine Grenzen nennt.
   - **Test auf der echten Datenbank (C-T-1):** `ResultService` mit `createDexieResultStore` je Weg (`record`, `recordFromSession`, `edit`, `delete`) prüfen; die Diensttests nutzen bisher nur den Speicher im Arbeitsspeicher.
   - **Frage für H-1 (siehe I3-C):** In der Planung klären, wann eine geänderte Spielbindung zu den bestehenden Partien eines Tischs „passt“ (US-VW-02 AK-3).
+- **Entschieden in der Planung (17.11.2026):** *(neu in 0.43)*
+  - **Grenzen (C-G-8):** kein Datum in der Zukunft, Punkte bis 99 999 im Betrag, Notizen bis 1000 Zeichen, Warnung vor dem Speichern bei mehr als 8 Stunden Spieldauer (Spezifikation 3.6, US-ER-01 AK-8).
+  - **Spielbindung (H-1):** frei änderbar, geprüft wird nur die Mitgliederzahl; bestehende Ergebnisse bleiben am Tisch (E-48, US-VW-02 AK-3). Damit entfällt C-H-1 in I3-C.
+  - **Spiele gemeinsam (US-SP-03):** Spielliste und Spieleseite zeigen alle Spiele in einem Raster mit denselben Karten; die getrennten Bereiche aus I5 entfallen (E-46). „Neues Spiel“ und „Bearbeiten“ als eigene Seiten.
+  - **Sieger aus Punkten:** gewählt nur bei Gleichstand an der Spitze; die Warnung bei einem Sieger ohne beste Punktzahl entfällt (E-47, US-ER-02 AK-4 und AK-6).
+  - **Nach dem Speichern:** zum Start mit einer Meldung; der Sprung zur Tischseite mit Reiter „Ergebnisse“ kommt mit I3-C, weil es Tischreiter und Ergebnisliste erst dort gibt. Die Karte „Statistik“ auf dem Start kommt mit I3-D.
+  - **Uhr korrigieren:** Die Spieldauer in der Übersicht öffnet ein Blatt mit dem Verlauf: Beginn und jede Pause mit Uhrzeit, änderbar, Pausen löschen und in Minuten nachtragen, „Fertig“ speichert (US-AB-07 AK-6, AK-7; nach der Abnahme statt Dauer ±1 und ±5, Referenz `docs/design/i3b-clock-final-preview.html`, ADR-031).
 
 ### I3-C Ergebnisliste und Korrektur
 
-- **Inhalt:** Tischseite mit den Reitern „Am Tisch | Ergebnisse | Statistik“ (Referenz aus I1-E); Ergebnisliste nach 3.7, Detailansicht mit allen Daten, den Plätzen (US-ER-02 AK-5, US-ER-06 AK-5) und den Catan-Farben, „Ergebnis eintragen“ vom Tisch, Bearbeiten mit Warnung, Löschen mit Bestätigung; Statistiken sofort aktuell (Lesehooks).
+- **Inhalt:** Tischseite mit den Reitern „Am Tisch | Ergebnisse | Statistik“ (Referenz aus I1-E); nach dem Speichern eines Ergebnisses führt die App auf die Tischseite in den Reiter „Ergebnisse“ und markiert den neuen Eintrag (Design N2 aus I3-B, *neu in 0.43*); Ergebnisliste nach 3.7, Detailansicht mit allen Daten, den Plätzen (US-ER-02 AK-5, US-ER-06 AK-5) und den Catan-Farben, „Ergebnis eintragen“ vom Tisch, Bearbeiten mit Warnung, Löschen mit Bestätigung; Statistiken sofort aktuell (Lesehooks).
 - **Löschen ohne Sicherungspunkt:** siehe Hinweise.
 - **Aus der erweiterten Codeanalyse durch Fable (Kapitel 6):** *(neu in 0.40)*
-  - **Spielbindung gegen bestehende Partien prüfen (C-H-1, C-T-3):** Bisher prüft `editGroup` nur Mitgliederzahl und laufende Partie. Sobald I3-B Ergebnisse speichert, könnte etwa ein Catan-Ergebnis an einem Tisch „Nur Uno“ hängen. `MatchFacts` um die gespielten Spiele des Tischs erweitern, in `editGroup` prüfen, neuer Fehlercode, Grund im Editor (US-VW-02 AK-3 und AK-6). Die Bedeutung von „passt“ klärt die Planung von I3-B. Kein Bündel führte diese Story bisher; sie gehört vor Release 0.3.0.
+  - ~~**Spielbindung gegen bestehende Partien prüfen (C-H-1, C-T-3):**~~ *Entfällt seit 0.43 (E-48): Die Spielbindung ist frei änderbar, bestehende Ergebnisse bleiben am Tisch.* Bisher prüft `editGroup` nur Mitgliederzahl und laufende Partie. Sobald I3-B Ergebnisse speichert, könnte etwa ein Catan-Ergebnis an einem Tisch „Nur Uno“ hängen. `MatchFacts` um die gespielten Spiele des Tischs erweitern, in `editGroup` prüfen, neuer Fehlercode, Grund im Editor (US-VW-02 AK-3 und AK-6). Die Bedeutung von „passt“ klärt die Planung von I3-B. Kein Bündel führte diese Story bisher; sie gehört vor Release 0.3.0.
   - **Mitnehmen:** Modus der Übersicht aus der Partie statt fest „Standard“, Spielerzahl von Catan aus dem Catan-Modul (C-G-9); gemeinsame, barrierefreie Reiter-Komponente für Übersicht und Tischseite (C-G-10); Ergebnisse in den Anzahlen der Diagnose (C-W-4).
 
 ### I3-C2 Notizblock für eigene Spiele *(neu in 0.42)*

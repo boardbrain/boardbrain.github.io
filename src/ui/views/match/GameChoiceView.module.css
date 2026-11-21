@@ -1,29 +1,85 @@
-/* Design I2-C, page 1 (form A, card K2). */
-.gameGrid {
+/* Design I3-B (docs/design/i3b-result-entry-final-preview.html): game list, empty page (LZ2) and
+   the Catan question (Q5). */
+.empty {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  text-align: center;
+}
+
+.empty p {
+  margin: 0;
+}
+
+/* Q5: the list stays visible behind the dark; the fan sits in the middle. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--color-backdrop);
+  container-type: inline-size;
+}
+
+.fan {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  align-items: center;
   justify-content: center;
-  padding-top: 8px;
+  width: 100%;
+  pointer-events: none;
 }
 
-.gameLink {
+.left,
+.right {
+  width: min(44cqw, 175px);
+  pointer-events: auto;
+}
+
+.left {
+  z-index: 1;
   display: block;
-  width: min(64cqw, 240px);
+  padding: 0;
+  margin-right: -6px;
   color: inherit;
-  text-decoration: none;
-  border-radius: 14px;
+  background: none;
+  border: 0;
+  border-radius: 5.83% / 3.94%;
+  transform: rotate(-8deg) translateY(6px);
 }
 
-.gameLink > * {
+.left > * {
   display: flex;
   width: 100%;
 }
 
-.lead {
-  font-size: 0.92rem;
+.right {
+  display: grid;
+  gap: 8px;
+  place-items: center;
+  align-content: center;
+  aspect-ratio: 5 / 7.4;
+  padding: 14px 10px 14px 18px;
+  color: var(--color-text);
+  text-align: center;
+  background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px var(--color-shadow);
+  transform: rotate(8deg) translateY(6px);
 }
 
-.note {
-  color: var(--color-text-muted);
+.askIcon {
+  color: var(--color-accent-text);
+}
+
+.askLabel {
+  max-width: 100%;
+  font-size: 1.05rem;
+}
+
+/* The symbol of the order fades in when the order changes. */
+.sortIcon {
+  display: grid;
 }

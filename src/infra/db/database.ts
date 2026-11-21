@@ -1,5 +1,6 @@
 import { Dexie, type DexieOptions, type Table, type Transaction } from 'dexie';
 import type { ErrorLogEntry, StoredSession } from '@/app/ports';
+import { clockFromVersion4, type ClockVersion4 } from '@/core/generation';
 import type {
   CustomGame,
   GameId,
@@ -41,6 +42,48 @@ type SchemaVersion = {
   readonly upgrade?: (transaction: Transaction) => Promise<void>;
 };
 
+// The timer as session version 4 stored it, or `undefined` if the value is something else.
+function clockOfVersion4(value: unknown): ClockVersion4 | undefined {
+  if (typeof value !== 'object' || value === null) {
+    return undefined;
+  }
+  if (!('startedAt' in value) || !('pausedMs' in value)) {
+    return undefined;
+  }
+  const { startedAt, pausedMs } = value;
+  const pausedAt = 'pausedAt' in value ? value.pausedAt : undefined;
+  if (
+    typeof startedAt !== 'string' ||
+    typeof pausedMs !== 'number' ||
+    (pausedAt !== undefined && typeof pausedAt !== 'string')
+  ) {
+    return undefined;
+  }
+  return pausedAt === undefined ? { startedAt, pausedMs } : { startedAt, pausedAt, pausedMs };
+}
+
+// I3-B (ADR-031): a running match of session version 4 becomes version 5, its timer keeps every
+// pause; the sum of its pauses becomes one pause after the beginning. A session that does not
+// look like version 4 stays as it is and is reported as unknown (Architecture 10.3).
+async function upgradeSessionToVersion5(transaction: Transaction): Promise<void> {
+  await transaction
+    .table('session')
+    .toCollection()
+    .modify((row: Record<string, unknown>) => {
+      if (row.schemaVersion !== 4) {
+        return;
+      }
+      if (row.clock !== undefined) {
+        const clock = clockOfVersion4(row.clock);
+        if (clock === undefined) {
+          return;
+        }
+        row.clock = clockFromVersion4(clock);
+      }
+      row.schemaVersion = 5;
+    });
+}
+
 /**
  * All schema versions in ascending order (Architecture 7.3). Version 1 already contains every
  * store of version 1 of the app, so later increments need no migration for their stores.
@@ -57,6 +100,12 @@ export const SCHEMA_VERSIONS: readonly SchemaVersion[] = [
       session: 'id',
       meta: 'key',
     },
+  },
+  {
+    // I3-B: no new store; converts the session of a running match (ADR-031).
+    version: 2,
+    stores: {},
+    upgrade: upgradeSessionToVersion5,
   },
 ];
 

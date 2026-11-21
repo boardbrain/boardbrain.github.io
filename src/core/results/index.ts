@@ -7,7 +7,9 @@
  * game allows comes as `ResultRules` from its module (ADR-028).
  */
 export {
+  bestScorers,
   durationMinutesOf,
+  LONG_DURATION_MINUTES,
   placesOf,
   plausibilityWarnings,
   suggestedWinners,
@@ -16,8 +18,11 @@ export {
   type ResultOutcome,
 } from './evaluation';
 export { compareMatches, sortMatches, type MatchMoment } from './order';
+export { playedGames, type PlayedGame } from './played';
 export {
   checkResult,
+  MAX_NOTES_LENGTH,
+  MAX_SCORE,
   resultErrors,
   type ResultContent,
   type ResultError,

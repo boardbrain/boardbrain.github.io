@@ -1,0 +1,111 @@
+/* Design I3-B "Neues Spiel" and "Spiel bearbeiten" (V2): name and "Punkte" as a list. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.section {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.label {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.field {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.bad {
+  border-color: var(--color-danger-text);
+}
+
+.error {
+  margin: -4px 0 0;
+  font-size: 0.8rem;
+  color: var(--color-danger-text);
+}
+
+.group {
+  display: grid;
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.group > * + * {
+  border-top: 1px solid var(--color-border);
+}
+
+.radioRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 14px;
+  color: var(--color-text);
+  text-align: left;
+  background: none;
+  border-radius: 0;
+}
+
+.radioRow:disabled {
+  opacity: 0.45;
+}
+
+.radio {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-text-muted);
+  border-radius: 50%;
+}
+
+.radioRow[aria-checked='true'] .radio {
+  border-color: var(--color-accent-text);
+  box-shadow:
+    inset 0 0 0 4px var(--color-surface-raised),
+    inset 0 0 0 11px var(--color-accent-text);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.hint {
+  margin: -4px 0 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.saveBar {
+  padding: var(--space-3) 0 var(--space-1);
+  margin-top: auto;
+}
+
+.save {
+  width: 100%;
+  min-height: 3.25rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}

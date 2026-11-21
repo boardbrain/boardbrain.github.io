@@ -1,0 +1,95 @@
+/* Design I3-B: the timer of the match; its history is ClockSheet. */
+.pill {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+  align-items: center;
+  padding: 3px 3px 3px 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+/* The time is tappable without a circle of its own: the dotted underline is enough; an invisible
+   margin makes the target 44 px high. Motion moves --paused from 0 to 1 while the timer is paused:
+   the time turns grey. */
+.time {
+  --paused: 0;
+
+  min-height: 0;
+  padding: 10px 6px;
+  margin: -10px -6px;
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--color-text-muted) calc(var(--paused) * 100%), var(--color-text));
+  background: none;
+  border-radius: 0;
+}
+
+/* The dotted line under the whole time, seconds included: a border, because an underline is
+   drawn in pieces for text of two sizes, with dots that do not line up (PO 21.11.). */
+.time > span {
+  border-bottom: 2px dotted var(--color-text-muted);
+}
+
+/* The symbol of the round button fades in when it changes. */
+.icon {
+  display: grid;
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  min-height: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--color-accent-text);
+  background: var(--color-surface-overlay);
+  border-radius: 50%;
+}
+
+/* Below the board: "Partie beenden ohne Ergebnis" on the left, the timer on the right. */
+.endRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* The pill keeps one line, as high as the timer; with too little room the timer moves below. */
+.endRow > :first-child {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+/* Narrow phones (360 px): a tighter timer, so it still fits beside the pill (PO 21.11.). */
+@media (width < 384px) {
+  .endRow {
+    gap: 6px;
+  }
+
+  .pill {
+    gap: 4px;
+    padding-left: 8px;
+  }
+
+  .time {
+    font-size: 1rem;
+  }
+
+  .time span span {
+    font-size: 0.55em;
+  }
+
+  .toggle {
+    width: 32px;
+    min-height: 32px;
+    height: 32px;
+  }
+}

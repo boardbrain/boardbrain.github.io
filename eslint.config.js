@@ -216,6 +216,8 @@ export default defineConfig([
     'test-results/',
     'blob-report/',
     'docs/',
+    // Local design previews, not in the repository (.gitignore, Development Guidelines 2.5)
+    'previews/',
   ]),
 
   // Base rules for all files

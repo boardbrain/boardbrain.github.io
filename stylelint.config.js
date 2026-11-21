@@ -13,6 +13,8 @@ export default {
     'coverage/**',
     'playwright-report/**',
     'test-results/**',
+    // Local design previews, not in the repository (.gitignore)
+    'previews/**',
   ],
   rules: {
     'color-no-hex': [true, { message: COLOR_MESSAGE }],
@@ -29,6 +31,11 @@ export default {
       { message: 'Class names in CSS Modules use camelCase.' },
     ],
     'selector-pseudo-class-no-unknown': [true, { ignorePseudoClasses: ['global', 'local'] }],
+    // Safari on iOS ignores text-decoration with style and colour as one shorthand (PO 21.11.).
+    'declaration-block-no-redundant-longhand-properties': [
+      true,
+      { ignoreShorthands: ['text-decoration'] },
+    ],
   },
   overrides: [
     {
@@ -41,8 +48,13 @@ export default {
     },
     // K-4: the shimmer mixes the element's own text colour (currentcolor) with transparent and
     // depends on --press per element, so it cannot live in tokens.css. It adds no colour value.
+    // The same for the timer: Motion moves a variable per element between two colour tokens.
     {
-      files: ['src/ui/components/Pressable.module.css'],
+      files: [
+        'src/ui/components/Pressable.module.css',
+        'src/ui/views/match/ClockSheet.module.css',
+        'src/ui/views/match/MatchClock.module.css',
+      ],
       rules: {
         'function-disallowed-list': [
           ['rgb', 'rgba', 'hsl', 'hsla', 'hwb', 'lab', 'lch', 'oklab', 'oklch', 'color'],

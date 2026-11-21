@@ -8,9 +8,11 @@ import { useAppDependencies } from '@/ui/AppDependencies';
 import { Board } from '@/ui/board/Board';
 import { PieceMark } from '@/ui/board/PieceMark';
 import { AgainIcon, BackIcon, ExitDoorIcon } from '@/ui/components/Icons';
-import { PressableButton } from '@/ui/components/Pressable';
+import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 import { matchBoardPieces, pieceMarking } from './boardPieces';
 import { Coin } from './Coin';
+import { MatchClock } from './MatchClock';
+import clockStyles from './MatchClock.module.css';
 import { DrawSymbol } from './DrawSymbol';
 import { EndMatchDialog } from './EndMatchDialog';
 import { MatchDialog } from './MatchDialog';
@@ -83,6 +85,8 @@ export function MatchOverviewView(): React.JSX.Element | null {
   const steps = session.generation.steps;
   const lastStep = steps.length - 1;
 
+  // The timer of the match (US-AB-07 AK-1, AK-2, AK-6).
+  const clock = session.clock === undefined ? null : <MatchClock clock={session.clock} />;
   const board = summary.placementSkipped ? (
     <div className={styles.skippedBox}>
       <strong>
@@ -107,13 +111,16 @@ export function MatchOverviewView(): React.JSX.Element | null {
         onPieceTap={(key) => {
           setRepeating(pieces.stepOf.get(key) ?? null);
         }}
+        attached={
+          // H1: at the board, nothing moves (design I2-H); in portrait right below it, so board
+          // and hint sit together in the middle of the free room (Product Owner 20.11.2026).
+          pieces.buildings.length > 0 && (
+            <div className={styles.tapHint}>
+              <span>{t('partie.steinAntippen')}</span>
+            </div>
+          )
+        }
       />
-      {/* H1: in the free room below the board, nothing moves (design I2-H). */}
-      {pieces.buildings.length > 0 && (
-        <div className={styles.tapHint}>
-          <span>{t('partie.steinAntippen')}</span>
-        </div>
-      )}
     </div>
   );
 
@@ -336,17 +343,26 @@ export function MatchOverviewView(): React.JSX.Element | null {
       ) : (
         results
       )}
+      {/* Product Owner 20.11.2026: "Partie beenden ohne Ergebnis" with the timer beside it, then
+          "Ergebnis eintragen" at the very bottom; the timer takes no room from the board. */}
       <div className={styles.ovEnd}>
-        <PressableButton
-          type="button"
-          className={shared.pill}
-          onClick={() => {
-            setAskingEnd(true);
-          }}
-        >
-          <ExitDoorIcon size={14} />
-          {t('partie.beenden')}
-        </PressableButton>
+        <div className={clockStyles.endRow}>
+          <PressableButton
+            type="button"
+            className={shared.pill}
+            onClick={() => {
+              setAskingEnd(true);
+            }}
+          >
+            <ExitDoorIcon size={14} />
+            {t('partie.beenden')}
+          </PressableButton>
+          {clock}
+        </div>
+        {/* US-AB-06 AK-1, AK-2: the result of the match, filled in from it. */}
+        <PressableLink to="/partie/ergebnis" className={cx(shared.primary, styles.enterResult)}>
+          {t('partie.ergebnisEintragen')}
+        </PressableLink>
       </div>
       {repeating !== null && repeatStep !== undefined && (
         <MatchDialog

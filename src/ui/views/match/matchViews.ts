@@ -6,3 +6,6 @@ export { MatchView } from './MatchView';
 export { OptionsView } from './OptionsView';
 export { PreparationLayout } from './PreparationLayout';
 export { TableChoiceView } from './TableChoiceView';
+// The result form shares coins, dialogs and the table choice with the match (design I3-B).
+export { MatchResultView, ResultView } from '@/ui/views/result/ResultView';
+export { ResultTableView } from '@/ui/views/result/ResultTableView';

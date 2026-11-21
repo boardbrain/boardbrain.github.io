@@ -15,12 +15,12 @@ import { BackButton } from '@/ui/components/BackButton';
 import { ChevronIcon, InfoIcon } from '@/ui/components/Icons';
 import { MiniTable } from '@/ui/components/MiniTable';
 import { PressableButton } from '@/ui/components/Pressable';
+import { Unfold } from '@/ui/components/Unfold';
 import { DrawSymbol } from './DrawSymbol';
 import { MatchDialog } from './MatchDialog';
 import { DRAW_NAMES } from './matchTexts';
 import { isOrderComplete, tapForOrder, type MatchPreparation } from './preparation';
 import { useChosenPreparation } from './PreparationLayout';
-import { Unfold } from './Unfold';
 import { WizardDots } from './WizardDots';
 import shared from './Match.module.css';
 import styles from './OptionsView.module.css';
@@ -137,7 +137,7 @@ export function OptionsView(): React.JSX.Element | null {
               change({ isOrderDrawn: !preparation.isOrderDrawn });
             }}
           />
-          <Unfold isOpen={!preparation.isOrderDrawn}>
+          <Unfold isDivided isOpen={!preparation.isOrderDrawn}>
             <div className={styles.optColumn}>
               <Segmented
                 options={[
@@ -180,7 +180,7 @@ export function OptionsView(): React.JSX.Element | null {
               change({ hasStartingResources: !preparation.hasStartingResources });
             }}
           />
-          <Unfold isOpen={preparation.hasStartingResources}>
+          <Unfold isDivided isOpen={preparation.hasStartingResources}>
             <div className={styles.optRow}>
               <span className={styles.txt}>{t('partie.anzahlJePerson')}</span>
               <span className={styles.stepper}>

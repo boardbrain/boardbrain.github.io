@@ -1,81 +1,85 @@
+import { defined } from '@tests/support/defined';
 import { aCustomGame } from '@tests/support/masterDataFakes';
+import { OverviewRoutes } from '@tests/support/overviewRoutes';
 import { renderWithApp } from '@tests/support/renderWithApp';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import { GamesView } from './GamesView';
 
-function customGamesArea(): HTMLElement {
-  return screen.getByRole('region', { name: 'Eigene Spiele' });
+function gameCards(): string[] {
+  return within(screen.getByRole('list', { name: 'Spiele' }))
+    .getAllByRole('listitem')
+    .map((item) => item.textContent);
 }
 
-describe('US-SP-02 Create a custom game (game management)', () => {
-  it('shows Catan under supported games and a hint under custom games', async () => {
-    renderWithApp(<GamesView />);
+describe('US-SP-03 Supported and custom games (games page, design I3-B)', () => {
+  it('AK-1: one grid: "Neues Spiel", Catan as a development card, then the custom games', async () => {
+    const { db } = renderWithApp(<OverviewRoutes />, { path: '/verwaltung/spiele' });
+    await db.games.add(aCustomGame({ name: 'Uno' }));
 
-    const supported = screen.getByRole('region', { name: 'Unterstützte Spiele' });
-    expect(within(supported).getByRole('listitem')).toHaveTextContent('Catan');
-    expect(
-      await within(customGamesArea()).findByText('Noch keine eigenen Spiele angelegt.'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Uno')).toBeInTheDocument();
+    expect(gameCards()).toEqual([
+      'Neues Spiel',
+      'Catannoch nie gespieltmit Generierung',
+      '0UUnonoch nie gespieltohne Punkte0',
+    ]);
+    expect(screen.getByText('Zahl in der Ecke: Partien')).toBeInTheDocument();
   });
 
-  it('AK-1: shows the saved game in the area "Eigene Spiele"', async () => {
+  it('says when there are no custom games yet', async () => {
+    renderWithApp(<OverviewRoutes />, { path: '/verwaltung/spiele' });
+
+    expect(await screen.findByText('Noch keine eigenen Spiele')).toBeInTheDocument();
+  });
+});
+
+describe('US-SP-02 Create a custom game (design I3-B V2)', () => {
+  it('AK-1, AK-4: "Neues Spiel" opens its own page; the game is created with its points', async () => {
     const user = userEvent.setup();
-    renderWithApp(<GamesView />);
+    const { db } = renderWithApp(<OverviewRoutes />, { path: '/verwaltung/spiele' });
 
-    await user.type(screen.getByLabelText('Name'), 'Uno');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
-
-    expect(await within(customGamesArea()).findByRole('listitem')).toHaveTextContent('Uno');
+    // The plus in the head and the dashed card both open the page.
     await waitFor(() => {
-      expect(screen.getByLabelText('Name')).toHaveValue('');
+      expect(screen.getAllByRole('link', { name: 'Neues Spiel' })).toHaveLength(2);
     });
+    const [plus, card] = screen.getAllByRole('link', { name: 'Neues Spiel' });
+    expect(card).toHaveAttribute('href', defined(plus, 'plus').getAttribute('href'));
+    await user.click(defined(plus, 'plus'));
+    const editor = await screen.findByRole('dialog', { name: 'Neues Spiel' });
+    expect(within(editor).getByRole('radio', { name: /Keine Punkte/ })).toBeChecked();
+    await user.type(within(editor).getByRole('textbox', { name: 'Name des Spiels' }), 'Skyjo');
+    await user.click(within(editor).getByRole('radio', { name: /Wenigste Punkte gewinnen/ }));
+    await user.click(within(editor).getByRole('button', { name: 'Spiel anlegen' }));
+
+    expect(await screen.findByText('Skyjo')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    const [game] = await db.games.toArray();
+    expect(game).toMatchObject({ name: 'Skyjo', scoring: 'lowest-wins' });
   });
 
   it('saving is impossible with a blank name', async () => {
     const user = userEvent.setup();
-    renderWithApp(<GamesView />);
+    renderWithApp(<OverviewRoutes />, { path: '/verwaltung/spiele/neu' });
 
-    await user.type(screen.getByLabelText('Name'), '  ');
+    await user.type(await screen.findByRole('textbox', { name: 'Name des Spiels' }), '  ');
 
-    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Spiel anlegen' })).toBeDisabled();
   });
 
-  it('AK-2: points out an existing game with the same name and does not save', async () => {
-    const user = userEvent.setup();
-    const { db } = renderWithApp(<GamesView />);
-    await db.games.add(aCustomGame({ name: 'Uno' }));
+  it.each(['UNO', 'catan'])(
+    'AK-2: points out the taken name %j while typing and does not save',
+    async (name) => {
+      const user = userEvent.setup();
+      const { db } = renderWithApp(<OverviewRoutes />, { path: '/verwaltung/spiele/neu' });
+      await db.games.add(aCustomGame({ name: 'Uno' }));
 
-    await user.type(screen.getByLabelText('Name'), 'UNO');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
+      await user.type(await screen.findByRole('textbox', { name: 'Name des Spiels' }), name);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Es gibt bereits ein Spiel namens „UNO“. Bitte wähle einen anderen Namen.',
-    );
-    expect(await db.games.count()).toBe(1);
-  });
-
-  it('AK-2: points out Catan as an existing game and does not save', async () => {
-    const user = userEvent.setup();
-    const { db } = renderWithApp(<GamesView />);
-
-    await user.type(screen.getByLabelText('Name'), 'catan');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('„catan“');
-    expect(await db.games.count()).toBe(0);
-  });
-
-  it('AK-2: changing the name removes the hint', async () => {
-    const user = userEvent.setup();
-    renderWithApp(<GamesView />);
-
-    await user.type(screen.getByLabelText('Name'), 'Catan');
-    await user.click(screen.getByRole('button', { name: 'Speichern' }));
-    await screen.findByRole('alert');
-    await user.type(screen.getByLabelText('Name'), ' Junior');
-
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  });
+      expect(await screen.findByText('Name gibt es schon')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Spiel anlegen' })).toBeDisabled();
+      expect(await db.games.count()).toBe(1);
+    },
+  );
 });

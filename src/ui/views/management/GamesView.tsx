@@ -1,152 +1,126 @@
-import { useId, useState, useTransition } from 'react';
-import type { NameDuplicateError } from '@/app/services/masterDataService';
-import {
-  cleanName,
-  containsName,
-  type CustomGame,
-  type Group,
-  type NameEmptyError,
-} from '@/core/model';
+import { useState } from 'react';
+import { findByName, sortByName, type CustomGame } from '@/core/model';
+import { CATAN_GAME_ID } from '@/games/catan';
 import { SUPPORTED_GAMES } from '@/games/registry';
-import { useCustomGames, useGroups } from '@/infra/db/readHooks';
+import { useCustomGames, usePlayedGames } from '@/infra/db/readHooks';
 import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
-import { NameForm } from '@/ui/components/NameForm';
-import { ChevronIcon } from '@/ui/components/Icons';
-import { Notice } from '@/ui/components/Notice';
+import { EditorDialog } from '@/ui/components/EditorDialog';
+import { PlusIcon } from '@/ui/components/Icons';
 import { Page } from '@/ui/components/Page';
-import overview from './Overview.module.css';
-import styles from './GamesView.module.css';
 import { PressableLink } from '@/ui/components/Pressable';
+import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
+import { useGoBack } from '@/ui/components/useGoBack';
+import { GameEditor } from '@/ui/views/games/GameEditor';
+import { CatanGameCard, CustomGameCard, GameGrid, NewGameCard } from '@/ui/views/games/GameCards';
+import { localToday } from '@/ui/views/games/dates';
+import persons from './PersonsView.module.css';
 
-// `submitted` is the input the message belongs to; the message is hidden once the input changes.
-type Message = {
-  readonly error: NameEmptyError | NameDuplicateError;
-  readonly submitted: string;
+const SEARCH_LABELS = {
+  open: t('spiele.suchen'),
+  field: t('spiele.suchfeld'),
+  close: t('spiele.suchfeldSchliessen'),
 };
 
-const CHEVRON_SIZE = 18;
-
-// How many tables play only this game, e.g. "2 Tische nur dafür" (design I1-F).
-function boundTablesText(game: CustomGame, groups: readonly Group[]): string {
-  const count = groups.filter(
-    (group) => group.binding.kind === 'game' && group.binding.gameId === game.id,
-  ).length;
-  if (count === 0) {
-    return t('spiele.keinEigenerTisch');
-  }
-  return count === 1
-    ? t('spiele.einTischNurDafuer')
-    : t('spiele.tischeNurDafuer', { anzahl: count });
+/**
+ * Names of all games except `except`, Catan included (US-SP-02 AK-2, US-VW-07 AK-1).
+ */
+export function otherGameNames(customGames: readonly CustomGame[], except?: CustomGame): string[] {
+  return [
+    ...SUPPORTED_GAMES.map((game) => t(game.nameKey)),
+    ...customGames.filter((game) => game.id !== except?.id).map((game) => game.name),
+  ];
 }
 
 /**
- * Game management `#/verwaltung/spiele` (US-SP-02): supported and custom games in separate
- * areas (FA-SP-03) and creating custom games with a unique name (AK-2). A custom game opens
- * its page (US-VW-07, design I1-F); Catan is built in and has none.
+ * Games `#/verwaltung/spiele` (US-SP-02, US-SP-03, design I3-B): "Neues Spiel" first, then all
+ * games in one grid with the same cards as the game list of "Partie" (AK-1). A custom game opens
+ * its page (US-VW-07); Catan is built in and has none. Under `#/verwaltung/spiele/neu` the editor
+ * for a new game lies over the page, as "Neuer Tisch" does (US-SP-02 AK-1).
  */
-export function GamesView(): React.JSX.Element {
-  const { db, masterData } = useAppDependencies();
+export function GamesView({
+  isCreating = false,
+}: {
+  readonly isCreating?: boolean;
+}): React.JSX.Element {
+  const { db } = useAppDependencies();
   const customGames = useCustomGames(db);
-  const groups = useGroups(db);
-  const [name, setName] = useState('');
-  const [message, setMessage] = useState<Message | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const supportedId = useId();
-
-  function save(): void {
-    // Unexpected errors in the transition reach the error boundary of the view (ADR-025).
-    const submitted = name;
-    startTransition(async () => {
-      const result = await masterData.createCustomGame(submitted);
-      startTransition(() => {
-        if (result.ok) {
-          // Keep a name that was typed while saving was still running.
-          setName((current) => (current === submitted ? '' : current));
-          setMessage(null);
-          return;
-        }
-        setMessage({ error: result.error, submitted });
-      });
-    });
-  }
-
-  const visibleMessage = message?.submitted === name ? message : null;
-  // US-SP-02 AK-2: checked while typing against Catan and all custom games.
-  const isTaken = containsName(
-    [
-      ...SUPPORTED_GAMES.map((game) => t(game.nameKey)),
-      ...(customGames ?? []).map((game) => game.name),
-    ],
-    name,
-  );
-
-  function handleNameChange(value: string): void {
-    setName(value);
-    setMessage(null);
-  }
-
+  const played = usePlayedGames(db);
+  const closeEditor = useGoBack('/verwaltung/spiele');
+  const today = localToday();
+  const active = sortByName((customGames ?? []).filter((game) => !game.archived));
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const trimmedQuery = query.trim();
+  const isCatanFound = findByName([{ name: t('spiele.namen.catan') }], query).length > 0;
+  const found = findByName(active, query);
+  const toggleSearch = (): void => {
+    setIsSearchOpen(!isSearchOpen);
+    setQuery('');
+  };
   return (
-    <Page title={t('spiele.titel')} backFallback="/verwaltung">
-      <NameForm
-        title={t('spiele.neu')}
-        value={name}
-        isPending={isPending}
-        onValueChange={handleNameChange}
-        onSubmit={save}
-        error={isTaken ? t('spiele.gleicherName', { name: cleanName(name) }) : null}
-      >
-        {visibleMessage?.error === 'name-duplicate' && !isTaken && (
-          <Notice tone="error">
-            <p>{t('spiele.gleicherName', { name: cleanName(visibleMessage.submitted) })}</p>
-          </Notice>
-        )}
-        {visibleMessage?.error === 'name-empty' && (
-          <Notice tone="error">
-            <p>{t('verwaltung.nameLeer')}</p>
-          </Notice>
-        )}
-      </NameForm>
-      <section className={overview.section} aria-labelledby={supportedId}>
-        <h2 id={supportedId} className={overview.sectionTitle}>
-          {t('spiele.unterstuetzt')}
-        </h2>
-        <ul className={overview.rows} aria-label={t('spiele.unterstuetzt')}>
-          {SUPPORTED_GAMES.map((game) => (
-            <li key={game.id} className={overview.row}>
-              <span className={overview.rowText}>
-                <strong className={overview.rowTitle}>{t(game.nameKey)}</strong>
-                <span className={overview.rowNote}>{t('spiele.catanBeschreibung')}</span>
-              </span>
-              <span className={styles.builtIn}>{t('spiele.festEingebaut')}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className={overview.section} aria-label={t('spiele.eigene')}>
-        <h2 className={overview.sectionTitle}>
-          {t('spiele.eigeneAnzahl', { anzahl: customGames?.length ?? 0 })}
-        </h2>
-        {customGames?.length === 0 && <p className={overview.hint}>{t('spiele.eigeneLeer')}</p>}
-        {customGames !== undefined && customGames.length > 0 && (
-          <ul className={overview.rows} aria-label={t('spiele.eigene')}>
-            {customGames.map((game) => (
-              <li key={game.id}>
-                {/* US-VW-07: a custom game opens its page, where it can be renamed. */}
-                <PressableLink to={`/verwaltung/spiele/${game.id}`} className={overview.row}>
-                  <span className={overview.rowText}>
-                    <strong className={overview.rowTitle}>{game.name}</strong>
-                    <span className={overview.rowNote}>{boundTablesText(game, groups ?? [])}</span>
-                  </span>
-                  <span className={overview.chevron}>
-                    <ChevronIcon size={CHEVRON_SIZE} />
-                  </span>
-                </PressableLink>
-              </li>
+    <Page
+      title={t('spiele.titel')}
+      backFallback="/verwaltung"
+      actions={
+        <div className={persons.actions}>
+          <SearchButton
+            labels={SEARCH_LABELS}
+            isOpen={isSearchOpen}
+            className={persons.iconButton}
+            onToggle={toggleSearch}
+          />
+          {/* As on "Personen": a new game without scrolling to the dashed card. */}
+          <PressableLink
+            to="/verwaltung/spiele/neu"
+            className={persons.addButton}
+            aria-label={t('spiele.neuesSpiel')}
+          >
+            <PlusIcon />
+          </PressableLink>
+        </div>
+      }
+    >
+      <SearchRow
+        isOpen={isSearchOpen}
+        labels={SEARCH_LABELS}
+        query={query}
+        closeClassName={persons.iconButton}
+        onQuery={setQuery}
+        onClose={toggleSearch}
+      />
+      {trimmedQuery !== '' && found.length === 0 && !isCatanFound && (
+        <p className={persons.hint}>{t('spiele.keinTreffer', { suche: trimmedQuery })}</p>
+      )}
+      {customGames !== undefined && played !== undefined && (
+        <>
+          <GameGrid
+            label={t('spiele.karten')}
+            hint={t(active.length === 0 ? 'spiele.keineEigenen' : 'spiele.eckeHinweis')}
+          >
+            {trimmedQuery === '' && <NewGameCard to="/verwaltung/spiele/neu" />}
+            {isCatanFound && <CatanGameCard played={played.get(CATAN_GAME_ID)} today={today} />}
+            {found.map((game) => (
+              <CustomGameCard
+                key={game.id}
+                game={game}
+                played={played.get(game.id)}
+                today={today}
+                target={{ to: `/verwaltung/spiele/${game.id}` }}
+              />
             ))}
-          </ul>
-        )}
-      </section>
+          </GameGrid>
+        </>
+      )}
+      {isCreating && customGames !== undefined && (
+        <EditorDialog title={t('spiele.neuesSpiel')} isNarrow onClose={closeEditor}>
+          <GameEditor
+            otherNames={otherGameNames(customGames)}
+            scoredCount={0}
+            onSaved={closeEditor}
+          />
+        </EditorDialog>
+      )}
     </Page>
   );
 }

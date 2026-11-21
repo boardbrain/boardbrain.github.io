@@ -3,6 +3,8 @@ import {
   CURRENT_SESSION_ID,
   drawNextStep,
   markStaged,
+  checkClock,
+  isSameClock,
   pauseClock,
   repeatStep,
   resumeClock,
@@ -11,6 +13,7 @@ import {
   startClock,
   startGeneration,
   withGameState,
+  type ClockInvalidError,
   type ClockPausedError,
   type ClockRunningError,
   type GenerationCompleteError,
@@ -85,6 +88,12 @@ export type NothingToConfirmError = 'nothing-to-confirm';
  * (US-AB-07 AK-1).
  */
 export type ClockNotStartedError = 'clock-not-started';
+
+/**
+ * Error code when the timer was changed meanwhile, e.g. paused on another device, so an edit
+ * based on the old one is not stored (US-AB-07 AK-7).
+ */
+export type ClockChangedError = 'clock-changed';
 
 /**
  * Why the stored session cannot be worked with.
@@ -199,6 +208,20 @@ export type SessionService = {
   /** Resumes the paused timer; the paused time does not count (US-AB-07 AK-2). */
   resumeClock(): Promise<
     Result<StoredSession, SessionAccessError | ClockNotStartedError | ClockRunningError>
+  >;
+  /**
+   * Stores the timer edited in its sheet with "Fertig" (US-AB-07 AK-6, AK-7, ADR-031), but only
+   * while the stored timer is still `expected`: `clock-changed` otherwise, `clock-invalid` for a
+   * timer that breaks its rules.
+   */
+  replaceClock(
+    expected: SessionClock,
+    edited: SessionClock,
+  ): Promise<
+    Result<
+      StoredSession,
+      SessionAccessError | ClockNotStartedError | ClockChangedError | ClockInvalidError
+    >
   >;
   /**
    * Ends the match without a result: the generation is discarded and nothing is stored
@@ -431,6 +454,12 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
 
     resumeClock() {
       return changeClock((timer, now) => resumeClock(timer, now));
+    },
+
+    replaceClock(expected, edited) {
+      return changeClock<ClockChangedError | ClockInvalidError>((timer, now) =>
+        isSameClock(timer, expected) ? checkClock(edited, now) : err('clock-changed'),
+      );
     },
 
     endWithoutResult() {

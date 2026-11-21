@@ -11,6 +11,11 @@ type DevCardProps = {
   readonly children: ReactNode;
   /** The result of a draw (D2): ribbon a little smaller, text centred with more room. */
   readonly isResult?: boolean;
+  /**
+   * Design I3-B F2: every measure relative to the width of the card, so a small card in a grid
+   * looks like the big one of 240 px.
+   */
+  readonly isScaled?: boolean;
   readonly className?: string | undefined;
 };
 
@@ -23,10 +28,11 @@ export function DevCard({
   art,
   children,
   isResult = false,
+  isScaled = false,
   className,
 }: DevCardProps): React.JSX.Element {
   return (
-    <span className={cx(styles.card, className)}>
+    <span className={cx(styles.card, isScaled && styles.scaled, className)}>
       <span className={styles.head}>
         <span className={cx(styles.ribbon, isResult && styles.resultRibbon)}>
           <strong className={isResult ? styles.resultRibbonText : styles.ribbonText}>

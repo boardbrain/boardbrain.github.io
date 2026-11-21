@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import type { Group, Person, PersonId } from '@/core/model';
+import { findGroups, type Group, type Person, type PersonId } from '@/core/model';
 import { CATAN_GAME_ID, canPlayCatan } from '@/games/catan';
 import { t } from '@/i18n/t';
 import { useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { BackButton } from '@/ui/components/BackButton';
 import { MiniTable } from '@/ui/components/MiniTable';
+import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
 import { useLongPress } from '@/ui/components/useLongPress';
 import { MatchDialog } from './MatchDialog';
@@ -18,13 +19,24 @@ import styles from './TableChoiceView.module.css';
 import { cx } from '@/ui/components/classNames';
 
 const FULL_CIRCLE_DEGREES = 360;
+/**
+ * Texts of the search in a table choice (Product Owner 20.11.2026, as on "Tische").
+ */
+export const TABLE_SEARCH_LABELS = {
+  open: t('ergebnis.tischeSuchen'),
+  field: t('ergebnis.tischSuchfeld'),
+  close: t('ergebnis.suchfeldSchliessen'),
+};
 const DETAIL_SEAT_RADIUS = 41;
 // From this many seats they get smaller so they still fit around the table.
 const DENSE_FROM = 7;
 // Catan colours appear in the details only where Catan is possible.
 const CATAN_MAX_SEATS = 4;
 
-function namesOf(group: Group, persons: ReadonlyMap<PersonId, Person>): string[] {
+/**
+ * The names of the members in seat order.
+ */
+export function namesOf(group: Group, persons: ReadonlyMap<PersonId, Person>): string[] {
   return group.members.map((member) => persons.get(member.personId)?.name ?? '');
 }
 
@@ -43,11 +55,19 @@ export function TableChoiceView(): React.JSX.Element | null {
   const { preparation, setPreparation } = usePreparationContext();
   const navigate = useNavigate();
   const [details, setDetails] = useState<Group | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
   if (groups === undefined || persons === undefined) {
     return null;
   }
   const byId = new Map(persons.map((person) => [person.id, person]));
-  const tables = groups.filter(canPlayCatan);
+  const playable = groups.filter(canPlayCatan);
+  const tables = findGroups(playable, persons, query).map((match) => match.group);
+  const trimmedQuery = query.trim();
+  const toggleSearch = (): void => {
+    setIsSearchOpen(!isSearchOpen);
+    setQuery('');
+  };
 
   const choose = async (group: Group): Promise<void> => {
     setDetails(null);
@@ -71,9 +91,30 @@ export function TableChoiceView(): React.JSX.Element | null {
             {t('partie.schritt', { spiel: t('spiele.namen.catan'), nummer: 1 })}
           </div>
         </div>
+        {playable.length > 0 && (
+          <SearchButton
+            labels={TABLE_SEARCH_LABELS}
+            isOpen={isSearchOpen}
+            className={shared.iconBtn}
+            onToggle={toggleSearch}
+          />
+        )}
       </div>
       <WizardDots done={1} />
-      {tables.length === 0 ? (
+      <SearchRow
+        isOpen={isSearchOpen}
+        labels={TABLE_SEARCH_LABELS}
+        query={query}
+        closeClassName={shared.iconBtn}
+        onQuery={setQuery}
+        onClose={toggleSearch}
+      />
+      {trimmedQuery !== '' && tables.length === 0 && (
+        <p className={cx(shared.small, shared.muted)}>
+          {t('ergebnis.keinTischGefunden', { suche: trimmedQuery })}
+        </p>
+      )}
+      {playable.length === 0 ? (
         <div className={cx(shared.card, styles.emptyTables)}>
           <strong>{t('partie.keinTischTitel')}</strong>
           <span className={cx(shared.small, shared.muted)}>{t('partie.keinTischText')}</span>
@@ -89,6 +130,11 @@ export function TableChoiceView(): React.JSX.Element | null {
                 key={group.id}
                 group={group}
                 names={namesOf(group, byId)}
+                boundTag={
+                  isCatanOnly(group)
+                    ? t('partie.nurSpiel', { spiel: t('spiele.namen.catan') })
+                    : undefined
+                }
                 isSelected={preparation?.base.groupId === group.id}
                 onChoose={() => void choose(group)}
                 onHold={() => {
@@ -109,7 +155,15 @@ export function TableChoiceView(): React.JSX.Element | null {
           }}
           onConfirm={() => void choose(details)}
         >
-          <TableDetails group={details} persons={byId} />
+          <TableDetails
+            group={details}
+            persons={byId}
+            binding={
+              isCatanOnly(details)
+                ? t('partie.nurSpiel', { spiel: t('spiele.namen.catan') })
+                : t('partie.alleSpiele')
+            }
+          />
         </MatchDialog>
       )}
     </main>
@@ -119,15 +173,21 @@ export function TableChoiceView(): React.JSX.Element | null {
 type TableCardProps = {
   readonly group: Group;
   readonly names: readonly string[];
+  /** "nur Catan" on a table bound to the game. */
+  readonly boundTag?: string | undefined;
   readonly isSelected: boolean;
   readonly onChoose: () => void;
   readonly onHold: () => void;
 };
 
-// One table of the room with fixed rows: table, name and names, number of persons (T2).
-function TableCard({
+/**
+ * One table of the room with fixed rows: table, name and names, number of persons (design I2-C
+ * T2); a tap chooses, holding shows the details. Also the table choice of a result (I3-B).
+ */
+export function TableCard({
   group,
   names,
+  boundTag,
   isSelected,
   onChoose,
   onHold,
@@ -142,11 +202,7 @@ function TableCard({
       aria-label={t('partie.tischBeschriftung', { tisch: group.name, namen: names.join(', ') })}
       {...press}
     >
-      {isCatanOnly(group) && (
-        <span className={styles.boundTag}>
-          {t('partie.nurSpiel', { spiel: t('spiele.namen.catan') })}
-        </span>
-      )}
+      {boundTag !== undefined && <span className={styles.boundTag}>{boundTag}</span>}
       <span className={styles.mini}>
         <MiniTable
           seats={group.members.map(({ personId, groupColor }) => ({ personId, groupColor }))}
@@ -168,14 +224,15 @@ function TableCard({
 type TableDetailsProps = {
   readonly group: Group;
   readonly persons: ReadonlyMap<PersonId, Person>;
+  /** What the table plays, e.g. "alle Spiele". */
+  readonly binding: string;
 };
 
-// Details after holding a table: the large table with initials, full name, binding, everyone.
-function TableDetails({ group, persons }: TableDetailsProps): React.JSX.Element {
+/**
+ * Details after holding a table: the large table with initials, full name, binding, everyone.
+ */
+export function TableDetails({ group, persons, binding }: TableDetailsProps): React.JSX.Element {
   const count = group.members.length;
-  const binding = isCatanOnly(group)
-    ? t('partie.nurSpiel', { spiel: t('spiele.namen.catan') })
-    : t('partie.alleSpiele');
   return (
     <>
       <div className={styles.detailHead}>

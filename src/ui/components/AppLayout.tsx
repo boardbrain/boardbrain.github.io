@@ -14,7 +14,13 @@ const HINT_ICON_SIZE = 56;
 // Architecture 13.1: only areas that already exist. Later areas (statistics I3, data I4,
 // settings I6) are one entry each; their look is in docs/design/d3-start-navigation-final-preview.html.
 const AREAS: readonly HandArea[] = [
-  { to: '/', label: 'navigation.start', icon: HomeIcon, isEnd: true, alsoOn: ['/partie'] },
+  {
+    to: '/',
+    label: 'navigation.start',
+    icon: HomeIcon,
+    isEnd: true,
+    alsoOn: ['/partie', '/ergebnis'],
+  },
   { to: '/verwaltung', label: 'navigation.verwaltung', icon: FolderIcon },
 ];
 

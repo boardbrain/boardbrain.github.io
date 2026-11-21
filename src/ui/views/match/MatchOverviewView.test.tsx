@@ -1,10 +1,10 @@
-import { aGroup, aPerson } from '@tests/support/masterDataFakes';
+import { aGroup, aPerson, utcDateTime } from '@tests/support/masterDataFakes';
 import { renderWithApp } from '@tests/support/renderWithApp';
-import { act, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { RouteObject } from 'react-router';
 import { describe, expect, it } from 'vitest';
-import type { StoredSession } from '@/app/ports';
+import type { Clock, StoredSession } from '@/app/ports';
 import { revealedStepIndex } from '@/core/generation';
 import { toPersonId } from '@/core/model';
 import { CATAN_DEFAULT_OPTIONS, type CatanOptions } from '@/games/catan';
@@ -29,8 +29,14 @@ const ROUTES: RouteObject[] = [
 ];
 
 // Starts a match and taps "Losen" until it runs, then opens the overview.
-async function runMatch(options: Partial<CatanOptions> = {}): Promise<BoardBrainDb> {
-  const { db, session, router } = renderWithApp(null, { routes: ROUTES });
+async function runMatch(
+  options: Partial<CatanOptions> = {},
+  sessionClock?: Clock,
+): Promise<BoardBrainDb> {
+  const { db, session, router } = renderWithApp(null, {
+    routes: ROUTES,
+    ...(sessionClock === undefined ? {} : { sessionClock }),
+  });
   await db.persons.bulkAdd(
     TABLE.members.map((member, index) =>
       aPerson({ id: member.personId, name: NAMES[index] ?? '' }),
@@ -223,5 +229,103 @@ describe('US-AB-03 AK-8 Tapping pieces on the board of the overview (design I2-H
 
     expect(screen.getByRole('alertdialog')).toBeInTheDocument();
     expect(screen.queryByTestId('board-spotlight')).not.toBeInTheDocument();
+  });
+});
+
+describe('US-AB-07 AK-6, AK-7 the history of the timer (design I3-B, ADR-031)', () => {
+  // The sheet counts with the real time, so the session service does too.
+  const REAL_TIME = { now: () => new Date().toISOString(), localDateTime: utcDateTime };
+
+  function hhmm(date: Date): string {
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  }
+
+  async function openSheet(): Promise<{ db: BoardBrainDb; sheet: HTMLElement }> {
+    const db = await runMatch({}, REAL_TIME);
+    await userEvent
+      .setup()
+      .click(await screen.findByRole('button', { name: /^Spieldauer .* – Verlauf$/ }));
+    return { db, sheet: await screen.findByRole('dialog', { name: 'Spieldauer' }) };
+  }
+
+  it('AK-6: adds a pause in minutes; "Fertig" stores beginning and pause', async () => {
+    const { db, sheet } = await openSheet();
+    const user = userEvent.setup();
+    expect(within(sheet).getByText('jetzt')).toBeInTheDocument();
+    // Right after the start the only stretch is shorter than a minute: no pause fits.
+    await user.click(
+      within(sheet).getByRole('button', { name: 'Pause in dieser Strecke nachtragen' }),
+    );
+    expect(within(sheet).getByRole('button', { name: 'Hinzufügen' })).toBeDisabled();
+    expect(within(sheet).getByRole('button', { name: '5 Minuten' })).toBeDisabled();
+    await user.click(within(sheet).getByRole('button', { name: 'Abbrechen' }));
+
+    fireEvent.change(within(sheet).getByLabelText('Beginn der Partie'), {
+      target: { value: hhmm(new Date(Date.now() - 10 * 60_000)) },
+    });
+    await user.click(
+      within(sheet).getByRole('button', { name: 'Pause in dieser Strecke nachtragen' }),
+    );
+    await user.click(within(sheet).getByRole('button', { name: '5 Minuten' }));
+    await user.click(within(sheet).getByRole('button', { name: 'Hinzufügen' }));
+    expect(within(sheet).getByText('Pause 1')).toBeInTheDocument();
+    await user.click(within(sheet).getByRole('button', { name: 'Fertig' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Spieldauer' })).not.toBeInTheDocument();
+    });
+    const pauses = (await db.session.toArray())[0]?.clock?.pauses ?? [];
+    expect(pauses).toHaveLength(1);
+    expect(Date.parse(pauses[0]?.to ?? '') - Date.parse(pauses[0]?.from ?? '')).toBe(5 * 60_000);
+  });
+
+  it('AK-6: a pause before the beginning is not taken and says why', async () => {
+    const { sheet } = await openSheet();
+    fireEvent.change(within(sheet).getByLabelText('Beginn der Partie'), {
+      target: { value: hhmm(new Date(Date.now() - 10 * 60_000)) },
+    });
+    const user = userEvent.setup();
+    await user.click(
+      within(sheet).getByRole('button', { name: 'Pause in dieser Strecke nachtragen' }),
+    );
+    await user.click(within(sheet).getByRole('button', { name: '5 Minuten' }));
+    await user.click(within(sheet).getByRole('button', { name: 'Hinzufügen' }));
+
+    fireEvent.change(within(sheet).getByLabelText('Pause 1 von'), {
+      target: { value: hhmm(new Date(Date.now() - 20 * 60_000)) },
+    });
+
+    expect(within(sheet).getByRole('alert')).toHaveTextContent('Nicht übernommen · vor dem Beginn');
+  });
+
+  it('AK-6: pausing in the sheet acts at once and needs no "Fertig"', async () => {
+    const { db, sheet } = await openSheet();
+    const user = userEvent.setup();
+
+    await user.click(within(sheet).getByRole('button', { name: 'Anhalten' }));
+
+    expect(await within(sheet).findByRole('button', { name: 'Fortsetzen' })).toBeInTheDocument();
+    expect((await db.session.toArray())[0]?.clock?.pauses).toHaveLength(1);
+    expect(within(sheet).getByText('Pause 1')).toBeInTheDocument();
+    await user.click(within(sheet).getByRole('button', { name: 'Fertig' }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('AK-7: closing with a change asks; "Verwerfen" keeps the stored timer', async () => {
+    const { db, sheet } = await openSheet();
+    const user = userEvent.setup();
+    const stored = (await db.session.toArray())[0]?.clock;
+    fireEvent.change(within(sheet).getByLabelText('Beginn der Partie'), {
+      target: { value: hhmm(new Date(Date.now() - 5 * 60_000)) },
+    });
+
+    await user.click(within(sheet).getByRole('button', { name: 'Verlauf schließen' }));
+
+    const question = await screen.findByRole('alertdialog', { name: 'Änderungen übernehmen?' });
+    await user.click(within(question).getByRole('button', { name: 'Verwerfen' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Spieldauer' })).not.toBeInTheDocument();
+    });
+    expect((await db.session.toArray())[0]?.clock).toEqual(stored);
   });
 });

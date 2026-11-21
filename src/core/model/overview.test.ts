@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Person } from './entities';
 import type { Group } from './group';
 import { toGroupId, toPersonId } from './ids';
-import { countFellowPlayers, findPersons, tablesOfPerson } from './overview';
+import { countFellowPlayers, findByName, findPersons, tablesOfPerson } from './overview';
 
 const NOW = '2026-10-07T18:30:00.000Z';
 
@@ -79,5 +79,15 @@ describe('US-VW-05 search for persons', () => {
 
   it('returns nothing when no name matches', () => {
     expect(findPersons(persons, 'Xaver')).toEqual([]);
+  });
+});
+
+describe('design I3-B search of games', () => {
+  it('finds games by a part of their name, ignoring case, in their order', () => {
+    const games = [{ name: 'Skyjo' }, { name: 'Catan' }, { name: 'Wizard' }, { name: 'Uno' }];
+
+    expect(findByName(games, ' a ')).toEqual([{ name: 'Catan' }, { name: 'Wizard' }]);
+    expect(findByName(games, 'SKY')).toEqual([{ name: 'Skyjo' }]);
+    expect(findByName(games, '')).toEqual(games);
   });
 });

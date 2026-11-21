@@ -1,0 +1,2175 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>BoardBrain – I3-B Uhr der Partie (final)</title>
+    <style>
+/*
+ * Design tokens (Architecture 13.4, ADR-018). The only file with colour values (NFA-GB-05).
+ * Colour values from design D-1 (OP-11, E-26). Contrast on every surface of every design:
+ * text at least 4.5:1, Catan and group colours at least 3:1.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Catan colours (Specification 3.3): the same in every design */
+  --color-catan-red: #ef5359;
+  --color-catan-blue: #4189f5;
+  --color-catan-white: #f1f1f4;
+  --color-catan-orange: #f5852b;
+
+  /* Group colours (Specification 3.3, E-28): 12 colours; red, orange, blue, white = Catan tones (FA-PG-07) */
+  --color-group-red: var(--color-catan-red);
+  --color-group-orange: var(--color-catan-orange);
+  --color-group-yellow: #e6cb72;
+  --color-group-green: #8fb35a;
+  --color-group-teal: #5fbfb2;
+  --color-group-blue: var(--color-catan-blue);
+  --color-group-indigo: #aeb0f2;
+  --color-group-pink: #eba3bf;
+  --color-group-magenta: #d46bc4;
+  --color-group-brown: #94643f;
+  --color-group-gray: #9aa1ab;
+  --color-group-white: var(--color-catan-white);
+
+  /* Board (US-PL-01, design I1-D, docs/design/i1d-board-final-preview.html): the same in every design */
+  --color-board-sea: #1c4a5c;
+  --color-board-sea-deep: #123241;
+  --color-board-shallow: #2f7480;
+  --color-board-wave: #e8f3ef33;
+  --color-board-sand: #d9b77e;
+  --color-board-wood-top: #b48a5a;
+  --color-board-wood-bottom: #93683c;
+  --color-board-wood-edge: #d0a877;
+  --color-board-highlight: #ffffff2e;
+  --color-board-hint: #123241d9;
+
+  /* Pieces on the board and in symbols (US-PL-04 AK-3, design I2-C, G1, R1): dark outline */
+  --color-piece-outline: #231d18;
+
+  /* Marked pieces while repeating one is asked (US-AB-03 AK-8, design I2-H, M1): the gold of the app */
+  --color-piece-mark: #f5be5b;
+
+  /* Highlighting and tension mode of the placement (design D-2): the dark laid over the board
+     (55 % in the style sheet), the bright centre of a dot, the golden switch with its glow */
+  --color-board-dark: #0d0a08;
+  --color-highlight-core: #fff;
+  --color-tension-on: #f5be5b;
+  --color-on-tension: #231d18;
+  --color-tension-glow-near: #f5be5b2e;
+  --color-tension-glow: #f5be5b73;
+
+  /* Ink on Catan colours: coins, swatches and the band of the person at turn (design I2-C) */
+  --color-on-catan: #231d18;
+  --color-on-catan-strong: #fff;
+  --color-band-shade: #231d18cc;
+  --color-catan-red-band-light: color-mix(in srgb, var(--color-catan-red) 92%, #fff);
+  --color-catan-red-band-dark: color-mix(in srgb, var(--color-catan-red) 75%, #000);
+  --color-catan-blue-band-light: color-mix(in srgb, var(--color-catan-blue) 92%, #fff);
+  --color-catan-blue-band-dark: color-mix(in srgb, var(--color-catan-blue) 75%, #000);
+  --color-catan-white-band-light: color-mix(in srgb, var(--color-catan-white) 92%, #fff);
+  --color-catan-white-band-dark: color-mix(in srgb, var(--color-catan-white) 75%, #000);
+  --color-catan-orange-band-light: color-mix(in srgb, var(--color-catan-orange) 92%, #fff);
+  --color-catan-orange-band-dark: color-mix(in srgb, var(--color-catan-orange) 75%, #000);
+
+  /* Resources (US-SR-01 AK-5, design I2-C): discs of the resource symbols */
+  --color-resource-lumber: #74a75a;
+  --color-resource-brick: #d0714a;
+  --color-resource-wool: #b9dc8a;
+  --color-resource-grain: #e6c454;
+  --color-resource-ore: #a3acb8;
+  --color-resource-card-shadow: #00000073;
+
+  /* Development card K2/D2 (design I2-C, pages 1 and 5), the same in every design */
+  --color-card-paper: #3d342b;
+  --color-card-paper-low: #2c251f;
+  --color-card-ribbon-top: #d08c2c;
+  --color-card-ribbon-bottom: #9a5a12;
+  --color-card-ribbon-ink: #fff6e2;
+  --color-card-ribbon-shadow: #00000070;
+  --color-card-frame: #b98a3e;
+  --color-card-art-shadow: #00000070;
+  --color-card-glow: #fff2;
+
+  /* Design I3-B: the light centre behind the first letter of a custom game. */
+  --color-game-letter-glow: #5a4636;
+
+  /* Card back R1 (design I2-D): dark wood, lozenge pattern, golden frame, medallion with the logo */
+  --color-card-back-gold: #e0b25a;
+  --color-card-back-top: #4a3d31;
+  --color-card-back-bottom: #28211b;
+  --color-card-back-medal-light: #3d3229;
+  --color-card-back-medal-dark: #1d1713;
+
+  /* Destructive action, e.g. "Beenden" (design I2-C) */
+  --color-danger: #b42f36;
+
+  /* Destructive action as text on a dark surface, e.g. "Neu beginnen" (design I2-D, Q1) */
+  --color-danger-text: #f08a8f;
+
+  /* Translucent tag in front of a picture, e.g. "nur Catan" on a table (design I2-C, L2) */
+  --color-tag-glass: color-mix(in srgb, var(--color-surface-raised) 45%, transparent);
+
+  /*
+   * Illustrations (design I2-C, docs/design/i2-match-final-preview.html): landscape of the Catan
+   * card, pictures of the draws (hexes, harbours, number tokens), resource symbols and resource
+   * cards. One shared palette by hue, numbered from light to dark; the same in every design.
+   */
+  --color-art-red-1: #ef5359;
+  --color-art-red-2: #c98a78;
+  --color-art-red-3: #dc4224;
+  --color-art-red-4: #c4532f;
+  --color-art-red-5: #b8261f;
+  --color-art-red-6: #9e2a24;
+  --color-art-red-7: #9c3d22;
+  --color-art-red-8: #8e3e28;
+  --color-art-red-9: #7a3826;
+  --color-art-red-10: #7c151c;
+  --color-art-red-11: #7a2a12;
+  --color-art-red-12: #5a1f18;
+  --color-art-red-13: #5c2616;
+  --color-art-red-14: #4a2219;
+  --color-art-red-15: #2a110b;
+  --color-art-red-16: #140806;
+  --color-art-orange-1: #f7ecd8;
+  --color-art-orange-2: #e3d7c2;
+  --color-art-orange-3: #dcc9a8;
+  --color-art-orange-4: #ffcf7a;
+  --color-art-orange-5: #f0a882;
+  --color-art-orange-6: #ffc764;
+  --color-art-orange-7: #f0a070;
+  --color-art-orange-8: #e2b679;
+  --color-art-orange-9: #d9b77e;
+  --color-art-orange-10: #e8a06a;
+  --color-art-orange-11: #f0b45e;
+  --color-art-orange-12: #c6ad88;
+  --color-art-orange-13: #c4ad8a;
+  --color-art-orange-14: #e58a63;
+  --color-art-orange-15: #f0a858;
+  --color-art-orange-16: #d0a877;
+  --color-art-orange-17: #ff9d44;
+  --color-art-orange-18: #f39a50;
+  --color-art-orange-19: #f8a641;
+  --color-art-orange-20: #ef8a48;
+  --color-art-orange-21: #d6845a;
+  --color-art-orange-22: #ff7a30;
+  --color-art-orange-23: #eb693b;
+  --color-art-orange-24: #e9683b;
+  --color-art-orange-25: #f5852b;
+  --color-art-orange-26: #e07a40;
+  --color-art-orange-27: #ef7a2e;
+  --color-art-orange-28: #dba63f;
+  --color-art-orange-29: #d0714a;
+  --color-art-orange-30: #d0704a;
+  --color-art-orange-31: #d4a243;
+  --color-art-orange-32: #b48a5a;
+  --color-art-orange-33: #c97a42;
+  --color-art-orange-34: #c99a40;
+  --color-art-orange-35: #c75932;
+  --color-art-orange-36: #c48f34;
+  --color-art-orange-37: #b07a44;
+  --color-art-orange-38: #8f8064;
+  --color-art-orange-39: #c08a30;
+  --color-art-orange-40: #b25a3c;
+  --color-art-orange-41: #a57a45;
+  --color-art-orange-42: #bb532f;
+  --color-art-orange-43: #a8703d;
+  --color-art-orange-44: #b5532f;
+  --color-art-orange-45: #b8862a;
+  --color-art-orange-46: #b4602d;
+  --color-art-orange-47: #b4502d;
+  --color-art-orange-48: #b04f2c;
+  --color-art-orange-49: #b07a26;
+  --color-art-orange-50: #aa4c2b;
+  --color-art-orange-51: #a77a2c;
+  --color-art-orange-52: #a85a2a;
+  --color-art-brown-1: #a2532a;
+  --color-art-brown-2: #7d6a4e;
+  --color-art-brown-3: #a8731f;
+  --color-art-brown-4: #6e6156;
+  --color-art-brown-5: #9c4627;
+  --color-art-brown-6: #86693a;
+  --color-art-brown-7: #8a5a2e;
+  --color-art-brown-8: #8f6422;
+  --color-art-brown-9: #8f6420;
+  --color-art-brown-10: #8e6420;
+  --color-art-brown-11: #7d5a30;
+  --color-art-brown-12: #5d5248;
+  --color-art-brown-13: #6f5530;
+  --color-art-brown-14: #7d5420;
+  --color-art-brown-15: #6e4c26;
+  --color-art-brown-16: #5a4a38;
+  --color-art-brown-17: #6c4423;
+  --color-art-brown-18: #743619;
+  --color-art-brown-19: #6e4a1a;
+  --color-art-brown-20: #672e1a;
+  --color-art-brown-21: #6a4416;
+  --color-art-brown-22: #4a3e33;
+  --color-art-brown-23: #5e3f1e;
+  --color-art-brown-24: #5a3418;
+  --color-art-brown-25: #5e2a12;
+  --color-art-brown-26: #3a332c;
+  --color-art-brown-27: #3b2a18;
+  --color-art-brown-28: #3f2412;
+  --color-art-brown-29: #3a2210;
+  --color-art-brown-30: #2a231e;
+  --color-art-brown-31: #3a1a0c;
+  --color-art-brown-32: #3a1608;
+  --color-art-brown-33: #2a2018;
+  --color-art-brown-34: #231d18;
+  --color-art-brown-35: #2a160a;
+  --color-art-brown-36: #1e0f06;
+  --color-art-yellow-1: #faf5ea;
+  --color-art-yellow-2: #fffae0;
+  --color-art-yellow-3: #f4f1ea;
+  --color-art-yellow-4: #f5f1e6;
+  --color-art-yellow-5: #f3ecdc;
+  --color-art-yellow-6: #f7ecd0;
+  --color-art-yellow-7: #fff3c0;
+  --color-art-yellow-8: #ece3cf;
+  --color-art-yellow-9: #e8dec8;
+  --color-art-yellow-10: #fbe7a6;
+  --color-art-yellow-11: #e8d5a6;
+  --color-art-yellow-12: #ffe08a;
+  --color-art-yellow-13: #ffd987;
+  --color-art-yellow-14: #f6dc8c;
+  --color-art-yellow-15: #f4dc80;
+  --color-art-yellow-16: #d9c597;
+  --color-art-yellow-17: #c9ba98;
+  --color-art-yellow-18: #f1cd6a;
+  --color-art-yellow-19: #f3cf62;
+  --color-art-yellow-20: #f0c95a;
+  --color-art-yellow-21: #e8c35a;
+  --color-art-yellow-22: #e6c454;
+  --color-art-yellow-23: #b8a682;
+  --color-art-yellow-24: #a89f88;
+  --color-art-yellow-25: #e2b44c;
+  --color-art-yellow-26: #e2b542;
+  --color-art-yellow-27: #b9a06b;
+  --color-art-yellow-28: #e2b93b;
+  --color-art-yellow-29: #a3967a;
+  --color-art-yellow-30: #d9a63e;
+  --color-art-yellow-31: #a99a46;
+  --color-art-green-1: #cdeb85;
+  --color-art-green-2: #b9dc8a;
+  --color-art-green-3: #b3dc63;
+  --color-art-green-4: #8fbf5a;
+  --color-art-green-5: #86c443;
+  --color-art-green-6: #6fa95b;
+  --color-art-green-7: #74a75a;
+  --color-art-green-8: #93a246;
+  --color-art-green-9: #7d8b5a;
+  --color-art-green-10: #6c9b44;
+  --color-art-green-11: #5b9a33;
+  --color-art-green-12: #4f8f2c;
+  --color-art-green-13: #3f7a3a;
+  --color-art-green-14: #5d7c36;
+  --color-art-green-15: #64772f;
+  --color-art-green-16: #5d722d;
+  --color-art-green-17: #3f7a22;
+  --color-art-green-18: #3d6c2c;
+  --color-art-green-19: #55662a;
+  --color-art-green-20: #46612c;
+  --color-art-green-21: #46602a;
+  --color-art-green-22: #33602a;
+  --color-art-green-23: #3e5228;
+  --color-art-green-24: #4a5822;
+  --color-art-green-25: #2d5a18;
+  --color-art-green-26: #3f4c1f;
+  --color-art-green-27: #264a1d;
+  --color-art-green-28: #1f3a14;
+  --color-art-green-29: #24301a;
+  --color-art-green-30: #22301a;
+  --color-art-green-31: #1f2f17;
+  --color-art-green-32: #152a10;
+  --color-art-teal-1: #a9cbc8;
+  --color-art-teal-2: #5c8a8c;
+  --color-art-blue-1: #dfe4ea;
+  --color-art-blue-2: #d9dee5;
+  --color-art-blue-3: #c7ccd4;
+  --color-art-blue-4: #c3c8d0;
+  --color-art-blue-5: #a3acb8;
+  --color-art-blue-6: #4189f5;
+  --color-art-blue-7: #6f688a;
+  --color-art-blue-8: #57506c;
+  --color-art-blue-9: #3b3646;
+  --color-art-violet-1: #e9e5ef;
+  --color-art-violet-2: #dcd8e3;
+  --color-art-violet-3: #c6bfd1;
+  --color-art-violet-4: #bdb6c8;
+  --color-art-violet-5: #aaa3b8;
+  --color-art-pink-1: #7e5a6a;
+  --color-art-pink-2: #4d3646;
+  --color-art-pink-3: #3a2834;
+  --color-art-gray-1: #fff;
+  --color-art-gray-2: #f1f1f4;
+  --color-art-gray-3: #aba5b8;
+  --color-art-gray-4: #9d97ab;
+  --color-art-gray-5: #9a93a8;
+  --color-art-gray-6: #948da4;
+  --color-art-gray-7: #8f949c;
+  --color-art-gray-8: #8c949c;
+  --color-art-gray-9: #8d929b;
+  --color-art-gray-10: #9c9a8a;
+  --color-art-gray-11: #857f93;
+  --color-art-gray-12: #847d92;
+  --color-art-gray-13: #8d8b7c;
+  --color-art-gray-14: #7a7488;
+  --color-art-gray-15: #666a72;
+  --color-art-gray-16: #62666e;
+  --color-art-gray-17: #5f5d50;
+  --color-art-gray-18: #4f5258;
+  --color-art-gray-19: #4c4f56;
+  --color-art-gray-20: #3a3d42;
+  --color-art-gray-21: #383b40;
+  --color-art-gray-22: #2c2e33;
+  --color-art-gray-23: #2a2c30;
+  --color-art-gray-24: #24262a;
+  --color-art-gray-25: #000;
+
+  /* Accent palette (NFA-GB-03): fill carries --color-on-accent text, text variant sits on surfaces */
+  --color-accent-indigo: #4f46e5;
+  --color-accent-indigo-text: #a5a8ff;
+  --color-accent-blue: #2563eb;
+  --color-accent-blue-text: #86b4ff;
+  --color-accent-teal: #0f766e;
+  --color-accent-teal-text: #5fd4c4;
+  --color-accent-green: #15803d;
+  --color-accent-green-text: #6fd99a;
+  --color-accent-amber: #b45309;
+  --color-accent-amber-text: #f5be5b;
+  --color-accent-berry: #a8336a;
+  --color-accent-berry-text: #e79ac0;
+  --color-on-accent: #fff;
+  --color-backdrop: #000000b3;
+  --color-shadow: #0000008c;
+
+  /* Home screen icon of the local acceptance app (build mode "acceptance", E-40): violet instead of
+     wood and amber, so it can be told apart from the published app; only read by npm run icons */
+  --color-acceptance-icon-surface: #211a2e;
+  --color-acceptance-icon-raised: #2c2340;
+  --color-acceptance-icon-overlay: #3a2e52;
+  --color-acceptance-icon-glow: #5a3a8c;
+  --color-acceptance-icon-accent: #c4a0ff;
+
+  /* States */
+  --color-status-ok: #4ade80;
+  --color-status-error: #fc8585;
+  --color-status-warning: #fbbf24;
+  --color-status-info: #60a5fa;
+
+  /* Typography */
+  --font-family-base: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+  --font-family-mono: ui-monospace, 'Cascadia Mono', consolas, monospace;
+  --font-size-tiny: 0.75rem;
+  --font-size-small: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-title: 1.5rem;
+  --line-height-base: 1.5;
+
+  /* Spacing and radii */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --radius-2: 0.5rem;
+  --radius-4: 1rem;
+  --touch-target-min: 44px;
+
+  /* Page layout (design I2-G): every view but the start has the same width, padding and head
+     height, so the back button sits in the same place on every page. */
+  --page-max-width: 80rem;
+  --page-padding-top: 20px;
+  --page-padding-side: 16px;
+  --page-head-height: 52px;
+
+  /* Durations and easings for Motion (Architecture 13.6) */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Pressed state (K-4, NFA-GB-04): cards rise and darken, controls shimmer in their text colour */
+  --press-lift: -3px;
+  --press-darken: 0.15;
+  --press-shimmer: 16%;
+}
+
+/*
+ * Designs (NFA-GB-02, NFA-GB-03): surfaces, text, background and default accent.
+ * "Holz" is the default; switching via data-theme follows with US-GB-01.
+ */
+:root,
+:root[data-theme='wood'] {
+  --color-surface: #231d18;
+  --color-surface-raised: #2d2620;
+  --color-surface-overlay: #383028;
+  --color-border: #4b4036;
+  --color-text: #f4ece1;
+  --color-text-muted: #b8ab9b;
+  --background-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+  --color-accent: var(--color-accent-amber);
+  --color-accent-text: var(--color-accent-amber-text);
+}
+
+:root[data-theme='ocean'] {
+  --color-surface: #10232c;
+  --color-surface-raised: #17303b;
+  --color-surface-overlay: #1f3c49;
+  --color-border: #2d5262;
+  --color-text: #e6f4f7;
+  --color-text-muted: #98b8c2;
+  --background-image: linear-gradient(180deg, #17404e 0%, #10232c 45%);
+  --color-accent: var(--color-accent-teal);
+  --color-accent-text: var(--color-accent-teal-text);
+}
+
+:root[data-theme='forest'] {
+  --color-surface: #1b221e;
+  --color-surface-raised: #232c27;
+  --color-surface-overlay: #2c3731;
+  --color-border: #3b4941;
+  --color-text: #e9f0ea;
+  --color-text-muted: #a5b4aa;
+  --background-image: none;
+  --color-accent: var(--color-accent-green);
+  --color-accent-text: var(--color-accent-green-text);
+}
+
+/* Glass: frosted surfaces over a colour gradient; the blur costs performance on older devices. */
+:root[data-theme='glass'] {
+  --color-surface: #161a2e;
+  --color-surface-raised: #232845;
+  --color-surface-overlay: #2b3152;
+  --color-border: #ffffff26;
+  --color-text: #f1f2fa;
+  --color-text-muted: #aeb3cf;
+  --background-image:
+    radial-gradient(circle at 15% 5%, #4338ca80 0%, transparent 40%),
+    radial-gradient(circle at 90% 35%, #0e749080 0%, transparent 40%),
+    radial-gradient(circle at 40% 100%, #9d174d66 0%, transparent 45%);
+  --color-accent: var(--color-accent-indigo);
+  --color-accent-text: var(--color-accent-indigo-text);
+}
+
+/* Chosen accent overrides the default accent of the design (US-GB-01). */
+:root[data-accent='indigo'] {
+  --color-accent: var(--color-accent-indigo);
+  --color-accent-text: var(--color-accent-indigo-text);
+}
+
+:root[data-accent='blue'] {
+  --color-accent: var(--color-accent-blue);
+  --color-accent-text: var(--color-accent-blue-text);
+}
+
+:root[data-accent='teal'] {
+  --color-accent: var(--color-accent-teal);
+  --color-accent-text: var(--color-accent-teal-text);
+}
+
+:root[data-accent='green'] {
+  --color-accent: var(--color-accent-green);
+  --color-accent-text: var(--color-accent-green-text);
+}
+
+:root[data-accent='amber'] {
+  --color-accent: var(--color-accent-amber);
+  --color-accent-text: var(--color-accent-amber-text);
+}
+
+:root[data-accent='berry'] {
+  --color-accent: var(--color-accent-berry);
+  --color-accent-text: var(--color-accent-berry-text);
+}
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html {
+        font-family: var(--font-family-base);
+        font-size: var(--font-size-base);
+        line-height: var(--line-height-base);
+        color: var(--color-text);
+        background-color: var(--color-surface);
+        background-image: var(--background-image);
+        background-repeat: no-repeat;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body { margin: 0; }
+      button { font: inherit; cursor: pointer; border: 0; }
+      button:disabled { cursor: not-allowed; opacity: 0.45; }
+      main { max-width: 46rem; margin: 0 auto; padding: 20px 16px 48px; }
+      h1 { margin: 0 0 4px; font-size: 1.35rem; }
+      .intro { margin: 0 0 14px; color: var(--color-text-muted); font-size: 0.9rem; }
+
+      /* Concept list (not sticky) */
+      .concepts { display: grid; gap: 8px; margin: 0 0 12px; }
+      .concept { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: start; padding: 10px 12px; text-align: left; color: var(--color-text); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 14px; }
+      .concept[aria-pressed='true'] { border-color: var(--color-accent-text); box-shadow: inset 0 0 0 1px var(--color-accent-text); }
+      .concept .id { font-weight: 800; color: var(--color-accent-text); }
+      .concept .name { font-weight: 700; }
+      .concept .what { grid-column: 2 / 4; font-size: 0.85rem; color: var(--color-text-muted); }
+      .concept .cost { grid-column: 2 / 4; font-size: 0.78rem; color: var(--color-text-muted); }
+      .concept .cost b { color: var(--color-text); font-weight: 600; }
+      .star { min-width: 44px; min-height: 36px; padding: 2px 8px; font-size: 0.8rem; color: var(--color-text-muted); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 999px; }
+      .star[aria-pressed='true'] { color: var(--color-on-accent); background: var(--color-accent); border-color: transparent; }
+      .switches { display: grid; gap: 6px; margin: 0 0 12px; padding: 10px 12px; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 14px; font-size: 0.9rem; }
+      .switches label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+      .switches input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--color-accent); flex: none; }
+      .switches small { display: block; color: var(--color-text-muted); }
+      .demoRow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 10px 0; }
+      .demoBtn { min-height: 36px; padding: 4px 12px; font-size: 0.85rem; color: var(--color-accent-text); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 999px; }
+
+      /* Phone frame */
+      .frame { position: relative; width: min(100%, 412px); height: 780px; margin: 0 auto; overflow: hidden; background-color: var(--color-surface); background-image: var(--background-image); background-repeat: no-repeat; border: 1px solid var(--color-border); border-radius: 18px; touch-action: manipulation; }
+      @media (max-width: 440px) { .frame { width: calc(100% + 32px); margin: 0 -16px; border-radius: 0; border-left: 0; border-right: 0; } }
+      .page { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 18px; }
+      .ovHead { display: flex; gap: 10px; align-items: center; }
+      .back { display: grid; place-items: center; width: 40px; height: 40px; color: var(--color-text); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 50%; }
+      .ovTitle { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
+      .ovSub { font-size: 0.78rem; color: var(--color-text-muted); }
+      .tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 12px; font-size: 0.9rem; text-align: center; }
+      .tabs span { padding: 6px; border-radius: 9px; }
+      .tabs span:first-child { color: var(--color-on-accent); background: var(--color-accent); font-weight: 600; }
+      .board { flex: 1; min-height: 120px; display: grid; place-items: center; color: var(--color-text-muted); font-size: 0.85rem; background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--color-catan-blue) 30%, transparent), transparent 70%); border-radius: 16px; }
+      .hex { width: 62%; aspect-ratio: 1.1; clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); background: color-mix(in srgb, var(--color-group-brown) 55%, var(--color-surface-raised)); display: grid; place-items: center; }
+      .coins { display: flex; gap: 14px; justify-content: center; }
+      .coinWrap { position: relative; display: grid; justify-items: center; gap: 2px; padding: 0; background: none; color: var(--color-text); }
+      .coin { position: relative; display: grid; place-items: center; width: 40px; height: 40px; font-weight: 800; color: #1a1a1a; border-radius: 50%; box-shadow: inset 0 -3px 0 #0003; }
+      .coinWrap .ring { position: absolute; top: -5px; left: 50%; translate: -50% 0; width: 50px; height: 50px; pointer-events: none; }
+      .coinTime { font-size: 0.72rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; min-height: 1.1em; }
+      .endRow { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+      .endPill { min-height: 44px; white-space: nowrap; display: inline-flex; align-items: center; padding: 4px 14px; font-size: 0.85rem; color: var(--color-danger-text); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 999px; }
+      .primary, .secondary { display: inline-flex; gap: 8px; align-items: center; justify-content: center; min-height: 48px; font-weight: 600; border-radius: 10px; }
+      .primary { padding: 8px 20px; color: var(--color-on-accent); background: var(--color-accent); }
+      .secondary { padding: 8px 16px; color: var(--color-text); background: var(--color-surface-raised); border: 1px solid var(--color-border); }
+      .wide { width: 100%; }
+
+      /* Mini timer pill */
+      .pill { display: inline-flex; flex: none; gap: 6px; align-items: center; min-height: 44px; padding: 3px 3px 3px 12px; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 999px; }
+      .pillTime { padding: 6px 4px; font-size: 1.1rem; font-weight: 700; color: var(--color-text); background: none; text-decoration: underline dotted var(--color-text-muted); text-underline-offset: 4px; }
+      .pillTime.noLine { text-decoration: none; }
+      .muted { color: var(--color-text-muted); }
+      .toggle { display: grid; place-items: center; width: 36px; height: 36px; color: var(--color-accent-text); background: var(--color-surface-overlay); border-radius: 50%; }
+
+      /* Time display; number-flow digits when available */
+      .tv { display: inline-flex; align-items: baseline; font-variant-numeric: tabular-nums; }
+      .tv .sec { opacity: 0.6; font-size: 0.62em; margin-left: 1px; }
+      .tv .sep { padding: 0 0.02em; }
+      .tv .sec .sep { padding: 0; }
+      number-flow { --number-flow-char-height: 1em; }
+
+      /* Sheets */
+      .backdrop { position: absolute; inset: 0; z-index: 20; background: var(--color-backdrop); }
+      .sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; display: flex; flex-direction: column; gap: 14px; max-height: 94%; padding: 8px 18px 18px; overflow-y: auto; background: var(--color-surface-overlay); border-top: 1px solid var(--color-border); border-radius: 22px 22px 0 0; box-shadow: 0 -10px 30px var(--color-shadow); }
+      .sheet.full { top: 6%; }
+      .grab { align-self: center; width: 100%; height: 26px; display: grid; place-items: center; background: none; touch-action: none; }
+      .grab::before { content: ''; width: 42px; height: 5px; background: var(--color-border); border-radius: 3px; }
+      .dialogC { position: absolute; inset: 0; z-index: 21; display: grid; place-items: center; padding: 16px; }
+      .dialog { display: grid; gap: 14px; width: min(100%, 25rem); padding: 20px; background: var(--color-surface-overlay); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: 0 10px 30px var(--color-shadow); }
+      .buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+      .buttons > * { flex: 1 1 8rem; }
+      .center { display: grid; justify-items: center; text-align: center; gap: 2px; }
+      .bigT { font-size: 3rem; font-weight: 800; line-height: 1.1; color: var(--color-accent-text); }
+      .title { margin: 0; font-size: 1.15rem; }
+      .sub { font-size: 0.85rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+      .group { display: grid; overflow: hidden; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 14px; }
+      .group > * + * { border-top: 1px solid var(--color-border); }
+      .row { display: flex; gap: 10px; align-items: center; min-height: 50px; padding: 8px 14px; }
+      .txt { flex: 1; min-width: 0; }
+      .steps { display: flex; flex: 1 0 100%; gap: 6px; justify-content: space-between; align-items: center; }
+      .stepLine { flex-wrap: wrap; }
+      .step { min-width: 38px; min-height: 38px; padding: 0 6px; font-size: 0.85rem; font-weight: 700; color: var(--color-accent-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; }
+      .valPill { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; font-variant-numeric: tabular-nums; color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; }
+      .pickWrap { position: relative; display: inline-grid; cursor: pointer; }
+      .pickNative { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; opacity: 0; font-size: 16px; cursor: pointer; }
+      .mpill { display: inline-flex; gap: 6px; align-items: center; justify-content: center; min-height: 36px; padding: 4px 12px; font-size: 0.85rem; color: var(--color-accent-text); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 999px; }
+      .mpill.on { color: var(--color-on-accent); background: var(--color-accent); border-color: transparent; }
+
+      /* K1 stopwatch */
+      .dial { position: relative; width: min(78vw, 270px); aspect-ratio: 1; margin: 4px auto 0; }
+      .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .dialIn { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 4px; text-align: center; }
+      .dialT { font-size: 2.6rem; font-weight: 800; color: var(--color-text); line-height: 1; }
+      .lapNow { font-size: 0.9rem; color: var(--color-accent-text); font-variant-numeric: tabular-nums; }
+      .roundBtns { display: flex; justify-content: space-between; align-items: center; padding: 0 6px; }
+      .roundBtn { display: grid; place-items: center; width: 78px; height: 78px; font-size: 0.85rem; font-weight: 700; color: var(--color-text); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 50%; }
+      .roundBtn.main { width: 92px; height: 92px; color: var(--color-on-accent); background: var(--color-accent); border-color: transparent; }
+      .roundBtn.go { background: color-mix(in srgb, var(--color-group-green) 70%, #000); }
+      .laps { display: grid; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+      .lap { display: grid; grid-template-columns: 1fr auto auto; gap: 16px; padding: 8px 4px; border-bottom: 1px solid var(--color-border); }
+      .lap .tot { color: var(--color-text-muted); min-width: 4.6em; text-align: right; }
+      .lap.best .lt { color: var(--color-group-green); }
+      .lap.worst .lt { color: var(--color-danger-text); }
+      .lap.cur { color: var(--color-accent-text); }
+      .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+      .toast { position: absolute; left: 50%; bottom: 22px; z-index: 40; translate: -50% 0; display: flex; gap: 12px; align-items: center; padding: 8px 8px 8px 16px; font-size: 0.85rem; white-space: nowrap; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 999px; box-shadow: 0 6px 20px var(--color-shadow); }
+
+      /* K2 timeline */
+      .tl { position: relative; height: 46px; margin: 4px 2px 18px; background: color-mix(in srgb, var(--color-accent) 70%, transparent); border-radius: 10px; overflow: visible; }
+      .tlPause { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, var(--color-surface) 0 6px, var(--color-surface-raised) 6px 12px); border-left: 1px solid var(--color-border); border-right: 1px solid var(--color-border); }
+      .tlPause.sel { outline: 2px solid var(--color-accent-text); z-index: 1; }
+      .tlTick { position: absolute; top: 100%; translate: -50% 0; padding-top: 3px; font-size: 0.7rem; color: var(--color-text-muted); white-space: nowrap; }
+      .tlTick::before { content: ''; position: absolute; left: 50%; top: -6px; width: 1px; height: 6px; background: var(--color-text-muted); }
+      .tlNow { position: absolute; right: -2px; top: -4px; bottom: -4px; width: 4px; background: var(--color-text); border-radius: 2px; }
+      .legend { display: flex; gap: 14px; justify-content: center; font-size: 0.78rem; color: var(--color-text-muted); }
+      .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 4px; vertical-align: -1px; border-radius: 3px; }
+      .icoBtn { display: grid; place-items: center; width: 38px; height: 38px; color: var(--color-text-muted); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; }
+
+      /* K3 wheels */
+      .seg { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; }
+      .seg button { min-height: 38px; color: var(--color-text); background: none; border-radius: 9px; }
+      .seg button[aria-pressed='true'] { color: var(--color-on-accent); background: var(--color-accent); font-weight: 600; }
+      .wheels { position: relative; display: flex; justify-content: center; gap: 6px; height: 220px; }
+      .wheels::before { content: ''; position: absolute; left: 10%; right: 10%; top: 50%; height: 44px; translate: 0 -50%; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 12px; pointer-events: none; }
+      .wheel { position: relative; width: 84px; height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent); -webkit-mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent); overscroll-behavior: contain; }
+      .wheel::-webkit-scrollbar { display: none; }
+      .wheel div { height: 44px; display: grid; place-items: center; scroll-snap-align: center; font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .wheel .pad { scroll-snap-align: none; height: 88px; }
+      .wheelUnit { align-self: center; z-index: 1; color: var(--color-text-muted); font-size: 0.9rem; width: 2.2em; }
+
+      /* K4 live bar */
+      .island { position: absolute; top: 10px; left: 50%; z-index: 15; translate: -50% 0; display: flex; gap: 8px; align-items: center; padding: 4px 4px 4px 12px; color: var(--color-text); background: #000; border: 1px solid var(--color-border); border-radius: 999px; box-shadow: 0 6px 20px var(--color-shadow); white-space: nowrap; transition: border-radius 0.25s; }
+      .island .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-group-green); }
+      .island .dot.off { background: var(--color-text-muted); }
+      .island .itime { font-weight: 700; padding: 6px 2px; background: none; color: inherit; }
+      .islandOpen { position: absolute; top: 10px; left: 12px; right: 12px; z-index: 15; display: grid; gap: 12px; padding: 16px; background: #000; border: 1px solid var(--color-border); border-radius: 26px; box-shadow: 0 10px 30px var(--color-shadow); }
+      .k4page { padding-top: 64px; }
+      .navHand { display: flex; justify-content: center; gap: 8px; margin-top: auto; }
+      .navHand button { min-height: 40px; padding: 4px 14px; font-size: 0.85rem; color: var(--color-text); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 10px; }
+      .navHand button[aria-current='page'] { color: var(--color-accent-text); border-color: var(--color-accent-text); }
+      .card { padding: 14px; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 14px; }
+
+      /* K5 turns */
+      .turnBtn { min-height: 52px; font-size: 1rem; }
+      .bars { display: grid; gap: 10px; }
+      .barRow { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: center; }
+      .barRow .coin { width: 34px; height: 34px; font-size: 0.85rem; }
+      .bar { height: 10px; background: var(--color-surface); border-radius: 5px; overflow: hidden; }
+      .bar i { display: block; height: 100%; border-radius: 5px; }
+      .barTxt { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; margin-top: 3px; }
+      .barTxt b { color: var(--color-text); font-weight: 600; }
+
+      .answer { margin-top: 20px; padding: 12px 14px; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 14px; }
+      .answer h2, .pkg h2 { margin: 0 0 6px; font-size: 1rem; }
+      .answer code { display: block; margin: 6px 0 10px; padding: 8px 10px; background: var(--color-surface); border-radius: 8px; user-select: all; white-space: pre-wrap; }
+      .pkg { margin-top: 14px; font-size: 0.88rem; color: var(--color-text-muted); }
+      .pkg table { width: 100%; border-collapse: collapse; }
+      .pkg td { padding: 6px 4px; border-top: 1px solid var(--color-border); vertical-align: top; }
+      .pkg td:first-child { color: var(--color-text); font-weight: 600; white-space: nowrap; }
+      /* Round 2 */
+      .plist { display: grid; }
+      .prow { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 8px 2px; border-bottom: 1px solid var(--color-border); }
+      .prow.live { color: var(--color-accent-text); }
+      .pdur { font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
+      .prow.live .pdur { color: var(--color-accent-text); font-weight: 700; }
+      .range { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 2px; }
+      .valPill.small { padding: 3px 9px; font-size: 0.9rem; }
+      .sectionT { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; margin-top: 2px; }
+      .roundBtn.small { width: 68px; height: 68px; flex: none; }
+      .z3head { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+      .dbar { position: relative; height: 64px; margin: 34px 14px 26px; touch-action: none; user-select: none; -webkit-user-select: none; }
+      .dbar .pre { position: absolute; top: 0; bottom: 0; left: 0; background: var(--color-surface); border-radius: 12px 0 0 12px; opacity: 0.7; }
+      .dbar .played { position: absolute; top: 0; bottom: 0; right: 0; background: color-mix(in srgb, var(--color-accent) 75%, transparent); border-radius: 0 12px 12px 0; }
+      .dbar .pz { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, var(--color-surface) 0 6px, var(--color-surface-raised) 6px 12px); cursor: pointer; }
+      .dbar .pz.sel { outline: 2px solid var(--color-accent-text); z-index: 1; }
+      .handle { position: absolute; top: -10px; bottom: -10px; z-index: 3; width: 30px; padding: 0; translate: -50% 0; display: grid; place-items: center; background: none; touch-action: none; cursor: ew-resize; }
+      .handle::before { content: ''; width: 8px; height: 100%; background: var(--color-text); border-radius: 4px; box-shadow: 0 0 0 2px var(--color-surface-overlay); }
+      .handle.start::before { background: var(--color-accent-text); }
+      .dragLabel { position: absolute; top: -34px; z-index: 4; translate: -50% 0; padding: 2px 8px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-surface); background: var(--color-text); border-radius: 6px; pointer-events: none; }
+      .pop { display: grid; gap: 8px; padding: 12px; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 14px; }
+      .popHead { display: flex; justify-content: space-between; align-items: baseline; }
+      .hist { display: grid; grid-template-columns: 26px 1fr; column-gap: 10px; }
+      .rail { display: grid; justify-items: center; }
+      .rail .line { width: 4px; height: 100%; min-height: 44px; border-radius: 2px; background: color-mix(in srgb, var(--color-accent) 75%, transparent); }
+      .rail .line.pause { background: repeating-linear-gradient(180deg, var(--color-text-muted) 0 5px, transparent 5px 10px); width: 3px; }
+      .evDot { align-self: center; width: 16px; height: 16px; border-radius: 50%; background: var(--color-accent-text); }
+      .evDot.stop { background: var(--color-surface-overlay); border: 3px solid var(--color-text-muted); }
+      .evDot.now { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent-text) 30%, transparent); }
+      .ev { display: flex; gap: 10px; align-items: center; min-height: 48px; }
+      .evLabel { color: var(--color-text-muted); }
+      .spanRow { display: flex; gap: 8px; align-items: center; min-height: 52px; font-size: 0.9rem; }
+      .spanRow.pause { color: var(--color-text-muted); }
+      /* Round 3 */
+      .sheet > * { flex-shrink: 0; }
+      .err { margin-top: 3px; font-size: 0.8rem; color: var(--color-danger-text); }
+      .valPill.bad { border-color: var(--color-danger-text); box-shadow: inset 0 0 0 1px var(--color-danger-text); }
+      .adder { display: grid; gap: 10px; padding: 12px; background: var(--color-surface-raised); border: 1px solid var(--color-accent-text); border-radius: 14px; }
+      .dial.sm { width: min(60vw, 220px); }
+      .dial.sm .dialT { font-size: 2.2rem; }
+      .pblock { display: grid; gap: 2px; padding: 8px 0; }
+      .pdur.live { color: var(--color-accent-text); font-weight: 700; }
+      .ev { flex-wrap: wrap; }
+      .selRow { background: var(--color-surface-overlay); }
+      .icoGap { width: 38px; flex: none; }
+      .roundBtn[aria-pressed='true'] { border-color: var(--color-accent-text); color: var(--color-accent-text); }
+      /* Round 4 */
+      .q4 { display: grid; gap: 8px; padding: 12px 14px; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 14px; }
+      .q4 h2 { margin: 0; font-size: 1.1rem; }
+      .q4 .opt { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; cursor: pointer; }
+      .q4 .opt input { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--color-accent); flex: none; }
+      .q4 .opt b { color: var(--color-accent-text); }
+      .q4 small { display: block; color: var(--color-text-muted); }
+      .q4 .demoBtn { justify-self: start; }
+      .navQ { display: flex; gap: 8px; }
+      .navQ > * { flex: 1; }
+      .pickList { margin: 0; padding-left: 18px; }
+      .valPill.tap { padding: 4px 2px; font-weight: 600; background: none; border: 0; text-decoration: underline dotted var(--color-text-muted); text-underline-offset: 5px; }
+      .valPill.tap.bad { color: var(--color-danger-text); box-shadow: none; text-decoration-color: var(--color-danger-text); }
+      .evLabel.strong { color: var(--color-text); font-weight: 600; }
+      .nowText { padding: 4px 2px; color: var(--color-text-muted); }
+      .railPlus { position: relative; display: grid; justify-items: center; height: 100%; }
+      .plusDot { position: absolute; top: 50%; left: 50%; translate: -50% -50%; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; color: var(--color-accent-text); background: var(--color-surface-overlay); border: 2px solid var(--color-accent-text); border-radius: 50%; }
+      .plusDot::after { content: ''; position: absolute; inset: -8px; }
+      .plusDot.on { color: var(--color-on-accent); background: var(--color-accent); border-color: transparent; }
+      .icoPlain { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; color: var(--color-text-muted); background: none; }
+      .dangerPill { color: var(--color-danger-text); }
+      .btnCap { display: grid; justify-items: center; gap: 2px; }
+      .wideToggle { display: flex; gap: 8px; align-items: center; justify-content: center; min-height: 48px; font-weight: 600; color: var(--color-on-accent); background: var(--color-accent); border-radius: 12px; }
+      .wideToggle.go { background: color-mix(in srgb, var(--color-group-green) 70%, #000); }
+      .closeX { position: absolute; top: 8px; right: 10px; z-index: 2; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; color: var(--color-text-muted); background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: 50%; }
+      .pblock { cursor: default; border-radius: 10px; }
+      .pblock.selRow { padding: 8px; margin: 0 -8px; }
+      .railChip { position: absolute; top: 50%; left: 0; z-index: 1; translate: 0 -50%; display: inline-flex; gap: 3px; align-items: center; height: 28px; padding: 0 9px 0 6px; font-size: 0.8rem; font-weight: 700; white-space: nowrap; color: var(--color-accent-text); background: var(--color-surface-overlay); border: 2px solid var(--color-accent-text); border-radius: 999px; }
+      .railChip::after { content: ''; position: absolute; inset: -8px -4px; }
+      .railChip.on { color: var(--color-on-accent); background: var(--color-accent); border-color: transparent; }
+      .spanRow.chipGap { padding-left: 58px; }
+      .textBtn { min-height: 40px; padding: 4px 6px; font-weight: 600; color: var(--color-accent-text); background: none; }
+      .textBtn.on { text-decoration: underline; }
+      .adder .popHead { gap: 8px; white-space: nowrap; }
+      .adder .buttons > * { flex: 1 1 0; }
+      .range.linked { flex-wrap: nowrap; gap: 4px; }
+      .range.linked .minsField { width: 52px; }
+      .quickRow { flex-wrap: nowrap; gap: 6px; }
+      .quickChip { width: 44px; flex: none; }
+      .quickRow .minsField { width: 56px; }
+      .chipRow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+      .chip { min-height: 40px; padding: 0; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-accent-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; }
+      .chip.on { color: var(--color-on-accent); background: var(--color-accent); border-color: transparent; }
+      .minsField { width: 64px; min-height: 40px; padding: 0 8px; font: inherit; font-size: max(1rem, 16px); font-weight: 700; text-align: center; color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; }
+      #concepts, #switches, .answer, .pkg { display: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>I3-B Uhr der Partie (final)</h1>
+      <p class="intro">
+        Abgenommen vom Product Owner am 21.11.2026 (Runden 1 bis 6 in previews/i3b-uhr-*): kleine Uhr mit kleinen Sekunden,
+        Blatt Z3+ mit Verlauf von oben (A2 B2 C2 D1 E1 F1), „Fertig“ speichert, jedes andere Schließen fragt bei Änderungen (G1),
+        „+ Pause“ als Text (P4), Pause nachtragen nur in Minuten mit 5 · 15 · 30, mittig in der Strecke (N6). „Anhalten“ wirkt sofort.
+      </p>
+      <div class="concepts" id="concepts"></div>
+      <div class="switches" id="switches"></div>
+      <div class="demoRow" id="demoRow"></div>
+      <div class="frame" id="frame"></div>
+
+      <section class="answer">
+        <h2>Deine Auswahl</h2>
+        <code id="answer"></code>
+        <button type="button" class="secondary" id="copy">Kopieren</button>
+      </section>
+
+      <section class="pkg">
+        <h2>Pakete</h2>
+        Kein neues Paket: Federn und Ziehen zum Schließen mit Motion, das schon in der App ist. Ohne NumberFlow, ohne „Bildschirm anlassen“, ohne Vibration.
+      </section>
+    </main>
+
+    <script type="module">
+      const MINUTE = 60000;
+      const SECOND = 1000;
+      const STORE_KEY = 'boardbrain.preview.uhrRunde6c';
+      const NF_URL = 'https://cdn.jsdelivr.net/npm/number-flow@0.6.2/+esm';
+      const MOTION_URL = 'https://cdn.jsdelivr.net/npm/motion@14.9.0/+esm';
+
+      const CONCEPTS = [
+        ['Z1+', 'Stoppuhr mit Verlauf', 'Kleineres Zifferblatt, darunter der Verlauf: Pausen, neueste oben, ganz unten der Beginn. „Pause nachtragen“ als runder Knopf mit Formular; Änderungen sofort, Löschen mit Rückgängig.', 'mittel'],
+        ['Z3+', 'Verlauf, kompakt', 'Große Zeit links, runder Knopf rechts. Darunter der Verlauf von oben: Beginn, gespielt, Pause als ein Eintrag (von–bis, Dauer, löschen), jetzt. „+ Pause“ öffnet das Formular genau in dieser gespielten Strecke.', 'mittel'],
+        ['K2+', 'Zeitleiste und Liste', 'Große Zeit, Leiste (Pause antippen markiert ihre Zeile), Liste mit Beginn und Pausen. Erst „Übernehmen“ speichert; der Knopf ist erst nach einer Änderung aktiv.', 'mittel'],
+        ['M1', 'Mix: Stoppuhr + Leiste + Verlauf', 'Zifferblatt und runde Knöpfe aus Z1+, darunter die Leiste aus K2+ als Überblick, dann der Verlauf aus Z1+. Sofort, mit Rückgängig.', 'mittel'],
+        ['M2', 'Mix: kompakter Kopf + Leiste + Verlauf', 'Kopf aus Z3+, die Leiste aus K2+ als Überblick, darunter der kompakte Verlauf aus Z3+ mit „+ Pause“ je Strecke. Sofort, mit Rückgängig.', 'mittel'],
+        ['M3', 'Mix: kompakter Kopf + Leiste + Liste', 'Kopf aus Z3+, Leiste und Liste aus K2+, aber ohne „Übernehmen“: Änderungen sofort, mit Rückgängig. Das kürzeste Blatt.', 'mittel'],
+      ];
+
+      const PEOPLE = [
+        { name: 'Anna', color: 'var(--color-catan-red)' },
+        { name: 'Ben', color: 'var(--color-catan-blue)' },
+        { name: 'Clara', color: 'var(--color-catan-white)' },
+        { name: 'David', color: 'var(--color-catan-orange)' },
+      ];
+
+      // ---------- stored choice
+      const DEFAULTS = { concept: 'Z4', stars: [], flow: false, spring: true };
+      let prefs = (() => {
+        try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORE_KEY) ?? '{}') }; }
+        catch { return { ...DEFAULTS }; }
+      })();
+      function savePrefs() { try { localStorage.setItem(STORE_KEY, JSON.stringify(prefs)); } catch { /* private window */ } }
+
+      // ---------- packages (preview only, from the CDN)
+      let hasFlow = false;
+      let motionAnimate = null;
+      async function loadPackages() {
+        try {
+          const mod = {}; void NF_URL; // NumberFlow not chosen (Product Owner 21.11.2026)
+          if (!customElements.get('number-flow')) {
+            const C = mod.default ?? mod.NumberFlowElement ?? mod.NumberFlowLite;
+            if (C) customElements.define('number-flow', C);
+          }
+          hasFlow = Boolean(customElements.get('number-flow'));
+        } catch (e) { console.warn('NumberFlow not loaded', e); }
+        try {
+          const m = await import(MOTION_URL);
+          motionAnimate = m.animate ?? null;
+        } catch (e) { console.warn('Motion not loaded', e); }
+      }
+
+      // ---------- DOM helpers (no innerHTML)
+      function h(tag, attrs, ...kids) {
+        const el = document.createElement(tag);
+        setAttrs(el, attrs);
+        append(el, kids);
+        return el;
+      }
+      const NS = 'http://www.w3.org/2000/svg';
+      function s(tag, attrs, ...kids) {
+        const el = document.createElementNS(NS, tag);
+        setAttrs(el, attrs);
+        append(el, kids);
+        return el;
+      }
+      function setAttrs(el, attrs) {
+        for (const [k, v] of Object.entries(attrs ?? {})) {
+          if (v === false || v === null || v === undefined) continue;
+          if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+          else if (k === 'class') el.setAttribute('class', v);
+          else if (k === 'value') el.value = v;
+          else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+          else el.setAttribute(k, v === true ? '' : v);
+        }
+      }
+      function append(el, kids) {
+        for (const kid of kids.flat(3)) {
+          if (kid === null || kid === undefined || kid === false || kid === true) continue;
+          el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+        }
+      }
+      function icon(d, size = 18) {
+        return s('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' }, s('path', { d }));
+      }
+      const I = {
+        pause: 'M8 5v14M16 5v14', play: 'M7 4l13 8-13 8z', back: 'M15 18l-6-6 6-6', down: 'M6 9l6 6 6-6',
+        flag: 'M5 21V4h11l-2 4 2 4H5', reset: 'M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4', trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
+        plus: 'M12 5v14M5 12h14', sun: 'M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8',
+        next: 'M5 12h14M13 6l6 6-6 6', edit: 'M4 20h4L19 9l-4-4L4 16v4',
+      };
+
+      // ---------- the clock: beginning, list of pauses, a correction, laps, turns
+      let S;
+      function resetModel() {
+        const now = Date.now();
+        S = {
+          startedAt: now - 95 * MINUTE - 20 * SECOND,
+          pauses: [{ from: now - 55 * MINUTE, to: now - 43 * MINUTE }],
+          adjust: 0,
+          laps: [],
+          lastActive: now,
+          turn: null,
+        };
+        const played = elapsed(now);
+        // Laps: marks in played time, like a phone stopwatch.
+        let mark = 0;
+        for (const m of [11.3, 13.1, 9.4, 14.6, 12.2, 10.7]) { mark += m * MINUTE; S.laps.push(Math.round(mark)); }
+        const since = played - 42 * SECOND;
+        const shares = [0.29, 0.36, 0.19, 0.16];
+        S.turn = { cur: 0, since, totals: shares.map((x) => x * since), counts: [24, 24, 24, 24], round: 25, limit: 0, warned: false };
+      }
+      function mergedPauses(pauses, now) {
+        const list = pauses.map((p) => [p.from, p.to ?? now]).filter(([a, b]) => b > a).sort((a, b) => a[0] - b[0]);
+        const out = [];
+        for (const [a, b] of list) {
+          const last = out[out.length - 1];
+          if (last && a <= last[1]) last[1] = Math.max(last[1], b); else out.push([a, b]);
+        }
+        return out;
+      }
+      function pausedMs(m, now) {
+        return mergedPauses(m.pauses, now).reduce((sum, [a, b]) => sum + Math.max(0, Math.min(b, now) - Math.max(a, m.startedAt)), 0);
+      }
+      function elapsed(now, m = S) { return Math.max(0, now - m.startedAt - pausedMs(m, now) + m.adjust); }
+      function isPaused(m = S) { return m.pauses.some((p) => p.to === null); }
+      function pause(m, now) { if (!isPaused(m)) m.pauses.push({ from: now, to: null }); }
+      function resume(m, now) { for (const p of m.pauses) if (p.to === null) p.to = now; }
+      function toggle(m, now) { if (isPaused(m)) resume(m, now); else pause(m, now); }
+      function clone(m) { return structuredClone(m); }
+
+      const two = (n) => String(n).padStart(2, '0');
+      const hm = (ms) => { const m = Math.floor(ms / MINUTE); return `${Math.floor(m / 60)}:${two(m % 60)}`; };
+      const hms = (ms) => { const t = Math.floor(ms / SECOND); return `${Math.floor(t / 3600)}:${two(Math.floor(t / 60) % 60)}:${two(t % 60)}`; };
+      const ms_ = (ms) => { const t = Math.floor(ms / SECOND); return `${Math.floor(t / 60)}:${two(t % 60)}`; };
+      const clockOf = (ts) => { const d = new Date(ts); return `${two(d.getHours())}:${two(d.getMinutes())}`; };
+      function lastTimeOfDay(time, now) {
+        const [hh, mm] = time.split(':').map(Number);
+        const d = new Date(now); d.setHours(hh, mm, 0, 0);
+        if (d.getTime() > now) { d.setDate(d.getDate() - 1); d.setHours(hh, mm, 0, 0); }
+        return d.getTime();
+      }
+      function buzz() { /* no vibration (Product Owner 21.11.2026) */ }
+
+      // ---------- live values: built once per render, updated every tick without rebuilding
+      let live = [];
+      function onTick(fn) { live.push(fn); }
+      function tick() { const now = Date.now(); for (const fn of live) fn(now); }
+
+      // A time as h:mm or h:mm:ss; with NumberFlow the digits roll.
+      function timeView(getMs, { seconds = false, cls = '' } = {}) {
+        const root = h('span', { class: `tv ${cls}` });
+        const useFlow = hasFlow && prefs.flow;
+        const mk = (pad) => {
+          if (!useFlow) return { el: document.createTextNode(''), set: (v, t) => { t.data = pad ? two(v) : String(v); } };
+          const f = document.createElement('number-flow');
+          f.format = { useGrouping: false, minimumIntegerDigits: pad ? 2 : 1 };
+          if (pad) f.digits = { 1: { max: 5 } };
+          f.trend = 0;
+          return { el: f, set: (v, el) => el.update(v) };
+        };
+        const H = mk(false), M = mk(true), Sx = seconds ? mk(true) : null;
+        root.append(H.el, h('span', { class: 'sep' }, ':'), M.el);
+        if (Sx) root.append(h('span', { class: 'sec' }, h('span', { class: 'sep' }, ':'), Sx.el));
+        let last = [];
+        onTick((now) => {
+          const t = Math.floor(getMs(now) / SECOND);
+          const vals = [Math.floor(t / 3600), Math.floor(t / 60) % 60, t % 60];
+          [H, M, Sx].forEach((p, i) => { if (p && vals[i] !== last[i]) p.set(vals[i], p.el); });
+          last = vals;
+        });
+        return root;
+      }
+      function textLive(fn, attrs = {}) {
+        const el = h('span', attrs);
+        onTick((now) => { const v = fn(now); if (el.textContent !== v) el.textContent = v; });
+        return el;
+      }
+
+      // ---------- sheet with spring and drag to close
+      let openSheet = null; // name of the open layer
+      let sheetEntered = false;
+      function sheet(content, { full = false, onClose }) {
+        const el = h('div', { class: `sheet${full ? ' full' : ''}`, role: 'dialog', 'aria-modal': 'true' });
+        const grab = h('button', { type: 'button', class: 'grab', 'aria-label': 'Schließen' });
+        let startY = null, dy = 0;
+        grab.addEventListener('click', () => { if (Math.abs(dy) < 4) onClose(); });
+        grab.addEventListener('pointerdown', (e) => { startY = e.clientY; dy = 0; grab.setPointerCapture(e.pointerId); });
+        grab.addEventListener('pointermove', (e) => { if (startY === null) return; dy = Math.max(0, e.clientY - startY); el.style.transform = `translateY(${dy}px)`; });
+        const release = () => {
+          if (startY === null) return;
+          startY = null;
+          if (dy > 90) { onClose(); return; }
+          if (motionAnimate && prefs.spring) motionAnimate(el, { transform: [`translateY(${dy}px)`, 'translateY(0px)'] }, { type: 'spring', bounce: 0.3, duration: 0.4 });
+          else el.style.transform = '';
+          setTimeout(() => { dy = 0; }, 0);
+        };
+        grab.addEventListener('pointerup', release);
+        grab.addEventListener('pointercancel', release);
+        el.append(grab, ...[content].flat().filter(Boolean));
+        if (!sheetEntered) {
+          sheetEntered = true;
+          queueMicrotask(() => {
+            if (motionAnimate && prefs.spring) motionAnimate(el, { transform: ['translateY(100%)', 'translateY(0%)'] }, { type: 'spring', bounce: 0.18, duration: 0.5 });
+          });
+        }
+        return [h('div', { class: 'backdrop', onclick: onClose }), el];
+      }
+      function open(name) { openSheet = name; sheetEntered = false; render(); }
+      function close() { openSheet = null; render(); }
+
+      let toast = null;
+      function showToast(text, undo) {
+        toast = { text, undo };
+        render();
+        clearTimeout(showToast.t);
+        showToast.t = setTimeout(() => { toast = null; render(); }, 5000);
+      }
+
+      // ---------- shared page parts
+      function coin(i, size) {
+        const p = PEOPLE[i];
+        return h('span', { class: 'coin', style: { background: p.color, ...(size ? { width: `${size}px`, height: `${size}px` } : {}) } }, p.name[0]);
+      }
+      function overview({ timer, coins, extra, bottom }) {
+        return h('div', { class: 'page' },
+          h('div', { class: 'ovHead' },
+            h('span', { class: 'back' }, icon(I.back, 20)),
+            h('div', {}, h('div', { class: 'ovTitle' }, 'Laufende Partie'), h('div', { class: 'ovSub' }, 'Freitagsrunde · Basisspiel · Standard'))),
+          h('div', { class: 'tabs' }, h('span', {}, 'Brett'), h('span', {}, 'Ergebnisse')),
+          h('div', { class: 'board' }, h('div', { class: 'hex' }, 'Brett')),
+          coins ?? h('div', { class: 'coins' }, PEOPLE.map((_, i) => h('span', { class: 'coinWrap' }, coin(i)))),
+          extra,
+          h('div', { class: 'endRow' }, h('span', { class: 'endPill' }, 'Partie beenden ohne Ergebnis'), timer),
+          bottom ?? h('button', { type: 'button', class: 'primary wide' }, 'Ergebnis eintragen'));
+      }
+      function miniPill({ seconds = false, onOpen, model = S }) {
+        const paused = isPaused(model);
+        return h('span', { class: 'pill' },
+          h('button', { type: 'button', class: `pillTime${paused ? ' muted' : ''}`, 'aria-label': 'Uhr öffnen', onclick: onOpen },
+            timeView((now) => elapsed(now, model), { seconds })),
+          h('button', { type: 'button', class: 'toggle', 'aria-label': paused ? 'Fortsetzen' : 'Anhalten',
+            onclick: () => { toggle(model, Date.now()); buzz(); render(); } }, icon(paused ? I.play : I.pause, 16)));
+      }
+
+      // ---------- K0 as today
+      let k0 = null;
+      function renderK0() {
+        const parts = [overview({ timer: miniPill({ onOpen: () => { k0 = { draft: clone(S) }; open('k0'); } }) })];
+        if (openSheet === 'k0') {
+          const d = k0.draft;
+          const paused = isPaused(d);
+          const step = (m) => h('button', { type: 'button', class: 'step', onclick: () => { const e = elapsed(Date.now(), d); d.adjust += Math.max(m * MINUTE, -e); render(); } }, m < 0 ? `−${-m}` : `+${m}`);
+          parts.push(h('div', { class: 'backdrop', onclick: close }), h('div', { class: 'dialogC', onclick: (e) => { if (e.target === e.currentTarget) close(); } },
+            h('div', { class: 'dialog' },
+              h('div', { class: 'center' }, h('span', { class: 'bigT', style: { opacity: paused ? 0.55 : 1 } }, timeView((now) => elapsed(now, d))), h('h2', { class: 'title' }, 'Spieldauer')),
+              h('div', { class: 'group' },
+                h('div', { class: 'row stepLine' }, h('span', { class: 'txt' }, 'Dauer korrigieren'),
+                  h('span', { class: 'steps' }, step(-5), step(-1), textLive((now) => `${Math.floor(elapsed(now, d) / MINUTE)} min`, { style: { fontWeight: 700 } }), step(1), step(5))),
+                h('div', { class: 'row' }, h('span', { class: 'txt' }, 'Beginn'), h('span', { class: 'valPill' }, clockOf(d.startedAt))),
+                h('div', { class: 'row' }, h('span', { class: 'txt' }, 'Uhr'), h('button', { type: 'button', class: 'mpill', onclick: () => { toggle(d, Date.now()); render(); } }, icon(paused ? I.play : I.pause, 14), paused ? 'Fortsetzen' : 'Anhalten'))),
+              h('div', { class: 'buttons' },
+                h('button', { type: 'button', class: 'secondary', onclick: close }, 'Schließen'),
+                h('button', { type: 'button', class: 'primary', onclick: () => { S = d; close(); } }, 'Übernehmen')))));
+        }
+        return parts;
+      }
+
+      // ---------- K1 stopwatch
+      let wakeLock = null;
+      async function setWake(on) {
+        try {
+          if (on && 'wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+          else { await wakeLock?.release(); wakeLock = null; }
+        } catch { wakeLock = null; }
+        render();
+      }
+      function renderK1() {
+        const parts = [overview({ timer: miniPill({ seconds: true, onOpen: () => open('k1') }) })];
+        if (openSheet !== 'k1') return parts;
+        const paused = isPaused();
+        const R = 118, C = 2 * Math.PI * R;
+        const arc = s('circle', { cx: 130, cy: 130, r: R, fill: 'none', stroke: 'var(--color-accent)', 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-dasharray': C, transform: 'rotate(-90 130 130)' });
+        const knob = s('circle', { r: 9, fill: 'var(--color-accent-text)' });
+        const ticks = Array.from({ length: 60 }, (_, i) => {
+          const a = (i / 60) * 2 * Math.PI, r1 = i % 5 === 0 ? 100 : 104, r2 = 108;
+          return s('line', { x1: 130 + r1 * Math.sin(a), y1: 130 - r1 * Math.cos(a), x2: 130 + r2 * Math.sin(a), y2: 130 - r2 * Math.cos(a), stroke: 'var(--color-text-muted)', 'stroke-width': i % 5 === 0 ? 2 : 1, opacity: i % 5 === 0 ? 0.8 : 0.4 });
+        });
+        onTick((now) => {
+          // A smooth second hand: the ring follows the milliseconds of the current minute.
+          const f = (elapsed(now) % MINUTE) / MINUTE;
+          arc.setAttribute('stroke-dashoffset', String(C * (1 - f)));
+          const a = f * 2 * Math.PI;
+          knob.setAttribute('cx', String(130 + R * Math.sin(a)));
+          knob.setAttribute('cy', String(130 - R * Math.cos(a)));
+        });
+        const lastMark = () => S.laps[S.laps.length - 1] ?? 0;
+        const lapTimes = S.laps.map((m, i) => m - (S.laps[i - 1] ?? 0));
+        const best = lapTimes.length > 1 ? Math.min(...lapTimes) : -1;
+        const worst = lapTimes.length > 1 ? Math.max(...lapTimes) : -1;
+        const laps = h('div', { class: 'laps' },
+          h('div', { class: 'lap cur' }, h('span', {}, `Runde ${S.laps.length + 1}`), textLive((now) => ms_(elapsed(now) - lastMark()), { class: 'lt' }), textLive((now) => hms(elapsed(now)), { class: 'tot' })),
+          [...S.laps].map((m, i) => ({ m, i, t: lapTimes[i] })).reverse().map(({ m, i, t }) =>
+            h('div', { class: `lap${t === best ? ' best' : ''}${t === worst ? ' worst' : ''}` },
+              h('span', {}, `Runde ${i + 1}${t === best ? ' · schnellste' : t === worst ? ' · längste' : ''}`), h('span', { class: 'lt' }, ms_(t)), h('span', { class: 'tot' }, hms(m)))));
+        const avg = lapTimes.length ? lapTimes.reduce((a, b) => a + b, 0) / lapTimes.length : 0;
+        parts.push(...sheet([
+          h('div', { class: 'dial' },
+            s('svg', { viewBox: '0 0 260 260', 'aria-hidden': 'true' },
+              s('circle', { cx: 130, cy: 130, r: R, fill: 'none', stroke: 'var(--color-surface)', 'stroke-width': 8 }), ticks, arc, knob),
+            h('div', { class: 'dialIn' },
+              h('span', { class: 'dialT', style: { opacity: paused ? 0.55 : 1 } }, timeView((now) => elapsed(now), { seconds: true })),
+              h('span', { class: 'lapNow' }, 'Runde ', String(S.laps.length + 1), ' · ', textLive((now) => ms_(elapsed(now) - lastMark()))),
+              h('span', { class: 'sub' }, `seit ${clockOf(S.startedAt)} · `, textLive((now) => `${Math.floor(pausedMs(S, now) / MINUTE)} min Pause`)))),
+          h('div', { class: 'roundBtns' },
+            paused
+              ? h('button', { type: 'button', class: 'roundBtn', onclick: () => {
+                  const before = clone(S);
+                  const now = Date.now();
+                  S.startedAt = now; S.pauses = [{ from: now, to: null }]; S.adjust = 0; S.laps = [];
+                  buzz(30);
+                  showToast('Uhr auf 0 gesetzt', () => { S = before; });
+                } }, 'Zurück-', h('br'), 'setzen')
+              : h('button', { type: 'button', class: 'roundBtn', onclick: () => { S.laps.push(elapsed(Date.now())); buzz(); render(); } }, icon(I.flag, 22), 'Runde'),
+            h('button', { type: 'button', class: `roundBtn main${paused ? ' go' : ''}`, 'aria-label': paused ? 'Weiter' : 'Pause', onclick: () => { toggle(S, Date.now()); buzz(); render(); } }, icon(paused ? I.play : I.pause, 30))),
+          h('div', { class: 'chips' },
+            h('label', { class: 'mpill pickWrap' }, icon(I.edit, 14), `Beginn ${clockOf(S.startedAt)}`,
+              h('input', { type: 'time', class: 'pickNative', value: clockOf(S.startedAt), 'aria-label': 'Beginn ändern', onchange: (e) => { if (e.target.value) { S.startedAt = lastTimeOfDay(e.target.value, Date.now()); render(); } } })),
+            h('button', { type: 'button', class: 'mpill', onclick: () => { S.adjust += 5 * MINUTE; render(); } }, '+5 min'),
+            h('button', { type: 'button', class: 'mpill', onclick: () => { S.adjust -= Math.min(5 * MINUTE, elapsed(Date.now())); render(); } }, '−5 min'),
+            h('button', { type: 'button', class: `mpill${wakeLock ? ' on' : ''}`, onclick: () => setWake(!wakeLock) }, icon(I.sun, 14), wakeLock ? 'Bildschirm bleibt an' : 'Bildschirm anlassen')),
+          lapTimes.length > 0 && h('div', { class: 'sub', style: { textAlign: 'center' } }, `Ø Runde ${ms_(avg)} · ${lapTimes.length} Runden fertig`),
+          laps,
+        ], { full: true, onClose: close }));
+        return parts;
+      }
+
+      // ---------- K2 timeline
+      let k2 = null;
+      function renderK2() {
+        const parts = [overview({ timer: miniPill({ onOpen: () => { k2 = { draft: clone(S), sel: null }; open('k2'); } }) })];
+        if (openSheet !== 'k2') return parts;
+        const d = k2.draft;
+        const now = Date.now();
+        const span = Math.max(MINUTE, now - d.startedAt);
+        const pct = (t) => `${(((t - d.startedAt) / span) * 100).toFixed(2)}%`;
+        const ticks = [];
+        const first = new Date(d.startedAt); first.setMinutes(0, 0, 0);
+        for (let t = first.getTime() + 3600000; t < now; t += 3600000) if ((t - d.startedAt) / span > 0.14 && (now - t) / span > 0.1) ticks.push(h('span', { class: 'tlTick', style: { left: pct(t) } }, clockOf(t)));
+        const bar = h('div', { class: 'tl', 'aria-label': 'Zeitleiste' },
+          d.pauses.map((p, i) => h('button', { type: 'button', class: `tlPause${k2.sel === i ? ' sel' : ''}`, 'aria-label': `Pause ${i + 1}`,
+            style: { left: pct(Math.max(p.from, d.startedAt)), width: `${((Math.min(p.to ?? now, now) - Math.max(p.from, d.startedAt)) / span) * 100}%` },
+            onclick: () => { k2.sel = i; render(); } })),
+          h('span', { class: 'tlNow' }),
+          h('span', { class: 'tlTick', style: { left: '0%', translate: '0 0' } }, clockOf(d.startedAt)), ticks,
+          h('span', { class: 'tlTick', style: { left: '100%', translate: '-100% 0' } }, 'jetzt'));
+        const timeInput = (value, label, onSet) => h('label', { class: 'pickWrap' }, h('span', { class: 'valPill' }, clockOf(value)),
+          h('input', { type: 'time', class: 'pickNative', value: clockOf(value), 'aria-label': label, onchange: (e) => { if (e.target.value) { onSet(lastTimeOfDay(e.target.value, Date.now())); render(); } } }));
+        const rows = d.pauses.map((p, i) => h('div', { class: 'row', style: k2.sel === i ? { background: 'var(--color-surface-overlay)' } : {} },
+          h('span', { class: 'txt' }, h('div', {}, `Pause ${i + 1}`), h('div', { class: 'sub' }, p.to === null ? textLive((n) => `läuft · ${Math.floor((n - p.from) / MINUTE)} min`) : `${Math.round((p.to - p.from) / MINUTE)} min`)),
+          timeInput(p.from, 'Pause von', (t) => { p.from = Math.max(t, d.startedAt); }),
+          '–',
+          p.to === null ? h('span', { class: 'valPill muted' }, 'jetzt') : timeInput(p.to, 'Pause bis', (t) => { p.to = Math.max(t, p.from + MINUTE); }),
+          h('button', { type: 'button', class: 'icoBtn', 'aria-label': `Pause ${i + 1} löschen`, onclick: () => { d.pauses.splice(i, 1); k2.sel = null; render(); } }, icon(I.trash, 16))));
+        const paused = isPaused(d);
+        parts.push(...sheet([
+          h('div', { class: 'center' },
+            h('span', { class: 'bigT', style: { opacity: paused ? 0.55 : 1 } }, timeView((n) => elapsed(n, d), { seconds: true })),
+            h('span', { class: 'sub' }, 'gespielt · ', textLive((n) => `${hm(n - d.startedAt)} seit Beginn · ${hm(pausedMs(d, n))} Pause`))),
+          bar,
+          h('div', { class: 'legend' }, h('span', {}, h('i', { style: { background: 'var(--color-accent)' } }), 'gespielt'), h('span', {}, h('i', { style: { background: 'repeating-linear-gradient(135deg, var(--color-surface) 0 3px, var(--color-border) 3px 6px)' } }), 'Pause')),
+          h('div', { class: 'group' },
+            h('div', { class: 'row' }, h('span', { class: 'txt' }, 'Beginn'), timeInput(d.startedAt, 'Beginn', (t) => { d.startedAt = t; })),
+            rows,
+            h('div', { class: 'row' },
+              h('button', { type: 'button', class: 'mpill', onclick: () => { const n = Date.now(); d.pauses.push({ from: Math.max(d.startedAt, n - 20 * MINUTE), to: n - 5 * MINUTE }); k2.sel = d.pauses.length - 1; render(); } }, icon(I.plus, 14), 'Pause nachtragen'),
+              h('span', { class: 'txt' }),
+              h('button', { type: 'button', class: 'mpill', onclick: () => { toggle(d, Date.now()); render(); } }, icon(paused ? I.play : I.pause, 14), paused ? 'Fortsetzen' : 'Anhalten'))),
+          h('div', { class: 'buttons' },
+            h('button', { type: 'button', class: 'secondary', onclick: close }, 'Verwerfen'),
+            h('button', { type: 'button', class: 'primary', onclick: () => { S = d; close(); } }, 'Übernehmen')),
+        ], { onClose: close }));
+        return parts;
+      }
+
+      // ---------- K3 wheels
+      let k3 = { mode: 'dauer', touchUntil: 0 };
+      const ITEM = 44;
+      function wheel(count, label, getValue, onPick, fmt = two) {
+        const el = h('div', { class: 'wheel', 'aria-label': label, tabindex: '0' }, h('div', { class: 'pad' }), Array.from({ length: count }, (_, i) => h('div', {}, fmt(i))), h('div', { class: 'pad' }));
+        const touch = () => { k3.touchUntil = Date.now() + 1500; };
+        el.addEventListener('pointerdown', touch); el.addEventListener('touchstart', touch, { passive: true }); el.addEventListener('wheel', touch, { passive: true });
+        let timer;
+        el.addEventListener('scroll', () => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            if (Date.now() > k3.touchUntil) return; // moved by the clock itself
+            const idx = Math.max(0, Math.min(count - 1, Math.round(el.scrollTop / ITEM)));
+            if (idx !== getValue(Date.now())) { onPick(idx); buzz(8); }
+          }, 140);
+        });
+        let shown = -1;
+        onTick((now) => {
+          if (now < k3.touchUntil) return;
+          const v = Math.min(count - 1, getValue(now));
+          if (v !== shown) { el.scrollTo({ top: v * ITEM, behavior: shown === -1 ? 'instant' : 'smooth' }); shown = v; }
+        });
+        return el;
+      }
+      function renderK3() {
+        const parts = [overview({ timer: miniPill({ onOpen: () => { k3 = { mode: 'dauer', touchUntil: 0 }; open('k3'); } }) })];
+        if (openSheet !== 'k3') return parts;
+        const paused = isPaused();
+        const mins = (n) => Math.floor(elapsed(n) / MINUTE);
+        const setDur = (total) => { const n = Date.now(); S.adjust += total * MINUTE - elapsed(n); };
+        const start = new Date(S.startedAt);
+        const wheels = k3.mode === 'dauer'
+          ? [wheel(13, 'Stunden', (n) => Math.floor(mins(n) / 60), (v) => setDur(v * 60 + (mins(Date.now()) % 60)), String), h('span', { class: 'wheelUnit' }, 'h'),
+             wheel(60, 'Minuten', (n) => mins(n) % 60, (v) => setDur(Math.floor(mins(Date.now()) / 60) * 60 + v)), h('span', { class: 'wheelUnit' }, 'min')]
+          : [wheel(24, 'Stunde', () => new Date(S.startedAt).getHours(), (v) => { S.startedAt = lastTimeOfDay(`${two(v)}:${two(new Date(S.startedAt).getMinutes())}`, Date.now()); }), h('span', { class: 'wheelUnit' }, ':'),
+             wheel(60, 'Minute', () => new Date(S.startedAt).getMinutes(), (v) => { S.startedAt = lastTimeOfDay(`${two(new Date(S.startedAt).getHours())}:${two(v)}`, Date.now()); }), h('span', { class: 'wheelUnit' }, 'Uhr')];
+        void start;
+        parts.push(...sheet([
+          h('div', { class: 'center' },
+            h('span', { class: 'bigT', style: { opacity: paused ? 0.55 : 1 } }, timeView((n) => elapsed(n), { seconds: true })),
+            h('span', { class: 'sub' }, textLive((n) => `seit ${clockOf(S.startedAt)} · ${Math.floor(pausedMs(S, n) / MINUTE)} min Pause`))),
+          h('div', { class: 'seg' },
+            h('button', { type: 'button', 'aria-pressed': String(k3.mode === 'dauer'), onclick: () => { k3.mode = 'dauer'; render(); } }, 'Dauer'),
+            h('button', { type: 'button', 'aria-pressed': String(k3.mode === 'beginn'), onclick: () => { k3.mode = 'beginn'; render(); } }, 'Beginn')),
+          h('div', { class: 'wheels' }, wheels),
+          h('div', { class: 'roundBtns', style: { justifyContent: 'center', gap: '24px' } },
+            h('button', { type: 'button', class: `roundBtn main${paused ? ' go' : ''}`, 'aria-label': paused ? 'Weiter' : 'Pause', onclick: () => { toggle(S, Date.now()); buzz(); render(); } }, icon(paused ? I.play : I.pause, 30))),
+          h('button', { type: 'button', class: 'primary', onclick: close }, 'Fertig'),
+        ], { onClose: close }));
+        return parts;
+      }
+
+      // ---------- K4 always visible
+      let k4 = { page: 'partie', open: false, ask: null };
+      function islandEl() {
+        const paused = isPaused();
+        if (!k4.open) {
+          return h('div', { class: 'island' },
+            h('span', { class: `dot${paused ? ' off' : ''}` }),
+            h('button', { type: 'button', class: 'itime', 'aria-label': 'Uhr aufklappen', onclick: () => { k4.open = true; k4.justOpened = true; render(); } },
+              paused ? textLive((n) => `Pause ${hm(n - S.pauses.find((p) => p.to === null).from)}`) : timeView((n) => elapsed(n), { seconds: true })),
+            h('button', { type: 'button', class: 'toggle', 'aria-label': paused ? 'Fortsetzen' : 'Anhalten', onclick: () => { toggle(S, Date.now()); buzz(); render(); } }, icon(paused ? I.play : I.pause, 16)));
+        }
+        const el = h('div', { class: 'islandOpen' },
+          h('div', { style: { display: 'flex', alignItems: 'center', gap: '10px' } },
+            h('span', { class: `dot${paused ? ' off' : ''}`, style: { width: '10px', height: '10px', borderRadius: '50%', background: paused ? 'var(--color-text-muted)' : 'var(--color-group-green)' } }),
+            h('div', { style: { flex: 1 } }, h('div', { style: { fontWeight: 700 } }, 'Catan · Freitagsrunde'), h('div', { class: 'sub' }, textLive((n) => paused ? `angehalten seit ${hm(n - S.pauses.find((p) => p.to === null).from)}` : `seit ${clockOf(S.startedAt)}`))),
+            h('button', { type: 'button', class: 'toggle', 'aria-label': 'Zuklappen', onclick: () => { k4.open = false; render(); } }, icon(I.down, 18))),
+          h('div', { class: 'center' }, h('span', { class: 'bigT', style: { opacity: paused ? 0.55 : 1 } }, timeView((n) => elapsed(n), { seconds: true }))),
+          h('div', { class: 'chips' },
+            h('button', { type: 'button', class: 'mpill', onclick: () => { S.adjust -= Math.min(5 * MINUTE, elapsed(Date.now())); render(); } }, '−5'),
+            h('button', { type: 'button', class: `mpill on`, onclick: () => { toggle(S, Date.now()); buzz(); render(); } }, icon(paused ? I.play : I.pause, 14), paused ? 'Fortsetzen' : 'Anhalten'),
+            h('button', { type: 'button', class: 'mpill', onclick: () => { S.adjust += 5 * MINUTE; render(); } }, '+5'),
+            h('label', { class: 'mpill pickWrap' }, `Beginn ${clockOf(S.startedAt)}`,
+              h('input', { type: 'time', class: 'pickNative', value: clockOf(S.startedAt), 'aria-label': 'Beginn ändern', onchange: (e) => { if (e.target.value) { S.startedAt = lastTimeOfDay(e.target.value, Date.now()); render(); } } }))),
+          h('div', { class: 'buttons' },
+            h('button', { type: 'button', class: 'secondary', onclick: () => { k4.page = 'partie'; k4.open = false; render(); } }, 'Zur Partie'),
+            h('button', { type: 'button', class: 'primary' }, 'Ergebnis eintragen')));
+        if (k4.justOpened && prefs.spring && motionAnimate) queueMicrotask(() => motionAnimate(el, { transform: ['scale(0.6)', 'scale(1)'], opacity: [0, 1] }, { type: 'spring', bounce: 0.25, duration: 0.45 }));
+        k4.justOpened = false;
+        return el;
+      }
+      function renderK4() {
+        let pageEl;
+        if (k4.page === 'partie') {
+          pageEl = overview({ timer: h('span') });
+          pageEl.classList.add('k4page');
+        } else {
+          pageEl = h('div', { class: 'page k4page' },
+            h('div', { class: 'ovTitle' }, k4.page === 'start' ? 'Start' : 'Verwaltung'),
+            h('div', { class: 'card' }, k4.page === 'start' ? 'Letzte Ergebnisse, Statistik …' : 'Personen · Tische · Spiele'),
+            h('div', { class: 'card' }, 'Die Uhr bleibt oben sichtbar, auf jeder Seite.'));
+        }
+        pageEl.append(h('div', { class: 'navHand' }, ['start', 'partie', 'verwaltung'].map((p) =>
+          h('button', { type: 'button', 'aria-current': k4.page === p ? 'page' : null, onclick: () => { k4.page = p; render(); } }, { start: 'Start', partie: 'Partie', verwaltung: 'Verwaltung' }[p]))));
+        const parts = [pageEl, islandEl()];
+        if (k4.ask) {
+          const a = k4.ask;
+          parts.push(h('div', { class: 'backdrop' }), h('div', { class: 'dialogC' }, h('div', { class: 'dialog', role: 'alertdialog' },
+            h('h2', { class: 'title' }, `So lange gespielt?`),
+            h('p', { class: 'sub', style: { margin: 0 } }, `Die Uhr lief weiter, während die App ${hm(a.gap)} h zu war. Zuletzt benutzt um ${clockOf(a.lastActive)}.`),
+            h('div', { style: { display: 'grid', gap: '8px' } },
+              h('button', { type: 'button', class: 'secondary', onclick: () => { k4.ask = null; render(); } }, `Ja, alles zählen (${hm(elapsed(Date.now()))})`),
+              h('button', { type: 'button', class: 'secondary', onclick: () => { S.pauses.push({ from: a.lastActive, to: Date.now() }); k4.ask = null; render(); } }, `Lücke als Pause, ab jetzt weiter`),
+              h('button', { type: 'button', class: 'primary', onclick: () => { S.pauses.push({ from: a.lastActive, to: null }); k4.ask = null; render(); } }, `Um ${clockOf(a.lastActive)} angehalten`)))));
+        }
+        return parts;
+      }
+
+      // ---------- K5 turns
+      function renderK5() {
+        const T = S.turn;
+        const paused = isPaused();
+        const turnMs = (n) => elapsed(n) - T.since;
+        const avg = (i) => T.totals[i] / Math.max(1, T.counts[i]);
+        const next = (T.cur + 1) % PEOPLE.length;
+        const pass = (to) => {
+          const n = Date.now();
+          T.totals[T.cur] += turnMs(n); T.counts[T.cur] += 1;
+          if (to <= T.cur) T.round += 1;
+          T.cur = to; T.since = elapsed(n); T.warned = false;
+          buzz(15); render();
+        };
+        const coins = h('div', { class: 'coins' }, PEOPLE.map((p, i) => {
+          const isCur = i === T.cur;
+          const R = 22, C = 2 * Math.PI * R;
+          let ring = null;
+          if (isCur) {
+            const arc = s('circle', { cx: 25, cy: 25, r: R, fill: 'none', stroke: 'var(--color-accent-text)', 'stroke-width': 3, 'stroke-dasharray': C, transform: 'rotate(-90 25 25)', 'stroke-linecap': 'round' });
+            ring = s('svg', { class: 'ring', viewBox: '0 0 50 50', 'aria-hidden': 'true' }, s('circle', { cx: 25, cy: 25, r: R, fill: 'none', stroke: 'var(--color-border)', 'stroke-width': 3 }), arc);
+            onTick((n) => {
+              const ref = T.limit ? T.limit * MINUTE : avg(i) * 1.5;
+              const f = Math.min(1, turnMs(n) / ref);
+              arc.setAttribute('stroke-dashoffset', String(C * (1 - f)));
+              const over = T.limit && turnMs(n) > T.limit * MINUTE;
+              arc.setAttribute('stroke', over ? 'var(--color-danger-text)' : 'var(--color-accent-text)');
+              if (over && !T.warned) { T.warned = true; buzz([60, 60, 60]); }
+            });
+          }
+          return h('button', { type: 'button', class: 'coinWrap', 'aria-label': `${p.name} ist dran`, onclick: () => { if (i !== T.cur) pass(i); } },
+            ring, coin(i), isCur ? textLive((n) => ms_(turnMs(n)), { class: 'coinTime', style: { color: 'var(--color-accent-text)', fontWeight: 700 } }) : h('span', { class: 'coinTime' }, ''));
+        }));
+        const parts = [overview({
+          coins,
+          extra: h('button', { type: 'button', class: 'primary turnBtn', disabled: paused, onclick: () => pass(next) }, `Weiter an ${PEOPLE[next].name}`, icon(I.next, 20)),
+          timer: miniPill({ onOpen: () => open('k5') }),
+          bottom: h('button', { type: 'button', class: 'secondary wide' }, 'Ergebnis eintragen'),
+        })];
+        if (openSheet !== 'k5') return parts;
+        const maxT = Math.max(...T.totals);
+        parts.push(...sheet([
+          h('div', { class: 'center' },
+            h('span', { class: 'bigT', style: { opacity: paused ? 0.55 : 1 } }, timeView((n) => elapsed(n), { seconds: true })),
+            h('span', { class: 'sub' }, `Runde ${T.round} · ${PEOPLE[T.cur].name} ist dran · `, textLive((n) => ms_(turnMs(n))))),
+          h('div', { class: 'bars' }, PEOPLE.map((p, i) => h('div', { class: 'barRow' }, coin(i),
+            h('div', {},
+              h('div', { class: 'bar' }, h('i', { style: { width: `${(T.totals[i] / maxT) * 100}%`, background: p.color } })),
+              h('div', { class: 'barTxt' }, h('span', {}, h('b', {}, hm(T.totals[i])), ` · ${T.counts[i]} Züge`), h('span', {}, `Ø ${ms_(avg(i))}`)))))),
+          h('div', { class: 'group' },
+            h('div', { class: 'row stepLine' }, h('span', { class: 'txt' }, 'Zeitlimit pro Zug'),
+              h('span', { class: 'steps' }, [0, 1, 2, 3, 5].map((m) => h('button', { type: 'button', class: `mpill${T.limit === m ? ' on' : ''}`, onclick: () => { T.limit = m; T.warned = false; render(); } }, m === 0 ? 'ohne' : `${m} min`)))),
+            h('div', { class: 'row' }, h('span', { class: 'txt' }, 'Uhr'),
+              h('button', { type: 'button', class: 'mpill', onclick: () => { toggle(S, Date.now()); render(); } }, icon(paused ? I.play : I.pause, 14), paused ? 'Fortsetzen' : 'Anhalten'))),
+          h('button', { type: 'button', class: 'primary', onclick: close }, 'Fertig'),
+        ], { onClose: close }));
+        return parts;
+      }
+
+      // ================= Round 2: Z1–Z3 =================
+      function sortPauses(m) { m.pauses.sort((a, b) => a.from - b.from); }
+      function durText(ms) {
+        const m = Math.max(0, Math.round(ms / MINUTE));
+        return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`;
+      }
+      function timePill(value, label, onSet, cls = '') {
+        return h('label', { class: 'pickWrap' }, h('span', { class: `valPill ${cls}` }, clockOf(value)),
+          h('input', { type: 'time', class: 'pickNative', value: clockOf(value), 'aria-label': label,
+            onchange: (e) => { if (e.target.value) { onSet(lastTimeOfDay(e.target.value, Date.now())); render(); } } }));
+      }
+      function neighbours(m, p) {
+        sortPauses(m);
+        const i = m.pauses.indexOf(p);
+        return { prevEnd: i > 0 ? (m.pauses[i - 1].to ?? Date.now()) : m.startedAt, nextFrom: i < m.pauses.length - 1 ? m.pauses[i + 1].from : Date.now() };
+      }
+      function setStart(m, t) {
+        const first = m.pauses.length ? Math.min(...m.pauses.map((p) => p.from)) : Date.now() - MINUTE;
+        m.startedAt = Math.min(t, first);
+        return m.startedAt;
+      }
+      function setPauseFrom(m, p, t) {
+        const { prevEnd } = neighbours(m, p);
+        p.from = Math.max(prevEnd, Math.min(t, (p.to ?? Date.now()) - MINUTE));
+        return p.from;
+      }
+      function setPauseTo(m, p, t) {
+        const { nextFrom } = neighbours(m, p);
+        p.to = Math.min(nextFrom, Math.max(t, p.from + MINUTE));
+        return p.to;
+      }
+      // A pause of up to 10 minutes in the middle of a played stretch.
+      function insertPause(m, a, b) {
+        const end = b ?? Date.now();
+        const len = Math.min(10 * MINUTE, Math.max(MINUTE, (end - a) / 2));
+        const mid = (a + end) / 2;
+        const from = Math.round((mid - len / 2) / MINUTE) * MINUTE;
+        m.pauses.push({ from: Math.max(a, from), to: Math.min(end, Math.max(a, from) + len) });
+        sortPauses(m);
+      }
+
+      // Stopwatch dial (from K1), without laps.
+      function dialEl(m, inner) {
+        const R = 118, C = 2 * Math.PI * R;
+        const arc = s('circle', { cx: 130, cy: 130, r: R, fill: 'none', stroke: 'var(--color-accent)', 'stroke-width': 8, 'stroke-linecap': 'round', 'stroke-dasharray': C, transform: 'rotate(-90 130 130)' });
+        const knob = s('circle', { r: 9, fill: 'var(--color-accent-text)' });
+        const ticks = Array.from({ length: 60 }, (_, i) => {
+          const a = (i / 60) * 2 * Math.PI, r1 = i % 5 === 0 ? 100 : 104, r2 = 108;
+          return s('line', { x1: 130 + r1 * Math.sin(a), y1: 130 - r1 * Math.cos(a), x2: 130 + r2 * Math.sin(a), y2: 130 - r2 * Math.cos(a), stroke: 'var(--color-text-muted)', 'stroke-width': i % 5 === 0 ? 2 : 1, opacity: i % 5 === 0 ? 0.8 : 0.4 });
+        });
+        onTick((now) => {
+          const f = (elapsed(now, m) % MINUTE) / MINUTE;
+          arc.setAttribute('stroke-dashoffset', String(C * (1 - f)));
+          const a = f * 2 * Math.PI;
+          knob.setAttribute('cx', String(130 + R * Math.sin(a)));
+          knob.setAttribute('cy', String(130 - R * Math.cos(a)));
+        });
+        return h('div', { class: 'dial' },
+          s('svg', { viewBox: '0 0 260 260', 'aria-hidden': 'true' }, s('circle', { cx: 130, cy: 130, r: R, fill: 'none', stroke: 'var(--color-surface)', 'stroke-width': 8 }), ticks, arc, knob),
+          h('div', { class: 'dialIn' }, inner));
+      }
+      function undoable(text, change) {
+        const before = clone(S);
+        change();
+        buzz(20);
+        showToast(text, () => { S = before; });
+      }
+
+      // ---------- Z1: stopwatch with pauses
+      function renderZ1() {
+        const parts = [overview({ timer: miniPill({ onOpen: () => open('z1') }) })];
+        if (openSheet !== 'z1') return parts;
+        sortPauses(S);
+        const paused = isPaused();
+        const numbered = S.pauses.map((p, i) => ({ p, n: i + 1 })).reverse();
+        const rows = numbered.map(({ p, n }) => p.to === null
+          ? h('div', { class: 'prow live' },
+              h('span', {}, h('div', { style: { fontWeight: 700 } }, `Pause ${n} läuft`), h('div', { class: 'sub' }, 'seit ', timePill(p.from, `Pause ${n} seit`, (t) => setPauseFrom(S, p, t), 'small'))),
+              textLive((now) => ms_(now - p.from), { class: 'pdur' }), h('span'))
+          : h('div', { class: 'prow' },
+              h('span', {}, h('div', {}, `Pause ${n}`), h('div', { class: 'range' },
+                timePill(p.from, `Pause ${n} von`, (t) => setPauseFrom(S, p, t), 'small'), '–', timePill(p.to, `Pause ${n} bis`, (t) => setPauseTo(S, p, t), 'small'))),
+              h('span', { class: 'pdur' }, durText(p.to - p.from)),
+              h('button', { type: 'button', class: 'icoBtn', 'aria-label': `Pause ${n} löschen`, onclick: () => undoable(`Pause ${n} gelöscht`, () => { S.pauses.splice(S.pauses.indexOf(p), 1); }) }, icon(I.trash, 16))));
+        parts.push(...sheet([
+          dialEl(S, [
+            h('span', { class: 'dialT', style: { opacity: paused ? 0.55 : 1 } }, timeView((now) => elapsed(now), { seconds: true })),
+            paused ? h('span', { class: 'lapNow' }, 'angehalten') : h('span', { class: 'lapNow' }, 'läuft'),
+            h('span', { class: 'sub' }, textLive((now) => `seit ${clockOf(S.startedAt)} · ${durText(pausedMs(S, now))} Pause`))]),
+          h('div', { class: 'roundBtns' },
+            h('button', { type: 'button', class: 'roundBtn', onclick: () => undoable('Pause nachgetragen', () => insertPause(S, Date.now() - 25 * MINUTE, Date.now() - 5 * MINUTE)) }, icon(I.plus, 22), 'Pause', h('br'), 'nachtragen'),
+            h('button', { type: 'button', class: `roundBtn main${paused ? ' go' : ''}`, 'aria-label': paused ? 'Weiter' : 'Pause', onclick: () => { toggle(S, Date.now()); buzz(); render(); } }, icon(paused ? I.play : I.pause, 30))),
+          h('div', { class: 'chips' }, h('span', { class: 'sub', style: { alignSelf: 'center' } }, 'Beginn'), timePill(S.startedAt, 'Beginn', (t) => setStart(S, t))),
+          h('div', { class: 'sectionT' }, h('span', {}, 'Pausen'), textLive((now) => S.pauses.length ? `${S.pauses.length} · zusammen ${durText(pausedMs(S, now))}` : '', { class: 'sub' })),
+          rows.length ? h('div', { class: 'plist' }, rows) : h('p', { class: 'sub', style: { margin: 0 } }, 'Noch keine Pause'),
+        ], { full: true, onClose: close }));
+        return parts;
+      }
+
+      // ---------- Z2: timeline to drag
+      let z2 = null;
+      function renderZ2() {
+        const parts = [overview({ timer: miniPill({ onOpen: () => { z2 = { draft: clone(S), sel: null, lo: S.startedAt - 20 * MINUTE }; open('z2'); } }) })];
+        if (openSheet !== 'z2') return parts;
+        const d = z2.draft;
+        sortPauses(d);
+        z2.lo = Math.min(z2.lo, d.startedAt - 10 * MINUTE);
+        const paused = isPaused(d);
+        const pos = (t, n) => ((t - z2.lo) / (n - z2.lo)) * 100;
+        const bar = h('div', { class: 'dbar' });
+        const pre = h('div', { class: 'pre' });
+        const played = h('div', { class: 'played' });
+        const pz = d.pauses.map((p, i) => h('div', { class: `pz${z2.sel?.kind === 'pause' && z2.sel.i === i ? ' sel' : ''}`, 'data-i': String(i) }));
+        const label = h('span', { class: 'dragLabel', style: { display: 'none' } });
+        const hStart = h('button', { type: 'button', class: 'handle start', 'aria-label': 'Beginn ziehen' });
+        const hFrom = d.pauses.map((_, i) => h('button', { type: 'button', class: 'handle', 'aria-label': `Pause ${i + 1} Anfang ziehen` }));
+        const hTo = d.pauses.map((p, i) => p.to === null ? null : h('button', { type: 'button', class: 'handle', 'aria-label': `Pause ${i + 1} Ende ziehen` }));
+        const now0 = Date.now();
+        const tickTimes = [];
+        const first = new Date(z2.lo); first.setMinutes(0, 0, 0);
+        for (let t = first.getTime() + 3600000; t < now0; t += 3600000) tickTimes.push(t);
+        const ticks = tickTimes.map((t) => h('span', { class: 'tlTick' }, clockOf(t)));
+        const layout = (n) => {
+          pre.style.width = `${pos(d.startedAt, n)}%`;
+          played.style.left = `${pos(d.startedAt, n)}%`;
+          hStart.style.left = `${pos(d.startedAt, n)}%`;
+          d.pauses.forEach((p, i) => {
+            const a = pos(p.from, n), b = pos(p.to ?? n, n);
+            pz[i].style.left = `${a}%`; pz[i].style.width = `${b - a}%`;
+            hFrom[i].style.left = `${a}%`;
+            if (hTo[i]) hTo[i].style.left = `${b}%`;
+          });
+          ticks.forEach((el, i) => { el.style.left = `${pos(tickTimes[i], n)}%`; });
+        };
+        onTick(layout);
+        const drag = (handle, apply) => {
+          handle.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            handle.setPointerCapture(e.pointerId);
+            label.style.display = 'block';
+            buzz(8);
+            let moved = false;
+            const move = (ev) => {
+              moved = true;
+              const r = bar.getBoundingClientRect();
+              const n = Date.now();
+              const t = z2.lo + Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)) * (n - z2.lo);
+              const v = apply(Math.round(t / MINUTE) * MINUTE);
+              label.textContent = clockOf(v);
+              layout(n);
+              label.style.left = handle.style.left;
+            };
+            handle.onpointermove = move;
+            handle.onpointerup = handle.onpointercancel = () => {
+              handle.onpointermove = null;
+              label.style.display = 'none';
+              if (moved) { z2.sel = null; render(); }
+            };
+          });
+        };
+        drag(hStart, (t) => setStart(d, Math.max(z2.lo, t)));
+        d.pauses.forEach((p, i) => {
+          drag(hFrom[i], (t) => setPauseFrom(d, p, t));
+          if (hTo[i]) drag(hTo[i], (t) => setPauseTo(d, p, t));
+        });
+        bar.addEventListener('click', (e) => {
+          if (e.target.closest('.handle')) return;
+          const seg = e.target.closest('.pz');
+          if (seg) { z2.sel = { kind: 'pause', i: Number(seg.dataset.i) }; render(); return; }
+          const r = bar.getBoundingClientRect(), n = Date.now();
+          const t = z2.lo + ((e.clientX - r.left) / r.width) * (n - z2.lo);
+          if (t < d.startedAt) { z2.sel = null; render(); return; }
+          z2.sel = { kind: 'gap', at: Math.round(t / MINUTE) * MINUTE };
+          render();
+        });
+        append(bar, [pre, played, pz, ticks, hStart, hFrom, hTo, label, h('span', { class: 'tlNow' })]);
+        let pop;
+        if (z2.sel?.kind === 'pause' && d.pauses[z2.sel.i]) {
+          const p = d.pauses[z2.sel.i], n = z2.sel.i + 1;
+          pop = h('div', { class: 'pop' },
+            h('div', { class: 'popHead' }, h('b', {}, `Pause ${n}`), p.to === null ? textLive((x) => durText(x - p.from), { class: 'sub' }) : h('span', { class: 'sub' }, durText(p.to - p.from))),
+            h('div', { class: 'range' }, timePill(p.from, `Pause ${n} von`, (t) => setPauseFrom(d, p, t)), '–',
+              p.to === null ? h('span', { class: 'valPill muted' }, 'jetzt') : timePill(p.to, `Pause ${n} bis`, (t) => setPauseTo(d, p, t)),
+              h('span', { class: 'txt' }),
+              h('button', { type: 'button', class: 'mpill', onclick: () => { d.pauses.splice(z2.sel.i, 1); z2.sel = null; render(); } }, icon(I.trash, 14), 'Löschen')));
+        } else if (z2.sel?.kind === 'gap') {
+          const at = z2.sel.at;
+          pop = h('div', { class: 'pop' },
+            h('div', { class: 'popHead' }, h('b', {}, `${clockOf(at)} Uhr`), h('span', { class: 'sub' }, 'gespielt')),
+            h('div', { class: 'range' },
+              h('button', { type: 'button', class: 'mpill on', onclick: () => {
+                const nx = d.pauses.find((p) => p.from > at)?.from ?? Date.now();
+                d.pauses.push({ from: at, to: Math.min(nx, at + 10 * MINUTE) });
+                sortPauses(d);
+                z2.sel = { kind: 'pause', i: d.pauses.findIndex((p) => p.from === at) };
+                render();
+              } }, icon(I.plus, 14), 'Pause hier'),
+              h('button', { type: 'button', class: 'mpill', onclick: () => { z2.sel = null; render(); } }, 'Abbrechen')));
+        } else {
+          pop = h('p', { class: 'sub', style: { margin: 0, textAlign: 'center' } }, 'Griffe ziehen · Pause antippen · Leiste antippen für neue Pause');
+        }
+        parts.push(...sheet([
+          h('div', { class: 'z3head' },
+            h('div', {}, h('div', { class: 'bigT', style: { opacity: paused ? 0.55 : 1 } }, timeView((n) => elapsed(n, d), { seconds: true })),
+              h('div', { class: 'sub' }, textLive((n) => `seit ${clockOf(d.startedAt)} · ${durText(pausedMs(d, n))} Pause`))),
+            h('button', { type: 'button', class: `roundBtn main small${paused ? ' go' : ''}`, 'aria-label': paused ? 'Weiter' : 'Pause', onclick: () => { toggle(d, Date.now()); buzz(); render(); } }, icon(paused ? I.play : I.pause, 26))),
+          bar,
+          pop,
+          h('div', { class: 'buttons' },
+            h('button', { type: 'button', class: 'secondary', onclick: close }, 'Verwerfen'),
+            h('button', { type: 'button', class: 'primary', onclick: () => { S = d; close(); } }, 'Übernehmen')),
+        ], { onClose: close }));
+        return parts;
+      }
+
+      // ---------- Z3: history, top to bottom
+      function renderZ3() {
+        const parts = [overview({ timer: miniPill({ onOpen: () => open('z3') }) })];
+        if (openSheet !== 'z3') return parts;
+        sortPauses(S);
+        const paused = isPaused();
+        const items = [];
+        const event = (kind, label, pill) => items.push(
+          h('div', { class: 'rail' }, h('span', { class: `evDot ${kind}` })),
+          h('div', { class: 'ev' }, pill, h('span', { class: 'evLabel' }, label)));
+        const stretch = (kind, text, action) => items.push(
+          h('div', { class: 'rail' }, h('span', { class: `line ${kind}` })),
+          h('div', { class: `spanRow ${kind}` }, text, h('span', { class: 'txt' }), action));
+        const addBtn = (a, b) => h('button', { type: 'button', class: 'mpill', onclick: () => undoable('Pause eingefügt', () => insertPause(S, a, b)) }, icon(I.plus, 14), 'Pause');
+        event('start', 'Beginn', timePill(S.startedAt, 'Beginn', (t) => setStart(S, t)));
+        let cursor = S.startedAt;
+        S.pauses.forEach((p, i) => {
+          const a = cursor;
+          stretch('play', `gespielt ${durText(p.from - a)}`, addBtn(a, p.from));
+          event('stop', 'angehalten', timePill(p.from, `Pause ${i + 1} von`, (t) => setPauseFrom(S, p, t)));
+          stretch('pause', p.to === null ? textLive((n) => `Pause ${durText(n - p.from)}`) : `Pause ${durText(p.to - p.from)}`,
+            p.to !== null && h('button', { type: 'button', class: 'icoBtn', 'aria-label': `Pause ${i + 1} löschen`, onclick: () => undoable('Pause gelöscht', () => { S.pauses.splice(i, 1); }) }, icon(I.trash, 16)));
+          if (p.to !== null) { event('go', 'weiter', timePill(p.to, `Pause ${i + 1} bis`, (t) => setPauseTo(S, p, t))); cursor = p.to; } else cursor = null;
+        });
+        if (cursor !== null) { const c = cursor; stretch('play', textLive((n) => `gespielt ${durText(n - c)}`), addBtn(c, null)); }
+        event(paused ? 'stop' : 'now', paused ? 'Pause läuft' : 'läuft', h('span', { class: 'valPill muted' }, 'jetzt'));
+        parts.push(...sheet([
+          h('div', { class: 'z3head' },
+            h('div', {}, h('div', { class: 'bigT', style: { opacity: paused ? 0.55 : 1 } }, timeView((n) => elapsed(n), { seconds: true })),
+              h('div', { class: 'sub' }, textLive((n) => `${durText(pausedMs(S, n))} Pause`))),
+            h('button', { type: 'button', class: `roundBtn main small${paused ? ' go' : ''}`, 'aria-label': paused ? 'Weiter' : 'Pause', onclick: () => { toggle(S, Date.now()); buzz(); render(); } }, icon(paused ? I.play : I.pause, 26))),
+          h('div', { class: 'hist' }, items),
+          h('button', { type: 'button', class: 'primary', onclick: close }, 'Fertig'),
+        ], { full: true, onClose: close }));
+        return parts;
+      }
+
+      // ================= Round 3: optimised Z1+, Z3+, K2+ and mixes M1–M3 =================
+      let pseq = 0;
+      const pid = (p) => (p.id ??= ++pseq);
+      let errs = {};
+      let adding = null; // { from, to, at }
+      let selPid = null; // pause chosen on the timeline
+      let draftOf = null; // K2+: { draft, orig }
+
+      // Live check like everywhere in the app: a wrong time is not taken and says why.
+      function pauseProblem(m, from, to, self) {
+        if (to !== null && to <= from) return 'Ende vor dem Anfang';
+        if (from < m.startedAt) return 'vor dem Beginn';
+        const now = Date.now();
+        sortPauses(m);
+        for (const [i, p] of m.pauses.entries()) {
+          if (p === self) continue;
+          if (from < (p.to ?? now) && (to ?? now) > p.from) return `überschneidet Pause ${i + 1}`;
+        }
+        return null;
+      }
+      function startProblem(m, t) {
+        sortPauses(m);
+        const first = m.pauses[0];
+        return first && t > first.from ? 'nach dem Anfang von Pause 1' : null;
+      }
+      function editPill(value, label, key, tryApply, cls = '') {
+        return timePill(value, label, (t) => {
+          const problem = tryApply(t);
+          if (problem) errs[key] = problem; else delete errs[key];
+        }, `${cls}${errs[key] ? ' bad' : ''}`);
+      }
+      const fromPill = (m, p, n, cls) => editPill(p.from, `Pause ${n} von`, pid(p), (t) => { const pr = pauseProblem(m, t, p.to, p); if (!pr) p.from = t; return pr; }, cls);
+      const toPill = (m, p, n, cls) => editPill(p.to, `Pause ${n} bis`, pid(p), (t) => { const pr = pauseProblem(m, p.from, t, p); if (!pr) p.to = t; return pr; }, cls);
+      const startPill = (m, cls) => editPill(m.startedAt, 'Beginn', 'start', (t) => { const pr = startProblem(m, t); if (!pr) m.startedAt = t; return pr; }, cls);
+      const errLine = (key) => (errs[key] ? h('div', { class: 'err', role: 'alert' }, `Nicht übernommen · ${errs[key]}`) : null);
+      const trashBtn = (label, onDelete) => h('button', { type: 'button', class: 'icoBtn', 'aria-label': label, onclick: onDelete }, icon(I.trash, 16));
+      // Immediate variants delete with "Rückgängig"; the draft of K2+ simply drops it.
+      function removePause(m, p, n, immediate) {
+        if (selPid === pid(p)) selPid = null;
+        if (immediate) undoable(`Pause ${n} gelöscht`, () => { S.pauses.splice(S.pauses.indexOf(p), 1); });
+        else { m.pauses.splice(m.pauses.indexOf(p), 1); render(); }
+      }
+
+      // A suggestion of up to 10 minutes in the middle of a played stretch.
+      function rangeIn(a, b) {
+        const len = Math.min(10 * MINUTE, Math.max(MINUTE, Math.floor((b - a) / 2 / MINUTE) * MINUTE));
+        const from = Math.ceil(((a + b) / 2 - len / 2) / MINUTE) * MINUTE;
+        return { from, to: from + len };
+      }
+      function lastStretch(m) {
+        sortPauses(m);
+        const run = m.pauses.find((p) => p.to === null);
+        const closed = m.pauses.filter((p) => p.to !== null);
+        return [closed.length ? closed[closed.length - 1].to : m.startedAt, run ? run.from : Date.now()];
+      }
+      function adderEl(m, immediate) {
+        const a = adding;
+        const problem = pauseProblem(m, a.from, a.to, null);
+        return h('div', { class: 'adder' },
+          h('div', { class: 'popHead' }, h('b', {}, 'Pause nachtragen'), h('span', { class: 'sub' }, problem ? '' : durText(a.to - a.from))),
+          h('div', { class: 'range' },
+            timePill(a.from, 'Neue Pause von', (t) => { a.from = t; }, problem ? 'bad' : ''), '–',
+            timePill(a.to, 'Neue Pause bis', (t) => { a.to = t; }, problem ? 'bad' : '')),
+          problem && h('div', { class: 'err', role: 'alert' }, problem),
+          h('div', { class: 'buttons' },
+            h('button', { type: 'button', class: 'secondary', onclick: () => { adding = null; render(); } }, 'Abbrechen'),
+            h('button', { type: 'button', class: 'primary', disabled: Boolean(problem), onclick: () => {
+              const add = () => { m.pauses.push({ from: a.from, to: a.to }); sortPauses(m); };
+              adding = null;
+              if (immediate) undoable('Pause nachgetragen', add); else { add(); render(); }
+            } }, 'Hinzufügen')));
+      }
+      function openFresh(name) { errs = {}; adding = null; selPid = null; S.pauses.forEach(pid); open(name); }
+      const pauseButton = (m, small) => {
+        const paused = isPaused(m);
+        return h('button', { type: 'button', class: `roundBtn main${small ? ' small' : ''}${paused ? ' go' : ''}`, 'aria-label': paused ? 'Weiter' : 'Anhalten', onclick: () => { toggle(m, Date.now()); render(); } }, icon(paused ? I.play : I.pause, small ? 26 : 30));
+      };
+      const pauseSub = (m) => textLive((n) => isPaused(m) ? `angehalten · ${durText(pausedMs(m, n))} Pause` : `seit ${clockOf(m.startedAt)} · ${durText(pausedMs(m, n))} Pause`);
+
+      // ---------- building blocks
+      // Z1: dial with the round buttons "Pause nachtragen" and pause.
+      function dialHead(m) {
+        const dial = dialEl(m, [
+          h('span', { class: 'dialT', style: { opacity: isPaused(m) ? 0.55 : 1 } }, timeView((now) => elapsed(now, m), { seconds: true })),
+          h('span', { class: 'sub' }, pauseSub(m))]);
+        dial.classList.add('sm');
+        return [dial,
+          h('div', { class: 'roundBtns' },
+            h('button', { type: 'button', class: 'roundBtn', 'aria-pressed': String(adding !== null), onclick: () => { const [a, b] = lastStretch(m); adding = adding ? null : rangeIn(a, b); render(); } }, icon(I.plus, 22), 'Pause', h('br'), 'nachtragen'),
+            pauseButton(m, false)),
+          adding && adding.at === undefined && adderEl(m, true)];
+      }
+      // Z3: big time on the left, round pause button on the right.
+      function compactHead(m) {
+        return h('div', { class: 'z3head' },
+          h('div', {}, h('div', { class: 'bigT', style: { opacity: isPaused(m) ? 0.55 : 1 } }, timeView((n) => elapsed(n, m), { seconds: true })), h('div', { class: 'sub' }, pauseSub(m))),
+          pauseButton(m, true));
+      }
+      // K2: timeline from the beginning to now; tapping a pause marks its entry below.
+      function timelineBar(m) {
+        const now = Date.now();
+        const span = Math.max(MINUTE, now - m.startedAt);
+        const pct = (t) => `${(((t - m.startedAt) / span) * 100).toFixed(2)}%`;
+        const ticks = [];
+        const first = new Date(m.startedAt); first.setMinutes(0, 0, 0);
+        for (let t = first.getTime() + 3600000; t < now; t += 3600000) if ((t - m.startedAt) / span > 0.14 && (now - t) / span > 0.1) ticks.push(h('span', { class: 'tlTick', style: { left: pct(t) } }, clockOf(t)));
+        return h('div', { class: 'tl' },
+          m.pauses.map((p, i) => h('button', { type: 'button', class: `tlPause${selPid === pid(p) ? ' sel' : ''}`, 'aria-label': `Pause ${i + 1} wählen`,
+            style: { left: pct(p.from), width: `${(((p.to ?? now) - p.from) / span) * 100}%` },
+            onclick: () => {
+              selPid = selPid === pid(p) ? null : pid(p);
+              render();
+              queueMicrotask(() => document.querySelector('#frame .selRow')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+            } })),
+          h('span', { class: 'tlNow' }),
+          h('span', { class: 'tlTick', style: { left: '0%', translate: '0 0' } }, clockOf(m.startedAt)), ticks,
+          h('span', { class: 'tlTick', style: { left: '100%', translate: '-100% 0' } }, 'jetzt'));
+      }
+      // Z1: history, newest first, the beginning at the end, like a stopwatch.
+      function historyList(m, immediate) {
+        sortPauses(m);
+        const rows = m.pauses.map((p, i) => ({ p, n: i + 1 })).reverse().map(({ p, n }) => {
+          const sel = selPid === pid(p) ? ' selRow' : '';
+          return p.to === null
+            ? h('div', { class: `prow live${sel}` },
+                h('span', {}, h('div', { style: { fontWeight: 700 } }, `Pause ${n} läuft`), h('div', { class: 'range' }, 'seit ', fromPill(m, p, n, 'small')), errLine(pid(p))),
+                textLive((now) => ms_(now - p.from), { class: 'pdur' }), h('span'))
+            : h('div', { class: `prow${sel}` },
+                h('span', {}, h('div', {}, `Pause ${n}`), h('div', { class: 'range' }, fromPill(m, p, n, 'small'), '–', toPill(m, p, n, 'small')), errLine(pid(p))),
+                h('span', { class: 'pdur' }, durText(p.to - p.from)),
+                trashBtn(`Pause ${n} löschen`, () => removePause(m, p, n, immediate)));
+        });
+        rows.push(h('div', { class: 'prow' }, h('span', {}, h('div', {}, 'Beginn'), h('div', { class: 'range' }, startPill(m, 'small')), errLine('start')), h('span'), h('span')));
+        return [h('div', { class: 'sectionT' }, h('span', {}, 'Verlauf'), h('span', { class: 'sub' }, `${m.pauses.length} ${m.pauses.length === 1 ? 'Pause' : 'Pausen'}`)), h('div', { class: 'plist' }, rows)];
+      }
+      // Z3: compact history from the top; a pause is one entry.
+      function compactHistory(m) {
+        sortPauses(m);
+        const items = [];
+        const row = (rail, content) => items.push(
+          h('div', { class: 'rail' }, rail === 'dot' ? h('span', { class: 'evDot' }) : rail === 'now' ? h('span', { class: 'evDot now' }) : h('span', { class: `line ${rail}` })),
+          content);
+        const stretch = (idx, from, to) => {
+          row('play', h('div', { class: 'spanRow' },
+            to === null ? textLive((n) => `gespielt ${durText(n - from)}`) : `gespielt ${durText(to - from)}`,
+            h('span', { class: 'txt' }),
+            h('button', { type: 'button', class: `mpill${adding?.at === idx ? ' on' : ''}`, onclick: () => { adding = adding?.at === idx ? null : { ...rangeIn(from, to ?? Date.now()), at: idx }; render(); } }, icon(I.plus, 14), 'Pause')));
+          if (adding?.at === idx) row('play', adderEl(m, true));
+        };
+        row('dot', h('div', { class: 'ev' }, startPill(m), h('span', { class: 'evLabel' }, 'Beginn'), errLine('start')));
+        let a = m.startedAt;
+        m.pauses.forEach((p, i) => {
+          stretch(i, a, p.from);
+          const n = i + 1;
+          row('pause', h('div', { class: `pblock${selPid === pid(p) ? ' selRow' : ''}` },
+            h('div', { class: 'sub' }, p.to === null ? `Pause ${n} läuft` : `Pause ${n}`),
+            h('div', { class: 'range' }, fromPill(m, p, n), '–',
+              p.to === null ? h('span', { class: 'valPill muted' }, 'jetzt') : toPill(m, p, n),
+              h('span', { class: 'txt' }),
+              p.to === null ? textLive((x) => ms_(x - p.from), { class: 'pdur live' }) : h('span', { class: 'pdur' }, durText(p.to - p.from)),
+              p.to !== null && trashBtn(`Pause ${n} löschen`, () => removePause(m, p, n, true))),
+            errLine(pid(p))));
+          a = p.to;
+        });
+        if (a !== null) {
+          stretch(m.pauses.length, a, null);
+          row('now', h('div', { class: 'ev' }, h('span', { class: 'valPill muted' }, 'jetzt'), h('span', { class: 'evLabel' }, 'läuft')));
+        }
+        return h('div', { class: 'hist' }, items);
+      }
+      // K2: list with the beginning on top; with `withToggle` the last row also pauses.
+      function k2List(m, immediate, withToggle) {
+        sortPauses(m);
+        const paused = isPaused(m);
+        const rows = m.pauses.map((p, i) => {
+          const n = i + 1;
+          return h('div', { class: `row${selPid === pid(p) ? ' selRow' : ''}` },
+            h('span', { class: 'txt' }, h('div', {}, `Pause ${n}`),
+              p.to === null ? textLive((x) => `läuft · ${ms_(x - p.from)}`, { class: 'sub' }) : h('div', { class: 'sub' }, durText(p.to - p.from)),
+              errLine(pid(p))),
+            fromPill(m, p, n), '–',
+            p.to === null ? h('span', { class: 'valPill muted' }, 'jetzt') : toPill(m, p, n),
+            p.to === null ? h('span', { class: 'icoGap' }) : trashBtn(`Pause ${n} löschen`, () => removePause(m, p, n, immediate)));
+        });
+        return h('div', { class: 'group' },
+          h('div', { class: 'row' }, h('span', { class: 'txt' }, h('div', {}, 'Beginn'), errLine('start')), startPill(m)),
+          rows,
+          adding
+            ? h('div', { class: 'row', style: { display: 'block' } }, adderEl(m, immediate))
+            : h('div', { class: 'row' },
+                h('button', { type: 'button', class: 'mpill', onclick: () => { const [a, b] = lastStretch(m); adding = rangeIn(a, b); render(); } }, icon(I.plus, 14), 'Pause nachtragen'),
+                h('span', { class: 'txt' }),
+                withToggle && h('button', { type: 'button', class: 'mpill', onclick: () => { toggle(m, Date.now()); render(); } }, icon(paused ? I.play : I.pause, 14), paused ? 'Fortsetzen' : 'Anhalten')));
+      }
+      const doneButton = () => h('button', { type: 'button', class: 'primary', onclick: close }, 'Fertig');
+
+      // ---------- the candidates
+      function candidate(name, build, opts = { full: true }) {
+        return () => {
+          const parts = [overview({ timer: miniPill({ onOpen: () => openFresh(name) }) })];
+          if (openSheet === name) parts.push(...sheet(build(), { ...opts, onClose: close }));
+          return parts;
+        };
+      }
+      const renderZ1p = candidate('z1p', () => [...dialHead(S), ...historyList(S, true)]);
+      const renderZ3p = candidate('z3p', () => [compactHead(S), compactHistory(S), doneButton()]);
+      const renderM1 = candidate('m1', () => [...dialHead(S), timelineBar(S), ...historyList(S, true)]);
+      const renderM2 = candidate('m2', () => [compactHead(S), timelineBar(S), compactHistory(S), doneButton()]);
+      const renderM3 = candidate('m3', () => [compactHead(S), timelineBar(S), k2List(S, true, false), doneButton()], { full: false });
+      function renderK2p() {
+        const parts = [overview({ timer: miniPill({ onOpen: () => { S.pauses.forEach(pid); draftOf = { draft: clone(S), orig: JSON.stringify(S) }; errs = {}; adding = null; selPid = null; open('k2p'); } }) })];
+        if (openSheet !== 'k2p') return parts;
+        const d = draftOf.draft;
+        const changed = JSON.stringify(d) !== draftOf.orig;
+        parts.push(...sheet([
+          h('div', { class: 'center' },
+            h('span', { class: 'bigT', style: { opacity: isPaused(d) ? 0.55 : 1 } }, timeView((n) => elapsed(n, d), { seconds: true })),
+            h('span', { class: 'sub' }, pauseSub(d))),
+          timelineBar(d),
+          k2List(d, false, true),
+          h('div', { class: 'buttons' },
+            h('button', { type: 'button', class: 'secondary', onclick: close }, changed ? 'Verwerfen' : 'Schließen'),
+            h('button', { type: 'button', class: 'primary', disabled: !changed, onclick: () => { S = d; close(); } }, 'Übernehmen')),
+        ], { onClose: close }));
+        return parts;
+      }
+
+      // ================= Round 6: a better "Pause nachtragen" =================
+      const CHIPS = [5, 10, 15, 20, 30, 45];
+      const snapMin = (t) => Math.round(t / MINUTE) * MINUTE;
+      // A new form for the stretch [a, b] (b null: up to now).
+      function newAdding(at, a, b) {
+        const end = b ?? Date.now();
+        const room = Math.max(1, Math.floor((end - a) / MINUTE));
+        const mins = Math.min(10, room);
+        const from = snapMin(a + (end - a) / 2 - (mins * MINUTE) / 2);
+        return { at, a, b, mins: String(mins), from: Math.max(a, from), to: Math.max(a, from) + mins * MINUTE, mode: 'dauer' };
+      }
+      function adderZ6(m, immediate) {
+        const ad = adding;
+        const N = prefs.opt.N;
+        const mode = N === 'N1' ? 'range' : N === 'N5' ? 'linked' : N === 'N3' ? ad.mode : 'dauer';
+        const roomOf = (now) => Math.max(0, Math.floor(((ad.b ?? now) - ad.a) / MINUTE));
+        // What the form would add now, and what is wrong with it.
+        const evaluate = (now) => {
+          const room = roomOf(now);
+          if (mode === 'range') return { from: ad.from, to: ad.to, problem: pauseProblem(m, ad.from, ad.to, null) ?? (ad.to > now ? 'reicht über jetzt hinaus' : null) };
+          if (mode === 'linked') {
+            const text = ad.mins.trim();
+            if (!/^\d+$/u.test(text) || Number(text) < 1) return { problem: 'mindestens 1 min' };
+            return { from: ad.from, to: ad.to, problem: pauseProblem(m, ad.from, ad.to, null) ?? (ad.to > now ? 'reicht über jetzt hinaus' : null) };
+          }
+          const text = ad.mins.trim();
+          const mins = Number(text);
+          if (!/^\d+$/u.test(text) || mins < 1) return { problem: 'mindestens 1 min' };
+          if (mins > room) return { problem: `höchstens ${room} min in dieser Strecke` };
+          let from = ad.from;
+          if (N === 'N4' || N === 'N6') {
+            // In the middle of its stretch; whole minutes, but always inside, also when it fills it.
+            const end = ad.b ?? now;
+            from = Math.max(ad.a, Math.min(snapMin(ad.a + (end - ad.a) / 2 - (mins * MINUTE) / 2), end - mins * MINUTE));
+          }
+          const to = from + mins * MINUTE;
+          return { from, to, problem: pauseProblem(m, from, to, null) ?? (to > now ? 'reicht über jetzt hinaus' : null) };
+        };
+        const setMins = (v) => {
+          ad.mins = String(v);
+          const now = Date.now();
+          // The beginning moves only as far as needed to keep the pause in its stretch.
+          ad.from = Math.max(ad.a, Math.min(ad.from, (ad.b ?? now) - v * MINUTE));
+          render();
+        };
+        const problemEl = h('div', { class: 'err', role: 'alert' });
+        const afterEl = h('span', { class: 'sub' });
+        const untilEl = h('span', { class: 'sub' });
+        const addBtn = h('button', { type: 'button', class: 'primary', onclick: () => {
+          const r = evaluate(Date.now());
+          if (r.problem) return;
+          const add = () => { m.pauses.push({ from: r.from, to: r.to }); sortPauses(m); };
+          adding = null;
+          if (immediate) undoable('Pause nachgetragen', add); else { add(); render(); }
+        } }, 'Hinzufügen');
+        const refresh = (now) => {
+          const r = evaluate(now);
+          problemEl.textContent = r.problem ?? '';
+          problemEl.style.display = r.problem ? '' : 'none';
+          addBtn.disabled = Boolean(r.problem);
+          afterEl.textContent = r.problem ? '' : `danach ${hm(elapsed(now, m) - (Math.min(r.to, now) - Math.min(r.from, now)))}`;
+          untilEl.textContent = r.problem || mode === 'range' ? '' : `bis ${clockOf(r.to)}`;
+        };
+        onTick(refresh);
+        const minsInput = h('input', { class: 'minsField', inputmode: 'numeric', enterkeyhint: 'done', 'aria-label': 'Pause in Minuten', value: ad.mins,
+          oninput: (e) => { ad.mins = e.target.value; refresh(Date.now()); },
+          onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } } });
+        const chips = h('div', { class: 'chipRow' }, CHIPS.map((c) => h('button', { type: 'button', class: `chip${ad.mins === String(c) ? ' on' : ''}`, disabled: c > roomOf(Date.now()), onclick: () => setMins(c) }, `${c}`)));
+        let body;
+        if (mode === 'linked') {
+          // N5: von – bis on the left, the minutes on the right. One rule: the minutes move "bis".
+          const fromPillEl = timePill(ad.from, 'Neue Pause von', (t) => { const len = ad.to - ad.from; ad.from = t; ad.to = t + len; }, 'small');
+          const toPillEl = timePill(ad.to, 'Neue Pause bis', (t) => { ad.to = t; ad.mins = String(Math.max(0, Math.round((t - ad.from) / MINUTE))); }, 'small');
+          const linkedMins = h('input', { class: 'minsField', inputmode: 'numeric', enterkeyhint: 'done', 'aria-label': 'Pause in Minuten', value: ad.mins,
+            oninput: (e) => {
+              ad.mins = e.target.value;
+              const v = Number(ad.mins.trim());
+              const now = Date.now();
+              if (/^\d+$/u.test(ad.mins.trim()) && v >= 1) {
+                ad.to = ad.from + v * MINUTE;
+                for (const [el, t] of [[toPillEl, ad.to]]) {
+                  el.querySelector('.valPill').textContent = clockOf(t);
+                  el.querySelector('input').value = clockOf(t);
+                }
+              }
+              refresh(now);
+            },
+            onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } } });
+          body = [h('div', { class: 'range linked' },
+            fromPillEl, '–', toPillEl,
+            h('span', { class: 'txt' }), linkedMins, h('span', {}, 'min'))];
+        } else if (mode === 'range') {
+          body = [h('div', { class: 'range' },
+            timePill(ad.from, 'Neue Pause von', (t) => { ad.from = t; }), '–',
+            timePill(ad.to, 'Neue Pause bis', (t) => { ad.to = t; }))];
+        } else if (N === 'N6') {
+          // N6: only the minutes, with a few quick choices in the same line; the exact times are
+          // changed afterwards in the list, like any pause (Product Owner 21.11.2026).
+          const quick = [5, 15, 30].map((c) => h('button', { type: 'button', class: `chip quickChip${ad.mins === String(c) ? ' on' : ''}`, 'aria-label': `${c} Minuten`, disabled: c > roomOf(Date.now()),
+            onclick: () => {
+              ad.mins = String(c);
+              minsInput.value = ad.mins;
+              for (const b of quick) b.classList.toggle('on', b === quickByValue.get(c));
+              refresh(Date.now());
+            } }, String(c)));
+          const quickByValue = new Map([5, 15, 30].map((c, i) => [c, quick[i]]));
+          minsInput.addEventListener('input', () => { for (const [c, b] of quickByValue) b.classList.toggle('on', ad.mins.trim() === String(c)); });
+          body = [h('div', { class: 'range quickRow' }, quick, minsInput, h('span', {}, 'min'))];
+        } else {
+          body = [chips,
+            h('div', { class: 'range' }, h('span', {}, 'oder'), minsInput, h('span', {}, 'min')),
+            N !== 'N4' && h('div', { class: 'range' }, h('span', {}, 'ab'), timePill(ad.from, 'Pause ab', (t) => { ad.from = t; }), untilEl)];
+        }
+        refresh(Date.now());
+        return h('div', { class: 'adder' },
+          h('div', { class: 'popHead' }, h('b', {}, 'Pause nachtragen'), afterEl),
+          N === 'N3' && h('div', { class: 'seg' },
+            h('button', { type: 'button', 'aria-pressed': String(ad.mode === 'dauer'), onclick: () => { ad.mode = 'dauer'; render(); } }, 'Dauer'),
+            h('button', { type: 'button', 'aria-pressed': String(ad.mode === 'range'), onclick: () => { ad.mode = 'range'; render(); } }, 'von – bis')),
+          body,
+          problemEl,
+          h('div', { class: 'buttons' },
+            h('button', { type: 'button', class: 'secondary', onclick: () => { adding = null; render(); } }, 'Abbrechen'),
+            addBtn));
+      }
+
+      // ================= Round 5: Z3+ with A2 B2 C2 D1 E1 F1; saving and the marker =================
+      const QUESTIONS4 = [
+        { id: 'N', title: 'Pause nachtragen', options: [
+          ['N1', 'von – bis', 'wie Runde 5, mit „Spieldauer danach“ und Grenzen'],
+          ['N2', 'Minuten und „ab“', 'Dauer antippen (5 bis 45) oder eintippen, dazu ab wann; „bis“ rechnet die App'],
+          ['N3', 'Umschalter Dauer oder von – bis', 'beides möglich, Dauer zuerst'],
+          ['N4', 'Nur Minuten', 'die Pause liegt mitten in der Strecke, wo „+ Pause“ getippt wurde'],
+          ['N5', 'von – bis, daneben Minuten', 'links von – bis, rechts die Minuten; Minuten verschieben immer nur „bis“'],
+          ['N6', 'Nur Minuten, mit 5 · 15 · 30', 'Schnellwahl und Feld in einer Zeile; Pause liegt in der Mitte der Strecke, Uhrzeiten danach in der Liste']] },
+      ];
+      const OPT_DEFAULT = { A: 'A2', B: 'B2', C: 'C2', D: 'D1', E: 'E1', F: 'F1', G: 'G1', P: 'P4', N: 'N6' };
+      const OPT_PROPOSAL = { ...OPT_DEFAULT, N: 'N6' };
+      prefs.opt = { ...OPT_DEFAULT, ...(prefs.opt ?? {}) };
+      prefs.step = prefs.step ?? 0;
+      const PAUSE_PLUS = 'M7 5v10M12 5v10M18 14v8M14 18h8';
+
+      // Draft while the sheet is open (G1, G3); "Anhalten" always acts at once on the real clock too.
+      let z5 = null; // { draft, base, asking }
+      const norm = (m) => JSON.stringify([m.startedAt, m.adjust, [...m.pauses].sort((a, b) => a.from - b.from).map((p) => [p.from, p.to])]);
+      const isDraftMode = () => prefs.opt.G !== 'G2';
+      const model = () => (isDraftMode() ? z5.draft : S);
+      const changed = () => isDraftMode() && norm(z5.draft) !== z5.base;
+      // Every way of leaving goes through tryClose: ✕/"Fertig" aside, dragging the handle or the
+      // sheet, tapping beside it and the back gesture of the phone (a history entry while open).
+      let ignorePop = false;
+      function pushSheetState() { try { if (!history.state?.uhrSheet) history.pushState({ uhrSheet: true }, ''); } catch { /* no history in this frame */ } }
+      function leaveSheetState() { if (history.state?.uhrSheet) { ignorePop = true; history.back(); } }
+      window.addEventListener('popstate', () => {
+        if (ignorePop) { ignorePop = false; return; }
+        if (openSheet !== 'z4' || z5 === null) return;
+        if (changed()) { z5.asking = true; pushSheetState(); render(); } else { close(); }
+      });
+      function openZ5() { S.pauses.forEach(pid); z5 = { draft: clone(S), base: norm(S), asking: false }; openFresh('z4'); pushSheetState(); }
+      function closeZ5() { leaveSheetState(); close(); }
+      function tryClose() { if (changed()) { z5.asking = true; render(); } else { closeZ5(); } }
+      function commit() { S = z5.draft; z5.asking = false; closeZ5(); }
+      // Dragging the sheet itself down, when it is scrolled to the top, closes it like the handle.
+      function dragToClose(el, onClose) {
+        let y0 = null, dy = 0, t0 = 0, active = false;
+        el.addEventListener('touchstart', (e) => {
+          if (e.touches.length !== 1 || e.target.closest('.grab, input, .pickWrap')) return;
+          y0 = e.touches[0].clientY; dy = 0; t0 = performance.now(); active = false;
+        }, { passive: true });
+        el.addEventListener('touchmove', (e) => {
+          if (y0 === null) return;
+          const d = e.touches[0].clientY - y0;
+          if (!active) {
+            if (el.scrollTop > 0 || d < -4) { y0 = null; return; }
+            if (d < 8) return;
+            active = true;
+          }
+          e.preventDefault();
+          dy = Math.max(0, d);
+          el.style.transform = `translateY(${dy}px)`;
+        }, { passive: false });
+        const end = () => {
+          if (y0 === null) return;
+          y0 = null;
+          if (!active) return;
+          active = false;
+          const speed = dy / Math.max(1, performance.now() - t0);
+          if (dy > 90 || (dy > 40 && speed > 0.6)) { onClose(); return; }
+          if (motionAnimate && prefs.spring) motionAnimate(el, { transform: [`translateY(${dy}px)`, 'translateY(0px)'] }, { type: 'spring', bounce: 0.3, duration: 0.4 });
+          else el.style.transform = '';
+        };
+        el.addEventListener('touchend', end);
+        el.addEventListener('touchcancel', end);
+      }
+      function toggleBoth() {
+        const n = Date.now();
+        toggle(S, n);
+        if (isDraftMode()) {
+          toggle(z5.draft, n);
+          const b = clone(S); // the base follows the pause, so pausing alone is no change
+          z5.base = norm(b);
+        }
+        render();
+      }
+
+      function headZ5(m) {
+        const paused = isPaused(m);
+        return h('div', { class: 'z3head' },
+          h('div', {}, h('div', { class: 'bigT', style: { opacity: paused ? 0.55 : 1 } }, timeView((n) => elapsed(n, m), { seconds: true })), h('div', { class: 'sub' }, pauseSub(m))),
+          h('button', { type: 'button', class: `roundBtn main small${paused ? ' go' : ''}`, 'aria-label': paused ? 'Weiter' : 'Anhalten', onclick: toggleBoth }, icon(paused ? I.play : I.pause, 26)));
+      }
+
+      function historyZ5(m) {
+        const o = prefs.opt;
+        const immediate = !isDraftMode();
+        sortPauses(m);
+        const items = [];
+        const row = (rail, content) => items.push(h('div', { class: 'rail' }, rail), content);
+        const dot = (cls = '') => h('span', { class: `evDot ${cls}` });
+        const line = (cls) => h('span', { class: `line ${cls}` });
+        const openAdder = (at, a, b) => { adding = adding?.at === at ? null : newAdding(at, a, b); render(); };
+        const stretch = (idx, from, to) => {
+          const label = to === null ? textLive((n) => `gespielt ${durText(n - from)}`) : `gespielt ${durText(to - from)}`;
+          const on = adding?.at === idx ? ' on' : '';
+          const aria = 'Pause in dieser Strecke nachtragen';
+          const act = () => openAdder(idx, from, to);
+          if (o.P === 'P4') {
+            row(line('play'), h('div', { class: 'spanRow' }, label, h('span', { class: 'txt' }),
+              h('button', { type: 'button', class: `textBtn${on}`, onclick: act }, '+ Pause')));
+          } else if (o.P === 'P2') {
+            row(h('span', { class: 'railPlus' }, line('play'),
+              h('button', { type: 'button', class: `railChip${on}`, 'aria-label': aria, onclick: act }, icon(I.plus, 12), 'Pause')),
+              h('div', { class: 'spanRow chipGap' }, label));
+          } else {
+            row(h('span', { class: 'railPlus' }, line('play'),
+              h('button', { type: 'button', class: `plusDot${on}`, 'aria-label': aria, onclick: act }, icon(o.P === 'P3' ? PAUSE_PLUS : I.plus, o.P === 'P3' ? 16 : 14))),
+              h('div', { class: 'spanRow' }, label));
+          }
+          if (adding?.at === idx) row(line('play'), adderZ6(m, immediate));
+        };
+        row(dot(), h('div', { class: 'ev' }, h('span', { class: 'evLabel strong' }, 'Beginn'), startPill(m, 'tap'), errLine('start')));
+        let a = m.startedAt;
+        m.pauses.forEach((p, i) => {
+          stretch(i, a, p.from);
+          const n = i + 1;
+          row(line('pause'), h('div', { class: 'pblock' },
+            h('div', { class: 'range' },
+              h('span', { class: 'evLabel strong' }, `Pause ${n}`),
+              fromPill(m, p, n, 'tap'), '–',
+              p.to === null ? h('span', { class: 'nowText' }, 'jetzt') : toPill(m, p, n, 'tap'),
+              h('span', { class: 'txt' }),
+              p.to === null ? textLive((x) => ms_(x - p.from), { class: 'pdur live' }) : h('span', { class: 'pdur' }, durText(p.to - p.from)),
+              p.to !== null && h('button', { type: 'button', class: 'icoPlain', 'aria-label': `Pause ${n} löschen`, onclick: () => removePause(m, p, n, immediate) }, icon(I.trash, 16))),
+            errLine(pid(p))));
+          a = p.to;
+        });
+        if (a !== null) {
+          stretch(m.pauses.length, a, null);
+          row(dot('now'), h('div', { class: 'ev' }, h('span', { class: 'evLabel strong' }, 'jetzt'), h('span', { class: 'evLabel' }, 'läuft')));
+        }
+        return h('div', { class: 'hist' }, items);
+      }
+
+      function renderZ4() {
+        const parts = [overview({ timer: miniPill({ onOpen: openZ5, seconds: true }) })];
+        if (openSheet !== 'z4' || z5 === null) return parts;
+        const m = model();
+        const g = prefs.opt.G;
+        const footer = g === 'G1'
+          ? h('button', { type: 'button', class: 'primary', onclick: () => (changed() ? commit() : closeZ5()) }, 'Fertig')
+          : g === 'G2'
+            ? h('button', { type: 'button', class: 'secondary', onclick: closeZ5 }, 'Schließen')
+            : h('div', { class: 'buttons' },
+                h('button', { type: 'button', class: 'secondary', onclick: closeZ5 }, changed() ? 'Verwerfen' : 'Schließen'),
+                h('button', { type: 'button', class: 'primary', disabled: !changed(), onclick: commit }, 'Übernehmen'));
+        const onClose = isDraftMode() ? tryClose : closeZ5;
+        const sheetParts = sheet([headZ5(m), historyZ5(m), changed() && h('div', { class: 'sub', style: { textAlign: 'center' } }, 'geändert · noch nicht gespeichert'), footer], { onClose });
+        dragToClose(sheetParts[1], onClose);
+        parts.push(...sheetParts);
+        if (z5.asking) {
+          parts.push(h('div', { class: 'backdrop', style: { zIndex: 30 } }), h('div', { class: 'dialogC', style: { zIndex: 31 } }, h('div', { class: 'dialog', role: 'alertdialog' },
+            h('h2', { class: 'title' }, 'Änderungen übernehmen?'),
+            h('p', { class: 'sub', style: { margin: 0 } }, 'Beginn oder Pausen wurden geändert'),
+            h('div', { class: 'buttons' },
+              h('button', { type: 'button', class: 'secondary', onclick: () => { z5.asking = false; closeZ5(); } }, 'Verwerfen'),
+              h('button', { type: 'button', class: 'primary', onclick: commit }, 'Übernehmen')))));
+        }
+        return parts;
+      }
+
+      // Guided: one question at a time with "Weiter", the sheet below changes live.
+      function renderConcepts() {
+        const root = document.getElementById('concepts');
+        const total = QUESTIONS4.length;
+        const go = (to) => { prefs.step = to; savePrefs(); adding = null; renderConcepts(); };
+        const nav = h('div', { class: 'navQ' },
+          h('button', { type: 'button', class: 'secondary', disabled: prefs.step === 0, onclick: () => go(prefs.step - 1) }, 'Zurück'),
+          prefs.step < total && h('button', { type: 'button', class: 'primary', onclick: () => go(prefs.step + 1) }, prefs.step === total - 1 ? 'Deine Auswahl' : 'Weiter'));
+        const proposal = h('button', { type: 'button', class: 'demoBtn', onclick: () => { prefs.opt = { ...OPT_PROPOSAL }; savePrefs(); openZ5(); renderAll(); } }, `Mein Vorschlag: ${OPT_PROPOSAL.N}`);
+        const fixed = h('div', { class: 'sub' }, 'Fest nach deiner Wahl: A2 B2 C2 D1 E1 F1 G1 P4');
+        if (prefs.step >= total) {
+          root.replaceChildren(h('div', { class: 'q4' },
+            h('div', { class: 'sub' }, 'Fertig'), h('h2', {}, 'Deine Auswahl'),
+            h('ul', { class: 'pickList' }, QUESTIONS4.map((q) => {
+              const opt = q.options.find(([id]) => id === prefs.opt[q.id]);
+              return h('li', {}, h('b', {}, `${q.title} `), `${opt[0]} ${opt[1]}`);
+            })),
+            fixed, proposal, nav));
+          return;
+        }
+        const q = QUESTIONS4[prefs.step];
+        root.replaceChildren(h('div', { class: 'q4' },
+          h('div', { class: 'sub' }, `Frage ${prefs.step + 1} von ${total}`),
+          h('h2', {}, q.title),
+          q.options.map(([id, label, note]) => h('label', { class: 'opt' },
+            h('input', { type: 'radio', name: q.id, checked: prefs.opt[q.id] === id, onchange: () => { prefs.opt[q.id] = id; savePrefs(); adding = null; if (q.id === 'G') openZ5(); else render(); renderAnswer(); } }),
+            h('span', {}, h('b', {}, id), ' ', label, h('small', {}, note)))),
+          fixed, proposal, nav));
+      }
+
+      const RENDERERS = { Z4: renderZ4 };
+
+      // ---------- page around the frame
+      function renderSwitches() {
+        const sw = (key, label, note, ok) => h('label', {},
+          h('input', { type: 'checkbox', checked: prefs[key], disabled: !ok, onchange: (e) => { prefs[key] = e.target.checked; savePrefs(); render(); renderAnswer(); } }),
+          h('span', {}, label, h('small', {}, ok ? note : 'konnte nicht geladen werden (kein Internet?)')));
+        document.getElementById('switches').replaceChildren(
+          sw('spring', 'Federnde Bewegungen (Motion, schon in der App)', 'Blatt fährt federnd hoch, mit dem Griff oben nach unten ziehen schließt', Boolean(motionAnimate)));
+        const demo = document.getElementById('demoRow');
+        demo.replaceChildren(
+          h('button', { type: 'button', class: 'demoBtn', onclick: () => { resetModel(); errs = {}; adding = null; selPid = null; openZ5(); sheetEntered = true; k4 = { page: 'partie', open: false, ask: null }; toast = null; render(); } }, 'Von vorn'),
+          prefs.concept === 'K4' && h('button', { type: 'button', class: 'demoBtn', onclick: () => {
+            const n = Date.now();
+            S.startedAt -= 3 * 3600000;
+            k4.ask = { lastActive: n - 3 * 3600000 + 10 * MINUTE, gap: 3 * 3600000 - 10 * MINUTE };
+            render();
+          } }, 'App war 3 Stunden zu'));
+      }
+      function renderAnswer() {
+        document.getElementById('answer').textContent =
+          `Uhr Z3+: A2 B2 C2 D1 E1 F1 G1 P4 · Pause nachtragen ${prefs.opt.N}`;
+      }
+      function render() {
+        live = [];
+        const frame = document.getElementById('frame');
+        const parts = RENDERERS[prefs.concept]();
+        if (toast) parts.push(h('div', { class: 'toast', role: 'status' }, toast.text, toast.undo && h('button', { type: 'button', class: 'mpill', onclick: () => { toast.undo(); toast = null; render(); } }, 'Rückgängig')));
+        frame.replaceChildren(...parts.flat().filter(Boolean));
+        tick();
+      }
+      function renderAll() { renderConcepts(); renderSwitches(); renderAnswer(); render(); }
+
+      document.getElementById('copy').addEventListener('click', async (e) => {
+        try { await navigator.clipboard.writeText(document.getElementById('answer').textContent); e.target.textContent = 'Kopiert'; }
+        catch { e.target.textContent = 'Bitte von Hand markieren'; }
+        setTimeout(() => { e.target.textContent = 'Kopieren'; }, 1500);
+      });
+
+      resetModel();
+      openZ5();
+      renderAll();
+      // Smooth second ring in K1 needs more than one update per second.
+      const loop = () => { tick(); requestAnimationFrame(loop); };
+      requestAnimationFrame(loop);
+      loadPackages().then(() => { renderAll(); window.__ready = true; });
+    </script>
+  </body>
+</html>

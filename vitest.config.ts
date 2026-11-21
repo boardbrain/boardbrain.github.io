@@ -18,7 +18,11 @@ export default mergeConfig(
           test: {
             name: 'unit',
             environment: 'node',
-            include: ['src/**/*.test.ts', 'tests/support/**/*.test.ts'],
+            include: [
+              'src/**/*.test.ts',
+              'tests/support/**/*.test.ts',
+              'tests/integration/**/*.test.ts',
+            ],
             exclude: ['src/ui/**'],
           },
         },

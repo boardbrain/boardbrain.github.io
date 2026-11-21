@@ -18,7 +18,22 @@
   background: var(--color-surface);
 }
 
+/* A short form (design I3-B "Neues Spiel"): the content fills the page, so the save button at its
+   end sits at the bottom. */
+.narrow {
+  display: flex;
+  flex-direction: column;
+}
+
+.narrow > :last-child {
+  flex: 1;
+}
+
 @media (width >= 48rem) {
+  .narrow {
+    max-width: 28rem;
+  }
+
   .backdrop {
     align-items: flex-start;
     padding: var(--space-6);

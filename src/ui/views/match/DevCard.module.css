@@ -97,3 +97,48 @@
   justify-items: center;
   padding: 12px 6px 6px;
 }
+
+/* Design I3-B F2: the card of 240 px scaled to its width. The card is its own size container, so
+   its parts measure in `cqi` of the card; the card itself measures in % (its own `cqi` would refer
+   to the container around it) and draws the light inner ring on a pseudo element. */
+.scaled {
+  padding: 0;
+  border-radius: 5.83% / 3.94%;
+  box-shadow: 0 6px 18px var(--color-shadow);
+}
+
+.scaled::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 max(1px, 1.67cqi) var(--color-card-glow);
+}
+
+.scaled .head {
+  height: 13.33cqi;
+  margin: 4.17cqi 4.17cqi 0;
+}
+
+.scaled .ribbon {
+  font-size: 7.67cqi;
+}
+
+.scaled .art {
+  margin: 0 5.84cqi;
+  border-width: 0 max(2px, 1.25cqi) max(2px, 1.25cqi);
+}
+
+.scaled .text {
+  padding: 5cqi 2.5cqi 1.67cqi;
+  margin: -5cqi 4.17cqi 3.75cqi;
+  font-size: max(0.62rem, 5.33cqi);
+  border-top-width: max(1px, 0.83cqi);
+  border-radius: 50% 50% 2.5cqi 2.5cqi / 6.67cqi 6.67cqi 2.5cqi 2.5cqi;
+}
+
+.scaled .text strong {
+  font-size: max(0.7rem, 6.13cqi);
+  white-space: nowrap;
+}
