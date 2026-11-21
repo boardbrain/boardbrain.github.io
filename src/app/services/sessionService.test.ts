@@ -145,7 +145,7 @@ describe('US-AB-01 Prepare and start a match', () => {
 
     expect(session).toEqual({
       id: 'current',
-      schemaVersion: 4,
+      schemaVersion: 5,
       gameId: CATAN_GAME_ID,
       groupId: FOUR.id,
       setup: { participants: CATAN_TEST_PERSONS, options: ALL_ON, colors },
@@ -625,7 +625,7 @@ describe('US-AB-07 Measure the duration of a match (service)', () => {
     clock.advance(3);
     const running = await value(service.confirm(0));
 
-    expect(running.clock).toEqual({ startedAt: clock.now(), pausedMs: 0 });
+    expect(running.clock).toEqual({ startedAt: clock.now(), pauses: [] });
     expect(running.startedAt).toBe(TEST_NOW);
   });
 
@@ -637,7 +637,7 @@ describe('US-AB-07 Measure the duration of a match (service)', () => {
       personDraws: { landscapes: false, harbors: false, numbers: false },
     });
 
-    expect(session.clock).toEqual({ startedAt: TEST_NOW, pausedMs: 0 });
+    expect(session.clock).toEqual({ startedAt: TEST_NOW, pauses: [] });
   });
 
   it('AK-2: paused time does not count; pausing twice or resuming a running timer is rejected', async () => {
@@ -692,28 +692,55 @@ describe('US-AB-07 Measure the duration of a match (service)', () => {
     expect(again.clock).toEqual(running.clock);
   });
 
-  it('AK-6: the overview corrects beginning and duration and stores them', async () => {
+  it('AK-6, AK-7: "Fertig" stores the edited timer as a whole', async () => {
     const clock = new SettableClock();
     const { service } = launch(1, clock);
     await startFour(service, ONE_STEP);
     await value(service.draw(null));
     const running = await value(service.confirm(0));
     clock.advance(30);
-    const startedAt = new Date(
-      Date.parse(defined(running.clock, 'clock').startedAt) - 10 * MINUTE,
-    ).toISOString();
+    const before = defined(running.clock, 'clock');
+    const startedAt = new Date(Date.parse(before.startedAt) - 10 * MINUTE).toISOString();
+    const pause = {
+      from: new Date(Date.parse(before.startedAt) + 5 * MINUTE).toISOString(),
+      to: new Date(Date.parse(before.startedAt) + 20 * MINUTE).toISOString(),
+    };
 
-    const corrected = await value(
-      service.correctClock({ startedAt, elapsedMs: 35 * MINUTE, isPaused: true }),
-    );
-    clock.advance(15);
+    const edited = await value(service.replaceClock(before, { startedAt, pauses: [pause] }));
 
-    expect(stored()?.clock).toEqual(corrected.clock);
-    expect(corrected.clock?.startedAt).toBe(startedAt);
-    expect(elapsedMilliseconds(defined(stored()?.clock, 'clock'), clock.now())).toBe(35 * MINUTE);
-    expect(
-      await service.correctClock({ startedAt, elapsedMs: 120 * MINUTE, isPaused: false }),
-    ).toEqual({ ok: false, error: 'clock-correction-invalid' });
+    expect(stored()?.clock).toEqual({ startedAt, pauses: [pause] });
+    expect(edited.clock).toEqual(stored()?.clock);
+    expect(elapsedMilliseconds(defined(stored()?.clock, 'clock'), clock.now())).toBe(25 * MINUTE);
+  });
+
+  it('AK-7: an edit based on a timer that changed meanwhile is not stored', async () => {
+    const clock = new SettableClock();
+    const { service } = launch(1, clock);
+    await startFour(service, ONE_STEP);
+    await value(service.draw(null));
+    const before = defined((await value(service.confirm(0))).clock, 'clock');
+    clock.advance(30);
+    await value(service.pauseClock());
+
+    expect(await service.replaceClock(before, before)).toEqual({
+      ok: false,
+      error: 'clock-changed',
+    });
+  });
+
+  it('ADR-031: a timer that breaks its rules is not stored', async () => {
+    const clock = new SettableClock();
+    const { service } = launch(1, clock);
+    await startFour(service, ONE_STEP);
+    await value(service.draw(null));
+    const before = defined((await value(service.confirm(0))).clock, 'clock');
+    const future = new Date(Date.parse(clock.now()) + MINUTE).toISOString();
+
+    expect(await service.replaceClock(before, { startedAt: future, pauses: [] })).toEqual({
+      ok: false,
+      error: 'clock-invalid',
+    });
+    expect(stored()?.clock).toEqual(before);
   });
 
   it('a session of unknown version cannot pause its timer', async () => {

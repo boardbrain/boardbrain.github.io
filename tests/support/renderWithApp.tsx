@@ -7,6 +7,7 @@ import {
   type RouteObject,
 } from 'react-router';
 import { onTestFinished } from 'vitest';
+import type { Clock } from '@/app/ports';
 import { createErrorLogService } from '@/app/services/errorLogService';
 import { createMasterDataService, type MasterDataService } from '@/app/services/masterDataService';
 import { createResultService } from '@/app/services/resultService';
@@ -30,6 +31,8 @@ type RenderOptions = {
   readonly seed?: number;
   /** Wraps the real service, e.g. to hold back a save in a test. */
   readonly wrapMasterData?: (service: MasterDataService) => MasterDataService;
+  /** Clock of the session service; the timer tests use the real time, like the views. */
+  readonly sessionClock?: Clock;
 };
 
 /**
@@ -39,7 +42,13 @@ type RenderOptions = {
  */
 export function renderWithApp(
   element: ReactNode,
-  { path = '/', routes, seed = 1, wrapMasterData = (service) => service }: RenderOptions = {},
+  {
+    path = '/',
+    routes,
+    seed = 1,
+    wrapMasterData = (service) => service,
+    sessionClock = fixedClock(),
+  }: RenderOptions = {},
 ): { db: BoardBrainDb; session: SessionService; router: DataRouter } {
   const db = createTestDb();
   onTestFinished(() => {
@@ -55,7 +64,7 @@ export function renderWithApp(
   );
   const session = createSessionService({
     store: createDexieSessionStore(db),
-    clock: fixedClock(),
+    clock: sessionClock,
     rng: new SeededRandomSource(seed),
   });
   const router = createMemoryRouter(routes ?? [{ path: '*', element }], {
