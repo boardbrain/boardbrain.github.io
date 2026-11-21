@@ -1,4 +1,4 @@
-import { animate, m, useMotionValue, useReducedMotion } from 'motion/react';
+import { animate, frame, m, useMotionValue, useReducedMotion } from 'motion/react';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useTransition } from 'react';
 import { useBlocker } from 'react-router';
 import {
@@ -69,6 +69,11 @@ function unfoldItem(item: Element, isOpening: boolean): Promise<void> {
   }
   const height = item.offsetHeight;
   item.style.overflow = 'hidden';
+  if (isOpening) {
+    // Closed at once, so the new entry is not shown at full height for one frame.
+    item.style.height = '0px';
+    item.style.opacity = '0';
+  }
   const keyframes = isOpening
     ? { height: [0, height], opacity: [0, 1] }
     : { height: [height, 0], opacity: [1, 0] };
@@ -76,6 +81,7 @@ function unfoldItem(item: Element, isOpening: boolean): Promise<void> {
     if (isOpening) {
       item.style.removeProperty('height');
       item.style.removeProperty('overflow');
+      item.style.removeProperty('opacity');
     }
   });
 }
@@ -230,16 +236,30 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
       return;
     }
     const added = current.filter((key) => !before.includes(key));
-    const opened = isReduced
-      ? []
-      : historyItems(sheetRef.current, added).map((item) => unfoldItem(item, true));
-    if (opening === 'at-end') {
-      const [now] = historyItems(sheetRef.current, ['now']);
-      const toEnd = (): void => {
-        now?.scrollIntoView({ block: 'nearest', behavior: isReduced ? 'auto' : 'smooth' });
-      };
-      toEnd();
-      void Promise.all(opened).then(toEnd);
+    if (!isReduced) {
+      for (const item of historyItems(sheetRef.current, added)) {
+        void unfoldItem(item, true);
+      }
+    }
+    const scroller = sheetRef.current?.querySelector('[data-scroll]');
+    if (opening === 'at-end' && scroller instanceof HTMLElement) {
+      // The end is followed at once each frame while the entry opens; only the distance there
+      // was before closes smoothly, so scrolling and opening end together.
+      const end = (): number => scroller.scrollHeight - scroller.clientHeight;
+      const distance = end() - scroller.scrollTop;
+      if (isReduced) {
+        scroller.scrollTop = end();
+      } else {
+        void animate(0, 1, {
+          ...ITEM_TIMING,
+          // After the frame's heights are written, so the end is the one on screen.
+          onUpdate: (progress) => {
+            frame.postRender(() => {
+              scroller.scrollTop = end() - distance * (1 - progress);
+            });
+          },
+        });
+      }
     }
   }, [keys, isReduced]);
 

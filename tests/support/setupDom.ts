@@ -32,7 +32,7 @@ Object.defineProperty(Element.prototype, 'setPointerCapture', {
   value: () => undefined,
 });
 
-// jsdom does not scroll; the timer sheet scrolls its history to "jetzt" after pausing.
+// jsdom does not scroll; opened content scrolls into view (Unfold).
 Object.defineProperty(Element.prototype, 'scrollIntoView', {
   configurable: true,
   value: () => undefined,
