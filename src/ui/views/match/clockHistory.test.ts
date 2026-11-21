@@ -32,7 +32,7 @@ describe('US-AB-07 AK-6 the history in the sheet of the timer', () => {
     ]);
   });
 
-  it('a paused timer ends with its lasting pause, without "jetzt"', () => {
+  it('a paused timer ends with its lasting pause and "jetzt"', () => {
     const paused = value(pauseClock(PLAYED, at(90)));
 
     expect(historyOf(paused).map((item) => item.kind)).toEqual([
@@ -41,6 +41,7 @@ describe('US-AB-07 AK-6 the history in the sheet of the timer', () => {
       'pause',
       'stretch',
       'pause',
+      'now',
     ]);
   });
 

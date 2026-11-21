@@ -55,6 +55,8 @@ const SHAKE = { x: [0, -5, 5, -3, 3, 0] };
 const SHAKE_TIMING = { duration: 0.35, ease: 'easeOut' } as const;
 const ITEM_TIMING = { duration: 0.2, ease: 'easeOut' } as const;
 const ICON_FROM = { opacity: 0, scale: 0.6 };
+const WORD_FROM = { opacity: 0 };
+const DOT_TIMING = { duration: 0.25, ease: 'easeOut' } as const;
 
 // Opens or closes an entry of the history; the inline styles go again once it is open.
 function unfoldItem(item: Element, isOpening: boolean): Promise<void> {
@@ -376,27 +378,17 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
     });
   };
 
-  // Pausing closes "jetzt" while the pause is stored, then the pause opens; resuming opens the
-  // new stretch and "jetzt".
+  // Pausing opens the pause above "jetzt", which turns grey; resuming opens the new stretch.
   const togglePause = (): void => {
     const before = clock;
-    const leaving = isPaused || isReduced ? [] : historyItems(sheetRef.current, ['now']);
-    const closing = Promise.all(leaving.map((item) => unfoldItem(item, false)));
     startTransition(async () => {
-      const [changed] = await Promise.all([
-        isClockPaused(before) ? session.resumeClock() : session.pauseClock(),
-        closing,
-      ]);
+      const changed = await (isClockPaused(before) ? session.resumeClock() : session.pauseClock());
       const after = changed.ok ? changed.value.clock : undefined;
-      if (after === undefined) {
-        for (const item of leaving) {
-          void unfoldItem(item, true);
-        }
-        return;
+      if (after !== undefined) {
+        opensNew.current = true;
+        setDraft((current) => mirrorToggle(current, before, after));
+        setExpected(after);
       }
-      opensNew.current = true;
-      setDraft((current) => mirrorToggle(current, before, after));
-      setExpected(after);
     });
   };
 
@@ -723,11 +715,18 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                     data-history={historyKey(item)}
                   >
                     <span className={styles.rail}>
-                      <span className={cx(styles.dot, styles.dotNow)} />
+                      <m.span
+                        className={cx(styles.dot, styles.dotNow)}
+                        initial={false}
+                        animate={{ '--paused': isPaused ? 1 : 0 }}
+                        transition={DOT_TIMING}
+                      />
                     </span>
                     <div className={styles.event}>
                       <b>{t('partie.uhrJetzt')}</b>
-                      <span className={styles.muted}>{t('partie.laeuft')}</span>
+                      <Swap swapKey={String(isPaused)} from={WORD_FROM} className={styles.muted}>
+                        {t(isPaused ? 'partie.uhrPausiert' : 'partie.laeuft')}
+                      </Swap>
                     </div>
                   </div>
                 );

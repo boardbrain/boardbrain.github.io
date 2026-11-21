@@ -123,9 +123,18 @@
   min-width: 8.4rem;
 }
 
-/* The trophy grows and bounces back; centred in its button. */
+/* The trophy pops and bounces back, centred in its button; a golden ring spreads from it. */
 .trophy {
+  position: relative;
   display: grid;
+}
+
+.trophyRing {
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border: 2px solid var(--color-accent-text);
+  border-radius: inherit;
 }
 
 /* Inline, but movable: the day slides in. */
@@ -245,6 +254,7 @@
 }
 
 .crown {
+  position: relative;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
 }
@@ -289,6 +299,7 @@
 }
 
 .pn {
+  position: relative;
   display: grid;
   place-items: center;
   width: 36px;

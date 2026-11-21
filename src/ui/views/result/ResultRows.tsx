@@ -19,11 +19,50 @@ import styles from './Result.module.css';
 const TROPHY_SIZE = 20;
 // A row that moves to its new place glides there, like the ring of the order band (TurnBand).
 const GLIDE = { duration: 0.25, ease: 'easeOut' } as const;
-// The trophy of a new winner grows, then bounces back, long enough to be noticed (PO 21.11.).
-const POP_FROM = { scale: 1 };
-const POP_TO = { scale: [1, 1.45, 0.9, 1.06, 1] };
-const STILL = { scale: 1 };
-const POP = { duration: 0.65, times: [0, 0.3, 0.6, 0.8, 1], ease: 'easeOut' as const };
+// The trophy of a new winner jumps up with a wiggle and bounces back while a golden ring spreads
+// from it, clearly to be noticed (PO 21.11.). A winner by points waits until the rows have glided.
+const POP_FROM = { scale: 1, rotate: 0 };
+const POP_TO = { scale: [1, 1.8, 0.85, 1.15, 0.97, 1], rotate: [0, -16, 12, -6, 2, 0] };
+const STILL = { scale: 1, rotate: 0 };
+const POP = { duration: 0.9, times: [0, 0.25, 0.5, 0.7, 0.85, 1], ease: 'easeOut' as const };
+const RING_FROM = { opacity: 0, scale: 0.9 };
+const RING_TO = { opacity: [0, 0.9, 0], scale: [0.9, 1.05, 1.7] };
+const RING = { duration: 0.8, times: [0, 0.15, 1], ease: 'easeOut' as const };
+
+/**
+ * The trophy in its button; a new winner's trophy pops after `delay` seconds.
+ */
+function Trophy({
+  isPopping,
+  delay,
+  size,
+}: {
+  readonly isPopping: boolean;
+  readonly delay: number;
+  readonly size: number;
+}): React.JSX.Element {
+  return (
+    <>
+      {isPopping && (
+        <m.span
+          className={styles.trophyRing}
+          aria-hidden="true"
+          initial={RING_FROM}
+          animate={RING_TO}
+          transition={{ ...RING, delay: delay + 0.1 }}
+        />
+      )}
+      <m.span
+        className={styles.trophy}
+        initial={isPopping ? POP_FROM : false}
+        animate={isPopping ? POP_TO : STILL}
+        transition={{ ...POP, delay }}
+      >
+        <TrophyIcon size={size} />
+      </m.span>
+    </>
+  );
+}
 
 // iOS and iPadOS show no minus on the numeric keypad; an iPad reports itself as a Mac with touch.
 function hasNoMinusOnKeypad(): boolean {
@@ -150,15 +189,12 @@ export function PointsRows({
                 onWinner(person.id);
               }}
             >
-              <m.span
+              <Trophy
                 key={String(isWinner)}
-                className={styles.trophy}
-                initial={isWinner ? POP_FROM : false}
-                animate={isWinner ? POP_TO : STILL}
-                transition={POP}
-              >
-                <TrophyIcon size={TROPHY_SIZE} />
-              </m.span>
+                isPopping={isWinner}
+                delay={isTieChoice || isOpen ? 0 : GLIDE.duration}
+                size={TROPHY_SIZE}
+              />
             </PressableButton>
           );
         } else if (derived.isPointsComplete && place !== undefined) {
@@ -267,15 +303,12 @@ export function PlaceRows({
                     }}
                   >
                     {place === 1 ? (
-                      <m.span
+                      <Trophy
                         key={String(isOn)}
-                        className={styles.trophy}
-                        initial={isOn ? POP_FROM : false}
-                        animate={isOn ? POP_TO : STILL}
-                        transition={POP}
-                      >
-                        <TrophyIcon size={PLACE_TROPHY_SIZE} />
-                      </m.span>
+                        isPopping={isOn}
+                        delay={0}
+                        size={PLACE_TROPHY_SIZE}
+                      />
                     ) : (
                       t('ergebnis.platzZahl', { platz: place })
                     )}

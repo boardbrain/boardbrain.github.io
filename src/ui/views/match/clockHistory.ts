@@ -22,7 +22,7 @@ export type HistoryItem =
 
 /**
  * The history of a timer from the top: beginning, played stretches and pauses in turn, and "jetzt"
- * while it runs (design Z3+, D1).
+ * at the end, also while paused (design Z3+, D1; PO 21.11.: nothing disappears when pausing).
  */
 export function historyOf(clock: SessionClock): readonly HistoryItem[] {
   const stretches = clockStretches(clock);
@@ -41,8 +41,8 @@ export function historyOf(clock: SessionClock): readonly HistoryItem[] {
   }
   if (!isClockPaused(clock)) {
     pushStretch();
-    items.push({ kind: 'now' });
   }
+  items.push({ kind: 'now' });
   return items;
 }
 

@@ -136,8 +136,17 @@
   border-radius: 50%;
 }
 
+/* "jetzt": Motion moves --paused from 0 to 1 while the timer is paused, the dot turns grey. */
 .dotNow {
-  box-shadow: 0 0 0 5px var(--color-clock-now);
+  --paused: 0;
+
+  background: color-mix(
+    in srgb,
+    var(--color-text-muted) calc(var(--paused) * 100%),
+    var(--color-accent-text)
+  );
+  box-shadow: 0 0 0 5px
+    color-mix(in srgb, var(--color-border) calc(var(--paused) * 100%), var(--color-clock-now));
 }
 
 .line {

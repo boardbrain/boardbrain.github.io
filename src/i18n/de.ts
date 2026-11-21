@@ -498,6 +498,7 @@ export const de = {
     uhrJetzt: 'jetzt',
     zeitBis: '–',
     laeuft: 'läuft',
+    uhrPausiert: 'Pause',
     pauseNachtragen: 'Pause nachtragen',
     danach: 'danach {zeit}',
     pauseMinuten: 'Pause in Minuten',
