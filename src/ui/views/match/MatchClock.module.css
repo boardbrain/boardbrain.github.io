@@ -13,23 +13,27 @@
 }
 
 /* The time is tappable without a circle of its own: the dotted underline is enough; an invisible
-   margin makes the target 44 px high. */
+   margin makes the target 44 px high. Motion moves --paused from 0 to 1 while the timer is paused:
+   the time turns grey. */
 .time {
+  --paused: 0;
+
   min-height: 0;
   padding: 10px 6px;
   margin: -10px -6px;
   font: inherit;
   font-size: 1.1rem;
   font-weight: 700;
-  color: inherit;
+  color: color-mix(in srgb, var(--color-text-muted) calc(var(--paused) * 100%), var(--color-text));
   text-decoration: underline dotted var(--color-text-muted);
   text-underline-offset: 4px;
   background: none;
   border-radius: 0;
 }
 
-.paused {
-  color: var(--color-text-muted);
+/* The symbol of the round button fades in when it changes. */
+.icon {
+  display: grid;
 }
 
 .toggle {

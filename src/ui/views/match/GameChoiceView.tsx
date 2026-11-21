@@ -12,6 +12,7 @@ import { cx } from '@/ui/components/classNames';
 import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
 import { PlusIcon, SortAzIcon, SortRecentIcon, TrophyIcon } from '@/ui/components/Icons';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
+import { Swap } from '@/ui/components/Swap';
 import { CatanGameCard, CustomGameCard, GameGrid } from '@/ui/views/games/GameCards';
 import { localToday } from '@/ui/views/games/dates';
 import gameStyles from '@/ui/views/games/GameCards.module.css';
@@ -20,6 +21,8 @@ import shared from './Match.module.css';
 import styles from './GameChoiceView.module.css';
 
 const SORT_ICON_SIZE = 22;
+const ICON_FROM = { opacity: 0, scale: 0.6 };
+const GRID_FROM = { opacity: 0 };
 const SEARCH_LABELS = {
   open: t('spiele.suchen'),
   field: t('spiele.suchfeld'),
@@ -137,23 +140,24 @@ export function GameChoiceView(): React.JSX.Element {
               storeOrder(next);
             }}
           >
-            {order === 'recent' ? (
-              <SortRecentIcon size={SORT_ICON_SIZE} />
-            ) : (
-              <SortAzIcon size={SORT_ICON_SIZE} />
-            )}
+            <Swap swapKey={order} from={ICON_FROM} className={styles.sortIcon}>
+              {order === 'recent' ? (
+                <SortRecentIcon size={SORT_ICON_SIZE} />
+              ) : (
+                <SortAzIcon size={SORT_ICON_SIZE} />
+              )}
+            </Swap>
           </PressableButton>
         </span>
       </div>
-      {isSearchOpen && (
-        <SearchRow
-          labels={SEARCH_LABELS}
-          query={query}
-          closeClassName={shared.iconBtn}
-          onQuery={setQuery}
-          onClose={toggleSearch}
-        />
-      )}
+      <SearchRow
+        isOpen={isSearchOpen}
+        labels={SEARCH_LABELS}
+        query={query}
+        closeClassName={shared.iconBtn}
+        onQuery={setQuery}
+        onClose={toggleSearch}
+      />
       {trimmedQuery !== '' && games.length === 0 && (
         <p className={cx(shared.muted, shared.small)}>
           {t('spiele.keinTreffer', { suche: trimmedQuery })}
@@ -161,33 +165,36 @@ export function GameChoiceView(): React.JSX.Element {
       )}
       {customGames !== undefined && played !== undefined && (
         <>
-          <GameGrid
-            label={t('spiele.karten')}
-            hint={active.length === 0 ? undefined : t('spielliste.hinweis')}
-          >
-            {games.map((listed) =>
-              listed.kind === 'catan' ? (
-                <CatanGameCard
-                  key={listed.id}
-                  played={played.get(listed.id)}
-                  today={today}
-                  target={{
-                    onPress: () => {
-                      setIsAsking(true);
-                    },
-                  }}
-                />
-              ) : (
-                <CustomGameCard
-                  key={listed.id}
-                  game={listed.game}
-                  played={played.get(listed.id)}
-                  today={today}
-                  target={{ to: `/ergebnis/neu/${listed.id}` }}
-                />
-              ),
-            )}
-          </GameGrid>
+          {/* Sorted anew, the cards fade in instead of jumping. */}
+          <Swap swapKey={order} from={GRID_FROM} className={styles.sorted}>
+            <GameGrid
+              label={t('spiele.karten')}
+              hint={active.length === 0 ? undefined : t('spielliste.hinweis')}
+            >
+              {games.map((listed) =>
+                listed.kind === 'catan' ? (
+                  <CatanGameCard
+                    key={listed.id}
+                    played={played.get(listed.id)}
+                    today={today}
+                    target={{
+                      onPress: () => {
+                        setIsAsking(true);
+                      },
+                    }}
+                  />
+                ) : (
+                  <CustomGameCard
+                    key={listed.id}
+                    game={listed.game}
+                    played={played.get(listed.id)}
+                    today={today}
+                    target={{ to: `/ergebnis/neu/${listed.id}` }}
+                  />
+                ),
+              )}
+            </GameGrid>
+          </Swap>
           {active.length === 0 && (
             // LZ2: what is missing and the way to it.
             <div className={styles.empty}>

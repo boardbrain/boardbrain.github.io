@@ -11,6 +11,7 @@ import { useAppDependencies } from '@/ui/AppDependencies';
 import { ConfirmDialog } from '@/ui/components/ConfirmDialog';
 import { cx } from '@/ui/components/classNames';
 import { PressableButton } from '@/ui/components/Pressable';
+import { Unfold } from '@/ui/components/Unfold';
 import styles from './GameEditor.module.css';
 
 type Scoring = ScoringDirection | null;
@@ -136,7 +137,9 @@ export function GameEditor({
             setIsTakenOnSave(false);
           }}
         />
-        {isTaken && <p className={styles.error}>{t('spiele.nameGibtEs')}</p>}
+        <Unfold isOpen={isTaken} isQuick>
+          <p className={styles.error}>{t('spiele.nameGibtEs')}</p>
+        </Unfold>
       </div>
       <div className={styles.section}>
         <h2 id={scoringId} className={styles.label}>
@@ -164,7 +167,9 @@ export function GameEditor({
             </PressableButton>
           ))}
         </div>
-        {isNoneRefused && <p className={styles.error}>{t('spiele.keineNichtMehr')}</p>}
+        <Unfold isOpen={isNoneRefused} isQuick>
+          <p className={styles.error}>{t('spiele.keineNichtMehr')}</p>
+        </Unfold>
         {isNoneLocked && game?.scoring !== undefined && (
           <p className={styles.hint}>
             {t('spiele.keineGesperrt', { ergebnisse: resultsText(scoredCount) })}

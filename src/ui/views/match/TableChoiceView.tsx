@@ -101,15 +101,14 @@ export function TableChoiceView(): React.JSX.Element | null {
         )}
       </div>
       <WizardDots done={1} />
-      {isSearchOpen && (
-        <SearchRow
-          labels={TABLE_SEARCH_LABELS}
-          query={query}
-          closeClassName={shared.iconBtn}
-          onQuery={setQuery}
-          onClose={toggleSearch}
-        />
-      )}
+      <SearchRow
+        isOpen={isSearchOpen}
+        labels={TABLE_SEARCH_LABELS}
+        query={query}
+        closeClassName={shared.iconBtn}
+        onQuery={setQuery}
+        onClose={toggleSearch}
+      />
       {trimmedQuery !== '' && tables.length === 0 && (
         <p className={cx(shared.small, shared.muted)}>
           {t('ergebnis.keinTischGefunden', { suche: trimmedQuery })}

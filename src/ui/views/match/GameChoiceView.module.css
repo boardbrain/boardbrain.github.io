@@ -78,3 +78,12 @@
   max-width: 100%;
   font-size: 1.05rem;
 }
+
+/* The symbol of the order and the sorted cards fade in when the order changes. */
+.sortIcon {
+  display: grid;
+}
+
+.sorted {
+  display: block;
+}

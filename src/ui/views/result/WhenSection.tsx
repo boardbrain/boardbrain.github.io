@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import { parseLocalDate, type LocalDate } from '@/core/model';
 import { t } from '@/i18n/t';
 import { BackIcon, ChevronIcon, TrashIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
+import { Swap } from '@/ui/components/Swap';
 import { cx } from '@/ui/components/classNames';
 import { addDays, dayLabel } from '@/ui/views/games/dates';
 import shared from '@/ui/views/match/Match.module.css';
 import styles from './Result.module.css';
 
 const ARROW_SIZE = 18;
+// The day slides a little in the direction of the arrow that was tapped.
+const DAY_SHIFT = 8;
 
 // Opens the picker of a native field where the browser offers it (Chrome on computers would
 // otherwise only let the field be typed into).
@@ -38,7 +42,8 @@ type WhenSectionProps = {
 /**
  * "Wann" (design I3-B D1, Pf2): the day with an arrow for a day earlier and later, never after
  * today (US-ER-01 AK-8); the optional time with a bin to remove it and "Jetzt" (AK-3). The bin
- * keeps its place when there is no time, so nothing moves.
+ * keeps its place when there is no time, so nothing moves. A new day slides in a little in the
+ * direction of the arrow.
  */
 export function WhenSection({
   date,
@@ -47,6 +52,12 @@ export function WhenSection({
   onDate,
   onTime,
 }: WhenSectionProps): React.JSX.Element {
+  // -1 for a day earlier, 1 for a day later, 0 for a day from the picker (it only fades in).
+  const [step, setStep] = useState(0);
+  const pick = (next: LocalDate, by: number): void => {
+    setStep(by);
+    onDate(next);
+  };
   return (
     <section className={shared.section}>
       <h2 className={shared.sectionTitle}>{t('ergebnis.wann')}</h2>
@@ -59,13 +70,21 @@ export function WhenSection({
               className={styles.dayArrow}
               aria-label={t('ergebnis.tagFrueher')}
               onClick={() => {
-                onDate(addDays(date, -1));
+                pick(addDays(date, -1), -1);
               }}
             >
               <BackIcon size={ARROW_SIZE} />
             </PressableButton>
             <label className={styles.pickWrap}>
-              <span className={cx(styles.valPill, styles.datePill)}>{dayLabel(date, today)}</span>
+              <span className={cx(styles.valPill, styles.datePill)}>
+                <Swap
+                  swapKey={date}
+                  from={{ opacity: 0, x: -step * DAY_SHIFT }}
+                  className={styles.dayText}
+                >
+                  {dayLabel(date, today)}
+                </Swap>
+              </span>
               <input
                 type="date"
                 className={styles.pickNative}
@@ -78,7 +97,7 @@ export function WhenSection({
                 onChange={(event) => {
                   const picked = parseLocalDate(event.target.value);
                   if (picked.ok && picked.value <= today) {
-                    onDate(picked.value);
+                    pick(picked.value, 0);
                   }
                 }}
               />
@@ -89,7 +108,7 @@ export function WhenSection({
               aria-label={t('ergebnis.tagSpaeter')}
               disabled={date >= today}
               onClick={() => {
-                onDate(addDays(date, 1));
+                pick(addDays(date, 1), 1);
               }}
             >
               <ChevronIcon size={ARROW_SIZE} />

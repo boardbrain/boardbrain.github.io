@@ -17,6 +17,7 @@ import { Page } from '@/ui/components/Page';
 import { PersonCard } from './PersonCard';
 import styles from './PersonsView.module.css';
 import { PressableButton } from '@/ui/components/Pressable';
+import { Unfold } from '@/ui/components/Unfold';
 
 const PLUS_CARD_ICON_SIZE = 28;
 
@@ -109,7 +110,7 @@ export function PersonsView(): React.JSX.Element {
         </div>
       }
     >
-      {isSearchOpen && (
+      <Unfold isOpen={isSearchOpen}>
         <div className={styles.searchRow}>
           <input
             className={styles.searchInput}
@@ -132,8 +133,8 @@ export function PersonsView(): React.JSX.Element {
             <CloseIcon />
           </PressableButton>
         </div>
-      )}
-      {isFormOpen && (
+      </Unfold>
+      <Unfold isOpen={isFormOpen}>
         <NameForm
           title={t('personen.neu')}
           value={name}
@@ -155,7 +156,7 @@ export function PersonsView(): React.JSX.Element {
             </Notice>
           )}
         </NameForm>
-      )}
+      </Unfold>
       {persons?.length === 0 && <p className={styles.hint}>{t('personen.leer')}</p>}
       {trimmedQuery !== '' && matches.length === 0 && (
         <p className={styles.hint}>{t('personen.keinTreffer', { suche: trimmedQuery })}</p>

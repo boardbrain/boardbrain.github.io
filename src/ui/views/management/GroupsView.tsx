@@ -13,6 +13,7 @@ import { GroupTable, type TableSeat } from './GroupTable';
 import styles from './GroupsView.module.css';
 import personStyles from './PersonsView.module.css';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
+import { Unfold } from '@/ui/components/Unfold';
 
 const MIN_PERSONS_FOR_GROUP = 2;
 
@@ -87,7 +88,7 @@ export function GroupsView(): React.JSX.Element {
           <p>{t('gruppen.zuWenigPersonen')}</p>
         </Notice>
       )}
-      {isSearchOpen && (
+      <Unfold isOpen={isSearchOpen}>
         <div className={styles.searchRow}>
           <input
             className={styles.searchInput}
@@ -110,7 +111,7 @@ export function GroupsView(): React.JSX.Element {
             <CloseIcon />
           </PressableButton>
         </div>
-      )}
+      </Unfold>
       {trimmedQuery !== '' && matches.length === 0 && (
         <p className={styles.hint}>{t('gruppen.keinTreffer', { suche: trimmedQuery })}</p>
       )}

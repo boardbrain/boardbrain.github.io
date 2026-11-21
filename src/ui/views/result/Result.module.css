@@ -123,6 +123,11 @@
   min-width: 8.4rem;
 }
 
+/* Inline, but movable: the day slides in. */
+.dayText {
+  display: inline-block;
+}
+
 .timePill {
   min-width: 4.4rem;
 }
@@ -141,6 +146,11 @@
   cursor: pointer;
   border: 0;
   opacity: 0;
+}
+
+/* The rows of one way; the other fades in when switching. */
+.wayFade {
+  display: grid;
 }
 
 /* E6: one row per person. */

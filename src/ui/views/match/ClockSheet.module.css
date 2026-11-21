@@ -89,7 +89,10 @@
   color: var(--color-text-muted);
 }
 
+/* Motion moves --resume from 0 to 1 when the timer is paused: the button turns green. */
 .round {
+  --resume: 0;
+
   display: grid;
   flex: none;
   place-items: center;
@@ -97,12 +100,16 @@
   height: 68px;
   padding: 0;
   color: var(--color-on-accent);
-  background: var(--color-accent);
+  background: color-mix(
+    in srgb,
+    var(--color-resume) calc(var(--resume) * 100%),
+    var(--color-accent)
+  );
   border-radius: 50%;
 }
 
-.resume {
-  background: var(--color-resume);
+.roundIcon {
+  display: grid;
 }
 
 /* D1: from the top, a rail of dots and lines on the left. */
@@ -314,6 +321,11 @@
 
 .buttons > * {
   flex: 1 1 0;
+}
+
+/* A message below the beginning takes a line of its own. */
+.errorLine {
+  flex-basis: 100%;
 }
 
 .error {

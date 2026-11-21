@@ -1,5 +1,6 @@
 import { CloseIcon, SearchIcon } from './Icons';
 import { PressableButton } from './Pressable';
+import { Unfold } from './Unfold';
 import styles from './SearchControls.module.css';
 
 /**
@@ -40,15 +41,17 @@ export function SearchButton({
 
 /**
  * The search row below the head: a field that filters while typing and a cross that empties and
- * closes it.
+ * closes it. It opens and closes smoothly.
  */
 export function SearchRow({
+  isOpen,
   labels,
   query,
   closeClassName,
   onQuery,
   onClose,
 }: {
+  readonly isOpen: boolean;
   readonly labels: SearchLabels;
   readonly query: string;
   readonly closeClassName: string | undefined;
@@ -56,28 +59,30 @@ export function SearchRow({
   readonly onClose: () => void;
 }): React.JSX.Element {
   return (
-    <div className={styles.searchRow}>
-      <input
-        className={styles.searchInput}
-        type="search"
-        autoComplete="off"
-        autoFocus
-        enterKeyHint="search"
-        aria-label={labels.field}
-        placeholder={labels.field}
-        value={query}
-        onChange={(event) => {
-          onQuery(event.target.value);
-        }}
-      />
-      <PressableButton
-        type="button"
-        className={closeClassName}
-        aria-label={labels.close}
-        onClick={onClose}
-      >
-        <CloseIcon />
-      </PressableButton>
-    </div>
+    <Unfold isOpen={isOpen}>
+      <div className={styles.searchRow}>
+        <input
+          className={styles.searchInput}
+          type="search"
+          autoComplete="off"
+          autoFocus
+          enterKeyHint="search"
+          aria-label={labels.field}
+          placeholder={labels.field}
+          value={query}
+          onChange={(event) => {
+            onQuery(event.target.value);
+          }}
+        />
+        <PressableButton
+          type="button"
+          className={closeClassName}
+          aria-label={labels.close}
+          onClick={onClose}
+        >
+          <CloseIcon />
+        </PressableButton>
+      </div>
+    </Unfold>
   );
 }

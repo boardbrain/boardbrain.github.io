@@ -1,3 +1,5 @@
+import { animate, m, useReducedMotion } from 'motion/react';
+import { useLayoutEffect, useRef } from 'react';
 import type { CatanColorKey, GroupColorKey, PersonId } from '@/core/model';
 import type { ResultRules } from '@/core/results';
 import { t } from '@/i18n/t';
@@ -15,6 +17,12 @@ import {
 import styles from './Result.module.css';
 
 const TROPHY_SIZE = 20;
+// A row that moves to its new place glides there, like the ring of the order band (TurnBand).
+const GLIDE = { duration: 0.25, ease: 'easeOut' } as const;
+// The trophy of a winner grows in briefly.
+const POP_FROM = { scale: 0.8 };
+const POP_TO = { scale: 1 };
+const POP = { duration: 0.15, ease: 'easeOut' } as const;
 
 // iOS and iPadOS show no minus on the numeric keypad; an iPad reports itself as a Mac with touch.
 function hasNoMinusOnKeypad(): boolean {
@@ -88,8 +96,31 @@ export function PointsRows({
   onWinner,
 }: PointsRowsProps): React.JSX.Element {
   const hasAnyPoints = persons.some((person) => (entries.points[person.id] ?? '').trim() !== '');
+  const rowsRef = useRef<HTMLDivElement>(null);
+  const isReduced = useReducedMotion() === true;
+  const order = persons.map((person) => person.id).join(' ');
+  const shownOrder = useRef(order);
+  // Motion (external system): sorted by points, each row glides from the place it had before.
+  useLayoutEffect(() => {
+    const was = shownOrder.current.split(' ');
+    shownOrder.current = order;
+    const box = rowsRef.current;
+    if (box === null || isReduced) {
+      return;
+    }
+    const rows = [...box.children].filter((row) => row instanceof HTMLElement);
+    const tops = rows.map((row) => row.offsetTop);
+    rows.forEach((row, index) => {
+      const from = was.indexOf(row.dataset.person ?? '');
+      const top = tops[index];
+      const fromTop = tops[from];
+      if (from !== index && top !== undefined && fromTop !== undefined) {
+        void animate(row, { y: [fromTop - top, 0] }, GLIDE);
+      }
+    });
+  }, [order, isReduced]);
   return (
-    <div className={styles.rows}>
+    <div ref={rowsRef} className={styles.rows}>
       {persons.map((person) => {
         const text = entries.points[person.id] ?? '';
         const isBad = derived.badPoints.includes(person.id);
@@ -111,7 +142,14 @@ export function PointsRows({
                 onWinner(person.id);
               }}
             >
-              <TrophyIcon size={TROPHY_SIZE} />
+              <m.span
+                key={String(isWinner)}
+                initial={isWinner ? POP_FROM : false}
+                animate={POP_TO}
+                transition={POP}
+              >
+                <TrophyIcon size={TROPHY_SIZE} />
+              </m.span>
             </PressableButton>
           );
         } else if (derived.isPointsComplete && place !== undefined) {
@@ -220,7 +258,14 @@ export function PlaceRows({
                     }}
                   >
                     {place === 1 ? (
-                      <TrophyIcon size={PLACE_TROPHY_SIZE} />
+                      <m.span
+                        key={String(isOn)}
+                        initial={isOn ? POP_FROM : false}
+                        animate={POP_TO}
+                        transition={POP}
+                      >
+                        <TrophyIcon size={PLACE_TROPHY_SIZE} />
+                      </m.span>
                     ) : (
                       t('ergebnis.platzZahl', { platz: place })
                     )}

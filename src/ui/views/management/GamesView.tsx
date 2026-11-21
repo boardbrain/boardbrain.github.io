@@ -81,15 +81,14 @@ export function GamesView({
         </div>
       }
     >
-      {isSearchOpen && (
-        <SearchRow
-          labels={SEARCH_LABELS}
-          query={query}
-          closeClassName={persons.iconButton}
-          onQuery={setQuery}
-          onClose={toggleSearch}
-        />
-      )}
+      <SearchRow
+        isOpen={isSearchOpen}
+        labels={SEARCH_LABELS}
+        query={query}
+        closeClassName={persons.iconButton}
+        onQuery={setQuery}
+        onClose={toggleSearch}
+      />
       {trimmedQuery !== '' && found.length === 0 && !isCatanFound && (
         <p className={persons.hint}>{t('spiele.keinTreffer', { suche: trimmedQuery })}</p>
       )}

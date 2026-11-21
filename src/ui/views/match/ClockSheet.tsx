@@ -1,5 +1,5 @@
-import { animate, m, useMotionValue } from 'motion/react';
-import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
+import { animate, m, useMotionValue, useReducedMotion } from 'motion/react';
+import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useTransition } from 'react';
 import { useBlocker } from 'react-router';
 import {
   addPauseInStretch,
@@ -23,6 +23,8 @@ import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { PauseIcon, PlayIcon, TrashIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
+import { Swap } from '@/ui/components/Swap';
+import { Unfold } from '@/ui/components/Unfold';
 import { cx } from '@/ui/components/classNames';
 import { MatchDialog } from './MatchDialog';
 import shared from './Match.module.css';
@@ -48,6 +50,36 @@ const FLICK_SPEED = 0.6;
 const ENTER = { type: 'spring', bounce: 0.18, duration: 0.45 } as const;
 const SNAP_BACK = { type: 'spring', bounce: 0.3, duration: 0.4 } as const;
 const LEAVE = { duration: 0.2 } as const;
+// A time that is not taken shakes once, a pause added or removed opens or closes in the history.
+const SHAKE = { x: [0, -5, 5, -3, 3, 0] };
+const SHAKE_TIMING = { duration: 0.35, ease: 'easeOut' } as const;
+const ITEM_TIMING = { duration: 0.2, ease: 'easeOut' } as const;
+const ICON_FROM = { opacity: 0, scale: 0.6 };
+
+// Opens or closes an entry of the history; the inline styles go again once it is open.
+function unfoldItem(item: Element, isOpening: boolean): Promise<void> {
+  if (!(item instanceof HTMLElement)) {
+    return Promise.resolve();
+  }
+  const height = item.offsetHeight;
+  item.style.overflow = 'hidden';
+  const keyframes = isOpening
+    ? { height: [0, height], opacity: [0, 1] }
+    : { height: [height, 0], opacity: [1, 0] };
+  return animate(item, keyframes, ITEM_TIMING).then(() => {
+    if (isOpening) {
+      item.style.removeProperty('height');
+      item.style.removeProperty('overflow');
+    }
+  });
+}
+
+// A pause and the played stretch after it, as they stand in the history.
+function pauseItems(sheet: HTMLElement | null, pause: ClockPause): Element[] {
+  const item = sheet?.querySelector(`[data-history="pause-${pause.from}"]`) ?? null;
+  const after = item?.nextElementSibling ?? null;
+  return [item, after].filter((element) => element !== null);
+}
 
 type Adding = { readonly stretch: number; readonly minutes: string };
 type Drag = { readonly y: number; readonly at: number };
@@ -87,12 +119,17 @@ function TimeField({
   readonly at: IsoTimestamp;
   readonly label: string;
   readonly isBad: boolean;
-  readonly onPick: (at: IsoTimestamp) => void;
+  /** Takes the time; false when it is not taken, then the field shakes once. */
+  readonly onPick: (at: IsoTimestamp) => boolean;
 }): React.JSX.Element {
   const text = timeOfDay(at);
+  const shownRef = useRef<HTMLSpanElement>(null);
+  const isReduced = useReducedMotion() === true;
   return (
     <label className={styles.pickWrap}>
-      <span className={cx(styles.tap, isBad && styles.bad)}>{text}</span>
+      <span ref={shownRef} className={cx(styles.tap, isBad && styles.bad)}>
+        {text}
+      </span>
       <input
         type="time"
         className={styles.pickNative}
@@ -100,8 +137,14 @@ function TimeField({
         aria-label={label}
         aria-invalid={isBad}
         onChange={(event) => {
-          if (event.target.value !== '') {
-            onPick(lastTimeOfDay(event.target.value, Date.now()));
+          const shown = shownRef.current;
+          if (
+            event.target.value !== '' &&
+            !onPick(lastTimeOfDay(event.target.value, Date.now())) &&
+            shown !== null &&
+            !isReduced
+          ) {
+            void animate(shown, SHAKE, SHAKE_TIMING);
           }
         }}
       />
@@ -141,8 +184,24 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
   const sheetRef = useRef<HTMLDivElement>(null);
   const drag = useRef<Drag | null>(null);
   const y = useMotionValue(0);
+  const isReduced = useReducedMotion() === true;
+  // A pause just added, to open it in the history; a pause being removed closes first.
+  const appearing = useRef<ClockPause | null>(null);
+  const isRemoving = useRef(false);
   const nowIso = iso(now);
   const isPaused = isClockPaused(draft);
+  const isStoredPaused = isClockPaused(clock);
+
+  // Motion (external system): an added pause and the stretch after it open in the history.
+  useLayoutEffect(() => {
+    const added = appearing.current;
+    appearing.current = null;
+    if (added !== null && !isReduced) {
+      for (const item of pauseItems(sheetRef.current, added)) {
+        void unfoldItem(item, true);
+      }
+    }
+  }, [draft, isReduced]);
 
   // The router holds the blocked closing (external system); once saved it may go on.
   useEffect(() => {
@@ -239,7 +298,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
     key: string,
     result: Result<SessionClock, ClockEditError>,
     details: { readonly pause?: number; readonly minutes?: number } = {},
-  ): void => {
+  ): boolean => {
     const others = Object.fromEntries(Object.entries(errors).filter(([other]) => other !== key));
     if (result.ok) {
       setDraft(result.value);
@@ -248,12 +307,33 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
       const grund = editErrorText(result.error, details);
       setErrors({ ...others, [key]: t('partie.nichtUebernommen', { grund }) });
     }
+    return result.ok;
   };
 
-  const pauseTimes = (index: number, from: IsoTimestamp, to: IsoTimestamp | undefined): void => {
+  const pauseTimes = (index: number, from: IsoTimestamp, to: IsoTimestamp | undefined): boolean => {
     const overlapped = overlappingPause(draft, from, to, nowIso, index);
-    apply(`pause-${String(index)}`, setPauseTimes(draft, index, from, to, nowIso), {
+    return apply(`pause-${String(index)}`, setPauseTimes(draft, index, from, to, nowIso), {
       pause: (overlapped ?? 0) + 1,
+    });
+  };
+
+  // The pause and the stretch after it close, then the pause is gone from the draft.
+  const remove = (pause: ClockPause, key: string): void => {
+    if (isRemoving.current) {
+      return;
+    }
+    isRemoving.current = true;
+    const items = isReduced ? [] : pauseItems(sheetRef.current, pause);
+    void Promise.all(items.map((item) => unfoldItem(item, false))).then(() => {
+      isRemoving.current = false;
+      setDraft((current) => {
+        const index = current.pauses.findIndex((other) => other.from === pause.from);
+        const removed = index < 0 ? undefined : removePause(current, index);
+        return removed?.ok === true ? removed.value : current;
+      });
+      setErrors((current) =>
+        Object.fromEntries(Object.entries(current).filter(([other]) => other !== key)),
+      );
     });
   };
 
@@ -343,11 +423,11 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
           />
           <span>{t('partie.minuten')}</span>
         </div>
-        {!result.ok && (
+        <Unfold isOpen={!result.ok} isQuick>
           <p className={styles.error} role="alert">
-            {editErrorText(result.error, { minutes: room })}
+            {result.ok ? '' : editErrorText(result.error, { minutes: room })}
           </p>
-        )}
+        </Unfold>
         <div className={styles.buttons}>
           <PressableButton
             type="button"
@@ -364,6 +444,8 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
             disabled={!result.ok}
             onClick={() => {
               if (result.ok) {
+                appearing.current =
+                  result.value.pauses.find((pause) => !draft.pauses.includes(pause)) ?? null;
                 setDraft(result.value);
                 setAdding(null);
               }
@@ -388,9 +470,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
             at={pause.from}
             label={t('partie.pauseVon', { nummer })}
             isBad={error !== undefined}
-            onPick={(from) => {
-              pauseTimes(index, from, pause.to);
-            }}
+            onPick={(from) => pauseTimes(index, from, pause.to)}
           />
           <span aria-hidden="true">{t('partie.zeitBis')}</span>
           {pause.to === undefined ? (
@@ -400,9 +480,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
               at={pause.to}
               label={t('partie.pauseBis', { nummer })}
               isBad={error !== undefined}
-              onPick={(to) => {
-                pauseTimes(index, pause.from, to);
-              }}
+              onPick={(to) => pauseTimes(index, pause.from, to)}
             />
           )}
           <span className={styles.spacer} />
@@ -419,18 +497,18 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
               className={styles.trash}
               aria-label={t('partie.pauseLoeschen', { nummer })}
               onClick={() => {
-                apply(key, removePause(draft, index));
+                remove(pause, key);
               }}
             >
               <TrashIcon size={TRASH_SIZE} />
             </PressableButton>
           )}
         </div>
-        {error !== undefined && (
+        <Unfold isOpen={error !== undefined} isQuick>
           <p className={styles.error} role="alert">
             {error}
           </p>
-        )}
+        </Unfold>
       </div>
     );
   };
@@ -495,17 +573,22 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                 : t('partie.uhrSeit', { beginn: timeOfDay(draft.startedAt), pause: pausedFor })}
             </p>
           </div>
+          {/* Pausing turns the button green, resuming back; the symbol fades in. */}
           <PressableButton
             type="button"
-            className={cx(styles.round, isClockPaused(clock) && styles.resume)}
-            aria-label={t(isClockPaused(clock) ? 'partie.fortsetzen' : 'partie.anhalten')}
+            className={styles.round}
+            initial={false}
+            animate={{ '--resume': isStoredPaused ? 1 : 0 }}
+            aria-label={t(isStoredPaused ? 'partie.fortsetzen' : 'partie.anhalten')}
             onClick={togglePause}
           >
-            {isClockPaused(clock) ? (
-              <PlayIcon size={BIG_ICON_SIZE} />
-            ) : (
-              <PauseIcon size={BIG_ICON_SIZE} />
-            )}
+            <Swap swapKey={String(isStoredPaused)} from={ICON_FROM} className={styles.roundIcon}>
+              {isStoredPaused ? (
+                <PlayIcon size={BIG_ICON_SIZE} />
+              ) : (
+                <PauseIcon size={BIG_ICON_SIZE} />
+              )}
+            </Swap>
           </PressableButton>
         </div>
         <div className={styles.history}>
@@ -513,7 +596,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
             switch (item.kind) {
               case 'start':
                 return (
-                  <div key="start" className={styles.item}>
+                  <div key="start" className={styles.item} data-history="start">
                     <span className={styles.rail}>
                       <span className={styles.dot} />
                     </span>
@@ -523,15 +606,17 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                         at={draft.startedAt}
                         label={t('partie.beginnFeld')}
                         isBad={startError !== undefined}
-                        onPick={(at) => {
-                          apply('start', setClockStart(draft, at, iso(Date.now())));
-                        }}
+                        onPick={(at) => apply('start', setClockStart(draft, at, iso(Date.now())))}
                       />
-                      {startError !== undefined && (
+                      <Unfold
+                        isOpen={startError !== undefined}
+                        isQuick
+                        className={styles.errorLine}
+                      >
                         <p className={styles.error} role="alert">
                           {startError}
                         </p>
-                      )}
+                      </Unfold>
                     </div>
                   </div>
                 );
@@ -539,7 +624,11 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                 const { stretch, index } = item;
                 const played = Date.parse(stretch.to ?? nowIso) - Date.parse(stretch.from);
                 return (
-                  <div key={`stretch-${stretch.from}`} className={styles.item}>
+                  <div
+                    key={`stretch-${stretch.from}`}
+                    className={styles.item}
+                    data-history={`stretch-${stretch.from}`}
+                  >
                     <span className={styles.rail}>
                       <span className={styles.line} />
                     </span>
@@ -567,14 +656,20 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                           {t('partie.plusPause')}
                         </PressableButton>
                       </div>
-                      {adding?.stretch === index && adder(stretch, index, adding)}
+                      <Unfold isOpen={adding?.stretch === index}>
+                        {adding?.stretch === index && adder(stretch, index, adding)}
+                      </Unfold>
                     </div>
                   </div>
                 );
               }
               case 'pause':
                 return (
-                  <div key={`pause-${item.pause.from}`} className={styles.item}>
+                  <div
+                    key={`pause-${item.pause.from}`}
+                    className={styles.item}
+                    data-history={`pause-${item.pause.from}`}
+                  >
                     <span className={styles.rail}>
                       <span className={cx(styles.line, styles.linePause)} />
                     </span>
@@ -596,11 +691,11 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
             }
           })}
         </div>
-        {failure !== null && (
+        <Unfold isOpen={failure !== null} isQuick>
           <p className={styles.error} role="alert">
             {failure}
           </p>
-        )}
+        </Unfold>
         <PressableButton
           type="button"
           className={cx(shared.primary, styles.done)}

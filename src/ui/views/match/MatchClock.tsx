@@ -5,7 +5,7 @@ import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { PauseIcon, PlayIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
-import { cx } from '@/ui/components/classNames';
+import { Swap } from '@/ui/components/Swap';
 import { ClockSheet, ClockTime } from './ClockSheet';
 import { clockParts } from './clockHistory';
 import styles from './MatchClock.module.css';
@@ -13,6 +13,7 @@ import styles from './MatchClock.module.css';
 // Every second, so the seconds count on, in the overview and in the sheet.
 const TICK_MS = 1000;
 const PILL_ICON_SIZE = 16;
+const ICON_FROM = { opacity: 0, scale: 0.6 };
 
 // The sheet is an entry of its own in the history of the router, so the back gesture closes it.
 const SHEET_STATE = 'clockSheet';
@@ -55,7 +56,9 @@ export function MatchClock({ clock }: { readonly clock: SessionClock }): React.J
       <span className={styles.pill}>
         <PressableButton
           type="button"
-          className={cx(styles.time, isPaused && styles.paused)}
+          className={styles.time}
+          initial={false}
+          animate={{ '--paused': isPaused ? 1 : 0 }}
           aria-label={t('partie.uhrDetails', { zeit: text })}
           onClick={() => {
             void navigate(
@@ -76,7 +79,9 @@ export function MatchClock({ clock }: { readonly clock: SessionClock }): React.J
             });
           }}
         >
-          {isPaused ? <PlayIcon size={PILL_ICON_SIZE} /> : <PauseIcon size={PILL_ICON_SIZE} />}
+          <Swap swapKey={String(isPaused)} from={ICON_FROM} className={styles.icon}>
+            {isPaused ? <PlayIcon size={PILL_ICON_SIZE} /> : <PauseIcon size={PILL_ICON_SIZE} />}
+          </Swap>
         </PressableButton>
       </span>
       {isSheetOpen(location.state) && (

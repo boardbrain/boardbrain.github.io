@@ -19,6 +19,8 @@ import { t } from '@/i18n/t';
 import { CheckIcon, InfoIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
 import { PressableButton } from '@/ui/components/Pressable';
+import { Swap } from '@/ui/components/Swap';
+import { Unfold } from '@/ui/components/Unfold';
 import { cx } from '@/ui/components/classNames';
 import { MatchDialog } from '@/ui/views/match/MatchDialog';
 import shared from '@/ui/views/match/Match.module.css';
@@ -45,6 +47,7 @@ const CHECK_SIZE = 18;
 const INFO_SIZE = 18;
 const MINUTES_PER_HOUR = 60;
 const NUDGE_SECONDS = 0.9;
+const WAY_FROM = { opacity: 0 };
 
 /**
  * What is said after storing (design I3-B R3): who won, game and table.
@@ -232,34 +235,37 @@ export function ResultForm({
           </div>
         )}
         <div className={shared.group} aria-label={t('ergebnis.personen')} role="group">
-          {way === 'points' ? (
-            <PointsRows
-              persons={rows}
-              entries={entries}
-              derived={derived}
-              rules={rules}
-              isPointsRequired={hasBothWays}
-              missing={derived.missing}
-              onPoints={(personId, text) => {
-                change(setPoints(entries, personId, text, participants, rules));
-              }}
-              onCommit={() => {
-                setCommitted(entries.points);
-              }}
-              onWinner={(personId) => {
-                change(toggleWinner(entries, personId, rules));
-              }}
-            />
-          ) : (
-            <PlaceRows
-              persons={rows}
-              derived={derived}
-              missing={derived.missing}
-              onPlace={(personId, place) => {
-                change(setPlace(entries, personId, place, rules));
-              }}
-            />
-          )}
+          {/* The other way fades in instead of replacing the rows at once. */}
+          <Swap swapKey={way} from={WAY_FROM} className={styles.wayFade}>
+            {way === 'points' ? (
+              <PointsRows
+                persons={rows}
+                entries={entries}
+                derived={derived}
+                rules={rules}
+                isPointsRequired={hasBothWays}
+                missing={derived.missing}
+                onPoints={(personId, text) => {
+                  change(setPoints(entries, personId, text, participants, rules));
+                }}
+                onCommit={() => {
+                  setCommitted(entries.points);
+                }}
+                onWinner={(personId) => {
+                  change(toggleWinner(entries, personId, rules));
+                }}
+              />
+            ) : (
+              <PlaceRows
+                persons={rows}
+                derived={derived}
+                missing={derived.missing}
+                onPlace={(personId, place) => {
+                  change(setPlace(entries, personId, place, rules));
+                }}
+              />
+            )}
+          </Swap>
         </div>
       </section>
 
@@ -353,9 +359,28 @@ export function ResultForm({
       {isCatan && colors !== undefined && (
         <section className={shared.section}>
           <h2 className={shared.sectionTitle}>{t('ergebnis.farben')}</h2>
+          {/* "Ändern" opens the colours smoothly in place of the coins. */}
           <div className={shared.group}>
-            {isColorsOpen ? (
-              participants.map((personId) => {
+            <Unfold isOpen={!isColorsOpen}>
+              <div className={styles.optRow}>
+                <span className={styles.coins}>
+                  {rows.map((person) => (
+                    <PersonMark key={person.id} person={person} />
+                  ))}
+                </span>
+                <PressableButton
+                  type="button"
+                  className={shared.pill}
+                  onClick={() => {
+                    setIsColorsOpen(true);
+                  }}
+                >
+                  {t('ergebnis.aendern')}
+                </PressableButton>
+              </div>
+            </Unfold>
+            <Unfold isOpen={isColorsOpen} isDivided>
+              {participants.map((personId) => {
                 const person = byId.get(personId);
                 const holderOf = new Map(
                   participants.flatMap((holder) => {
@@ -398,25 +423,8 @@ export function ResultForm({
                     </span>
                   </div>
                 );
-              })
-            ) : (
-              <div className={styles.optRow}>
-                <span className={styles.coins}>
-                  {rows.map((person) => (
-                    <PersonMark key={person.id} person={person} />
-                  ))}
-                </span>
-                <PressableButton
-                  type="button"
-                  className={shared.pill}
-                  onClick={() => {
-                    setIsColorsOpen(true);
-                  }}
-                >
-                  {t('ergebnis.aendern')}
-                </PressableButton>
-              </div>
-            )}
+              })}
+            </Unfold>
           </div>
         </section>
       )}
@@ -436,11 +444,11 @@ export function ResultForm({
       </section>
 
       <div className={styles.footer}>
-        {failure !== null && (
+        <Unfold isOpen={failure !== null} isQuick>
           <Notice tone="error">
             <p>{failure}</p>
           </Notice>
-        )}
+        </Unfold>
         <PressableButton
           type="submit"
           className={cx(shared.primary, !canSave && styles.looksOff)}
