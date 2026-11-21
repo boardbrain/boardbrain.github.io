@@ -337,8 +337,12 @@
   --color-on-accent: #fff;
   --color-backdrop: #000000b3;
   --color-shadow: #0000008c;
-  /* "Weiter" of a paused timer (US-AB-07, design I3-B Z3+): green, as on a stopwatch. */
+
+  /* History of the timer (US-AB-07, design I3-B Z3+): "Weiter" green as on a stopwatch, the
+     played stretches and the ring around "jetzt". */
   --color-resume: color-mix(in srgb, var(--color-group-green) 70%, #000);
+  --color-clock-played: color-mix(in srgb, var(--color-accent) 75%, transparent);
+  --color-clock-now: color-mix(in srgb, var(--color-accent-text) 30%, transparent);
 
   /* Home screen icon of the local acceptance app (build mode "acceptance", E-40): violet instead of
      wood and amber, so it can be told apart from the published app; only read by npm run icons */

@@ -133,6 +133,9 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
   const [adding, setAdding] = useState<Adding | null>(null);
   const [errors, setErrors] = useState<Readonly<Record<string, string>>>({});
   const [failure, setFailure] = useState<string | null>(null);
+  // Closing with changes by tapping beside, the handle or "pulling": the sheet asks itself;
+  // the back gesture asks through the router (useBlocker).
+  const [isAsking, setIsAsking] = useState(false);
   const isDirty = !isSameClock(draft, expected);
   const blocker = useBlocker(isDirty);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -151,7 +154,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
   const close = (): void => {
     if (isDirty) {
       void animate(y, 0, SNAP_BACK);
-      onClose();
+      setIsAsking(true);
       return;
     }
     const height = sheetRef.current?.offsetHeight ?? 0;
@@ -612,25 +615,43 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
           {t('partie.fertig')}
         </PressableButton>
       </m.div>
-      {blocker.state === 'blocked' && isDirty && (
+      {(isAsking || (blocker.state === 'blocked' && isDirty)) && (
         <MatchDialog
           title={t('partie.aenderungenFrage')}
           lines={[t('partie.aenderungenText')]}
           cancelLabel={t('partie.verwerfen')}
           onCancel={() => {
-            blocker.proceed();
+            setIsAsking(false);
+            if (blocker.state === 'blocked') {
+              blocker.proceed();
+            } else {
+              // Discarded: the closing below is not blocked once the draft is the stored timer.
+              setDraft(expected);
+              onClose();
+            }
           }}
           onDismiss={() => {
-            blocker.reset();
+            setIsAsking(false);
+            if (blocker.state === 'blocked') {
+              blocker.reset();
+            }
           }}
           confirmLabel={t('partie.uebernehmen')}
           onConfirm={() => {
             save(
               () => {
-                blocker.proceed();
+                setIsAsking(false);
+                if (blocker.state === 'blocked') {
+                  blocker.proceed();
+                } else {
+                  onClose();
+                }
               },
               () => {
-                blocker.reset();
+                setIsAsking(false);
+                if (blocker.state === 'blocked') {
+                  blocker.reset();
+                }
               },
             );
           }}

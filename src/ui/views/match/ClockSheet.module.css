@@ -130,14 +130,14 @@
 }
 
 .dotNow {
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent-text) 30%, transparent);
+  box-shadow: 0 0 0 5px var(--color-clock-now);
 }
 
 .line {
   width: 4px;
   height: 100%;
   min-height: 44px;
-  background: color-mix(in srgb, var(--color-accent) 75%, transparent);
+  background: var(--color-clock-played);
   border-radius: 2px;
 }
 

@@ -182,30 +182,65 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
 });
 
 test.describe('US-AB-06 AK-2 and US-AB-07 the result of the running match', () => {
-  test('AK-6: the timer is corrected; the form is filled in from the match and ends it', async ({
+  test('AK-6, AK-7: the history of the timer; the form is filled in from the match and ends it', async ({
     page,
   }) => {
     await seedMatch(page, { table: TABLE, options: { edition: 'cities-and-knights' } });
+    // As when the app starts: the entry of the overview is the router's own, so going back from
+    // the sheet can be held (the seeding changed the address from outside).
+    await page.reload();
     await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
 
-    const time = page.getByRole('button', { name: /^Spieldauer .* – Details$/ });
-    const shown = await time.innerText();
-    await time.click();
-    const details = page.getByRole('alertdialog');
-    // The details show the same time as the overview (no minute added) and add 5 minutes.
-    const minutesOf = (text: string): number => {
-      const [hours = 0, rest = 0] = text.split(':').map(Number);
-      return hours * 60 + rest;
+    // AK-1: hours and minutes, the seconds small beside them.
+    const time = page.getByRole('button', { name: /^Spieldauer .* – Verlauf$/ });
+    const minutesOf = async (): Promise<number> => {
+      const [hours = 0, minutes = 0] = (await time.innerText()).split(':').map(Number);
+      return hours * 60 + minutes;
     };
-    const big = details
-      .getByRole('heading', { name: 'Spieldauer' })
-      .locator('xpath=preceding-sibling::span[1]');
-    expect(minutesOf(await big.innerText())).toBe(minutesOf(shown));
-    await details.getByRole('button', { name: 'plus 5 Minuten' }).click();
-    expect(minutesOf(await big.innerText())).toBe(minutesOf(shown) + 5);
-    await details.getByRole('button', { name: 'Anhalten' }).click();
-    await details.getByRole('button', { name: 'Übernehmen' }).click();
+    await expect(time).toHaveText(/^\d+:\d{2}:\d{2}$/);
+    const before = await minutesOf();
+
+    // AK-6: a pause of 15 minutes is added in the played stretch and can be removed again.
+    await time.click();
+    const sheet = page.getByRole('dialog', { name: 'Spieldauer' });
+    await expect(sheet.getByText('Beginn', { exact: true })).toBeVisible();
+    await sheet.getByRole('button', { name: 'Pause in dieser Strecke nachtragen' }).click();
+    await sheet.getByRole('button', { name: '15 Minuten' }).click();
+    await sheet.getByRole('button', { name: 'Hinzufügen' }).click();
+    await expect(sheet.getByText('Pause 1', { exact: true })).toBeVisible();
+    await sheet.getByRole('button', { name: 'Pause 1 löschen' }).click();
+    await expect(sheet.getByText('Pause 1', { exact: true })).toBeHidden();
+    await sheet.getByRole('button', { name: 'Pause in dieser Strecke nachtragen' }).click();
+    await sheet.getByRole('textbox', { name: 'Pause in Minuten' }).fill('5');
+    await sheet.getByRole('button', { name: 'Hinzufügen' }).click();
+
+    // AK-7: closing beside the sheet asks; "Übernehmen" stores the 5 minutes.
+    await page.mouse.click(10, 10);
+    const question = page.getByRole('alertdialog', { name: 'Änderungen übernehmen?' });
+    await question.getByRole('button', { name: 'Übernehmen' }).click();
+    await expect(sheet).toBeHidden();
+    expect(before - (await minutesOf())).toBeGreaterThanOrEqual(4);
+    expect(before - (await minutesOf())).toBeLessThanOrEqual(5);
+
+    // Pausing acts at once; "Fertig" without a change just closes, as does going back.
+    await time.click();
+    await sheet.getByRole('button', { name: 'Anhalten' }).click();
+    await expect(sheet.getByRole('button', { name: 'Fortsetzen' })).toBeVisible();
+    await sheet.getByRole('button', { name: 'Fertig' }).click();
+    await expect(sheet).toBeHidden();
     await expect(page.getByRole('button', { name: 'Fortsetzen' })).toBeVisible();
+    // AK-7: going back with a change asks too; "Verwerfen" keeps the stored timer.
+    await time.click();
+    await sheet.getByRole('button', { name: 'Pause in dieser Strecke nachtragen' }).first().click();
+    await sheet.getByRole('button', { name: 'Hinzufügen' }).click();
+    await page.goBack();
+    await question.getByRole('button', { name: 'Verwerfen' }).click();
+    await expect(sheet).toBeHidden();
+    await time.click();
+    await expect(sheet.getByText('Pause 3', { exact: true })).toBeHidden();
+    await page.goBack();
+    await expect(sheet).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Ergebnis eintragen' }).click();
     await expect(page.getByText('Catan · Freitagsrunde · aus der Partie')).toBeVisible();
