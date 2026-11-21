@@ -24,6 +24,7 @@ import { MatchDialog } from '@/ui/views/match/MatchDialog';
 import shared from '@/ui/views/match/Match.module.css';
 import options from '@/ui/views/match/OptionsView.module.css';
 import colorStyles from '@/ui/views/match/ColorsView.module.css';
+import { durationFields, readDuration } from './duration';
 import {
   deriveEntry,
   isEntryComplete,
@@ -117,9 +118,7 @@ export function ResultForm({
   const [edition, setEdition] = useState(values.edition ?? rules.editions[0]);
   const [colors, setColors] = useState(values.catanColors);
   const [isColorsOpen, setIsColorsOpen] = useState(false);
-  const [duration, setDuration] = useState(
-    values.durationMinutes === undefined ? '' : String(values.durationMinutes),
-  );
+  const [duration, setDuration] = useState(() => durationFields(values.durationMinutes));
   const [notes, setNotes] = useState('');
   const [isAskingLong, setIsAskingLong] = useState(false);
   const [isShowingRules, setIsShowingRules] = useState(false);
@@ -128,9 +127,9 @@ export function ResultForm({
 
   const entries = byWay[way];
   const derived = deriveEntry(way, entries, participants, rules);
-  const durationMinutes = duration.trim() === '' ? undefined : Number(duration.trim());
-  const isDurationBad =
-    durationMinutes !== undefined && (!Number.isInteger(durationMinutes) || durationMinutes < 1);
+  const readDurationResult = readDuration(duration);
+  const durationMinutes = readDurationResult.minutes;
+  const isDurationBad = readDurationResult.isHoursBad || readDurationResult.isMinutesBad;
   const isLong = durationMinutes !== undefined && durationMinutes > LONG_DURATION_MINUTES;
   const canSave = isEntryComplete(derived) && !isDurationBad && !isPending;
   const byId = new Map(persons.map((person) => [person.id, person]));
@@ -306,21 +305,46 @@ export function ResultForm({
                   {t(isLong ? 'ergebnis.ueberAchtStunden' : 'ergebnis.optional')}
                 </span>
               </span>
-              <input
-                ref={durationRef}
-                enterKeyHint="done"
-                className={cx(styles.num, isDurationBad && styles.bad)}
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder={t('ergebnis.keineUhrzeit')}
-                aria-label={t('ergebnis.minutenFeld')}
-                aria-invalid={isDurationBad}
-                value={duration}
-                onChange={(event) => {
-                  setDuration(event.target.value);
-                }}
-              />
-              <span className={cx(shared.muted, shared.small)}>{t('ergebnis.minuten')}</span>
+              {/* Hours and minutes in two fields (Product Owner 21.11.2026). */}
+              <span className={styles.duration}>
+                <input
+                  ref={durationRef}
+                  enterKeyHint="done"
+                  className={cx(
+                    styles.num,
+                    styles.durNum,
+                    readDurationResult.isHoursBad && styles.bad,
+                  )}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder={t('ergebnis.keineUhrzeit')}
+                  aria-label={t('ergebnis.stundenFeld')}
+                  aria-invalid={readDurationResult.isHoursBad}
+                  value={duration.hours}
+                  onChange={(event) => {
+                    setDuration({ ...duration, hours: event.target.value });
+                  }}
+                />
+                <span className={cx(shared.muted, shared.small)}>{t('ergebnis.stunden')}</span>
+                <input
+                  enterKeyHint="done"
+                  className={cx(
+                    styles.num,
+                    styles.durNum,
+                    readDurationResult.isMinutesBad && styles.bad,
+                  )}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder={t('ergebnis.keineUhrzeit')}
+                  aria-label={t('ergebnis.minutenFeld')}
+                  aria-invalid={readDurationResult.isMinutesBad}
+                  value={duration.minutes}
+                  onChange={(event) => {
+                    setDuration({ ...duration, minutes: event.target.value });
+                  }}
+                />
+                <span className={cx(shared.muted, shared.small)}>{t('ergebnis.minuten')}</span>
+              </span>
             </div>
           </div>
         </section>
@@ -432,7 +456,6 @@ export function ResultForm({
           title={t('ergebnis.langeFrage')}
           lines={[
             t('ergebnis.langeText', {
-              minuten: durationMinutes,
               stunden: Math.floor(durationMinutes / MINUTES_PER_HOUR),
               rest: durationMinutes % MINUTES_PER_HOUR,
             }),

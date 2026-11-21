@@ -142,14 +142,14 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
     await expect(page.getByText(/^gestern, /)).toBeVisible();
     await page.getByRole('switch', { name: /Sieger oder Rangfolge/ }).click();
     await page.getByRole('button', { name: 'Anna Platz 1' }).click();
-    await page.getByRole('textbox', { name: 'Spieldauer in Minuten' }).fill('1200');
+    await page.getByRole('textbox', { name: 'Spieldauer Stunden' }).fill('20');
     await expect(page.getByText('über 8 Stunden')).toBeVisible();
     await page.getByRole('button', { name: 'Ergebnis speichern' }).click();
 
     const question = page.getByRole('alertdialog', { name: 'Über 8 Stunden?' });
-    await expect(question).toContainText('Spieldauer 1200 min · 20 h 0 min');
+    await expect(question).toContainText('Spieldauer 20 h 0 min');
     await question.getByRole('button', { name: 'Korrigieren' }).click();
-    await expect(page.getByRole('textbox', { name: 'Spieldauer in Minuten' })).toBeFocused();
+    await expect(page.getByRole('textbox', { name: 'Spieldauer Stunden' })).toBeFocused();
   });
 
   test('the list sorts by the last match or A–Z and can be searched', async ({ page }) => {
@@ -214,8 +214,15 @@ test.describe('US-AB-06 AK-2 and US-AB-07 the result of the running match', () =
       'true',
     );
     await expect(page.getByRole('button', { name: 'Uhrzeit löschen' })).toBeVisible();
-    await expect(page.getByRole('textbox', { name: 'Spieldauer in Minuten' })).not.toHaveValue('');
-    await page.getByRole('textbox', { name: 'Spieldauer in Minuten' }).fill('95');
+    await expect(page.getByRole('textbox', { name: 'Spieldauer Minuten' })).not.toHaveValue('');
+    // US-ER-01 AK-7: hours and minutes; minutes above 59 are marked.
+    await page.getByRole('textbox', { name: 'Spieldauer Minuten' }).fill('95');
+    await expect(page.getByRole('textbox', { name: 'Spieldauer Minuten' })).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
+    await page.getByRole('textbox', { name: 'Spieldauer Stunden' }).fill('1');
+    await page.getByRole('textbox', { name: 'Spieldauer Minuten' }).fill('35');
     for (const [name, points] of [
       ['Anna', '10'],
       ['Ben', '8'],
