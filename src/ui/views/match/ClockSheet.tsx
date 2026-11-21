@@ -268,11 +268,14 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
     const entering = animate(y, 0, ENTER);
     let start: Drag | null = null;
     let isPulling = false;
+    // The history scrolls on its own; scrolled down, pulling scrolls it back instead of closing.
+    let scroller: Element | null = null;
     const onStart = (event: TouchEvent): void => {
       const touch = event.touches[0];
       const target = event.target;
       const isControl =
         target instanceof Element && target.closest('input, label, button') !== null;
+      scroller = target instanceof Element ? target.closest('[data-scroll]') : null;
       start =
         event.touches.length === 1 && touch !== undefined && !isControl
           ? { y: touch.clientY, at: Date.now() }
@@ -286,7 +289,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
       }
       const distance = touch.clientY - start.y;
       if (!isPulling) {
-        if (sheet.scrollTop > 0 || distance < 0) {
+        if (sheet.scrollTop > 0 || (scroller?.scrollTop ?? 0) > 0 || distance < 0) {
           start = null;
           return;
         }
@@ -618,7 +621,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
             </Swap>
           </PressableButton>
         </div>
-        <div className={styles.history}>
+        <div className={styles.history} data-scroll="">
           {history.map((item) => {
             switch (item.kind) {
               case 'start':

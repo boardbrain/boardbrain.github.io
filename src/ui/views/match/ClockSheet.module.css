@@ -16,7 +16,7 @@
   flex-direction: column;
   gap: 14px;
   width: min(100%, 32rem);
-  max-height: 94%;
+  max-height: 75%;
   padding: 8px 18px calc(18px + env(safe-area-inset-bottom));
   margin: 0 auto;
   overflow-y: auto;
@@ -27,7 +27,7 @@
   box-shadow: 0 -10px 30px var(--color-shadow);
 }
 
-.sheet > * {
+.sheet > :not(.history) {
   flex-shrink: 0;
 }
 
@@ -113,9 +113,16 @@
   display: grid;
 }
 
-/* D1: from the top, a rail of dots and lines on the left. */
+/* D1: from the top, a rail of dots and lines on the left. At most three quarters of the screen
+   (PO 21.11.): only the history scrolls, the head and "Fertig" stay in view; on very low screens
+   the whole sheet scrolls. */
 .history {
   display: grid;
+  flex: 0 1 auto;
+  align-content: start;
+  min-height: 96px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .item {
