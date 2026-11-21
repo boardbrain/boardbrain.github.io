@@ -318,7 +318,8 @@ describe('US-PL-04 Buildings and roads on the board', () => {
     expect(screen.getByText('· Straße')).toBeInTheDocument();
     await tapForward(user, 'Losen');
     expect(screen.getAllByTestId('board-road')).toHaveLength(1);
-  });
+    // Through order, resources and two pieces: under full load with coverage it took 5.2 s.
+  }, 15_000);
 });
 
 describe('Architecture 13.2 match from the database', () => {
