@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import type { CustomGame, LocalDate } from '@/core/model';
 import type { PlayedGame } from '@/core/results';
 import { t } from '@/i18n/t';
@@ -51,16 +51,19 @@ export function scoringShort(game: CustomGame): string {
 export function GameGrid({
   label,
   hint,
+  listRef,
   children,
 }: {
   readonly label: string;
+  /** The list of cards, e.g. to let them glide when sorted anew. */
+  readonly listRef?: Ref<HTMLUListElement>;
   /** A short line below the cards. */
   readonly hint?: string | undefined;
   readonly children: ReactNode;
 }): React.JSX.Element {
   return (
     <div className={styles.frame}>
-      <ul className={styles.grid} aria-label={label}>
+      <ul ref={listRef} className={styles.grid} aria-label={label}>
         {children}
       </ul>
       {hint !== undefined && <p className={styles.hint}>{hint}</p>}

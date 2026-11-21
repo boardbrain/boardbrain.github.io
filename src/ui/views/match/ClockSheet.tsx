@@ -74,11 +74,26 @@ function unfoldItem(item: Element, isOpening: boolean): Promise<void> {
   });
 }
 
-// A pause and the played stretch after it, as they stand in the history.
-function pauseItems(sheet: HTMLElement | null, pause: ClockPause): Element[] {
-  const item = sheet?.querySelector(`[data-history="pause-${pause.from}"]`) ?? null;
-  const after = item?.nextElementSibling ?? null;
-  return [item, after].filter((element) => element !== null);
+type HistoryItem = ReturnType<typeof historyOf>[number];
+
+// The key of an entry of the history; a played stretch is named after its beginning.
+function historyKey(item: HistoryItem): string {
+  switch (item.kind) {
+    case 'stretch':
+      return `stretch-${item.stretch.from}`;
+    case 'pause':
+      return `pause-${item.pause.from}`;
+    case 'start':
+    case 'now':
+      return item.kind;
+  }
+}
+
+// The entries of the history with these keys, as they stand in the sheet.
+function historyItems(sheet: HTMLElement | null, keys: readonly string[]): Element[] {
+  return keys
+    .map((key) => sheet?.querySelector(`[data-history="${key}"]`) ?? null)
+    .filter((element) => element !== null);
 }
 
 type Adding = { readonly stretch: number; readonly minutes: string };
@@ -185,23 +200,30 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
   const drag = useRef<Drag | null>(null);
   const y = useMotionValue(0);
   const isReduced = useReducedMotion() === true;
-  // A pause just added, to open it in the history; a pause being removed closes first.
-  const appearing = useRef<ClockPause | null>(null);
+  // Entries that come with an added pause, pausing or resuming open; changed times do not move.
+  const opensNew = useRef(false);
+  const shownKeys = useRef<readonly string[] | null>(null);
   const isRemoving = useRef(false);
   const nowIso = iso(now);
   const isPaused = isClockPaused(draft);
   const isStoredPaused = isClockPaused(clock);
+  const history = historyOf(draft);
+  const keys = history.map(historyKey).join(' ');
 
-  // Motion (external system): an added pause and the stretch after it open in the history.
+  // Motion (external system): new entries of the history open instead of appearing at once.
   useLayoutEffect(() => {
-    const added = appearing.current;
-    appearing.current = null;
-    if (added !== null && !isReduced) {
-      for (const item of pauseItems(sheetRef.current, added)) {
+    const current = keys.split(' ');
+    const before = shownKeys.current;
+    shownKeys.current = current;
+    const shouldOpen = opensNew.current;
+    opensNew.current = false;
+    if (shouldOpen && before !== null && !isReduced) {
+      const added = current.filter((key) => !before.includes(key));
+      for (const item of historyItems(sheetRef.current, added)) {
         void unfoldItem(item, true);
       }
     }
-  }, [draft, isReduced]);
+  }, [keys, isReduced]);
 
   // The router holds the blocked closing (external system); once saved it may go on.
   useEffect(() => {
@@ -323,7 +345,9 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
       return;
     }
     isRemoving.current = true;
-    const items = isReduced ? [] : pauseItems(sheetRef.current, pause);
+    const items = isReduced
+      ? []
+      : historyItems(sheetRef.current, [`pause-${pause.from}`, `stretch-${pause.to ?? ''}`]);
     void Promise.all(items.map((item) => unfoldItem(item, false))).then(() => {
       isRemoving.current = false;
       setDraft((current) => {
@@ -352,15 +376,27 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
     });
   };
 
+  // Pausing closes "jetzt" while the pause is stored, then the pause opens; resuming opens the
+  // new stretch and "jetzt".
   const togglePause = (): void => {
     const before = clock;
+    const leaving = isPaused || isReduced ? [] : historyItems(sheetRef.current, ['now']);
+    const closing = Promise.all(leaving.map((item) => unfoldItem(item, false)));
     startTransition(async () => {
-      const changed = await (isClockPaused(before) ? session.resumeClock() : session.pauseClock());
+      const [changed] = await Promise.all([
+        isClockPaused(before) ? session.resumeClock() : session.pauseClock(),
+        closing,
+      ]);
       const after = changed.ok ? changed.value.clock : undefined;
-      if (after !== undefined) {
-        setDraft((current) => mirrorToggle(current, before, after));
-        setExpected(after);
+      if (after === undefined) {
+        for (const item of leaving) {
+          void unfoldItem(item, true);
+        }
+        return;
       }
+      opensNew.current = true;
+      setDraft((current) => mirrorToggle(current, before, after));
+      setExpected(after);
     });
   };
 
@@ -444,8 +480,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
             disabled={!result.ok}
             onClick={() => {
               if (result.ok) {
-                appearing.current =
-                  result.value.pauses.find((pause) => !draft.pauses.includes(pause)) ?? null;
+                opensNew.current = true;
                 setDraft(result.value);
                 setAdding(null);
               }
@@ -592,11 +627,15 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
           </PressableButton>
         </div>
         <div className={styles.history}>
-          {historyOf(draft).map((item) => {
+          {history.map((item) => {
             switch (item.kind) {
               case 'start':
                 return (
-                  <div key="start" className={styles.item} data-history="start">
+                  <div
+                    key={historyKey(item)}
+                    className={styles.item}
+                    data-history={historyKey(item)}
+                  >
                     <span className={styles.rail}>
                       <span className={styles.dot} />
                     </span>
@@ -625,9 +664,9 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                 const played = Date.parse(stretch.to ?? nowIso) - Date.parse(stretch.from);
                 return (
                   <div
-                    key={`stretch-${stretch.from}`}
+                    key={historyKey(item)}
                     className={styles.item}
-                    data-history={`stretch-${stretch.from}`}
+                    data-history={historyKey(item)}
                   >
                     <span className={styles.rail}>
                       <span className={styles.line} />
@@ -666,9 +705,9 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
               case 'pause':
                 return (
                   <div
-                    key={`pause-${item.pause.from}`}
+                    key={historyKey(item)}
                     className={styles.item}
-                    data-history={`pause-${item.pause.from}`}
+                    data-history={historyKey(item)}
                   >
                     <span className={styles.rail}>
                       <span className={cx(styles.line, styles.linePause)} />
@@ -678,7 +717,11 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                 );
               case 'now':
                 return (
-                  <div key="now" className={styles.item}>
+                  <div
+                    key={historyKey(item)}
+                    className={styles.item}
+                    data-history={historyKey(item)}
+                  >
                     <span className={styles.rail}>
                       <span className={cx(styles.dot, styles.dotNow)} />
                     </span>

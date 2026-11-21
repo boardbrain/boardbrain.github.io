@@ -123,6 +123,11 @@
   min-width: 8.4rem;
 }
 
+/* The trophy grows and bounces back; centred in its button. */
+.trophy {
+  display: grid;
+}
+
 /* Inline, but movable: the day slides in. */
 .dayText {
   display: inline-block;
@@ -146,11 +151,6 @@
   cursor: pointer;
   border: 0;
   opacity: 0;
-}
-
-/* The rows of one way; the other fades in when switching. */
-.wayFade {
-  display: grid;
 }
 
 /* E6: one row per person. */

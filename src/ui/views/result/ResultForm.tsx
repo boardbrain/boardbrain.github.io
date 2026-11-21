@@ -19,7 +19,6 @@ import { t } from '@/i18n/t';
 import { CheckIcon, InfoIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
 import { PressableButton } from '@/ui/components/Pressable';
-import { Swap } from '@/ui/components/Swap';
 import { Unfold } from '@/ui/components/Unfold';
 import { cx } from '@/ui/components/classNames';
 import { MatchDialog } from '@/ui/views/match/MatchDialog';
@@ -47,7 +46,6 @@ const CHECK_SIZE = 18;
 const INFO_SIZE = 18;
 const MINUTES_PER_HOUR = 60;
 const NUDGE_SECONDS = 0.9;
-const WAY_FROM = { opacity: 0 };
 
 /**
  * What is said after storing (design I3-B R3): who won, game and table.
@@ -130,6 +128,11 @@ export function ResultForm({
 
   const entries = byWay[way];
   const derived = deriveEntry(way, entries, participants, rules);
+  // Places and the trophy follow the points once a field is left, not while typing (PO 21.11.).
+  const settled =
+    way === 'points'
+      ? deriveEntry(way, { ...entries, points: committed }, participants, rules)
+      : derived;
   const readDurationResult = readDuration(duration);
   const durationMinutes = readDurationResult.minutes;
   const isDurationBad = readDurationResult.isHoursBad || readDurationResult.isMinutesBad;
@@ -235,37 +238,36 @@ export function ResultForm({
           </div>
         )}
         <div className={shared.group} aria-label={t('ergebnis.personen')} role="group">
-          {/* The other way fades in instead of replacing the rows at once. */}
-          <Swap swapKey={way} from={WAY_FROM} className={styles.wayFade}>
-            {way === 'points' ? (
-              <PointsRows
-                persons={rows}
-                entries={entries}
-                derived={derived}
-                rules={rules}
-                isPointsRequired={hasBothWays}
-                missing={derived.missing}
-                onPoints={(personId, text) => {
-                  change(setPoints(entries, personId, text, participants, rules));
-                }}
-                onCommit={() => {
-                  setCommitted(entries.points);
-                }}
-                onWinner={(personId) => {
-                  change(toggleWinner(entries, personId, rules));
-                }}
-              />
-            ) : (
-              <PlaceRows
-                persons={rows}
-                derived={derived}
-                missing={derived.missing}
-                onPlace={(personId, place) => {
-                  change(setPlace(entries, personId, place, rules));
-                }}
-              />
-            )}
-          </Swap>
+          {way === 'points' ? (
+            <PointsRows
+              persons={rows}
+              entries={entries}
+              derived={settled}
+              badPoints={derived.badPoints}
+              committed={committed}
+              rules={rules}
+              isPointsRequired={hasBothWays}
+              missing={derived.missing}
+              onPoints={(personId, text) => {
+                change(setPoints(entries, personId, text, participants, rules));
+              }}
+              onCommit={() => {
+                setCommitted(entries.points);
+              }}
+              onWinner={(personId) => {
+                change(toggleWinner(entries, personId, rules));
+              }}
+            />
+          ) : (
+            <PlaceRows
+              persons={rows}
+              derived={derived}
+              missing={derived.missing}
+              onPlace={(personId, place) => {
+                change(setPlace(entries, personId, place, rules));
+              }}
+            />
+          )}
         </div>
       </section>
 

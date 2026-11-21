@@ -19,10 +19,11 @@ import styles from './Result.module.css';
 const TROPHY_SIZE = 20;
 // A row that moves to its new place glides there, like the ring of the order band (TurnBand).
 const GLIDE = { duration: 0.25, ease: 'easeOut' } as const;
-// The trophy of a winner grows in briefly.
-const POP_FROM = { scale: 0.8 };
-const POP_TO = { scale: 1 };
-const POP = { duration: 0.15, ease: 'easeOut' } as const;
+// The trophy of a new winner grows, then bounces back, long enough to be noticed (PO 21.11.).
+const POP_FROM = { scale: 1 };
+const POP_TO = { scale: [1, 1.45, 0.9, 1.06, 1] };
+const STILL = { scale: 1 };
+const POP = { duration: 0.65, times: [0, 0.3, 0.6, 0.8, 1], ease: 'easeOut' as const };
 
 // iOS and iPadOS show no minus on the numeric keypad; an iPad reports itself as a Mac with touch.
 function hasNoMinusOnKeypad(): boolean {
@@ -66,7 +67,12 @@ export function PersonMark({ person }: { readonly person: ResultPerson }): React
 type PointsRowsProps = {
   readonly persons: readonly ResultPerson[];
   readonly entries: WayEntries;
+  /** Derived from the points as they were when a field was last left. */
   readonly derived: DerivedEntry;
+  /** Wrong points, shown while typing. */
+  readonly badPoints: readonly PersonId[];
+  /** The points as they were when a field was last left. */
+  readonly committed: Readonly<Record<PersonId, string>>;
   readonly rules: ResultRules;
   /**
    * Every score is required in this way, since the game also has "Sieger oder Rangfolge" (A2, all
@@ -88,6 +94,8 @@ export function PointsRows({
   persons,
   entries,
   derived,
+  badPoints,
+  committed,
   rules,
   isPointsRequired,
   missing,
@@ -95,7 +103,7 @@ export function PointsRows({
   onCommit,
   onWinner,
 }: PointsRowsProps): React.JSX.Element {
-  const hasAnyPoints = persons.some((person) => (entries.points[person.id] ?? '').trim() !== '');
+  const hasAnyPoints = persons.some((person) => (committed[person.id] ?? '').trim() !== '');
   const rowsRef = useRef<HTMLDivElement>(null);
   const isReduced = useReducedMotion() === true;
   const order = persons.map((person) => person.id).join(' ');
@@ -123,7 +131,7 @@ export function PointsRows({
     <div ref={rowsRef} className={styles.rows}>
       {persons.map((person) => {
         const text = entries.points[person.id] ?? '';
-        const isBad = derived.badPoints.includes(person.id);
+        const isBad = badPoints.includes(person.id);
         const isWinner = derived.winners.includes(person.id);
         const isTieChoice = derived.best.length > 1 && derived.best.includes(person.id);
         const isOpen = !hasAnyPoints && !isPointsRequired;
@@ -144,8 +152,9 @@ export function PointsRows({
             >
               <m.span
                 key={String(isWinner)}
+                className={styles.trophy}
                 initial={isWinner ? POP_FROM : false}
-                animate={POP_TO}
+                animate={isWinner ? POP_TO : STILL}
                 transition={POP}
               >
                 <TrophyIcon size={TROPHY_SIZE} />
@@ -260,8 +269,9 @@ export function PlaceRows({
                     {place === 1 ? (
                       <m.span
                         key={String(isOn)}
+                        className={styles.trophy}
                         initial={isOn ? POP_FROM : false}
-                        animate={POP_TO}
+                        animate={isOn ? POP_TO : STILL}
                         transition={POP}
                       >
                         <TrophyIcon size={PLACE_TROPHY_SIZE} />

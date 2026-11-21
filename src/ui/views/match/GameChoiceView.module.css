@@ -79,11 +79,7 @@
   font-size: 1.05rem;
 }
 
-/* The symbol of the order and the sorted cards fade in when the order changes. */
+/* The symbol of the order fades in when the order changes. */
 .sortIcon {
   display: grid;
-}
-
-.sorted {
-  display: block;
 }

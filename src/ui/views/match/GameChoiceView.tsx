@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { animate, useReducedMotion } from 'motion/react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { findByName, sortByName, type CustomGame, type GameId } from '@/core/model';
 import type { PlayedGame } from '@/core/results';
@@ -22,7 +23,8 @@ import styles from './GameChoiceView.module.css';
 
 const SORT_ICON_SIZE = 22;
 const ICON_FROM = { opacity: 0, scale: 0.6 };
-const GRID_FROM = { opacity: 0 };
+// Sorted anew, every card glides from its old place to the new one (PO 21.11.: no blinking).
+const GLIDE = { duration: 0.35, ease: 'easeInOut' } as const;
 const SEARCH_LABELS = {
   open: t('spiele.suchen'),
   field: t('spiele.suchfeld'),
@@ -106,6 +108,34 @@ export function GameChoiceView(): React.JSX.Element {
     order,
   );
   const games = findByName(sorted, query);
+  const listRef = useRef<HTMLUListElement>(null);
+  const isReduced = useReducedMotion() === true;
+  const shownIds = games.map((listed) => listed.id).join(' ');
+  const shown = useRef({ order, ids: shownIds });
+
+  // Motion (external system): when the order changes, each card glides from the place it had;
+  // that place is where the card at its old position stands now. Searching moves nothing.
+  useLayoutEffect(() => {
+    const before = shown.current;
+    shown.current = { order, ids: shownIds };
+    const list = listRef.current;
+    if (before.order === order || list === null || isReduced) {
+      return;
+    }
+    const was = before.ids.split(' ');
+    const cards = [...list.children].filter((card) => card instanceof HTMLElement);
+    const ids = shownIds.split(' ');
+    cards.forEach((card, index) => {
+      const from = cards[was.indexOf(ids[index] ?? '')];
+      if (from !== undefined && from !== card) {
+        void animate(
+          card,
+          { x: [from.offsetLeft - card.offsetLeft, 0], y: [from.offsetTop - card.offsetTop, 0] },
+          GLIDE,
+        );
+      }
+    });
+  }, [order, shownIds, isReduced]);
   const trimmedQuery = query.trim();
   const toggleSearch = (): void => {
     setIsSearchOpen(!isSearchOpen);
@@ -165,36 +195,34 @@ export function GameChoiceView(): React.JSX.Element {
       )}
       {customGames !== undefined && played !== undefined && (
         <>
-          {/* Sorted anew, the cards fade in instead of jumping. */}
-          <Swap swapKey={order} from={GRID_FROM} className={styles.sorted}>
-            <GameGrid
-              label={t('spiele.karten')}
-              hint={active.length === 0 ? undefined : t('spielliste.hinweis')}
-            >
-              {games.map((listed) =>
-                listed.kind === 'catan' ? (
-                  <CatanGameCard
-                    key={listed.id}
-                    played={played.get(listed.id)}
-                    today={today}
-                    target={{
-                      onPress: () => {
-                        setIsAsking(true);
-                      },
-                    }}
-                  />
-                ) : (
-                  <CustomGameCard
-                    key={listed.id}
-                    game={listed.game}
-                    played={played.get(listed.id)}
-                    today={today}
-                    target={{ to: `/ergebnis/neu/${listed.id}` }}
-                  />
-                ),
-              )}
-            </GameGrid>
-          </Swap>
+          <GameGrid
+            listRef={listRef}
+            label={t('spiele.karten')}
+            hint={active.length === 0 ? undefined : t('spielliste.hinweis')}
+          >
+            {games.map((listed) =>
+              listed.kind === 'catan' ? (
+                <CatanGameCard
+                  key={listed.id}
+                  played={played.get(listed.id)}
+                  today={today}
+                  target={{
+                    onPress: () => {
+                      setIsAsking(true);
+                    },
+                  }}
+                />
+              ) : (
+                <CustomGameCard
+                  key={listed.id}
+                  game={listed.game}
+                  played={played.get(listed.id)}
+                  today={today}
+                  target={{ to: `/ergebnis/neu/${listed.id}` }}
+                />
+              ),
+            )}
+          </GameGrid>
           {active.length === 0 && (
             // LZ2: what is missing and the way to it.
             <div className={styles.empty}>
