@@ -12,7 +12,8 @@ type PersonCardProps = {
 };
 
 /**
- * A person as a small playing card in the person list (design I1-E, L1): the number of tables
+ * A person as a small playing card in the person list (design I1-E, L1; layout K3 of
+ * docs/design/i1e-person-cards-final-preview.html): the number of tables
  * in the corners, the initial, the name, the person's colour at each table and the names of the
  * tables (US-VW-05 AK-1). The whole card opens the person (AK-2).
  */
@@ -39,20 +40,19 @@ export function PersonCard({ person, tables }: PersonCardProps): React.JSX.Eleme
         {person.name.charAt(0)}
       </span>
       <span className={styles.name}>{person.name}</span>
-      {tables.length > 0 && (
-        <span className={styles.dots} aria-hidden="true">
-          {dots.map(({ group, member }) => (
-            <span
-              key={group.id}
-              className={styles.dot}
-              style={{ background: `var(--color-group-${member.groupColor})` }}
-            />
-          ))}
-          {hidden > 0 && (
-            <span className={styles.more}>{t('personen.weitere', { anzahl: hidden })}</span>
-          )}
-        </span>
-      )}
+      {/* Also without tables, so every card has the same rows (layout K3). */}
+      <span className={styles.dots} aria-hidden="true">
+        {dots.map(({ group, member }) => (
+          <span
+            key={group.id}
+            className={styles.dot}
+            style={{ background: `var(--color-group-${member.groupColor})` }}
+          />
+        ))}
+        {hidden > 0 && (
+          <span className={styles.more}>{t('personen.weitere', { anzahl: hidden })}</span>
+        )}
+      </span>
       <span className={styles.tables}>{tableNames}</span>
       <span className={styles.cornerBottom} aria-hidden="true">
         {tables.length}

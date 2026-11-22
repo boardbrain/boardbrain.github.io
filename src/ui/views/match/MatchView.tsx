@@ -1,6 +1,6 @@
 import { animate, m, useReducedMotion } from 'motion/react';
 import { useLayoutEffect, useRef, useState, useTransition } from 'react';
-import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router';
+import { Navigate, useNavigate, useSearchParams } from 'react-router';
 import type { StoredSession } from '@/app/ports';
 import { revealedStepIndex, unstagedStepIndex } from '@/core/generation';
 import type { PersonId } from '@/core/model';
@@ -134,10 +134,6 @@ function pathOf(page: FlowPage | null, session: StoredSession): string {
     : `/partie?schritt=${String(page.index)}`;
 }
 
-function isFromStart(state: unknown): boolean {
-  return typeof state === 'object' && state !== null && 'from' in state && state.from === 'start';
-}
-
 // The step number in the address, `null` without one.
 function lookBackOf(value: string | null): number | null {
   return value !== null && /^\d+$/.test(value) ? Number(value) : null;
@@ -158,7 +154,6 @@ export function MatchView(): React.JSX.Element | null {
   const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
   const navigate = useNavigate();
   const [search] = useSearchParams();
-  const location = useLocation();
   const [dialog, setDialog] = useState<Dialog>(null);
   // The step a question about repeating is about (US-AB-03 AK-1, AK-8).
   const [repeatAt, setRepeatAt] = useState<number | null>(null);
@@ -228,14 +223,7 @@ export function MatchView(): React.JSX.Element | null {
     return <UnsupportedSession />;
   }
   if (page === null) {
-    // The overview leads back to where it came from: the start, or else this flow.
-    return (
-      <Navigate
-        to="/partie/uebersicht"
-        replace
-        state={{ from: isFromStart(location.state) ? 'start' : 'flow' }}
-      />
-    );
+    return <Navigate to="/partie/uebersicht" replace />;
   }
   // Tables are never deleted, so a match always has one; `null` is the result of the query
   // before the match was read and only means "still loading".
@@ -334,19 +322,15 @@ export function MatchView(): React.JSX.Element | null {
     }
   };
 
-  // The overview reached from here leads back into the flow (PO 10.11.2026: after "Blättern" to
-  // the overview, its back button led to the start).
+  // A look back replaces the entry, so the back gesture does not lead through every step.
   const go = (target: FlowPage | null): void => {
-    void navigate(pathOf(target, session), { replace: true, state: { from: 'flow' } });
+    void navigate(pathOf(target, session), { replace: true });
   };
   const act = (work: () => Promise<boolean>): void => {
     setDialog(null);
     startTransition(async () => {
       const isRunning = await work();
-      await navigate(isRunning ? '/partie/uebersicht' : '/partie', {
-        replace: true,
-        state: { from: 'flow' },
-      });
+      await navigate(isRunning ? '/partie/uebersicht' : '/partie', { replace: true });
     });
   };
   const onForward = (): void => {

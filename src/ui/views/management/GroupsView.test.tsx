@@ -431,7 +431,7 @@ describe('US-PG-03 Colours of a group', () => {
     await setUpEditor(user, 5, 'Anna', 'Ben', 'Clara', 'David', 'Eva');
 
     expect(screen.queryByRole('group', { name: /Catan-Farbe/ })).not.toBeInTheDocument();
-    expect(pressedColor('Gruppenfarbe von Eva')).toBe('Indigo');
+    expect(pressedColor('Gruppenfarbe von Eva')).toBe('Lila');
   });
 
   it('AK-5: choosing a colour that someone else has swaps the two', async () => {

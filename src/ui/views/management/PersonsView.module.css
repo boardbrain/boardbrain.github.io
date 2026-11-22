@@ -57,9 +57,11 @@
   }
 }
 
+/* Size container: the person card grows with its width (layout K3, PersonCard.module.css). */
 .item {
   display: grid;
   min-width: 0;
+  container-type: inline-size;
 }
 
 .newCard {

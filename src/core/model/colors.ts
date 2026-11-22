@@ -11,7 +11,7 @@ export type CatanColorKey = (typeof CATAN_COLOR_KEYS)[number];
 
 /**
  * Keys of the 12 group colours in the order of the automatic assignment (FA-PG-07, FA-PG-08,
- * E-28, Architecture 13.4). The order alternates between colour families, so the first colours
+ * E-28, E-50, Architecture 13.4). The order alternates between colour families, so the first colours
  * of a group are easy to tell apart.
  */
 export const GROUP_COLOR_KEYS = [

@@ -182,6 +182,26 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
 });
 
 test.describe('US-AB-06 AK-2 and US-AB-07 the result of the running match', () => {
+  test('AK-6: a long history opens at its end, at "jetzt" (PO 22.11.2026)', async ({ page }) => {
+    // Six pauses of 10 minutes, one per hour: longer than the sheet on every device.
+    const hour = 3_600_000;
+    const start = Date.now() - 7 * hour;
+    const pauses = [1, 2, 3, 4, 5, 6].map((at) => ({
+      from: new Date(start + at * hour).toISOString(),
+      to: new Date(start + at * hour + 600_000).toISOString(),
+    }));
+    await seedMatch(page, {
+      table: TABLE,
+      clock: { startedAt: new Date(start).toISOString(), pauses },
+    });
+    await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
+
+    await page.getByRole('button', { name: /^Spieldauer .* – Verlauf$/ }).click();
+    const sheet = page.getByRole('dialog', { name: 'Spieldauer' });
+    await expect(sheet.getByText('Pause 6', { exact: true })).toBeInViewport();
+    await expect(sheet.getByText('Beginn', { exact: true })).not.toBeInViewport();
+  });
+
   test('AK-6, AK-7: the history of the timer; the form is filled in from the match and ends it', async ({
     page,
   }) => {

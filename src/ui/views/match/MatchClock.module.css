@@ -12,21 +12,29 @@
   border-radius: 999px;
 }
 
-/* The time is tappable without a circle of its own: the dotted underline is enough; an invisible
-   margin makes the target 44 px high. Motion moves --paused from 0 to 1 while the timer is paused:
-   the time turns grey. */
+/* The time is tappable without a circle of its own: the dotted underline is enough. Pressed, it
+   shimmers as a small capsule inside the pill; the target is 44 px high through an invisible
+   ::before, so the shimmer never shows the whole target (PO 22.11.2026: a square box stuck out
+   of the pill). Motion moves --paused from 0 to 1 while the timer is paused: the time turns grey. */
 .time {
   --paused: 0;
 
+  position: relative;
   min-height: 0;
-  padding: 10px 6px;
-  margin: -10px -6px;
+  padding: 4px 5px;
+  margin: -4px -5px;
   font: inherit;
   font-size: 1.1rem;
   font-weight: 700;
   color: color-mix(in srgb, var(--color-text-muted) calc(var(--paused) * 100%), var(--color-text));
   background: none;
-  border-radius: 0;
+  border-radius: 999px;
+}
+
+.time::before {
+  position: absolute;
+  inset: -6px -1px;
+  content: '';
 }
 
 /* The dotted line under the whole time, seconds included: a border, because an underline is

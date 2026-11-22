@@ -134,13 +134,14 @@ describe('US-AB-04 Overview of the running match', () => {
     expect(screen.queryByText('Stein antippen zum Wiederholen')).not.toBeInTheDocument();
   });
 
-  it('"Zurück" leads to the start, the match keeps running', async () => {
+  it('US-AB-04 AK-3: "Zurück" leads to the last view in the look back, the match keeps running', async () => {
     const user = userEvent.setup();
     const db = await runMatch();
 
+    // PO 22.11.2026: also when the overview was opened from the start or after a restart.
     await user.click(await screen.findByRole('button', { name: 'Zurück' }));
 
-    expect(await screen.findByRole('heading', { name: 'start page' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'flow page' })).toBeInTheDocument();
     expect(await db.session.count()).toBe(1);
   });
 

@@ -45,7 +45,7 @@ export function PreparationLayout(): React.JSX.Element | null {
     return <Navigate to="/partie" replace />;
   }
   const toMatch = (): void => {
-    void navigate('/partie', { replace: true, state: { from: 'start' } });
+    void navigate('/partie', { replace: true });
   };
   return (
     <>

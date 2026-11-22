@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>BoardBrain – E-50 Personenfarben (final)</title>
+    <!--
+      Final reference of the person colours (E-50, Architecture 13.4), chosen by the product owner
+      on 22.11.2026 in round 4 of the colour preview (variant D4). Shows the 12 colours in the order
+      of the automatic assignment with the dark letter of the person coins, on all four designs, and
+      the previous palette (E-28) as a backup.
+    -->
+    <style>
+      :root {
+        color-scheme: dark;
+        --surface: #231d18;
+        --raised: #2d2620;
+        --text: #f3ece4;
+        --muted: #b7aa9c;
+        --border: #4a3f35;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: system-ui, sans-serif;
+        background: var(--surface);
+        color: var(--text);
+      }
+      main {
+        display: grid;
+        gap: 20px;
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.4rem;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 1.05rem;
+      }
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        overflow: hidden;
+        border-radius: 14px;
+      }
+      .grid span {
+        display: grid;
+        place-items: center;
+        min-height: 64px;
+        padding: 6px;
+        color: #231d18;
+        font-weight: 650;
+        text-align: center;
+      }
+      .grid small {
+        display: block;
+        font-weight: 500;
+        opacity: 0.8;
+      }
+      .designs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .design {
+        display: grid;
+        gap: 8px;
+        padding: 12px;
+        border-radius: 14px;
+      }
+      .coins {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .coin {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border-radius: 50%;
+        font-weight: 700;
+      }
+      @media (width < 520px) {
+        .designs {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div>
+        <h1>Personenfarben (E-50)</h1>
+        <p>Reihenfolge der automatischen Vergabe. Rot, Blau, Orange, Weiß sind die Catan-Töne. Neu: Lila, Pink, Rosa.</p>
+      </div>
+      <section>
+        <h2>Aktuell</h2>
+        <div class="grid" id="now"></div>
+      </section>
+      <section>
+        <h2>Münzen in allen Designs</h2>
+        <div class="designs" id="designs"></div>
+      </section>
+      <section>
+        <h2>Bisher (E-28, Sicherung)</h2>
+        <div class="grid" id="before"></div>
+      </section>
+    </main>
+    <script>
+      const NOW = [
+        ['red', 'Rot', '#ef5359'], ['blue', 'Blau', '#4189f5'], ['yellow', 'Gelb', '#e6cb72'], ['green', 'Grün', '#8fb35a'],
+        ['indigo', 'Lila', '#9873e8'], ['orange', 'Orange', '#f5852b'], ['teal', 'Türkis', '#5fbfb2'], ['magenta', 'Pink', '#f77de2'],
+        ['brown', 'Braun', '#94643f'], ['pink', 'Rosa', '#fbb1c6'], ['gray', 'Grau', '#9aa1ab'], ['white', 'Weiß', '#f1f1f4'],
+      ];
+      const BEFORE = [
+        ['red', 'Rot', '#ef5359'], ['blue', 'Blau', '#4189f5'], ['yellow', 'Gelb', '#e6cb72'], ['green', 'Moosgrün', '#8fb35a'],
+        ['indigo', 'Indigo', '#aeb0f2'], ['orange', 'Orange', '#f5852b'], ['teal', 'Petrol', '#5fbfb2'], ['magenta', 'Magenta', '#d46bc4'],
+        ['brown', 'Kaffee', '#94643f'], ['pink', 'Rosé', '#eba3bf'], ['gray', 'Steingrau', '#9aa1ab'], ['white', 'Weiß', '#f1f1f4'],
+      ];
+      const DESIGNS = [
+        ['Holz', '#231d18', '#2d2620'], ['Tiefsee', '#10232c', '#17303b'],
+        ['Wald', '#1b221e', '#232c27'], ['Glas', '#161a2e', '#232845'],
+      ];
+      const PERSONS = 'ABCDEFGHIJKL';
+      function swatches(id, palette) {
+        document.getElementById(id).replaceChildren(...palette.map(([key, name, hex]) => {
+          const cell = document.createElement('span');
+          cell.style.background = hex;
+          cell.title = key;
+          cell.append(name);
+          const code = document.createElement('small');
+          code.textContent = hex;
+          cell.append(code);
+          return cell;
+        }));
+      }
+      swatches('now', NOW);
+      swatches('before', BEFORE);
+      document.getElementById('designs').replaceChildren(...DESIGNS.map(([name, surface, raised]) => {
+        const box = document.createElement('div');
+        box.className = 'design';
+        box.style.background = raised;
+        box.style.border = `6px solid ${surface}`;
+        const label = document.createElement('b');
+        label.textContent = name;
+        const coins = document.createElement('div');
+        coins.className = 'coins';
+        coins.append(...NOW.map(([, , hex], index) => {
+          const coin = document.createElement('span');
+          coin.className = 'coin';
+          coin.style.background = hex;
+          coin.style.color = surface;
+          coin.textContent = PERSONS[index];
+          return coin;
+        }));
+        box.append(label, coins);
+        return box;
+      }));
+    </script>
+  </body>
+</html>
