@@ -358,6 +358,34 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
   });
 
+  test('AK-1: a second tap of a double tap on "Zur Übersicht" does not reach the overview', async ({
+    page,
+  }) => {
+    await seedMatch(page, { table: TWO });
+    await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
+    await tap(page.getByRole('button', { name: /Straße.*wiederholen/ }).first());
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await tapForward(page, 'Losen');
+    await expect(forward(page)).toHaveText('Zur Übersicht');
+
+    // PO 22.11.2026: "Ergebnis eintragen" sits where "Zur Übersicht" was; the second tap of a
+    // double tap opened the result.
+    const spot = await forward(page).boundingBox();
+    expect(spot).not.toBeNull();
+    const x = (spot?.x ?? 0) + (spot?.width ?? 0) / 2;
+    const y = (spot?.y ?? 0) + (spot?.height ?? 0) / 2;
+    await page.mouse.click(x, y);
+    await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Ergebnis eintragen' })).toBeVisible();
+    await page.mouse.click(x, y);
+
+    await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
+    await expect(page).toHaveURL(/#\/partie\/uebersicht$/);
+    // Afterwards the overview answers as always.
+    await page.getByRole('link', { name: 'Ergebnis eintragen' }).click();
+    await expect(page).toHaveURL(/#\/partie\/ergebnis$/);
+  });
+
   test('AK-2: the start leads back; a new match asks first (Q1)', async ({ page }) => {
     await seedTable(page, 'Zu zweit', 'Anna', 'Ben');
     await openOptions(page, /^Zu zweit:/);
@@ -435,6 +463,9 @@ async function tapPiece(page: Page, piece: Locator): Promise<void> {
   if (box === null) {
     throw new Error('The piece has no tap area on the screen');
   }
+  // A page that just opened ignores taps for a moment (TapShield); a click of the mouse does not
+  // wait for it as a click on a locator does.
+  await expect(page.getByTestId('tap-shield')).toHaveCount(0);
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 }
 

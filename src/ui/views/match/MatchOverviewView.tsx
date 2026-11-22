@@ -9,6 +9,7 @@ import { Board } from '@/ui/board/Board';
 import { PieceMark } from '@/ui/board/PieceMark';
 import { AgainIcon, BackIcon, ExitDoorIcon } from '@/ui/components/Icons';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
+import { TapShield } from '@/ui/components/TapShield';
 import { matchBoardPieces, pieceMarking } from './boardPieces';
 import { Coin } from './Coin';
 import { MatchClock } from './MatchClock';
@@ -391,6 +392,8 @@ export function MatchOverviewView(): React.JSX.Element | null {
           }
         />
       )}
+      {/* "Ergebnis eintragen" sits where "Zur Übersicht" ends the flow (PO 22.11.2026). */}
+      <TapShield />
       {isAskingEnd && (
         <EndMatchDialog
           onCancel={() => {
