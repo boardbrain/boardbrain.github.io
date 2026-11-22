@@ -702,6 +702,13 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                   >
                     <span className={styles.rail}>
                       <span className={styles.dot} />
+                      {/* The line after the beginning starts at the dot, no gap (PO 22.11.2026). */}
+                      <span
+                        className={cx(
+                          styles.tail,
+                          history[position + 1]?.kind === 'pause' && styles.leadPause,
+                        )}
+                      />
                     </span>
                     <div className={styles.event}>
                       <b>{t('partie.beginn')}</b>
@@ -736,6 +743,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                       <span
                         className={cx(
                           styles.line,
+                          history[position - 1]?.kind === 'start' && styles.lineFromStart,
                           history[position + 1]?.kind === 'now' && styles.lineIntoNow,
                         )}
                       />
@@ -783,6 +791,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                         className={cx(
                           styles.line,
                           styles.linePause,
+                          history[position - 1]?.kind === 'start' && styles.lineFromStart,
                           history[position + 1]?.kind === 'now' && styles.lineIntoNow,
                         )}
                       />
