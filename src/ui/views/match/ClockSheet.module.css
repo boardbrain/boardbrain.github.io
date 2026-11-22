@@ -31,8 +31,10 @@
   flex-shrink: 0;
 }
 
-/* The handle: tap or pull down to close. */
-.grab {
+/* The handle: tap or pull down to close. The whole width is the target, but only the bar is seen:
+   pressed, the bar grows and lightens instead of the invisible target shimmering (K-4, PO
+   22.11.2026). Two classes, so this wins over the shimmer of Pressable. */
+.sheet > .grab {
   display: grid;
   place-items: center;
   width: 100%;
@@ -42,13 +44,18 @@
   touch-action: none;
   background: none;
   border-radius: 0;
+  box-shadow: none;
 }
 
 .grab::before {
-  width: 42px;
+  width: calc(42px + var(--press) * 14px);
   height: 5px;
   content: '';
-  background: var(--color-border);
+  background: color-mix(
+    in srgb,
+    var(--color-text-muted) calc(var(--press) * 100%),
+    var(--color-border)
+  );
   border-radius: 3px;
 }
 
@@ -292,16 +299,25 @@
   text-decoration-color: var(--color-danger-text);
 }
 
-/* P4: "+ Pause" as quiet text at the end of the line. */
+/* P4: "+ Pause" as quiet text at the end of the line. Pressed, a capsule around the text shimmers;
+   the invisible ::before keeps the target 44 px high (PO 22.11.2026: no box of the target). */
 .textButton {
-  min-height: 44px;
-  padding: 4px 6px;
+  position: relative;
+  min-height: 0;
+  padding: 4px 10px;
   font-weight: 600;
   color: var(--color-accent-text);
   background: none;
+  border-radius: 999px;
 }
 
-/* C2: the bin without a box. */
+.textButton::before {
+  position: absolute;
+  inset: -6px 0;
+  content: '';
+}
+
+/* C2: the bin without a box; pressed, a circle shimmers, not a square. */
 .trash {
   display: grid;
   place-items: center;
@@ -310,6 +326,7 @@
   padding: 0;
   color: var(--color-text-muted);
   background: none;
+  border-radius: 50%;
 }
 
 /* N6: only minutes, three quick choices in the same line. */
