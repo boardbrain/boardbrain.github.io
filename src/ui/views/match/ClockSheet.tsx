@@ -232,7 +232,15 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
     shownKeys.current = current;
     const opening = opensNew.current;
     opensNew.current = null;
-    if (opening === null || before === null) {
+    const scroller = sheetRef.current?.querySelector('[data-scroll]');
+    if (before === null) {
+      // The sheet opens at the end of the history, at "jetzt" (PO 22.11.2026).
+      if (scroller instanceof HTMLElement) {
+        scroller.scrollTop = scroller.scrollHeight;
+      }
+      return;
+    }
+    if (opening === null) {
       return;
     }
     const added = current.filter((key) => !before.includes(key));
@@ -241,7 +249,6 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
         void unfoldItem(item, true);
       }
     }
-    const scroller = sheetRef.current?.querySelector('[data-scroll]');
     if (opening === 'at-end' && scroller instanceof HTMLElement) {
       // The end is followed at once each frame while the entry opens; only the distance there
       // was before closes smoothly, so scrolling and opening end together.

@@ -5,6 +5,7 @@ import {
   SESSION_SCHEMA_VERSION,
   startClock,
   startGeneration,
+  type SessionClock,
 } from '@/core/generation';
 import {
   CATAN_COLOR_KEYS,
@@ -164,6 +165,8 @@ export type SeedMatch = {
   readonly options?: Partial<CatanOptions>;
   /** Number of steps drawn and confirmed; without it every step, so the match is running. */
   readonly steps?: number;
+  /** The timer of the running match; without it started at the beginning of the seed. */
+  readonly clock?: SessionClock;
 };
 
 // The starting resources drawn are turned over, as "Alle umdrehen" does in the flow.
@@ -220,7 +223,7 @@ export async function seedMatch(page: Page, match: SeedMatch): Promise<void> {
     }),
     startedAt: NOW,
     // US-AB-07: a running match has its timer, started when the generation was completed.
-    ...(generation.state === 'running' ? { clock: startClock(NOW) } : {}),
+    ...(generation.state === 'running' ? { clock: match.clock ?? startClock(NOW) } : {}),
   };
   await writeRecords(page, { persons, groups, session });
   await page.goto('/#/partie');
