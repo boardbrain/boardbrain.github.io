@@ -152,13 +152,15 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
     await expect(page.getByText('Rückblick')).toBeVisible();
     await expect(progress(page)).toContainText('Platzierung 16/16');
 
-    // US-AB-05 AK-1: after a restart the overview opens again from the start.
+    // US-AB-05 AK-1: after a restart the overview opens again from the start; "Zurück" still
+    // leads into the look back (PO 22.11.2026).
     await page.reload();
     await page.goto('/#/');
     await tap(page.getByRole('link', { name: 'Partie' }));
     await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
     await tap(page.getByRole('button', { name: 'Zurück' }));
-    await expect(page.getByRole('link', { name: 'Partie' })).toBeVisible();
+    await expect(page.getByText('Rückblick')).toBeVisible();
+    await expect(progress(page)).toContainText('Platzierung 16/16');
   });
 
   test('US-SP-04, US-SR-01: three persons, Cities & Knights, resources without replacement', async ({

@@ -1,5 +1,5 @@
 import { useId, useRef, useState, useTransition, type ReactNode } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import type { PersonId } from '@/core/model';
 import { CATAN_BOARD, catanSummary, type CatanStep } from '@/games/catan';
 import { t } from '@/i18n/t';
@@ -29,12 +29,6 @@ import { cx } from '@/ui/components/classNames';
 
 type Tab = 'board' | 'list';
 
-// Where the overview was opened from: the flow (after its last step, state `{ from: 'flow' }`)
-// or the start. "Zurück" leads there (design I2-D, page 9).
-function isFromFlow(state: unknown): boolean {
-  return typeof state === 'object' && state !== null && 'from' in state && state.from === 'flow';
-}
-
 /**
  * Overview of the running match `#/partie/uebersicht` (US-AB-04 AK-1, US-AB-03 AK-6, US-AB-06
  * AK-3, design I2-C page 9, T1, G2, N1, and I2-D): tabs "Brett" and "Ergebnisse" and "Partie
@@ -51,7 +45,6 @@ export function MatchOverviewView(): React.JSX.Element | null {
   const [isAskingEnd, setAskingEnd] = useState(false);
   const [repeating, setRepeating] = useState<number | null>(null);
   const [, startTransition] = useTransition();
-  const location = useLocation();
   const boardRef = useRef<HTMLDivElement>(null);
 
   if (current === undefined || persons === undefined) {
@@ -281,11 +274,10 @@ export function MatchOverviewView(): React.JSX.Element | null {
           type="button"
           className={shared.iconBtn}
           aria-label={t('allgemein.zurueck')}
-          onClick={() =>
-            void (isFromFlow(location.state)
-              ? navigate(`/partie?schritt=${String(lastStep)}`, { replace: true })
-              : navigate('/'))
-          }
+          // US-AB-04 AK-3: always the last view in the look back, wherever the overview was
+          // opened from, also after a restart (PO 22.11.2026; before, from the start it led back
+          // there). The start is in the card hand.
+          onClick={() => void navigate(`/partie?schritt=${String(lastStep)}`, { replace: true })}
         >
           <BackIcon />
         </PressableButton>
