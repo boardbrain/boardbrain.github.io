@@ -10,15 +10,19 @@
   margin: 0 auto;
 }
 
-/* In the bottom padding of the page, so it moves none of the cards (I1-D). */
+/* In the bottom padding of the page, so it moves none of the cards (I1-D). Pressed, a capsule
+   shimmers instead of a square box (PO 22.11.2026); the margin keeps the text in its place. */
 .diagnostics {
   position: absolute;
   right: 16px;
   bottom: 6px;
+  padding: 1px 8px;
+  margin: -1px -8px;
   font-size: var(--font-size-tiny);
   line-height: 1.5;
   color: var(--color-text-muted);
   text-decoration: none;
+  border-radius: 999px;
 }
 
 .title {

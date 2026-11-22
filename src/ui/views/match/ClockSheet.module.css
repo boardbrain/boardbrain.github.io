@@ -31,8 +31,10 @@
   flex-shrink: 0;
 }
 
-/* The handle: tap or pull down to close. */
-.grab {
+/* The handle: tap or pull down to close. The whole width is the target, but only the bar is seen:
+   pressed, the bar grows and lightens instead of the invisible target shimmering (K-4, PO
+   22.11.2026). Two classes, so this wins over the shimmer of Pressable. */
+.sheet > .grab {
   display: grid;
   place-items: center;
   width: 100%;
@@ -42,13 +44,18 @@
   touch-action: none;
   background: none;
   border-radius: 0;
+  box-shadow: none;
 }
 
 .grab::before {
-  width: 42px;
+  width: calc(42px + var(--press) * 14px);
   height: 5px;
   content: '';
-  background: var(--color-border);
+  background: color-mix(
+    in srgb,
+    var(--color-text-muted) calc(var(--press) * 100%),
+    var(--color-border)
+  );
   border-radius: 3px;
 }
 
@@ -132,8 +139,42 @@
 }
 
 .rail {
+  position: relative;
   display: grid;
   justify-items: center;
+}
+
+/* Before "jetzt": the line of the stretch or pause above runs on to the ring of the dot, without a
+   gap (PO 22.11.2026). The dot sits in the middle of its row: 8 px radius, 5 px ring. The line
+   above ends square, so the seam does not show; overlapping would darken the translucent line. */
+.lead {
+  position: absolute;
+  top: 0;
+  width: 4px;
+  height: calc(50% - 13px);
+  background: var(--color-clock-played);
+  border-radius: 0 0 2px 2px;
+}
+
+/* After "Beginn": the line starts at the dot (8 px radius, no ring) and runs on into the next
+   row, which starts square (PO 22.11.2026). */
+.tail {
+  position: absolute;
+  bottom: 0;
+  width: 4px;
+  height: calc(50% - 8px);
+  background: var(--color-clock-played);
+  border-radius: 2px 2px 0 0;
+}
+
+.leadPause {
+  width: 3px;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--color-text-muted) 0 5px,
+    transparent 5px 10px
+  );
+  border-radius: 0;
 }
 
 .dot {
@@ -163,6 +204,16 @@
   min-height: 44px;
   background: var(--color-clock-played);
   border-radius: 2px;
+}
+
+.lineFromStart {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+.lineIntoNow {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .linePause {
@@ -264,16 +315,25 @@
   text-decoration-color: var(--color-danger-text);
 }
 
-/* P4: "+ Pause" as quiet text at the end of the line. */
+/* P4: "+ Pause" as quiet text at the end of the line. Pressed, a capsule around the text shimmers;
+   the invisible ::before keeps the target 44 px high (PO 22.11.2026: no box of the target). */
 .textButton {
-  min-height: 44px;
-  padding: 4px 6px;
+  position: relative;
+  min-height: 0;
+  padding: 4px 10px;
   font-weight: 600;
   color: var(--color-accent-text);
   background: none;
+  border-radius: 999px;
 }
 
-/* C2: the bin without a box. */
+.textButton::before {
+  position: absolute;
+  inset: -6px 0;
+  content: '';
+}
+
+/* C2: the bin without a box; pressed, a circle shimmers, not a square. */
 .trash {
   display: grid;
   place-items: center;
@@ -282,6 +342,7 @@
   padding: 0;
   color: var(--color-text-muted);
   background: none;
+  border-radius: 50%;
 }
 
 /* N6: only minutes, three quick choices in the same line. */

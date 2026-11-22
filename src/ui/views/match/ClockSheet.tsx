@@ -232,7 +232,15 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
     shownKeys.current = current;
     const opening = opensNew.current;
     opensNew.current = null;
-    if (opening === null || before === null) {
+    const scroller = sheetRef.current?.querySelector('[data-scroll]');
+    if (before === null) {
+      // The sheet opens at the end of the history, at "jetzt" (PO 22.11.2026).
+      if (scroller instanceof HTMLElement) {
+        scroller.scrollTop = scroller.scrollHeight;
+      }
+      return;
+    }
+    if (opening === null) {
       return;
     }
     const added = current.filter((key) => !before.includes(key));
@@ -241,7 +249,6 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
         void unfoldItem(item, true);
       }
     }
-    const scroller = sheetRef.current?.querySelector('[data-scroll]');
     if (opening === 'at-end' && scroller instanceof HTMLElement) {
       // The end is followed at once each frame while the entry opens; only the distance there
       // was before closes smoothly, so scrolling and opening end together.
@@ -684,7 +691,7 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
           </PressableButton>
         </div>
         <div className={styles.history} data-scroll="">
-          {history.map((item) => {
+          {history.map((item, position) => {
             switch (item.kind) {
               case 'start':
                 return (
@@ -695,6 +702,13 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                   >
                     <span className={styles.rail}>
                       <span className={styles.dot} />
+                      {/* The line after the beginning starts at the dot, no gap (PO 22.11.2026). */}
+                      <span
+                        className={cx(
+                          styles.tail,
+                          history[position + 1]?.kind === 'pause' && styles.leadPause,
+                        )}
+                      />
                     </span>
                     <div className={styles.event}>
                       <b>{t('partie.beginn')}</b>
@@ -726,7 +740,13 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                     data-history={historyKey(item)}
                   >
                     <span className={styles.rail}>
-                      <span className={styles.line} />
+                      <span
+                        className={cx(
+                          styles.line,
+                          history[position - 1]?.kind === 'start' && styles.lineFromStart,
+                          history[position + 1]?.kind === 'now' && styles.lineIntoNow,
+                        )}
+                      />
                     </span>
                     <div className={styles.stretchBody}>
                       <div className={styles.stretch}>
@@ -767,7 +787,14 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                     data-history={historyKey(item)}
                   >
                     <span className={styles.rail}>
-                      <span className={cx(styles.line, styles.linePause)} />
+                      <span
+                        className={cx(
+                          styles.line,
+                          styles.linePause,
+                          history[position - 1]?.kind === 'start' && styles.lineFromStart,
+                          history[position + 1]?.kind === 'now' && styles.lineIntoNow,
+                        )}
+                      />
                     </span>
                     {pauseLine(item.pause, item.index)}
                   </div>
@@ -780,6 +807,13 @@ export function ClockSheet({ clock, now, onClose }: ClockSheetProps): React.JSX.
                     data-history={historyKey(item)}
                   >
                     <span className={styles.rail}>
+                      {/* The line before reaches the dot, no gap (PO 22.11.2026). */}
+                      <span
+                        className={cx(
+                          styles.lead,
+                          history[position - 1]?.kind === 'pause' && styles.leadPause,
+                        )}
+                      />
                       <m.span
                         className={cx(styles.dot, styles.dotNow)}
                         initial={false}

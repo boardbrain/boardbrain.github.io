@@ -122,7 +122,7 @@ export function StartView(): React.JSX.Element {
             <b>{group.name}</b>
             {t('start.spieltGerade')}
           </span>
-          <PressableLink to="/partie" state={{ from: 'start' }} className={styles.pill}>
+          <PressableLink to="/partie" className={styles.pill}>
             {t('start.weiter')}
             <ChevronIcon size={14} />
           </PressableLink>
@@ -134,7 +134,6 @@ export function StartView(): React.JSX.Element {
       <div className={styles.column}>
         <PressableLink
           to={current !== undefined && current.status !== 'none' ? '/partie' : '/partie/neu'}
-          state={{ from: 'start' }}
           look="card"
           className={styles.pile}
         >

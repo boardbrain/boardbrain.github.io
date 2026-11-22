@@ -1,5 +1,5 @@
 import { useId, useRef, useState, useTransition, type ReactNode } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import type { PersonId } from '@/core/model';
 import { CATAN_BOARD, catanSummary, type CatanStep } from '@/games/catan';
 import { t } from '@/i18n/t';
@@ -9,6 +9,7 @@ import { Board } from '@/ui/board/Board';
 import { PieceMark } from '@/ui/board/PieceMark';
 import { AgainIcon, BackIcon, ExitDoorIcon } from '@/ui/components/Icons';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
+import { useJustOpened } from '@/ui/components/useJustOpened';
 import { matchBoardPieces, pieceMarking } from './boardPieces';
 import { Coin } from './Coin';
 import { MatchClock } from './MatchClock';
@@ -28,12 +29,6 @@ import { cx } from '@/ui/components/classNames';
 
 type Tab = 'board' | 'list';
 
-// Where the overview was opened from: the flow (after its last step, state `{ from: 'flow' }`)
-// or the start. "Zurück" leads there (design I2-D, page 9).
-function isFromFlow(state: unknown): boolean {
-  return typeof state === 'object' && state !== null && 'from' in state && state.from === 'flow';
-}
-
 /**
  * Overview of the running match `#/partie/uebersicht` (US-AB-04 AK-1, US-AB-03 AK-6, US-AB-06
  * AK-3, design I2-C page 9, T1, G2, N1, and I2-D): tabs "Brett" and "Ergebnisse" and "Partie
@@ -50,7 +45,6 @@ export function MatchOverviewView(): React.JSX.Element | null {
   const [isAskingEnd, setAskingEnd] = useState(false);
   const [repeating, setRepeating] = useState<number | null>(null);
   const [, startTransition] = useTransition();
-  const location = useLocation();
   const boardRef = useRef<HTMLDivElement>(null);
 
   if (current === undefined || persons === undefined) {
@@ -280,11 +274,10 @@ export function MatchOverviewView(): React.JSX.Element | null {
           type="button"
           className={shared.iconBtn}
           aria-label={t('allgemein.zurueck')}
-          onClick={() =>
-            void (isFromFlow(location.state)
-              ? navigate(`/partie?schritt=${String(lastStep)}`, { replace: true })
-              : navigate('/'))
-          }
+          // US-AB-04 AK-3: always the last view in the look back, wherever the overview was
+          // opened from, also after a restart (PO 22.11.2026; before, from the start it led back
+          // there). The start is in the card hand.
+          onClick={() => void navigate(`/partie?schritt=${String(lastStep)}`, { replace: true })}
         >
           <BackIcon />
         </PressableButton>
@@ -359,10 +352,7 @@ export function MatchOverviewView(): React.JSX.Element | null {
           </PressableButton>
           {clock}
         </div>
-        {/* US-AB-06 AK-1, AK-2: the result of the match, filled in from it. */}
-        <PressableLink to="/partie/ergebnis" className={cx(shared.primary, styles.enterResult)}>
-          {t('partie.ergebnisEintragen')}
-        </PressableLink>
+        <EnterResultLink />
       </div>
       {repeating !== null && repeatStep !== undefined && (
         <MatchDialog
@@ -406,6 +396,21 @@ export function MatchOverviewView(): React.JSX.Element | null {
         />
       )}
     </main>
+  );
+}
+
+// US-AB-06 AK-1, AK-2: the result of the match, filled in from it. It sits where "Zur Übersicht"
+// ends the flow, so it ignores taps for a moment after it appeared (PO 22.11.2026: double tap);
+// such a tap falls through to the empty row behind it.
+function EnterResultLink(): React.JSX.Element {
+  const isJustOpened = useJustOpened();
+  return (
+    <PressableLink
+      to="/partie/ergebnis"
+      className={cx(shared.primary, styles.enterResult, isJustOpened && styles.justOpened)}
+    >
+      {t('partie.ergebnisEintragen')}
+    </PressableLink>
   );
 }
 

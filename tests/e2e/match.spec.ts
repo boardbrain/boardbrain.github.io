@@ -152,13 +152,15 @@ test.describe('US-AB-01 and US-AB-02 a new match from the start to the overview'
     await expect(page.getByText('Rückblick')).toBeVisible();
     await expect(progress(page)).toContainText('Platzierung 16/16');
 
-    // US-AB-05 AK-1: after a restart the overview opens again from the start.
+    // US-AB-05 AK-1: after a restart the overview opens again from the start; "Zurück" still
+    // leads into the look back (PO 22.11.2026).
     await page.reload();
     await page.goto('/#/');
     await tap(page.getByRole('link', { name: 'Partie' }));
     await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
     await tap(page.getByRole('button', { name: 'Zurück' }));
-    await expect(page.getByRole('link', { name: 'Partie' })).toBeVisible();
+    await expect(page.getByText('Rückblick')).toBeVisible();
+    await expect(progress(page)).toContainText('Platzierung 16/16');
   });
 
   test('US-SP-04, US-SR-01: three persons, Cities & Knights, resources without replacement', async ({
@@ -356,6 +358,34 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
     await expect(page.getByText('Platzierung fertig')).toBeVisible();
     await tapForward(page, 'Zur Übersicht');
     await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
+  });
+
+  test('AK-1: a second tap of a double tap on "Zur Übersicht" does not reach the overview', async ({
+    page,
+  }) => {
+    await seedMatch(page, { table: TWO });
+    await tap(page.getByRole('tab', { name: 'Ergebnisse' }));
+    await tap(page.getByRole('button', { name: /Straße.*wiederholen/ }).first());
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Wiederholen' }).click();
+    await tapForward(page, 'Losen');
+    await expect(forward(page)).toHaveText('Zur Übersicht');
+
+    // PO 22.11.2026: "Ergebnis eintragen" sits where "Zur Übersicht" was; the second tap of a
+    // double tap opened the result.
+    const spot = await forward(page).boundingBox();
+    expect(spot).not.toBeNull();
+    const x = (spot?.x ?? 0) + (spot?.width ?? 0) / 2;
+    const y = (spot?.y ?? 0) + (spot?.height ?? 0) / 2;
+    await page.mouse.click(x, y);
+    await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Ergebnis eintragen' })).toBeVisible();
+    await page.mouse.click(x, y);
+
+    await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
+    await expect(page).toHaveURL(/#\/partie\/uebersicht$/);
+    // Afterwards the overview answers as always.
+    await page.getByRole('link', { name: 'Ergebnis eintragen' }).click();
+    await expect(page).toHaveURL(/#\/partie\/ergebnis$/);
   });
 
   test('AK-2: the start leads back; a new match asks first (Q1)', async ({ page }) => {
