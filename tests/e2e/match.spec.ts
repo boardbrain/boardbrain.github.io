@@ -383,7 +383,12 @@ test.describe('US-AB-04, US-AB-05 a running match (design I2-D)', () => {
 
     await expect(page.getByRole('heading', { name: 'Laufende Partie' })).toBeVisible();
     await expect(page).toHaveURL(/#\/partie\/uebersicht$/);
-    // Afterwards the overview answers as always.
+    // On a tablet across the clock sits at that spot and its sheet may open (PO 22.11.2026: fine,
+    // only "Ergebnis eintragen" is guarded). Afterwards the overview answers as always.
+    // The sheet lives in the history state, so a reload keeps it, and WebKit keeps it for the same
+    // address too; a fresh entry over the start does not.
+    await page.goto('/#/');
+    await page.goto('/#/partie/uebersicht');
     await page.getByRole('link', { name: 'Ergebnis eintragen' }).click();
     await expect(page).toHaveURL(/#\/partie\/ergebnis$/);
   });
