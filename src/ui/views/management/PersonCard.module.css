@@ -1,13 +1,16 @@
-/* Playing card 5 : 7 like on the start view (design D-3), content from the top (design I1-E, L1). */
+/* Playing card 5 : 7 like on the start view (design D-3). Layout K3 (22.11.2026,
+   docs/design/i1e-person-cards-final-preview.html): large initial and name in the middle, colour
+   dots and tables at the bottom. Sizes grow with the card: the list item is a size container
+   (PersonsView.module.css), so cqi is a hundredth of the card width. Every card has the same rows
+   (dots and two lines of tables reserved), so initials and names line up in a row. */
 .card {
   position: relative;
   display: grid;
-  gap: 3px;
+  grid-template-rows: 1fr auto auto 1fr auto auto;
   place-items: center;
-  align-content: start;
   min-width: 0;
   aspect-ratio: 5 / 7;
-  padding: 14px 8px 24px;
+  padding: 20px 8px 28px;
   color: var(--color-text);
   text-align: center;
   text-decoration: none;
@@ -22,7 +25,7 @@
   position: absolute;
   top: 8px;
   left: 10px;
-  font-size: 0.85rem;
+  font-size: clamp(0.85rem, 8cqi, 1.05rem);
   font-weight: 800;
   line-height: 1;
   color: var(--color-accent-text);
@@ -36,14 +39,15 @@
 
 .initial {
   display: grid;
+  grid-row: 2;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  margin-top: 6px;
-  font-size: var(--font-size-base);
+  width: clamp(42px, 40cqi, 84px);
+  height: clamp(42px, 40cqi, 84px);
+  margin-bottom: clamp(3px, 3cqi, 8px);
+  font-size: clamp(1.15rem, 18cqi, 2.3rem);
   font-weight: 800;
   color: var(--color-accent-text);
-  border: 2px solid var(--color-accent-text);
+  border: clamp(2px, 1.6cqi, 3px) solid var(--color-accent-text);
   border-radius: 50%;
 }
 
@@ -54,9 +58,10 @@
 }
 
 .name {
+  grid-row: 3;
   max-width: 100%;
   overflow: hidden;
-  font-size: 0.85rem;
+  font-size: clamp(0.85rem, 9.5cqi, 1.15rem);
   font-weight: 700;
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -65,14 +70,17 @@
 
 .dots {
   display: flex;
-  gap: 4px;
+  grid-row: 5;
+  gap: clamp(4px, 3cqi, 6px);
   align-items: center;
   justify-content: center;
+  min-height: clamp(10px, 7.5cqi, 14px);
+  margin-bottom: clamp(3px, 2.5cqi, 6px);
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  width: clamp(10px, 7.5cqi, 14px);
+  height: clamp(10px, 7.5cqi, 14px);
   border-radius: 50%;
 }
 
@@ -83,12 +91,15 @@
   color: var(--color-text-muted);
 }
 
-/* US-VW-05 AK-1: the names of the tables, two lines at most. */
+/* US-VW-05 AK-1: the names of the tables, two lines at most, always two lines of room. */
 .tables {
   display: -webkit-box;
+  grid-row: 6;
+  align-self: end;
   max-width: 100%;
+  min-height: 2.5em;
   overflow: hidden;
-  font-size: 0.68rem;
+  font-size: clamp(0.68rem, 7cqi, 0.85rem);
   line-height: 1.25;
   color: var(--color-text-muted);
   overflow-wrap: anywhere;
@@ -100,6 +111,7 @@
 /* Very narrow phones: one line, so the corner number stays free. */
 @media (width < 370px) {
   .tables {
+    min-height: 1.25em;
     -webkit-line-clamp: 1;
     line-clamp: 1;
   }

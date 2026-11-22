@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>BoardBrain – Personenkarten K3 (final)</title>
+    <style>
+/*
+ * Design tokens (Architecture 13.4, ADR-018). The only file with colour values (NFA-GB-05).
+ * Colour values from design D-1 (OP-11, E-26). Contrast on every surface of every design:
+ * text at least 4.5:1, Catan and group colours at least 3:1.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Catan colours (Specification 3.3): the same in every design */
+  --color-catan-red: #ef5359;
+  --color-catan-blue: #4189f5;
+  --color-catan-white: #f1f1f4;
+  --color-catan-orange: #f5852b;
+
+  /* Group colours (Specification 3.3, E-50): 12 colours; red, orange, blue, white = Catan tones (FA-PG-07) */
+  --color-group-red: var(--color-catan-red);
+  --color-group-orange: var(--color-catan-orange);
+  --color-group-yellow: #e6cb72;
+  --color-group-green: #8fb35a;
+  --color-group-teal: #5fbfb2;
+  --color-group-blue: var(--color-catan-blue);
+  --color-group-indigo: #9873e8;
+  --color-group-pink: #fbb1c6;
+  --color-group-magenta: #f77de2;
+  --color-group-brown: #94643f;
+  --color-group-gray: #9aa1ab;
+  --color-group-white: var(--color-catan-white);
+
+  /* Board (US-PL-01, design I1-D, docs/design/i1d-board-final-preview.html): the same in every design */
+  --color-board-sea: #1c4a5c;
+  --color-board-sea-deep: #123241;
+  --color-board-shallow: #2f7480;
+  --color-board-wave: #e8f3ef33;
+  --color-board-sand: #d9b77e;
+  --color-board-wood-top: #b48a5a;
+  --color-board-wood-bottom: #93683c;
+  --color-board-wood-edge: #d0a877;
+  --color-board-highlight: #ffffff2e;
+  --color-board-hint: #123241d9;
+
+  /* Pieces on the board and in symbols (US-PL-04 AK-3, design I2-C, G1, R1): dark outline */
+  --color-piece-outline: #231d18;
+
+  /* Marked pieces while repeating one is asked (US-AB-03 AK-8, design I2-H, M1): the gold of the app */
+  --color-piece-mark: #f5be5b;
+
+  /* Highlighting and tension mode of the placement (design D-2): the dark laid over the board
+     (55 % in the style sheet), the bright centre of a dot, the golden switch with its glow */
+  --color-board-dark: #0d0a08;
+  --color-highlight-core: #fff;
+  --color-tension-on: #f5be5b;
+  --color-on-tension: #231d18;
+  --color-tension-glow-near: #f5be5b2e;
+  --color-tension-glow: #f5be5b73;
+
+  /* Ink on Catan colours: coins, swatches and the band of the person at turn (design I2-C) */
+  --color-on-catan: #231d18;
+  --color-on-catan-strong: #fff;
+  --color-band-shade: #231d18cc;
+  --color-catan-red-band-light: color-mix(in srgb, var(--color-catan-red) 92%, #fff);
+  --color-catan-red-band-dark: color-mix(in srgb, var(--color-catan-red) 75%, #000);
+  --color-catan-blue-band-light: color-mix(in srgb, var(--color-catan-blue) 92%, #fff);
+  --color-catan-blue-band-dark: color-mix(in srgb, var(--color-catan-blue) 75%, #000);
+  --color-catan-white-band-light: color-mix(in srgb, var(--color-catan-white) 92%, #fff);
+  --color-catan-white-band-dark: color-mix(in srgb, var(--color-catan-white) 75%, #000);
+  --color-catan-orange-band-light: color-mix(in srgb, var(--color-catan-orange) 92%, #fff);
+  --color-catan-orange-band-dark: color-mix(in srgb, var(--color-catan-orange) 75%, #000);
+
+  /* Resources (US-SR-01 AK-5, design I2-C): discs of the resource symbols */
+  --color-resource-lumber: #74a75a;
+  --color-resource-brick: #d0714a;
+  --color-resource-wool: #b9dc8a;
+  --color-resource-grain: #e6c454;
+  --color-resource-ore: #a3acb8;
+  --color-resource-card-shadow: #00000073;
+
+  /* Development card K2/D2 (design I2-C, pages 1 and 5), the same in every design */
+  --color-card-paper: #3d342b;
+  --color-card-paper-low: #2c251f;
+  --color-card-ribbon-top: #d08c2c;
+  --color-card-ribbon-bottom: #9a5a12;
+  --color-card-ribbon-ink: #fff6e2;
+  --color-card-ribbon-shadow: #00000070;
+  --color-card-frame: #b98a3e;
+  --color-card-art-shadow: #00000070;
+  --color-card-glow: #fff2;
+
+  /* Design I3-B: the light centre behind the first letter of a custom game. */
+  --color-game-letter-glow: #5a4636;
+
+  /* Card back R1 (design I2-D): dark wood, lozenge pattern, golden frame, medallion with the logo */
+  --color-card-back-gold: #e0b25a;
+  --color-card-back-top: #4a3d31;
+  --color-card-back-bottom: #28211b;
+  --color-card-back-medal-light: #3d3229;
+  --color-card-back-medal-dark: #1d1713;
+
+  /* Destructive action, e.g. "Beenden" (design I2-C) */
+  --color-danger: #b42f36;
+
+  /* Destructive action as text on a dark surface, e.g. "Neu beginnen" (design I2-D, Q1) */
+  --color-danger-text: #f08a8f;
+
+  /* Translucent tag in front of a picture, e.g. "nur Catan" on a table (design I2-C, L2) */
+  --color-tag-glass: color-mix(in srgb, var(--color-surface-raised) 45%, transparent);
+
+  /*
+   * Illustrations (design I2-C, docs/design/i2-match-final-preview.html): landscape of the Catan
+   * card, pictures of the draws (hexes, harbours, number tokens), resource symbols and resource
+   * cards. One shared palette by hue, numbered from light to dark; the same in every design.
+   */
+  --color-art-red-1: #ef5359;
+  --color-art-red-2: #c98a78;
+  --color-art-red-3: #dc4224;
+  --color-art-red-4: #c4532f;
+  --color-art-red-5: #b8261f;
+  --color-art-red-6: #9e2a24;
+  --color-art-red-7: #9c3d22;
+  --color-art-red-8: #8e3e28;
+  --color-art-red-9: #7a3826;
+  --color-art-red-10: #7c151c;
+  --color-art-red-11: #7a2a12;
+  --color-art-red-12: #5a1f18;
+  --color-art-red-13: #5c2616;
+  --color-art-red-14: #4a2219;
+  --color-art-red-15: #2a110b;
+  --color-art-red-16: #140806;
+  --color-art-orange-1: #f7ecd8;
+  --color-art-orange-2: #e3d7c2;
+  --color-art-orange-3: #dcc9a8;
+  --color-art-orange-4: #ffcf7a;
+  --color-art-orange-5: #f0a882;
+  --color-art-orange-6: #ffc764;
+  --color-art-orange-7: #f0a070;
+  --color-art-orange-8: #e2b679;
+  --color-art-orange-9: #d9b77e;
+  --color-art-orange-10: #e8a06a;
+  --color-art-orange-11: #f0b45e;
+  --color-art-orange-12: #c6ad88;
+  --color-art-orange-13: #c4ad8a;
+  --color-art-orange-14: #e58a63;
+  --color-art-orange-15: #f0a858;
+  --color-art-orange-16: #d0a877;
+  --color-art-orange-17: #ff9d44;
+  --color-art-orange-18: #f39a50;
+  --color-art-orange-19: #f8a641;
+  --color-art-orange-20: #ef8a48;
+  --color-art-orange-21: #d6845a;
+  --color-art-orange-22: #ff7a30;
+  --color-art-orange-23: #eb693b;
+  --color-art-orange-24: #e9683b;
+  --color-art-orange-25: #f5852b;
+  --color-art-orange-26: #e07a40;
+  --color-art-orange-27: #ef7a2e;
+  --color-art-orange-28: #dba63f;
+  --color-art-orange-29: #d0714a;
+  --color-art-orange-30: #d0704a;
+  --color-art-orange-31: #d4a243;
+  --color-art-orange-32: #b48a5a;
+  --color-art-orange-33: #c97a42;
+  --color-art-orange-34: #c99a40;
+  --color-art-orange-35: #c75932;
+  --color-art-orange-36: #c48f34;
+  --color-art-orange-37: #b07a44;
+  --color-art-orange-38: #8f8064;
+  --color-art-orange-39: #c08a30;
+  --color-art-orange-40: #b25a3c;
+  --color-art-orange-41: #a57a45;
+  --color-art-orange-42: #bb532f;
+  --color-art-orange-43: #a8703d;
+  --color-art-orange-44: #b5532f;
+  --color-art-orange-45: #b8862a;
+  --color-art-orange-46: #b4602d;
+  --color-art-orange-47: #b4502d;
+  --color-art-orange-48: #b04f2c;
+  --color-art-orange-49: #b07a26;
+  --color-art-orange-50: #aa4c2b;
+  --color-art-orange-51: #a77a2c;
+  --color-art-orange-52: #a85a2a;
+  --color-art-brown-1: #a2532a;
+  --color-art-brown-2: #7d6a4e;
+  --color-art-brown-3: #a8731f;
+  --color-art-brown-4: #6e6156;
+  --color-art-brown-5: #9c4627;
+  --color-art-brown-6: #86693a;
+  --color-art-brown-7: #8a5a2e;
+  --color-art-brown-8: #8f6422;
+  --color-art-brown-9: #8f6420;
+  --color-art-brown-10: #8e6420;
+  --color-art-brown-11: #7d5a30;
+  --color-art-brown-12: #5d5248;
+  --color-art-brown-13: #6f5530;
+  --color-art-brown-14: #7d5420;
+  --color-art-brown-15: #6e4c26;
+  --color-art-brown-16: #5a4a38;
+  --color-art-brown-17: #6c4423;
+  --color-art-brown-18: #743619;
+  --color-art-brown-19: #6e4a1a;
+  --color-art-brown-20: #672e1a;
+  --color-art-brown-21: #6a4416;
+  --color-art-brown-22: #4a3e33;
+  --color-art-brown-23: #5e3f1e;
+  --color-art-brown-24: #5a3418;
+  --color-art-brown-25: #5e2a12;
+  --color-art-brown-26: #3a332c;
+  --color-art-brown-27: #3b2a18;
+  --color-art-brown-28: #3f2412;
+  --color-art-brown-29: #3a2210;
+  --color-art-brown-30: #2a231e;
+  --color-art-brown-31: #3a1a0c;
+  --color-art-brown-32: #3a1608;
+  --color-art-brown-33: #2a2018;
+  --color-art-brown-34: #231d18;
+  --color-art-brown-35: #2a160a;
+  --color-art-brown-36: #1e0f06;
+  --color-art-yellow-1: #faf5ea;
+  --color-art-yellow-2: #fffae0;
+  --color-art-yellow-3: #f4f1ea;
+  --color-art-yellow-4: #f5f1e6;
+  --color-art-yellow-5: #f3ecdc;
+  --color-art-yellow-6: #f7ecd0;
+  --color-art-yellow-7: #fff3c0;
+  --color-art-yellow-8: #ece3cf;
+  --color-art-yellow-9: #e8dec8;
+  --color-art-yellow-10: #fbe7a6;
+  --color-art-yellow-11: #e8d5a6;
+  --color-art-yellow-12: #ffe08a;
+  --color-art-yellow-13: #ffd987;
+  --color-art-yellow-14: #f6dc8c;
+  --color-art-yellow-15: #f4dc80;
+  --color-art-yellow-16: #d9c597;
+  --color-art-yellow-17: #c9ba98;
+  --color-art-yellow-18: #f1cd6a;
+  --color-art-yellow-19: #f3cf62;
+  --color-art-yellow-20: #f0c95a;
+  --color-art-yellow-21: #e8c35a;
+  --color-art-yellow-22: #e6c454;
+  --color-art-yellow-23: #b8a682;
+  --color-art-yellow-24: #a89f88;
+  --color-art-yellow-25: #e2b44c;
+  --color-art-yellow-26: #e2b542;
+  --color-art-yellow-27: #b9a06b;
+  --color-art-yellow-28: #e2b93b;
+  --color-art-yellow-29: #a3967a;
+  --color-art-yellow-30: #d9a63e;
+  --color-art-yellow-31: #a99a46;
+  --color-art-green-1: #cdeb85;
+  --color-art-green-2: #b9dc8a;
+  --color-art-green-3: #b3dc63;
+  --color-art-green-4: #8fbf5a;
+  --color-art-green-5: #86c443;
+  --color-art-green-6: #6fa95b;
+  --color-art-green-7: #74a75a;
+  --color-art-green-8: #93a246;
+  --color-art-green-9: #7d8b5a;
+  --color-art-green-10: #6c9b44;
+  --color-art-green-11: #5b9a33;
+  --color-art-green-12: #4f8f2c;
+  --color-art-green-13: #3f7a3a;
+  --color-art-green-14: #5d7c36;
+  --color-art-green-15: #64772f;
+  --color-art-green-16: #5d722d;
+  --color-art-green-17: #3f7a22;
+  --color-art-green-18: #3d6c2c;
+  --color-art-green-19: #55662a;
+  --color-art-green-20: #46612c;
+  --color-art-green-21: #46602a;
+  --color-art-green-22: #33602a;
+  --color-art-green-23: #3e5228;
+  --color-art-green-24: #4a5822;
+  --color-art-green-25: #2d5a18;
+  --color-art-green-26: #3f4c1f;
+  --color-art-green-27: #264a1d;
+  --color-art-green-28: #1f3a14;
+  --color-art-green-29: #24301a;
+  --color-art-green-30: #22301a;
+  --color-art-green-31: #1f2f17;
+  --color-art-green-32: #152a10;
+  --color-art-teal-1: #a9cbc8;
+  --color-art-teal-2: #5c8a8c;
+  --color-art-blue-1: #dfe4ea;
+  --color-art-blue-2: #d9dee5;
+  --color-art-blue-3: #c7ccd4;
+  --color-art-blue-4: #c3c8d0;
+  --color-art-blue-5: #a3acb8;
+  --color-art-blue-6: #4189f5;
+  --color-art-blue-7: #6f688a;
+  --color-art-blue-8: #57506c;
+  --color-art-blue-9: #3b3646;
+  --color-art-violet-1: #e9e5ef;
+  --color-art-violet-2: #dcd8e3;
+  --color-art-violet-3: #c6bfd1;
+  --color-art-violet-4: #bdb6c8;
+  --color-art-violet-5: #aaa3b8;
+  --color-art-pink-1: #7e5a6a;
+  --color-art-pink-2: #4d3646;
+  --color-art-pink-3: #3a2834;
+  --color-art-gray-1: #fff;
+  --color-art-gray-2: #f1f1f4;
+  --color-art-gray-3: #aba5b8;
+  --color-art-gray-4: #9d97ab;
+  --color-art-gray-5: #9a93a8;
+  --color-art-gray-6: #948da4;
+  --color-art-gray-7: #8f949c;
+  --color-art-gray-8: #8c949c;
+  --color-art-gray-9: #8d929b;
+  --color-art-gray-10: #9c9a8a;
+  --color-art-gray-11: #857f93;
+  --color-art-gray-12: #847d92;
+  --color-art-gray-13: #8d8b7c;
+  --color-art-gray-14: #7a7488;
+  --color-art-gray-15: #666a72;
+  --color-art-gray-16: #62666e;
+  --color-art-gray-17: #5f5d50;
+  --color-art-gray-18: #4f5258;
+  --color-art-gray-19: #4c4f56;
+  --color-art-gray-20: #3a3d42;
+  --color-art-gray-21: #383b40;
+  --color-art-gray-22: #2c2e33;
+  --color-art-gray-23: #2a2c30;
+  --color-art-gray-24: #24262a;
+  --color-art-gray-25: #000;
+
+  /* Accent palette (NFA-GB-03): fill carries --color-on-accent text, text variant sits on surfaces */
+  --color-accent-indigo: #4f46e5;
+  --color-accent-indigo-text: #a5a8ff;
+  --color-accent-blue: #2563eb;
+  --color-accent-blue-text: #86b4ff;
+  --color-accent-teal: #0f766e;
+  --color-accent-teal-text: #5fd4c4;
+  --color-accent-green: #15803d;
+  --color-accent-green-text: #6fd99a;
+  --color-accent-amber: #b45309;
+  --color-accent-amber-text: #f5be5b;
+  --color-accent-berry: #a8336a;
+  --color-accent-berry-text: #e79ac0;
+  --color-on-accent: #fff;
+  --color-backdrop: #000000b3;
+  --color-shadow: #0000008c;
+
+  /* History of the timer (US-AB-07, design I3-B Z3+): "Weiter" green as on a stopwatch, the
+     played stretches and the ring around "jetzt". */
+  --color-resume: color-mix(in srgb, var(--color-group-green) 70%, #000);
+  --color-clock-played: color-mix(in srgb, var(--color-accent) 75%, transparent);
+  --color-clock-now: color-mix(in srgb, var(--color-accent-text) 30%, transparent);
+
+  /* Home screen icon of the local acceptance app (build mode "acceptance", E-40): violet instead of
+     wood and amber, so it can be told apart from the published app; only read by npm run icons */
+  --color-acceptance-icon-surface: #211a2e;
+  --color-acceptance-icon-raised: #2c2340;
+  --color-acceptance-icon-overlay: #3a2e52;
+  --color-acceptance-icon-glow: #5a3a8c;
+  --color-acceptance-icon-accent: #c4a0ff;
+
+  /* States */
+  --color-status-ok: #4ade80;
+  --color-status-error: #fc8585;
+  --color-status-warning: #fbbf24;
+  --color-status-info: #60a5fa;
+
+  /* Typography */
+  --font-family-base: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+  --font-family-mono: ui-monospace, 'Cascadia Mono', consolas, monospace;
+  --font-size-tiny: 0.75rem;
+  --font-size-small: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-title: 1.5rem;
+  --line-height-base: 1.5;
+
+  /* Spacing and radii */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --radius-2: 0.5rem;
+  --radius-4: 1rem;
+  --touch-target-min: 44px;
+
+  /* Page layout (design I2-G): every view but the start has the same width, padding and head
+     height, so the back button sits in the same place on every page. */
+  --page-max-width: 80rem;
+  --page-padding-top: 20px;
+  --page-padding-side: 16px;
+  --page-head-height: 52px;
+
+  /* Durations and easings for Motion (Architecture 13.6) */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Pressed state (K-4, NFA-GB-04): cards rise and darken, controls shimmer in their text colour */
+  --press-lift: -3px;
+  --press-darken: 0.15;
+  --press-shimmer: 16%;
+}
+
+/*
+ * Designs (NFA-GB-02, NFA-GB-03): surfaces, text, background and default accent.
+ * "Holz" is the default; switching via data-theme follows with US-GB-01.
+ */
+:root,
+:root[data-theme='wood'] {
+  --color-surface: #231d18;
+  --color-surface-raised: #2d2620;
+  --color-surface-overlay: #383028;
+  --color-border: #4b4036;
+  --color-text: #f4ece1;
+  --color-text-muted: #b8ab9b;
+  --background-image: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%);
+  --color-accent: var(--color-accent-amber);
+  --color-accent-text: var(--color-accent-amber-text);
+}
+
+:root[data-theme='ocean'] {
+  --color-surface: #10232c;
+  --color-surface-raised: #17303b;
+  --color-surface-overlay: #1f3c49;
+  --color-border: #2d5262;
+  --color-text: #e6f4f7;
+  --color-text-muted: #98b8c2;
+  --background-image: linear-gradient(180deg, #17404e 0%, #10232c 45%);
+  --color-accent: var(--color-accent-teal);
+  --color-accent-text: var(--color-accent-teal-text);
+}
+
+:root[data-theme='forest'] {
+  --color-surface: #1b221e;
+  --color-surface-raised: #232c27;
+  --color-surface-overlay: #2c3731;
+  --color-border: #3b4941;
+  --color-text: #e9f0ea;
+  --color-text-muted: #a5b4aa;
+  --background-image: none;
+  --color-accent: var(--color-accent-green);
+  --color-accent-text: var(--color-accent-green-text);
+}
+
+/* Glass: frosted surfaces over a colour gradient; the blur costs performance on older devices. */
+:root[data-theme='glass'] {
+  --color-surface: #161a2e;
+  --color-surface-raised: #232845;
+  --color-surface-overlay: #2b3152;
+  --color-border: #ffffff26;
+  --color-text: #f1f2fa;
+  --color-text-muted: #aeb3cf;
+  --background-image:
+    radial-gradient(circle at 15% 5%, #4338ca80 0%, transparent 40%),
+    radial-gradient(circle at 90% 35%, #0e749080 0%, transparent 40%),
+    radial-gradient(circle at 40% 100%, #9d174d66 0%, transparent 45%);
+  --color-accent: var(--color-accent-indigo);
+  --color-accent-text: var(--color-accent-indigo-text);
+}
+
+/* Chosen accent overrides the default accent of the design (US-GB-01). */
+:root[data-accent='indigo'] {
+  --color-accent: var(--color-accent-indigo);
+  --color-accent-text: var(--color-accent-indigo-text);
+}
+
+:root[data-accent='blue'] {
+  --color-accent: var(--color-accent-blue);
+  --color-accent-text: var(--color-accent-blue-text);
+}
+
+:root[data-accent='teal'] {
+  --color-accent: var(--color-accent-teal);
+  --color-accent-text: var(--color-accent-teal-text);
+}
+
+:root[data-accent='green'] {
+  --color-accent: var(--color-accent-green);
+  --color-accent-text: var(--color-accent-green-text);
+}
+
+:root[data-accent='amber'] {
+  --color-accent: var(--color-accent-amber);
+  --color-accent-text: var(--color-accent-amber-text);
+}
+
+:root[data-accent='berry'] {
+  --color-accent: var(--color-accent-berry);
+  --color-accent-text: var(--color-accent-berry-text);
+}
+
+      /* Preview chrome (same look as the colour rounds). */
+      .pv {
+        --bg: #231d18;
+        --raised: #2d2620;
+        --overlay: #383028;
+        --border: #4b4036;
+        --text: #f4ece1;
+        --muted: #b8ab9b;
+        --accent-text: #f5be5b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body.pv {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%) fixed, var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+        line-height: 1.5;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        background: none;
+        border: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .pv h1,
+      .pv h2,
+      .pv p {
+        margin: 0;
+      }
+      .pv h1 {
+        font-size: 1.25rem;
+        line-height: 1.25;
+      }
+      .pv h2 {
+        font-size: 1rem;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 0.85rem;
+      }
+      .picker {
+        display: grid;
+        gap: 10px;
+        padding: 10px 16px 14px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .label {
+        min-width: 86px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .chip {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .chip[aria-pressed='true'] {
+        font-weight: 600;
+        color: var(--accent-text);
+        background: var(--overlay);
+        border-color: var(--accent-text);
+      }
+      .guideTop {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .guideDots {
+        display: flex;
+        gap: 6px;
+      }
+      .guideDots a {
+        width: 22px;
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+      }
+      .guideDots a.done {
+        background: var(--muted);
+      }
+      .guideDots a.on {
+        background: var(--accent-text);
+      }
+      .guideBox {
+        display: grid;
+        gap: 8px;
+        max-width: 760px;
+      }
+      .guideOpts {
+        display: grid;
+        gap: 6px;
+        margin-top: 4px;
+      }
+      .guideOpt {
+        display: grid;
+        gap: 2px;
+        padding: 10px 14px;
+        text-align: left;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .guideOpt[aria-pressed='true'] {
+        background: var(--overlay);
+        border-color: var(--accent-text);
+      }
+      .guideOpt[aria-pressed='true'] .optHead {
+        color: var(--accent-text);
+      }
+      .star {
+        font-size: 0.8rem;
+        color: var(--accent-text);
+      }
+      .stage {
+        display: grid;
+        gap: 18px;
+        justify-items: center;
+        padding: 16px;
+      }
+      .figures {
+        display: grid;
+        gap: 18px;
+        width: 100%;
+        justify-items: center;
+      }
+      .figures figure {
+        display: grid;
+        gap: 6px;
+        width: 100%;
+        margin: 0;
+        justify-items: center;
+      }
+      .figures figure.on figcaption {
+        color: var(--accent-text);
+        font-weight: 700;
+      }
+      .fit {
+        width: 100%;
+        overflow: hidden;
+      }
+      .copy {
+        width: min(100%, 520px);
+        padding: 12px 14px;
+        margin: 0;
+        overflow-x: auto;
+        font: 0.95rem/1.5 ui-monospace, 'Cascadia Mono', consolas, monospace;
+        white-space: pre-wrap;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .pv textarea {
+        width: min(100%, 520px);
+        min-height: 70px;
+        padding: 10px;
+        font: inherit;
+        color: var(--text);
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .primary,
+      .secondary {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        font-weight: 650;
+        text-decoration: none;
+        border-radius: 12px;
+      }
+      .primary {
+        color: #fff;
+        background: #b45309;
+      }
+      .secondary {
+        color: var(--text);
+        background: var(--raised);
+        border: 1px solid var(--border);
+      }
+      .guideNav {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        width: min(100%, 520px);
+      }
+
+      /* Device screen with the app's person list (replica of PersonsView and PersonCard). */
+      .screen {
+        transform-origin: top left;
+        padding: 16px;
+        font-family: var(--font-family-base);
+        font-size: var(--font-size-base);
+        line-height: var(--line-height-base);
+        color: var(--color-text);
+        background: var(--background-image), var(--color-surface);
+        background-repeat: no-repeat;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+      }
+      .head {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin: 8px 0 24px;
+      }
+      .head b {
+        flex: 1;
+        font-size: var(--font-size-title);
+      }
+      .round {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+        border: 1px solid var(--color-border);
+        border-radius: 50%;
+      }
+      .round.add {
+        color: var(--color-accent-text);
+        border-color: var(--color-accent-text);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+        gap: 12px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+      }
+      .item {
+        display: grid;
+        min-width: 0;
+      }
+      .newCard {
+        display: grid;
+        gap: 3px;
+        place-items: center;
+        align-content: center;
+        aspect-ratio: 5 / 7;
+        padding: 18px 10px;
+        color: var(--color-accent-text);
+        border: 1px dashed var(--color-accent-text);
+        border-radius: 14px;
+      }
+      .newCard b {
+        font-size: 0.85rem;
+        line-height: 1.2;
+      }
+
+      /* K0: PersonCard.module.css today. */
+      .card {
+        position: relative;
+        display: grid;
+        gap: 3px;
+        place-items: center;
+        align-content: start;
+        min-width: 0;
+        aspect-ratio: 5 / 7;
+        padding: 14px 8px 24px;
+        color: var(--color-text);
+        text-align: center;
+        background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
+        border: 1px solid var(--color-border);
+        border-radius: 14px;
+        box-shadow: 0 6px 18px var(--color-shadow);
+      }
+      .corner,
+      .cornerBottom {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--color-accent-text);
+      }
+      .cornerBottom {
+        inset: auto 10px 8px auto;
+        transform: rotate(180deg);
+      }
+      .initial {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        margin-top: 6px;
+        font-size: var(--font-size-base);
+        font-weight: 800;
+        color: var(--color-accent-text);
+        border: 2px solid var(--color-accent-text);
+        border-radius: 50%;
+      }
+      .alone .initial {
+        color: var(--color-text-muted);
+        border-style: dashed;
+        border-color: var(--color-text-muted);
+      }
+      .name {
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .dots {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .more {
+        font-size: 0.68rem;
+        font-weight: 700;
+        line-height: 10px;
+        color: var(--color-text-muted);
+      }
+      .tables {
+        display: -webkit-box;
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 0.68rem;
+        line-height: 1.25;
+        color: var(--color-text-muted);
+        overflow-wrap: anywhere;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+      }
+      .narrow .tables {
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+      }
+      .ring {
+        display: none;
+      }
+
+      /* K1: the same content, centred in the card. */
+      .K1 .card {
+        align-content: center;
+        padding: 22px 8px;
+      }
+      .K1 .initial {
+        margin-top: 0;
+      }
+
+      /* K2: centred and growing with the card (container query units). */
+      .K2 .item,
+      .K3 .item,
+      .K4 .item {
+        container-type: inline-size;
+      }
+      .K2 .card {
+        align-content: center;
+        gap: clamp(3px, 2.5cqi, 7px);
+        padding: 22px 8px;
+      }
+      .K2 .initial {
+        width: clamp(36px, 32cqi, 64px);
+        height: clamp(36px, 32cqi, 64px);
+        margin: 0 0 clamp(0px, 2cqi, 4px);
+        font-size: clamp(1rem, 14cqi, 1.75rem);
+        border-width: clamp(2px, 1.5cqi, 3px);
+      }
+      .K2 .name,
+      .K3 .name,
+      .K4 .name {
+        font-size: clamp(0.85rem, 9.5cqi, 1.15rem);
+      }
+      .K2 .dots,
+      .K3 .dots {
+        gap: clamp(4px, 3cqi, 6px);
+      }
+      .K2 .dot,
+      .K3 .dot {
+        width: clamp(10px, 7.5cqi, 14px);
+        height: clamp(10px, 7.5cqi, 14px);
+      }
+      .K2 .tables,
+      .K3 .tables,
+      .K4 .tables {
+        font-size: clamp(0.68rem, 7cqi, 0.85rem);
+      }
+      .K2 .corner,
+      .K2 .cornerBottom,
+      .K3 .corner,
+      .K3 .cornerBottom,
+      .K4 .corner,
+      .K4 .cornerBottom {
+        font-size: clamp(0.85rem, 8cqi, 1.05rem);
+      }
+
+      /* K3: like a playing card – large initial and name in the middle, the tables at the bottom. */
+      .K3 .card,
+      .K4 .card {
+        grid-template-rows: 1fr auto auto 1fr auto auto;
+        align-content: stretch;
+        gap: 0;
+        padding: 20px 8px 22px;
+      }
+      .K3 .initial,
+      .K4 .initial {
+        grid-row: 2;
+        width: clamp(42px, 40cqi, 84px);
+        height: clamp(42px, 40cqi, 84px);
+        margin: 0 0 clamp(3px, 3cqi, 8px);
+        font-size: clamp(1.15rem, 18cqi, 2.3rem);
+        border-width: clamp(2px, 1.6cqi, 3px);
+      }
+      .K3 .name,
+      .K4 .name {
+        grid-row: 3;
+      }
+      .K3 .dots {
+        grid-row: 5;
+        margin-bottom: clamp(3px, 2.5cqi, 6px);
+      }
+      .K3 .tables,
+      .K4 .tables {
+        grid-row: 6;
+      }
+
+      /* K4: like K3, the colours of the tables as a ring around the initial instead of dots. */
+      .K4 .dots {
+        display: none;
+      }
+      .K4 .initial {
+        position: relative;
+        color: var(--color-text);
+        border-color: transparent;
+      }
+      .K4 .ring {
+        position: absolute;
+        inset: clamp(-3px, -1.6cqi, -2px);
+        display: block;
+        border-radius: 50%;
+        mask: radial-gradient(closest-side, transparent calc(100% - clamp(4px, 3cqi, 6px)), #000 calc(100% - clamp(4px, 3cqi, 6px) + 0.5px));
+      }
+      .K4 .alone .ring {
+        display: none;
+      }
+      .K4 .tables {
+        grid-row: 5 / 7;
+        align-self: end;
+      }
+      .K4 .alone .initial {
+        color: var(--color-text-muted);
+        border-color: var(--color-text-muted);
+      }
+
+      /* K1–K4: every card has the same rows (dots and two lines of tables reserved), so initials
+         and names sit at the same height in a row; the text stays clear of the corner number. */
+      .K1 .tables,
+      .K2 .tables,
+      .K3 .tables,
+      .K4 .tables {
+        min-height: 2.5em;
+      }
+      .K1 .narrow .tables,
+      .narrow.K1 .tables,
+      .narrow.K2 .tables,
+      .narrow.K3 .tables,
+      .narrow.K4 .tables {
+        min-height: 1.25em;
+      }
+      .K1 .dots,
+      .K2 .dots,
+      .K3 .dots {
+        min-height: 10px;
+      }
+      .K2 .dots,
+      .K3 .dots {
+        min-height: clamp(10px, 7.5cqi, 14px);
+      }
+      .K1 .card,
+      .K2 .card {
+        padding-bottom: 28px;
+      }
+      .K3 .card,
+      .K4 .card {
+        padding-bottom: 28px;
+      }
+      .K3 .tables,
+      .K4 .tables {
+        align-self: end;
+      }
+      .K0 .alone .dots {
+        display: none;
+      }
+
+    </style>
+  </head>
+  <body class="pv">
+    <div id="picker" class="picker"></div>
+    <main id="stage" class="stage"></main>
+    <script>
+      const STEP = 0;
+      const FILES = ["personenkarten-r1-1-aufbau-preview.html","personenkarten-r1-2-spalten-preview.html","personenkarten-r1-3-auswahl-preview.html"];
+      // Guided preview of the person cards (22.11.2026). STEP and FILES come from build.mjs.
+      const STORE = 'boardbrain-personenkarten-r1';
+      const LAYOUTS = {
+        K0: { title: 'Bisher', text: 'Inhalt oben, gleiche Größe auf allen Geräten' },
+        K1: { title: 'Mittig', text: 'Gleicher Inhalt, senkrecht in der Mitte der Karte' },
+        K2: { title: 'Mittig, mitwachsend', text: 'In der Mitte, Buchstabe, Name und Punkte wachsen mit der Karte' },
+        K3: { title: 'Spielkarte', text: 'Großer Buchstabe und Name in der Mitte, Tische unten; wächst mit' },
+        K4: { title: 'Spielkarte mit Farbring', text: 'Wie K3, die Farben der Tische als Ring um den Buchstaben statt Punkten' },
+      };
+      const REC_LAYOUT = 'K3';
+      const COLUMNS = {
+        S0: { title: 'Bisher', text: 'Handy 3 · iPad hoch 5 · iPad quer 7', cols: { phone: 3, narrow: 3, ipad: 5, ipadq: 7 } },
+        S1: { title: 'Größer', text: 'Handy 3 · iPad hoch 4 · iPad quer 6', cols: { phone: 3, narrow: 3, ipad: 4, ipadq: 6 } },
+        S2: { title: 'Noch größer', text: 'Handy 3 · iPad hoch 4 · iPad quer 5', cols: { phone: 3, narrow: 3, ipad: 4, ipadq: 5 } },
+      };
+      const REC_COLUMNS = 'S0';
+      const DEVICES = [
+        ['phone', 'Handy', 412, 'Handy (412 px)'],
+        ['narrow', 'Handy schmal', 360, 'Schmales Handy (360 px)'],
+        ['ipad', 'iPad hoch', 820, 'iPad hochkant (820 px)'],
+        ['ipadq', 'iPad quer', 1180, 'iPad quer (1180 px)'],
+      ];
+      // Persons of the sample: name and the colour at each table (group colour keys).
+      const PERSONS = [
+        ['Anna', [['Familie Schneider', 'red'], ['Freitagsrunde', 'red'], ['Kollegen', 'red'], ['Nachbarn', 'red'], ['Spieletreff Süd', 'blue'], ['Urlaub 2026', 'red']]],
+        ['Ben', [['Familie Schneider', 'green'], ['Freitagsrunde', 'blue'], ['Urlaub 2026', 'blue']]],
+        ['Clara', [['Freitagsrunde', 'yellow'], ['Uni', 'red']]],
+        ['David', [['Freitagsrunde', 'green']]],
+        ['Emil', [['Familie Schneider', 'blue']]],
+        ['Frieda', [['Familie Schneider', 'yellow']]],
+        ['Georg', [['Familie Schneider', 'indigo'], ['Kollegen', 'blue']]],
+        ['Hanna', [['Spieletreff Süd', 'orange'], ['Uni', 'blue']]],
+        ['Ida', [['Kollegen', 'yellow'], ['Uni', 'yellow']]],
+        ['Jonas', [['Spieletreff Süd', 'yellow']]],
+        ['Karl', [['Nachbarn', 'blue'], ['Spieletreff Süd', 'green']]],
+        ['Lena', [['Spieletreff Süd', 'indigo'], ['Urlaub 2026', 'yellow']]],
+        ['Maximilian-Alexander', [['Spieletreff Süd', 'blue']]],
+        ['Nora', []],
+      ];
+      const MAX_DOTS = 5;
+      function load() {
+        try {
+          return JSON.parse(localStorage.getItem(STORE) || '{}');
+        } catch {
+          return {};
+        }
+      }
+      function save() {
+        try {
+          localStorage.setItem(STORE, JSON.stringify(state));
+        } catch {
+          // Private mode: the choice still applies on this page.
+        }
+      }
+      // STEP 0 is the final reference (docs/design): the chosen K3 and S0, nothing stored.
+      const state = STEP === 0 ? { layout: 'K3', columns: 'S0', device: 'ipad', all: false } : Object.assign({ layout: null, columns: null, device: 'ipad', all: false }, load());
+      const layout = () => state.layout || REC_LAYOUT;
+      const columns = () => state.columns || REC_COLUMNS;
+      function h(tag, attrs, ...children) {
+        const el = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          if (v === false || v == null) continue;
+          if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+          else if (k === 'style' && typeof v === 'object') for (const [p, x] of Object.entries(v)) p.startsWith('--') ? el.style.setProperty(p, x) : (el.style[p] = x);
+          else el.setAttribute(k, v);
+        }
+        for (const c of children.flat()) if (c !== false && c != null && c !== '') el.append(c);
+        return el;
+      }
+      const update = (patch) => {
+        Object.assign(state, patch);
+        save();
+        render();
+      };
+      const chips = (label, items, value, pick) =>
+        h('div', { class: 'row' }, h('span', { class: 'label' }, label), items.map(([k, l]) => h('button', { class: 'chip', 'aria-pressed': String(value === k), onclick: () => pick(k) }, l)));
+      // The table colours as ring segments with small gaps (K4).
+      function ringOf(tables) {
+        const step = 360 / tables.length;
+        const gap = tables.length > 1 ? 6 : 0;
+        const stops = tables.map(([, color], i) => `var(--color-group-${color}) ${i * step + gap / 2}deg ${(i + 1) * step - gap / 2}deg, transparent 0 ${(i + 1) * step}deg`);
+        return `conic-gradient(from ${-step / 2}deg, ${stops.join(', ')})`;
+      }
+      function card([name, tables]) {
+        const shown = tables.length > MAX_DOTS ? tables.slice(0, MAX_DOTS - 1) : tables;
+        const hidden = tables.length - shown.length;
+        const names = tables.length === 0 ? 'kein Tisch' : tables.map(([table]) => table).join(', ');
+        return h('div', { class: 'card' + (tables.length === 0 ? ' alone' : '') },
+          h('span', { class: 'corner' }, String(tables.length)),
+          h('span', { class: 'initial' }, h('span', { class: 'ring', style: { background: tables.length ? ringOf(tables) : 'none' } }), name[0]),
+          h('span', { class: 'name' }, name),
+          h('span', { class: 'dots' }, shown.map(([, color]) => h('span', { class: 'dot', style: { background: `var(--color-group-${color})` } })), hidden > 0 ? h('span', { class: 'more' }, `+${hidden}`) : ''),
+          h('span', { class: 'tables' }, names),
+          h('span', { class: 'cornerBottom' }, String(tables.length)));
+      }
+      const ICON_BACK = '‹';
+      // One device screen with the person list, scaled to the width of the page.
+      function screen(layoutId, columnsId, deviceId) {
+        const [, , width] = DEVICES.find(([id]) => id === deviceId);
+        const inner = h('div', { class: `screen ${layoutId}${width < 370 ? ' narrow' : ''}`, style: { width: `${width}px` } },
+          h('div', { class: 'head' }, h('span', { class: 'round' }, ICON_BACK), h('b', {}, 'Personen'), h('span', { class: 'round' }, '⌕'), h('span', { class: 'round add' }, '+')),
+          h('ul', { class: 'grid', style: { '--cols': String(COLUMNS[columnsId].cols[deviceId]) } },
+            h('li', {}, h('div', { class: 'newCard' }, h('span', { style: { fontSize: '1.6rem', lineHeight: '1' } }, '+'), h('b', {}, 'Neue Person'))),
+            PERSONS.map((person) => h('li', { class: 'item' }, card(person)))));
+        const fit = h('div', { class: 'fit', 'data-width': String(width) }, inner);
+        return fit;
+      }
+      function scaleAll() {
+        for (const fit of document.querySelectorAll('.fit')) {
+          const inner = fit.firstElementChild;
+          const width = Number(fit.dataset.width);
+          const scale = Math.min(1, fit.clientWidth / (width + 2));
+          inner.style.transform = `scale(${scale})`;
+          fit.style.height = `${Math.ceil(inner.offsetHeight * scale)}px`;
+          fit.style.maxWidth = `${Math.ceil((width + 2) * scale)}px`;
+          fit.dataset.scale = String(scale);
+        }
+      }
+      window.addEventListener('resize', scaleAll);
+      const deviceChips = () => chips('Gerät', DEVICES.map(([id, label]) => [id, label]), state.device, (k) => update({ device: k }));
+      function options(items, value, rec, pick) {
+        return h('div', { class: 'guideOpts' }, Object.entries(items).map(([k, v]) =>
+          h('button', { class: 'guideOpt', 'aria-pressed': String(value === k), onclick: () => pick(k) },
+            h('span', { class: 'optHead' }, h('b', {}, k), ' ', v.title, k === rec ? h('span', { class: 'star' }, ' ★ Empfehlung') : ''),
+            h('span', { class: 'small muted' }, v.text))));
+      }
+      function guideHead(question) {
+        return h('div', { class: 'guideTop' },
+          h('span', { class: 'small muted' }, `Personenkarten · ${STEP < 3 ? `Frage ${STEP} von 2` : 'Deine Auswahl'}`),
+          h('span', { class: 'guideDots' }, FILES.map((file, i) => h('a', { href: file, class: i + 1 === STEP ? 'on' : i + 1 < STEP ? 'done' : '', 'aria-label': `Seite ${i + 1}` }))));
+      }
+      function summary() {
+        const lines = [
+          `Personenkarten: ${layout()} ${LAYOUTS[layout()].title}${state.layout ? '' : ' (Empfehlung, nicht gewählt)'}`,
+          `Spalten: ${columns()} ${COLUMNS[columns()].title} (${COLUMNS[columns()].text})${state.columns ? '' : ' (Empfehlung, nicht gewählt)'}`,
+        ];
+        const note = document.getElementById('note')?.value.trim();
+        return [...lines, ...(note ? [note] : [])].join('\n');
+      }
+      function nav() {
+        const back = STEP > 1 ? h('a', { class: 'secondary', href: FILES[STEP - 2] }, '‹ Zurück') : h('a', { class: 'secondary', href: 'uebersicht-preview.html' }, '‹ Übersicht');
+        const next = STEP < 3 ? h('a', { class: 'primary', href: FILES[STEP] }, 'Weiter ›') : h('a', { class: 'secondary', href: 'uebersicht-preview.html' }, 'Übersicht');
+        return h('div', { class: 'guideNav' }, back, next);
+      }
+      function render() {
+        const picker = document.getElementById('picker');
+        const stage = document.getElementById('stage');
+        if (STEP === 0) {
+          picker.replaceChildren(h('div', { class: 'guideBox' },
+            h('h1', {}, 'Personenkarten K3 Spielkarte (final)'),
+            h('p', { class: 'small muted' }, 'Abgenommen am 22.11.2026: großer Buchstabe und Name in der Mitte, Farbpunkte und Tische unten, Größen wachsen mit der Karte. Spalten wie bisher: Handy 3, iPad hoch 5, iPad quer 7.')));
+          stage.replaceChildren(h('div', { class: 'figures' }, DEVICES.map(([id, , , caption]) => h('figure', {}, screen('K3', 'S0', id), h('figcaption', { class: 'small' }, caption)))));
+        } else if (STEP === 1) {
+          picker.replaceChildren(guideHead(),
+            h('div', { class: 'guideBox' },
+              h('h1', {}, 'Wie sollen die Personenkarten aufgebaut sein?'),
+              h('p', { class: 'small muted' }, 'Auf dem iPad sitzt der Inhalt heute klein oben auf großen Karten. Gleiche Personen, gleiche Daten wie in der App.'),
+              options(LAYOUTS, layout(), REC_LAYOUT, (k) => update({ layout: k }))),
+            deviceChips(),
+            chips('Vergleich', [['one', 'nur gewählte'], ['all', 'alle fünf']], state.all ? 'all' : 'one', (k) => update({ all: k === 'all' })));
+          const shown = state.all ? Object.keys(LAYOUTS) : [layout()];
+          stage.replaceChildren(h('div', { class: 'figures' }, shown.map((k) => h('figure', { class: k === layout() && state.all ? 'on' : '' },
+            screen(k, columns(), state.device), state.all ? h('figcaption', { class: 'small' }, `${k} ${LAYOUTS[k].title}`) : ''))), nav());
+        } else if (STEP === 2) {
+          picker.replaceChildren(guideHead(),
+            h('div', { class: 'guideBox' },
+              h('h1', {}, 'Wie viele Karten nebeneinander?'),
+              h('p', { class: 'small muted' }, `Mit deinem Aufbau ${layout()} ${LAYOUTS[layout()].title}. Weniger Spalten = größere Karten. Am Handy bleiben es 3.`),
+              options(COLUMNS, columns(), REC_COLUMNS, (k) => update({ columns: k }))),
+            deviceChips(),
+            chips('Vergleich', [['one', 'nur gewählte'], ['all', 'alle drei']], state.all ? 'all' : 'one', (k) => update({ all: k === 'all' })));
+          const shown = state.all ? Object.keys(COLUMNS) : [columns()];
+          stage.replaceChildren(h('div', { class: 'figures' }, shown.map((k) => h('figure', { class: k === columns() && state.all ? 'on' : '' },
+            screen(layout(), k, state.device), state.all ? h('figcaption', { class: 'small' }, `${k} ${COLUMNS[k].title}`) : ''))), nav());
+        } else {
+          picker.replaceChildren(guideHead(),
+            h('div', { class: 'guideBox' },
+              h('h1', {}, 'Deine Auswahl'),
+              h('p', { class: 'small muted' }, `${layout()} ${LAYOUTS[layout()].title} · ${columns()} ${COLUMNS[columns()].title}. Unten auf allen vier Geräten.`)));
+          const out = h('pre', { class: 'copy' }, summary());
+          const copy = h('button', { class: 'primary', onclick: async () => {
+            try {
+              await navigator.clipboard.writeText(summary());
+              copy.textContent = 'Kopiert';
+            } catch {
+              copy.textContent = 'Bitte von Hand kopieren';
+            }
+          } }, 'Antwort kopieren');
+          stage.replaceChildren(
+            h('h2', {}, 'Deine Antwort'), out,
+            h('label', { class: 'small muted', for: 'note' }, 'Anmerkungen (optional)'),
+            h('textarea', { id: 'note', oninput: () => { out.textContent = summary(); } }),
+            copy,
+            h('div', { class: 'figures' }, DEVICES.map(([id, , , caption]) => h('figure', {}, screen(layout(), columns(), id), h('figcaption', { class: 'small' }, caption)))),
+            nav());
+        }
+        requestAnimationFrame(scaleAll);
+      }
+      render();
+
+    </script>
+  </body>
+</html>
