@@ -463,9 +463,6 @@ async function tapPiece(page: Page, piece: Locator): Promise<void> {
   if (box === null) {
     throw new Error('The piece has no tap area on the screen');
   }
-  // A page that just opened ignores taps for a moment (TapShield); a click of the mouse does not
-  // wait for it as a click on a locator does.
-  await expect(page.getByTestId('tap-shield')).toHaveCount(0);
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 }
 

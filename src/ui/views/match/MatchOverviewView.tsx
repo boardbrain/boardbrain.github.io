@@ -9,7 +9,7 @@ import { Board } from '@/ui/board/Board';
 import { PieceMark } from '@/ui/board/PieceMark';
 import { AgainIcon, BackIcon, ExitDoorIcon } from '@/ui/components/Icons';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
-import { TapShield } from '@/ui/components/TapShield';
+import { useJustOpened } from '@/ui/components/useJustOpened';
 import { matchBoardPieces, pieceMarking } from './boardPieces';
 import { Coin } from './Coin';
 import { MatchClock } from './MatchClock';
@@ -360,10 +360,7 @@ export function MatchOverviewView(): React.JSX.Element | null {
           </PressableButton>
           {clock}
         </div>
-        {/* US-AB-06 AK-1, AK-2: the result of the match, filled in from it. */}
-        <PressableLink to="/partie/ergebnis" className={cx(shared.primary, styles.enterResult)}>
-          {t('partie.ergebnisEintragen')}
-        </PressableLink>
+        <EnterResultLink />
       </div>
       {repeating !== null && repeatStep !== undefined && (
         <MatchDialog
@@ -392,8 +389,6 @@ export function MatchOverviewView(): React.JSX.Element | null {
           }
         />
       )}
-      {/* "Ergebnis eintragen" sits where "Zur Übersicht" ends the flow (PO 22.11.2026). */}
-      <TapShield />
       {isAskingEnd && (
         <EndMatchDialog
           onCancel={() => {
@@ -409,6 +404,21 @@ export function MatchOverviewView(): React.JSX.Element | null {
         />
       )}
     </main>
+  );
+}
+
+// US-AB-06 AK-1, AK-2: the result of the match, filled in from it. It sits where "Zur Übersicht"
+// ends the flow, so it ignores taps for a moment after it appeared (PO 22.11.2026: double tap);
+// such a tap falls through to the empty row behind it.
+function EnterResultLink(): React.JSX.Element {
+  const isJustOpened = useJustOpened();
+  return (
+    <PressableLink
+      to="/partie/ergebnis"
+      className={cx(shared.primary, styles.enterResult, isJustOpened && styles.justOpened)}
+    >
+      {t('partie.ergebnisEintragen')}
+    </PressableLink>
   );
 }
 

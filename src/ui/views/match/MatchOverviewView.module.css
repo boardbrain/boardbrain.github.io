@@ -122,6 +122,11 @@
   width: 100%;
 }
 
+/* Just appeared: the second tap of a double tap on "Zur Übersicht" does not open the result. */
+.justOpened {
+  pointer-events: none;
+}
+
 /* Wide screens in landscape: the board is limited by the height, so the end of the page is one
    row: "Partie beenden ohne Ergebnis", "Ergebnis eintragen", the timer (Product Owner
    20.11.2026). Portrait keeps two rows. */

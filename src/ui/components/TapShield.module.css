@@ -1,6 +1,0 @@
-/* Over everything, dialogs and notes included, but invisible: it only catches taps. */
-.shield {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-}
