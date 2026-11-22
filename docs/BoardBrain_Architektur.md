@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.41 |
+| Version | 0.43 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 18.11.2026 |
+| Stand | 22.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
 | Sprache | Deutsch |
 
@@ -55,6 +55,7 @@
 | 0.39 | 15.11.2026 | Vorabversionen 0.x als normales GitHub-Release und damit „Latest“ statt Pre-release (16.3; Anforderungsdokumentation E-40) |
 | 0.40 | 16.11.2026 | Punkte und Rangfolge bei eigenen Spielen (Anforderungsdokumentation 0.25, E-45): `CustomGame.scoring`, `Match.victoryPoints` heißt `scores`, neu `Match.places` für eine Rangfolge von Hand; `ResultRules` und `GameModule` mit `scoring`, `allowsNegativeScores` und `supportsRanking` statt `supportsVictoryPoints`; `gameCapabilities` erhält bei eigenen Spielen den Datensatz; Plätze nach Richtung, `suggestedWinners`, `winnersOfRanking`; `MasterDataService.changeCustomGameScoring` mit Lesezugriff auf Partien (4.3, 4.5, 5.1, 7.1) |
 | 0.41 | 18.11.2026 | Bündel I3-B: Adressen für Spielliste, Ergebnisformular, „Neues Spiel“ und „Spiel bearbeiten“; kleine Entwicklungskarten maßstäblich über Größen-Container; Meldung nach dem Speichern als schwebende Karte; Uhr der laufenden Partie mit Korrektur; Design-Referenz `docs/design/i3b-result-entry-final-preview.html` (13.1); `ResultService` liest flach, Test auf der echten Datenbank (4.4, C-T-1); Uhr der laufenden Partie nach der Abnahme mit einzeln gespeicherten Pausen, `SESSION_SCHEMA_VERSION` 5, Datenbankversion 2 wandelt um, Blatt mit Verlauf (10.2, 13.1, ADR-031); kleine Bewegungen mit `Unfold` und `Swap` (13.6) |
+| 0.43 | 22.11.2026 | Personenfarben nach E-50: neues Lila, Pink und Rosa, einfache Farbnamen; Schlüssel unverändert, daher ohne Datenmigration; bisherige Werte als Sicherung; Design-Referenz `docs/design/e50-person-colors-final-preview.html` (13.4) |
 
 ## Inhaltsverzeichnis
 
@@ -1087,9 +1088,26 @@ Ein Rahmen (`AppLayout`) füllt den Bildschirm: die Ansicht (nur sie scrollt) un
 
 - Alle Farben, Abstände, Radien, Schatten und Dauern stehen als CSS-Variablen in `src/ui/styles/tokens.css`.
 - Paletten: 4 Catan-Farben (`--color-catan-‹key›`) und 12 Gruppenfarben (`--color-group-‹key›`), in allen Designs gleich; Rot, Orange, Blau und Weiß der Gruppenfarben verweisen auf die Catan-Töne (FA-PG-07). 6 Akzentfarben mit je einem Flächenwert für weiße Schrift und einem Textwert für dunkle Flächen. Werte aus Design D-1 (OP-11, E-26).
-- Farbschlüssel: Catan `red`, `blue`, `white`, `orange`; Gruppen `red`, `blue`, `yellow`, `green` (Moosgrün), `indigo`, `orange`, `teal` (Petrol), `magenta`, `brown` (Kaffee), `pink` (Rosé), `gray` (Steingrau), `white` – in dieser Reihenfolge vergibt `core/model` die Farben automatisch (E-28); Akzent `indigo`, `blue`, `teal`, `green`, `amber`, `berry`. Die Reihenfolge der automatischen Vergabe legt `core/model` fest, nicht die Tokens. *(Gruppen geändert in 0.10: `lime`, `cyan`, `violet` entfallen, `magenta`, `brown`, `gray` neu)*
+- Farbschlüssel: Catan `red`, `blue`, `white`, `orange`; Gruppen `red`, `blue`, `yellow`, `green`, `indigo`, `orange`, `teal`, `magenta`, `brown`, `pink`, `gray`, `white` – in dieser Reihenfolge vergibt `core/model` die Farben automatisch (E-28, E-50); Namen und Werte in der Tabelle unten; Akzent `indigo`, `blue`, `teal`, `green`, `amber`, `berry`. Die Reihenfolge der automatischen Vergabe legt `core/model` fest, nicht die Tokens. *(Gruppen geändert in 0.10: `lime`, `cyan`, `violet` entfallen, `magenta`, `brown`, `gray` neu)*
 - Designs (NFA-GB-03): Jedes Design ist ein Satz Werte für Oberflächen, Text, Rahmen, Hintergrundbild (`--background-image`) und Standard-Akzent unter `:root[data-theme='‹key›']`. Standard ist `wood` („Holz“, auch unter `:root` ohne Merkmal); dazu `ocean`, `forest`, `glass`. Eine gewählte Akzentfarbe setzt `data-accent` am Wurzelelement und überschreibt den Standard-Akzent, weil ihre Regeln danach stehen. Ein weiteres Design ist ein weiterer Block, ohne Änderung an Komponenten.
 - Alle Designs sind dunkel (NFA-GB-02). Mindestkontrast für Text: 4,5 : 1 auf jeder Fläche jedes Designs. Catan- und Gruppenfarben: 3 : 1 zum Hintergrund (`--color-surface`) jedes Designs und 2,3 : 1 auf dessen Karten und Überlagerungen (`--color-surface-raised`, `--color-surface-overlay`); untereinander unterscheiden sich die Gruppenfarben um mindestens ΔE 25 (CIE76), Vorrang hat diese Unterscheidbarkeit (E-28). *(geändert in 0.10)* „Glas“ nutzt durchscheinende Flächen mit Unschärfe; das kostet Rechenleistung und wird in US-GB-01 auf älteren Geräten geprüft.
+- Gruppenfarben (Personenfarben) nach E-50. Die Schlüssel sind gespeichert und bleiben, deshalb tragen manche einen älteren Namen (`indigo` ist Lila, `magenta` Pink, `pink` Rosa). Die Spalten „bisher“ sichern die vorige Palette nach E-28 (gültig bis 22.11.2026); ein Zurückwechseln ändert nur `tokens.css` und `de.ts`. Engstes Paar: Blau–Lila mit ΔE 26,8 (CIE76); Kontrast mindestens 4,5 : 1 zum Hintergrund und 3,3 : 1 auf Karten. Der Buchstabe auf den Personenmünzen ist dunkel (`--color-surface`), auf Braun nur 3,2 : 1, so vom Product Owner gewählt. Referenz: `docs/design/e50-person-colors-final-preview.html`. *(neu in 0.43)*
+
+  | Schlüssel | Name | Wert | bisher (E-28): Name | bisher: Wert |
+  |---|---|---|---|---|
+  | `red` | Rot | `#ef5359` (Catan) | Rot | `#ef5359` |
+  | `blue` | Blau | `#4189f5` (Catan) | Blau | `#4189f5` |
+  | `yellow` | Gelb | `#e6cb72` | Gelb | `#e6cb72` |
+  | `green` | Grün | `#8fb35a` | Moosgrün | `#8fb35a` |
+  | `indigo` | Lila | `#9873e8` | Indigo | `#aeb0f2` |
+  | `orange` | Orange | `#f5852b` (Catan) | Orange | `#f5852b` |
+  | `teal` | Türkis | `#5fbfb2` | Petrol | `#5fbfb2` |
+  | `magenta` | Pink | `#f77de2` | Magenta | `#d46bc4` |
+  | `brown` | Braun | `#94643f` | Kaffee | `#94643f` |
+  | `pink` | Rosa | `#fbb1c6` | Rosé | `#eba3bf` |
+  | `gray` | Grau | `#9aa1ab` | Steingrau | `#9aa1ab` |
+  | `white` | Weiß | `#f1f1f4` (Catan) | Weiß | `#f1f1f4` |
+
 - Gespeicherte Farbschlüssel werden über eine Zuordnung in Variablen übersetzt, z. B. `catanColor: 'white'` → `var(--color-catan-white)`.
 - Brett (US-PL-01, Design I1-D): `--color-board-sea`, `-sea-deep`, `-shallow`, `-wave`, `-sand`, `-wood-top`, `-wood-bottom`, `-wood-edge`, `-highlight`; in allen Designs gleich. *(neu in 0.15)*
 - Partie (Design I2-C): Landschaften, Häfen und Rohstoffe (`--color-resource-‹rohstoff›`), Karten (`--color-card-paper`, `-ribbon-…`, `-frame`, `-glow` u. a.), Schrift auf Catan-Farben (`--color-on-catan`, `-strong`), Bänder je Catan-Farbe (`--color-catan-‹key›-band-light/-dark`), Konturen der Stücke (`--color-piece-outline`) und `--color-danger`; die Illustrationen der Referenz (Landschaft, Losschritte, Symbole, Rohstoffkarten S4) nutzen eine eigene Palette `--color-art-‹familie›-‹n›`. Kleine Grafiken (Losschritte, Symbole der Optionen und Rohstoffe) liegen als Komponenten in `ui/art`, aus der Referenz übernommen; Kennungen ihrer Verläufe kommen aus `useId`. Die großen Bilder, die Rohstoffkarten und die Landschaft der Catan-Karte, sind erzeugte Bilder (ADR-030): Quellen als SVG in `scripts/art` mit Verweisen auf die Tokens, `npm run art` (`scripts/generate-art.mjs`) zeichnet sie mit Playwright und den Werten aus `tokens.css` als WebP mit Transparenz in 1200 px Breite nach `public/art/`; `ui/art/Pictures.tsx` zeigt sie als Bild mit leerem `alt`. Der Service Worker hält sie für die Offline-Nutzung vor. In allen Designs gleich. *(neu in 0.22)*

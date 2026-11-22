@@ -60,7 +60,7 @@ describe('E-27 global group that excludes Catan', () => {
   });
 });
 
-describe('E-28 palette', () => {
+describe('E-28 and E-50 palette', () => {
   it('has 12 different group colours and starts with four colour families', () => {
     expect(new Set(GROUP_COLOR_KEYS).size).toBe(12);
     expect(GROUP_COLOR_KEYS.slice(0, 4)).toEqual(['red', 'blue', 'yellow', 'green']);

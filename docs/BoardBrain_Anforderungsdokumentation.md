@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.26 |
+| Version | 0.27 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 18.11.2026 |
+| Stand | 22.11.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -40,6 +40,7 @@
 | 0.24 | 15.11.2026 | Vorabversionen 0.x erscheinen auf GitHub als normales Release und damit als „Latest“ statt als Pre-release; der Platzhalter 0.1.0 bleibt Pre-release (E-40, Entscheidung des Product Owners) |
 | 0.25 | 16.11.2026 | OP-14 geklärt (Entscheidungen des Product Owners vor I3-B): Eigene Spiele können Punkte zählen, wahlweise gewinnen die meisten oder die wenigsten (neu FA-SP-07, FA-SP-05); Punkte bei eigenen Spielen auch negativ, Siegervorschlag aus der besten Punktzahl (FA-ER-03, FA-ER-06); Plätze aus Punkten je nach Richtung (FA-ER-11); Rangfolge von Hand bei eigenen Spielen ohne erfasste Punkte, Platz 1 ist Sieger (neu FA-ER-12, E-45); Ø Platz für alle Spiele mit Plätzen, Ø Punkte je Spiel (FA-ST-02, FA-ST-03); Bestwert je Spiel als Rekord (FA-ST-08); neu Platzverteilung, Rote Laterne, Paradespiel, Partien je Spiel und Ø Abstand zum Sieger (FA-ST-09); Ø Abstand zum Sieger bleibt offen (neu OP-15) (3, 5.1, 5.8, 5.9, 10, 11) |
 | 0.26 | 18.11.2026 | Design I3-B (Entscheidungen des Product Owners): unterstützte und eigene Spiele in einer gemeinsamen Liste, unterscheidbar am Aussehen (FA-SP-03, E-46); bei Punkten ergibt sich der Sieger aus der besten Punktzahl, gewählt wird nur bei Gleichstand an der Spitze, die Warnung bei einem Sieger ohne beste Punktzahl entfällt (FA-ER-06, E-47); Spielbindung eines Tischs frei änderbar, nur die Mitgliederzahl wird geprüft (FA-VW-02, E-48); Spieldauer in der laufenden Partie korrigierbar, mit einzeln erfassten Pausen (FA-AB-11); Rangfolge von Hand auch bei Catan, mit genau einer Person auf Platz 1 (FA-ER-12, E-49) (5.1, 5.3, 5.8, 5.13, 10) |
+| 0.27 | 22.11.2026 | Personenfarben überarbeitet (Entscheidung des Product Owners in der Farbvorschau): neues Lila, Pink und Rosa, einfache Farbnamen; ersetzt die Palette aus E-28 (neu E-50) |
 
 ## Inhaltsverzeichnis
 
@@ -539,6 +540,7 @@ Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phas
 | E-47 | Bei Punkten ergibt sich der Sieger aus der besten Punktzahl; gewählt wird nur bei Gleichstand an der Spitze. Wer keine Punkte hat, trägt bei eigenen Spielen nur den Sieger oder alle Plätze ein (FA-ER-06, FA-ER-12) *(neu in 0.26)* | Ein Sieger ohne die beste Punktzahl kommt in den Spielen am Tisch nicht vor; die Warnung dazu war eine Hürde ohne Nutzen. Der einzige echte Sonderfall, eine eigene Regel bei Gleichstand, bleibt mit der Wahl unter den Besten möglich. Entscheidung des Product Owners in der Design-Planung von I3-B (17.11.2026) |
 | E-48 | Die Spielbindung eines Tischs ist frei änderbar, geprüft wird nur die Mitgliederzahl; bestehende Ergebnisse bleiben am Tisch, auch wenn ihr Spiel nicht mehr zur Bindung passt (FA-VW-02) *(neu in 0.26)* | Die Bindung bestimmt, was künftig gespielt wird, nicht was gespielt wurde. Eine Prüfung gegen bestehende Partien hätte einen Tisch, der früher Catan gespielt hat, für immer festgelegt; Ergebnisse und Statistik bleiben ohnehin beim Tisch. Entscheidung des Product Owners in der Planung von I3-B (17.11.2026) |
 | E-49 | Auch bei Catan kann statt der Siegpunkte eine Rangfolge von Hand eingetragen werden, mit genau einer Person auf Platz 1; ohne Siegpunkte und ohne Rangfolge nur der Sieger. Damit verhält sich Catan im Formular wie ein eigenes Spiel mit Punkten: Siegpunkte für alle oder „Sieger oder Rangfolge“ (FA-ER-12) *(neu in 0.26, ersetzt den Ausschluss aus E-45)* | Ob die Siegpunkte notiert werden oder nur die Reihenfolge, soll die Person beim Eintragen selbst entscheiden; nicht an jedem Abend liegen am Ende alle Siegpunkte noch offen. Ein gleiches Formular für alle Spiele ist leichter zu lernen. Entscheidung des Product Owners bei der Abnahme von I3-B (20.11.2026) |
+| E-50 | Personenfarben in dieser Reihenfolge der automatischen Vergabe: Rot, Blau, Gelb, Grün, Lila, Orange, Türkis, Pink, Braun, Rosa, Grau, Weiß. Rot, Blau, Orange und Weiß bleiben die Catan-Töne; neu sind Lila, Pink und Rosa, die übrigen Farben bleiben unverändert. Ersetzt die Farbnamen und die Palette aus E-28; die Kontrastregel aus E-28 gilt weiter *(neu in 0.27)* | In der alten Palette waren Indigo und Grau sowie Magenta und Rosé zu ähnlich, und Namen wie „Kaffee“ oder „Moosgrün“ wirkten ungewohnt. Lila ist jetzt kräftig violett, Pink hell und leuchtend, Rosa zart; Pink und Rosa bleiben beide, weil der Product Owner beide möchte. Engstes Paar ist Blau–Lila mit ΔE 26,8 (CIE76, Regel mindestens 25). Ausgewählt vom Product Owner in vier Runden der Farbvorschau mit echten Bildschirmen der App; die bisherigen Werte stehen als Sicherung in Architektur 13.4 |
 
 ---
 
