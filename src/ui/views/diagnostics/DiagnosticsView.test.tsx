@@ -135,8 +135,10 @@ describe('Architecture 13.1, K-9 diagnostics view', () => {
 
     const data = screen.getByRole('region', { name: 'Daten' });
     expect(await within(data).findByText('2 · 1 archiviert')).toBeInTheDocument();
-    const results = within(data).getByText('Ergebnisse').parentElement;
-    expect(results).toHaveTextContent('Ergebnisse1');
+    const terms = within(data).getAllByRole('term');
+    const values = within(data).getAllByRole('definition');
+    const index = terms.findIndex((term) => term.textContent === 'Ergebnisse');
+    expect(values[index]).toHaveTextContent('1');
     expect(within(data).getByText('2,1 MB von 9,3 GB')).toBeInTheDocument();
     expect(within(data).getByText('keine')).toBeInTheDocument();
     expect(screen.queryByText('Anna')).not.toBeInTheDocument();
