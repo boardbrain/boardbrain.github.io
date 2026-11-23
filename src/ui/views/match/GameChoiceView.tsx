@@ -196,12 +196,15 @@ export function GameChoiceView(): React.JSX.Element | null {
           </div>
         </div>
         <span className={gameStyles.headActions}>
-          <SearchButton
-            labels={SEARCH_LABELS}
-            isOpen={isSearchOpen}
-            className={shared.iconBtn}
-            onToggle={toggleSearch}
-          />
+          {/* A table plays few games: no search there, so the title keeps one line (I3-C). */}
+          {fixed === null && (
+            <SearchButton
+              labels={SEARCH_LABELS}
+              isOpen={isSearchOpen}
+              className={shared.iconBtn}
+              onToggle={toggleSearch}
+            />
+          )}
           <PressableButton
             type="button"
             className={shared.iconBtn}

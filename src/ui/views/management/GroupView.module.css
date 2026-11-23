@@ -1,25 +1,21 @@
 /* Design I3-C RT2: the tabs right below the head; the big table only on "Am Tisch". From 1000 px
    as before two columns: the table on the left, tabs and content on the right (I1-E T7). */
 .layout {
-  display: grid;
-  grid-template-areas: 'tabs' 'table' 'panel';
+  display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: start;
 }
 
+/* In the page the table comes first, so screen readers meet it before the tabs; on a phone the
+   tabs stand above it. A hidden table leaves no gap. */
 .tabs {
-  grid-area: tabs;
+  order: -1;
   margin-top: -8px;
 }
 
 .tableColumn {
   display: grid;
-  grid-area: table;
   gap: 12px;
-}
-
-.panel {
-  grid-area: panel;
 }
 
 .panel:focus-visible {
@@ -35,6 +31,8 @@
 
 @media (width >= 62.5rem) {
   .layout {
+    display: grid;
+    align-items: start;
     grid-template:
       'table tabs' auto
       'table panel' 1fr / 380px minmax(0, 1fr);
@@ -42,7 +40,16 @@
   }
 
   .tabs {
+    grid-area: tabs;
     margin-top: 0;
+  }
+
+  .tableColumn {
+    grid-area: table;
+  }
+
+  .panel {
+    grid-area: panel;
   }
 }
 

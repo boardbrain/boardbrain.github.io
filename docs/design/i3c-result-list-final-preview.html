@@ -12534,6 +12534,21 @@
         go('mgResult');
       }
 
+      // As built: the subtitle names the order, no search on the game choice of a table.
+      function i3cPickGameScreen() {
+        const t = i3Table(res3.fixedTable || res3.tableId || 't1');
+        res3.fixedTable = t.id;
+        const sortWord = ui.S === 'S2' ? 'A–Z' : 'zuletzt gespielt';
+        const cards = listGames().filter((g) => canPlay(t, g.id)).map((g) => (g.supported ? catanDev(null, () => startResult('catan')) : sameCard(g, () => startResult(g.id))));
+        return h('main', { class: 'main' },
+          pageHead('Ergebnis eintragen', {
+            back: () => { res3.fixedTable = null; i3c.tab = 'results'; go('mgTable'); },
+            sub: `${t.name} · ${sortWord}`,
+            actions: h('button', { class: 'iconBtn', 'aria-label': `Sortiert nach ${sortWord}, wechseln zu ${ui.S === 'S2' ? 'zuletzt gespielt' : 'A–Z'}`, onclick: () => { ui.S = ui.S === 'S2' ? 'S1' : 'S2'; render(); } }, icon(ui.S === 'S2' ? 'sortAz' : 'sortRecent', 22)),
+          }),
+          h('div', { class: gridClass() }, cards));
+      }
+
       // ---------- pages of the reference ----------
       const I3C_FINAL_PAGES = [
         ['members', 'Tisch: Am Tisch', () => { res3.tableId = 't1'; i3c.tab = 'members'; return 'mgTable'; }],
@@ -12601,9 +12616,9 @@
             'Löschen fragt immer: „Ergebnis löschen?“ / „Skyjo · heute, 17.11.“ / „Lässt sich nicht rückgängig machen“ / „Abbrechen“ / „Löschen“ (Fehlerfarbe). Danach Tischseite im Reiter „Ergebnisse“. Sicherungspunkt folgt mit I4 (Variante A).',
           ]),
           spec('Ergebnis vom Tisch und nach dem Speichern (US-ER-01 AK-1, NM3, NB1)', [
-            'Plus im Kopf: Spielwahl „Ergebnis eintragen“ / „‹Tisch› · Welches Spiel?“ mit den Spielkarten der Spielliste, nur Spiele dieses Tischs, Sortierknopf wie dort; Catan ohne Catan-Frage. Spielt der Tisch nur ein Spiel, gleich das Formular.',
+            'Plus im Kopf: Spielwahl „Ergebnis eintragen“ / „‹Tisch› · zuletzt gespielt“ (bzw. „A–Z“) mit den Spielkarten der Spielliste, nur Spiele dieses Tischs, Sortierknopf wie dort, ohne Suche (sonst bricht der Titel um); Catan ohne Catan-Frage. Spielt der Tisch nur ein Spiel, gleich das Formular.',
             'Vom Tisch aus gespeichert: zurück zur Tischseite im Reiter „Ergebnisse“. Der neue Eintrag hellt einmal golden auf (Hintergrund Akzentfarbe 20 %, nach 0,44 s am hellsten) und verblasst in 2,2 s; danach sieht er aus wie alle anderen (HL1). Liegt er außer Sicht, wird er vorher ins Bild gescrollt (ein Drittel von oben).',
-            'Aus der Spielliste oder der laufenden Partie gespeichert: Start mit der Meldungskarte aus I3-B oben (R3), jetzt ein Knopf mit Pfeil rechts; antippen öffnet die Tischseite im Reiter „Ergebnisse“, der Eintrag hellt auf wie oben. Sie verschwindet nach 6 Sekunden.',
+            'Aus der Spielliste oder der laufenden Partie gespeichert: Start mit der Meldungskarte aus I3-B oben (R3), jetzt ein Knopf mit Pfeil rechts; antippen öffnet die Tischseite im Reiter „Ergebnisse“, der Eintrag hellt auf wie oben. Sie verschwindet wie bisher von selbst, sobald sie lesbar war: mindestens 5 Sekunden, bei langen Namen länger.',
           ]),
           spec('Laufende Partie (UE1, C-G-9)', [
             'Reiter „Brett | Ergebnisse“ mit derselben Komponente und demselben Aussehen RA1. Alles andere wie gebaut: „Partie beenden ohne Ergebnis“ und Uhr in einer Zeile, darunter „Ergebnis eintragen“ (#58).',
