@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Verbindliche Arbeitsregeln für Code, Tests, Git, Abhängigkeiten und Dokumentation (EP-12) |
-| Version | 0.18 |
+| Version | 0.19 |
 | Status | Verbindlich ab der Setup-Phase |
-| Stand | 16.11.2026 |
+| Stand | 23.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5, BoardBrain_Architektur.md v0.2 |
 | Kurzfassung | `CLAUDE.md` im Wurzelordner des Repositorys |
 | Sprache | Deutsch |
@@ -33,6 +33,7 @@
 | 0.16 | 15.11.2026 | Kleine Aufgabe K-8: Reine Doku-Änderungen sind auch auf GitHub schnell grün; `check` und `stat` überspringen ihre Schritte, die Ende-zu-Ende-Läufe entfallen (3.6) |
 | 0.17 | 15.11.2026 | Vorabversionen 0.x als normales Release, „Latest“ statt Pre-release (3.8; Anforderungsdokumentation E-40) |
 | 0.18 | 16.11.2026 | Unterordner `test-reports/analyse/` für Berichte von Prüfungen des Codes und der Fachlogik, erstmals mit der erweiterten Codeanalyse durch Fable (11.2) |
+| 0.19 | 23.11.2026 | Kleine Aufgabe K-18: je Bildschirm gilt nur die jüngste Referenz, Übersicht in `docs/design/README.md`; weicht die App nach der Abnahme ab, wird die Referenz im selben PR nachgezogen (2.5) |
 
 ## Inhaltsverzeichnis
 
@@ -116,7 +117,7 @@ Vor dem Bau einer neuen oder sichtbar geänderten Oberfläche (Ansicht, Ablauf, 
 - **Form:** eine lokale, klickbare HTML-Datei im Ordner `previews/` (z. B. `previews/groups-preview.html`). Der Name enthält immer `-preview`; `.gitignore` hält den Ordner `/previews/` und zur Sicherheit jede Datei `/*-preview*.html` im Wurzelordner aus dem Repository. *(geändert in 0.12)* Der Entwicklungsserver liefert sie mit aus, sodass der Product Owner sie auf allen Abnahmegeräten öffnen kann (`https://192.168.178.20:5173/previews/‹datei›`).
 - **Inhalt:** mindestens zwei, besser drei bis fünf deutlich verschiedene Ansätze, umschaltbar; Handy hochkant und Tablet quer; die echten Farbwerte aus `tokens.css` und realistische Datenmengen (auch eine volle Liste); bei Farben die Kontraste und Farbabstände als Zahl.
 - **Ablauf:** Der Product Owner wählt, kombiniert oder wünscht weitere Varianten; jede Runde bleibt als eigene Datei zum Vergleich erhalten (`…-preview-v1.html`) und wird nie gelöscht. Die gewählte Variante hält Claude Code im Pull Request fest.
-- **Finale Referenz:** Nach der Wahl erstellt Claude Code eine finale Vorschau nur mit der gewählten Variante: umschaltbar nach Gerät, Datenstand und Umfang („jetzt gebaut“ / „mit späteren Funktionen“), darunter Bauangaben mit Maßen, Abständen und Verhalten. Nach Abnahme durch den Product Owner kommt sie als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (z. B. `d3-start-navigation-final-preview.html`) und ist die verbindliche Vorlage für dieses und spätere Bündel, die dort andocken. Nach dem Bau vergleicht Claude Code Vorlage und App per Screenshot in denselben Zuständen und behebt Abweichungen, bevor es „fertig“ meldet. *(neu in 0.6)*
+- **Finale Referenz:** Nach der Wahl erstellt Claude Code eine finale Vorschau nur mit der gewählten Variante: umschaltbar nach Gerät, Datenstand und Umfang („jetzt gebaut“ / „mit späteren Funktionen“), darunter Bauangaben mit Maßen, Abständen und Verhalten. Nach Abnahme durch den Product Owner kommt sie als `docs/design/‹id›-‹kurzbeschreibung›-final-preview.html` ins Repository (z. B. `d3-start-navigation-final-preview.html`) und ist die verbindliche Vorlage für dieses und spätere Bündel, die dort andocken. Nach dem Bau vergleicht Claude Code Vorlage und App per Screenshot in denselben Zuständen und behebt Abweichungen, bevor es „fertig“ meldet. *(neu in 0.6)* **Aktualität:** Je Bildschirm gilt nur die jüngste Referenz; `docs/design/README.md` nennt sie und listet ersetzte Dateien, die nur den Stand ihres Bündels zeigen. Ändert sich die App nach der Abnahme bewusst (andere Wahl, Nachbesserung), zieht Claude Code die gültige Referenz im selben PR nach und aktualisiert die Übersicht. Eine neue Vorschau baut nie auf einer veralteten Referenz auf. *(neu in 0.19)*
 - **Ausnahme:** reine Fehlerbehebungen und Änderungen, die einem bereits gewählten Entwurf folgen.
 
 ---
