@@ -60,24 +60,31 @@
   border-radius: 50%;
 }
 
-/* Below the board: "Partie beenden ohne Ergebnis" on the left, the timer on the right. */
+/* Below the board: "Partie beenden ohne Ergebnis" on the left, the timer on the right. The row
+   never wraps, the timer never moves below (PO 23.11.2026, V1): it keeps its size, the pill gives
+   way. */
 .endRow {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   justify-content: space-between;
   width: 100%;
 }
 
-/* The pill keeps one line, as high as the timer; with too little room the timer moves below. */
+/* The pill is as high as the timer. Only where even the tighter sizes do not fit (320 px) its
+   label breaks into two balanced lines: "Partie beenden / ohne Ergebnis". */
 .endRow > :first-child {
+  flex: 0 1 auto;
+  min-width: 0;
   min-height: 44px;
-  white-space: nowrap;
+  line-height: 1.15;
+  text-align: left;
+  text-wrap: balance;
 }
 
-/* Narrow phones (360 px): a tighter timer, so it still fits beside the pill (PO 21.11.). */
-@media (width < 384px) {
+/* Phones: a tighter timer, so two- and three-digit hours fit beside the pill (PO 21.11., below
+   420 px since 23.11.: at 384 px "12:34" was 1 px too wide). */
+@media (width < 420px) {
   .endRow {
     gap: 6px;
   }
@@ -99,5 +106,14 @@
     width: 32px;
     min-height: 32px;
     height: 32px;
+  }
+}
+
+/* Narrow phones (360 px): the pill is a little tighter too. */
+@media (width < 384px) {
+  .endRow > :first-child {
+    gap: 5px;
+    padding-inline: 9px;
+    font-size: 0.8rem;
   }
 }
