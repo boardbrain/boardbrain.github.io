@@ -47,10 +47,11 @@ describe('Architecture 13.1 start view (design D-3)', () => {
       aCustomGame({ id: toGameId('00000000-0000-4000-8000-0000000000b2'), name: 'Wizard' }),
     ]);
 
+    // Each count is a query of its own and may arrive later than the others: wait for each.
     const persons = await within(cards()).findByRole('link', { name: 'Personen: 2' });
     expect(persons).not.toHaveTextContent('hier anfangen');
-    expect(within(cards()).getByRole('link', { name: 'Tische: 1' })).toBeInTheDocument();
-    expect(within(cards()).getByRole('link', { name: 'Spiele: 3' })).toBeInTheDocument();
+    expect(await within(cards()).findByRole('link', { name: 'Tische: 1' })).toBeInTheDocument();
+    expect(await within(cards()).findByRole('link', { name: 'Spiele: 3' })).toBeInTheDocument();
   });
 });
 
