@@ -4,6 +4,10 @@ import styles from './Page.module.css';
 
 type PageProps = {
   readonly title: string;
+  /** A line below the title, e.g. the day of a result. */
+  readonly subtitle?: string;
+  /** A picture between the back button and the title, e.g. the symbol of a game. */
+  readonly picture?: ReactNode;
   readonly intro?: string;
   /** Controls to the right of the heading, e.g. a search button. */
   readonly actions?: ReactNode;
@@ -20,6 +24,8 @@ type PageProps = {
  */
 export function Page({
   title,
+  subtitle,
+  picture,
   intro,
   actions,
   isFullHeight,
@@ -34,7 +40,15 @@ export function Page({
     >
       <div className={styles.header}>
         {backFallback !== undefined && <BackButton fallback={backFallback} />}
-        <h1 className={styles.title}>{title}</h1>
+        {picture}
+        {subtitle === undefined ? (
+          <h1 className={styles.title}>{title}</h1>
+        ) : (
+          <div className={styles.titles}>
+            <h1 className={styles.title}>{title}</h1>
+            <div className={styles.subtitle}>{subtitle}</div>
+          </div>
+        )}
         {actions}
       </div>
       {intro !== undefined && <p className={styles.intro}>{intro}</p>}

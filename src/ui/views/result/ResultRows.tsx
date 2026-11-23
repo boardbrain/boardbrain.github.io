@@ -14,6 +14,7 @@ import {
   type Missing,
   type WayEntries,
 } from './resultEntry';
+import { podiumClass } from './podium';
 import styles from './Result.module.css';
 
 const TROPHY_SIZE = 20;
@@ -197,7 +198,7 @@ export function PointsRows({
           );
         } else if (derived.isPointsComplete && place !== undefined) {
           trailing = (
-            <span className={cx(styles.crown, styles.placeNo)}>
+            <span className={cx(styles.crown, styles.placeNo, podiumClass(place))}>
               {t('ergebnis.platzZahl', { platz: place })}
             </span>
           );
@@ -211,7 +212,7 @@ export function PointsRows({
         } else {
           const provisional = provisionalPlace(derived, person.id, rules);
           trailing = (
-            <span className={styles.slot} aria-hidden="true">
+            <span className={cx(styles.slot, podiumClass(provisional))} aria-hidden="true">
               {provisional === null ? '' : String(provisional)}
             </span>
           );

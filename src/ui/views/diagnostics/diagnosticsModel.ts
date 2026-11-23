@@ -187,6 +187,7 @@ function dataSection({ diagnostics, data }: DiagnosticsInput): DiagnosticsSectio
       row('diagnose.personen', countText(data.persons)),
       row('diagnose.tische', countText(data.groups)),
       row('diagnose.eigeneSpiele', countText(data.customGames)),
+      row('diagnose.ergebnisse', String(data.matches)),
       row('diagnose.laufendePartie', sessionText(data.session)),
       row(
         'diagnose.letzteAenderung',

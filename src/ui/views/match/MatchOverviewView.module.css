@@ -6,29 +6,20 @@
 /* The tab bar keeps its place when switching tabs: 12 px below the title as on the board tab,
    although the results tab keeps the usual gap of 20 px below the bar. */
 .tabs {
-  display: flex;
   margin-top: -8px;
-  padding: 3px;
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
 }
 
-.tabs > button {
-  flex: 1;
-  min-height: 40px;
-  padding: 0;
-  font-size: 0.92rem;
-  color: var(--color-text);
-  background: none;
-  border-radius: 9px;
+/* The content of a tab lays out like the page around it: a column with the same gaps, and on the
+   board tab the board takes the room that is left. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+  min-height: 0;
 }
 
-.tabs > button[aria-selected='true'] {
-  font-weight: 600;
-  color: var(--color-accent-text);
-  background: var(--color-surface-overlay);
-  box-shadow: inset 0 0 0 1px var(--color-accent-text);
+.boardTab > .panel {
+  flex: 1 1 0;
 }
 
 .ovBoard {

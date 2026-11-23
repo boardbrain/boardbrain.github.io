@@ -112,6 +112,17 @@ describe('C-T-1 ResultService on the database (US-ER-01, US-ER-05, US-AB-06)', (
     expect(changed.recordedAt).toBe(stored.recordedAt);
   });
 
+  it('draftOf reads a stored result for changing it', async () => {
+    const stored = await value(
+      service.record({ groupId: FOUR.id, gameId: SKYJO.id, date: '2026-10-07', winnerIds: [ANNA] }),
+    );
+
+    const draft = await value(service.draftOf(stored.id));
+
+    expect(draft.values).toEqual({ date: '2026-10-07', winnerIds: [ANNA] });
+    expect(draft.groupId).toBe(FOUR.id);
+  });
+
   it('delete removes the result', async () => {
     const stored = await value(
       service.record({ groupId: FOUR.id, gameId: SKYJO.id, date: '2026-10-07', winnerIds: [ANNA] }),

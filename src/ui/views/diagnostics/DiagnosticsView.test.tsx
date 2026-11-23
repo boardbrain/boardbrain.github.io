@@ -1,5 +1,6 @@
 import { aPerson } from '@tests/support/masterDataFakes';
 import { renderWithApp } from '@tests/support/renderWithApp';
+import { aMatch } from '@tests/support/resultFakes';
 import { act, fireEvent, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { toPersonId } from '@/core/model';
@@ -114,7 +115,7 @@ describe('Architecture 13.1, K-9 diagnostics view', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows counts of the stored data but no names', async () => {
+  it('shows counts of the stored data, results too (C-W-4), but no names', async () => {
     const { db } = await renderView();
 
     await act(async () => {
@@ -128,8 +129,16 @@ describe('Architecture 13.1, K-9 diagnostics view', () => {
       ]);
     });
 
+    await act(async () => {
+      await db.matches.add(aMatch());
+    });
+
     const data = screen.getByRole('region', { name: 'Daten' });
     expect(await within(data).findByText('2 · 1 archiviert')).toBeInTheDocument();
+    const terms = within(data).getAllByRole('term');
+    const values = within(data).getAllByRole('definition');
+    const index = terms.findIndex((term) => term.textContent === 'Ergebnisse');
+    expect(values[index]).toHaveTextContent('1');
     expect(within(data).getByText('2,1 MB von 9,3 GB')).toBeInTheDocument();
     expect(within(data).getByText('keine')).toBeInTheDocument();
     expect(screen.queryByText('Anna')).not.toBeInTheDocument();

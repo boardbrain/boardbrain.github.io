@@ -1,14 +1,24 @@
 import { useEffect, useEffectEvent, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { ResultDraft } from '@/app/services/resultService';
-import { parseGameId, parseGroupId, type Person } from '@/core/model';
+import {
+  parseGameId,
+  parseGroupId,
+  parseMatchId,
+  type GroupId,
+  type MatchId,
+  type Person,
+} from '@/core/model';
 import type { ResultInput } from '@/core/results';
-import type { Result } from '@/core/shared';
+import { err, ok, type Result } from '@/core/shared';
 import { t } from '@/i18n/t';
-import { useGroup, usePersons } from '@/infra/db/readHooks';
+import { useCustomGames, useGroup, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { BackButton } from '@/ui/components/BackButton';
+import { useGoBack } from '@/ui/components/useGoBack';
 import { localToday } from '@/ui/views/games/dates';
+import { gameNameOf, resultHref } from '@/ui/views/management/GroupResults';
+import { groupResultsHref } from '@/ui/views/management/ResultDetailView';
 import shared from '@/ui/views/match/Match.module.css';
 import { ResultForm, type SavedNote } from './ResultForm';
 import type { ResultPerson } from './ResultRows';
@@ -16,6 +26,12 @@ import { useGameName } from './ResultTableView';
 
 type Loaded =
   { readonly draft: ResultDraft } | { readonly failed: true } | { readonly error: unknown };
+
+/**
+ * What the start shows after storing (design I3-B R3, I3-C NB1): who won, game and table, and
+ * where the card leads: the result in the list of its table.
+ */
+export type SavedResult = SavedNote & { readonly groupId: GroupId; readonly matchId: MatchId };
 
 // External system: the starting values come from the result service (Architecture 4.4), read
 // again when group or game change.
@@ -70,23 +86,28 @@ function personsOf(
 type FormPageProps = {
   readonly draft: ResultDraft;
   readonly gameName: string;
+  readonly title: string;
   readonly isFromMatch: boolean;
-  /** Stores the result; `null` when stored, otherwise why not, as a text. */
-  readonly save: (input: ResultInput) => Promise<string | null>;
+  /** Stores the result: its id, otherwise why not, as a text. */
+  readonly save: (input: ResultInput) => Promise<Result<MatchId, string>>;
+  readonly onSaved: (note: SavedNote, matchId: MatchId) => void;
+  readonly onUnchanged?: (() => void) | undefined;
   readonly backFallback: string;
 };
 
 function FormPage({
   draft,
   gameName,
+  title,
   isFromMatch,
   save,
+  onSaved,
+  onUnchanged,
   backFallback,
 }: FormPageProps): React.JSX.Element | null {
   const { db } = useAppDependencies();
   const group = useGroup(db, draft.groupId);
   const persons = usePersons(db);
-  const navigate = useNavigate();
   if (group === undefined || group === null || persons === undefined) {
     return null;
   }
@@ -99,7 +120,7 @@ function FormPage({
       <div className={shared.pageHead}>
         <BackButton fallback={backFallback} />
         <div className={shared.titles}>
-          <h1 className={shared.title}>{t('ergebnis.titel')}</h1>
+          <h1 className={shared.title}>{title}</h1>
           <div className={shared.sub}>{subtitle}</div>
         </div>
       </div>
@@ -110,10 +131,8 @@ function FormPage({
         tableName={group.name}
         today={localToday()}
         save={save}
-        onSaved={(note: SavedNote) => {
-          // R3: back to the start, which shows who won (the table page follows with I3-C).
-          void navigate('/', { replace: true, state: { saved: note } });
-        }}
+        onSaved={onSaved}
+        onUnchanged={onUnchanged}
       />
     </main>
   );
@@ -121,10 +140,15 @@ function FormPage({
 
 /**
  * Result form `#/ergebnis/neu/‹spiel›/‹tisch›` (US-ER-01 AK-1, design I3-B): game and table are
- * fixed, the form starts with today and the defaults of the game.
+ * fixed, the form starts with today and the defaults of the game. Entered from the table page
+ * (`?von=tisch`) it returns there with the new result lit up (design I3-C); otherwise the start
+ * shows who won, and the card leads to the result (NM3, NB1).
  */
 export function ResultView(): React.JSX.Element | null {
   const { results } = useAppDependencies();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isFromTable = searchParams.get('von') === 'tisch';
   const { gameId = '', groupId = '' } = useParams();
   const game = parseGameId(gameId);
   const group = parseGroupId(groupId);
@@ -147,17 +171,33 @@ export function ResultView(): React.JSX.Element | null {
       key={`${gameId}/${groupId}`}
       draft={loaded.draft}
       gameName={name}
+      title={t('ergebnis.titel')}
       isFromMatch={false}
-      backFallback={`/ergebnis/neu/${gameId}`}
+      backFallback={
+        isFromTable ? `/verwaltung/gruppen/${group.value}/ergebnis` : `/ergebnis/neu/${gameId}`
+      }
       save={async (input) => {
         const stored = await results.record({ ...input, groupId: group.value, gameId: game.value });
         if (stored.ok) {
-          return null;
+          return ok(stored.value.id);
         }
         // The table was archived or rebound, or the game archived, while the form was open.
-        return stored.error === 'group-not-eligible' || stored.error === 'game-not-eligible'
-          ? t('ergebnis.tischNichtMehr')
-          : t('ergebnis.nichtGespeichert');
+        return err(
+          stored.error === 'group-not-eligible' || stored.error === 'game-not-eligible'
+            ? t('ergebnis.tischNichtMehr')
+            : t('ergebnis.nichtGespeichert'),
+        );
+      }}
+      onSaved={(note, matchId) => {
+        if (isFromTable) {
+          void navigate(groupResultsHref(group.value), {
+            replace: true,
+            state: { highlight: matchId },
+          });
+          return;
+        }
+        const saved: SavedResult = { ...note, groupId: group.value, matchId };
+        void navigate('/', { replace: true, state: { saved } });
       }}
     />
   );
@@ -169,6 +209,7 @@ export function ResultView(): React.JSX.Element | null {
  */
 export function MatchResultView(): React.JSX.Element | null {
   const { results } = useAppDependencies();
+  const navigate = useNavigate();
   const loaded = useDraft(() => results.draftFromSession(), 'session');
   const name = useGameName(loaded !== null && 'draft' in loaded ? loaded.draft.gameId : null);
   if (loaded !== null && 'failed' in loaded) {
@@ -180,24 +221,71 @@ export function MatchResultView(): React.JSX.Element | null {
   if (name === null) {
     return <Navigate to="/partie" replace />;
   }
+  const { groupId } = loaded.draft;
   return (
     <FormPage
       draft={loaded.draft}
       gameName={name}
+      title={t('ergebnis.titel')}
       isFromMatch
       backFallback="/partie/uebersicht"
       save={async (input) => {
         const stored = await results.recordFromSession(input);
         if (stored.ok) {
-          return null;
+          return ok(stored.value.id);
         }
         // The match was ended meanwhile, e.g. on another device or tab.
-        return stored.error === 'no-session' ||
-          stored.error === 'session-not-running' ||
-          stored.error === 'session-unsupported'
-          ? t('ergebnis.partieBeendet')
-          : t('ergebnis.nichtGespeichert');
+        return err(
+          stored.error === 'no-session' ||
+            stored.error === 'session-not-running' ||
+            stored.error === 'session-unsupported'
+            ? t('ergebnis.partieBeendet')
+            : t('ergebnis.nichtGespeichert'),
+        );
       }}
+      onSaved={(note, matchId) => {
+        const saved: SavedResult = { ...note, groupId, matchId };
+        void navigate('/', { replace: true, state: { saved } });
+      }}
+    />
+  );
+}
+
+/**
+ * Changing a result `#/verwaltung/gruppen/‹tisch›/ergebnisse/‹ergebnis›/bearbeiten` (US-ER-05,
+ * design I3-C): the result form with the stored values; group and game stay fixed (AK-4), a
+ * change asks before it is stored (AK-1). Afterwards, or without a change, back to the result.
+ */
+export function ResultEditView(): React.JSX.Element | null {
+  const { db, results } = useAppDependencies();
+  const { groupId = '', matchId = '' } = useParams();
+  const match = parseMatchId(matchId);
+  const customGames = useCustomGames(db);
+  const goBack = useGoBack(resultHref(groupId, matchId));
+  const loaded = useDraft(
+    () =>
+      match.ok ? results.draftOf(match.value) : Promise.resolve({ ok: false, error: 'invalid' }),
+    matchId,
+  );
+  if (!match.ok || (loaded !== null && 'failed' in loaded)) {
+    return <Navigate to={groupResultsHref(groupId)} replace />;
+  }
+  if (loaded === null || customGames === undefined) {
+    return null;
+  }
+  return (
+    <FormPage
+      draft={loaded.draft}
+      gameName={gameNameOf(loaded.draft.gameId, customGames)}
+      title={t('ergebnisse.bearbeitenTitel')}
+      isFromMatch={false}
+      backFallback={resultHref(groupId, matchId)}
+      save={async (input) => {
+        const stored = await results.edit(match.value, input);
+        return stored.ok ? ok(stored.value.id) : err(t('ergebnisse.nichtGeaendert'));
+      }}
+      onSaved={goBack}
+      onUnchanged={goBack}
     />
   );
 }

@@ -3,7 +3,9 @@ import { toPersonId, type PersonId } from '@/core/model';
 import type { ResultRules } from '@/core/results';
 import {
   deriveEntry,
+  entriesOf,
   isEntryComplete,
+  isSameInput,
   isPlaceSkipped,
   NO_ENTRIES,
   outcomeOf,
@@ -245,5 +247,51 @@ describe('E-49 Catan with "Sieger oder Rangfolge"', () => {
       winnerIds: [BEN],
       places: { [ANNA]: 2, [BEN]: 1, [CLARA]: 2 },
     });
+  });
+});
+
+describe('US-ER-05 Change a result: the form starts with the stored values', () => {
+  it('AK-4: points start in the way of points, as text, with the winners of a tie', () => {
+    expect(
+      entriesOf({ winnerIds: [ANNA], scores: { [ANNA]: 8, [BEN]: -3, [CLARA]: 12 } }, SKYJO),
+    ).toEqual({
+      way: 'points',
+      entries: { points: { [ANNA]: '8', [BEN]: '-3', [CLARA]: '12' }, places: {}, winners: [ANNA] },
+    });
+  });
+
+  it('AK-4: a ranking starts in "Sieger oder Rangfolge"', () => {
+    const places = { [ANNA]: 2, [BEN]: 1, [CLARA]: 2 };
+
+    expect(entriesOf({ winnerIds: [BEN], places }, SKYJO)).toEqual({
+      way: 'places',
+      entries: { points: {}, places, winners: [] },
+    });
+  });
+
+  it('AK-4: only the winners start as place 1 in "Sieger oder Rangfolge"', () => {
+    const { way, entries } = entriesOf({ winnerIds: [ANNA, CLARA] }, SKYJO);
+
+    expect(way).toBe('places');
+    expect(deriveEntry(way, entries, TABLE, SKYJO).winners).toEqual([ANNA, CLARA]);
+    expect(isEntryComplete(deriveEntry(way, entries, TABLE, SKYJO))).toBe(true);
+  });
+
+  it('AK-4: a game without a ranking by hand keeps its winners', () => {
+    const rules: ResultRules = { ...SKYJO, scoring: null, supportsRanking: false };
+
+    expect(entriesOf({ winnerIds: [BEN] }, rules)).toEqual({
+      way: 'points',
+      entries: { points: {}, places: {}, winners: [BEN] },
+    });
+  });
+
+  it('AK-1: the same content in another order is no change', () => {
+    const stored = { date: '2026-11-17', winnerIds: [ANNA, BEN], scores: { [ANNA]: 5, [BEN]: 5 } };
+    const again = { scores: { [BEN]: 5, [ANNA]: 5 }, winnerIds: [BEN, ANNA], date: '2026-11-17' };
+
+    expect(isSameInput(stored, again)).toBe(true);
+    expect(isSameInput(stored, { ...again, notes: 'neu' })).toBe(false);
+    expect(isSameInput(stored, { ...again, date: '2026-11-16' })).toBe(false);
   });
 });

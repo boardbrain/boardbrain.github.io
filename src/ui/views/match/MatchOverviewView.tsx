@@ -1,4 +1,5 @@
 import { useId, useRef, useState, useTransition, type ReactNode } from 'react';
+import { TabPanel, Tabs, type TabItem } from '@/ui/components/Tabs';
 import { Navigate, useNavigate } from 'react-router';
 import type { PersonId } from '@/core/model';
 import { CATAN_BOARD, catanSummary, type CatanStep } from '@/games/catan';
@@ -20,7 +21,7 @@ import { MatchDialog } from './MatchDialog';
 import { PieceSpot } from './PieceSpot';
 import { colorOf } from './matchColors';
 import { orderOrSeats, stepIndexWhere } from './matchFlow';
-import { DRAW_NAMES, editionName, repeatLines, stepTitle } from './matchTexts';
+import { DRAW_NAMES, editionName, modeName, repeatLines, stepTitle } from './matchTexts';
 import { ResourceIcon } from './ResourceIcon';
 import { UnsupportedSession } from './UnsupportedSession';
 import shared from './Match.module.css';
@@ -28,6 +29,11 @@ import styles from './MatchOverviewView.module.css';
 import { cx } from '@/ui/components/classNames';
 
 type Tab = 'board' | 'list';
+
+const OVERVIEW_TABS: readonly TabItem<Tab>[] = [
+  { key: 'board', label: t('partie.reiterBrett') },
+  { key: 'list', label: t('partie.reiterErgebnisse') },
+];
 
 /**
  * Overview of the running match `#/partie/uebersicht` (US-AB-04 AK-1, US-AB-03 AK-6, US-AB-06
@@ -42,6 +48,7 @@ export function MatchOverviewView(): React.JSX.Element | null {
   const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('board');
+  const tabsId = useId();
   const [isAskingEnd, setAskingEnd] = useState(false);
   const [repeating, setRepeating] = useState<number | null>(null);
   const [, startTransition] = useTransition();
@@ -287,55 +294,45 @@ export function MatchOverviewView(): React.JSX.Element | null {
             {t('partie.uebersichtUnterzeile', {
               tisch: group.name,
               version: editionName(session.setup.options.edition),
-              modus: t('partie.standard'),
+              // C-G-9: the mode of the match, not a fixed text.
+              modus: modeName(session.setup.options.mode),
             })}
           </div>
         </div>
       </div>
-      <div className={styles.tabs} role="tablist">
-        <PressableButton
-          type="button"
-          role="tab"
-          aria-selected={tab === 'board'}
-          onClick={() => {
-            setTab('board');
-          }}
-        >
-          {t('partie.reiterBrett')}
-        </PressableButton>
-        <PressableButton
-          type="button"
-          role="tab"
-          aria-selected={tab === 'list'}
-          onClick={() => {
-            setTab('list');
-          }}
-        >
-          {t('partie.reiterErgebnisse')}
-        </PressableButton>
-      </div>
-      {tab === 'board' ? (
-        <>
-          {board}
-          {!summary.placementSkipped && (
-            <div className={styles.ovNames}>
-              {order.map((personId, place) => (
-                <span key={personId} className={styles.ovName}>
-                  <b className={styles.place}>{place + 1}</b>
-                  <Coin
-                    name={nameOf(personId)}
-                    color={colorOf(session, personId)}
-                    className={styles.smallCoin}
-                  />
-                  <span className={styles.nm}>{nameOf(personId)}</span>
-                </span>
-              ))}
-            </div>
-          )}
-        </>
-      ) : (
-        results
-      )}
+      {/* UE1, C-G-10: the same tabs as on the table page (design I3-C). */}
+      <Tabs
+        label={t('partie.laufendePartie')}
+        idPrefix={tabsId}
+        tabs={OVERVIEW_TABS}
+        selected={tab}
+        onSelect={setTab}
+        className={styles.tabs}
+      />
+      <TabPanel idPrefix={tabsId} tabKey={tab} className={styles.panel}>
+        {tab === 'board' ? (
+          <>
+            {board}
+            {!summary.placementSkipped && (
+              <div className={styles.ovNames}>
+                {order.map((personId, place) => (
+                  <span key={personId} className={styles.ovName}>
+                    <b className={styles.place}>{place + 1}</b>
+                    <Coin
+                      name={nameOf(personId)}
+                      color={colorOf(session, personId)}
+                      className={styles.smallCoin}
+                    />
+                    <span className={styles.nm}>{nameOf(personId)}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          results
+        )}
+      </TabPanel>
       {/* Product Owner 20.11.2026: "Partie beenden ohne Ergebnis" with the timer beside it, then
           "Ergebnis eintragen" at the very bottom; the timer takes no room from the board. */}
       <div className={styles.ovEnd}>

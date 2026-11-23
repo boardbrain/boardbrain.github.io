@@ -1,0 +1,32 @@
+/* A small version of the round picture of the game cards (GameCards.module.css .art, .letter). */
+.symbol {
+  display: grid;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.letter {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font:
+    700 1.1rem Georgia,
+    'Times New Roman',
+    serif;
+  color: var(--color-accent-text);
+  background: radial-gradient(
+    circle at 50% 42%,
+    var(--color-game-letter-glow) 0%,
+    var(--color-card-paper-low) 72%
+  );
+}

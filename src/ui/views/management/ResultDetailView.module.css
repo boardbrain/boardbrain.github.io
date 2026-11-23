@@ -1,0 +1,136 @@
+/* Design I3-C DA1: the result with a note on the right, places in circles, points on the right. */
+.headRow {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.headNote {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.row {
+  cursor: default;
+}
+
+/* A place in a 30 px circle; the winners with the trophy and a golden rim (MP2 for 2 and 3). */
+.slot {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.win {
+  color: var(--color-accent-text);
+  border-color: var(--color-accent-text);
+}
+
+.none {
+  border-color: transparent;
+}
+
+/* The seat in the table colour, as on the table page (GroupView.module.css .seat). */
+.seat {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-surface);
+  border-radius: 50%;
+}
+
+.coin {
+  font-size: 15px;
+}
+
+/* Without a place: the others of a result with only its winner. */
+.other {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.points {
+  flex: none;
+  min-width: 3ch;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.facts {
+  margin: 0;
+}
+
+.fact {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 8px 14px;
+}
+
+.fact + .fact {
+  border-top: 1px solid var(--color-border);
+}
+
+.fact dt {
+  margin: 0;
+}
+
+.fact dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.empty {
+  color: var(--color-text-muted);
+}
+
+.notes {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  line-height: 1.45;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-4);
+}
+
+.meta {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* BL1: "Bearbeiten" in the middle, 18 px below it "Ergebnis löschen" in the danger colour. */
+.actions {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+}
+
+.delete {
+  min-height: var(--touch-target-min);
+  padding: 0 var(--space-3);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-danger-text);
+  background: none;
+  border-radius: 999px;
+}

@@ -123,6 +123,8 @@ export type DataSummary = {
   readonly persons: RecordCount;
   readonly groups: RecordCount;
   readonly customGames: RecordCount;
+  /** Number of stored results (C-W-4). */
+  readonly matches: number;
   readonly session:
     | { readonly status: 'none' | 'unsupported' }
     | {
@@ -147,10 +149,11 @@ function countOf(records: readonly { readonly archived: boolean }[]): RecordCoun
  */
 export function useDataSummary(db: BoardBrainDb): DataSummary | undefined {
   return useLiveQuery(async (): Promise<DataSummary> => {
-    const [persons, groups, customGames, session, meta] = await Promise.all([
+    const [persons, groups, customGames, matches, session, meta] = await Promise.all([
       db.persons.toArray(),
       db.groups.toArray(),
       db.games.toArray(),
+      db.matches.count(),
       db.session.get(CURRENT_SESSION_ID),
       db.meta.get('state'),
     ]);
@@ -172,6 +175,7 @@ export function useDataSummary(db: BoardBrainDb): DataSummary | undefined {
       persons: countOf(persons),
       groups: countOf(groups),
       customGames: countOf(customGames),
+      matches,
       session: sessionSummary,
       ...(lastChange === undefined ? {} : { lastUserDataChangeAt: lastChange }),
     };

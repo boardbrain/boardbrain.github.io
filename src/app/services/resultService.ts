@@ -90,6 +90,11 @@ export type ResultService = {
    * whole minutes, at least 1 (US-AB-07 AK-4).
    */
   draftFromSession(): Promise<Result<ResultDraft, SessionAccessError | SessionNotRunningError>>;
+  /**
+   * Starting values for changing a stored result (US-ER-05 AK-4): its values, its group and game,
+   * which stay fixed, and the current rules of the game; also for a group or game archived since.
+   */
+  draftOf(matchId: MatchId): Promise<Result<ResultDraft, MatchNotFoundError>>;
   /** Records a result (US-ER-01, FA-ER-01), also without a generation. */
   record(input: RecordResultInput): Promise<Result<Match, ResultError | ResultTargetError>>;
   /**
@@ -179,6 +184,24 @@ function checkTarget(
     rules = gameCapabilities(gameId, game);
   }
   return canGroupPlay(group, gameId) ? ok(rules) : err('group-not-eligible');
+}
+
+// The stored values of a result as the form takes them (US-ER-05 AK-4).
+function inputOf(match: Match): ResultInput {
+  const { date, time, edition, mode, winnerIds, scores, places } = match;
+  const { catanColors, durationMinutes, notes } = match;
+  return {
+    date,
+    winnerIds,
+    ...(time === undefined ? {} : { time }),
+    ...(edition === undefined ? {} : { edition }),
+    ...(mode === undefined ? {} : { mode }),
+    ...(scores === undefined ? {} : { scores }),
+    ...(places === undefined ? {} : { places }),
+    ...(catanColors === undefined ? {} : { catanColors }),
+    ...(durationMinutes === undefined ? {} : { durationMinutes }),
+    ...(notes === undefined ? {} : { notes }),
+  };
 }
 
 type RunningSession = { readonly session: StoredSession; readonly group: Group };
@@ -300,6 +323,23 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
             catanColors: colorRecord(session.setup.colors),
             durationMinutes: durationMinutesOf(elapsedMilliseconds(timer, now)),
           },
+        });
+      });
+    },
+
+    draftOf(matchId) {
+      return store.transaction(async (repositories) => {
+        const match = await repositories.matches.get(matchId);
+        if (match === undefined) {
+          return err('match-not-found');
+        }
+        const stored = await readStored(repositories);
+        return ok({
+          groupId: match.groupId,
+          gameId: match.gameId,
+          participants: participantsOf(findGroup(stored, match.groupId)),
+          rules: rulesOf(stored, match.gameId),
+          values: inputOf(match),
         });
       });
     },

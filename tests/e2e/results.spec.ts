@@ -181,6 +181,102 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
   });
 });
 
+// The table of `seedResults` (seedDatabase.ts: first group).
+const TABLE_PAGE = '/#/verwaltung/gruppen/00000000-0000-4000-8000-000000000101';
+
+test.describe('US-ER-04 and US-ER-05 the results of a table (design I3-C)', () => {
+  test('US-ER-01 AK-1: from the table, game choice and form lead back to its list', async ({
+    page,
+  }) => {
+    await seedResults(page, TABLE, [{ date: day(2), game: 'Uno', winners: ['Anna'] }]);
+    await page.goto(TABLE_PAGE);
+    // SW4: the plus in the head, in every tab.
+    await page.getByRole('link', { name: 'Ergebnis eintragen' }).click();
+    await expect(page.getByRole('heading', { name: 'Ergebnis eintragen', level: 1 })).toBeVisible();
+    await expect(page.getByText('Freitagsrunde · zuletzt gespielt')).toBeVisible();
+    // Catan without the question: the table is fixed.
+    await page.getByRole('link', { name: 'Uno' }).click();
+    await page.getByRole('button', { name: 'Clara Platz 1' }).click();
+    await page.getByRole('button', { name: 'Ergebnis speichern' }).click();
+
+    await expect(page.getByRole('tab', { name: 'Ergebnisse', selected: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Uno, Clara gewinnt' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Uno, Anna gewinnt' })).toBeVisible();
+  });
+
+  test('NB1: the note on the start opens the result in the list of its table', async ({ page }) => {
+    await seedResults(page, TABLE, [{ date: day(2), game: 'Uno', winners: ['Anna'] }]);
+    await page.getByRole('link', { name: 'Partie' }).click();
+    await page.getByRole('link', { name: 'Uno' }).click();
+    await page.getByRole('button', { name: 'Ben Platz 1' }).click();
+    await page.getByRole('button', { name: 'Ergebnis speichern' }).click();
+
+    await saved(page).getByRole('button').click();
+    await expect(page.getByRole('heading', { name: 'Freitagsrunde', level: 1 })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Ergebnisse', selected: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Uno, Ben gewinnt' })).toBeInViewport();
+  });
+
+  test('AK-2, US-ER-05 AK-1: a result opens; a change asks first, without one nothing is asked', async ({
+    page,
+  }) => {
+    await seedResults(
+      page,
+      TABLE,
+      [{ date: day(1), time: '20:15', game: 'Skyjo', winners: ['Ben'], scores: [9, 2, 30, 14] }],
+      { Skyjo: 'lowest-wins' },
+    );
+    await page.goto(`${TABLE_PAGE}?reiter=ergebnisse`);
+    await page.getByRole('link', { name: 'Skyjo, 20:15, Ben gewinnt' }).click();
+    await expect(page.getByRole('heading', { name: 'Skyjo', level: 1 })).toBeVisible();
+    await expect(page.getByText('Punkte · wenigste gewinnen')).toBeVisible();
+    await expect(page.getByLabel('Platz 2')).toBeVisible();
+
+    await page.getByRole('link', { name: 'Bearbeiten' }).click();
+    await expect(
+      page.getByRole('heading', { name: 'Ergebnis bearbeiten', level: 1 }),
+    ).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'Punkte Ben' })).toHaveValue('2');
+    // Without a change: back to the result, no question.
+    await page.getByRole('button', { name: 'Änderungen speichern' }).click();
+    await expect(page.getByRole('heading', { name: 'Skyjo', level: 1 })).toBeVisible();
+
+    await page.getByRole('link', { name: 'Bearbeiten' }).click();
+    await page.getByRole('textbox', { name: 'Punkte Clara' }).fill('1');
+    await page.getByRole('textbox', { name: 'Punkte Clara' }).blur();
+    await page.getByRole('button', { name: 'Änderungen speichern' }).click();
+    const ask = page.getByRole('alertdialog', { name: 'Ergebnis ändern?' });
+    await expect(ask).toContainText('Die Statistik ändert sich mit');
+    await ask.getByRole('button', { name: 'Speichern' }).click();
+
+    await expect(page.getByRole('heading', { name: 'Skyjo', level: 1 })).toBeVisible();
+    await expect(page.getByText(/geändert/u)).toBeVisible();
+    await expect(
+      page.getByRole('list', { name: 'Ergebnis' }).getByRole('listitem').first(),
+    ).toContainText('Clara');
+  });
+
+  test('US-ER-05 AK-2: deleting asks first and removes the result from the list', async ({
+    page,
+  }) => {
+    await seedResults(page, TABLE, [
+      { date: day(2), game: 'Uno', winners: ['Anna'] },
+      { date: day(1), game: 'Uno', winners: ['David'] },
+    ]);
+    await page.goto(`${TABLE_PAGE}?reiter=ergebnisse`);
+    await page.getByRole('link', { name: 'Uno, David gewinnt' }).click();
+    await page.getByRole('button', { name: 'Ergebnis löschen' }).click();
+    await page
+      .getByRole('alertdialog', { name: 'Ergebnis löschen?' })
+      .getByRole('button', { name: 'Löschen' })
+      .click();
+
+    await expect(page.getByRole('tab', { name: 'Ergebnisse', selected: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Uno, Anna gewinnt' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Uno, David gewinnt' })).toHaveCount(0);
+  });
+});
+
 test.describe('US-AB-06 AK-2 and US-AB-07 the result of the running match', () => {
   test('AK-1: three-digit hours keep the timer beside "Partie beenden ohne Ergebnis" (PO 23.11.2026)', async ({
     page,

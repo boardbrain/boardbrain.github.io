@@ -1,0 +1,73 @@
+/* Design I3-C EM3: a heading per day, below the results of the day as a card of rows. */
+.days {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.day {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.dayHead {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+/* The coins of the winners, 32 px, overlapping, a trophy at the bottom right of the last. */
+.winners {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  padding-right: 4px;
+}
+
+.coin {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-surface);
+  border: 2px solid var(--color-surface-raised);
+  border-radius: 50%;
+}
+
+.coin + .coin {
+  margin-left: -10px;
+}
+
+.more {
+  margin-left: 4px;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  color: var(--color-surface);
+  background: var(--color-accent-text);
+  border: 2px solid var(--color-surface-raised);
+  border-radius: 50%;
+}
+
+/* Design I3-B LZ: a dashed box. */
+.empty {
+  display: grid;
+  justify-items: center;
+  padding: 28px var(--space-4);
+  text-align: center;
+  background: var(--color-surface-raised);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-4);
+}

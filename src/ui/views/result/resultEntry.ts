@@ -337,3 +337,52 @@ export function outcomeOf(
     ...(isRanked ? { places: Object.fromEntries(derived.places) } : {}),
   };
 }
+
+/**
+ * The way and entries a stored result starts with when it is changed (US-ER-05 AK-4): points in
+ * the way of points; a ranking, or only the winners, in "Sieger oder Rangfolge"; a game without
+ * a ranking by hand keeps its winners in the way of points.
+ */
+export function entriesOf(
+  values: Pick<ResultInput, 'winnerIds' | 'scores' | 'places'>,
+  rules: ResultRules,
+): { readonly way: Way; readonly entries: WayEntries } {
+  const winners = [...values.winnerIds];
+  if (values.scores !== undefined) {
+    const points = Object.fromEntries(
+      Object.entries(values.scores).map(([personId, score]) => [personId, String(score)]),
+    );
+    return { way: 'points', entries: { points, places: {}, winners } };
+  }
+  if (!rules.supportsRanking) {
+    return { way: 'points', entries: { ...NO_ENTRIES, winners } };
+  }
+  const places = values.places ?? Object.fromEntries(winners.map((personId) => [personId, 1]));
+  return { way: 'places', entries: { points: {}, places, winners: [] } };
+}
+
+// Keys sorted at every level, so the same content gives the same text.
+function canonical(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(canonical);
+  }
+  if (typeof value === 'object' && value !== null) {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([, entry]) => entry !== undefined)
+        .toSorted(([a], [b]) => (a < b ? -1 : 1))
+        .map(([key, entry]) => [key, canonical(entry)]),
+    );
+  }
+  return value;
+}
+
+/**
+ * Whether two results have the same content (US-ER-05 AK-1: without a change no warning), also
+ * when points or winners come in another order.
+ */
+export function isSameInput(a: ResultInput, b: ResultInput): boolean {
+  const normal = (input: ResultInput): string =>
+    JSON.stringify(canonical({ ...input, winnerIds: input.winnerIds.toSorted() }));
+  return normal(a) === normal(b);
+}

@@ -28,6 +28,7 @@ import { GamesView } from '@/ui/views/management/GamesView';
 import { GameView } from '@/ui/views/management/GameView';
 import { GroupsView } from '@/ui/views/management/GroupsView';
 import { GroupView } from '@/ui/views/management/GroupView';
+import { ResultDetailView } from '@/ui/views/management/ResultDetailView';
 import { ManagementView } from '@/ui/views/management/ManagementView';
 import { PersonsView } from '@/ui/views/management/PersonsView';
 import { PersonView } from '@/ui/views/management/PersonView';
@@ -121,6 +122,19 @@ const router = createHashRouter([
       { path: '/verwaltung/gruppen', element: view(<GroupsView />) },
       { path: '/verwaltung/gruppen/:groupId', element: view(<GroupView />) },
       { path: '/verwaltung/gruppen/:groupId/bearbeiten', element: view(<GroupView isEditing />) },
+      // I3-C: entering a result from the table, a result and changing it (US-ER-01, -04, -05).
+      {
+        path: '/verwaltung/gruppen/:groupId/ergebnis',
+        lazy: matchRoute((match) => view(<match.GameChoiceView />)),
+      },
+      {
+        path: '/verwaltung/gruppen/:groupId/ergebnisse/:matchId',
+        element: view(<ResultDetailView />),
+      },
+      {
+        path: '/verwaltung/gruppen/:groupId/ergebnisse/:matchId/bearbeiten',
+        lazy: matchRoute((match) => view(<match.ResultEditView />)),
+      },
       { path: '/verwaltung/spiele', element: view(<GamesView />) },
       { path: '/verwaltung/spiele/neu', element: view(<GamesView isCreating />) },
       { path: '/verwaltung/spiele/:gameId', element: view(<GameView />) },

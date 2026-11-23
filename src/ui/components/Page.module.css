@@ -28,6 +28,19 @@
   line-height: 1.25;
 }
 
+.titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.subtitle {
+  overflow: hidden;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .intro {
   margin: 0;
   color: var(--color-text-muted);
