@@ -182,6 +182,32 @@ test.describe('US-SP-01 game list and US-ER-01 entering a result (design I3-B)',
 });
 
 test.describe('US-AB-06 AK-2 and US-AB-07 the result of the running match', () => {
+  test('AK-1: three-digit hours keep the timer beside "Partie beenden ohne Ergebnis" (PO 23.11.2026)', async ({
+    page,
+  }) => {
+    for (const width of [360, 384]) {
+      await page.setViewportSize({ width, height: 800 });
+      const start = Date.now() - (123 * 60 + 34) * 60_000;
+      await seedMatch(page, {
+        table: TABLE,
+        clock: { startedAt: new Date(start).toISOString(), pauses: [] },
+      });
+      const time = page.getByRole('button', { name: /^Spieldauer 123:34 – Verlauf$/ });
+      await expect(time).toBeVisible();
+      const end = await page
+        .getByRole('button', { name: 'Partie beenden ohne Ergebnis' })
+        .boundingBox();
+      const timeBox = await time.boundingBox();
+      const pause = await page.getByRole('button', { name: 'Anhalten' }).boundingBox();
+      if (end === null || timeBox === null || pause === null) {
+        throw new Error('the end row is not shown');
+      }
+      // One row: the time is centred on the pill, the pause button is inside the page.
+      expect(Math.abs(timeBox.y + timeBox.height / 2 - (end.y + end.height / 2))).toBeLessThan(4);
+      expect(pause.x + pause.width).toBeLessThanOrEqual(width);
+    }
+  });
+
   test('AK-6: a long history opens at its end, at "jetzt" (PO 22.11.2026)', async ({ page }) => {
     // Six pauses of 10 minutes, one per hour: longer than the sheet on every device.
     const hour = 3_600_000;
