@@ -554,6 +554,28 @@ describe('US-ER-05 Change and delete a result (service)', () => {
     expect(store.changes).toEqual(['2026-10-09T08:00:00.000Z']);
   });
 
+  it('AK-4: the form for a change starts with the stored values, group and game fixed', async () => {
+    const stored = aMatch({ time: '20:15', places: { [ANNA]: 1, [BEN]: 2 }, notes: 'knapp' });
+    store.matches = [stored];
+    store.groups = [aGroup({ archived: true })];
+
+    const draft = await value(launch().draftOf(stored.id));
+
+    expect(draft).toEqual({
+      groupId: stored.groupId,
+      gameId: stored.gameId,
+      participants: aGroup().members.map((member) => member.personId),
+      rules: gameCapabilities(stored.gameId, UNO),
+      values: {
+        date: stored.date,
+        time: '20:15',
+        winnerIds: stored.winnerIds,
+        places: { [ANNA]: 1, [BEN]: 2 },
+        notes: 'knapp',
+      },
+    });
+  });
+
   it('rejects changing or deleting a result that does not exist', async () => {
     const missing = toMatchId('00000000-0000-4000-8000-0000000000d9');
 
@@ -562,5 +584,6 @@ describe('US-ER-05 Change and delete a result (service)', () => {
       error: 'match-not-found',
     });
     expect(await launch().delete(missing)).toEqual({ ok: false, error: 'match-not-found' });
+    expect(await launch().draftOf(missing)).toEqual({ ok: false, error: 'match-not-found' });
   });
 });
