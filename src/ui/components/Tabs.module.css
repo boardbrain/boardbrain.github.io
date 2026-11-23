@@ -1,0 +1,41 @@
+/* Design I3-C RA1: text on a thin line; the chosen tab golden, semi-bold, with a 3px bar below. */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* The whole third is the target; pressed, only a capsule around the label shimmers (K-4), never
+   the invisible rectangle (Product Owner 22.11.2026). */
+.tabs > button {
+  position: relative;
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 44px;
+  padding: 0;
+  font-size: 0.92rem;
+  color: var(--color-text-muted);
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.label {
+  padding: 4px 12px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 999px
+    color-mix(in srgb, currentcolor calc(var(--press, 0) * var(--press-shimmer)), transparent);
+}
+
+.tabs > button[aria-selected='true'] {
+  font-weight: 600;
+  color: var(--color-accent-text);
+}
+
+.tabs > button[aria-selected='true']::after {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 3px;
+  content: '';
+  background: var(--color-accent-text);
+}

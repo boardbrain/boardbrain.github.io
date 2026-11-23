@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { findGroups, type Group, type Person, type PersonId } from '@/core/model';
-import { CATAN_GAME_ID, canPlayCatan } from '@/games/catan';
+import { CATAN_GAME_ID, CATAN_MODULE, canPlayCatan } from '@/games/catan';
 import { t } from '@/i18n/t';
 import { useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
@@ -30,8 +30,8 @@ export const TABLE_SEARCH_LABELS = {
 const DETAIL_SEAT_RADIUS = 41;
 // From this many seats they get smaller so they still fit around the table.
 const DENSE_FROM = 7;
-// Catan colours appear in the details only where Catan is possible.
-const CATAN_MAX_SEATS = 4;
+// Catan colours appear in the details only where Catan is possible (C-G-9: from the Catan module).
+const CATAN_MAX_SEATS = CATAN_MODULE.playerCount.max;
 
 /**
  * The names of the members in seat order.

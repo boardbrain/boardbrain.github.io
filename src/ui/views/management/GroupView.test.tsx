@@ -32,7 +32,8 @@ describe('US-VW-05 Persons and tables in the overview (table page)', () => {
     expect(screen.getAllByText('Alle Spiele').length).toBeGreaterThan(0);
     expect(screen.getByText('Personen')).toBeInTheDocument();
     expect(screen.getByText('angelegt am 07.10.2026')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Am Tisch · 2', level: 2 })).toBeInTheDocument();
+    // Design I3-C RT2: the members are the tab "Am Tisch", chosen when the page opens.
+    expect(screen.getByRole('tab', { name: 'Am Tisch', selected: true })).toBeInTheDocument();
     const members = within(screen.getByRole('list', { name: 'Mitglieder' })).getAllByRole('link');
     expect(members.map((link) => link.textContent)).toEqual(['AAnnaRot', 'BBenBlau']);
   });

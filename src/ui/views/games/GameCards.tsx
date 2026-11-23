@@ -103,8 +103,10 @@ function CardPress({
 
 const LETTERS = new Intl.Segmenter('de', { granularity: 'grapheme' });
 
-// The first character as a person sees it, also for an emoji or an accented letter.
-function firstLetter(name: string): string {
+/**
+ * The first character as a person sees it, also for an emoji or an accented letter.
+ */
+export function firstLetter(name: string): string {
   for (const { segment } of LETTERS.segment(name)) {
     return segment;
   }

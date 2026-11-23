@@ -1,10 +1,18 @@
 import { animate, useReducedMotion } from 'motion/react';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { findByName, sortByName, type CustomGame, type GameId } from '@/core/model';
+import { Navigate, useNavigate, useParams } from 'react-router';
+import {
+  findByName,
+  parseGroupId,
+  sortByName,
+  type CustomGame,
+  type GameId,
+  type Group,
+} from '@/core/model';
 import type { PlayedGame } from '@/core/results';
 import { CATAN_GAME_ID } from '@/games/catan';
-import { useCustomGames, usePlayedGames } from '@/infra/db/readHooks';
+import { canGroupPlay } from '@/games/registry';
+import { useCustomGames, useGroup, usePlayedGames } from '@/infra/db/readHooks';
 import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { LandscapePicture } from '@/ui/art/Pictures';
@@ -83,13 +91,25 @@ function sortGames(
   return byName.toSorted((a, b) => (last(a) === last(b) ? 0 : last(a) < last(b) ? 1 : -1));
 }
 
+// Entered from a table (design I3-C SW4): the form returns to the table afterwards.
+function formHref(gameId: GameId, group: Group): string {
+  return `/ergebnis/neu/${gameId}/${group.id}?von=tisch`;
+}
+
 /**
  * The game list `#/partie/neu` (US-SP-01, US-SP-03, design I3-B): every active game as a card in
  * one grid, sorted by the last match or A–Z. A custom game opens the result (AK-2); Catan asks
  * "Neue Partie" or "Ergebnis eintragen" with two fanned cards over the dimmed list (Q5).
+ *
+ * From a table `#/verwaltung/gruppen/‹tisch›/ergebnis` (US-ER-01 AK-1, AK-5, design I3-C): the
+ * table is fixed, the list shows only the games it can play and every card opens the result,
+ * Catan too, without the question; with only one such game the form opens at once.
  */
-export function GameChoiceView(): React.JSX.Element {
+export function GameChoiceView(): React.JSX.Element | null {
   const { db } = useAppDependencies();
+  const { groupId } = useParams();
+  const parsedGroup = groupId === undefined ? null : parseGroupId(groupId);
+  const table = useGroup(db, parsedGroup?.ok === true ? parsedGroup.value : null);
   const customGames = useCustomGames(db);
   const played = usePlayedGames(db);
   const navigate = useNavigate();
@@ -99,11 +119,13 @@ export function GameChoiceView(): React.JSX.Element {
   const [query, setQuery] = useState('');
   const today = localToday();
   const active = (customGames ?? []).filter((game) => !game.archived);
+  const fixed = table ?? null;
+  const all: ListedGame[] = [
+    { kind: 'catan', id: CATAN_GAME_ID, name: t('spiele.namen.catan') },
+    ...active.map((game) => ({ kind: 'custom' as const, id: game.id, name: game.name, game })),
+  ];
   const sorted = sortGames(
-    [
-      { kind: 'catan', id: CATAN_GAME_ID, name: t('spiele.namen.catan') },
-      ...active.map((game) => ({ kind: 'custom' as const, id: game.id, name: game.name, game })),
-    ],
+    fixed === null ? all : all.filter((listed) => canGroupPlay(fixed, listed.id)),
     played ?? new Map(),
     order,
   );
@@ -145,13 +167,33 @@ export function GameChoiceView(): React.JSX.Element {
     order === 'recent' ? t('spielliste.zuletztGespielt') : t('spielliste.alphabetisch');
   const otherWord =
     order === 'recent' ? t('spielliste.alphabetisch') : t('spielliste.zuletztGespielt');
+  if (groupId !== undefined) {
+    if (parsedGroup?.ok !== true || table === null || table?.archived === true) {
+      return <Navigate to="/verwaltung/gruppen" replace />;
+    }
+    if (table === undefined || customGames === undefined) {
+      return null;
+    }
+    const [only] = sorted;
+    if (sorted.length === 1 && only !== undefined) {
+      return <Navigate to={formHref(only.id, table)} replace />;
+    }
+  }
   return (
     <main className={shared.main}>
       <div className={shared.pageHead}>
-        <BackButton fallback="/" />
+        <BackButton
+          fallback={fixed === null ? '/' : `/verwaltung/gruppen/${fixed.id}?reiter=ergebnisse`}
+        />
         <div className={shared.titles}>
-          <h1 className={shared.title}>{t('spielliste.titel')}</h1>
-          <div className={shared.sub}>{orderWord}</div>
+          <h1 className={shared.title}>
+            {fixed === null ? t('spielliste.titel') : t('ergebnisse.eintragen')}
+          </h1>
+          <div className={shared.sub}>
+            {fixed === null
+              ? orderWord
+              : t('ergebnisse.spielwahl', { tisch: fixed.name, sortierung: orderWord })}
+          </div>
         </div>
         <span className={gameStyles.headActions}>
           <SearchButton
@@ -206,11 +248,15 @@ export function GameChoiceView(): React.JSX.Element {
                   key={listed.id}
                   played={played.get(listed.id)}
                   today={today}
-                  target={{
-                    onPress: () => {
-                      setIsAsking(true);
-                    },
-                  }}
+                  target={
+                    fixed === null
+                      ? {
+                          onPress: () => {
+                            setIsAsking(true);
+                          },
+                        }
+                      : { to: formHref(listed.id, fixed) }
+                  }
                 />
               ) : (
                 <CustomGameCard
@@ -218,7 +264,9 @@ export function GameChoiceView(): React.JSX.Element {
                   game={listed.game}
                   played={played.get(listed.id)}
                   today={today}
-                  target={{ to: `/ergebnis/neu/${listed.id}` }}
+                  target={{
+                    to: fixed === null ? `/ergebnis/neu/${listed.id}` : formHref(listed.id, fixed),
+                  }}
                 />
               ),
             )}

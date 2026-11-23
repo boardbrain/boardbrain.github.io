@@ -4,6 +4,7 @@ import type { PersonId } from '@/core/model';
 import {
   CATAN_GENERATION,
   type CatanEdition,
+  type CatanMode,
   type CatanPersonDraw,
   type CatanResource,
   type CatanSlot,
@@ -31,6 +32,15 @@ export const RESOURCE_NAMES: Readonly<Record<CatanResource, TextKey>> = {
   grain: 'partie.rohstoff.grain',
   ore: 'partie.rohstoff.ore',
 };
+
+/**
+ * Name of a mode (US-SP-04 AK-1); Catan has only "Standard" so far (C-G-9).
+ */
+export function modeName(mode: CatanMode): string {
+  return t(MODE_NAMES[mode]);
+}
+
+const MODE_NAMES: Readonly<Record<CatanMode, TextKey>> = { standard: 'partie.standard' };
 
 /**
  * Name of an edition (US-SP-04 AK-1).

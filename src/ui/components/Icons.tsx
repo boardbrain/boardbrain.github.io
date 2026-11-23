@@ -180,6 +180,17 @@ export function PlusIcon({ size }: IconProps): React.JSX.Element {
 }
 
 /**
+ * Bar chart for the statistics (design I3-C). Decorative.
+ */
+export function ChartIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+    </Outline>
+  );
+}
+
+/**
  * Pen for "rename" and "edit". Decorative: the button around it carries the label.
  */
 export function PenIcon({ size }: IconProps): React.JSX.Element {

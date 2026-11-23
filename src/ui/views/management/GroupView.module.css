@@ -1,19 +1,79 @@
-/* Design I1-E T7: table above the members; on wide screens the table on the left. */
+/* Design I3-C RT2: the tabs right below the head; the big table only on "Am Tisch". From 1000 px
+   as before two columns: the table on the left, tabs and content on the right (I1-E T7). */
 .layout {
   display: grid;
-  gap: 24px;
+  grid-template-areas: 'tabs' 'table' 'panel';
+  gap: 20px;
   align-items: start;
 }
 
-@media (width >= 62.5rem) {
-  .layout {
-    grid-template-columns: 380px minmax(0, 1fr);
-  }
+.tabs {
+  grid-area: tabs;
+  margin-top: -8px;
 }
 
 .tableColumn {
   display: grid;
+  grid-area: table;
   gap: 12px;
+}
+
+.panel {
+  grid-area: panel;
+}
+
+.panel:focus-visible {
+  outline: 2px solid var(--color-accent-text);
+  outline-offset: 4px;
+}
+
+@media (width < 62.5rem) {
+  .onlyWide {
+    display: none;
+  }
+}
+
+@media (width >= 62.5rem) {
+  .layout {
+    grid-template:
+      'table tabs' auto
+      'table panel' 1fr / 380px minmax(0, 1fr);
+    gap: 16px 24px;
+  }
+
+  .tabs {
+    margin-top: 0;
+  }
+}
+
+/* SW4: "Ergebnis eintragen" as a round plus in the head (like the sort button of the game list). */
+.plus {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-accent-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+/* Statistics until I3-D: a dashed box (design I3-C). */
+.soon {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding: 28px var(--space-4);
+  color: var(--color-text-muted);
+  text-align: center;
+  background: var(--color-surface-raised);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-4);
+}
+
+.soon strong {
+  color: var(--color-text);
 }
 
 /* The member's seat: group colour with the initial, like at the table. */

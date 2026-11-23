@@ -88,6 +88,12 @@
   /* Design I3-B: the light centre behind the first letter of a custom game. */
   --color-game-letter-glow: #5a4636;
 
+  /* Design I3-C MP2: places 2 and 3 in a circle, number and rim in muted silver and bronze. */
+  --color-place-silver: #c4cad3;
+  --color-place-bronze: #cf9468;
+  --color-place-silver-rim: color-mix(in srgb, var(--color-place-silver) 75%, transparent);
+  --color-place-bronze-rim: color-mix(in srgb, var(--color-place-bronze) 75%, transparent);
+
   /* Card back R1 (design I2-D): dark wood, lozenge pattern, golden frame, medallion with the logo */
   --color-card-back-gold: #e0b25a;
   --color-card-back-top: #4a3d31;

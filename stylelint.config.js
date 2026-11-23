@@ -48,10 +48,12 @@ export default {
     },
     // K-4: the shimmer mixes the element's own text colour (currentcolor) with transparent and
     // depends on --press per element, so it cannot live in tokens.css. It adds no colour value.
-    // The same for the timer: Motion moves a variable per element between two colour tokens.
+    // The same for the timer: Motion moves a variable per element between two colour tokens, and
+    // for the tabs, whose shimmer sits on the label instead of the button (design I3-C).
     {
       files: [
         'src/ui/components/Pressable.module.css',
+        'src/ui/components/Tabs.module.css',
         'src/ui/views/match/ClockSheet.module.css',
         'src/ui/views/match/MatchClock.module.css',
       ],

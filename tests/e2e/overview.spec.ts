@@ -43,7 +43,8 @@ test.describe('US-VW-05 Persons and tables in the overview', () => {
     // AK-3: the table opens the table page with binding, members and colours.
     await page.getByRole('list', { name: 'Tische' }).getByRole('link').click();
     await expect(page.getByRole('heading', { name: 'Anna & Ben', level: 1 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Am Tisch · 2', level: 2 })).toBeVisible();
+    // Design I3-C RT2: the members are the tab "Am Tisch".
+    await expect(page.getByRole('tab', { name: 'Am Tisch', selected: true })).toBeVisible();
     await expect(page).toHaveURL(/#\/verwaltung\/gruppen\/[0-9a-f-]{36}$/);
 
     // AK-4: a seat at the table opens the member's page.

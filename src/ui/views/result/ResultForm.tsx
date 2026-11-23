@@ -7,6 +7,7 @@ import {
   setMatchColor,
   type CatanColorKey,
   type LocalDate,
+  type MatchId,
   type PersonId,
 } from '@/core/model';
 import {
@@ -15,6 +16,7 @@ import {
   plausibilityWarnings,
   type ResultInput,
 } from '@/core/results';
+import type { Result } from '@/core/shared';
 import { t } from '@/i18n/t';
 import { CheckIcon, InfoIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
@@ -28,7 +30,9 @@ import colorStyles from '@/ui/views/match/ColorsView.module.css';
 import { durationFields, readDuration } from './duration';
 import {
   deriveEntry,
+  entriesOf,
   isEntryComplete,
+  isSameInput,
   NO_ENTRIES,
   outcomeOf,
   rowOrder,
@@ -38,6 +42,7 @@ import {
   type Way,
   type WayEntries,
 } from './resultEntry';
+import { winnerText } from '@/ui/views/management/resultList';
 import { PersonMark, PlaceRows, PointsRows, type ResultPerson } from './ResultRows';
 import { WhenSection } from './WhenSection';
 import styles from './Result.module.css';
@@ -58,16 +63,30 @@ type ResultFormProps = {
   readonly gameName: string;
   readonly tableName: string;
   readonly today: LocalDate;
-  /** Stores the result; `null` when stored, otherwise why not, as a text shown above the button. */
-  readonly save: (input: ResultInput) => Promise<string | null>;
-  readonly onSaved: (note: SavedNote) => void;
+  /**
+   * Stores the result: the id of the stored result, otherwise why not, as a text shown above the
+   * button.
+   */
+  readonly save: (input: ResultInput) => Promise<Result<MatchId, string>>;
+  readonly onSaved: (note: SavedNote, matchId: MatchId) => void;
+  /**
+   * Changing a stored result (US-ER-05): the form starts with its values, asks before storing a
+   * change (AK-1) and calls this without a change.
+   */
+  readonly onUnchanged?: (() => void) | undefined;
 };
 
-function namesText(names: readonly string[]): string {
-  if (names.length <= 1) {
-    return names.join('');
+// The way and entries the form starts with: a stored result when changing it, else nothing.
+function startOf(
+  draft: ResultDraft,
+  isEditing: boolean,
+): { readonly way: Way; readonly byWay: Readonly<Record<Way, WayEntries>> } {
+  const empty = { points: NO_ENTRIES, places: NO_ENTRIES };
+  if (!isEditing) {
+    return { way: draft.rules.scoring === null ? 'places' : 'points', byWay: empty };
   }
-  return `${names.slice(0, -1).join(t('ergebnis.komma'))}${t('ergebnis.und')}${names.at(-1) ?? ''}`;
+  const { way, entries } = entriesOf(draft.values, draft.rules);
+  return { way, byWay: { ...empty, [way]: entries } };
 }
 
 // Lights up what is missing once (design I3-B E6): no red, no text.
@@ -99,18 +118,20 @@ export function ResultForm({
   today,
   save,
   onSaved,
+  onUnchanged,
 }: ResultFormProps): React.JSX.Element {
   const { rules, participants, values } = draft;
+  const isEditing = onUnchanged !== undefined;
   const isCatan = rules.hasSingleWinner;
   const hasBothWays = rules.scoring !== null && rules.supportsRanking;
   const formRef = useRef<HTMLFormElement>(null);
   const durationRef = useRef<HTMLInputElement>(null);
-  const [way, setWay] = useState<Way>(rules.scoring === null ? 'places' : 'points');
-  const [byWay, setByWay] = useState<Readonly<Record<Way, WayEntries>>>({
-    points: NO_ENTRIES,
-    places: NO_ENTRIES,
-  });
-  const [committed, setCommitted] = useState<Readonly<Record<PersonId, string>>>({});
+  const [start] = useState(() => startOf(draft, isEditing));
+  const [way, setWay] = useState<Way>(start.way);
+  const [byWay, setByWay] = useState<Readonly<Record<Way, WayEntries>>>(start.byWay);
+  const [committed, setCommitted] = useState<Readonly<Record<PersonId, string>>>(
+    start.byWay.points.points,
+  );
   const [date, setDate] = useState<LocalDate>(() => {
     const parsed = parseLocalDate(values.date);
     return parsed.ok ? parsed.value : today;
@@ -120,8 +141,9 @@ export function ResultForm({
   const [colors, setColors] = useState(values.catanColors);
   const [isColorsOpen, setIsColorsOpen] = useState(false);
   const [duration, setDuration] = useState(() => durationFields(values.durationMinutes));
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(values.notes ?? '');
   const [isAskingLong, setIsAskingLong] = useState(false);
+  const [isAskingChange, setIsAskingChange] = useState(false);
   const [isShowingRules, setIsShowingRules] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -169,22 +191,33 @@ export function ResultForm({
 
   function store(): void {
     setIsAskingLong(false);
+    setIsAskingChange(false);
     const result = input();
     // Unexpected errors in the transition reach the error view of the routes (ADR-025).
     startTransition(async () => {
-      const problem = await save(result);
-      setFailure(problem);
-      if (problem === null) {
+      const stored = await save(result);
+      setFailure(stored.ok ? null : stored.error);
+      if (stored.ok) {
         const names = derived.winners.map((personId) => byId.get(personId)?.name ?? '');
-        onSaved({
-          who:
-            names.length > 1
-              ? t('ergebnis.unentschieden', { namen: namesText(names) })
-              : t('ergebnis.gewinnt', { name: names[0] ?? '' }),
-          where: t('ergebnis.gespeichert', { spiel: gameName, tisch: tableName }),
-        });
+        onSaved(
+          {
+            who: winnerText(names),
+            where: t('ergebnis.gespeichert', { spiel: gameName, tisch: tableName }),
+          },
+          stored.value,
+        );
       }
     });
+  }
+
+  // US-ER-05 AK-1: a change is stored only after the warning; without a change nothing is asked.
+  function proceed(): void {
+    setIsAskingLong(false);
+    if (isEditing) {
+      setIsAskingChange(true);
+      return;
+    }
+    store();
   }
 
   return (
@@ -205,6 +238,10 @@ export function ResultForm({
           nudge(formRef.current);
           return;
         }
+        if (onUnchanged !== undefined && isSameInput(input(), values)) {
+          onUnchanged();
+          return;
+        }
         // H3: a very long duration asks first (US-ER-01 AK-8).
         if (
           plausibilityWarnings({ ...(durationMinutes === undefined ? {} : { durationMinutes }) })
@@ -213,7 +250,7 @@ export function ResultForm({
           setIsAskingLong(true);
           return;
         }
-        store();
+        proceed();
       }}
     >
       <section className={shared.section}>
@@ -457,7 +494,7 @@ export function ResultForm({
           aria-disabled={!canSave}
         >
           <CheckIcon size={CHECK_SIZE} />
-          {t('ergebnis.speichern')}
+          {t(isEditing ? 'ergebnisse.aenderungenSpeichern' : 'ergebnis.speichern')}
         </PressableButton>
       </div>
 
@@ -476,6 +513,18 @@ export function ResultForm({
             durationRef.current?.focus();
           }}
           confirmLabel={t('ergebnis.langeSpeichern')}
+          onConfirm={proceed}
+        />
+      )}
+      {isAskingChange && (
+        <MatchDialog
+          title={t('ergebnisse.aendernFrage')}
+          lines={[t('ergebnisse.aendernText')]}
+          cancelLabel={t('allgemein.zurueck')}
+          onCancel={() => {
+            setIsAskingChange(false);
+          }}
+          confirmLabel={t('allgemein.speichern')}
           onConfirm={store}
         />
       )}

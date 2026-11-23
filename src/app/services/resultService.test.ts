@@ -20,6 +20,7 @@ import type { Clock, StoredSession } from '@/app/ports';
 import { pauseClock, startClock } from '@/core/generation';
 import {
   CATAN_COLOR_KEYS,
+  parseLocalTime,
   toGameId,
   toGroupId,
   toMatchId,
@@ -555,7 +556,9 @@ describe('US-ER-05 Change and delete a result (service)', () => {
   });
 
   it('AK-4: the form for a change starts with the stored values, group and game fixed', async () => {
-    const stored = aMatch({ time: '20:15', places: { [ANNA]: 1, [BEN]: 2 }, notes: 'knapp' });
+    const time = parseLocalTime('20:15');
+    if (!time.ok) throw new Error('a time');
+    const stored = aMatch({ time: time.value, places: { [ANNA]: 1, [BEN]: 2 }, notes: 'knapp' });
     store.matches = [stored];
     store.groups = [aGroup({ archived: true })];
 

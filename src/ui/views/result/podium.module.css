@@ -1,0 +1,12 @@
+/* Design I3-C MP2: places 2 and 3 in a circle with number and rim in muted silver and bronze,
+   without a fill; the trophy stays the only filled one. Two class names win over the colours
+   of the circles themselves. */
+.silver.silver {
+  color: var(--color-place-silver);
+  border-color: var(--color-place-silver-rim);
+}
+
+.bronze.bronze {
+  color: var(--color-place-bronze);
+  border-color: var(--color-place-bronze-rim);
+}

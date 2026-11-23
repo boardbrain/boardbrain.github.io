@@ -1,6 +1,7 @@
 import { AnimatePresence, m } from 'motion/react';
 import { useEffect, useId } from 'react';
 import { useLocation, useNavigate } from 'react-router';
+import { parseGroupId, parseMatchId, type GroupId, type MatchId } from '@/core/model';
 import { t } from '@/i18n/t';
 import { useCurrentSession, useGroup } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
@@ -15,29 +16,41 @@ import styles from './StartView.module.css';
 const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
 const LOGO_SIZE = 44;
 const TROPHY_SIZE = 24;
+const SAVED_ARROW_SIZE = 20;
 // Long enough to read (Product Owner 20.11.2026): at least 5 s, longer for long names.
 const NOTE_MIN_MS = 5000;
 const NOTE_MS_PER_CHARACTER = 70;
 
-type SavedNote = { readonly who: string; readonly where: string };
+type SavedNote = {
+  readonly who: string;
+  readonly where: string;
+  readonly groupId: GroupId;
+  readonly matchId: MatchId;
+};
 
-// The note the result form passes along (design I3-B R3); anything else in the history is ignored.
+// The note the result form passes along (design I3-B R3, I3-C NB1); anything else in the history
+// is ignored.
 function savedNoteOf(state: unknown): SavedNote | null {
   if (typeof state !== 'object' || state === null || !('saved' in state)) {
     return null;
   }
   const { saved } = state;
   if (
-    typeof saved === 'object' &&
-    saved !== null &&
-    'who' in saved &&
-    'where' in saved &&
-    typeof saved.who === 'string' &&
-    typeof saved.where === 'string'
+    typeof saved !== 'object' ||
+    saved === null ||
+    !('who' in saved && 'where' in saved && 'groupId' in saved && 'matchId' in saved) ||
+    typeof saved.who !== 'string' ||
+    typeof saved.where !== 'string' ||
+    typeof saved.groupId !== 'string' ||
+    typeof saved.matchId !== 'string'
   ) {
-    return { who: saved.who, where: saved.where };
+    return null;
   }
-  return null;
+  const groupId = parseGroupId(saved.groupId);
+  const matchId = parseMatchId(saved.matchId);
+  return groupId.ok && matchId.ok
+    ? { who: saved.who, where: saved.where, groupId: groupId.value, matchId: matchId.value }
+    : null;
 }
 
 /**
@@ -57,8 +70,12 @@ export function StartView(): React.JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
   const saved = savedNoteOf(location.state);
-  const hideNote = (): void => {
+  // NB1: the card leads to the result in the list of its table, lit up once (design I3-C).
+  const openSaved = (note: SavedNote): void => {
     void navigate('.', { replace: true, state: null });
+    void navigate(`/verwaltung/gruppen/${note.groupId}?reiter=ergebnisse`, {
+      state: { highlight: note.matchId },
+    });
   };
   const noteMs =
     saved === null
@@ -79,8 +96,8 @@ export function StartView(): React.JSX.Element {
   return (
     <main className={styles.start}>
       {/* R3: after storing a result a card floats at the top, over the banner of a match, and
-          moves nothing; it disappears once it could be read, a tap closes it at once (the jump
-          to the table page follows with I3-C). */}
+          moves nothing; it disappears once it could be read. NB1: a tap opens the result in the
+          list of its table (design I3-C). */}
       <AnimatePresence>
         {saved !== null && (
           <m.div
@@ -95,7 +112,10 @@ export function StartView(): React.JSX.Element {
               type="button"
               look="card"
               className={styles.savedButton}
-              onClick={hideNote}
+              aria-label={t('ergebnisse.ansehen', { wer: saved.who, wo: saved.where })}
+              onClick={() => {
+                openSaved(saved);
+              }}
             >
               <span className={styles.savedIcon}>
                 <TrophyIcon size={TROPHY_SIZE} />
@@ -103,6 +123,9 @@ export function StartView(): React.JSX.Element {
               <span className={styles.savedText}>
                 <strong>{saved.who}</strong>
                 <small>{saved.where}</small>
+              </span>
+              <span className={styles.savedArrow}>
+                <ChevronIcon size={SAVED_ARROW_SIZE} />
               </span>
             </PressableButton>
           </m.div>
