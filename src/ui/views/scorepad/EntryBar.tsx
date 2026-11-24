@@ -45,6 +45,12 @@ function cleaned(text: string): string | null {
   return ALLOWED.test(plain) ? plain : null;
 }
 
+// The field shows the typographic minus: wider than a hyphen, so it does not look like the dash
+// of an empty field.
+function shown(text: string): string {
+  return text.replace('-', '−');
+}
+
 function toggledSign(text: string): string {
   return text.startsWith('-') ? text.slice(1) : `-${text}`;
 }
@@ -109,6 +115,7 @@ export function EntryBar({
     };
   }, [isOpen, inputRef]);
 
+  const isNegative = value.startsWith('-');
   const keepFocus = (event: React.MouseEvent | React.PointerEvent): void => {
     event.preventDefault();
   };
@@ -173,14 +180,13 @@ export function EntryBar({
           enterKeyHint={isLast ? 'done' : 'next'}
           autoComplete="off"
           tabIndex={isOpen ? 0 : -1}
-          placeholder={t('notizblock.keineZahl')}
           aria-label={
             target === null
               ? t('notizblock.titel')
               : t('notizblock.feld', { name: target.person.name, was: target.subtitle })
           }
           aria-invalid={error !== null}
-          value={value}
+          value={shown(value)}
           onChange={(event) => {
             const text = cleaned(event.target.value);
             if (text !== null) {
@@ -200,8 +206,9 @@ export function EntryBar({
         <PressableButton
           type="button"
           tabIndex={isOpen ? 0 : -1}
-          className={styles.sign}
+          className={cx(styles.sign, isNegative && styles.negative)}
           aria-label={t('notizblock.vorzeichen')}
+          aria-pressed={isNegative}
           onMouseDown={keepFocus}
           onPointerDown={keepFocus}
           onClick={() => {

@@ -118,10 +118,6 @@
   outline: none;
 }
 
-.value::placeholder {
-  color: var(--color-text);
-}
-
 .sign {
   display: grid;
   flex: none;
@@ -135,4 +131,11 @@
   background: var(--color-surface-overlay);
   border: 1px solid var(--color-border);
   border-radius: 8px;
+}
+
+/* A minus is set: the key is filled, so the sign is seen even without a number (design I3-C2). */
+.sign.negative {
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
 }

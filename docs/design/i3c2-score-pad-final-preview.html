@@ -15778,7 +15778,7 @@
         const all = spMembers().every((o) => spFilled(a.draft[o]));
         return h('div', { class: 'kbBar' }, spSeat(p, 30),
           h('span', { class: 'kbBarName' }, h('strong', { class: 'ellipsis' }, nameOf(p)), h('small', {}, a.editCell ? `Runde ${a.editCell.i + 1} ändern` : `Runde ${a.rounds.length + 1}`)),
-          h('span', { class: 'kbBarVal' }, spVal(v)),
+          h('span', { class: 'kbBarVal' }, spBarVal(v)),
           h('button', { class: 'pzSign' + ((v || '').startsWith('-') ? ' neg' : ''), 'aria-label': 'Plus oder Minus', onclick: () => spKbPress('minus') }, '±'),
           !a.editCell && all && h('button', { class: 'primary kbSave', onclick: () => { spSaveRound(); render(); } }, icon('check', 16), 'Runde'));
       }
@@ -16097,7 +16097,7 @@
           spSeat(o, 20), h('span', {}, spFilled(a.draft[o]) ? spNum(Number(a.draft[o])) : '·'))));
         return h('div', { class: 'kbBarWrap' }, strip, h('div', { class: 'kbBar' }, spSeat(p, 30),
           h('span', { class: 'kbBarName' }, h('strong', { class: 'ellipsis' }, nameOf(p)), h('small', {}, a.editCell ? `Runde ${a.editCell.i + 1} ändern` : `Runde ${a.rounds.length + 1}`)),
-          h('span', { class: 'kbBarVal' }, spVal(v)),
+          h('span', { class: 'kbBarVal' }, spBarVal(v)),
           h('button', { class: 'pzSign' + ((v || '').startsWith('-') ? ' neg' : ''), 'aria-label': 'Plus oder Minus', onclick: () => spKbPress('minus') }, '±'),
           !a.editCell && all && h('button', { class: 'primary kbSave', onclick: () => { spSaveRound(); render(); } }, icon('check', 16), 'Runde')));
       }
@@ -16783,7 +16783,7 @@
         const sub = a.editCell ? `Runde ${a.editCell.i + 1} ändern` : self ? (ui.PSC === 'SC1' ? `Stand · vorher ${spNum(spSum(p))}` : 'Stand') : `Runde ${a.rounds.length + 1}`;
         return h('div', { class: 'kbBarWrap' }, strip, h('div', { class: 'kbBar' }, spSeat(p, 30),
           h('span', { class: 'kbBarName' }, h('strong', { class: 'ellipsis' }, nameOf(p)), h('small', {}, sub)),
-          h('span', { class: 'kbBarVal' }, spVal(v)),
+          h('span', { class: 'kbBarVal' }, spBarVal(v)),
           h('button', { class: 'pzSign' + ((v || '').startsWith('-') ? ' neg' : ''), 'aria-label': 'Plus oder Minus', onclick: () => spKbPress('minus') }, '±'),
           !a.editCell && all && h('button', { class: 'primary kbSave', onclick: () => { spSaveRound(); render(); } }, icon('check', 16), 'Runde')));
       }
@@ -17015,7 +17015,7 @@
         const sub = a.editCell ? `Runde ${a.editCell.i + 1} ändern` : self ? 'Neuer Stand' : `Runde ${a.rounds.length + 1}`;
         return h('div', { class: 'kbBarWrap' }, strip, h('div', { class: 'kbBar' }, spSeat(p, 30),
           h('span', { class: 'kbBarName' }, h('strong', { class: 'ellipsis' }, nameOf(p)), h('small', {}, sub)),
-          h('span', { class: 'kbBarVal' }, spVal(v)),
+          h('span', { class: 'kbBarVal' }, spBarVal(v)),
           h('button', { class: 'pzSign' + ((v || '').startsWith('-') ? ' neg' : ''), 'aria-label': 'Plus oder Minus', onclick: () => spKbPress('minus') }, '±'),
           !a.editCell && all && h('button', { class: 'primary kbSave', onclick: () => spSaveRound() }, icon('check', 16), 'Runde')));
       }
@@ -17367,7 +17367,7 @@
         const sub = a.editCell ? `Runde ${a.editCell.i + 1} ändern` : self ? 'Neuer Stand' : `Runde ${a.rounds.length + 1}`;
         return h('div', { class: 'kbBarWrap' }, strip, h('div', { class: 'kbBar' }, spSeat(p, 30),
           h('span', { class: 'kbBarName' }, h('strong', { class: 'ellipsis' }, nameOf(p)), h('small', {}, sub)),
-          h('span', { class: 'kbBarVal' }, spVal(v)),
+          h('span', { class: 'kbBarVal' }, spBarVal(v)),
           h('button', { class: 'pzSign' + ((v || '').startsWith('-') ? ' neg' : ''), 'aria-label': 'Plus oder Minus', onclick: () => spKbPress('minus') }, '±')));
       }
 
@@ -17720,6 +17720,9 @@
       app.prep = newPrep();
       app.session = null;
       showSpf('pad');
+      function spBarVal(v) {
+        return v === undefined || v === '' ? '' : v === '-' ? '−' : spVal(v);
+      }
     </script>
   </body>
 </html>

@@ -47,7 +47,12 @@ test.describe('US-NB-01 to US-NB-05 score pad (design I3-C2)', () => {
     const field = page.locator('input[enterkeyhint]').last();
     await field.fill('2');
     await page.getByRole('button', { name: 'Vorzeichen wechseln' }).click();
-    await expect(field).toHaveValue('-2');
+    // The field shows a real minus sign, the key stays pressed.
+    await expect(field).toHaveValue('−2');
+    await expect(page.getByRole('button', { name: 'Vorzeichen wechseln' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     await field.press('Enter');
     await expect(
       page.getByRole('button', { name: 'Runde 1, Clara: Stand -2, ändern' }),

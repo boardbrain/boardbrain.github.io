@@ -118,9 +118,14 @@ describe('US-NB-02 enter and correct rounds', () => {
     await user.click(await screen.findByRole('button', { name: 'Runde 1, Anna' }));
     expect(screen.getByText('Runde 1')).toBeInTheDocument();
     await user.type(field(), '12{Enter}');
-    await user.type(field(), '5');
     await user.click(screen.getByRole('button', { name: 'Vorzeichen wechseln' }));
-    await user.type(field(), '{Enter}');
+    // The minus alone is seen: the key is pressed and the field shows a real minus sign.
+    expect(screen.getByRole('button', { name: 'Vorzeichen wechseln' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(field()).toHaveValue('−');
+    await user.type(field(), '5{Enter}');
 
     await waitFor(async () => {
       expect((await db.scorePad.get('current'))?.rounds).toEqual([{ [ANNA]: 12, [BEN]: -5 }]);

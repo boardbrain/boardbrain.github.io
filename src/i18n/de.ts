@@ -428,7 +428,6 @@ export const de = {
     vorzeichen: 'Vorzeichen wechseln',
     plusMinus: '±',
     leer: '·',
-    keineZahl: '–',
     feld: '{name}, {was}',
     nochNichtAlle: 'Noch nicht alle eingetragen',
     ungueltig: 'Ganze Zahl bis 99 999',

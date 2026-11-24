@@ -49,6 +49,11 @@
   margin: auto 0 0;
 }
 
+/* While typing, the button does not rise above the keyboard; the block gets its room (PO). */
+.underKeyboard {
+  display: none;
+}
+
 .looksOff {
   opacity: 0.45;
 }

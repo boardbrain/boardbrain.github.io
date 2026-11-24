@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { PersonId, ScoreTarget, ScoringDirection } from '@/core/model';
 import {
   placesOfStanding,
@@ -90,6 +91,41 @@ export function ScoreBlock({
       ? rounds.length >= target.value
       : participants.some((personId) => (totals[personId] ?? 0) >= target.value));
 
+  const paperRef = useRef<HTMLDivElement>(null);
+  const headRef = useRef<HTMLTableSectionElement>(null);
+  const bodyRef = useRef<HTMLTableSectionElement>(null);
+  // The row at the keyboard: a stored round being changed or the new round.
+  const typedRow =
+    editing !== null
+      ? editing.index
+      : newRound !== null && newRound.current !== null
+        ? rounds.length
+        : null;
+
+  // External system: the scroll position of the paper. The row being typed moves up to just below
+  // the names, also once the keyboard has made the page smaller (PO 24.11.2026).
+  useEffect(() => {
+    const paper = paperRef.current;
+    const row = typedRow === null ? undefined : bodyRef.current?.rows[typedRow];
+    const head = headRef.current;
+    if (paper === null || row === undefined || head === null) {
+      return undefined;
+    }
+    const lift = (): void => {
+      paper.scrollTop += row.getBoundingClientRect().top - head.getBoundingClientRect().bottom;
+    };
+    lift();
+    // Older browsers and test environments cannot watch the size: the row then moves only once.
+    if (!('ResizeObserver' in window)) {
+      return undefined;
+    }
+    const watcher = new ResizeObserver(lift);
+    watcher.observe(paper);
+    return () => {
+      watcher.disconnect();
+    };
+  }, [typedRow]);
+
   function stack(standing: number, points: number, isPreview = false): React.JSX.Element {
     return (
       <span className={cx(styles.stack, isSelf && styles.only, isPreview && styles.preview)}>
@@ -105,6 +141,7 @@ export function ScoreBlock({
 
   return (
     <div
+      ref={paperRef}
       className={cx(styles.paper, isInCard && styles.inCard)}
       role="region"
       aria-label={t('notizblock.block')}
@@ -119,7 +156,7 @@ export function ScoreBlock({
             <col key={person.id} />
           ))}
         </colgroup>
-        <thead>
+        <thead ref={headRef}>
           <tr className={styles.names}>
             <th className={styles.rn} scope="col">
               {isReadOnly && target !== null && (
@@ -148,7 +185,7 @@ export function ScoreBlock({
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody ref={bodyRef}>
           {rounds.map((round, index) => {
             const standing = standings[index] ?? round;
             const number = index + 1;

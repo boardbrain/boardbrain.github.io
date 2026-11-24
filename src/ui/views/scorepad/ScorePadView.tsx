@@ -343,7 +343,7 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
         </p>
       )}
 
-      <div className={styles.bottom}>
+      <div className={cx(styles.bottom, entry !== null && styles.underKeyboard)}>
         <PressableButton
           type="button"
           className={cx(shared.primary, !canFinish && styles.looksOff)}
