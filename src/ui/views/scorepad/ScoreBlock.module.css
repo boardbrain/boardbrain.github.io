@@ -156,7 +156,7 @@
 /* Read only (detail): smaller rows, no buttons. */
 .readCell {
   display: block;
-  padding: 3px 0;
+  padding: 0;
 }
 
 .stack {

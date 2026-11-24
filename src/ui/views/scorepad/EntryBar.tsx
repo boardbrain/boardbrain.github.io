@@ -78,7 +78,8 @@ export function EntryBar({
   // smaller on Android and iOS, so the bar follows the visible area; when it grows back, the
   // keyboard was closed, e.g. with the back key of Android, which does not leave the field.
   useEffect(() => {
-    const viewport = window.visualViewport;
+    // Older browsers and test environments have no visual viewport: the bar then stays at the bottom.
+    const viewport = 'visualViewport' in window ? window.visualViewport : null;
     const bar = barRef.current;
     if (viewport === null || bar === null || !isOpen) {
       return undefined;

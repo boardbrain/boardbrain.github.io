@@ -407,7 +407,10 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
                   groupId: pad.groupId,
                   settings: chosen,
                 });
-                void navigate(started.ok ? '/notizblock' : '/', { replace: true });
+                // Started, the page leads to the running score pad on its own (NewPad).
+                if (!started.ok) {
+                  void navigate('/', { replace: true });
+                }
                 return;
               }
               const changed = await scorePad.changeSettings(chosen);
