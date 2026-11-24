@@ -1,4 +1,14 @@
 /* Global base styles; components use CSS Modules (Architecture 13.4). */
+
+/* E-55, ADR-032: the handwriting of the score pad, shipped with the app (SIL Open Font License,
+   public/fonts/OFL-PatrickHand.txt). Only one weight; bold numbers are drawn by the browser. */
+@font-face {
+  font-family: 'Patrick Hand';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PatrickHand-Regular.woff2') format('woff2');
+}
 *,
 *::before,
 *::after {

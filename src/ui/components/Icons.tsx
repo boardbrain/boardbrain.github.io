@@ -404,3 +404,38 @@ export function TrashIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Score pad with rings and lines (design I3-C2 FB6), e.g. on the button of the result form.
+ * Decorative: the button around it carries the label.
+ */
+export function PadIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M6.5 5h11a1.5 1.5 0 0 1 1.5 1.5v13a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19.5v-13A1.5 1.5 0 0 1 6.5 5zM8.5 3v4M12 3v4M15.5 3v4M8.5 11h7M8.5 14.5h7M8.5 18h4" />
+    </Outline>
+  );
+}
+
+/**
+ * Horizontal sliders for the settings of the score pad (design I3-C2 GE2). Decorative.
+ */
+export function SlidersIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />
+    </Outline>
+  );
+}
+
+/**
+ * Arrow to a finishing line for the target of the score pad (design I3-C2 ZY5). Decorative: the
+ * text beside it says the target.
+ */
+export function TargetIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M3 12h13M12 7.5l4.5 4.5-4.5 4.5M20.5 5v14" />
+    </Outline>
+  );
+}
