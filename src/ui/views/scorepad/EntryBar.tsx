@@ -145,9 +145,7 @@ export function EntryBar({
                 >
                   {person.name.slice(0, 1)}
                 </span>
-                <span>
-                  {isActive || entry === undefined ? t('notizblock.leer') : formatPadNumber(entry)}
-                </span>
+                <span>{entry === undefined ? t('notizblock.leer') : formatPadNumber(entry)}</span>
               </PressableButton>
             );
           })}

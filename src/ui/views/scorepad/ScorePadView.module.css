@@ -11,6 +11,7 @@
 }
 
 .targetBtn {
+  position: relative;
   display: inline-flex;
   gap: 4px;
   align-items: center;
@@ -22,6 +23,13 @@
   vertical-align: bottom;
   background: none;
   border-radius: 0;
+}
+
+/* K-4: the tap area reaches 44 px high, the text stays in the line. */
+.targetBtn::before {
+  position: absolute;
+  inset: -12px -6px;
+  content: '';
 }
 
 .targetBtn.reached {
