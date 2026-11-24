@@ -63,7 +63,13 @@ test.describe('US-NB-01 to US-NB-05 score pad (design I3-C2)', () => {
     await expect(
       page.getByRole('button', { name: 'Runde 1, Anna: Stand 12, ändern' }),
     ).toBeVisible();
-    await page.goto('/#/');
+    // "Zurück" leads to the start, not to the choice of game or table (PO 24.11.2026).
+    await page.getByRole('button', { name: 'Zurück' }).click();
+    await expect(
+      page.getByRole('link', { name: /Notizblock.*Skyjo · Freitagsrunde · Runde 2/ }),
+    ).toBeVisible();
+    // The back key of the device: the choice of the running score pad leads to the start, too.
+    await page.goBack();
     await expect(
       page.getByRole('link', { name: /Notizblock.*Skyjo · Freitagsrunde · Runde 2/ }),
     ).toBeVisible();

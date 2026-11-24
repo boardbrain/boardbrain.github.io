@@ -1,5 +1,5 @@
 import { useRef, useState, useTransition } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import {
   parseGameId,
   parseGroupId,
@@ -34,6 +34,7 @@ import shared from '@/ui/views/match/Match.module.css';
 import type { ResultPerson } from '@/ui/views/result/ResultRows';
 import { EntryBar, type EntryTarget } from './EntryBar';
 import { ReachedSheet, SettingsSheet } from './PadSheets';
+import { isFromStart } from './padNavigation';
 import { targetText } from './padTexts';
 import { ScoreBlock } from './ScoreBlock';
 import styles from './ScorePadView.module.css';
@@ -101,6 +102,16 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
   const { scorePad } = useAppDependencies();
   const navigate = useNavigate();
   const goBackFromStart = useGoBack('/notizblock/neu');
+  const location = useLocation();
+  // "Zurück" in a running score pad leads to the start, never back to the choice of game or table,
+  // where another choice would change nothing (PO 24.11.2026). Opened from the start, it goes back.
+  const backToStart = (): void => {
+    if (isFromStart(location.state)) {
+      void navigate(-1);
+      return;
+    }
+    void navigate('/', { replace: true });
+  };
   const inputRef = useRef<HTMLInputElement>(null);
   const [entry, setEntry] = useState<Entry | null>(null);
   const [draft, setDraft] = useState<Readonly<Record<PersonId, string>>>({});
@@ -275,7 +286,7 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
   return (
     <main className={cx(shared.main, styles.main)}>
       <div className={shared.pageHead}>
-        <BackButton fallback="/" />
+        {isNew ? <BackButton fallback="/" /> : <BackButton fallback="/" onBack={backToStart} />}
         <div className={shared.titles}>
           <h1 className={shared.title}>{game.name}</h1>
           {/* The target first, so a long name of the table cannot push it out (PO 24.11.2026). */}

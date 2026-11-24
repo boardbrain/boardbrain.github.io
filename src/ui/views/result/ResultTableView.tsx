@@ -4,7 +4,7 @@ import { findGroups, parseGameId, type GameId, type Group } from '@/core/model';
 import { CATAN_GAME_ID } from '@/games/catan';
 import { canGroupPlay } from '@/games/registry';
 import { t } from '@/i18n/t';
-import { useCustomGame, useGroups, usePersons } from '@/infra/db/readHooks';
+import { useCurrentScorePad, useCustomGame, useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { BackButton } from '@/ui/components/BackButton';
 import { PlusIcon } from '@/ui/components/Icons';
@@ -65,6 +65,7 @@ export function ResultTableView({
   const name = useGameName(game);
   const groups = useGroups(db);
   const persons = usePersons(db);
+  const current = useCurrentScorePad(db);
   const navigate = useNavigate();
   const [details, setDetails] = useState<Group | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -75,8 +76,18 @@ export function ResultTableView({
   if (game === null || name === null) {
     return <Navigate to={start} replace />;
   }
-  if (name === undefined || groups === undefined || persons === undefined) {
+  if (
+    name === undefined ||
+    groups === undefined ||
+    persons === undefined ||
+    current === undefined
+  ) {
     return null;
+  }
+  // E-51: while a score pad runs, choosing a table for one changes nothing; e.g. the back key
+  // leads here from the running score pad.
+  if (isForPad && current.status !== 'none') {
+    return <Navigate to="/" replace />;
   }
   const active = groups.filter((group) => !group.archived);
   const fitting = active.filter((group) => canGroupPlay(group, game));

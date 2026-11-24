@@ -19,6 +19,7 @@ import { PressableLink } from '@/ui/components/Pressable';
 import { useAreaCards } from '@/ui/views/areaCards';
 import { MatchDialog } from '@/ui/views/match/MatchDialog';
 import { MiniPaper } from '@/ui/views/scorepad/MiniPaper';
+import { FROM_START } from '@/ui/views/scorepad/padNavigation';
 import styles from './StartView.module.css';
 
 const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
@@ -187,6 +188,7 @@ export function StartView(): React.JSX.Element {
         ) : (
           <PressableLink
             to={isPadRunning ? '/notizblock' : '/notizblock/neu'}
+            state={isPadRunning ? FROM_START : undefined}
             look="card"
             className={cx(styles.padRow, isPadRunning && styles.padRunning)}
           >

@@ -96,6 +96,42 @@ describe('US-NB-01 start a score pad', () => {
     expect(await screen.findByRole('button', { name: 'Ziel 7R, ändern' })).toBeInTheDocument();
   });
 
+  it('"Zurück" in a running score pad leads to the start (PO 24.11.2026)', async () => {
+    const user = userEvent.setup();
+    const { db, router } = renderWithApp(<ScorePadView />, {
+      routes: [
+        { path: '/', element: <p>start</p> },
+        { path: '/notizblock/neu/:gameId', element: <p>table</p> },
+        { path: '/notizblock', element: <ScorePadView /> },
+      ],
+      path: '/',
+    });
+    await seed(db, { rounds: [{ [ANNA]: 3, [BEN]: 4 }] });
+    await router.navigate(`/notizblock/neu/${SKYJO.id}`);
+    await router.navigate('/notizblock');
+
+    await user.click(await screen.findByRole('button', { name: 'Zurück' }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/');
+    });
+  });
+
+  it('the choice of game leads to the start while a score pad runs (E-51)', async () => {
+    const { db, router } = renderWithApp(<PadGameChoiceView />, {
+      routes: [
+        { path: '/', element: <p>start</p> },
+        { path: '/notizblock/neu', element: <PadGameChoiceView /> },
+      ],
+      path: '/',
+    });
+    await seed(db, {});
+    await router.navigate('/notizblock/neu');
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/');
+    });
+  });
+
   it('AK-4: the start shows the running score pad; "Partie" asks first', async () => {
     const user = userEvent.setup();
     const { db } = renderWithApp(<StartView />);

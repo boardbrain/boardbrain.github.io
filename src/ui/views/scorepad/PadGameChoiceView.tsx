@@ -1,6 +1,7 @@
 import { sortByName, type CustomGame } from '@/core/model';
 import { t } from '@/i18n/t';
-import { useCustomGames, usePlayedGames } from '@/infra/db/readHooks';
+import { Navigate } from 'react-router';
+import { useCurrentScorePad, useCustomGames, usePlayedGames } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { BackButton } from '@/ui/components/BackButton';
 import { PlusIcon } from '@/ui/components/Icons';
@@ -22,8 +23,13 @@ export function PadGameChoiceView(): React.JSX.Element | null {
   const { db } = useAppDependencies();
   const customGames = useCustomGames(db);
   const played = usePlayedGames(db);
-  if (customGames === undefined || played === undefined) {
+  const current = useCurrentScorePad(db);
+  if (customGames === undefined || played === undefined || current === undefined) {
     return null;
+  }
+  // E-51: while a score pad runs, its choice changes nothing; e.g. the back key leads here.
+  if (current.status !== 'none') {
+    return <Navigate to="/" replace />;
   }
   const today = localToday();
   const last = (game: CustomGame): string => played.get(game.id)?.lastDate ?? '';
