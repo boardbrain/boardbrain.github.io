@@ -305,11 +305,11 @@ export function withChanges(
   const isSameTarget =
     settings.target?.kind === pad.settings.target?.kind &&
     settings.target?.value === pad.settings.target?.value;
-  const wasNoticed = isSameTarget && pad.isTargetNoticed;
+  const isStillNoticed = isSameTarget && pad.isTargetNoticed;
   const isTargetReachedNow =
-    !wasNoticed && isTargetReached(settings.target, rounds, pad.participants);
+    !isStillNoticed && isTargetReached(settings.target, rounds, pad.participants);
   return {
-    pad: { ...pad, settings, rounds, isTargetNoticed: wasNoticed || isTargetReachedNow },
+    pad: { ...pad, settings, rounds, isTargetNoticed: isStillNoticed || isTargetReachedNow },
     isTargetReachedNow,
   };
 }

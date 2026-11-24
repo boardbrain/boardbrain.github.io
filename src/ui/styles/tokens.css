@@ -111,6 +111,13 @@
   --color-pad-shadow: #0000008c;
   --color-pad-gloss: #ffffff0a;
 
+  /* Gold accents of the score pad (FB6, EN2): the button of the form, the target in the sheet "Ziel
+     erreicht" and its leading line */
+  --color-pad-gold-rim: color-mix(in srgb, var(--color-piece-mark) 60%, transparent);
+  --color-pad-gold-edge: color-mix(in srgb, var(--color-piece-mark) 45%, transparent);
+  --color-pad-gold-soft: color-mix(in srgb, var(--color-piece-mark) 14%, transparent);
+  --color-pad-gold-line: color-mix(in srgb, var(--color-piece-mark) 8%, transparent);
+
   /* Card back R1 (design I2-D): dark wood, lozenge pattern, golden frame, medallion with the logo */
   --color-card-back-gold: #e0b25a;
   --color-card-back-top: #4a3d31;
@@ -384,6 +391,7 @@
   /* Typography */
   --font-family-base: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
   --font-family-mono: ui-monospace, 'Cascadia Mono', consolas, monospace;
+
   /* Handwriting of the score pad (E-55, ADR-032), shipped as a file, see global.css */
   --font-family-pad: 'Patrick Hand', cursive;
   --font-size-tiny: 0.75rem;

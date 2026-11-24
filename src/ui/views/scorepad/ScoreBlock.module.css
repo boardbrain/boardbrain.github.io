@@ -1,0 +1,308 @@
+/*
+ * The score pad BD2 with FT2 (design I3-C2, docs/design/i3c2-score-pad-final-preview.html): dark
+ * paper, persons as columns, rounds as rows, the red margin right of the round numbers.
+ *
+ * The paper scrolls itself in both directions, so the row of names stays at the top and the
+ * column of round numbers on the left (position: sticky works only inside one scroller). Columns
+ * are at least 64 px wide: a small phone shows about 4 persons, a phone 4 to 5, a tablet many
+ * more; with more persons the paper moves sideways (PO 24.11.2026).
+ */
+.paper {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--color-pad-paper);
+  border: 1px solid var(--color-pad-edge);
+  border-radius: 14px;
+  box-shadow:
+    0 6px 18px var(--color-pad-shadow),
+    inset 0 1px 0 var(--color-pad-gloss);
+  scrollbar-width: thin;
+}
+
+/* Inside a card (detail): no frame of its own, a line above. */
+.inCard {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.roundCol {
+  width: 30px;
+}
+
+.table th,
+.table td {
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* The column of round numbers with the red margin; it stays when the paper moves sideways. */
+.rn {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-pad-paper);
+  border-right: 2px solid var(--color-pad-margin);
+}
+
+/* The row of names stays at the top while the rounds scroll. */
+.names th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-pad-paper);
+  border-bottom: 1px solid var(--color-pad-line);
+  box-shadow: 0 1px 0 var(--color-pad-line);
+}
+
+.names th.rn {
+  z-index: 3;
+  border-top-left-radius: 14px;
+}
+
+.names th.lead {
+  background: var(--color-pad-lead-solid);
+}
+
+.headCell {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 8px 2px 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seat {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-surface);
+  border-radius: 50%;
+}
+
+.row td,
+.row th {
+  border-bottom: 1px solid var(--color-pad-line);
+}
+
+.lead {
+  background: var(--color-pad-lead);
+}
+
+.row th.rn,
+.places th.rn,
+.newRow th.rn {
+  background: var(--color-pad-paper);
+}
+
+.roundBtn {
+  display: inline-block;
+  width: 100%;
+  min-height: 40px;
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-pad-round);
+  background: none;
+  border-radius: 0;
+}
+
+.roundNumber {
+  color: var(--color-pad-round);
+}
+
+.cell {
+  display: inline-block;
+  width: 100%;
+  min-height: 46px;
+  padding: 3px 0;
+  font-weight: 600;
+  color: var(--color-text);
+  background: none;
+  border-radius: 0;
+}
+
+/* The number at the keyboard while it is changed. */
+.cell.editing {
+  box-shadow: inset 0 0 0 2px var(--color-accent-text);
+}
+
+/* Read only (detail): smaller rows, no buttons. */
+.readCell {
+  display: block;
+  padding: 3px 0;
+}
+
+.stack {
+  display: grid;
+  justify-items: center;
+  line-height: 1.05;
+}
+
+.stack b {
+  font-family: var(--font-family-pad);
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--color-pad-ink);
+}
+
+.stack small {
+  font-family: var(--font-family-pad);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-pad-ink-muted);
+}
+
+.stack small.minus {
+  color: var(--color-pad-minus);
+}
+
+/* FA-NB-06: from the target in points on, the standing is red. */
+.stack b.reached {
+  color: var(--color-status-error);
+}
+
+/* Calculating oneself: only the standings (SC2). */
+.only b {
+  font-size: 1.08rem;
+}
+
+/* The new round: dashed fields, the active one with a frame and the cursor. */
+.newRow th,
+.newRow td {
+  border-top: 1px dashed var(--color-border);
+}
+
+.newRow th.rn {
+  font-weight: 800;
+  color: var(--color-accent-text);
+}
+
+.newWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.newCell {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-pad-field);
+  border: 1px dashed var(--color-pad-field-edge);
+  border-radius: 8px;
+}
+
+.newCell.active {
+  color: var(--color-text);
+  border: 2px solid var(--color-pad-field-edge);
+}
+
+.newCell.active::after {
+  font-weight: 400;
+  color: var(--color-accent-text);
+  content: '|';
+}
+
+/* Not yet entered when the round should be stored (US-NB-02 AK-3). */
+.newCell.missing {
+  border: 1px solid var(--color-status-error);
+}
+
+/* Typed numbers show the coming standing, pale. */
+.preview b {
+  opacity: 0.55;
+}
+
+.dot {
+  color: var(--color-text-muted);
+}
+
+.places th,
+.places td {
+  padding: 8px 0;
+  border-top: 2px solid var(--color-border);
+}
+
+.places th.rn {
+  font-size: 0.65rem;
+}
+
+/* Places in a circle as in the result (design I3-C MP2). */
+.place {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.place.first {
+  color: var(--color-accent-text);
+  border-color: var(--color-accent-text);
+}
+
+.place.second {
+  color: var(--color-place-silver);
+  border-color: var(--color-place-silver-rim);
+}
+
+.place.third {
+  color: var(--color-place-bronze);
+  border-color: var(--color-place-bronze-rim);
+}
+
+/* The target in the corner of the read-only block (DF1). */
+.corner {
+  display: grid;
+  gap: 1px;
+  justify-items: center;
+  min-height: 48px;
+  align-content: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--color-accent-text);
+}
+
+.corner.reached {
+  color: var(--color-status-error);
+}
+
+.inCard .names th.rn {
+  border-top-left-radius: 0;
+}

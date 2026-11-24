@@ -165,6 +165,24 @@ const router = createHashRouter([
         path: '/ergebnis/neu/:gameId/:groupId',
         lazy: matchRoute((match) => view(<match.ResultView />)),
       },
+      // I3-C2: the score pad (US-NB-01 to US-NB-04, Architecture 13.1).
+      { path: '/notizblock', lazy: matchRoute((match) => view(<match.ScorePadView />)) },
+      {
+        path: '/notizblock/neu',
+        lazy: matchRoute((match) => view(<match.PadGameChoiceView />)),
+      },
+      {
+        path: '/notizblock/neu/:gameId',
+        lazy: matchRoute((match) => view(<match.ResultTableView isForPad />)),
+      },
+      {
+        path: '/notizblock/neu/:gameId/:groupId',
+        lazy: matchRoute((match) => view(<match.NewScorePadView />)),
+      },
+      {
+        path: '/notizblock/ergebnis',
+        lazy: matchRoute((match) => view(<match.PadResultView />)),
+      },
       {
         path: '/partie/uebersicht',
         lazy: matchRoute((match) => view(<match.MatchOverviewView />)),

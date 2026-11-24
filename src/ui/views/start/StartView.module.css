@@ -264,3 +264,60 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Design I3-C2 SL4, SY1: the row "Notizblock" above "Partie", smaller than the pile; while a score
+   pad runs, framed in the accent colour with game, table and round. */
+.padRow {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 6px 18px 6px 16px;
+  color: var(--color-text);
+  text-align: left;
+  text-decoration: none;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.padRunning {
+  border-color: var(--color-accent-text);
+}
+
+.padText {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.padText small {
+  overflow: hidden;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.padText small.live {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--color-accent-text);
+}
+
+.liveDot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: var(--color-accent-text);
+  border-radius: 50%;
+}
+
+.padArrow {
+  display: grid;
+  flex: none;
+  color: var(--color-text-muted);
+}

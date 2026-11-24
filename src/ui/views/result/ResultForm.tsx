@@ -16,9 +16,10 @@ import {
   plausibilityWarnings,
   type ResultInput,
 } from '@/core/results';
+import { changeEntry, totalsOf, type ScoreRound } from '@/core/scorepad';
 import type { Result } from '@/core/shared';
 import { t } from '@/i18n/t';
-import { CheckIcon, InfoIcon } from '@/ui/components/Icons';
+import { CheckIcon, InfoIcon, PadIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
 import { PressableButton } from '@/ui/components/Pressable';
 import { Unfold } from '@/ui/components/Unfold';
@@ -44,10 +45,14 @@ import {
 } from './resultEntry';
 import { winnerText } from '@/ui/views/management/resultList';
 import { PersonMark, PlaceRows, PointsRows, type ResultPerson } from './ResultRows';
+import { EntryBar } from '@/ui/views/scorepad/EntryBar';
+import { ScoreBlock } from '@/ui/views/scorepad/ScoreBlock';
 import { WhenSection } from './WhenSection';
 import styles from './Result.module.css';
 
 const CHECK_SIZE = 18;
+const PAD_SIZE = 18;
+const WHOLE_NUMBER = /^-?\d+$/u;
 const INFO_SIZE = 18;
 const MINUTES_PER_HOUR = 60;
 const NUDGE_SECONDS = 0.9;
@@ -74,15 +79,21 @@ type ResultFormProps = {
    * change (AK-1) and calls this without a change.
    */
   readonly onUnchanged?: (() => void) | undefined;
+  /**
+   * Starts the score pad with this game and table (US-NB-01 AK-2, design I3-C2 FB6); only for a
+   * new result of a custom game with points.
+   */
+  readonly onPad?: (() => void) | undefined;
 };
 
-// The way and entries the form starts with: a stored result when changing it, else nothing.
+// The way and entries the form starts with: a stored result when changing it or the sums of the
+// score pad, else nothing.
 function startOf(
   draft: ResultDraft,
-  isEditing: boolean,
+  isPrefilled: boolean,
 ): { readonly way: Way; readonly byWay: Readonly<Record<Way, WayEntries>> } {
   const empty = { points: NO_ENTRIES, places: NO_ENTRIES };
-  if (!isEditing) {
+  if (!isPrefilled) {
     return { way: draft.rules.scoring === null ? 'places' : 'points', byWay: empty };
   }
   const { way, entries } = entriesOf(draft.values, draft.rules);
@@ -119,14 +130,27 @@ export function ResultForm({
   save,
   onSaved,
   onUnchanged,
+  onPad,
 }: ResultFormProps): React.JSX.Element {
   const { rules, participants, values } = draft;
   const isEditing = onUnchanged !== undefined;
+  // US-NB-04 AK-1: from the score pad the points are its sums and are changed there.
+  const isFromPad = values.rounds !== undefined && !isEditing;
+  const padInputRef = useRef<HTMLInputElement>(null);
+  const [rounds, setRounds] = useState<readonly ScoreRound[] | null>(values.rounds ?? null);
+  const [padCell, setPadCell] = useState<{
+    readonly index: number;
+    readonly personId: PersonId;
+  } | null>(null);
+  const [padText, setPadText] = useState('');
+  const [padError, setPadError] = useState<string | null>(null);
+  const [isAskingRounds, setIsAskingRounds] = useState(false);
+  const [deletingRound, setDeletingRound] = useState<number | null>(null);
   const isCatan = rules.hasSingleWinner;
   const hasBothWays = rules.scoring !== null && rules.supportsRanking;
   const formRef = useRef<HTMLFormElement>(null);
   const durationRef = useRef<HTMLInputElement>(null);
-  const [start] = useState(() => startOf(draft, isEditing));
+  const [start] = useState(() => startOf(draft, isEditing || values.rounds !== undefined));
   const [way, setWay] = useState<Way>(start.way);
   const [byWay, setByWay] = useState<Readonly<Record<Way, WayEntries>>>(start.byWay);
   const [committed, setCommitted] = useState<Readonly<Record<PersonId, string>>>(
@@ -176,6 +200,49 @@ export function ResultForm({
     setByWay({ ...byWay, [way]: next });
   }
 
+  // US-NB-05 AK-2: the points of a result with rounds are the sums of its rounds.
+  function changeRounds(next: readonly ScoreRound[]): void {
+    const totals = totalsOf(next, participants);
+    const points = Object.fromEntries(
+      participants.map((personId) => [personId, String(totals[personId] ?? 0)]),
+    );
+    setRounds(next);
+    change({ ...entries, points });
+    setCommitted(points);
+  }
+
+  function closePadCell(): void {
+    const cell = padCell;
+    setPadCell(null);
+    setPadError(null);
+    const text = padText.trim();
+    if (cell === null || rounds === null || !WHOLE_NUMBER.test(text)) {
+      return;
+    }
+    const changed = changeEntry(
+      rounds,
+      cell.index,
+      cell.personId,
+      Number(text),
+      participants,
+      'app',
+    );
+    if (changed.ok) {
+      changeRounds(changed.value);
+    }
+  }
+
+  // FA-NB-08: "Sieger oder Rangfolge" discards the rounds, after a warning.
+  function toggleWay(): void {
+    if (way === 'points' && rounds !== null) {
+      setIsAskingRounds(true);
+      return;
+    }
+    setWay(way === 'places' ? 'points' : 'places');
+  }
+
+  const padPerson = persons.find((candidate) => candidate.id === padCell?.personId);
+
   function input(): ResultInput {
     return {
       date,
@@ -183,6 +250,9 @@ export function ResultForm({
       ...(edition === undefined ? {} : { edition }),
       ...(values.mode === undefined ? {} : { mode: values.mode }),
       ...outcomeOf(way, derived, participants),
+      ...(way === 'points' && rounds !== null
+        ? { rounds, ...(values.target === undefined ? {} : { target: values.target }) }
+        : {}),
       ...(colors === undefined ? {} : { catanColors: colors }),
       ...(durationMinutes === undefined ? {} : { durationMinutes }),
       ...(notes.trim() === '' ? {} : { notes }),
@@ -254,7 +324,19 @@ export function ResultForm({
       }}
     >
       <section className={shared.section}>
-        <h2 className={shared.sectionTitle}>{t('ergebnis.abschnitt')}</h2>
+        <h2 className={shared.sectionTitle}>
+          {t('ergebnis.abschnitt')}
+          {onPad !== undefined && (
+            <PressableButton
+              type="button"
+              className={styles.padBtn}
+              aria-label={t('notizblock.formKnopf')}
+              onClick={onPad}
+            >
+              <PadIcon size={PAD_SIZE} />
+            </PressableButton>
+          )}
+        </h2>
         {hasBothWays && (
           <div className={shared.group}>
             <PressableButton
@@ -262,9 +344,7 @@ export function ResultForm({
               role="switch"
               className={styles.switchRow}
               aria-checked={way === 'places'}
-              onClick={() => {
-                setWay(way === 'places' ? 'points' : 'places');
-              }}
+              onClick={toggleWay}
             >
               <span className={styles.txt}>
                 {t('ergebnis.siegerOderRangfolge')}
@@ -274,39 +354,92 @@ export function ResultForm({
             </PressableButton>
           </div>
         )}
-        <div className={shared.group} aria-label={t('ergebnis.personen')} role="group">
-          {way === 'points' ? (
-            <PointsRows
-              persons={rows}
-              entries={entries}
-              derived={settled}
-              badPoints={derived.badPoints}
-              committed={committed}
-              rules={rules}
-              isPointsRequired={hasBothWays}
-              missing={derived.missing}
-              onPoints={(personId, text) => {
-                change(setPoints(entries, personId, text, participants, rules));
-              }}
-              onCommit={() => {
-                setCommitted(entries.points);
-              }}
-              onWinner={(personId) => {
-                change(toggleWinner(entries, personId, rules));
-              }}
-            />
-          ) : (
-            <PlaceRows
-              persons={rows}
-              derived={derived}
-              missing={derived.missing}
-              onPlace={(personId, place) => {
-                change(setPlace(entries, personId, place, rules));
-              }}
-            />
-          )}
-        </div>
+        {way === 'points' && rounds !== null && isEditing ? (
+          <ScoreBlock
+            persons={persons}
+            rounds={rounds}
+            scoring={rules.scoring ?? 'highest-wins'}
+            calculation="app"
+            target={values.target ?? null}
+            editing={padCell}
+            onCell={(index, personId) => {
+              padInputRef.current?.focus({ preventScroll: true });
+              setPadCell({ index, personId });
+              setPadText(String(rounds[index]?.[personId] ?? ''));
+              setPadError(null);
+            }}
+            onRound={(index) => {
+              setDeletingRound(index);
+            }}
+          />
+        ) : (
+          <div className={shared.group} aria-label={t('ergebnis.personen')} role="group">
+            {way === 'points' ? (
+              <PointsRows
+                persons={rows}
+                entries={entries}
+                derived={settled}
+                badPoints={derived.badPoints}
+                committed={committed}
+                rules={rules}
+                isPointsRequired={hasBothWays}
+                missing={derived.missing}
+                isReadOnly={isFromPad && rounds !== null}
+                onPoints={(personId, text) => {
+                  change(setPoints(entries, personId, text, participants, rules));
+                }}
+                onCommit={() => {
+                  setCommitted(entries.points);
+                }}
+                onWinner={(personId) => {
+                  change(toggleWinner(entries, personId, rules));
+                }}
+              />
+            ) : (
+              <PlaceRows
+                persons={rows}
+                derived={derived}
+                missing={derived.missing}
+                onPlace={(personId, place) => {
+                  change(setPlace(entries, personId, place, rules));
+                }}
+              />
+            )}
+          </div>
+        )}
       </section>
+      {isEditing && rounds !== null && (
+        <EntryBar
+          isOpen={padCell !== null}
+          inputRef={padInputRef}
+          target={
+            padCell === null || padPerson === undefined
+              ? null
+              : {
+                  person: padPerson,
+                  subtitle: t('notizblock.rundeAendern', { runde: padCell.index + 1 }),
+                }
+          }
+          strip={[]}
+          entries={{}}
+          value={padText}
+          isLast
+          error={padError}
+          onValue={(text) => {
+            setPadText(text);
+            setPadError(null);
+          }}
+          onEnter={() => {
+            if (!WHOLE_NUMBER.test(padText.trim())) {
+              setPadError(t('notizblock.ungueltig'));
+              return;
+            }
+            padInputRef.current?.blur();
+          }}
+          onPerson={() => undefined}
+          onClose={closePadCell}
+        />
+      )}
 
       <WhenSection date={date} time={time} today={today} onDate={setDate} onTime={setTime} />
 
@@ -526,6 +659,50 @@ export function ResultForm({
           }}
           confirmLabel={t('allgemein.speichern')}
           onConfirm={store}
+        />
+      )}
+      {isAskingRounds && rounds !== null && (
+        <MatchDialog
+          title={t('notizblock.verwerfenFrage')}
+          lines={[
+            rounds.length === 1
+              ? t('notizblock.verwerfenEineRunde')
+              : t('notizblock.verwerfenText', { anzahl: rounds.length }),
+            t('notizblock.verwerfenStatistik'),
+          ]}
+          cancelLabel={t('allgemein.abbrechen')}
+          onCancel={() => {
+            setIsAskingRounds(false);
+          }}
+          confirmLabel={t('notizblock.verwerfen')}
+          isDanger
+          onConfirm={() => {
+            setIsAskingRounds(false);
+            setRounds(null);
+            setWay('places');
+          }}
+        />
+      )}
+      {deletingRound !== null && rounds !== null && (
+        <MatchDialog
+          title={t('notizblock.rundeLoeschenFrage', { runde: deletingRound + 1 })}
+          lines={[
+            rounds.length > 1 ? t('notizblock.rundeLoeschenText') : t('notizblock.letzteRunde'),
+          ]}
+          cancelLabel={t('allgemein.abbrechen')}
+          onCancel={() => {
+            setDeletingRound(null);
+          }}
+          {...(rounds.length > 1
+            ? {
+                confirmLabel: t('notizblock.loeschen'),
+                isDanger: true,
+                onConfirm: () => {
+                  changeRounds(rounds.filter((_, index) => index !== deletingRound));
+                  setDeletingRound(null);
+                },
+              }
+            : {})}
         />
       )}
       {isShowingRules && (

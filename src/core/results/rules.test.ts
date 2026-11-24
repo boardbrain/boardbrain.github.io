@@ -519,7 +519,7 @@ describe('US-NB-04 Rounds and target of a score pad in the result', () => {
         TODAY,
       ),
     ).toThrow(InvariantError);
-    const { scores: _scores, ...withoutScores } = FROM_PAD;
+    const withoutScores: ResultInput = { date: '2026-11-15', winnerIds: [CLARA], rounds: ROUNDS };
     expect(() => resultErrors(withoutScores, TABLE, SKYJO_LIKE, TODAY)).toThrow(InvariantError);
   });
 
@@ -539,7 +539,12 @@ describe('US-NB-04 Rounds and target of a score pad in the result', () => {
   });
 
   it('AK-2: a target needs rounds and is a whole number from 1', () => {
-    const { rounds: _rounds, ...withoutRounds } = FROM_PAD;
+    const withoutRounds: ResultInput = {
+      date: '2026-11-15',
+      winnerIds: [CLARA],
+      scores: { [ANNA]: 20, [BEN]: 39, [CLARA]: 19 },
+      target: { kind: 'points', value: 100 },
+    };
     expect(() => resultErrors(withoutRounds, TABLE, SKYJO_LIKE, TODAY)).toThrow(InvariantError);
     expect(() =>
       resultErrors({ ...FROM_PAD, target: { kind: 'rounds', value: 0 } }, TABLE, SKYJO_LIKE, TODAY),

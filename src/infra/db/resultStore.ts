@@ -57,8 +57,10 @@ export function createDexieResultStore(db: BoardBrainDb): ResultStore {
   const repos = repositories(db);
   return {
     transaction: (work) =>
-      db.transaction('rw', [db.matches, db.meta, db.groups, db.games, db.session, db.scorePad], () =>
-        work(repos),
+      db.transaction(
+        'rw',
+        [db.matches, db.meta, db.groups, db.games, db.session, db.scorePad],
+        () => work(repos),
       ),
   };
 }

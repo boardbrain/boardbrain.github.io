@@ -1,0 +1,30 @@
+/* Design I3-C2 SY1: 54 × 46 px, lines every 13 px, red margin left, turned by −4°. */
+.paper {
+  display: grid;
+  flex: none;
+  align-content: start;
+  width: 54px;
+  height: 46px;
+  padding: 3px 4px 0 9px;
+  font-family: var(--font-family-pad);
+  font-size: 10px;
+  line-height: 13px;
+  color: var(--color-pad-ink);
+  background: repeating-linear-gradient(
+    var(--color-pad-paper) 0,
+    var(--color-pad-paper) 12px,
+    var(--color-pad-field-edge) 12px,
+    var(--color-pad-field-edge) 13px
+  );
+  border: 1px solid var(--color-pad-field-edge);
+  border-left: 2px solid var(--color-pad-margin);
+  border-radius: 3px;
+  box-shadow: 0 3px 8px var(--color-pad-shadow);
+  transform: rotate(-4deg);
+}
+
+.row {
+  display: flex;
+  gap: 7px;
+  height: 13px;
+}

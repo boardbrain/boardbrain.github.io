@@ -49,8 +49,15 @@ function boundTo(group: Group, gameId: GameId): boolean {
  * Table choice of a result `#/ergebnis/neu/‹spiel›` (US-ER-01 AK-1, AK-5, design I3-B F2): the
  * active tables that can play the game, as for a new match; holding shows the details. With only
  * one such table the form opens at once; without one the page says what is missing (LZ2).
+ *
+ * For a score pad `#/notizblock/neu/‹spiel›` (US-NB-01 AK-1) the same choice leads to the score
+ * pad instead of the form.
  */
-export function ResultTableView(): React.JSX.Element | null {
+export function ResultTableView({
+  isForPad = false,
+}: {
+  readonly isForPad?: boolean;
+}): React.JSX.Element | null {
   const { db } = useAppDependencies();
   const { gameId = '' } = useParams();
   const parsed = parseGameId(gameId);
@@ -62,8 +69,11 @@ export function ResultTableView(): React.JSX.Element | null {
   const [details, setDetails] = useState<Group | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const start = isForPad ? '/notizblock/neu' : '/partie/neu';
+  const hrefOf = (gameId: GameId, group: Group): string =>
+    isForPad ? `/notizblock/neu/${gameId}/${group.id}` : `/ergebnis/neu/${gameId}/${group.id}`;
   if (game === null || name === null) {
-    return <Navigate to="/partie/neu" replace />;
+    return <Navigate to={start} replace />;
   }
   if (name === undefined || groups === undefined || persons === undefined) {
     return null;
@@ -71,7 +81,7 @@ export function ResultTableView(): React.JSX.Element | null {
   const active = groups.filter((group) => !group.archived);
   const fitting = active.filter((group) => canGroupPlay(group, game));
   if (fitting.length === 1 && fitting[0] !== undefined) {
-    return <Navigate to={`/ergebnis/neu/${game}/${fitting[0].id}`} replace />;
+    return <Navigate to={hrefOf(game, fitting[0])} replace />;
   }
   const byId = new Map(persons.map((person) => [person.id, person]));
   const left = active.length - fitting.length;
@@ -83,15 +93,19 @@ export function ResultTableView(): React.JSX.Element | null {
   };
   const choose = (group: Group): void => {
     setDetails(null);
-    void navigate(`/ergebnis/neu/${game}/${group.id}`);
+    void navigate(hrefOf(game, group));
   };
   return (
     <main className={shared.main}>
       <div className={shared.pageHead}>
-        <BackButton fallback="/partie/neu" />
+        <BackButton fallback={start} />
         <div className={shared.titles}>
           <h1 className={shared.title}>{t('ergebnis.tischTitel')}</h1>
-          <div className={shared.sub}>{t('ergebnis.tischUnterzeile', { spiel: name })}</div>
+          <div className={shared.sub}>
+            {t(isForPad ? 'notizblock.tischUnterzeile' : 'ergebnis.tischUnterzeile', {
+              spiel: name,
+            })}
+          </div>
         </div>
         {fitting.length > 0 && (
           <SearchButton

@@ -374,3 +374,26 @@
 .looksOff {
   opacity: 0.45;
 }
+
+/* Design I3-C2 FB6: the score pad as a round golden button right in the title "Ergebnis"; it does
+   not make the line higher, the tap area is 44 px through ::before (K-4). */
+.padBtn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  min-height: 34px;
+  height: 34px;
+  padding: 0;
+  margin: -8px 0;
+  color: var(--color-accent-text);
+  background: none;
+  border: 1px solid var(--color-pad-gold-rim);
+  border-radius: 50%;
+}
+
+.padBtn::before {
+  position: absolute;
+  inset: -5px;
+  content: '';
+}

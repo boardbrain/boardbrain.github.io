@@ -1,0 +1,46 @@
+/* Design I3-C2 DF1: the rounds in a card that opens in place. */
+.card {
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 14px;
+  color: var(--color-text);
+  text-align: left;
+  background: none;
+  border-radius: 0;
+}
+
+.text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.text small {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.target {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  font-weight: 600;
+}
+
+.chevron {
+  display: grid;
+  color: var(--color-text-muted);
+}

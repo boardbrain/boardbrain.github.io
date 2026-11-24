@@ -1,22 +1,31 @@
 import { AnimatePresence, m } from 'motion/react';
-import { useEffect, useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { parseGroupId, parseMatchId, type GroupId, type MatchId } from '@/core/model';
 import { t } from '@/i18n/t';
-import { useCurrentSession, useGroup } from '@/infra/db/readHooks';
+import {
+  useCurrentScorePad,
+  useCurrentSession,
+  useCustomGame,
+  useGroup,
+} from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { ChevronIcon, PlayIcon, TrophyIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
+import { cx } from '@/ui/components/classNames';
 import { Logo } from '@/ui/components/Logo';
 import { PlayingCard } from '@/ui/components/PlayingCard';
 import { PressableLink } from '@/ui/components/Pressable';
 import { useAreaCards } from '@/ui/views/areaCards';
+import { MatchDialog } from '@/ui/views/match/MatchDialog';
+import { MiniPaper } from '@/ui/views/scorepad/MiniPaper';
 import styles from './StartView.module.css';
 
 const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
 const LOGO_SIZE = 44;
 const TROPHY_SIZE = 24;
 const SAVED_ARROW_SIZE = 20;
+const PAD_ARROW_SIZE = 18;
 // Long enough to read (Product Owner 20.11.2026): at least 5 s, longer for long names.
 const NOTE_MIN_MS = 5000;
 const NOTE_MS_PER_CHARACTER = 70;
@@ -59,13 +68,22 @@ function savedNoteOf(state: unknown): SavedNote | null {
  * "Partie" (I2, US-SP-01 AK-1): it starts a new match, or leads to the running one. At the top
  * the logo with the app name, the only place it appears in the app (design I2-G, L5); below it
  * the banner of a running match leads back to it with one tap (US-AB-04 AK-2, design I2-D);
- * the banners of I4 follow there.
+ * the banners of I4 follow there. Above "Partie" the row "Notizblock" starts the score pad or, in
+ * the accent colour, leads back to the running one (US-NB-01, design I3-C2 SL4); there is at most
+ * one running match, so the other one asks first (E-51).
  */
 export function StartView(): React.JSX.Element {
   const { db } = useAppDependencies();
   const cards = useAreaCards();
   const current = useCurrentSession(db);
   const group = useGroup(db, current?.status === 'active' ? current.session.groupId : null);
+  const padState = useCurrentScorePad(db);
+  const pad = padState?.status === 'active' ? padState.pad : null;
+  const padGame = useCustomGame(db, pad?.gameId ?? null);
+  const padGroup = useGroup(db, pad?.groupId ?? null);
+  const [asking, setAsking] = useState<'pad' | 'match' | null>(null);
+  const isPadRunning = padState !== undefined && padState.status !== 'none';
+  const isMatchRunning = current !== undefined && current.status !== 'none';
   const headingId = useId();
   const location = useLocation();
   const navigate = useNavigate();
@@ -155,25 +173,56 @@ export function StartView(): React.JSX.Element {
       {/* "Partie" as a draw pile right above the cards, together with them in one column with a
           14px gap (same reference, docs/design/i2-match-final-preview.html). */}
       <div className={styles.column}>
-        <PressableLink
-          to={current !== undefined && current.status !== 'none' ? '/partie' : '/partie/neu'}
-          look="card"
-          className={styles.pile}
-        >
-          <span className={styles.pileStack} aria-hidden="true">
-            <span className={styles.back} />
-            <span className={styles.back} />
-            <span className={styles.back}>
-              <span className={styles.backBadge}>
-                <PlayIcon size={18} />
-              </span>
-            </span>
-          </span>
-          <strong className={styles.pileTitle}>{t('start.partie')}</strong>
-          <span className={styles.pileArrow}>
-            <ChevronIcon size={20} />
-          </span>
-        </PressableLink>
+        {isMatchRunning ? (
+          <PressableButton
+            type="button"
+            look="card"
+            className={styles.padRow}
+            onClick={() => {
+              setAsking('match');
+            }}
+          >
+            <PadRowContent />
+          </PressableButton>
+        ) : (
+          <PressableLink
+            to={isPadRunning ? '/notizblock' : '/notizblock/neu'}
+            look="card"
+            className={cx(styles.padRow, isPadRunning && styles.padRunning)}
+          >
+            <PadRowContent
+              running={
+                pad === null
+                  ? undefined
+                  : t('notizblock.startLaeuft', {
+                      spiel: padGame?.name ?? '',
+                      tisch: padGroup?.name ?? '',
+                      runde: pad.rounds.length + 1,
+                    })
+              }
+            />
+          </PressableLink>
+        )}
+        {isPadRunning ? (
+          <PressableButton
+            type="button"
+            look="card"
+            className={styles.pile}
+            onClick={() => {
+              setAsking('pad');
+            }}
+          >
+            <PileContent />
+          </PressableButton>
+        ) : (
+          <PressableLink
+            to={isMatchRunning ? '/partie' : '/partie/neu'}
+            look="card"
+            className={styles.pile}
+          >
+            <PileContent />
+          </PressableLink>
+        )}
         <nav className={styles.cards} aria-labelledby={headingId}>
           <h2 id={headingId} className={styles.heading}>
             {t('karten.titel')}
@@ -196,6 +245,96 @@ export function StartView(): React.JSX.Element {
         </nav>
       </div>
       <div className={styles.spacerLow} />
+      {asking === 'pad' && (
+        <MatchDialog
+          title={t('notizblock.laeuft')}
+          lines={[
+            ...(pad === null
+              ? []
+              : [
+                  t('notizblock.laeuftText', {
+                    tisch: padGroup?.name ?? '',
+                    spiel: padGame?.name ?? '',
+                    runde: pad.rounds.length + 1,
+                  }),
+                ]),
+            t('notizblock.erstBeenden'),
+          ]}
+          cancelLabel={t('allgemein.abbrechen')}
+          onCancel={() => {
+            setAsking(null);
+          }}
+          confirmLabel={t('notizblock.zumNotizblock')}
+          onConfirm={() => {
+            setAsking(null);
+            void navigate('/notizblock');
+          }}
+        />
+      )}
+      {asking === 'match' && (
+        <MatchDialog
+          title={t('notizblock.partieLaeuft')}
+          lines={[t('notizblock.partieLaeuftText')]}
+          cancelLabel={t('allgemein.abbrechen')}
+          onCancel={() => {
+            setAsking(null);
+          }}
+          confirmLabel={t('notizblock.zurPartie')}
+          onConfirm={() => {
+            setAsking(null);
+            void navigate('/partie');
+          }}
+        />
+      )}
     </main>
+  );
+}
+
+/**
+ * The draw pile "Partie" (design I2-C).
+ */
+function PileContent(): React.JSX.Element {
+  return (
+    <>
+      <span className={styles.pileStack} aria-hidden="true">
+        <span className={styles.back} />
+        <span className={styles.back} />
+        <span className={styles.back}>
+          <span className={styles.backBadge}>
+            <PlayIcon size={18} />
+          </span>
+        </span>
+      </span>
+      <strong className={styles.pileTitle}>{t('start.partie')}</strong>
+      <span className={styles.pileArrow}>
+        <ChevronIcon size={20} />
+      </span>
+    </>
+  );
+}
+
+/**
+ * The row "Notizblock" (design I3-C2 SL4, SY1): the small sheet, the name and either what it does
+ * or, in the accent colour with a dot, the running score pad with game, table and round.
+ */
+function PadRowContent({ running }: { readonly running?: string | undefined }): React.JSX.Element {
+  return (
+    <>
+      <MiniPaper />
+      <span className={styles.padText}>
+        <strong>{t('notizblock.titel')}</strong>
+        {running === undefined ? (
+          <small>{t('notizblock.startText')}</small>
+        ) : (
+          <small className={styles.live}>
+            <span className={styles.liveDot} aria-hidden="true" />
+            {running}
+          </small>
+        )}
+      </span>
+      <span className={styles.padArrow}>
+        <ChevronIcon size={PAD_ARROW_SIZE} />
+      </span>
+    </>
   );
 }

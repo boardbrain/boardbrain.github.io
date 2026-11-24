@@ -1,0 +1,57 @@
+/*
+ * The page of the score pad (design I3-C2 LA3): it fills the height; the block scrolls inside, so
+ * its row of names stays in view. While the keyboard is open the page ends above the bar
+ * (--entry-inset, set by EntryBar), so the new round can be scrolled into view.
+ */
+.main {
+  height: 100%;
+  min-height: 0;
+  gap: 16px;
+  padding-bottom: max(24px, calc(var(--entry-inset, 0px) - var(--hand-height, 0px)));
+}
+
+.targetBtn {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  min-height: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--color-accent-text);
+  vertical-align: bottom;
+  background: none;
+  border-radius: 0;
+}
+
+.targetBtn.reached {
+  color: var(--color-status-error);
+}
+
+.nudge {
+  margin: -8px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-status-error);
+}
+
+.bottom {
+  display: grid;
+  flex: none;
+  padding: 8px 0 0;
+  margin: auto 0 0;
+}
+
+.looksOff {
+  opacity: 0.45;
+}
+
+/* No custom game with points yet: what is missing and the way to it (LZ2). */
+.empty {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 16px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}

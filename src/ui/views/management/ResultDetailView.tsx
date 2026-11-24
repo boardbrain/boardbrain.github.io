@@ -18,6 +18,7 @@ import { dayLabel, localToday } from '@/ui/views/games/dates';
 import { Coin } from '@/ui/views/match/Coin';
 import { MatchDialog } from '@/ui/views/match/MatchDialog';
 import { podiumClass } from '@/ui/views/result/podium';
+import { RoundsCard } from '@/ui/views/scorepad/RoundsCard';
 import { gameNameOf, resultHref } from './GroupResults';
 import { detailRows, durationText, scoreNote } from './resultList';
 import overview from './Overview.module.css';
@@ -44,7 +45,8 @@ export function whenText(match: Pick<Match, 'date' | 'time'>): string {
 /**
  * Page of a result `#/verwaltung/gruppen/‹tisch›/ergebnisse/‹ergebnis›` (US-ER-04 AK-2, design
  * I3-C DA1, SY1, BL1, MP2): every recorded value, the places (US-ER-02 AK-5, US-ER-06 AK-5) and
- * in Catan the colours (US-ER-03 AK-2); below "Bearbeiten" and "Ergebnis löschen" (US-ER-05).
+ * in Catan the colours (US-ER-03 AK-2); from a score pad the rounds in a card that opens (US-NB-05
+ * AK-1, design I3-C2 DF1); below "Bearbeiten" and "Ergebnis löschen" (US-ER-05).
  */
 export function ResultDetailView(): React.JSX.Element | null {
   const { db, results } = useAppDependencies();
@@ -149,6 +151,19 @@ export function ResultDetailView(): React.JSX.Element | null {
           })}
         </ul>
       </section>
+
+      {match.rounds !== undefined && scoring !== null && (
+        <RoundsCard
+          persons={group.members.map((member) => ({
+            id: member.personId,
+            name: nameOf(member.personId),
+            groupColor: member.groupColor,
+          }))}
+          rounds={match.rounds}
+          target={match.target ?? null}
+          scoring={scoring}
+        />
+      )}
 
       {isCatan && (
         <section className={overview.section}>
