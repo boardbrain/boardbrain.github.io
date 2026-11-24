@@ -228,7 +228,9 @@
   border: 2px solid var(--color-pad-field-edge);
 }
 
-.newCell.active::after {
+/* The cursor while nothing is typed; a typed number shows its standing at once (design I3-C2). */
+.newCell.active:empty::after,
+.typed:empty::after {
   font-weight: 400;
   color: var(--color-accent-text);
   content: '|';

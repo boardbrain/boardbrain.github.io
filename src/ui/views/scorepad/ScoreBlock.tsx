@@ -1,3 +1,4 @@
+import { m, useReducedMotion, type AnimationPlaybackControls } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import type { PersonId, ScoreTarget, ScoringDirection } from '@/core/model';
 import {
@@ -14,6 +15,7 @@ import { PressableButton } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 import type { ResultPerson } from '@/ui/views/result/ResultRows';
 import { targetText } from './padTexts';
+import { glideScroll } from './scrollGlide';
 import styles from './ScoreBlock.module.css';
 
 // A small phone shows about 4 persons, a phone 4 to 5, a tablet many more; with more persons the
@@ -22,6 +24,10 @@ const COLUMN_MIN_WIDTH = 64;
 const ROUND_COLUMN_WIDTH = 30;
 const PLACE_TROPHY_SIZE = 14;
 const CORNER_ICON_SIZE = 14;
+// How far a cell may stick out and still count as seen, against rounding of the browser.
+const SEEN_SLACK = 2;
+// A stored round shows up gently below the earlier ones.
+const ROUND_IN = { duration: 0.3, ease: 'easeOut' } as const;
 
 /**
  * The round being typed (US-NB-02 AK-2): the numbers so far, the person at the keyboard and the
@@ -39,10 +45,16 @@ type ScoreBlockProps = {
   readonly scoring: ScoringDirection;
   readonly calculation: ScorePadCalculation;
   readonly target: ScoreTarget | null;
-  /** The cell at the keyboard while changing a stored number. */
-  readonly editing?: { readonly index: number; readonly personId: PersonId } | null;
+  /** The cell at the keyboard while changing a stored number, with what is typed so far. */
+  readonly editing?: {
+    readonly index: number;
+    readonly personId: PersonId;
+    readonly text: string;
+  } | null;
   /** The new round below the stored ones; without it the block only shows (DF1). */
   readonly newRound?: NewRound | null;
+  /** The round just stored: it fades in, the others stand still. */
+  readonly freshRound?: number | null;
   /** Read only (detail): no buttons, smaller rows, the target in the corner. */
   readonly isReadOnly?: boolean;
   readonly isInCard?: boolean;
@@ -71,6 +83,7 @@ export function ScoreBlock({
   target,
   editing = null,
   newRound = null,
+  freshRound = null,
   isReadOnly = false,
   isInCard = false,
   onCell,
@@ -94,37 +107,65 @@ export function ScoreBlock({
   const paperRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLTableSectionElement>(null);
   const bodyRef = useRef<HTMLTableSectionElement>(null);
-  // The row at the keyboard: a stored round being changed or the new round.
+  const isReduced = useReducedMotion() === true;
+  // The cell at the keyboard: in a stored round being changed or in the new round.
   const typedRow =
     editing !== null
       ? editing.index
       : newRound !== null && newRound.current !== null
         ? rounds.length
         : null;
+  const typedPerson = editing?.personId ?? newRound?.current ?? null;
+  const typedColumn = persons.findIndex((person) => person.id === typedPerson);
 
-  // External system: the scroll position of the paper. The row being typed moves up to just below
-  // the names, also once the keyboard has made the page smaller (PO 24.11.2026).
+  // External system: the scroll position of the paper. Only when the cell at the keyboard would be
+  // hidden (under the names, under the keyboard or beside the paper), the paper glides until its
+  // row is just below the names and its column in view; also once the keyboard has made the page
+  // smaller (PO 24.11.2026).
   useEffect(() => {
     const paper = paperRef.current;
     const row = typedRow === null ? undefined : bodyRef.current?.rows[typedRow];
+    const cell = row?.cells[typedColumn + 1];
+    const roundCell = row?.cells[0];
     const head = headRef.current;
-    if (paper === null || row === undefined || head === null) {
+    if (paper === null || cell === undefined || roundCell === undefined || head === null) {
       return undefined;
     }
-    const lift = (): void => {
-      paper.scrollTop += row.getBoundingClientRect().top - head.getBoundingClientRect().bottom;
+    let glide: AnimationPlaybackControls | null = null;
+    const reveal = (): void => {
+      const frame = paper.getBoundingClientRect();
+      const box = cell.getBoundingClientRect();
+      const top = head.getBoundingClientRect().bottom;
+      const bottom = frame.top + paper.clientTop + paper.clientHeight;
+      const left = roundCell.getBoundingClientRect().right;
+      const right = frame.left + paper.clientLeft + paper.clientWidth;
+      const isRowSeen = box.top >= top - SEEN_SLACK && box.bottom <= bottom + SEEN_SLACK;
+      const isColumnSeen = box.left >= left - SEEN_SLACK && box.right <= right + SEEN_SLACK;
+      if (isRowSeen && isColumnSeen) {
+        return;
+      }
+      const fromTop = paper.scrollTop;
+      const fromLeft = paper.scrollLeft;
+      const toTop = isRowSeen
+        ? fromTop
+        : Math.min(fromTop + box.top - top, paper.scrollHeight - paper.clientHeight);
+      const toLeft = isColumnSeen
+        ? fromLeft
+        : box.left < left
+          ? fromLeft + box.left - left
+          : fromLeft + box.right - right;
+      glide?.stop();
+      glide = glideScroll(paper, { left: toLeft, top: toTop }, isReduced);
     };
-    lift();
-    // Older browsers and test environments cannot watch the size: the row then moves only once.
-    if (!('ResizeObserver' in window)) {
-      return undefined;
-    }
-    const watcher = new ResizeObserver(lift);
-    watcher.observe(paper);
+    reveal();
+    // Older browsers and test environments cannot watch the size: the cell is then checked once.
+    const watcher = 'ResizeObserver' in window ? new ResizeObserver(reveal) : null;
+    watcher?.observe(paper);
     return () => {
-      watcher.disconnect();
+      watcher?.disconnect();
+      glide?.stop();
     };
-  }, [typedRow]);
+  }, [typedRow, typedColumn, isReduced]);
 
   function stack(standing: number, points: number, isPreview = false): React.JSX.Element {
     return (
@@ -190,7 +231,13 @@ export function ScoreBlock({
             const standing = standings[index] ?? round;
             const number = index + 1;
             return (
-              <tr key={number} className={styles.row}>
+              <m.tr
+                key={number}
+                className={styles.row}
+                initial={number === freshRound ? { opacity: 0 } : false}
+                animate={{ opacity: 1 }}
+                transition={ROUND_IN}
+              >
                 <th className={styles.rn} scope="row">
                   {isReadOnly || onRound === undefined ? (
                     <span className={styles.roundNumber}>{number}</span>
@@ -242,13 +289,20 @@ export function ScoreBlock({
                             onCell(index, person.id);
                           }}
                         >
-                          {stack(value, points)}
+                          {isEditing ? (
+                            // What is typed shows at once; the cursor while it is empty.
+                            <span className={styles.stack}>
+                              <b className={styles.typed}>{editing.text.replace('-', '−')}</b>
+                            </span>
+                          ) : (
+                            stack(value, points)
+                          )}
                         </PressableButton>
                       )}
                     </td>
                   );
                 })}
-              </tr>
+              </m.tr>
             );
           })}
           {newRound !== null && (
@@ -282,7 +336,7 @@ export function ScoreBlock({
                           onNewCell?.(person.id);
                         }}
                       >
-                        {entry !== undefined && !isActive
+                        {entry !== undefined
                           ? stack(
                               isSelf ? entry : before + entry,
                               isSelf ? entry - before : entry,

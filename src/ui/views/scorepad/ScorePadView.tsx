@@ -106,6 +106,7 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
   const [draft, setDraft] = useState<Readonly<Record<PersonId, string>>>({});
   const [cellText, setCellText] = useState('');
   const [missing, setMissing] = useState<readonly PersonId[]>([]);
+  const [freshRound, setFreshRound] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(isNew);
   const [isReachedOpen, setIsReachedOpen] = useState(false);
@@ -163,6 +164,7 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
       if (saved.ok) {
         setDraft({});
         setMissing([]);
+        setFreshRound(saved.value.pad.rounds.length);
         setIsReachedOpen(saved.value.isTargetReachedNow);
         return;
       }
@@ -276,11 +278,10 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
         <BackButton fallback="/" />
         <div className={shared.titles}>
           <h1 className={shared.title}>{game.name}</h1>
+          {/* The target first, so a long name of the table cannot push it out (PO 24.11.2026). */}
           <div className={shared.sub}>
-            {group.name}
             {target !== null && (
               <>
-                {t('notizblock.trenner')}
                 <PressableButton
                   type="button"
                   className={cx(styles.targetBtn, isReached && styles.reached)}
@@ -292,8 +293,10 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
                   <TargetIcon size={TARGET_SIZE} />
                   {targetText(target)}
                 </PressableButton>
+                {t('notizblock.trenner')}
               </>
             )}
+            {group.name}
           </div>
         </div>
         <PressableButton
@@ -325,7 +328,12 @@ function PadPage({ pad, game, group, persons, isNew }: PadPageProps): React.JSX.
         scoring={scoring}
         calculation={settings.calculation}
         target={target}
-        editing={entry?.kind === 'cell' ? entry : null}
+        freshRound={freshRound}
+        editing={
+          entry?.kind === 'cell'
+            ? { index: entry.index, personId: entry.personId, text: cellText }
+            : null
+        }
         newRound={{
           entries,
           current: entry?.kind === 'round' ? entry.current : null,

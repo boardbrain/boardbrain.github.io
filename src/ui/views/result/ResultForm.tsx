@@ -361,7 +361,7 @@ export function ResultForm({
             scoring={rules.scoring ?? 'highest-wins'}
             calculation="app"
             target={values.target ?? null}
-            editing={padCell}
+            editing={padCell === null ? null : { ...padCell, text: padText }}
             onCell={(index, personId) => {
               padInputRef.current?.focus({ preventScroll: true });
               setPadCell({ index, personId });

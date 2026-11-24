@@ -15808,7 +15808,7 @@
         const rows = a.rounds.map((r, i) => h('tr', {}, h('th', { class: 'rn' }, h('button', { class: 'pzRn', 'aria-label': `Runde ${i + 1} löschen`, onclick: () => spAskDelete(i) }, i + 1)),
           ms.map((p) => {
             const ed = a.editCell && a.editCell.i === i && a.editCell.p === p;
-            const inner = ed ? h('span', { class: 'pzEditing' }, spVal(a.editCell.val)) : b === 'B3' ? [h('span', { class: 'cumBig' }, spNum(cum(i, p))), h('small', { class: 'cumSmall' }, spDelta(r[p]))] : spNum(r[p]);
+            const inner = ed ? h('span', { class: 'pzEditing' }, spBarVal(a.editCell.val)) : b === 'B3' ? [h('span', { class: 'cumBig' }, spNum(cum(i, p))), h('small', { class: 'cumSmall' }, spDelta(r[p]))] : spNum(r[p]);
             return h('td', { class: lead(p) }, h('button', { class: 'pzCell' + (r[p] < 0 && b !== 'B3' ? ' neg' : '') + (ed ? ' on' : ''), 'aria-label': `Runde ${i + 1}, ${nameOf(p)}: ${r[p]}, ändern`, onclick: () => spEditCell(i, p) }, inner));
           })));
         let newRow;
@@ -16141,7 +16141,7 @@
           ms.map((p) => {
             const ed = a.editCell && a.editCell.i === i && a.editCell.p === p;
             const total = cum(i, p);
-            const inner = ed ? h('span', { class: 'pzEditing' }, spVal(a.editCell.val)) : both(total, r[p], over(total) ? 'over' : '');
+            const inner = ed ? h('span', { class: 'pzEditing' }, spBarVal(a.editCell.val)) : both(total, r[p], over(total) ? 'over' : '');
             return h('td', { class: lead(p) }, h('button', { class: 'pzCell rt' + (ed ? ' on' : ''), 'aria-label': `Runde ${i + 1}, ${nameOf(p)}: ${r[p]}, Stand ${total}, ändern`, onclick: () => spEditCell(i, p) }, inner));
           })));
         const roundsGoal = ui.PZT === 'ZT1' && t.kind === 'rounds';
@@ -16421,7 +16421,7 @@
           ms.map((p) => {
             const ed = a.editCell && a.editCell.i === i && a.editCell.p === p;
             const total = cum(i, p);
-            const inner = ed ? h('span', { class: 'pzEditing' }, spVal(a.editCell.val)) : both(total, r[p], !self && over(total) ? 'over' : '');
+            const inner = ed ? h('span', { class: 'pzEditing' }, spBarVal(a.editCell.val)) : both(total, r[p], !self && over(total) ? 'over' : '');
             return h('td', { class: lead(p) }, h('button', { class: 'pzCell rt' + (ed ? ' on' : ''), 'aria-label': `Runde ${i + 1}, ${nameOf(p)}: ${r[p]}, ändern`, onclick: () => spEditCell(i, p) }, inner));
           })));
         const roundsGoal = t.kind === 'rounds';
@@ -16812,7 +16812,7 @@
             ms.map((p) => {
               const ed = a.editCell && a.editCell.i === i && a.editCell.p === p;
               const total = cum(i, p);
-              const inner = ed ? h('span', { class: 'pzEditing' }, spVal(a.editCell.val)) : cellOf(total, r[p], over(total) ? 'over' : '');
+              const inner = ed ? h('span', { class: 'pzEditing' }, spBarVal(a.editCell.val)) : cellOf(total, r[p], over(total) ? 'over' : '');
               return h('td', { class: lead(p) }, h('button', { class: 'pzCell rt' + (ed ? ' on' : ''), 'aria-label': `Runde ${i + 1}, ${nameOf(p)}: Stand ${total}, ändern`, onclick: () => spEditCell(i, p) }, inner));
             })));
           if (i === reachedAt && ui.PEN === 'EN4' && spad.page === 'PEN')
@@ -17043,7 +17043,7 @@
           ms.map((p) => {
             const ed = a.editCell && a.editCell.i === i && a.editCell.p === p;
             const total = cum(i, p);
-            const inner = ed ? h('span', { class: 'pzEditing' }, spVal(a.editCell.val)) : cellOf(total, r[p], over(total) ? 'over' : '');
+            const inner = ed ? h('span', { class: 'pzEditing' }, spBarVal(a.editCell.val)) : cellOf(total, r[p], over(total) ? 'over' : '');
             return h('td', { class: lead(p) }, opts.readOnly ? h('span', { class: 'pzCell rt' }, inner)
               : h('button', { class: 'pzCell rt' + (ed ? ' on' : ''), 'aria-label': `Runde ${i + 1}, ${nameOf(p)}: Stand ${total}, ändern`, onclick: () => spEditCell(i, p) }, inner));
           })));
@@ -17562,7 +17562,7 @@
         const t = a.target, zo = ui.PZO, has = t.kind !== 'none';
         const reached = has && spGoal().reached;
         const finish = () => (a.rounds.length ? spFinish() : null);
-        const sub = h('div', { class: 'sub' }, tb.name, zo === 'ZO1' && has && [' · ', h('button', { class: 'pzSubZiel' + (reached ? ' reached' : ''), 'aria-label': `Ziel ${spGoalShortP(t)}`, onclick: spOpenSettings }, zielTag(t))]);
+        const sub = h('div', { class: 'sub' }, zo === 'ZO1' && has && [h('button', { class: 'pzSubZiel' + (reached ? ' reached' : ''), 'aria-label': `Ziel ${spGoalShortP(t)}`, onclick: spOpenSettings }, zielTag(t)), ' · '], tb.name);
         const head = h('div', { class: 'pageHead pzHead' }, h('button', { class: 'iconBtn', 'aria-label': 'Zurück', onclick: () => go('start') }, icon('back')),
           h('div', { class: 'titles' }, h('div', { class: 'pzTitleRow' }, h('h1', {}, g.name), zo === 'ZO2' && has && h('button', { class: 'pill pzZielPill' + (reached ? ' reached' : ''), onclick: spOpenSettings }, zielTag(t))), sub),
           zo === 'ZO4' && has && h('button', { class: 'pill pzZielPill' + (reached ? ' reached' : ''), onclick: spOpenSettings }, zielTag(t)),

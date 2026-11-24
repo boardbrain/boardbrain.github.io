@@ -161,7 +161,12 @@ describe('US-NB-02 enter and correct rounds', () => {
     await user.click(await screen.findByRole('button', { name: 'Runde 1, Ben: Stand 4, ändern' }));
     expect(screen.getByText('Runde 1 ändern')).toBeInTheDocument();
     await user.clear(field());
-    await user.type(field(), '9{Enter}');
+    await user.type(field(), '9');
+    // The cell shows what is typed before it is stored.
+    expect(screen.getByRole('button', { name: 'Runde 1, Ben: Stand 4, ändern' })).toHaveTextContent(
+      '9',
+    );
+    await user.type(field(), '{Enter}');
     expect(
       await screen.findByRole('button', { name: 'Runde 2, Ben: Stand 10, ändern' }),
     ).toBeInTheDocument();

@@ -1,3 +1,4 @@
+import { m, useReducedMotion } from 'motion/react';
 import { useEffect, useRef, type RefObject } from 'react';
 import type { PersonId } from '@/core/model';
 import { formatPadNumber } from '@/i18n/format';
@@ -6,12 +7,15 @@ import { PressableButton } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 import type { ResultPerson } from '@/ui/views/result/ResultRows';
 import styles from './EntryBar.module.css';
+import { glideScroll } from './scrollGlide';
 
 // The room the bar and the keyboard take from the bottom of the window, for the page above it.
 const INSET_PROPERTY = '--entry-inset';
 // Once the visible area is this close to the window again, the keyboard was closed.
 const KEYBOARD_GONE_MARGIN = 80;
 const ALLOWED = /^[-−]?\d{0,6}$/u;
+// The bar comes and goes with a short fade.
+const FADE = { duration: 0.15, ease: 'easeOut' } as const;
 
 /**
  * The person whose number is typed and what the bar says about it.
@@ -79,6 +83,9 @@ export function EntryBar({
   onClose,
 }: EntryBarProps): React.JSX.Element {
   const barRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const isReduced = useReducedMotion() === true;
+  const activeIndex = strip.findIndex((person) => person.id === target?.person.id);
 
   // External system: the visible area of the browser. The keyboard does not make the frame
   // smaller on Android and iOS, so the bar follows the visible area; when it grows back, the
@@ -115,15 +122,48 @@ export function EntryBar({
     };
   }, [isOpen, inputRef]);
 
+  // External system: the scroll position of the capsules. With many persons the capsule at the
+  // keyboard glides into view when "Weiter" reaches it.
+  useEffect(() => {
+    const row = stripRef.current;
+    const chip = row?.children[activeIndex];
+    if (row === null || !(chip instanceof HTMLElement) || !isOpen) {
+      return undefined;
+    }
+    const frame = row.getBoundingClientRect();
+    const box = chip.getBoundingClientRect();
+    const isSeen = box.left >= frame.left && box.right <= frame.right;
+    if (isSeen) {
+      return undefined;
+    }
+    const shift = box.left < frame.left ? box.left - frame.left : box.right - frame.right;
+    const glide = glideScroll(row, { left: row.scrollLeft + shift, top: 0 }, isReduced);
+    return () => {
+      glide?.stop();
+    };
+  }, [activeIndex, isOpen, isReduced]);
+
   const isNegative = value.startsWith('-');
   const keepFocus = (event: React.MouseEvent | React.PointerEvent): void => {
     event.preventDefault();
   };
 
   return (
-    <div ref={barRef} className={cx(styles.wrap, isOpen && styles.open)} aria-hidden={!isOpen}>
+    <m.div
+      ref={barRef}
+      className={cx(styles.wrap, isOpen && styles.open)}
+      aria-hidden={!isOpen}
+      initial={false}
+      animate={{ opacity: isOpen ? 1 : 0 }}
+      transition={FADE}
+    >
       {strip.length > 0 && (
-        <div className={styles.strip} role="group" aria-label={t('notizblock.personen')}>
+        <div
+          ref={stripRef}
+          className={styles.strip}
+          role="group"
+          aria-label={t('notizblock.personen')}
+        >
           {strip.map((person) => {
             const entry = entries[person.id];
             const isActive = target?.person.id === person.id;
@@ -218,6 +258,6 @@ export function EntryBar({
           {t('notizblock.plusMinus')}
         </PressableButton>
       </div>
-    </div>
+    </m.div>
   );
 }
