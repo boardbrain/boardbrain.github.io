@@ -6,12 +6,13 @@ Je Bildschirm gilt nur die **jüngste** Referenz. Ältere Dateien zeigen den Sta
 
 | Bildschirm / Thema | Gültige Referenz |
 |---|---|
-| Start (Was willst du ansehen?), Navigation | `i3c-result-list-final-preview.html` (Start); Kartenhand: `k3-card-hand-final-preview.html`; Aufbau Navigation: `d3-start-navigation-final-preview.html` |
+| Start (Was willst du ansehen?), Navigation | `i3c2-score-pad-final-preview.html` (Start mit der Zeile „Notizblock“); Kartenhand: `k3-card-hand-final-preview.html`; Aufbau Navigation: `d3-start-navigation-final-preview.html` |
 | Spielliste, Spielwahl, Tisch, Optionen, Farben | `i3c-result-list-final-preview.html` |
 | Losschritte, Reihenfolge, Platzierung, Startrohstoffe | `i3c-result-list-final-preview.html` |
 | Laufende Partie (Übersicht, Brett, Steine antippen, Uhr in der Zeile) | `i3c-result-list-final-preview.html` |
 | Uhr-Blatt (Verlauf der Uhr) | `i3b-clock-final-preview.html` |
-| Ergebnis eintragen, Ergebnisliste, Detail, Korrektur, Tischseite | `i3c-result-list-final-preview.html` |
+| Ergebnis eintragen, Ergebnisliste, Detail, Korrektur, Tischseite | `i3c-result-list-final-preview.html`; mit Notizblock (Knopf im Formular, Runden im Detail und beim Bearbeiten): `i3c2-score-pad-final-preview.html` |
+| Notizblock (Start-Zeile, Spielwahl, Block, Eingabe, Einstellungen, Ziel erreicht) | `i3c2-score-pad-final-preview.html` |
 | Verwaltung: Spiele, Personen, Tische (Übersicht) | `i3c-result-list-final-preview.html` |
 | Personen- und Tischdetail | `i1e-persons-tables-final-preview.html` |
 | Personenkarten | `i1e-person-cards-final-preview.html` |

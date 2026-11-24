@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Reihenfolge, Zuschnitt der Story-Bündel, Modellwahl und Ablauf der Sitzungen mit Claude Code |
-| Version | 0.45 |
-| Stand | 23.11.2026 |
+| Version | 0.46 |
+| Stand | 24.11.2026 |
 | Grundlage | BoardBrain_Spezifikation.md v0.17 (2.2, 2.3, 2.5), Entwicklungsrichtlinien.md v0.13 (2, 14), BoardBrain_Anforderungsdokumentation.md v0.21 (9.3, 13, E-32, E-38, E-39), BoardBrain_Architektur.md v0.32 (13.6, 19) |
 | Sprache | Deutsch |
 
@@ -58,6 +58,7 @@
 | 0.43 | 18.11.2026 | Planung und Design I3-B: US-SP-03 von I5 nach I3-B (gemeinsames Raster statt getrennter Bereiche, E-46); der Sprung zur Tischseite nach dem Speichern kommt mit I3-C; die Prüfung der Spielbindung gegen bestehende Partien (C-H-1) entfällt (E-48); Grenzen im Formular entschieden (C-G-8); Uhr der laufenden Partie korrigierbar (US-AB-07 AK-6) (2, 9); Uhr nach der Abnahme neu gefasst: Verlauf mit einzelnen Pausen, Pause nachtragen in Minuten, „Fertig“ speichert (US-AB-07 AK-6, AK-7, ADR-031) |
 | 0.44 | 23.11.2026 | Bündel I3-C umgesetzt, Entscheidungen der Designrunden 1 bis 4 (statt N2 zum Start mit einer Meldungskarte, die zum Ergebnis führt; vom Tisch aus zurück zum Tisch); I3-B umgesetzt (#56); neue kleine Aufgabe K-18 „Referenzen auf Aktualität prüfen“; neues Bündel I3-C3 „Spielsymbole“ nach I3-C2 (Wunsch des Product Owners: noch in I3); Personenseite mit Reitern als Frage für die Planung von I3-D; Idee „Kopf beim Scrollen stehen lassen“ mit drei Zwischenwegen und kleine Bestätigungen nach Löschen und Ändern als offene Punkte bei I6 (2, 6, 7, 9) |
 | 0.45 | 23.11.2026 | K-18 umgesetzt: je Bildschirm gilt nur die jüngste Referenz (Übersicht `docs/design/README.md`, Richtlinien 2.5); Personenfarben und Farbnamen in den gültigen Referenzen nachgezogen; I3-B-Referenz als ersetzt durch I3-C vermerkt |
+| 0.46 | 24.11.2026 | Bündel I3-C2 Notizblock geklärt, in neun Designrunden entworfen und umgesetzt (US-NB-01 bis US-NB-05, Referenz `docs/design/i3c2-score-pad-final-preview.html`); Abweichung vom Ablauf: Klärung, Vorschau und Umsetzung in einem gemeinsamen PR statt eines eigenen Doku-PRs (Wunsch des Product Owners); I3-C umgesetzt (#59), K-18 umgesetzt (#60) (2, 6, 9) |
 
 ## 1. Zweck
 
@@ -83,8 +84,8 @@ Rangfolge bei Widerspruch bleibt: Anforderungen > Spezifikation > Architektur > 
 | 4 | Entscheidung über Vorabversionen (OP-13) und lokale Abnahme-App mit lila Symbol | nach I2 | umgesetzt (#45) |
 | 4b | Release 0.2.0 als erste Vorabversion nach Richtlinien 3.8 | nach OP-13 | veröffentlicht: vorbereitet (#46), Release-PR nach `main` (#47), Tag `v0.2.0` |
 | 4a | Kleine Aufgabe K-8: Doku-PRs auf GitHub schnell grün | am Anfang von I3 (verschoben in 0.33) | umgesetzt (#48) |
-| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-A2, I3-B, I3-C, I3-C2, I3-C3, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50), I3-A2 umgesetzt (#52), I3-B umgesetzt (#56), I3-C in Abnahme |
-| 5c | Kleine Aufgabe K-18: Referenzen auf Aktualität prüfen (Kapitel 6) *(neu in 0.44)* | nach I3-C, in einer eigenen Sitzung | umgesetzt |
+| 5 | Inkrement I3 Ergebnisse und Statistik: Klärung I3-0, Bündel I3-A, I3-A2, I3-B, I3-C, I3-C2, I3-C3, I3-D, I3-E (Kapitel 9) | nach I2, in dieser Reihenfolge | in Arbeit: zugeschnitten (#48), I3-0 umgesetzt (#49), I3-A umgesetzt (#50), I3-A2 umgesetzt (#52), I3-B umgesetzt (#56), I3-C umgesetzt (#59), I3-C2 umgesetzt, in Abnahme |
+| 5c | Kleine Aufgabe K-18: Referenzen auf Aktualität prüfen (Kapitel 6) *(neu in 0.44)* | nach I3-C, in einer eigenen Sitzung | umgesetzt (#60) |
 | 5b | Kleine Aufgaben K-10 und K-11 aus der erweiterten Codeanalyse durch Fable (Kapitel 6) *(neu in 0.40)* | in I3, vor Release 0.3.0 | offen |
 | 5a | Release 0.3.0 als Vorabversion nach Richtlinien 3.8 | nach I3, K-10 und K-11 | offen |
 | 6 | Inkrement I4 Daten und Updates | nach I3 | offen |
@@ -426,8 +427,8 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 | I3-A Ergebnisse: Fachlogik und Dienst | US-ER-01, US-ER-02, US-ER-03, US-ER-05 (Fachlogik und Dienst), US-AB-06 AK-2 und US-AB-07 (Dienst) | Opus, high | `feat/us-er-01-results-service` | umgesetzt (#50) |
 | I3-A2 Punkte und Rangfolge bei eigenen Spielen *(neu in 0.39)* | US-SP-02 AK-4, US-VW-07 AK-3 und AK-4, US-ER-02, US-ER-06 (Fachlogik und Dienst) | Opus, high | `feat/op-14-scores-and-ranking` | umgesetzt (#52) |
 | I3-B Spielliste und Ergebnis eintragen | US-SP-01, US-SP-03, US-ER-01, US-ER-02, US-ER-03 AK-1, US-ER-06, US-AB-06 AK-1 und AK-2, US-AB-07 (Oberfläche); US-SP-02 AK-1 und AK-4, US-VW-07 AK-3 und AK-4 (Oberfläche) | Sonnet, medium | `feat/us-er-01-result-entry` | umgesetzt (#56); Referenz `docs/design/i3b-result-entry-final-preview.html` (ersetzt durch I3-C, siehe `docs/design/README.md`) |
-| I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | Sonnet, medium | `feat/us-er-04-result-list` | umgesetzt, in Abnahme; Referenz `docs/design/i3c-result-list-final-preview.html` |
-| I3-C2 Notizblock für eigene Spiele *(neu in 0.42)* | neue Anforderung, Stories folgen aus der Klärung | Klärung: Opus, medium; Umsetzung: nach der Klärung | nach der Klärung | offen |
+| I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | Sonnet, medium | `feat/us-er-04-result-list` | umgesetzt (#59); Referenz `docs/design/i3c-result-list-final-preview.html` |
+| I3-C2 Notizblock für eigene Spiele *(neu in 0.42)* | US-NB-01 bis US-NB-05 *(seit 0.46)* | Klärung: Opus, medium; Umsetzung: Opus, high | `feat/i3c2-score-pad` | umgesetzt, in Abnahme; Referenz `docs/design/i3c2-score-pad-final-preview.html` |
 | I3-C3 Spielsymbole *(neu in 0.44)* | neue Anforderung, Stories folgen aus der Klärung | Klärung: Opus, medium; Umsetzung: nach der Klärung | nach der Klärung | offen |
 | I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05, US-ST-06 | Sonnet, medium | `feat/us-st-01-statistics` | offen |
 | I3-E Diagramme | US-ST-04 | Sonnet, medium | `feat/us-st-04-charts` | offen |
@@ -513,6 +514,11 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
   - Gespeichert nur die Endsummen im Ergebnis oder alle Runden, zum Nachlesen und für die Statistik?
   - Eingabe je Runde und Person, Korrigieren einer Runde, Minuspunkte.
   - Anzeige während des Spiels: Zwischenstand mit Plätzen, wer vorn liegt, Abstand zum Ziel.
+
+- **Geklärt (23. und 24.11.2026, Anforderungsdokumentation 0.28, E-51 bis E-55):** Der Notizblock ist eine laufende Partie, höchstens eine insgesamt; Ziel (Punkte oder Runden) und Rechenweise je Notizblock, Standard kein Ziel, die App erinnert nur; alle Runden und das Ziel werden mit dem Ergebnis gespeichert; Eingabe über die Gerätetastatur mit einer Leiste und Knopf ±; Handschrift Patrick Hand als mitgelieferte Datei (ADR-032). *(neu in 0.46)*
+- **Entschieden in den Designrunden 1 bis 9 (24.11.2026, Referenz `docs/design/i3c2-score-pad-final-preview.html`):** Zeile „Notizblock“ über „Partie“ (SL4, Mini-Zettel SY1), Knopf im Ergebnisformular (FB6); dunkles Papier mit Ständen und Rundenpunkten (BD2, FT2); Leiste über der Tastatur mit allen Personen (EK5), „Neuer Stand“ beim Selbstrechnen (SC2); Einstellungen als Blatt, beim Start einmal „Los geht’s“ (ES3, SD1, GE2, HX4); „Ziel erreicht“ einmal als Blatt (EN2); Kopf mit Ziel „100P“/„15R“ im Untertitel (ZO1, ZY5), Regler und Tür für „Beenden ohne Ergebnis“, unten nur „Ergebnis speichern“ (LA3, RB0); im Detail die Runden in der aufklappenden Karte (DF1), beim Bearbeiten der Block im Formular mit Warnung beim Wechsel auf „Sieger oder Rangfolge“ (ED3). Spalten je Gerät: kleines Handy etwa 4, Handy 4 bis 5, Tablet mehr, sonst waagerecht verschiebbar. *(neu in 0.46)*
+- **Abweichung vom Ablauf:** Klärung, Vorschau und Umsetzung kamen in einem gemeinsamen PR statt erst eines Doku-PRs wie #49; die Doku-Commits stehen darin zuerst (Wunsch des Product Owners, 24.11.2026). *(neu in 0.46)*
+- **Offen für die Abnahme:** Der Product Owner prüft den Zeichenabstand der Handschrift nativ auf allen Geräten. *(neu in 0.46)*
 
 ### I3-C3 Spielsymbole *(neu in 0.44)*
 
