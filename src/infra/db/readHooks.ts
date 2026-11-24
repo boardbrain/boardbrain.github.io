@@ -20,6 +20,7 @@ import {
 import type { BoardBrainDb } from './database';
 import { readErrorLog } from './errorLogStore';
 import type { PlayedGame } from '@/core/results';
+import { SCORE_PAD_ID, SCORE_PAD_SCHEMA_VERSION, type ScorePad } from '@/core/scorepad';
 import {
   readMatch,
   readMatchesOfGroup,
@@ -104,6 +105,31 @@ export function useCurrentSession(db: BoardBrainDb): CurrentSession | undefined 
     }
     return session.schemaVersion === SESSION_SCHEMA_VERSION
       ? { status: 'active', session }
+      : { status: 'unsupported' };
+  }, [db]);
+}
+
+/**
+ * The running score pad as the views read it (Architecture 10.5): none, of a version this app does
+ * not know, or running.
+ */
+export type CurrentScorePad =
+  | { readonly status: 'none' }
+  | { readonly status: 'unsupported' }
+  | { readonly status: 'active'; readonly pad: ScorePad };
+
+/**
+ * The running score pad (US-NB-01 AK-4, AK-5); `undefined` while loading. The views update
+ * themselves on every stored round; they change it only through the score pad service.
+ */
+export function useCurrentScorePad(db: BoardBrainDb): CurrentScorePad | undefined {
+  return useLiveQuery(async (): Promise<CurrentScorePad> => {
+    const pad = await db.scorePad.get(SCORE_PAD_ID);
+    if (pad === undefined) {
+      return { status: 'none' };
+    }
+    return pad.schemaVersion === SCORE_PAD_SCHEMA_VERSION
+      ? { status: 'active', pad }
       : { status: 'unsupported' };
   }, [db]);
 }

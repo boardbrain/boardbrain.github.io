@@ -11,11 +11,13 @@ import type { Clock } from '@/app/ports';
 import { createErrorLogService } from '@/app/services/errorLogService';
 import { createMasterDataService, type MasterDataService } from '@/app/services/masterDataService';
 import { createResultService } from '@/app/services/resultService';
+import { createScorePadService, type ScorePadService } from '@/app/services/scorePadService';
 import { createSessionService, type SessionService } from '@/app/services/sessionService';
 import type { BoardBrainDb } from '@/infra/db/database';
 import { createDexieErrorLogStore } from '@/infra/db/errorLogStore';
 import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
 import { createDexieResultStore } from '@/infra/db/resultStore';
+import { createDexieScorePadStore } from '@/infra/db/scorePadStore';
 import { createDexieSessionStore } from '@/infra/db/sessionStore';
 import { AppDependenciesProvider } from '@/ui/AppDependencies';
 import { fixedClock, sequentialIds } from './masterDataFakes';
@@ -49,7 +51,12 @@ export function renderWithApp(
     wrapMasterData = (service) => service,
     sessionClock = fixedClock(),
   }: RenderOptions = {},
-): { db: BoardBrainDb; session: SessionService; router: DataRouter } {
+): {
+  db: BoardBrainDb;
+  session: SessionService;
+  scorePad: ScorePadService;
+  router: DataRouter;
+} {
   const db = createTestDb();
   onTestFinished(() => {
     db.close();
@@ -67,6 +74,10 @@ export function renderWithApp(
     clock: sessionClock,
     rng: new SeededRandomSource(seed),
   });
+  const scorePad = createScorePadService({
+    store: createDexieScorePadStore(db),
+    clock: sessionClock,
+  });
   const router = createMemoryRouter(routes ?? [{ path: '*', element }], {
     initialEntries: [path],
   });
@@ -81,6 +92,7 @@ export function renderWithApp(
           ids: sequentialIds(),
           clock: fixedClock(),
         }),
+        scorePad,
         rng: new SeededRandomSource(seed + 1),
         errorLog: createErrorLogService({
           store: createDexieErrorLogStore(db),
@@ -92,5 +104,5 @@ export function renderWithApp(
       <RouterProvider router={router} />
     </AppDependenciesProvider>,
   );
-  return { db, session, router };
+  return { db, session, scorePad, router };
 }

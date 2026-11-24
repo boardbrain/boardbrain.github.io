@@ -1,6 +1,7 @@
 import type { SessionRepositories, SessionStore, StoredSession } from '@/app/ports';
 import { drawNextStep, SESSION_SCHEMA_VERSION } from '@/core/generation';
 import type { Group } from '@/core/model';
+import type { ScorePad } from '@/core/scorepad';
 import { CATAN_GAME_ID, CATAN_GENERATION, type CatanSetup } from '@/games/catan';
 import { aCatanSetup, runCatanGeneration } from './catanGeneration';
 import { aGroup, TEST_NOW } from './masterDataFakes';
@@ -14,6 +15,8 @@ import { SeededRandomSource } from './seededRandomSource';
  */
 export class InMemorySessionStore implements SessionStore {
   session: StoredSession | undefined = undefined;
+  /** The running score pad, only read: at most one running match (E-51). */
+  scorePad: ScorePad | undefined = undefined;
   groups: readonly Group[];
   private queue: Promise<unknown> = Promise.resolve();
 
@@ -42,6 +45,7 @@ export class InMemorySessionStore implements SessionStore {
           return Promise.resolve();
         },
       },
+      scorePad: { get: () => Promise.resolve(this.scorePad) },
       groups: { listAll: () => Promise.resolve([...groups]) },
     });
     this.session = session;

@@ -20,12 +20,12 @@ afterEach(() => {
 });
 
 describe('Architecture 7.3 database', () => {
-  it('opens with schema version 2 and the stores and indexes of version 1', async () => {
+  it('opens with schema version 3, the stores of version 1 and the score pad (10.5)', async () => {
     const db = track(createTestDb());
 
     await db.open();
 
-    expect(db.verno).toBe(2);
+    expect(db.verno).toBe(3);
     const schema = Object.fromEntries(
       db.tables.map((table) => [
         table.name,
@@ -42,6 +42,7 @@ describe('Architecture 7.3 database', () => {
       matches: { key: 'id', indexes: ['groupId', 'gameId', '[groupId+date]'] },
       snapshots: { key: 'id', indexes: ['createdAt', 'reason'] },
       session: { key: 'id', indexes: [] },
+      scorePad: { key: 'id', indexes: [] },
       meta: { key: 'key', indexes: [] },
     });
   });

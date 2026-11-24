@@ -14,12 +14,14 @@ import {
   type PersonId,
 } from '@/core/model';
 import {
+  bestScorers,
   checkResult,
   durationMinutesOf,
   type ResultError,
   type ResultInput,
   type ResultRules,
 } from '@/core/results';
+import { SCORE_PAD_SCHEMA_VERSION, totalsOf, type ScorePad } from '@/core/scorepad';
 import { assert, err, ok, type Result } from '@/core/shared';
 import { canGroupPlay, findSupportedGame, gameCapabilities } from '@/games/registry';
 import type {
@@ -29,6 +31,7 @@ import type {
   ResultStore,
   StoredSession,
 } from '@/app/ports';
+import type { ScorePadAccessError } from './scorePadService';
 import type { GroupNotEligibleError, SessionAccessError } from './sessionService';
 
 /**
@@ -42,6 +45,11 @@ export type GameNotEligibleError = 'game-not-eligible';
  * offers "Ergebnis eintragen" (US-AB-06 AK-1, Specification 3.5).
  */
 export type SessionNotRunningError = 'session-not-running';
+
+/**
+ * Error code when the result of a score pad without any round is to be entered (US-NB-04 AK-1).
+ */
+export type ScorePadEmptyError = 'score-pad-empty';
 
 /**
  * Error code when a match to change or delete no longer exists, e.g. after a mistyped address.
@@ -91,6 +99,11 @@ export type ResultService = {
    */
   draftFromSession(): Promise<Result<ResultDraft, SessionAccessError | SessionNotRunningError>>;
   /**
+   * Starting values from the running score pad (US-NB-04 AK-1, FA-NB-07): game, table, the sums of
+   * the rounds as points with their winners, date and time of the start, rounds and target.
+   */
+  draftFromScorePad(): Promise<Result<ResultDraft, ScorePadAccessError | ScorePadEmptyError>>;
+  /**
    * Starting values for changing a stored result (US-ER-05 AK-4): its values, its group and game,
    * which stay fixed, and the current rules of the game; also for a group or game archived since.
    */
@@ -104,6 +117,13 @@ export type ResultService = {
   recordFromSession(
     input: ResultInput,
   ): Promise<Result<Match, SessionAccessError | SessionNotRunningError | ResultError>>;
+  /**
+   * Records the result of the running score pad and ends it in the same transaction (US-NB-04
+   * AK-2, FA-NB-07): afterwards no score pad runs. If storing fails, it keeps running.
+   */
+  recordFromScorePad(
+    input: ResultInput,
+  ): Promise<Result<Match, ScorePadAccessError | ScorePadEmptyError | ResultError>>;
   /**
    * Changes a result (US-ER-05, FA-ER-04). Group and game stay fixed (AK-4), also for a group
    * archived since; the time of recording is kept.
@@ -188,7 +208,7 @@ function checkTarget(
 
 // The stored values of a result as the form takes them (US-ER-05 AK-4).
 function inputOf(match: Match): ResultInput {
-  const { date, time, edition, mode, winnerIds, scores, places } = match;
+  const { date, time, edition, mode, winnerIds, scores, places, rounds, target } = match;
   const { catanColors, durationMinutes, notes } = match;
   return {
     date,
@@ -198,6 +218,8 @@ function inputOf(match: Match): ResultInput {
     ...(mode === undefined ? {} : { mode }),
     ...(scores === undefined ? {} : { scores }),
     ...(places === undefined ? {} : { places }),
+    ...(rounds === undefined ? {} : { rounds }),
+    ...(target === undefined ? {} : { target }),
     ...(catanColors === undefined ? {} : { catanColors }),
     ...(durationMinutes === undefined ? {} : { durationMinutes }),
     ...(notes === undefined ? {} : { notes }),
@@ -221,6 +243,25 @@ function checkRunning(
     return err('session-not-running');
   }
   return ok({ session, group: findGroup(stored, session.groupId) });
+}
+
+type RunningPad = { readonly pad: ScorePad; readonly group: Group };
+
+// Architecture 10.5: a score pad of unknown version leads to a message, not a crash.
+function checkPad(
+  pad: ScorePad | undefined,
+  stored: Stored,
+): Result<RunningPad, ScorePadAccessError | ScorePadEmptyError> {
+  if (pad === undefined) {
+    return err('no-score-pad');
+  }
+  if (pad.schemaVersion !== SCORE_PAD_SCHEMA_VERSION) {
+    return err('score-pad-unsupported');
+  }
+  if (pad.rounds.length === 0) {
+    return err('score-pad-empty');
+  }
+  return ok({ pad, group: findGroup(stored, pad.groupId) });
 }
 
 /**
@@ -327,6 +368,39 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
       });
     },
 
+    draftFromScorePad() {
+      return store.transaction(async (repositories) => {
+        const current = await repositories.scorePad.get();
+        const stored = await readStored(repositories);
+        const running = checkPad(current, stored);
+        if (!running.ok) {
+          return running;
+        }
+        const { pad, group } = running.value;
+        const participants = participantsOf(group);
+        const rules = rulesOf(stored, pad.gameId);
+        assert(rules.scoring !== null, 'the game of a score pad counts points (FA-NB-01)');
+        const scores = totalsOf(pad.rounds, participants);
+        const begin = clock.localDateTime(pad.startedAt);
+        const { target } = pad.settings;
+        return ok({
+          groupId: pad.groupId,
+          gameId: pad.gameId,
+          participants,
+          rules,
+          values: {
+            date: begin.date,
+            time: begin.time,
+            // FA-ER-06, E-47: with every score the best are the winners.
+            winnerIds: bestScorers(scores, participants, rules.scoring),
+            scores,
+            rounds: pad.rounds,
+            ...(target === null ? {} : { target }),
+          },
+        });
+      });
+    },
+
     draftOf(matchId) {
       return store.transaction(async (repositories) => {
         const match = await repositories.matches.get(matchId);
@@ -388,6 +462,28 @@ export function createResultService(deps: ResultServiceDependencies): ResultServ
         // FA-AB-08: one transaction stores the result and ends the match (Architecture 10.3).
         await repositories.matches.add(match.value);
         await repositories.session.delete();
+        return match;
+      });
+    },
+
+    recordFromScorePad(input) {
+      return store.transaction(async (repositories) => {
+        const current = await repositories.scorePad.get();
+        const stored = await readStored(repositories);
+        const running = checkPad(current, stored);
+        if (!running.ok) {
+          return running;
+        }
+        // The table cannot be rebound and the game keeps its points while the pad runs (FA-AB-09).
+        const { pad, group } = running.value;
+        const rules = rulesOf(stored, pad.gameId);
+        const match = newMatch(pad.groupId, pad.gameId, input, participantsOf(group), rules);
+        if (!match.ok) {
+          return match;
+        }
+        // FA-NB-07: one transaction stores the result and ends the score pad.
+        await repositories.matches.add(match.value);
+        await repositories.scorePad.delete();
         return match;
       });
     },

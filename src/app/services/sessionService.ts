@@ -136,7 +136,10 @@ export type SessionService = {
    * `catanSummary` (US-AB-04).
    */
   current(): Promise<Result<StoredSession | null, SessionUnsupportedError>>;
-  /** Whether a match is in generation or running; the services check their locks with it (Architecture 10.4). */
+  /**
+   * Whether a match is in generation or running or a score pad runs; the services check their
+   * locks with it (Architecture 10.4, FA-NB-02).
+   */
   isSessionActive(): Promise<boolean>;
   /**
    * Default values for preparing a Catan match with this group (US-AB-01, US-SP-04, US-PG-04).
@@ -146,7 +149,8 @@ export type SessionService = {
   /**
    * Starts the generation ("Generierung starten", Specification 3.5). Nothing is drawn yet: the
    * first step is shown without a result (US-AB-02 AK-3). A match without any step is running at
-   * once. Rejected while another match is in generation or running (US-AB-05 AK-2). Options and
+   * once. Rejected while another match is in generation or running or a score pad runs (US-AB-05
+   * AK-2, US-NB-01 AK-4). Options and
    * colours that do not fit, or a group that does not exist, are programming errors and throw.
    */
   start(
@@ -337,7 +341,10 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
 
     isSessionActive() {
       // A session of unknown version is still a running match and keeps the locks.
-      return store.transaction(async ({ session }) => (await session.get()) !== undefined);
+      return store.transaction(
+        async ({ session, scorePad }) =>
+          (await session.get()) !== undefined || (await scorePad.get()) !== undefined,
+      );
     },
 
     prepare(groupId) {
@@ -357,8 +364,11 @@ export function createSessionService(deps: SessionServiceDependencies): SessionS
 
     start({ groupId, options, colors }) {
       return store.transaction(async (repositories) => {
-        // Specification 3.5: at most one match in generation or running.
-        if ((await repositories.session.get()) !== undefined) {
+        // Specification 3.5, E-51: at most one match in generation or running, a score pad too.
+        if (
+          (await repositories.session.get()) !== undefined ||
+          (await repositories.scorePad.get()) !== undefined
+        ) {
           return err('session-active');
         }
         const group = await findGroup(repositories, groupId);

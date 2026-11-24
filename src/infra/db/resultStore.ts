@@ -1,5 +1,6 @@
 import type { ResultRepositories, ResultStore } from '@/app/ports';
 import { CURRENT_SESSION_ID } from '@/core/generation';
+import { SCORE_PAD_ID } from '@/core/scorepad';
 import { assert } from '@/core/shared';
 import type { BoardBrainDb } from './database';
 import { recordUserDataChange } from './userDataChange';
@@ -40,6 +41,10 @@ function repositories(db: BoardBrainDb): ResultRepositories {
       get: () => db.session.get(CURRENT_SESSION_ID),
       delete: () => db.session.delete(CURRENT_SESSION_ID),
     },
+    scorePad: {
+      get: () => db.scorePad.get(SCORE_PAD_ID),
+      delete: () => db.scorePad.delete(SCORE_PAD_ID),
+    },
   };
 }
 
@@ -52,7 +57,7 @@ export function createDexieResultStore(db: BoardBrainDb): ResultStore {
   const repos = repositories(db);
   return {
     transaction: (work) =>
-      db.transaction('rw', [db.matches, db.meta, db.groups, db.games, db.session], () =>
+      db.transaction('rw', [db.matches, db.meta, db.groups, db.games, db.session, db.scorePad], () =>
         work(repos),
       ),
   };

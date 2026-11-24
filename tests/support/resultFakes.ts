@@ -7,6 +7,7 @@ import {
   type Group,
   type Match,
 } from '@/core/model';
+import type { ScorePad } from '@/core/scorepad';
 import { assert } from '@/core/shared';
 import { aGroup, TEST_NOW } from './masterDataFakes';
 
@@ -46,6 +47,7 @@ export class InMemoryResultStore implements ResultStore {
   groups: readonly Group[];
   customGames: readonly CustomGame[];
   session: StoredSession | undefined = undefined;
+  scorePad: ScorePad | undefined = undefined;
   /** Moments of the recorded changes of user data (Architecture 7.4). */
   changes: readonly string[] = [];
 
@@ -57,6 +59,7 @@ export class InMemoryResultStore implements ResultStore {
   async transaction<T>(work: (repositories: ResultRepositories) => Promise<T>): Promise<T> {
     const matches = new Map(this.matches.map((match) => [match.id, structuredClone(match)]));
     let session = this.session;
+    let scorePad = this.scorePad;
     const changes = [...this.changes];
     const result = await work({
       matches: {
@@ -88,9 +91,17 @@ export class InMemoryResultStore implements ResultStore {
           return Promise.resolve();
         },
       },
+      scorePad: {
+        get: () => Promise.resolve(scorePad === undefined ? undefined : structuredClone(scorePad)),
+        delete: () => {
+          scorePad = undefined;
+          return Promise.resolve();
+        },
+      },
     });
     this.matches = [...matches.values()];
     this.session = session;
+    this.scorePad = scorePad;
     this.changes = changes;
     return result;
   }

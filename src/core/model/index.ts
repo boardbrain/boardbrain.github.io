@@ -59,7 +59,7 @@ export {
   type LocalTime,
   type TimeInvalidError,
 } from './localDateTime';
-export type { Match } from './match';
+export type { Match, ScoreTarget } from './match';
 export {
   areMatchColorsValid,
   matchColorsOf,

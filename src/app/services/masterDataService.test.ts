@@ -20,6 +20,7 @@ import {
   type GroupId,
   type PersonId,
 } from '@/core/model';
+import { createScorePad, DEFAULT_SCORE_PAD_SETTINGS } from '@/core/scorepad';
 import { InvariantError } from '@/core/shared';
 import { CATAN_INITIAL_GAME_STATE } from '@/games/catan';
 import {
@@ -574,6 +575,27 @@ describe('US-VW-02 Edit a group', () => {
     expect(store.groups).toEqual([aGroup()]);
   });
 
+  it('AK-5, US-NB-01: refuses changing the binding while the group writes in a score pad', async () => {
+    const store = storeWithGroup();
+    store.scorePad = createScorePad({
+      gameId: toGameId('00000000-0000-4000-8000-0000000000b1'),
+      groupId: aGroup().id,
+      participants: aGroup().members.map((member) => member.personId),
+      startedAt: TEST_NOW,
+      settings: DEFAULT_SCORE_PAD_SETTINGS,
+    });
+    const service = editSetUp(store);
+
+    const result = await service.editGroup({
+      groupId: aGroup().id,
+      name: 'Anna & Ben',
+      binding: { kind: 'global', excludesCatan: true },
+      colors: [{ groupColor: 'red' }, { groupColor: 'blue' }],
+    });
+
+    expect(result).toEqual({ ok: false, error: 'group-in-session' });
+  });
+
   it('AK-5: keeps name and colours changeable while the group is in a match', async () => {
     const store = storeWithGroup();
     store.session = sessionOf(aGroup().id);
@@ -786,6 +808,23 @@ describe('US-VW-07 Change the points of a custom game', () => {
     const off = await service.changeCustomGameScoring({ gameId: unoId, scoring: null });
 
     expect(off.ok && 'scoring' in off.value).toBe(false);
+  });
+
+  it('AK-4, FA-AB-09: refuses to switch points off while a score pad of the game runs', async () => {
+    const store = storeWith('highest-wins');
+    store.scorePad = createScorePad({
+      gameId: unoId,
+      groupId: aGroup().id,
+      participants: [anna, ben],
+      startedAt: TEST_NOW,
+      settings: DEFAULT_SCORE_PAD_SETTINGS,
+    });
+    const service = editSetUp(store);
+
+    expect(await service.changeCustomGameScoring({ gameId: unoId, scoring: null })).toEqual({
+      ok: false,
+      error: 'scoring-in-use',
+    });
   });
 
   it('AK-4: refuses to switch points off while a result of the game has points', async () => {

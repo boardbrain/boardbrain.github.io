@@ -483,3 +483,83 @@ describe('US-ER-03 Catan colours in a result', () => {
     ).toThrow(InvariantError);
   });
 });
+
+describe('US-NB-04 Rounds and target of a score pad in the result', () => {
+  const ROUNDS = [
+    { [ANNA]: 12, [BEN]: 25, [CLARA]: -2 },
+    { [ANNA]: 8, [BEN]: 14, [CLARA]: 21 },
+  ];
+  const FROM_PAD: ResultInput = {
+    date: '2026-11-15',
+    winnerIds: [CLARA],
+    scores: { [ANNA]: 20, [BEN]: 39, [CLARA]: 19 },
+    rounds: ROUNDS,
+    target: { kind: 'points', value: 100 },
+  };
+
+  it('AK-2: rounds and target are stored with the points as their sums', () => {
+    expect(checkResult(FROM_PAD, TABLE, SKYJO_LIKE, TODAY)).toEqual({
+      ok: true,
+      value: {
+        date: '2026-11-15',
+        winnerIds: [CLARA],
+        scores: { [ANNA]: 20, [BEN]: 39, [CLARA]: 19 },
+        rounds: ROUNDS,
+        target: { kind: 'points', value: 100 },
+      },
+    });
+  });
+
+  it('AK-2: points that are not the sums of the rounds are a programming error', () => {
+    expect(() =>
+      resultErrors(
+        { ...FROM_PAD, scores: { [ANNA]: 21, [BEN]: 39, [CLARA]: 19 } },
+        TABLE,
+        SKYJO_LIKE,
+        TODAY,
+      ),
+    ).toThrow(InvariantError);
+    const { scores: _scores, ...withoutScores } = FROM_PAD;
+    expect(() => resultErrors(withoutScores, TABLE, SKYJO_LIKE, TODAY)).toThrow(InvariantError);
+  });
+
+  it('AK-2: rounds need a game with points, every participant and at least one round', () => {
+    expect(() => resultErrors(FROM_PAD, TABLE, CUSTOM, TODAY)).toThrow(InvariantError);
+    expect(() =>
+      resultErrors({ ...FROM_PAD, rounds: [{ [ANNA]: 20, [BEN]: 39 }] }, TABLE, SKYJO_LIKE, TODAY),
+    ).toThrow(InvariantError);
+    expect(() =>
+      resultErrors(
+        { date: '2026-11-15', winnerIds: [CLARA], scores: FROM_PAD.scores ?? {}, rounds: [] },
+        TABLE,
+        SKYJO_LIKE,
+        TODAY,
+      ),
+    ).toThrow(InvariantError);
+  });
+
+  it('AK-2: a target needs rounds and is a whole number from 1', () => {
+    const { rounds: _rounds, ...withoutRounds } = FROM_PAD;
+    expect(() => resultErrors(withoutRounds, TABLE, SKYJO_LIKE, TODAY)).toThrow(InvariantError);
+    expect(() =>
+      resultErrors({ ...FROM_PAD, target: { kind: 'rounds', value: 0 } }, TABLE, SKYJO_LIKE, TODAY),
+    ).toThrow(InvariantError);
+  });
+
+  it('US-NB-02 AK-5: points of a round beyond 99 999 are an error', () => {
+    const big = [{ [ANNA]: 100_000, [BEN]: 0, [CLARA]: 0 }];
+    expect(
+      resultErrors(
+        {
+          ...FROM_PAD,
+          rounds: big,
+          scores: { [ANNA]: 100_000, [BEN]: 0, [CLARA]: 0 },
+          winnerIds: [BEN, CLARA],
+        },
+        TABLE,
+        SKYJO_LIKE,
+        TODAY,
+      ),
+    ).toEqual(['scores-invalid', 'rounds-invalid']);
+  });
+});

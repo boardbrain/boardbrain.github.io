@@ -13,7 +13,8 @@ import { aStoredSession, InMemorySessionStore } from '@tests/support/sessionFake
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Clock, StoredSession } from '@/app/ports';
 import { elapsedMilliseconds, revealedStepIndex, stepsDiscardedBy } from '@/core/generation';
-import { CATAN_COLOR_KEYS, toGroupId, type Group, type MemberColors } from '@/core/model';
+import { CATAN_COLOR_KEYS, toGameId, toGroupId, type Group, type MemberColors } from '@/core/model';
+import { createScorePad, DEFAULT_SCORE_PAD_SETTINGS } from '@/core/scorepad';
 import { InvariantError, type Result } from '@/core/shared';
 import {
   CATAN_DEFAULT_OPTIONS,
@@ -237,6 +238,23 @@ describe('US-AB-05 The running match survives a restart', () => {
     await startFour(service);
 
     const { colors } = await value(service.prepare(FOUR.id));
+    expect(await service.start({ groupId: FOUR.id, options: ALL_ON, colors })).toEqual({
+      ok: false,
+      error: 'session-active',
+    });
+  });
+
+  it('AK-2, US-NB-01 AK-4: a new match is rejected while a score pad runs (E-51)', async () => {
+    const { service, store } = launch();
+    const { colors } = await value(service.prepare(FOUR.id));
+    store.scorePad = createScorePad({
+      gameId: toGameId('00000000-0000-4000-8000-0000000000b1'),
+      groupId: FOUR.id,
+      participants: FOUR.members.map((member) => member.personId),
+      startedAt: TEST_NOW,
+      settings: DEFAULT_SCORE_PAD_SETTINGS,
+    });
+    expect(await service.isSessionActive()).toBe(true);
     expect(await service.start({ groupId: FOUR.id, options: ALL_ON, colors })).toEqual({
       ok: false,
       error: 'session-active',
