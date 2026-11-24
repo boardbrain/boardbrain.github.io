@@ -1,4 +1,4 @@
-import { m, useReducedMotion, type AnimationPlaybackControls } from 'motion/react';
+import { animate, useReducedMotion, type AnimationPlaybackControls } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import type { PersonId, ScoreTarget, ScoringDirection } from '@/core/model';
 import {
@@ -26,8 +26,8 @@ const PLACE_TROPHY_SIZE = 14;
 const CORNER_ICON_SIZE = 14;
 // How far a cell may stick out and still count as seen, against rounding of the browser.
 const SEEN_SLACK = 2;
-// A stored round shows up gently below the earlier ones.
-const ROUND_IN = { duration: 0.3, ease: 'easeOut' } as const;
+// A stored round lights up once in gold, like a new result in the list (GroupResults).
+const LIGHT_UP = { duration: 1.6, times: [0, 0.2, 1], ease: 'easeOut' as const };
 
 /**
  * The round being typed (US-NB-02 AK-2): the numbers so far, the person at the keyboard and the
@@ -167,6 +167,28 @@ export function ScoreBlock({
     };
   }, [typedRow, typedColumn, isReduced]);
 
+  // Motion (external system): the round just stored lights up once in gold, as soon as the block
+  // shows it (the saved rounds arrive a moment after the answer of the service).
+  const isFreshShown = freshRound !== null && rounds.length === freshRound;
+  useEffect(() => {
+    const row = isFreshShown ? bodyRef.current?.rows[rounds.length - 1] : undefined;
+    if (row === undefined || isReduced) {
+      return undefined;
+    }
+    const gold = getComputedStyle(row).getPropertyValue('--color-accent-text').trim();
+    if (gold === '') {
+      return undefined;
+    }
+    const glow = animate(
+      row,
+      { backgroundColor: [`${gold}00`, `${gold}40`, `${gold}00`] },
+      LIGHT_UP,
+    );
+    return () => {
+      glow.stop();
+    };
+  }, [isFreshShown, rounds.length, isReduced]);
+
   function stack(standing: number, points: number, isPreview = false): React.JSX.Element {
     return (
       <span className={cx(styles.stack, isSelf && styles.only, isPreview && styles.preview)}>
@@ -231,13 +253,7 @@ export function ScoreBlock({
             const standing = standings[index] ?? round;
             const number = index + 1;
             return (
-              <m.tr
-                key={number}
-                className={styles.row}
-                initial={number === freshRound ? { opacity: 0 } : false}
-                animate={{ opacity: 1 }}
-                transition={ROUND_IN}
-              >
+              <tr key={number} className={styles.row}>
                 <th className={styles.rn} scope="row">
                   {isReadOnly || onRound === undefined ? (
                     <span className={styles.roundNumber}>{number}</span>
@@ -302,7 +318,7 @@ export function ScoreBlock({
                     </td>
                   );
                 })}
-              </m.tr>
+              </tr>
             );
           })}
           {newRound !== null && (

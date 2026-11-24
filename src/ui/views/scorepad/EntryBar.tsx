@@ -14,8 +14,9 @@ const INSET_PROPERTY = '--entry-inset';
 // Once the visible area is this close to the window again, the keyboard was closed.
 const KEYBOARD_GONE_MARGIN = 80;
 const ALLOWED = /^[-−]?\d{0,6}$/u;
-// The bar comes and goes with a short fade.
-const FADE = { duration: 0.15, ease: 'easeOut' } as const;
+// The bar slides up like the sheets (PadSheets) and leaves quickly.
+const SLIDE_IN = { type: 'spring', bounce: 0.15, duration: 0.4 } as const;
+const SLIDE_OUT = { duration: 0.2, ease: 'easeIn' } as const;
 
 /**
  * The person whose number is typed and what the bar says about it.
@@ -149,115 +150,117 @@ export function EntryBar({
   };
 
   return (
-    <m.div
-      ref={barRef}
-      className={cx(styles.wrap, isOpen && styles.open)}
-      aria-hidden={!isOpen}
-      initial={false}
-      animate={{ opacity: isOpen ? 1 : 0 }}
-      transition={FADE}
-    >
-      {strip.length > 0 && (
-        <div
-          ref={stripRef}
-          className={styles.strip}
-          role="group"
-          aria-label={t('notizblock.personen')}
-        >
-          {strip.map((person) => {
-            const entry = entries[person.id];
-            const isActive = target?.person.id === person.id;
-            return (
-              <PressableButton
-                key={person.id}
-                type="button"
-                tabIndex={isOpen ? 0 : -1}
-                className={cx(
-                  styles.chip,
-                  entry !== undefined && styles.done,
-                  isActive && styles.on,
-                )}
-                aria-label={person.name}
-                aria-pressed={isActive}
-                onMouseDown={keepFocus}
-                onPointerDown={keepFocus}
-                onClick={() => {
-                  onPerson(person.id);
-                }}
-              >
-                <span
-                  className={styles.seat}
-                  style={{ background: `var(--color-group-${person.groupColor})` }}
-                  aria-hidden="true"
-                >
-                  {person.name.slice(0, 1)}
-                </span>
-                <span>{entry === undefined ? t('notizblock.leer') : formatPadNumber(entry)}</span>
-              </PressableButton>
-            );
-          })}
-        </div>
-      )}
-      <div className={styles.bar}>
-        {target !== null && (
-          <span
-            className={cx(styles.seat, styles.big)}
-            style={{ background: `var(--color-group-${target.person.groupColor})` }}
-            aria-hidden="true"
+    <div ref={barRef} className={cx(styles.wrap, isOpen && styles.open)} aria-hidden={!isOpen}>
+      <m.div
+        className={styles.panel}
+        initial={false}
+        animate={isOpen ? { y: 0, opacity: 1 } : { y: '100%', opacity: 0 }}
+        transition={isOpen ? SLIDE_IN : SLIDE_OUT}
+      >
+        {strip.length > 0 && (
+          <div
+            ref={stripRef}
+            className={styles.strip}
+            role="group"
+            aria-label={t('notizblock.personen')}
           >
-            {target.person.name.slice(0, 1)}
-          </span>
+            {strip.map((person) => {
+              const entry = entries[person.id];
+              const isActive = target?.person.id === person.id;
+              return (
+                <PressableButton
+                  key={person.id}
+                  type="button"
+                  tabIndex={isOpen ? 0 : -1}
+                  className={cx(
+                    styles.chip,
+                    entry !== undefined && styles.done,
+                    isActive && styles.on,
+                  )}
+                  aria-label={person.name}
+                  aria-pressed={isActive}
+                  onMouseDown={keepFocus}
+                  onPointerDown={keepFocus}
+                  onClick={() => {
+                    onPerson(person.id);
+                  }}
+                >
+                  <span
+                    className={styles.seat}
+                    style={{ background: `var(--color-group-${person.groupColor})` }}
+                    aria-hidden="true"
+                  >
+                    {person.name.slice(0, 1)}
+                  </span>
+                  <span>{entry === undefined ? t('notizblock.leer') : formatPadNumber(entry)}</span>
+                </PressableButton>
+              );
+            })}
+          </div>
         )}
-        <span className={styles.who}>
-          <strong>{target?.person.name}</strong>
-          <small className={cx(error !== null && styles.error)}>{error ?? target?.subtitle}</small>
-        </span>
-        <input
-          ref={inputRef}
-          className={styles.value}
-          type="text"
-          inputMode="numeric"
-          enterKeyHint={isLast ? 'done' : 'next'}
-          autoComplete="off"
-          tabIndex={isOpen ? 0 : -1}
-          aria-label={
-            target === null
-              ? t('notizblock.titel')
-              : t('notizblock.feld', { name: target.person.name, was: target.subtitle })
-          }
-          aria-invalid={error !== null}
-          value={shown(value)}
-          onChange={(event) => {
-            const text = cleaned(event.target.value);
-            if (text !== null) {
-              onValue(text);
+        <div className={styles.bar}>
+          {target !== null && (
+            <span
+              className={cx(styles.seat, styles.big)}
+              style={{ background: `var(--color-group-${target.person.groupColor})` }}
+              aria-hidden="true"
+            >
+              {target.person.name.slice(0, 1)}
+            </span>
+          )}
+          <span className={styles.who}>
+            <strong>{target?.person.name}</strong>
+            <small className={cx(error !== null && styles.error)}>
+              {error ?? target?.subtitle}
+            </small>
+          </span>
+          <input
+            ref={inputRef}
+            className={styles.value}
+            type="text"
+            inputMode="numeric"
+            enterKeyHint={isLast ? 'done' : 'next'}
+            autoComplete="off"
+            tabIndex={isOpen ? 0 : -1}
+            aria-label={
+              target === null
+                ? t('notizblock.titel')
+                : t('notizblock.feld', { name: target.person.name, was: target.subtitle })
             }
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              onEnter();
-            }
-          }}
-          onBlur={(event) => {
-            onClose(event.relatedTarget);
-          }}
-        />
-        <PressableButton
-          type="button"
-          tabIndex={isOpen ? 0 : -1}
-          className={cx(styles.sign, isNegative && styles.negative)}
-          aria-label={t('notizblock.vorzeichen')}
-          aria-pressed={isNegative}
-          onMouseDown={keepFocus}
-          onPointerDown={keepFocus}
-          onClick={() => {
-            onValue(toggledSign(value));
-          }}
-        >
-          {t('notizblock.plusMinus')}
-        </PressableButton>
-      </div>
-    </m.div>
+            aria-invalid={error !== null}
+            value={shown(value)}
+            onChange={(event) => {
+              const text = cleaned(event.target.value);
+              if (text !== null) {
+                onValue(text);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                onEnter();
+              }
+            }}
+            onBlur={(event) => {
+              onClose(event.relatedTarget);
+            }}
+          />
+          <PressableButton
+            type="button"
+            tabIndex={isOpen ? 0 : -1}
+            className={cx(styles.sign, isNegative && styles.negative)}
+            aria-label={t('notizblock.vorzeichen')}
+            aria-pressed={isNegative}
+            onMouseDown={keepFocus}
+            onPointerDown={keepFocus}
+            onClick={() => {
+              onValue(toggledSign(value));
+            }}
+          >
+            {t('notizblock.plusMinus')}
+          </PressableButton>
+        </div>
+      </m.div>
+    </div>
   );
 }
