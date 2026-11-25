@@ -50,6 +50,16 @@ test.describe('Architecture 12.1 installation (I1-D)', () => {
     expect(href).toBe('/icons/apple-touch-icon.png');
     expect(await loadPng(page.request, href ?? '')).toBe('180x180');
   });
+
+  test('K-20: the browser tab shows the app icon as a tile', async ({ page }) => {
+    await page.goto('/');
+
+    const href = await page.locator('link[rel="icon"]').getAttribute('href');
+    expect(href).toBe('/icons/favicon.svg');
+    const response = await page.request.get(href ?? '');
+    expect(response.ok()).toBe(true);
+    expect(await response.text()).toContain('<svg');
+  });
 });
 
 test.describe('NFA-PL-03 start without network (I1-D)', () => {

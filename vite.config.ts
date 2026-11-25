@@ -92,11 +92,16 @@ function acceptanceIcons(mode: string): Plugin {
 }
 
 // Architecture 12.1: icons and status bar for the home screen of iOS and iPadOS; Android and
-// Windows read the manifest.
+// Windows read the manifest. The browser tab shows the icon of the build as a tile (K-20 T2).
 function homeScreenTags(identity: AppIdentity): Plugin {
   return {
     name: 'boardbrain-home-screen',
     transformIndexHtml: () => [
+      {
+        tag: 'link',
+        attrs: { rel: 'icon', type: 'image/svg+xml', href: `${identity.iconDir}/favicon.svg` },
+        injectTo: 'head',
+      },
       { tag: 'meta', attrs: { name: 'theme-color', content: SURFACE_COLOR }, injectTo: 'head' },
       {
         tag: 'link',

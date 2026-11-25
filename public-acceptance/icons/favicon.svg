@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+    <defs>
+      <radialGradient id="background" cx="0.5" cy="0.05" r="0.9"><stop offset="0" stop-color="#5a3a8c"/><stop offset="1" stop-color="#211a2e"/></radialGradient>
+      <linearGradient id="face" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#3a2e52"/><stop offset="1" stop-color="#2c2340"/></linearGradient>
+      <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#0000008c"/></filter>
+    </defs>
+    <clipPath id="tile"><rect width="48" height="48" rx="11"/></clipPath>
+    <g clip-path="url(#tile)"><rect width="48" height="48" fill="url(#background)"/><g transform="rotate(-8 24 42)"><rect x="9.5" y="3.5" width="28" height="39" rx="3.64" fill="#2c2340" stroke="#c4a0ff" stroke-width="1.1" filter="url(#shadow)"/></g>
+    <g transform="rotate(4 24 42)"><rect x="11" y="4" width="28" height="40" rx="3.64" fill="url(#face)" stroke="#c4a0ff" stroke-width="1.9" filter="url(#shadow)"/>
+    <polygon points="16.32,7.24 18.02,8.22 18.02,10.18 16.32,11.16 14.62,10.18 14.62,8.22" fill="#c4a0ff"/>
+    <polygon points="33.68,36.84 35.38,37.82 35.38,39.78 33.68,40.76 31.98,39.78 31.98,37.82" fill="#c4a0ff"/>
+    <g transform="translate(13 12) scale(0.5)">
+    <clipPath id="outline"><path d="M24 8.5C21 5 14 5.5 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42.5 22 40.5 23 41 23.5 41 24 40.5 24.5 41 25 41 26 40.5 30 42.5 35 41 36 37 40 38 43 33 41 29 45 27 45 20 41 18 43 15 41 10 36 10 34 5.5 27 5 24 8.5Z"/></clipPath>
+    <clipPath id="left"><rect x="0" y="0" width="24" height="48"/></clipPath>
+    <g clip-path="url(#outline)"><g clip-path="url(#left)" fill="#c4a0ff"><rect x="18.60" y="2.40" width="5.4" height="5.4"/><rect x="18.60" y="13.20" width="5.4" height="5.4"/><rect x="18.60" y="24.00" width="5.4" height="5.4"/><rect x="18.60" y="34.80" width="5.4" height="5.4"/><rect x="18.60" y="45.60" width="5.4" height="5.4"/><rect x="13.20" y="-3.00" width="5.4" height="5.4"/><rect x="13.20" y="7.80" width="5.4" height="5.4"/><rect x="13.20" y="18.60" width="5.4" height="5.4"/><rect x="13.20" y="29.40" width="5.4" height="5.4"/><rect x="13.20" y="40.20" width="5.4" height="5.4"/><rect x="7.80" y="2.40" width="5.4" height="5.4"/><rect x="7.80" y="13.20" width="5.4" height="5.4"/><rect x="7.80" y="24.00" width="5.4" height="5.4"/><rect x="7.80" y="34.80" width="5.4" height="5.4"/><rect x="7.80" y="45.60" width="5.4" height="5.4"/><rect x="2.40" y="-3.00" width="5.4" height="5.4"/><rect x="2.40" y="7.80" width="5.4" height="5.4"/><rect x="2.40" y="18.60" width="5.4" height="5.4"/><rect x="2.40" y="29.40" width="5.4" height="5.4"/><rect x="2.40" y="40.20" width="5.4" height="5.4"/><rect x="-3.00" y="2.40" width="5.4" height="5.4"/><rect x="-3.00" y="13.20" width="5.4" height="5.4"/><rect x="-3.00" y="24.00" width="5.4" height="5.4"/><rect x="-3.00" y="34.80" width="5.4" height="5.4"/><rect x="-3.00" y="45.60" width="5.4" height="5.4"/></g></g>
+    <g fill="none" stroke="#c4a0ff" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke-width="2.2" d="M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6"/><path stroke-width="2.6" d="M24 8.5C21 5 14 5.5 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42.5 22 40.5 23 41 23.5 41 24 40.5 24.5 41 25 41 26 40.5 30 42.5 35 41 36 37 40 38 43 33 41 29 45 27 45 20 41 18 43 15 41 10 36 10 34 5.5 27 5 24 8.5Z"/><path stroke-width="2.6" d="M24 8.5V40.5"/>
+    </g>
+  </g></g></g>
+    <rect x="0.5" y="0.5" width="47" height="47" rx="10.5" fill="none" stroke="#3a2e52"/>
+  </svg>
