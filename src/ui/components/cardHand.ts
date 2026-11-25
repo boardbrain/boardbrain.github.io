@@ -94,3 +94,38 @@ export function foldedIconTop(
   const visible = CARD_HEIGHT - CARD_PIVOT + (CARD_PIVOT - y) * Math.cos((rotate * Math.PI) / 180);
   return Math.max(1, (visible - iconSize) / 2);
 }
+
+/** Size of the symbol on a fanned card in px. */
+export const ICON_SIZE = 22;
+
+/** Size of the symbol on a folded card in px. */
+export const FOLDED_ICON_SIZE = 16;
+
+/** Line height of the name below the symbol in px; HandNavigation.module.css uses the same. */
+export const NAME_LINE_HEIGHT = 17;
+
+const NAME_GAP = 2;
+
+/** Design K-20 F2: top of the symbol on a fanned card; symbol and name sit in the middle. */
+export const FANNED_ICON_TOP = (CARD_HEIGHT - (ICON_SIZE + NAME_GAP + NAME_LINE_HEIGHT)) / 2;
+
+/** Top of the name on a fanned card, right below the symbol. */
+export const NAME_TOP = FANNED_ICON_TOP + ICON_SIZE + NAME_GAP;
+
+/**
+ * Where the one symbol of a card sits (design K-20 F2): in the middle above the name while
+ * fanned, at the top of the visible part and shrunk to the folded size while folded. Between
+ * the two it glides instead of fading, so it stays the same symbol.
+ */
+export function iconPose(
+  index: number,
+  count: number,
+  isActive: boolean,
+  state: HandState,
+): { readonly top: number; readonly scale: number } {
+  if (state !== 'folded') return { top: FANNED_ICON_TOP, scale: 1 };
+  return {
+    top: foldedIconTop(index, count, isActive, FOLDED_ICON_SIZE),
+    scale: FOLDED_ICON_SIZE / ICON_SIZE,
+  };
+}

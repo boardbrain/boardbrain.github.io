@@ -5,20 +5,24 @@ import { t, type TextKey } from '@/i18n/t';
 import {
   CARD_PIVOT,
   cardPose,
-  foldedIconTop,
   handState,
+  ICON_SIZE,
+  iconPose,
   isCompactHand,
   LONG_PRESS_MS,
+  NAME_TOP,
 } from './cardHand';
 import { cx } from './classNames';
 import styles from './HandNavigation.module.css';
 
-const ICON_SIZE = 22;
-const FOLDED_ICON_SIZE = 16;
 // A pressed card of the folded hand rises a little (NFA-GB-04).
 const PRESS_LIFT = 8;
-const CARD_SPRING = { type: 'spring', stiffness: 420, damping: 32 } as const;
+// Design K-20 F2: a soft spring without overshoot (about 0.4 s); cards and symbols glide instead
+// of snapping (before 420/32).
+const CARD_SPRING = { type: 'spring', stiffness: 200, damping: 26 } as const;
 const FADE = { duration: 0.2 } as const;
+// The name fades out at once and comes back a little later, once the symbol has made room.
+const NAME_FADE = 0.22;
 
 /** An area of the app in the main navigation. */
 export type HandArea = {
@@ -132,6 +136,7 @@ export function HandNavigation({
                 (path) => matchPath({ path, end: false }, pathname) !== null,
               );
             const pose = cardPose(index, count, isActive, state);
+            const icon = iconPose(index, count, isActive, state);
             return (
               <m.li
                 key={area.to}
@@ -154,24 +159,24 @@ export function HandNavigation({
                   onPointerCancel={cancelPress}
                   onClick={handleClick}
                 >
+                  {/* K-20 F2: one symbol that glides and shrinks to the top of the folded card,
+                      instead of a large and a small symbol fading into each other. */}
                   <m.span
-                    className={styles.face}
+                    className={styles.icon}
                     initial={false}
-                    animate={{ opacity: isFolded ? 0 : 1 }}
-                    transition={FADE}
+                    animate={{ y: icon.top, scale: icon.scale }}
+                    transition={CARD_SPRING}
                   >
                     {area.icon({ size: ICON_SIZE })}
-                    {t(area.label)}
                   </m.span>
                   <m.span
-                    className={styles.foldedIcon}
-                    style={{ top: foldedIconTop(index, count, isActive, FOLDED_ICON_SIZE) }}
+                    className={styles.name}
+                    style={{ top: NAME_TOP }}
                     initial={false}
-                    animate={{ opacity: isFolded ? 1 : 0 }}
-                    transition={FADE}
-                    aria-hidden="true"
+                    animate={{ opacity: isFolded ? 0 : 1 }}
+                    transition={{ duration: NAME_FADE, delay: isFolded ? 0 : NAME_FADE / 2 }}
                   >
-                    {area.icon({ size: FOLDED_ICON_SIZE })}
+                    {t(area.label)}
                   </m.span>
                 </NavLink>
               </m.li>
