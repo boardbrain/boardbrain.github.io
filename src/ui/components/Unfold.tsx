@@ -3,10 +3,12 @@ import { useRef, type ReactNode } from 'react';
 import { cx } from './classNames';
 import styles from './Unfold.module.css';
 
-// Clipped only while moving, so a focus ring inside is not cut off once open.
+// Clipped only while moving, so a focus ring or a golden nudge inside is not cut off once open.
+// `transitionEnd` did not take the clipping back reliably (PO 25.11.2026: the nudge of "Neue
+// Person" was cut off); the panel lifts it itself when it has opened.
 const VARIANTS = {
   closed: { height: 0, opacity: 0, overflow: 'hidden' },
-  open: { height: 'auto', opacity: 1, transitionEnd: { overflow: 'visible' } },
+  open: { height: 'auto', opacity: 1 },
 };
 const TRANSITION = { duration: 0.2, ease: 'easeOut' } as const;
 const QUICK = { duration: 0.15, ease: 'easeOut' } as const;
@@ -73,9 +75,15 @@ function Panel({
       transition={isQuick ? QUICK : TRANSITION}
       aria-hidden={isPresent ? undefined : true}
       inert={!isPresent}
+      onAnimationStart={(definition) => {
+        if (definition === 'closed' && ref.current !== null) {
+          ref.current.style.overflow = 'hidden';
+        }
+      }}
       onAnimationComplete={(definition) => {
-        if (definition === 'open') {
-          ref.current?.scrollIntoView({
+        if (definition === 'open' && ref.current !== null) {
+          ref.current.style.overflow = 'visible';
+          ref.current.scrollIntoView({
             block: 'nearest',
             behavior: isReduced ? 'auto' : 'smooth',
           });
