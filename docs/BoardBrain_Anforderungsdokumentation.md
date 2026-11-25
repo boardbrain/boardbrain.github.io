@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Anforderungsdokumentation (Ergebnis der Anforderungserhebung) |
-| Version | 0.28 |
+| Version | 0.29 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung (zusammen mit Spezifikation v0.5 und Architektur v0.2) |
-| Stand | 24.11.2026 |
+| Stand | 25.11.2026 |
 | Sprache | Deutsch |
 | Ablage | Ab Abschluss des Setups ausschließlich im Repository unter `docs/` (EP-09) |
 
@@ -42,6 +42,7 @@
 | 0.26 | 18.11.2026 | Design I3-B (Entscheidungen des Product Owners): unterstützte und eigene Spiele in einer gemeinsamen Liste, unterscheidbar am Aussehen (FA-SP-03, E-46); bei Punkten ergibt sich der Sieger aus der besten Punktzahl, gewählt wird nur bei Gleichstand an der Spitze, die Warnung bei einem Sieger ohne beste Punktzahl entfällt (FA-ER-06, E-47); Spielbindung eines Tischs frei änderbar, nur die Mitgliederzahl wird geprüft (FA-VW-02, E-48); Spieldauer in der laufenden Partie korrigierbar, mit einzeln erfassten Pausen (FA-AB-11); Rangfolge von Hand auch bei Catan, mit genau einer Person auf Platz 1 (FA-ER-12, E-49) (5.1, 5.3, 5.8, 5.13, 10) |
 | 0.27 | 22.11.2026 | Personenfarben überarbeitet (Entscheidung des Product Owners in der Farbvorschau): neues Lila, Pink und Rosa, einfache Farbnamen; ersetzt die Palette aus E-28 (neu E-50) |
 | 0.28 | 24.11.2026 | Klärung und Design I3-C2 (Entscheidungen des Product Owners): Notizblock für eigene Spiele mit Punkten, der die Punkte Runde für Runde mitschreibt und am Ende das Ergebnis vorbelegt (neu 5.15, FA-NB-01 bis FA-NB-09); ein laufender Notizblock zählt als laufende Partie (FA-AB-07, FA-AB-09); Ziel und Rechenweise je Notizblock, kein automatisches Ende; Runden und Ziel werden mit dem Ergebnis gespeichert (FA-ER-03); Glossar „Notizblock“; neu E-51 bis E-55 und PP-24 (3, 5.3, 5.8, 5.15, 10, 12) |
+| 0.29 | 25.11.2026 | Empfehlungen zum Einsatz der Claude-Modelle entfernt (bisher 9.3) |
 
 ## Inhaltsverzeichnis
 
@@ -483,23 +484,6 @@ Das Projekt folgt einem strukturierten, sequenziellen Vorgehen:
 | EP-10 | Claude Code setzt ein Bündel zusammengehöriger User Stories in einem Arbeitsbranch eigenständig um, führt alle Prüfungen lokal aus und eröffnet einen Pull Request nach `develop`. Es hält an und fragt den Product Owner, wenn eine Anforderung unklar oder widersprüchlich ist, eine Lösung von der Architektur abweichen würde, eine neue Abhängigkeit nötig wäre oder Anforderungen bzw. Spezifikation geändert werden müssten (Haltepunkte). *(neu in 0.8)* |
 | EP-11 | Der Product Owner nimmt jeden Pull Request lokal ab und führt den Merge selbst durch. Die automatischen Prüfungen auf GitHub müssen vorher bestanden sein. *(neu in 0.8)* |
 | EP-12 | Verbindliche Regeln für Code, Tests, Git, Abhängigkeiten und Dokumentation stehen in `docs/Entwicklungsrichtlinien.md`. Die Datei `CLAUDE.md` im Repository enthält deren Kurzfassung für Claude Code. *(neu in 0.8)* |
-
-### 9.3 Empfohlener Einsatz der Claude-Modelle
-
-| Phase | Modell | Aufwand |
-|---|---|---|
-| Anforderungserhebung | Claude Opus 5.5 | Medium |
-| Spezifikation | Claude Opus 5.5 | High |
-| Architektur und Technologieentscheidungen | Claude Opus 5.5 | High, bei kritischen Entscheidungen xhigh |
-| Setup-Planung (Chat) | Claude Opus 5.5 | Medium, beim Erstellen der Dokumente High |
-| Durchführung des Setups (Claude Code) | Claude Opus 5.5 | High |
-| Implementierung (Claude Code) | Claude Sonnet 5.5 | Medium |
-| Implementierung kritischer Teile (Zufall, Platzierung und Sackgassen, Service Worker und Updates, Importkonflikte, Datenmigrationen) | Claude Opus 5.5 | High |
-| Tests, Boilerplate, Dokumentationspflege | Claude Sonnet 5.5 | Low bis Medium |
-| Code-Reviews und schwierige Fehler | Claude Opus 5.5 | High |
-| Einfache Hilfsaufgaben | Claude Haiku 4.5 | – |
-
-Hinweise zur Token-Effizienz: Die Stufe „max“ wird vermieden. Für jede Phase wird ein neuer Chat begonnen, und dieses Dokument dient zusammen mit der Spezifikation als gemeinsame Wissensgrundlage, z. B. als Dateien in einem Claude-Projekt. In Claude Code bietet sich die Einstellung `opusplan` an (Opus für die Planung, Sonnet für die Umsetzung). Mit dem Plan Pro verbraucht Opus das Nutzungskontingent deutlich schneller; Opus wird deshalb nur für das Setup und die kritischen Teile eingesetzt. Liegt Sonnet bei einer Aufgabe zweimal hintereinander daneben, wird auf Opus gewechselt, statt weiter nachzubessern. *(ergänzt in 0.8)*
 
 ---
 

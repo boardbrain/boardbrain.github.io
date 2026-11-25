@@ -6,7 +6,7 @@ Verbindliche Kurzfassung von `docs/Entwicklungsrichtlinien.md`. Dort stehen die 
 
 Progressive Web App für faire Zufallsentscheidungen und Statistik am Spieleabend (Catan). Veröffentlicht unter `https://boardbrain.github.io/` (Repository `boardbrain/boardbrain.github.io`). Stack: TypeScript strikt, React 19 mit React Compiler, Motion, Vite, Dexie (IndexedDB), Valibot, React Router (Hash), Vitest, Playwright.
 
-Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBrain_Spezifikation.md` (User Stories, Abnahmekriterien), `BoardBrain_Architektur.md` (Wie, ADRs), `Entwicklungsrichtlinien.md` (Arbeitsregeln), `Umsetzungsplan.md` (Reihenfolge, Bündel, Modelle, Ablauf jeder Sitzung). Lies den Umsetzungsplan und die betroffenen Kapitel, bevor du ein Bündel umsetzt. Rangfolge bei Widerspruch: Anforderungen > Spezifikation > Architektur > Richtlinien.
+Grundlagen in `docs/`: `BoardBrain_Anforderungsdokumentation.md` (Was), `BoardBrain_Spezifikation.md` (User Stories, Abnahmekriterien), `BoardBrain_Architektur.md` (Wie, ADRs), `Entwicklungsrichtlinien.md` (Arbeitsregeln), `Umsetzungsplan.md` (Reihenfolge, Bündel, Ablauf jeder Sitzung). Lies den Umsetzungsplan und die betroffenen Kapitel, bevor du ein Bündel umsetzt. Rangfolge bei Widerspruch: Anforderungen > Spezifikation > Architektur > Richtlinien.
 
 ## Befehle
 

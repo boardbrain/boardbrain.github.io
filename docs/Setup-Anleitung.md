@@ -4,8 +4,8 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Schritt-für-Schritt-Anleitung für die Einrichtung |
-| Version | 0.4 |
-| Stand | 07.10.2026 |
+| Version | 0.5 |
+| Stand | 25.11.2026 |
 | Grundlage | BoardBrain_Architektur.md v0.2 (Kapitel 16), Entwicklungsrichtlinien.md v0.1 |
 | Abschlusskriterium | Alle Punkte in `Setup-DoD.md` erfüllt |
 | Sprache | Deutsch |
@@ -18,6 +18,7 @@
 | 0.2 | 06.10.2026 | Lizenz in I2 von MIT auf PolyForm Strict License 1.0.0 geändert (Anforderungsdokumentation E-23) (PR #1) |
 | 0.3 | 07.10.2026 | Node.js 26 (B2); kein eigenes iPhone: Zertifikat nur auf dem iPad, iPhone nur für die veröffentlichte App über das Gerät eines Freundes (E3, F2, F3, I4, I10, Hilfe) (PR #2) |
 | 0.4 | 07.10.2026 | Abschluss des Setups: 2FA-Pflicht in der Organisation optional, solange der Product Owner einziges Mitglied ist (Teil A); Hilfe bei nicht erreichbarem Entwicklungsserver nach Branch-Wechsel |
+| 0.5 | 25.11.2026 | Empfehlung zu Modell und Aufwand entfernt |
 
 ## So liest du diese Anleitung
 
@@ -329,7 +330,7 @@ Die Frage „Do you trust the authors of the files in this folder?“ beantworte
 
 ## Teil I: Setup mit Claude Code
 
-Öffne Claude Code in VS Code (Claude-Symbol). Stelle das Modell ein: Befehl `/model`, **Opus 5.5**, Aufwand **high**. Füge dann den Text aus `Start-Prompt-Claude-Code.md` ein und sende ihn.
+Öffne Claude Code in VS Code (Claude-Symbol). Füge dann den Text aus `Start-Prompt-Claude-Code.md` ein und sende ihn.
 
 Claude Code arbeitet in Etappen und hält nach jeder an. Die folgende Übersicht zeigt, was wann passiert; die Details liefert Claude Code jeweils selbst.
 

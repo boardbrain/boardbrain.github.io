@@ -4,7 +4,7 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Architektur und Technologieentscheidungen |
-| Version | 0.47 |
+| Version | 0.48 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
 | Stand | 25.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md v0.8, BoardBrain_Spezifikation.md v0.5 |
@@ -61,6 +61,7 @@
 | 0.45 | 23.11.2026 | Bündel I3-C: Tischseite mit Reitern „Am Tisch \| Ergebnisse \| Statistik“, Ergebnisliste, Detailseite, Bearbeiten und Löschen, Ergebnis vom Tisch; Adressen `…/ergebnis`, `…/ergebnisse/‹ergebnis›`, `…/bearbeiten`, `?reiter=`, `?von=tisch`; Meldung auf dem Start führt zum Ergebnis; gemeinsame Reiter-Komponente `Tabs` auch für die Übersicht der laufenden Partie (C-G-10); Modus der Übersicht aus der Partie (C-G-9); Design-Referenz `docs/design/i3c-result-list-final-preview.html` (13.1); `ResultService.draftOf` (4.4); Tokens für Platz 2 und 3 in Silber und Bronze (13.4); Diagnose zählt Ergebnisse (C-W-4) |
 | 0.46 | 24.11.2026 | Bündel I3-C2 Notizblock (Anforderungsdokumentation 0.28, FA-NB-*): neues Modul `core/scorepad` (4.3) und Dienst `ScorePadService` (4.4); `Match` mit `rounds` und `target` (7.1); neuer Store `scorePad`, Datenbankversion 3 (7.3); laufender Notizblock neben der Sitzung, Sperren (10.4, neu 10.5); Adressen `#/notizblock…` (13.1); Farben des Papiers und mitgelieferte Handschrift (13.4, neu ADR-032); ausgegraute Speichern-Knöpfe zeigen in allen Formularen, was fehlt (13.6, Abnahme) |
 | 0.47 | 25.11.2026 | Aufgabe K-20 Feinschliff Start und Kartenhand: Logo auf dem Start als zwei Karten wie das App-Symbol (`Logo`), das Gehirn allein als `BrainMark` für die Kartenrückseite; Browser-Tab mit dem App-Symbol als Kachel, `favicon.svg` je Build aus `npm run icons` (12.1, 13.1); Start auf dem Handy und quer mit kleinerer Lücke über der Kartenhand; Kartenhand mit einem gleitenden Symbol je Karte und weicherer Feder (13.1); Design-Referenz `docs/design/k20-start-polish-final-preview.html` |
+| 0.48 | 25.11.2026 | Empfehlungen zu den Claude-Modellen entfernt: Hinweis in 16.5 gestrichen, Gegenmaßnahme beim Risiko „Nutzungsgrenzen des Claude-Plans“ ohne Modellwahl |
 
 ## Inhaltsverzeichnis
 
@@ -1517,8 +1518,6 @@ Die Datei im Repository ist die kurze, verbindliche Fassung der Entwicklungsrich
 | Modus ohne Berechtigungsprüfung | gesperrt (`disableBypassPermissionsMode`) |
 | Hinweise auf Claude in Commits und Pull Requests | abgeschaltet (`attribution` mit leeren Texten; Entwicklungsrichtlinien 3.3) |
 
-**Modelle:** siehe Anforderungsdokumentation 9.3.
-
 ### 16.6 Lokales HTTPS
 
 mkcert erzeugt eine lokale Zertifizierungsstelle, die in Windows sowie von Hand auf Android und dem iPad als vertrauenswürdig installiert wird (ein eigenes iPhone gibt es nicht, auf fremden Geräten wird sie nie installiert; Anforderungsdokumentation OP-13), und ein Serverzertifikat für `localhost`, `127.0.0.1`, `::1` und die feste IP-Adresse des PCs im Heimnetz (Adressreservierung in der FRITZ!Box). Das Serverzertifikat liegt unter `%USERPROFILE%\.boardbrain-certs\` (`cert.pem`, `key.pem`) und wird vom Product Owner erzeugt, nicht von Claude Code. `vite.config.ts` liest es von dort und schaltet HTTPS nur ein, wenn die Dateien vorhanden sind; ohne Zertifikat (z. B. auf GitHub) laufen `dev` und `preview` über `http://localhost`. Der Schlüssel der Zertifizierungsstelle verlässt den PC nie.
@@ -2067,7 +2066,7 @@ In `core` liegt, was auch Personen, Gruppen, Ergebnisse oder andere Spiele betri
 | Subtile Fehler in React-Effekten | Fehlverhalten in Randfällen | React Compiler, Hooks-Lint-Regeln, sparsame Effekte, Komponenten- und Ende-zu-Ende-Tests |
 | Veraltete Abhängigkeiten | Sicherheits- oder Kompatibilitätsprobleme | Dependabot (Sicherheitsupdates sofort, übrige monatlich gebündelt); wenige Abhängigkeiten |
 | Große Story-Bündel werden nicht vollständig gelesen | Code ist schwerer nachzuvollziehen (RB-04) | Pull-Request-Beschreibung nach Vorlage; Anforderungs-IDs im Code; strenge automatische Regeln; Bündel bei Fachlogik kleiner schneiden |
-| Nutzungsgrenzen des Claude-Plans | Unterbrechungen während eines Bündels | Sonnet als Standard, Opus nur für Setup und kritische Teile (Anforderungsdokumentation 9.3) |
+| Nutzungsgrenzen des Claude-Plans | Unterbrechungen während eines Bündels | neue Sitzung je Bündel; während der Arbeit nur die betroffenen Tests (Entwicklungsrichtlinien 8.2, 14) |
 
 ### 18.2 Offene Punkte
 
