@@ -27,8 +27,8 @@ async function createTable(page: Page, ...names: string[]): Promise<void> {
   for (const name of names) {
     await editor.getByRole('button', { name, exact: true }).click();
   }
-  await editor.getByLabel('Gruppenname').fill(tableName(names));
-  await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+  await editor.getByLabel('Name des Tisches').fill(tableName(names));
+  await page.getByRole('button', { name: 'Tisch anlegen' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }
 

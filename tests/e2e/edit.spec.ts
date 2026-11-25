@@ -27,8 +27,8 @@ async function createTable(page: Page, ...names: string[]): Promise<void> {
   for (const name of names) {
     await editor.getByRole('button', { name, exact: true }).click();
   }
-  await editor.getByLabel('Gruppenname').fill(tableName(names));
-  await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+  await editor.getByLabel('Name des Tisches').fill(tableName(names));
+  await page.getByRole('button', { name: 'Tisch anlegen' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }
 
@@ -137,7 +137,7 @@ test.describe('US-VW-02 Edit a table', () => {
     ).toBeVisible();
     await expect(editor.getByRole('heading', { name: 'Wer spielt mit?' })).toHaveCount(0);
     // AK-1 and AK-6: new name, Catan excluded, so the Catan colours go.
-    await editor.getByLabel('Gruppenname').fill('Spieleabend');
+    await editor.getByLabel('Name des Tisches').fill('Spieleabend');
     await editor.getByRole('switch', { name: /Catan ausschließen/ }).click();
     await expect(editor.getByRole('group', { name: /^Catan-Farbe/ })).toHaveCount(0);
     await editor.getByRole('button', { name: 'Änderungen speichern' }).click();
@@ -163,12 +163,15 @@ test.describe('US-VW-02 Edit a table', () => {
 
     await page.getByRole('link', { name: 'Bearbeiten' }).click();
     const editor = page.getByRole('dialog', { name: 'Tisch bearbeiten' });
-    await editor.getByLabel('Gruppenname').fill('anna & clara');
+    await editor.getByLabel('Name des Tisches').fill('anna & clara');
 
     await expect(editor.getByRole('alert')).toContainText(
       'Es gibt bereits einen Tisch namens „anna & clara“.',
     );
-    await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+    await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   test('AK-3: Catan is blocked for five persons', async ({ page }) => {
@@ -190,7 +193,7 @@ test.describe('US-VW-02 Edit a table', () => {
     await createTable(page, 'Anna', 'Ben');
     await openTable(page, 'Anna & Ben');
     await page.getByRole('link', { name: 'Bearbeiten' }).click();
-    await page.getByLabel('Gruppenname').fill('Zu zweit');
+    await page.getByLabel('Name des Tisches').fill('Zu zweit');
 
     await page.goBack();
     await page.getByRole('button', { name: 'Verwerfen' }).click();

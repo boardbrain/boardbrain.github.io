@@ -133,6 +133,16 @@
   font-weight: 700;
 }
 
+/* Something is still missing: the button only looks disabled, a tap lights up what (nudge). */
+.looksOff {
+  opacity: 0.45;
+}
+
+/* The bench lights up in a rounded frame when persons are missing. */
+.need {
+  border-radius: 12px;
+}
+
 /* Editing (design I1-F): instead of the bench a note that the members stay fixed. */
 .lockNote {
   display: flex;

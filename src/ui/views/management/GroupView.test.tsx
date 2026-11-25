@@ -120,18 +120,21 @@ describe('US-VW-02 Edit a table (table page)', () => {
     await openEditor();
 
     const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });
-    expect(within(editor).getByLabelText('Gruppenname')).toHaveValue('Freitagsrunde');
+    expect(within(editor).getByLabelText('Name des Tisches')).toHaveValue('Freitagsrunde');
     expect(within(editor).getByText(/Wer am Tisch sitzt, bleibt fest/)).toBeInTheDocument();
     expect(within(editor).queryByRole('heading', { name: 'Wer spielt mit?' })).toBeNull();
-    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   it('AK-1: saves a new name and colours and closes the editor', async () => {
     const { user, db } = await openEditor();
     const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });
 
-    await user.clear(within(editor).getByLabelText('Gruppenname'));
-    await user.type(within(editor).getByLabelText('Gruppenname'), 'Zu zweit');
+    await user.clear(within(editor).getByLabelText('Name des Tisches'));
+    await user.type(within(editor).getByLabelText('Name des Tisches'), 'Zu zweit');
     await user.click(within(editor).getByRole('button', { name: 'Gelb' }));
     await user.click(within(editor).getByRole('button', { name: 'Änderungen speichern' }));
 
@@ -163,16 +166,19 @@ describe('US-VW-02 Edit a table (table page)', () => {
     const { user } = await openEditor();
     const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });
 
-    await user.clear(within(editor).getByLabelText('Gruppenname'));
+    await user.clear(within(editor).getByLabelText('Name des Tisches'));
 
     expect(within(editor).getByRole('alert')).toHaveTextContent('Bitte gib einen Namen ein.');
-    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   it('closing with unsaved changes asks first', async () => {
     const { user } = await openEditor();
     const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });
-    await user.type(within(editor).getByLabelText('Gruppenname'), '!');
+    await user.type(within(editor).getByLabelText('Name des Tisches'), '!');
 
     await user.click(within(editor).getByRole('button', { name: 'Schließen' }));
 
@@ -216,7 +222,7 @@ describe('US-VW-02 AK-5 The game of a table in a match (design I2-D, S1)', () =>
     expect(allGames).toBeDisabled();
     expect(within(editor).getByRole('switch', { name: /Catan ausschließen/ })).toBeDisabled();
     // Name and colours stay changeable during the match.
-    expect(within(editor).getByLabelText('Gruppenname')).toBeEnabled();
+    expect(within(editor).getByLabelText('Name des Tisches')).toBeEnabled();
 
     await user.click(within(editor).getByRole('button', { name: 'Partie beenden' }));
     await user.click(
@@ -242,18 +248,24 @@ describe('US-VW-02 AK-1 Unique table names when editing', () => {
     ]);
     await user.click(await screen.findByRole('link', { name: 'Bearbeiten' }));
     const editor = await screen.findByRole('dialog', { name: 'Tisch bearbeiten' });
-    const field = within(editor).getByLabelText('Gruppenname');
+    const field = within(editor).getByLabelText('Name des Tisches');
 
     await user.clear(field);
     await user.type(field, 'familie');
     expect(within(editor).getByRole('alert')).toHaveTextContent(
       'Es gibt bereits einen Tisch namens „familie“.',
     );
-    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
 
     await user.clear(field);
     await user.type(field, 'FREITAGSRUNDE');
     expect(within(editor).queryByRole('alert')).not.toBeInTheDocument();
-    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toBeEnabled();
+    expect(within(editor).getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'false',
+    );
   });
 });

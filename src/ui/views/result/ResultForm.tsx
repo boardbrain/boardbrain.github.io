@@ -1,4 +1,4 @@
-import { animate } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import { useRef, useState, useTransition } from 'react';
 import type { ResultDraft } from '@/app/services/resultService';
 import {
@@ -24,6 +24,7 @@ import { Notice } from '@/ui/components/Notice';
 import { PressableButton } from '@/ui/components/Pressable';
 import { Unfold } from '@/ui/components/Unfold';
 import { cx } from '@/ui/components/classNames';
+import { nudgeMissing } from '@/ui/components/nudge';
 import { MatchDialog } from '@/ui/views/match/MatchDialog';
 import shared from '@/ui/views/match/Match.module.css';
 import options from '@/ui/views/match/OptionsView.module.css';
@@ -55,7 +56,6 @@ const PAD_SIZE = 18;
 const WHOLE_NUMBER = /^-?\d+$/u;
 const INFO_SIZE = 18;
 const MINUTES_PER_HOUR = 60;
-const NUDGE_SECONDS = 0.9;
 
 /**
  * What is said after storing (design I3-B R3): who won, game and table.
@@ -100,21 +100,6 @@ function startOf(
   return { way, byWay: { ...empty, [way]: entries } };
 }
 
-// Lights up what is missing once (design I3-B E6): no red, no text.
-function nudge(root: HTMLElement | null): void {
-  if (root === null) {
-    return;
-  }
-  const gold = getComputedStyle(root).getPropertyValue('--color-accent-text').trim();
-  for (const element of root.querySelectorAll('[data-need]')) {
-    void animate(
-      element,
-      { boxShadow: [`0 0 0 0px ${gold}00`, `0 0 0 3px ${gold}cc`, `0 0 0 0px ${gold}00`] },
-      { duration: NUDGE_SECONDS, ease: 'easeInOut' },
-    );
-  }
-}
-
 /**
  * The result form (US-ER-01, US-ER-02, US-ER-06, US-ER-03 AK-1, design I3-B E6, A2, G3, M3, D1,
  * C3, H3, LB1): the result first, then when, for Catan the edition, mode, duration and colours,
@@ -149,6 +134,7 @@ export function ResultForm({
   const isCatan = rules.hasSingleWinner;
   const hasBothWays = rules.scoring !== null && rules.supportsRanking;
   const formRef = useRef<HTMLFormElement>(null);
+  const isReduced = useReducedMotion() === true;
   const durationRef = useRef<HTMLInputElement>(null);
   const [start] = useState(() => startOf(draft, isEditing || values.rounds !== undefined));
   const [way, setWay] = useState<Way>(start.way);
@@ -306,7 +292,7 @@ export function ResultForm({
       onSubmit={(event) => {
         event.preventDefault();
         if (!canSave) {
-          nudge(formRef.current);
+          nudgeMissing(formRef.current, isReduced);
           return;
         }
         if (onUnchanged !== undefined && isSameInput(input(), values)) {

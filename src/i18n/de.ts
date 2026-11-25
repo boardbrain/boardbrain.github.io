@@ -157,7 +157,7 @@ export const de = {
     platzCatan: '{name}, {farbe}, Catan {catan}',
     tischLeer: 'Wer sitzt am Tisch?',
     farbenLeer: 'Hol Personen an den Tisch, dann bekommt jede automatisch eine Farbe.',
-    name: 'Gruppenname',
+    name: 'Name des Tisches',
     namePlatzhalter: 'z. B. Freitagsrunde',
     spiele: 'Was wird gespielt?',
     bindungGlobal: 'Alle Spiele',
@@ -184,7 +184,7 @@ export const de = {
     gleicheNamen:
       'Diese Personen heißen gleich: {namen}. An einem Tisch müssen die Namen verschieden sein.',
     fehlerSpeichern: 'Die Gruppe konnte nicht angelegt werden. Bitte prüfe deine Angaben.',
-    speichern: 'Gruppe anlegen',
+    speichern: 'Tisch anlegen',
     person: 'Person',
     personen: 'Personen',
     angelegtAm: 'angelegt am {datum}',
