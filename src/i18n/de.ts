@@ -158,7 +158,7 @@ export const de = {
     tischLeer: 'Wer sitzt am Tisch?',
     farbenLeer: 'Hol Personen an den Tisch, dann bekommt jede automatisch eine Farbe.',
     name: 'Gruppenname',
-    namenHinweis: 'Vorschlag aus den Namen – änderbar.',
+    namePlatzhalter: 'z. B. Freitagsrunde',
     spiele: 'Was wird gespielt?',
     bindungGlobal: 'Alle Spiele',
     bindungNur: 'Nur {spiel}',

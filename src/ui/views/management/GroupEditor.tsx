@@ -11,7 +11,6 @@ import {
   isBlankName,
   normalizeColors,
   setMemberColor,
-  suggestGroupName,
   type ColorScheme,
   type CustomGame,
   type GameId,
@@ -137,7 +136,8 @@ export function GroupEditor({
   const [choice, setChoice] = useState<BindingChoice>(choiceOf(group));
   const [isCatanExcluded, setIsCatanExcluded] = useState(excludesCatan(group));
   const [activeId, setActiveId] = useState<PersonId | null>(group?.members[0]?.personId ?? null);
-  // `null` while the user has not typed a name: the suggestion is shown then (US-PG-02 AK-2).
+  // `null` while the user has not typed a name: no suggestion, the field stays empty with an
+  // example, so each table gets a name of its own that is found again (US-PG-02 AK-2, K-19).
   const [typedName, setTypedName] = useState<string | null>(group?.name ?? null);
   const [hasSaveFailed, setHasSaveFailed] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
@@ -149,7 +149,7 @@ export function GroupEditor({
     return person === undefined ? [] : [person];
   });
   const scheme = schemeOf(members.length, choice, isCatanExcluded);
-  const name = typedName ?? suggestGroupName(members);
+  const name = typedName ?? '';
   const sameNamed = findSameNamedPersons(members);
   // US-PG-02 AK-3: fewer than 2 or more than 12 members cannot be saved.
   const isCountValid = members.length >= GROUP_SIZE.min && members.length <= GROUP_SIZE.max;
@@ -160,7 +160,7 @@ export function GroupEditor({
       choice !== choiceOf(group) ||
       (choice === null && isCatanExcluded !== excludesCatan(group)) ||
       !sameColors(colors, colorsOf(group)));
-  // Checked while typing, the suggested name as well (US-PG-02 AK-8, US-VW-02 AK-1).
+  // Checked while typing (US-PG-02 AK-8, US-VW-02 AK-1).
   const isNameTaken = containsName(takenNames, name);
   // A blank name is an error only once something was typed, not before members are chosen.
   const isTypedNameBlank = typedName !== null && isBlankName(typedName);
@@ -414,6 +414,7 @@ export function GroupEditor({
             id={nameId}
             type="text"
             autoComplete="off"
+            placeholder={t('gruppen.namePlatzhalter')}
             value={name}
             onChange={(event) => {
               setTypedName(event.target.value);
@@ -429,9 +430,6 @@ export function GroupEditor({
             <Notice tone="error">
               <p>{t('gruppen.gleicherName', { name: cleanName(name) })}</p>
             </Notice>
-          )}
-          {!isNameTaken && !isTypedNameBlank && group === undefined && (
-            <span className={styles.muted}>{t('gruppen.namenHinweis')}</span>
           )}
         </div>
 

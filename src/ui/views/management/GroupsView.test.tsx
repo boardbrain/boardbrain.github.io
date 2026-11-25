@@ -33,9 +33,19 @@ async function openEditor(user: User): Promise<void> {
   await user.click(button);
 }
 
-async function bring(user: User, ...names: string[]): Promise<void> {
+async function choose(user: User, ...names: string[]): Promise<void> {
   for (const name of names) {
     await user.click(await screen.findByRole('button', { name }));
+  }
+}
+
+// Brings the persons and, while the name is still empty, names the table after them: the app
+// suggests no name (US-PG-02 AK-2, K-19).
+async function bring(user: User, ...names: string[]): Promise<void> {
+  await choose(user, ...names);
+  const name = screen.getByLabelText('Gruppenname');
+  if (name instanceof HTMLInputElement && name.value === '') {
+    await user.type(name, names.join(' & '));
   }
 }
 
@@ -192,15 +202,20 @@ describe('US-VW-05 Search in the room', () => {
 });
 
 describe('US-PG-02 Bring persons to the table', () => {
-  it('AK-2: suggests the name from the members and allows changing it', async () => {
+  it('AK-2: suggests no name, the field shows an example; the typed name counts', async () => {
     const user = userEvent.setup();
-    await setUpEditor(user, 3, 'Anna', 'Ben', 'Clara');
+    const { db } = renderWithApp(<GroupsView />);
+    await addPersons(db, 3);
+    await openEditor(user);
+    await choose(user, 'Anna', 'Ben', 'Clara');
 
     const name = screen.getByLabelText('Gruppenname');
-    expect(name).toHaveValue('Anna, Ben & Clara');
-    await user.clear(name);
+    expect(name).toHaveValue('');
+    expect(name).toHaveAttribute('placeholder', 'z. B. Freitagsrunde');
+    expect(screen.getByRole('button', { name: 'Gruppe anlegen' })).toBeDisabled();
     await user.type(name, 'Freitag');
     expect(name).toHaveValue('Freitag');
+    expect(screen.getByRole('button', { name: 'Gruppe anlegen' })).toBeEnabled();
   });
 
   it('AK-2: the name is required', async () => {

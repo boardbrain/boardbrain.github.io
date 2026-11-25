@@ -21,9 +21,22 @@ async function openEditor(page: Page): Promise<void> {
   await expect(page.getByRole('dialog', { name: 'Neuer Tisch' })).toBeVisible();
 }
 
+// The app suggests no table name (US-PG-02 AK-2, K-19): the tests name a table after its members
+// as the earlier suggestion did, "Anna, Ben & Clara".
+function tableName(names: readonly string[]): string {
+  return names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} & ${names.at(-1) ?? ''}`;
+}
+
+// Brings the persons and, while the name is still empty, names the table after them.
 async function bring(page: Page, ...names: string[]): Promise<void> {
   for (const name of names) {
     await page.getByRole('dialog').getByRole('button', { name, exact: true }).click();
+  }
+  const field = page.getByLabel('Gruppenname');
+  if ((await field.inputValue()) === '') {
+    await field.fill(tableName(names));
   }
 }
 

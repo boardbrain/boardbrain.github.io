@@ -29,7 +29,6 @@ export {
   findSameNamedPersons,
   GROUP_MAX_PLAYERS_WITH_COLORS,
   GROUP_SIZE,
-  suggestGroupName,
   type BoundGame,
   type Group,
   type GroupBinding,

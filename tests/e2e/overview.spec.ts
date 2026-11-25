@@ -12,6 +12,14 @@ async function createPersons(page: Page, ...names: string[]): Promise<void> {
   }
 }
 
+// The app suggests no table name (US-PG-02 AK-2, K-19): the tests name a table after its members
+// as the earlier suggestion did, "Anna, Ben & Clara".
+function tableName(names: readonly string[]): string {
+  return names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} & ${names.at(-1) ?? ''}`;
+}
+
 async function createTable(page: Page, ...names: string[]): Promise<void> {
   await page.goto('/#/verwaltung/gruppen');
   await page.getByRole('button', { name: 'Neuer Tisch' }).first().click();
@@ -19,6 +27,7 @@ async function createTable(page: Page, ...names: string[]): Promise<void> {
   for (const name of names) {
     await editor.getByRole('button', { name, exact: true }).click();
   }
+  await editor.getByLabel('Gruppenname').fill(tableName(names));
   await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }
