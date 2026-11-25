@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import styles from './Logo.module.css';
+import styles from './BrainMark.module.css';
 
 // Design D-3 "Eine Kontur": one brain outline, symmetric to x = 24 in a 48 × 48 box.
 const OUTLINE =
@@ -21,15 +21,15 @@ const SQUARES = Array.from({ length: COLUMNS }, (_, column) =>
     })),
 ).flat();
 
-type LogoProps = {
+type BrainMarkProps = {
   readonly size: number;
 };
 
 /**
- * Logo of the app: a brain whose left half is a checkerboard (design D-3). Decorative; the app
- * name stands next to it as text.
+ * The brain whose left half is a checkerboard (design D-3), in the accent colour. Decorative. It
+ * sits on the cards of the logo (K-20) and in the medallion of the card back of a match.
  */
-export function Logo({ size }: LogoProps): React.JSX.Element {
+export function BrainMark({ size }: BrainMarkProps): React.JSX.Element {
   const id = useId();
   const outlineClip = `${id}-outline`;
   const leftClip = `${id}-left`;

@@ -1,0 +1,33 @@
+/* Design K-20 L2: the cards of the app icon (scripts/generate-icons.mjs) in the colours of the
+   current design. */
+.logo {
+  flex: none;
+  overflow: visible;
+}
+
+.faceTop {
+  stop-color: var(--color-surface-overlay);
+}
+
+.faceBottom {
+  stop-color: var(--color-surface-raised);
+}
+
+.shadow {
+  flood-color: var(--color-shadow);
+}
+
+.back {
+  fill: var(--color-surface-raised);
+  stroke: var(--color-accent-text);
+  stroke-width: 1.1;
+}
+
+.front {
+  stroke: var(--color-accent-text);
+  stroke-width: 1.9;
+}
+
+.pip {
+  fill: var(--color-accent-text);
+}

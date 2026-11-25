@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { Logo } from '@/ui/components/Logo';
+import { BrainMark } from '@/ui/components/BrainMark';
 import styles from './CardBack.module.css';
 
 const CORNERS = [
@@ -59,7 +59,7 @@ export function CardBack(): React.JSX.Element {
       <circle cx="50" cy="74" r="27.5" className={styles.ring} />
       <circle cx="50" cy="74" r="23" fill={`url(#${medal})`} className={styles.medal} />
       <svg x="33" y="57" width="34" height="34" viewBox="0 0 34 34" className={styles.logo}>
-        <Logo size={34} />
+        <BrainMark size={34} />
       </svg>
     </svg>
   );
