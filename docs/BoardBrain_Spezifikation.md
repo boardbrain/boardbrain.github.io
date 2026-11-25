@@ -336,8 +336,8 @@ Alle Kennzahlen beziehen sich auf eine Gruppe und den aktuell gewählten Filter 
 | Durchschnittliche Spieldauer | Gruppe | Mittelwert der Spieldauer über alle Partien mit erfasster Dauer, in Minuten; nur bei Catan; ohne Daten „–“ |
 | Platzverteilung | Person | Wie oft die Person Platz 1, 2, 3 usw. belegt hat und wie oft sie Letzter war, über alle Partien mit Plätzen; eine Partie als Letzter zählt nur dort, nicht zusätzlich bei ihrer Platzzahl (E-58) *(neu in 0.21, geändert in 0.24)* |
 | Letzter | Person | Wie oft die Person Letzter war, also den größten Platz einer Partie hatte, über alle Partien mit Plätzen; stehen alle auf Platz 1, ist niemand Letzter (bis 0.23 „Rote Laterne“) *(neu in 0.21, umbenannt in 0.24)* |
-| Paradespiel | Person | Das Spiel mit der höchsten Siegquote der Person; nur im Filter „Alle Spiele“, nur über Spiele mit mindestens 5 Partien und nur mit mindestens einem Sieg; bei Gleichstand das Spiel mit mehr Partien, dann nach Namen *(neu in 0.21, ergänzt in 0.24)* |
-| Partien je Spiel | Gruppe | Anzahl der Partien je Spiel, das meistgespielte zuerst; nur im Filter „Alle Spiele“ *(neu in 0.21)* |
+| Paradespiel | Person | Das Spiel mit der höchsten Siegquote der Person; nur im Filter „Alle Spiele“, nur über Spiele mit mindestens 5 Partien und nur mit mindestens einem Sieg; bei Gleichstand das Spiel mit mehr Partien, dann das zuerst gespielte *(neu in 0.21, ergänzt in 0.24)* |
+| Partien je Spiel | Gruppe | Anzahl der Partien je Spiel, das meistgespielte zuerst, bei Gleichstand das zuerst gespielte; nur im Filter „Alle Spiele“ *(neu in 0.21, ergänzt in 0.24)* |
 
 Niederlagen und Unentschieden beenden eine Siegesserie. Mit einem Sieg endet die Durststrecke; ist die aktuelle Siegesserie größer als 0, ist die aktuelle Durststrecke 0.
 
