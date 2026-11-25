@@ -49,6 +49,14 @@
   flex: 0 1 9cqh;
 }
 
+/* Design K-20 S2: on a phone and in landscape (tablet, PC) the content sits lower, closer to the
+   card hand; sizes stay the same. Tablets in portrait keep the gap. */
+@media (width < 37.5rem), (orientation: landscape) {
+  .spacerLow {
+    flex-basis: 3cqh;
+  }
+}
+
 .cards {
   display: grid;
   gap: 4px;

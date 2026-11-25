@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>BoardBrain – K-20 final: Start und Kartenhand</title>
+    <style>
+/* Shared look of the K-20 preview round: tokens of the design "Holz" (src/ui/styles/tokens.css). */
+:root {
+  --bg: #231d18;
+  --raised: #2d2620;
+  --overlay: #383028;
+  --border: #4b4036;
+  --text: #f4ece1;
+  --muted: #b8ab9b;
+  --accent-text: #f5be5b;
+  --accent: #c2570c;
+  --shadow: #0000008c;
+  --backdrop: #000000b3;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+}
+body {
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+  line-height: 1.5;
+  background: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%) fixed, var(--bg);
+}
+.top {
+  max-width: 46rem;
+  padding: 16px 16px 10px;
+  margin: 0 auto;
+}
+.step {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.step a {
+  color: var(--muted);
+}
+h1 {
+  margin: 2px 0 4px;
+  font-size: 1.3rem;
+}
+.question {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+.chips button {
+  min-height: 36px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.chips button[aria-pressed='true'] {
+  font-weight: 700;
+  color: var(--accent-text);
+  border-color: var(--accent-text);
+}
+.chips.small button {
+  min-height: 30px;
+  font-size: 0.8rem;
+}
+.label {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.desc {
+  min-height: 3em;
+  padding: 10px 12px;
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.desc b {
+  color: var(--accent-text);
+}
+.nav {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 12px 0 0;
+}
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 16px;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--overlay);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.nav a.next {
+  font-weight: 700;
+  color: var(--accent-text);
+  border-color: var(--accent-text);
+}
+.hint {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Device stage with the real app in a frame. */
+.stage {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 24px;
+}
+.frameBox {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+.frameBox.full {
+  border: 0;
+  border-radius: 0;
+}
+.frameBox iframe {
+  display: block;
+  background: var(--bg);
+  border: 0;
+  transform-origin: 0 0;
+}
+    </style>
+    <style>
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .controls button {
+        min-height: 40px;
+        padding: 6px 14px;
+        font: inherit;
+        font-size: 0.88rem;
+        color: var(--text);
+        cursor: pointer;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .controls button.slow[aria-pressed='true'] {
+        color: var(--accent-text);
+        border-color: var(--accent-text);
+      }
+
+      /* ---------- phone ---------- */
+      .phone {
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(ellipse at 50% -10%, #4a3420 0%, transparent 60%), var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+      }
+      .phone.full {
+        border: 0;
+        border-radius: 0;
+      }
+      .content {
+        position: absolute;
+        inset: 0 0 var(--hand) 0;
+        display: flex;
+        flex-direction: column;
+        padding: 14px 16px 0;
+        overflow: hidden;
+      }
+      .brand {
+        display: inline-flex;
+        gap: 12px;
+        align-items: center;
+        align-self: center;
+        margin: 0;
+        font-size: 1.45rem;
+        font-weight: 700;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .row {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        min-height: 64px;
+        padding: 6px 18px;
+        margin-bottom: 14px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+      .row.big {
+        min-height: 104px;
+        border-radius: 16px;
+      }
+      .row small {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .mini {
+        width: 54px;
+        height: 40px;
+        background: repeating-linear-gradient(180deg, #2b2420 0 9px, #3a312a 9px 10px);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+      }
+      .back {
+        width: 54px;
+        height: 74px;
+        background:
+          repeating-linear-gradient(45deg, transparent 0 5px, var(--border) 5px 6px),
+          repeating-linear-gradient(-45deg, transparent 0 5px, var(--border) 5px 6px),
+          var(--raised);
+        border: 2px solid var(--overlay);
+        border-radius: 8px;
+        box-shadow: inset 0 0 0 3px var(--raised), inset 0 0 0 4px var(--accent-text);
+      }
+      .h2 {
+        margin: 0 0 4px;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      .fan {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 9vh;
+      }
+      .play {
+        display: grid;
+        place-items: center;
+        align-content: center;
+        width: min(31%, 120px);
+        aspect-ratio: 5 / 7;
+        margin: 0 -2%;
+        font-weight: 700;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 6px 16px var(--shadow);
+      }
+      .play svg {
+        color: var(--accent-text);
+      }
+      .play:nth-child(1) {
+        transform: rotate(-7deg) translateY(8%);
+      }
+      .play:nth-child(2) {
+        z-index: 1;
+      }
+      .play:nth-child(3) {
+        transform: rotate(7deg) translateY(8%);
+      }
+      .pageTitle {
+        margin: 6px 0 12px;
+        font-size: 1.4rem;
+      }
+      .tabs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      .tabs span {
+        padding: 6px 14px;
+        font-size: 0.9rem;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+      .tabs span:first-child {
+        color: var(--accent-text);
+        border-color: var(--accent-text);
+      }
+      .entry {
+        padding: 14px 16px;
+        margin-bottom: 8px;
+        background: var(--raised);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+
+      /* ---------- hand, as src/ui/components/HandNavigation.module.css ---------- */
+      .backdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: var(--backdrop);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .hand {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 3;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        height: var(--hand);
+        pointer-events: none;
+        background: linear-gradient(180deg, transparent, var(--bg) var(--fade));
+      }
+      .list {
+        display: flex;
+        justify-content: center;
+      }
+      .item {
+        position: relative;
+        display: flex;
+        margin: 0 -8px;
+        pointer-events: auto;
+        transform-origin: 50% 145.6px;
+        will-change: transform;
+      }
+      .item.active {
+        z-index: 2;
+      }
+      .card {
+        position: relative;
+        width: 86px;
+        height: 104px;
+        font-size: 0.7rem;
+        color: var(--text);
+        cursor: pointer;
+        background: var(--overlay);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: 0 -4px 12px var(--shadow);
+      }
+      .active .card {
+        font-weight: 700;
+        color: var(--accent-text);
+        border-color: var(--accent-text);
+      }
+      /* Face of today: icon and name in the middle; folded symbol at the top. */
+      .face {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        display: grid;
+        gap: 2px;
+        place-items: center;
+        height: 100%;
+        align-content: center;
+      }
+      .face span,
+      .cardLabel {
+        line-height: 1.5;
+      }
+      .smallIcon,
+      .glideIcon {
+        position: absolute;
+        right: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        transform-origin: 50% 0;
+      }
+      .cardLabel {
+        position: absolute;
+        right: 0;
+        left: 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <p class="step">K-20 Feinschliff Start und Kartenhand · final, verbindlich (Product Owner 25.11.2026)</p>
+      <h1>Start und Kartenhand</h1>
+      <div class="desc">
+        <p><b>Logo L2</b> – oben auf dem Start zwei aufgefächerte Karten wie das App-Symbol (hintere −8°, vordere +4° um den Punkt 24/42 im 48er-Raster, vordere mit Goldrand 1,9, zwei Sechsecken und dem Gehirn 24 breit), 60 px hoch, daneben „BoardBrain“. Die Kartenrückseite der Partie behält das Gehirn allein.</p>
+        <p><b>Browser-Tab T2</b> – das App-Symbol als abgerundete Kachel (Radius 11 von 48, Rand in Randfarbe); die Abnahme-App lila.</p>
+        <p><b>Inhalt tiefer S2</b> – auf dem Handy (unter 600 px) und quer ist die Lücke zwischen Kartenfächer und Kartenhand 3 % statt 9 % der Höhe; Größen unverändert, iPad hochkant wie bisher. Start sonst nach <code>i3c2-score-pad-final-preview.html</code>.</p>
+        <p><b>Kartenhand F2</b> – jede Karte hat ein Symbol: Beim Einfahren gleitet es mit der Karte nach oben in die Mitte des sichtbaren Teils und schrumpft von 22 auf 16 px, beim Ausfahren zurück; nur der Name blendet aus (0,22 s) und beim Ausfahren 0,11 s später wieder ein. Feder 200/26 ohne Nachschwingen für Karten und Symbol, auch auf Tablet und PC. Maße der Hand nach <code>k3-card-hand-final-preview.html</code>.</p>
+      </div>
+      <p class="label">Ausprobieren</p>
+      <div class="chips" id="motion" hidden></div>
+      <div class="controls">
+        <button type="button" id="toAdmin">Zur Verwaltung</button>
+        <button type="button" id="toStart">Zum Start</button>
+        <button type="button" id="hold">Lange drücken</button>
+        <button type="button" id="loop">Hin und zurück</button>
+        <button type="button" class="slow" id="slow" aria-pressed="false">Zeitlupe ×4</button>
+      </div>
+      <p class="label">Gerät</p>
+      <div class="chips small" id="device"></div>
+    </div>
+    <div class="stage"><div class="phone" id="phone"></div></div>
+    <script type="module">
+// Shared helpers of the K-20 preview round: remembered choices, chips and the real app in a frame.
+const STORE = 'k20.final';
+
+function choices() {
+  try {
+    return JSON.parse(localStorage.getItem(STORE) ?? '{}');
+  } catch {
+    return {};
+  }
+}
+
+function choose(key, value) {
+  const all = choices();
+  all[key] = value;
+  localStorage.setItem(STORE, JSON.stringify(all));
+}
+
+// Chips for one question; `options` is [[id, label, description], ...].
+function chips(container, key, options, fallback, onChange) {
+  const desc = document.querySelector(`[data-desc="${key}"]`);
+  let current = choices()[key] ?? fallback;
+  if (!options.some(([id]) => id === current)) current = fallback;
+  function render() {
+    container.innerHTML = '';
+    for (const [id, label] of options) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.setAttribute('aria-pressed', String(id === current));
+      button.onclick = () => {
+        current = id;
+        choose(key, id);
+        render();
+        onChange(id);
+      };
+      container.append(button);
+    }
+    const option = options.find(([id]) => id === current);
+    if (desc && option) desc.innerHTML = `<b>${option[1]}</b> – ${option[2]}`;
+  }
+  render();
+  onChange(current);
+  return () => current;
+}
+
+// Plain chips without remembering (device, speed).
+function toggles(container, options, initial, onChange) {
+  let current = initial;
+  function render() {
+    container.innerHTML = '';
+    for (const [id, label] of options) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.setAttribute('aria-pressed', String(id === current));
+      button.onclick = () => {
+        current = id;
+        render();
+        onChange(id);
+      };
+      container.append(button);
+    }
+  }
+  render();
+  onChange(current);
+}
+
+function isTouch() {
+  return matchMedia('(pointer: coarse)').matches;
+}
+
+
+// Logo variants of K-20, built like scripts/generate-icons.mjs (app icon D8) and Logo.tsx (D-3).
+const C = {
+  surface: '#231d18',
+  raised: '#2d2620',
+  overlay: '#383028',
+  accent: '#f5be5b',
+  shadow: '#0000008c',
+  glow: '#4a3420',
+};
+const OUTLINE =
+  'M24 8.5C21 5 14 5.5 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42.5 22 40.5 23 41 23.5 41 24 40.5 24.5 41 25 41 26 40.5 30 42.5 35 41 36 37 40 38 43 33 41 29 45 27 45 20 41 18 43 15 41 10 36 10 34 5.5 27 5 24 8.5Z';
+const FOLDS = 'M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6';
+const SQUARE = 5.4;
+let uid = 0;
+
+function brain(width, cx, cy, color, id, strokeScale = 1) {
+  const scale = width / 48;
+  let squares = '';
+  for (let column = 0; column < 5; column += 1) {
+    for (let row = -5; row < 5; row += 1) {
+      if ((((column + row) % 2) + 2) % 2 === 0) {
+        squares += `<rect x="${(24 - SQUARE * (column + 1)).toFixed(2)}" y="${(24 + SQUARE * row).toFixed(2)}" width="${SQUARE}" height="${SQUARE}"/>`;
+      }
+    }
+  }
+  return `<g transform="translate(${cx - 24 * scale} ${cy - 24 * scale}) scale(${scale})">
+    <clipPath id="o${id}"><path d="${OUTLINE}"/></clipPath>
+    <clipPath id="l${id}"><rect x="0" y="0" width="24" height="48"/></clipPath>
+    <g clip-path="url(#o${id})"><g clip-path="url(#l${id})" fill="${color}">${squares}</g></g>
+    <g fill="none" stroke="${color}" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke-width="${2.2 * strokeScale}" d="${FOLDS}"/><path stroke-width="${2.6 * strokeScale}" d="${OUTLINE}"/><path stroke-width="${2.6 * strokeScale}" d="M24 8.5V40.5"/>
+    </g>
+  </g>`;
+}
+
+function hexagon(cx, cy, radius) {
+  return Array.from({ length: 6 }, (_, index) => {
+    const radians = ((60 * index - 90) * Math.PI) / 180;
+    return `${(cx + radius * Math.cos(radians)).toFixed(2)},${(cy + radius * Math.sin(radians)).toFixed(2)}`;
+  }).join(' ');
+}
+
+function defs(id) {
+  return `<defs>
+    <linearGradient id="f${id}" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="${C.overlay}"/><stop offset="1" stop-color="${C.raised}"/></linearGradient>
+    <radialGradient id="b${id}" cx="0.5" cy="0.05" r="0.9"><stop offset="0" stop-color="${C.glow}"/><stop offset="1" stop-color="${C.surface}"/></radialGradient>
+    <filter id="s${id}" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="${C.shadow}"/></filter>
+  </defs>`;
+}
+
+function backCard(id, x, y, w, h) {
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w * 0.13}" fill="${C.raised}" stroke="${C.accent}" stroke-width="1.1" filter="url(#s${id})"/>`;
+}
+
+function frontCard(id, x, y, w, h, { pips = true, brainWidth = 24 } = {}) {
+  const pip = w * 0.07;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w * 0.13}" fill="url(#f${id})" stroke="${C.accent}" stroke-width="1.9" filter="url(#s${id})"/>
+    ${pips ? `<polygon points="${hexagon(x + w * 0.19, y + h * 0.13, pip)}" fill="${C.accent}"/><polygon points="${hexagon(x + w * 0.81, y + h * 0.87, pip)}" fill="${C.accent}"/>` : ''}
+    ${brain(brainWidth, x + w / 2, y + h / 2, C.accent, id)}`;
+}
+
+// Each variant: [id, label, description, svg(height)].
+const LOGOS = [
+  [
+    'L0',
+    'L0 heute',
+    'Das Gehirn allein (D-3), 44 px. Zum Vergleich.',
+    (h) => {
+      const id = ++uid;
+      return `<svg width="${h}" height="${h}" viewBox="0 0 48 48" aria-hidden="true">${brain(48, 24, 24, C.accent, id, 1)}</svg>`;
+    },
+    44,
+  ],
+  [
+    'L1',
+    'L1 eine Karte',
+    'Die vordere Karte des App-Symbols, aufrecht: Goldrand, zwei Sechsecke, Gehirn in der Mitte.',
+    (h) => {
+      const id = ++uid;
+      return `<svg height="${h}" width="${(h * 32) / 44}" viewBox="8 2 32 44" aria-hidden="true">${defs(id)}${frontCard(id, 10, 4, 28, 40)}</svg>`;
+    },
+    56,
+  ],
+  [
+    'L2',
+    'L2 zwei Karten',
+    'Genau wie das App-Symbol auf dem Homescreen: zwei aufgefächerte Karten, nur ohne die eckige Kachel.',
+    (h) => {
+      const id = ++uid;
+      return `<svg height="${h}" width="${(h * 40) / 46}" viewBox="4 0 40 46" aria-hidden="true">${defs(id)}
+        <g transform="rotate(-8 24 42)">${backCard(id, 9.5, 3.5, 28, 39)}</g>
+        <g transform="rotate(4 24 42)">${frontCard(id, 11, 4, 28, 40)}</g></svg>`;
+    },
+    60,
+  ],
+  [
+    'L3',
+    'L3 Karte schräg',
+    'Eine Karte, leicht gedreht wie die vordere Karte im App-Symbol; wirkt lockerer als L1.',
+    (h) => {
+      const id = ++uid;
+      return `<svg height="${h}" width="${(h * 36) / 46}" viewBox="6 1 36 46" aria-hidden="true">${defs(id)}
+        <g transform="rotate(6 24 24)">${frontCard(id, 10, 4, 28, 40)}</g></svg>`;
+    },
+    58,
+  ],
+  [
+    'L4',
+    'L4 App-Kachel',
+    'Das App-Symbol komplett mit seiner abgerundeten Kachel, wie auf dem Homescreen.',
+    (h) => {
+      const id = ++uid;
+      return `<svg height="${h}" width="${h}" viewBox="0 0 48 48" aria-hidden="true">${defs(id)}
+        <clipPath id="t${id}"><rect width="48" height="48" rx="11"/></clipPath>
+        <g clip-path="url(#t${id})"><rect width="48" height="48" fill="url(#b${id})"/>
+        <g transform="rotate(-8 24 42)">${backCard(id, 9.5, 3.5, 28, 39)}</g>
+        <g transform="rotate(4 24 42)">${frontCard(id, 11, 4, 28, 40)}</g></g>
+        <rect x="0.5" y="0.5" width="47" height="47" rx="10.5" fill="none" stroke="#4b4036"/></svg>`;
+    },
+    52,
+  ],
+];
+
+// Favicon variants: [id, label, description, svg(size)]. In the browser tab there is no
+// background of the app, so the card needs its own face.
+const TABS = [
+  [
+    'T0',
+    'T0 Gehirn bleibt',
+    'Der Browser-Tab zeigt weiter nur das Gehirn (heute).',
+    (s) => LOGOS[0][3](s),
+  ],
+  [
+    'T1',
+    'T1 eine Karte',
+    'Wie L1: eine aufrechte Karte mit Gehirn. Bei 16 px sind die Sechsecke weg, damit das Gehirn größer wird.',
+    (s) => {
+      const id = ++uid;
+      return `<svg width="${s}" height="${s}" viewBox="8 2 32 44" aria-hidden="true">${defs(id)}
+        <rect x="10" y="4" width="28" height="40" rx="3.6" fill="url(#f${id})" stroke="${C.accent}" stroke-width="2.6"/>
+        ${brain(26, 24, 24, C.accent, id, 1.4)}</svg>`;
+    },
+  ],
+  [
+    'T2',
+    'T2 App-Kachel',
+    'Wie das App-Symbol mit Kachel (L4). Am PC sieht der Tab dann aus wie die installierte App.',
+    (s) => LOGOS[4][3](s),
+  ],
+];
+
+
+      // ---------- variants ----------
+      const VARIANTS = [
+        ['F2', 'F2 gleitet, weicher', 'Wie F1, dazu eine weichere Feder ohne Nachschwingen (200/26): die Karten gleiten statt zu schnappen, etwa 0,4 s.', { k: 200, c: 26, fade: 0.22, mode: 'glide', stagger: 0 }],
+      ];
+
+      // ---------- geometry of src/ui/components/cardHand.ts ----------
+      const CARD_HEIGHT = 104;
+      const PIVOT = CARD_HEIGHT * 1.4;
+      const ICON = 22;
+      const SMALL = 16;
+      const LABEL_LINE = 0.7 * 16 * 1.5;
+      const FACE_TOP = (CARD_HEIGHT - (ICON + 2 + LABEL_LINE)) / 2;
+      const LABEL_TOP = FACE_TOP + ICON + 2;
+      function pose(i, n, active, state) {
+        if (state !== 'folded') return { r: (i - (n - 1) / 2) * 9, y: active ? 4 : 16 };
+        return { r: (i - (n - 1) / 2) * 3, y: CARD_HEIGHT - (active ? 30 : 25) };
+      }
+      function foldedTop(i, n, active) {
+        const { r, y } = pose(i, n, active, 'folded');
+        const visible = CARD_HEIGHT - PIVOT + (PIVOT - y) * Math.cos((r * Math.PI) / 180);
+        return Math.max(1, (visible - SMALL) / 2);
+      }
+
+      // ---------- tiny spring and tween engine (like Motion: velocity is kept on a new target) ----------
+      let speed = 1;
+      class Spring {
+        constructor(value) {
+          this.value = value;
+          this.v = 0;
+          this.target = value;
+          this.k = 420;
+          this.c = 32;
+          this.wait = 0;
+        }
+        to(target, k, c, delay = 0) {
+          if (target === this.target) return;
+          this.target = target;
+          this.k = k;
+          this.c = c;
+          this.wait = delay;
+        }
+        set(value) {
+          this.value = this.target = value;
+          this.v = 0;
+        }
+        step(dt) {
+          if (this.wait > 0) {
+            this.wait -= dt;
+            return true;
+          }
+          const steps = Math.ceil(dt / 0.002);
+          const h = dt / steps;
+          for (let s = 0; s < steps; s += 1) {
+            const a = -this.k * (this.value - this.target) - this.c * this.v;
+            this.v += a * h;
+            this.value += this.v * h;
+          }
+          if (Math.abs(this.v) < 0.01 && Math.abs(this.value - this.target) < 0.01) {
+            this.value = this.target;
+            this.v = 0;
+            return false;
+          }
+          return true;
+        }
+      }
+      class Tween {
+        constructor(value) {
+          this.value = value;
+          this.from = value;
+          this.target = value;
+          this.t = 1;
+          this.d = 0.2;
+          this.wait = 0;
+        }
+        to(target, d, delay = 0) {
+          if (target === this.target) return;
+          this.from = this.value;
+          this.target = target;
+          this.t = 0;
+          this.d = d;
+          this.wait = delay;
+        }
+        set(value) {
+          this.value = this.from = this.target = value;
+          this.t = 1;
+        }
+        step(dt) {
+          if (this.wait > 0) {
+            this.wait -= dt;
+            return true;
+          }
+          if (this.t >= 1) return false;
+          this.t = Math.min(1, this.t + dt / this.d);
+          const e = 1 - (1 - this.t) ** 2;
+          this.value = this.from + (this.target - this.from) * e;
+          return this.t < 1;
+        }
+      }
+
+      // ---------- app state ----------
+      const AREAS = [
+        { key: 'start', label: 'Start', icon: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" />' },
+        { key: 'admin', label: 'Verwaltung', icon: '<path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />' },
+      ];
+      const svgIcon = (body, size) =>
+        `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+      let page = 'start';
+      let open = false;
+      let variant = VARIANTS[0][3];
+      const phone = document.getElementById('phone');
+      const logo = LOGOS.find(([id]) => id === 'L2');
+
+      function pageHtml() {
+        if (page === 'start') {
+          return `<p class="brand">${logo[3](logo[4])}BoardBrain</p><div class="spacer"></div>
+            <div class="row"><span class="mini"></span><span><b>Notizblock</b><small>Punkte live mitschreiben</small></span></div>
+            <div class="row big"><span class="back"></span><b style="margin-left:8px">Partie</b></div>
+            <p class="h2">Karten</p>
+            <div class="fan"><div class="play">Personen</div><div class="play">Tische</div><div class="play">Spiele</div></div>`;
+        }
+        return `<h2 class="pageTitle">Verwaltung</h2><div class="tabs"><span>Spiele</span><span>Personen</span><span>Tische</span></div>
+          ${['Catan', 'Carcassonne', 'Azul', 'Wingspan', 'Kniffel', 'Skat'].map((n) => `<div class="entry">${n}</div>`).join('')}`;
+      }
+
+      phone.innerHTML = `<div class="content" id="content"></div><div class="backdrop" id="backdrop"></div>
+        <nav class="hand" id="hand"><div class="list" id="list"></div></nav>`;
+      const content = document.getElementById('content');
+      const backdrop = document.getElementById('backdrop');
+      const list = document.getElementById('list');
+      const cards = AREAS.map((area, i) => {
+        const li = document.createElement('div');
+        li.className = 'item';
+        li.innerHTML = `<div class="card" role="button" tabindex="0" aria-label="${area.label}">
+          <div class="face">${svgIcon(area.icon, ICON)}<span>${area.label}</span></div>
+          <div class="smallIcon">${svgIcon(area.icon, SMALL)}</div>
+          <div class="glideIcon">${svgIcon(area.icon, ICON)}</div>
+          <div class="cardLabel">${area.label}</div></div>`;
+        list.append(li);
+        const card = li.firstElementChild;
+        let timer;
+        let long = false;
+        card.addEventListener('pointerdown', () => {
+          long = false;
+          if (state() !== 'folded') return;
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            long = true;
+            open = true;
+            update();
+          }, 450);
+        });
+        const cancel = () => clearTimeout(timer);
+        card.addEventListener('pointerup', cancel);
+        card.addEventListener('pointerleave', cancel);
+        card.addEventListener('pointercancel', cancel);
+        card.addEventListener('click', () => {
+          if (long) {
+            long = false;
+            return;
+          }
+          go(area.key);
+        });
+        return {
+          li,
+          face: li.querySelector('.face'),
+          small: li.querySelector('.smallIcon'),
+          glide: li.querySelector('.glideIcon'),
+          label: li.querySelector('.cardLabel'),
+          r: new Spring(0),
+          y: new Spring(0),
+          top: new Spring(FACE_TOP),
+          scale: new Spring(1),
+          faceOp: new Tween(1),
+          smallOp: new Tween(0),
+          labelOp: new Tween(1),
+          labelShift: new Spring(0),
+        };
+      });
+      const backOp = new Tween(0);
+
+      function state() {
+        if (page === 'start') return 'fanned';
+        return open ? 'open' : 'folded';
+      }
+      function go(key) {
+        page = key;
+        open = false;
+        update();
+      }
+      backdrop.addEventListener('click', () => {
+        open = false;
+        update();
+      });
+
+      // Targets per state; `initial` jumps without animation.
+      function update(initial = false) {
+        const s = state();
+        const folded = s === 'folded';
+        const n = AREAS.length;
+        content.innerHTML = pageHtml();
+        phone.style.setProperty('--hand', folded ? '46px' : '104px');
+        phone.style.setProperty('--fade', folded ? '32px' : '48px');
+        backdrop.style.pointerEvents = s === 'open' ? 'auto' : 'none';
+        backOp.to(s === 'open' ? 1 : 0, 0.2);
+        const activeIndex = page === 'start' ? 0 : 1;
+        const { k, c, fade, mode, stagger, labelRides } = variant;
+        // Folding in: the active card first; fanning out: from the middle outwards.
+        const order = [activeIndex, ...AREAS.map((_, i) => i).filter((i) => i !== activeIndex)];
+        cards.forEach((card, i) => {
+          const active = i === activeIndex;
+          card.li.classList.toggle('active', active);
+          const p = pose(i, n, active, s);
+          const delay = stagger * order.indexOf(i);
+          const top = folded ? foldedTop(i, n, active) : FACE_TOP;
+          const targets = [
+            [card.r, p.r],
+            [card.y, p.y],
+            [card.top, top],
+            [card.scale, folded ? SMALL / ICON : 1],
+            [card.labelShift, folded && labelRides ? top - FACE_TOP : 0],
+          ];
+          for (const [spring, value] of targets) {
+            if (initial) spring.set(value);
+            else spring.to(value, k, c, delay);
+          }
+          const tweens = [
+            [card.faceOp, folded ? 0 : 1],
+            [card.smallOp, folded ? 1 : 0],
+            [card.labelOp, folded ? 0 : 1],
+          ];
+          for (const [tween, value] of tweens) {
+            if (initial) tween.set(value);
+            // The name comes back a little later, once the symbol has room again.
+            else tween.to(value, fade, folded ? delay : delay + fade * 0.5);
+          }
+        });
+        if (initial) draw();
+        else run();
+      }
+
+      function draw() {
+        backdrop.style.opacity = backOp.value;
+        const glide = variant.mode === 'glide';
+        for (const card of cards) {
+          card.li.style.transform = `rotate(${card.r.value}deg) translateY(${card.y.value}px)`;
+          card.face.style.display = glide ? 'none' : '';
+          card.small.style.display = glide ? 'none' : '';
+          card.glide.style.display = glide ? '' : 'none';
+          card.label.style.display = glide ? '' : 'none';
+          card.face.style.opacity = card.faceOp.value;
+          card.small.style.opacity = card.smallOp.value;
+          card.small.style.top = `${card.top.target}px`;
+          card.glide.style.top = `${card.top.value}px`;
+          card.glide.style.transform = `scale(${card.scale.value})`;
+          card.label.style.top = `${LABEL_TOP}px`;
+          card.label.style.transform = `translateY(${card.labelShift.value}px)`;
+          card.label.style.opacity = card.labelOp.value;
+        }
+      }
+
+      let frame = 0;
+      let last = 0;
+      function run() {
+        cancelAnimationFrame(frame);
+        last = performance.now();
+        const tick = (now) => {
+          const dt = Math.min(0.05, (now - last) / 1000) * speed;
+          last = now;
+          let busy = backOp.step(dt);
+          for (const card of cards) {
+            for (const ch of [card.r, card.y, card.top, card.scale, card.faceOp, card.smallOp, card.labelOp, card.labelShift]) {
+              busy = ch.step(dt) || busy;
+            }
+          }
+          draw();
+          if (busy) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      }
+
+      // ---------- controls ----------
+      document.getElementById('toAdmin').onclick = () => go('admin');
+      document.getElementById('toStart').onclick = () => go('start');
+      document.getElementById('hold').onclick = () => {
+        if (page === 'start') page = 'admin';
+        open = true;
+        update();
+      };
+      let loopTimer;
+      document.getElementById('loop').onclick = () => {
+        clearTimeout(loopTimer);
+        go('start');
+        loopTimer = setTimeout(() => {
+          go('admin');
+          loopTimer = setTimeout(() => go('start'), 1400 / speed);
+        }, 900 / speed);
+      };
+      const slow = document.getElementById('slow');
+      slow.onclick = () => {
+        speed = speed === 1 ? 0.25 : 1;
+        slow.setAttribute('aria-pressed', String(speed !== 1));
+      };
+
+      let device = isTouch() ? 'here' : 'phone';
+      function layout() {
+        if (device === 'here') {
+          phone.classList.add('full');
+          phone.style.width = '100%';
+          phone.style.height = `${window.innerHeight}px`;
+        } else {
+          phone.classList.remove('full');
+          phone.style.width = '412px';
+          phone.style.height = `${Math.min(860, window.innerHeight - 24)}px`;
+        }
+      }
+      addEventListener('resize', layout);
+      toggles(document.getElementById('device'), [['here', 'Dieses Gerät'], ['phone', 'Handy 412 breit']], device, (id) => {
+        device = id;
+        layout();
+      });
+      chips(document.getElementById('motion'), 'motion', VARIANTS, 'F2', (id) => {
+        variant = VARIANTS.find(([key]) => key === id)[3];
+        update(true);
+      });
+    </script>
+  </body>
+</html>

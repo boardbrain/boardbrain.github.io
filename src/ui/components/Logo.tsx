@@ -1,63 +1,98 @@
 import { useId } from 'react';
+import { BrainMark } from './BrainMark';
 import styles from './Logo.module.css';
 
-// Design D-3 "Eine Kontur": one brain outline, symmetric to x = 24 in a 48 × 48 box.
-const OUTLINE =
-  'M24 8.5C21 5 14 5.5 12 10 7 10 5 15 7 18 3 20 3 27 7 29 5 33 8 38 12 37 13 41 18 42.5 22 40.5 23 41 23.5 41 24 40.5 24.5 41 25 41 26 40.5 30 42.5 35 41 36 37 40 38 43 33 41 29 45 27 45 20 41 18 43 15 41 10 36 10 34 5.5 27 5 24 8.5Z';
-const FOLDS = 'M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6';
-const MIDDLE = 'M24 8.5V40.5';
-const SQUARE = 5.4;
-const COLUMNS = 5;
-const ROWS = { from: -5, to: 5 };
+// Design K-20 L2: the two fanned cards of the app icon (scripts/generate-icons.mjs, icon D8)
+// without its tile. Coordinates in the 48 × 48 box of the icon; the view box cuts it to the cards.
+const VIEW_BOX = { x: 4, y: 0, width: 40, height: 46 };
+const BACK = { x: 9.5, y: 3.5, width: 28, height: 39, turn: -8 };
+const FRONT = { x: 11, y: 4, width: 28, height: 40, turn: 4 };
+const PIVOT = { x: 24, y: 42 };
+const CORNER_RADIUS = 0.13;
+const PIP_RADIUS = 0.07;
+const BRAIN = 24;
 
-// The squares start exactly at the middle line and run to the left; the rows are centred on
-// y = 24, so the board meets the middle without a gap.
-const SQUARES = Array.from({ length: COLUMNS }, (_, column) =>
-  Array.from({ length: ROWS.to - ROWS.from }, (_, index) => ROWS.from + index)
-    .filter((row) => (((column + row) % 2) + 2) % 2 === 0)
-    .map((row) => ({
-      x: Number((24 - SQUARE * (column + 1)).toFixed(2)),
-      y: Number((24 + SQUARE * row).toFixed(2)),
-    })),
-).flat();
+function hexagon(cx: number, cy: number, radius: number): string {
+  return Array.from({ length: 6 }, (_, index) => {
+    const radians = ((60 * index - 90) * Math.PI) / 180;
+    return `${(cx + radius * Math.cos(radians)).toFixed(2)},${(cy + radius * Math.sin(radians)).toFixed(2)}`;
+  }).join(' ');
+}
+
+// Hexagons in the top left and bottom right corner of the front card, as on the app icon.
+const PIPS = [
+  hexagon(FRONT.x + FRONT.width * 0.19, FRONT.y + FRONT.height * 0.13, FRONT.width * PIP_RADIUS),
+  hexagon(FRONT.x + FRONT.width * 0.81, FRONT.y + FRONT.height * 0.87, FRONT.width * PIP_RADIUS),
+];
+
+function turn(degrees: number): string {
+  return `rotate(${String(degrees)} ${String(PIVOT.x)} ${String(PIVOT.y)})`;
+}
 
 type LogoProps = {
+  /** Height in px; the width follows from the cards. */
   readonly size: number;
 };
 
 /**
- * Logo of the app: a brain whose left half is a checkerboard (design D-3). Decorative; the app
- * name stands next to it as text.
+ * Logo of the app on the start view (design K-20 L2): two fanned cards like the app icon, the
+ * front one with amber edge, two hexagons and the brain. Decorative; the app name stands next to
+ * it as text.
  */
 export function Logo({ size }: LogoProps): React.JSX.Element {
   const id = useId();
-  const outlineClip = `${id}-outline`;
-  const leftClip = `${id}-left`;
+  const face = `${id}-face`;
+  const shadow = `${id}-shadow`;
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
-      <clipPath id={outlineClip}>
-        <path d={OUTLINE} />
-      </clipPath>
-      <clipPath id={leftClip}>
-        <rect x="0" y="0" width="24" height="48" />
-      </clipPath>
-      <g clipPath={`url(#${outlineClip})`}>
-        <g clipPath={`url(#${leftClip})`}>
-          {SQUARES.map(({ x, y }) => (
-            <rect
-              key={`${String(x)}-${String(y)}`}
-              className={styles.square}
-              x={x}
-              y={y}
-              width={SQUARE}
-              height={SQUARE}
-            />
-          ))}
-        </g>
+    <svg
+      className={styles.logo}
+      width={(size * VIEW_BOX.width) / VIEW_BOX.height}
+      height={size}
+      viewBox={`${String(VIEW_BOX.x)} ${String(VIEW_BOX.y)} ${String(VIEW_BOX.width)} ${String(VIEW_BOX.height)}`}
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id={face} x1="0" y1="0" x2="0.6" y2="1">
+          <stop offset="0" className={styles.faceTop} />
+          <stop offset="1" className={styles.faceBottom} />
+        </linearGradient>
+        <filter id={shadow} x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="1" stdDeviation="1" className={styles.shadow} />
+        </filter>
+      </defs>
+      <rect
+        className={styles.back}
+        transform={turn(BACK.turn)}
+        x={BACK.x}
+        y={BACK.y}
+        width={BACK.width}
+        height={BACK.height}
+        rx={BACK.width * CORNER_RADIUS}
+        filter={`url(#${shadow})`}
+      />
+      <g transform={turn(FRONT.turn)}>
+        <rect
+          className={styles.front}
+          x={FRONT.x}
+          y={FRONT.y}
+          width={FRONT.width}
+          height={FRONT.height}
+          rx={FRONT.width * CORNER_RADIUS}
+          fill={`url(#${face})`}
+          filter={`url(#${shadow})`}
+        />
+        {PIPS.map((points) => (
+          <polygon key={points} className={styles.pip} points={points} />
+        ))}
+        <svg
+          x={FRONT.x + (FRONT.width - BRAIN) / 2}
+          y={FRONT.y + (FRONT.height - BRAIN) / 2}
+          width={BRAIN}
+          height={BRAIN}
+        >
+          <BrainMark size={BRAIN} />
+        </svg>
       </g>
-      <path className={styles.folds} d={FOLDS} />
-      <path className={styles.line} d={OUTLINE} />
-      <path className={styles.line} d={MIDDLE} />
     </svg>
   );
 }

@@ -2,9 +2,11 @@
 // the front one styled like the app's cards with amber edge, corner hexagons and the logo.
 // A second set in violet goes to public-acceptance/icons for the local acceptance app (build mode
 // "acceptance", E-40, Architecture 16.6); only that build ships it.
-// Run with `npm run icons` after changing the logo or the colours; the PNGs are committed.
+// The browser tab gets the same icon as a rounded tile (favicon.svg, design K-20 T2) in both
+// folders; vite.config.ts links the one of the current build.
+// Run with `npm run icons` after changing the logo or the colours; the files are committed.
 // Colours come from src/ui/styles/tokens.css (NFA-GB-05); Playwright renders the SVG.
-import { mkdirSync, readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { chromium } from '@playwright/test';
 
@@ -35,6 +37,7 @@ const COLORS = {
   overlay: token('--color-surface-overlay'),
   accent: token('--color-accent-amber-text'),
   shadow: token('--color-shadow'),
+  border: token('--color-border'),
   // The warm glow at the top of the background of the design "Holz".
   glow: firstColorIn(token('--background-image')),
 };
@@ -45,6 +48,7 @@ const ACCEPTANCE_COLORS = {
   overlay: token('--color-acceptance-icon-overlay'),
   accent: token('--color-acceptance-icon-accent'),
   shadow: COLORS.shadow,
+  border: token('--color-acceptance-icon-overlay'),
   glow: token('--color-acceptance-icon-glow'),
 };
 
@@ -95,6 +99,8 @@ function frontCard(colors, x, y, width, height) {
 }
 
 // purpose "maskable": Android cuts the icon round; the cards move into the safe zone (80 %).
+// purpose "favicon": the browser tab has no rounding of its own, so the tile is rounded and
+// framed (design K-20 T2).
 function iconSvg(colors, size, purpose) {
   const cards = `<g transform="rotate(-8 24 42)">${card(colors, 9.5, 3.5, 28, 39, colors.raised, 1.1)}</g>
     <g transform="rotate(4 24 42)">${frontCard(colors, 11, 4, 28, 40)}</g>`;
@@ -102,14 +108,20 @@ function iconSvg(colors, size, purpose) {
     purpose === 'maskable'
       ? `<g transform="translate(24 24) scale(0.8) translate(-24 -24)">${cards}</g>`
       : cards;
+  const tile =
+    purpose === 'favicon'
+      ? `<clipPath id="tile"><rect width="48" height="48" rx="11"/></clipPath>
+    <g clip-path="url(#tile)"><rect width="48" height="48" fill="url(#background)"/>${content}</g>
+    <rect x="0.5" y="0.5" width="47" height="47" rx="10.5" fill="none" stroke="${colors.border}"/>`
+      : `<rect width="48" height="48" fill="url(#background)"/>
+    ${content}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 48 48">
     <defs>
       <radialGradient id="background" cx="0.5" cy="0.05" r="0.9"><stop offset="0" stop-color="${colors.glow}"/><stop offset="1" stop-color="${colors.surface}"/></radialGradient>
       <linearGradient id="face" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="${colors.overlay}"/><stop offset="1" stop-color="${colors.raised}"/></linearGradient>
       <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="${colors.shadow}"/></filter>
     </defs>
-    <rect width="48" height="48" fill="url(#background)"/>
-    ${content}
+    ${tile}
   </svg>`;
 }
 
@@ -131,6 +143,13 @@ const browser = await chromium.launch();
 try {
   for (const { dir, colors } of SETS) {
     mkdirSync(path.join(ROOT, dir), { recursive: true });
+    writeFileSync(
+      path.join(ROOT, dir, 'favicon.svg'),
+      `${iconSvg(colors, 48, 'favicon')}
+`,
+    );
+    process.stdout.write(`${dir.replaceAll(path.sep, '/')}/favicon.svg
+`);
     for (const { file, size, purpose } of ICONS) {
       const page = await browser.newPage({ viewport: { width: size, height: size } });
       await page.setContent(

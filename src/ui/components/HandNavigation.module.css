@@ -97,19 +97,26 @@
   content: '';
 }
 
-.face {
-  display: grid;
-  gap: 2px;
-  place-items: center;
-}
-
-/* Small symbol at the top of a folded card; its distance from the top comes from cardHand.ts. */
-.foldedIcon {
+/* Design K-20 F2: the symbol and the name lie on the card at the places from cardHand.ts. The
+   symbol is moved and shrunk from its top edge by Motion; the name only fades. */
+.icon,
+.name {
   position: absolute;
   right: 0;
   left: 0;
   display: flex;
   justify-content: center;
+}
+
+.icon {
+  top: 0;
+  transform-origin: 50% 0;
+}
+
+/* NAME_LINE_HEIGHT in cardHand.ts. */
+.name {
+  line-height: 17px;
+  text-align: center;
 }
 
 /* From six areas the cards get narrower so that all fit on a phone. */

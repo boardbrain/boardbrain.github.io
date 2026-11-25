@@ -6,7 +6,7 @@ Je Bildschirm gilt nur die **jüngste** Referenz. Ältere Dateien zeigen den Sta
 
 | Bildschirm / Thema | Gültige Referenz |
 |---|---|
-| Start (Was willst du ansehen?), Navigation | `i3c2-score-pad-final-preview.html` (Start mit der Zeile „Notizblock“); Kartenhand: `k3-card-hand-final-preview.html`; Aufbau Navigation: `d3-start-navigation-final-preview.html` |
+| Start (Was willst du ansehen?), Navigation | `i3c2-score-pad-final-preview.html` (Start mit der Zeile „Notizblock“, seit K-20 mit Logo aus zwei Karten und tieferem Inhalt); Kartenhand: `k3-card-hand-final-preview.html`, Bewegung beim Ein- und Ausfahren, Logo und Browser-Tab: `k20-start-polish-final-preview.html`; Aufbau Navigation: `d3-start-navigation-final-preview.html` |
 | Spielliste, Spielwahl, Tisch, Optionen, Farben | `i3c-result-list-final-preview.html` |
 | Losschritte, Reihenfolge, Platzierung, Startrohstoffe | `i3c-result-list-final-preview.html` |
 | Laufende Partie (Übersicht, Brett, Steine antippen, Uhr in der Zeile) | `i3c-result-list-final-preview.html` |
@@ -18,7 +18,7 @@ Je Bildschirm gilt nur die **jüngste** Referenz. Ältere Dateien zeigen den Sta
 | Personenkarten | `i1e-person-cards-final-preview.html` |
 | Personenfarben (Palette, Namen) | `e50-person-colors-final-preview.html` |
 | Bearbeiten (Umbenennen, Spielseite) | `i1f-edit-final-preview.html` |
-| Brett, App-Symbol | `i1d-board-final-preview.html` |
+| Brett, App-Symbol | `i1d-board-final-preview.html`; Browser-Tab: `k20-start-polish-final-preview.html` |
 | Aufblinken und Spannung | `d2-staging-final-preview.html` |
 | Bewegungen der Karten | `i2e-card-moves-final-preview.html` |
 | Druckzustand | `k4-touch-final-preview.html` |

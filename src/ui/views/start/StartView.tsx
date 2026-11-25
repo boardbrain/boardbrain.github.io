@@ -23,7 +23,8 @@ import { FROM_START } from '@/ui/views/scorepad/padNavigation';
 import styles from './StartView.module.css';
 
 const FAN_POSITIONS = [styles.left, styles.middle, styles.right];
-const LOGO_SIZE = 44;
+// Height of the two cards of the logo (design K-20 L2).
+const LOGO_SIZE = 60;
 const TROPHY_SIZE = 24;
 const SAVED_ARROW_SIZE = 20;
 const PAD_ARROW_SIZE = 18;

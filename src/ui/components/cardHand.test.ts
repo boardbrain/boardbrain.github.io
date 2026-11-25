@@ -3,7 +3,10 @@ import {
   CARD_HEIGHT,
   cardPose,
   cardRotation,
+  FANNED_ICON_TOP,
   foldedIconTop,
+  iconPose,
+  NAME_TOP,
   handState,
   isCompactHand,
   isHandFolded,
@@ -69,5 +72,21 @@ describe('Design K-3 folded card hand', () => {
 
   it('never moves the small symbol above the card', () => {
     expect(foldedIconTop(0, 2, false, 40)).toBe(1);
+  });
+});
+
+describe('Design K-20 gliding symbol', () => {
+  it('centres symbol and name on a fanned or opened card', () => {
+    expect(iconPose(0, 2, true, 'fanned')).toEqual({ top: FANNED_ICON_TOP, scale: 1 });
+    expect(iconPose(1, 2, false, 'open')).toEqual({ top: FANNED_ICON_TOP, scale: 1 });
+    // symbol 22 + gap 2 + name 17 = 41 px in the middle of 104 px
+    expect(FANNED_ICON_TOP).toBe(31.5);
+    expect(NAME_TOP).toBe(55.5);
+  });
+
+  it('moves the same symbol to the top of a folded card and shrinks it to 16 px', () => {
+    const pose = iconPose(1, 3, true, 'folded');
+    expect(pose.top).toBe(foldedIconTop(1, 3, true, 16));
+    expect(pose.scale).toBeCloseTo(16 / 22);
   });
 });
