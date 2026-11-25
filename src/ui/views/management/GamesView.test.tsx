@@ -65,7 +65,10 @@ describe('US-SP-02 Create a custom game (design I3-B V2)', () => {
 
     await user.type(await screen.findByRole('textbox', { name: 'Name des Spiels' }), '  ');
 
-    expect(screen.getByRole('button', { name: 'Spiel anlegen' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Spiel anlegen' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   it.each(['UNO', 'catan'])(
@@ -78,7 +81,10 @@ describe('US-SP-02 Create a custom game (design I3-B V2)', () => {
       await user.type(await screen.findByRole('textbox', { name: 'Name des Spiels' }), name);
 
       expect(await screen.findByText('Name gibt es schon')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Spiel anlegen' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Spiel anlegen' })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
       expect(await db.games.count()).toBe(1);
     },
   );

@@ -1,11 +1,12 @@
-import { m } from 'motion/react';
-import { useId, useState, type ReactNode } from 'react';
+import { m, useReducedMotion } from 'motion/react';
+import { useId, useRef, useState, type ReactNode } from 'react';
 import type { PersonId, ScoreTarget } from '@/core/model';
 import { isValidTarget, type ScorePadSettings } from '@/core/scorepad';
 import { formatPadNumber } from '@/i18n/format';
 import { t } from '@/i18n/t';
 import { PlayIcon, TargetIcon, TrophyIcon } from '@/ui/components/Icons';
 import { PressableButton } from '@/ui/components/Pressable';
+import { nudgeMissing } from '@/ui/components/nudge';
 import { cx } from '@/ui/components/classNames';
 import shared from '@/ui/views/match/Match.module.css';
 import type { ResultPerson } from '@/ui/views/result/ResultRows';
@@ -110,6 +111,8 @@ export function SettingsSheet({
   const target: ScoreTarget | null =
     kind === 'none' || number === null ? null : { kind, value: number };
   const isTargetBad = kind !== 'none' && (target === null || !isValidTarget(target));
+  const targetRef = useRef<HTMLElement>(null);
+  const isReduced = useReducedMotion() === true;
   const quick = quickOf(kind);
   const chooseKind = (next: Kind): void => {
     setKind(next);
@@ -130,7 +133,7 @@ export function SettingsSheet({
           <div className={cx(shared.small, shared.muted)}>{subtitle}</div>
         </div>
       </div>
-      <section className={styles.section}>
+      <section ref={targetRef} className={styles.section}>
         <h2 className={styles.sectionTitle}>{t('notizblock.ziel')}</h2>
         <div className={styles.seg} role="group" aria-label={t('notizblock.ziel')}>
           {(['none', 'points', 'rounds'] as const).map((key) => (
@@ -189,6 +192,7 @@ export function SettingsSheet({
             autoComplete="off"
             aria-label={t('notizblock.andereFeld')}
             aria-invalid={isTargetBad}
+            data-need={isTargetBad ? '' : undefined}
             value={value}
             onChange={(event) => {
               setValue(event.target.value.trim());
@@ -227,9 +231,15 @@ export function SettingsSheet({
       </section>
       <PressableButton
         type="button"
-        className={cx(shared.primary, styles.done)}
-        disabled={isTargetBad || isBusy}
+        className={cx(shared.primary, styles.done, isTargetBad && styles.looksOff)}
+        disabled={isBusy}
+        aria-disabled={isTargetBad}
         onClick={() => {
+          if (isTargetBad) {
+            // Like every form: the button only looks disabled, a tap lights up the target.
+            nudgeMissing(targetRef.current, isReduced);
+            return;
+          }
           onDone({ target, calculation });
         }}
       >

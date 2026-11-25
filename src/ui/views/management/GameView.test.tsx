@@ -76,7 +76,10 @@ describe('US-VW-07 Edit a custom game (game page)', () => {
 
     // Checked while typing; saving stays blocked.
     expect(screen.getByText('Name gibt es schon')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     expect((await db.games.get(UNO))?.name).toBe('Uno');
   });
 

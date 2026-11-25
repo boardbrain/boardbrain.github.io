@@ -65,7 +65,10 @@ test.describe('US-VW-06 Rename a person', () => {
     await expect(page.getByRole('alert')).toContainText(
       'Es gibt bereits eine Person namens „ben“.',
     );
-    await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
 
     // AK-1: the new name everywhere.
     await field.fill('Anna');
@@ -85,7 +88,10 @@ test.describe('US-VW-06 Rename a person', () => {
     await expect(page.getByRole('alert')).toContainText(
       'Es gibt bereits eine Person namens „clara“. Bitte wähle einen anderen Namen.',
     );
-    await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   test('leaving with an unsaved name asks first', async ({ page }) => {
@@ -223,7 +229,10 @@ test.describe('US-VW-07 Edit a custom game', () => {
     for (const taken of ['skyjo', 'CATAN']) {
       await field.fill(taken);
       await expect(editor.getByText('Name gibt es schon')).toBeVisible();
-      await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+      await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
     }
     await field.fill('UNO');
     await editor.getByRole('button', { name: 'Änderungen speichern' }).click();

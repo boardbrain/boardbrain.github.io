@@ -18,3 +18,8 @@
   flex: 1 1 12rem;
   min-width: 0;
 }
+
+/* Something is missing: the button only looks disabled, a tap lights up what (nudgeMissing). */
+.looksOff {
+  opacity: 0.5;
+}

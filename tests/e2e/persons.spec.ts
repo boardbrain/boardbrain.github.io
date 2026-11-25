@@ -35,9 +35,9 @@ test.describe('US-PG-01 Create a person', () => {
     await page.goto('/#/verwaltung/personen');
     const save = page.getByRole('button', { name: 'Speichern' });
 
-    await expect(save).toBeDisabled();
+    await expect(save).toHaveAttribute('aria-disabled', 'true');
     await page.getByLabel('Name').fill('   ');
-    await expect(save).toBeDisabled();
+    await expect(save).toHaveAttribute('aria-disabled', 'true');
   });
 
   test('AK-3: a same-named person is an error while typing and cannot be saved', async ({
@@ -52,7 +52,10 @@ test.describe('US-PG-01 Create a person', () => {
     await expect(page.getByRole('alert')).toContainText(
       'Es gibt bereits eine Person namens „anna“. Bitte wähle einen anderen Namen.',
     );
-    await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     await page.getByLabel('Name').press('Enter');
     await page.reload();
     await expect(personCards(page)).toHaveCount(1);

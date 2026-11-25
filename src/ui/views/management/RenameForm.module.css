@@ -33,3 +33,8 @@
   display: grid;
   gap: var(--space-2);
 }
+
+/* Something is missing: the button only looks disabled, a tap lights up what (nudgeMissing). */
+.looksOff {
+  opacity: 0.5;
+}
