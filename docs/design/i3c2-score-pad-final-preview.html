@@ -3110,6 +3110,15 @@
       .topLogo svg {
         color: var(--accent-text);
       }
+      /* K-20 S2: the gap above the card hand; on a phone and in landscape a third of it. */
+      .startLow {
+        flex: 0 1 6%;
+      }
+      @container (width < 37.5rem) or (orientation: landscape) {
+        .startLow {
+          flex-basis: 2%;
+        }
+      }
       .topLogo.medium {
         gap: 12px;
         font-size: 1.45rem;
@@ -9009,6 +9018,16 @@
         let squares = '';
         for (let c = 0; c < 5; c++) for (let r = -5; r < 5; r++) if ((((c + r) % 2) + 2) % 2 === 0) squares += `<rect x="${(24 - 5.4 * (c + 1)).toFixed(2)}" y="${(24 + 5.4 * r).toFixed(2)}" width="5.4" height="5.4"/>`;
         return svgEl('0 0 48 48', `<clipPath id="lgo"><path d="${OUTLINE}"/></clipPath><clipPath id="lgl"><rect x="0" y="0" width="24" height="48"/></clipPath><g clip-path="url(#lgo)"><g clip-path="url(#lgl)" fill="currentColor">${squares}</g></g><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path stroke-width="2.2" d="M36 10c-2 3-6 3-7 6M41 18c-4 0-6 3-5 6M41 29c-4-1-7 1-8 4M30.5 22c2 3 0 6-3 6"/><path stroke-width="2.6" d="${OUTLINE}"/><path stroke-width="2.6" d="M24 8.5V40.5"/></g>`, { width: size, height: size });
+      }
+      // K-20 L2 (PO 25.11.2026): the logo on the start view is the two fanned cards of the app icon.
+      function startLogo(height) {
+        const hex = (cx, cy, r) => Array.from({ length: 6 }, (_, k) => { const a = ((60 * k - 90) * Math.PI) / 180; return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`; }).join(' ');
+        const inner = `<defs><linearGradient id="slf" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="var(--overlay)"/><stop offset="1" stop-color="var(--raised)"/></linearGradient><filter id="sls" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="var(--shadow)"/></filter></defs>`
+          + `<rect transform="rotate(-8 24 42)" x="9.5" y="3.5" width="28" height="39" rx="3.64" fill="var(--raised)" stroke="var(--accent-text)" stroke-width="1.1" filter="url(#sls)"/>`
+          + `<g transform="rotate(4 24 42)"><rect x="11" y="4" width="28" height="40" rx="3.64" fill="url(#slf)" stroke="var(--accent-text)" stroke-width="1.9" filter="url(#sls)"/>`
+          + `<polygon points="${hex(16.32, 9.2, 1.96)}" fill="var(--accent-text)"/><polygon points="${hex(33.68, 38.8, 1.96)}" fill="var(--accent-text)"/>`
+          + `<svg x="13" y="12" width="24" height="24" viewBox="0 0 48 48" style="color:var(--accent-text)">${logoMark(24).innerHTML}</svg></g>`;
+        return svgEl('4 0 40 46', inner, { width: String((height * 40) / 46), height: String(height), style: 'overflow:visible;flex:none' });
       }
 
       // Seeded generator for the preview only (the app draws via RandomSource).
@@ -17189,7 +17208,7 @@
         const slim = h('button', { class: 'pzSlim r3' + (run ? ' running' : '') + (big ? ' big' : ''), onclick: openPad }, spMiniPaper(big ? 'large' : ''), line, h('span', { class: 'muted', style: { marginLeft: 'auto' } }, icon('next', 18)));
         const card = (ic, title, count, rot, onclick) => h('button', { class: 'pcard', style: { transform: rot }, onclick }, h('span', { class: 'corner' }, count), h('span', { class: 'ic' }, icon(ic, 28)), h('strong', {}, title), h('span', { class: 'corner br' }, count));
         return h('main', { class: 'start' },
-          h('span', { class: 'topLogo medium' }, logoMark(44), 'BoardBrain'),
+          h('span', { class: 'topLogo medium' }, startLogo(60), 'BoardBrain'),
           s && h('div', { class: 'banner' }, h('span', { style: { flex: '1' } }, h('b', {}, s.table.name), ' spielt gerade'), h('button', { class: 'pill', onclick: () => { app.ovFrom = 'start'; go('overview'); } }, 'Weiter')),
           run && rf === 'RF3' && h('div', { class: 'banner' }, h('span', { style: { flex: '1' } }, h('b', {}, spT().name), ' spielt ', i3Game(run.game).name), h('button', { class: 'pill', onclick: () => go('spPad') }, 'Weiter')),
           h('div', { style: { flex: '1' } }),
@@ -17199,7 +17218,7 @@
               card('people', 'Personen', 15, 'rotate(-7deg) translateY(6%)', () => { i3c.ptab = 'tables'; go('mgPerson'); }),
               card('appTable', 'Tische', 5, 'rotate(0deg) translateY(-4%)', () => { res3.tableId = 't1'; i3c.tab = 'results'; go('mgTable'); }),
               card('appDice', 'Spiele', 6, 'rotate(7deg) translateY(6%)', () => go('mgGames')))),
-          h('div', { style: { flex: '0 1 6%' } }),
+          h('div', { class: 'startLow' }),
           res3.toast && toastEl());
       }
 
@@ -17681,6 +17700,7 @@
         const spec = (title, rows) => h('div', { class: 'card' }, h('h2', {}, title), h('ul', {}, rows.map((r) => h('li', { class: 'small' }, r))));
         return h('div', { class: 'notes' },
           spec('Einstieg (ST4, SL4, SY1, FB6, RF2)', [
+            'K-20 (25.11.2026): Logo oben als zwei aufgefächerte Karten wie das App-Symbol, 60 px hoch (L2); auf dem Handy und quer rücken Notizblock, Partie und Karten tiefer, die Lücke über der Kartenhand ist ein Drittel (S2), iPad hochkant unverändert. Bewegung der Kartenhand: k20-start-polish-final-preview.html.',
             'Start: über „Partie“ eine Zeile „Notizblock“, 64 px hoch, Rand und Fläche wie „Partie“: links der Mini-Zettel (54 × 46 px, dunkles Papier mit Linien, rotem Rand links und handgeschriebenen Zahlen, −4° gedreht), „Notizblock“ fett, darunter klein „Punkte live mitschreiben“, rechts Pfeil.',
             'Läuft ein Notizblock: Rand in Akzentfarbe, die zweite Zeile in Akzentfarbe mit Punkt: „Skyjo · Freitagsrunde · Runde 5“. Kein eigener Hinweis oben. Antippen öffnet den Notizblock.',
             'Antippen ohne laufenden Notizblock: Spielwahl „Notizblock“ / „Nur Spiele mit Punkten“ mit den Spielkarten der Spielliste (nur eigene Spiele, die Punkte zählen), Suche und Sortierung wie in der Spielliste; dann der Tisch, wenn mehrere passen; dann der Notizblock.',
