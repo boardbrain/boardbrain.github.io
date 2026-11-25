@@ -161,3 +161,8 @@
   font-weight: 700;
   line-height: 1.2;
 }
+
+/* The symbol of the sort button of a game list (GameListTools). */
+.sortIcon {
+  display: grid;
+}

@@ -159,24 +159,49 @@
   padding: 0;
 }
 
+/* Each cell measures its own width: wide columns (tablet, few persons) write larger. */
+.cell,
+.newCell,
+.readCell {
+  container-type: inline-size;
+}
+
+/*
+ * The standing, and the points of the round raised at its upper right, close to it in every
+ * width, like a note beside the number (PO 25.11.2026).
+ */
 .stack {
-  display: grid;
-  justify-items: center;
-  line-height: 1.05;
+  display: flex;
+  gap: 2px;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .stack b {
   font-family: var(--font-family-pad);
-  font-size: 1.08rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--color-pad-ink);
 }
 
 .stack small {
+  margin-top: -0.2em;
   font-family: var(--font-family-pad);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--color-pad-ink-muted);
+}
+
+@container (min-width: 110px) {
+  .stack b {
+    font-size: 1.6rem;
+  }
+
+  .stack small {
+    font-size: 1rem;
+  }
 }
 
 .stack small.minus {
@@ -186,11 +211,6 @@
 /* FA-NB-06: from the target in points on, the standing is red. */
 .stack b.reached {
   color: var(--color-status-error);
-}
-
-/* Calculating oneself: only the standings (SC2). */
-.only b {
-  font-size: 1.08rem;
 }
 
 /* The new round: dashed fields, the active one with a frame and the cursor. */

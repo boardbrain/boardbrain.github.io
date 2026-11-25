@@ -191,7 +191,7 @@ export function ScoreBlock({
 
   function stack(standing: number, points: number, isPreview = false): React.JSX.Element {
     return (
-      <span className={cx(styles.stack, isSelf && styles.only, isPreview && styles.preview)}>
+      <span className={cx(styles.stack, isPreview && styles.preview)}>
         <b className={cx(reachedAt !== null && standing >= reachedAt && styles.reached)}>
           {formatPadNumber(standing)}
         </b>

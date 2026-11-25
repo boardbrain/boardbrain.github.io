@@ -8845,6 +8845,36 @@
         border-radius: 0;
       }
       .pzMiniPaper { font-family: 'Patrick Hand', cursive; font-size: 10px; }
+      .rtBlk .pzCell.rt,
+      .rtBlk .pzNewCell.rt {
+        width: 100%;
+        container-type: inline-size;
+      }
+      .rtStack {
+        display: flex;
+        gap: 2px;
+        align-items: flex-start;
+        justify-content: center;
+        line-height: 1;
+        white-space: nowrap;
+      }
+      .rtStack b,
+      .rtBlk.selfCalc .rtStack.only b {
+        font-size: 1.15rem;
+      }
+      .rtStack small {
+        margin-top: -0.2em;
+        font-size: 0.72rem;
+      }
+      @container (min-width: 110px) {
+        .rtStack b,
+        .rtBlk.selfCalc .rtStack.only b {
+          font-size: 1.6rem;
+        }
+        .rtStack small {
+          font-size: 1rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -15268,7 +15298,7 @@
         const t = spad.forTable && i3Table(spad.forTable);
         const games = sortedGames().filter((g) => spHasPoints(g.id) && (!t || canPlay(t, g.id)));
         return h('main', { class: 'main' },
-          pageHead('Notizblock', { back: () => { spad.forTable = null; go(t ? 'mgTable' : 'start'); }, sub: t ? `${t.name} · Welches Spiel?` : 'Welches Spiel? · nur mit Punkten' }),
+          pageHead('Notizblock', { back: () => { spad.forTable = null; go(t ? 'mgTable' : 'start'); }, sub: t ? `${t.name} · Welches Spiel?` : 'Nur Spiele mit Punkten' , actions: [h('button', { class: 'iconBtn', 'aria-label': 'Spiele suchen' }, svgEl('0 0 24 24', '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>', { width: 22, height: 22, fill: 'none', stroke: 'currentColor', 'stroke-width': '2.2', 'stroke-linecap': 'round' })), h('button', { class: 'iconBtn', 'aria-label': `Sortiert nach ${ui.S === 'S2' ? 'A–Z' : 'zuletzt gespielt'}`, onclick: () => { ui.S = ui.S === 'S2' ? 'S1' : 'S2'; render(); } }, icon(ui.S === 'S2' ? 'sortAz' : 'sortRecent', 22))] }),
           h('div', { class: gridClass() }, games.map((g) => spBaseCard(g, () => spBegin(g.id, t ? t.id : null, 'spGames')))),
           h('p', { class: 'muted small', style: { textAlign: 'center' } }, 'Spiele ohne Punkte: Ergebnis eintragen'));
       }
@@ -17129,7 +17159,7 @@
         if (app.screen !== 'rForm' || !spHasPoints(res3.gameId) || res3.editId || spad.finishing || res3.fromRunning) return;
         const sec = [...frame.querySelectorAll('.section')].find((x) => x.querySelector(':scope > h2')?.textContent.trim().startsWith('Ergebnis'));
         if (!sec) return;
-        sec.querySelector(':scope > h2').append(h('button', { class: 'pzFb fb6 flat', 'aria-label': 'Notizblock: live mitschreiben', onclick: () => spBegin(res3.gameId, res3.tableId, 'rForm') }, icon('pad', 18)));
+        sec.querySelector(':scope > h2').append(h('button', { class: 'pzFb fb6 flat', 'aria-label': 'Notizblock: live mitschreiben', onclick: () => { app.dialog = { title: 'Zum Notizblock wechseln?', body: ['Punkte Runde für Runde mitschreiben', 'Eingaben im Formular werden verworfen'], cancel: 'Abbrechen', confirm: 'Zum Notizblock', onConfirm: () => { app.dialog = null; spBegin(res3.gameId, res3.tableId, 'rForm'); } }; render(); } }, icon('pad', 18)));
       }
 
       // ---------- start: finding a running pad (RF) ----------
@@ -17420,7 +17450,7 @@
           t.kind === 'points' ? (gl.reached ? `Ziel ${t.value} Punkte erreicht` : spSelf() ? `Ziel ${t.value} Punkte` : `Ziel ${t.value} Punkte · noch ${t.value - spSum(gl.who)}`) : gl.text);
         return h('main', { class: 'main pzMain' }, head, spBlock(), line,
           a.nudge && h('p', { class: 'small', style: { color: 'var(--error)', margin: '0' } }, 'Noch nicht alle eingetragen'),
-          h('div', { class: 'pzBottom one' }, h('button', { class: 'primary' + (a.rounds.length ? '' : ' looksOff'), onclick: finish }, 'Ergebnis speichern')));
+          !(a.cur || a.editCell) && h('div', { class: 'pzBottom one' }, h('button', { class: 'primary' + (a.rounds.length ? '' : ' looksOff'), onclick: finish }, 'Ergebnis speichern')));
       }
       function spSettingsBody() {
         const c = spCfg(), st = spad.setup;
@@ -17570,7 +17600,7 @@
           h('button', { class: 'iconBtn', 'aria-label': 'Beenden ohne Ergebnis', title: 'Beenden ohne Ergebnis', onclick: spAskQuit }, icon('exitDoor', 20)));
         return h('main', { class: 'main pzMain' }, head, spBlock(),
           a.nudge && h('p', { class: 'small', style: { color: 'var(--error)', margin: '0' } }, 'Noch nicht alle eingetragen'),
-          h('div', { class: 'pzBottom one' }, h('button', { class: 'primary' + (a.rounds.length ? '' : ' looksOff'), onclick: finish }, 'Ergebnis speichern')));
+          !(a.cur || a.editCell) && h('div', { class: 'pzBottom one' }, h('button', { class: 'primary' + (a.rounds.length ? '' : ' looksOff'), onclick: finish }, 'Ergebnis speichern')));
       }
       // ---------- detail: the block inside the fold ----------
       function i3cDetailParts(r, compact) {
@@ -17650,7 +17680,7 @@
           spec('Einstieg (ST4, SL4, SY1, FB6, RF2)', [
             'Start: über „Partie“ eine Zeile „Notizblock“, 64 px hoch, Rand und Fläche wie „Partie“: links der Mini-Zettel (54 × 46 px, dunkles Papier mit Linien, rotem Rand links und handgeschriebenen Zahlen, −4° gedreht), „Notizblock“ fett, darunter klein „Punkte live mitschreiben“, rechts Pfeil.',
             'Läuft ein Notizblock: Rand in Akzentfarbe, die zweite Zeile in Akzentfarbe mit Punkt: „Skyjo · Freitagsrunde · Runde 5“. Kein eigener Hinweis oben. Antippen öffnet den Notizblock.',
-            'Antippen ohne laufenden Notizblock: Spielwahl „Notizblock“ / „Welches Spiel? · nur mit Punkten“ mit den Spielkarten der Spielliste (nur eigene Spiele, die Punkte zählen); dann der Tisch, wenn mehrere passen; dann der Notizblock.',
+            'Antippen ohne laufenden Notizblock: Spielwahl „Notizblock“ / „Nur Spiele mit Punkten“ mit den Spielkarten der Spielliste (nur eigene Spiele, die Punkte zählen), Suche und Sortierung wie in der Spielliste; dann der Tisch, wenn mehrere passen; dann der Notizblock.',
             'Ergebnisformular eines Spiels mit Punkten: rechts in der Überschrift „Ergebnis“ ein runder Knopf 34 px mit Goldrand (60 %) und Block-Symbol 18 px, ohne die Zeile höher zu machen (Tippfläche per ::before 44 px). Name für Screenreader „Notizblock: live mitschreiben“. Startet den Notizblock mit diesem Spiel und Tisch. Nicht bei Catan, Spielen ohne Punkte, beim Bearbeiten und aus einer laufenden Partie.',
             'Höchstens eine laufende Partie: Tippt man bei laufendem Notizblock auf „Partie“, fragt die App „Notizblock läuft“ mit „Zum Notizblock“.',
           ]),

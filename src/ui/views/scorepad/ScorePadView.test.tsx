@@ -61,6 +61,27 @@ describe('US-NB-01 start a score pad', () => {
     expect(screen.getByText('Spiele ohne Punkte: Ergebnis eintragen')).toBeInTheDocument();
   });
 
+  it('AK-1: the game choice has the search and the order of the game list (PO 25.11.2026)', async () => {
+    const user = userEvent.setup();
+    const { db } = renderWithApp(<PadGameChoiceView />, { path: '/notizblock/neu' });
+    await seed(db);
+    await db.games.add(
+      aCustomGame({
+        id: toGameId('00000000-0000-4000-8000-0000000000b8'),
+        name: 'Wizard',
+        scoring: 'highest-wins',
+      }),
+    );
+
+    expect(
+      await screen.findByRole('button', { name: /^Sortiert nach zuletzt gespielt/ }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Spiele suchen' }));
+    await user.type(screen.getByRole('searchbox'), 'wiz');
+    expect(screen.getByRole('link', { name: 'Wizard' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Skyjo' })).not.toBeInTheDocument();
+  });
+
   it('AK-3: "Los geht’s" starts the score pad with the chosen target', async () => {
     const user = userEvent.setup();
     // The data come first, so the page does not lead away before them.

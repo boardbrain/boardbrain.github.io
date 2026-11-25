@@ -37,6 +37,7 @@ async function seed(db: BoardBrainDb): Promise<void> {
 const ROUTES = [
   { path: '/', element: <p>start</p> },
   { path: '/ergebnis/neu/:gameId/:groupId', element: <ResultView /> },
+  { path: '/notizblock/neu/:gameId/:groupId', element: <p>pad</p> },
   {
     path: '/verwaltung/gruppen/:groupId/ergebnisse/:matchId/bearbeiten',
     element: <ResultEditView />,
@@ -57,11 +58,21 @@ function field(): HTMLElement {
 }
 
 describe('US-NB-01 AK-2 the score pad from the result form (design I3-C2 FB6)', () => {
-  it('a new result of a custom game with points offers the score pad, without points not', async () => {
-    await open(`/ergebnis/neu/${SKYJO.id}/${TABLE.id}`);
-    expect(
-      await screen.findByRole('button', { name: 'Notizblock: live mitschreiben' }),
-    ).toBeInTheDocument();
+  it('a new result of a custom game with points offers the score pad after asking', async () => {
+    const user = userEvent.setup();
+    const db = await open(`/ergebnis/neu/${SKYJO.id}/${TABLE.id}`);
+    await user.click(await screen.findByRole('button', { name: 'Notizblock: live mitschreiben' }));
+
+    // The small symbol is easily hit: it asks first (PO 25.11.2026).
+    const ask = screen.getByRole('alertdialog', { name: 'Zum Notizblock wechseln?' });
+    await user.click(within(ask).getByRole('button', { name: 'Abbrechen' }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Notizblock: live mitschreiben' }));
+    await user.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Zum Notizblock' }),
+    );
+    expect(await screen.findByText('pad')).toBeInTheDocument();
+    expect(await db.scorePad.count()).toBe(0);
   });
 
   it('a game without points has no button', async () => {

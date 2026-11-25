@@ -167,6 +167,7 @@ export function ResultForm({
   const [duration, setDuration] = useState(() => durationFields(values.durationMinutes));
   const [notes, setNotes] = useState(values.notes ?? '');
   const [isAskingLong, setIsAskingLong] = useState(false);
+  const [isAskingPad, setIsAskingPad] = useState(false);
   const [isAskingChange, setIsAskingChange] = useState(false);
   const [isShowingRules, setIsShowingRules] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
@@ -331,7 +332,10 @@ export function ResultForm({
               type="button"
               className={styles.padBtn}
               aria-label={t('notizblock.formKnopf')}
-              onClick={onPad}
+              onClick={() => {
+                // The small symbol is easily hit: changing to the score pad asks first (PO 25.11.2026).
+                setIsAskingPad(true);
+              }}
             >
               <PadIcon size={PAD_SIZE} />
             </PressableButton>
@@ -631,6 +635,18 @@ export function ResultForm({
         </PressableButton>
       </div>
 
+      {isAskingPad && onPad !== undefined && (
+        <MatchDialog
+          title={t('notizblock.formFrage')}
+          lines={[t('notizblock.formText'), t('notizblock.formVerwerfen')]}
+          cancelLabel={t('allgemein.abbrechen')}
+          onCancel={() => {
+            setIsAskingPad(false);
+          }}
+          confirmLabel={t('notizblock.zumNotizblock')}
+          onConfirm={onPad}
+        />
+      )}
       {isAskingLong && durationMinutes !== undefined && (
         <MatchDialog
           title={t('ergebnis.langeFrage')}

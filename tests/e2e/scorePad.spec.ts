@@ -20,7 +20,7 @@ test.describe('US-NB-01 to US-NB-05 score pad (design I3-C2)', () => {
 
     // US-NB-01 AK-1: only custom games with points; one table plays Skyjo, so no table choice.
     await page.getByRole('link', { name: /^Notizblock/ }).click();
-    await expect(page.getByText('Welches Spiel? · nur mit Punkten')).toBeVisible();
+    await expect(page.getByText('Nur Spiele mit Punkten')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Uno' })).toHaveCount(0);
     await page.getByRole('link', { name: 'Skyjo' }).click();
 
