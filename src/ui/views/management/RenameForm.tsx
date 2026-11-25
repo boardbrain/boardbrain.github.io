@@ -1,8 +1,11 @@
-import { useState, useTransition, type SubmitEvent } from 'react';
+import { useReducedMotion } from 'motion/react';
+import { useRef, useState, useTransition, type SubmitEvent } from 'react';
 import { cleanName, isBlankName } from '@/core/model';
 import type { Result } from '@/core/shared';
 import { t } from '@/i18n/t';
+import { cx } from '@/ui/components/classNames';
 import { Notice } from '@/ui/components/Notice';
+import { nudgeMissing } from '@/ui/components/nudge';
 import { UnsavedChangesGuard } from '@/ui/components/UnsavedChangesGuard';
 import styles from './RenameForm.module.css';
 import { PressableButton } from '@/ui/components/Pressable';
@@ -42,11 +45,15 @@ export function useRenameForm<E extends string>({
   const isChanged = cleanName(name) !== initialName;
   const blockingError = isBlankName(name) ? t('verwaltung.nameLeer') : (liveError?.(name) ?? null);
   const canSave = isChanged && blockingError === null && !isPending;
+  const formRef = useRef<HTMLFormElement>(null);
+  const isReduced = useReducedMotion() === true;
   const savedError = submitted?.name === name ? messageFor(submitted.error, cleanName(name)) : null;
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>): void {
     event.preventDefault();
     if (!canSave) {
+      // Like every form: the button only looks disabled, a tap lights up the name.
+      nudgeMissing(formRef.current, isReduced);
       return;
     }
     // Unexpected errors in the transition reach the error boundary of the view (ADR-025).
@@ -64,12 +71,13 @@ export function useRenameForm<E extends string>({
   }
 
   const form = (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form ref={formRef} className={styles.form} onSubmit={handleSubmit}>
       <input
         type="text"
         autoComplete="off"
         autoFocus
         aria-label={fieldLabel}
+        data-need={blockingError === null ? undefined : ''}
         value={name}
         onChange={(event) => {
           setName(event.target.value);
@@ -84,7 +92,11 @@ export function useRenameForm<E extends string>({
         <PressableButton type="button" className={styles.cancel} onClick={onClose}>
           {t('allgemein.abbrechen')}
         </PressableButton>
-        <PressableButton type="submit" disabled={!canSave}>
+        <PressableButton
+          type="submit"
+          className={cx(!canSave && styles.looksOff)}
+          aria-disabled={!canSave}
+        >
           {t('allgemein.speichern')}
         </PressableButton>
       </div>

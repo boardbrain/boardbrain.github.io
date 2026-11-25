@@ -118,7 +118,10 @@ describe('US-VW-06 Rename a person (person page)', () => {
     const field = screen.getByLabelText('Neuer Name');
     expect(field).toHaveValue('Anna');
     expect(screen.queryByText('dabei seit 07.10.2026')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
 
     await user.clear(field);
     await user.type(field, ' Annika ');
@@ -144,7 +147,10 @@ describe('US-VW-06 Rename a person (person page)', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(
       `Es gibt bereits eine Person namens „${name}“. Bitte wähle einen anderen Namen.`,
     );
-    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     expect((await db.persons.get(ANNA))?.name).toBe('Anna');
   });
 
@@ -155,7 +161,10 @@ describe('US-VW-06 Rename a person (person page)', () => {
     await user.type(screen.getByLabelText('Neuer Name'), '  ');
 
     expect(screen.getByRole('alert')).toHaveTextContent('Bitte gib einen Namen ein.');
-    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   it('cancelling keeps the old name without asking', async () => {

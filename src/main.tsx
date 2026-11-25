@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router/dom';
 import { createErrorLogService } from '@/app/services/errorLogService';
 import { createMasterDataService } from '@/app/services/masterDataService';
 import { createResultService } from '@/app/services/resultService';
+import { createScorePadService } from '@/app/services/scorePadService';
 import { createSessionService } from '@/app/services/sessionService';
 import { SUPPORTED_GAMES } from '@/games/registry';
 import { t } from '@/i18n/t';
@@ -12,6 +13,7 @@ import { BoardBrainDb } from '@/infra/db/database';
 import { createDexieErrorLogStore } from '@/infra/db/errorLogStore';
 import { createDexieMasterDataStore } from '@/infra/db/masterDataStore';
 import { createDexieResultStore } from '@/infra/db/resultStore';
+import { createDexieScorePadStore } from '@/infra/db/scorePadStore';
 import { createDexieSessionStore } from '@/infra/db/sessionStore';
 import { readDiagnostics } from '@/infra/platform/diagnostics';
 import { systemClock } from '@/infra/platform/systemClock';
@@ -98,6 +100,7 @@ const dependencies: AppDependencies = {
     ids: uuidGenerator,
     clock: systemClock,
   }),
+  scorePad: createScorePadService({ store: createDexieScorePadStore(db), clock: systemClock }),
   rng,
   errorLog,
 };
@@ -161,6 +164,24 @@ const router = createHashRouter([
       {
         path: '/ergebnis/neu/:gameId/:groupId',
         lazy: matchRoute((match) => view(<match.ResultView />)),
+      },
+      // I3-C2: the score pad (US-NB-01 to US-NB-04, Architecture 13.1).
+      { path: '/notizblock', lazy: matchRoute((match) => view(<match.ScorePadView />)) },
+      {
+        path: '/notizblock/neu',
+        lazy: matchRoute((match) => view(<match.PadGameChoiceView />)),
+      },
+      {
+        path: '/notizblock/neu/:gameId',
+        lazy: matchRoute((match) => view(<match.ResultTableView isForPad />)),
+      },
+      {
+        path: '/notizblock/neu/:gameId/:groupId',
+        lazy: matchRoute((match) => view(<match.NewScorePadView />)),
+      },
+      {
+        path: '/notizblock/ergebnis',
+        lazy: matchRoute((match) => view(<match.PadResultView />)),
       },
       {
         path: '/partie/uebersicht',

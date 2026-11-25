@@ -1,4 +1,5 @@
-import { useId, useState, useTransition } from 'react';
+import { useReducedMotion } from 'motion/react';
+import { useId, useRef, useState, useTransition } from 'react';
 import {
   cleanName,
   containsName,
@@ -10,6 +11,7 @@ import { t } from '@/i18n/t';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { ConfirmDialog } from '@/ui/components/ConfirmDialog';
 import { cx } from '@/ui/components/classNames';
+import { nudgeMissing } from '@/ui/components/nudge';
 import { PressableButton } from '@/ui/components/Pressable';
 import { Unfold } from '@/ui/components/Unfold';
 import styles from './GameEditor.module.css';
@@ -64,6 +66,9 @@ export function GameEditor({
   const isNoneLocked = scoredCount > 0;
   const isChanged = cleanName(name) !== game?.name || scoring !== (game.scoring ?? null);
   const canSave = cleanName(name) !== '' && !isTaken && isChanged && !isPending;
+  const isNameMissing = cleanName(name) === '' || isTaken;
+  const formRef = useRef<HTMLFormElement>(null);
+  const isReduced = useReducedMotion() === true;
 
   function store(): void {
     setIsAsking(false);
@@ -106,10 +111,13 @@ export function GameEditor({
 
   return (
     <form
+      ref={formRef}
       className={styles.form}
       onSubmit={(event) => {
         event.preventDefault();
         if (!canSave) {
+          // Like every form: the button only looks disabled, a tap lights up the name.
+          nudgeMissing(formRef.current, isReduced);
           return;
         }
         if (shouldAsk) {
@@ -131,6 +139,7 @@ export function GameEditor({
           placeholder={t('spiele.nameBeispiel')}
           aria-label={t('spiele.nameFeld')}
           aria-invalid={isTaken}
+          data-need={isNameMissing ? '' : undefined}
           value={name}
           onChange={(event) => {
             setName(event.target.value);
@@ -177,7 +186,11 @@ export function GameEditor({
         )}
       </div>
       <div className={styles.saveBar}>
-        <PressableButton type="submit" className={styles.save} disabled={!canSave}>
+        <PressableButton
+          type="submit"
+          className={cx(styles.save, !canSave && styles.looksOff)}
+          aria-disabled={!canSave}
+        >
           {t(game === undefined ? 'spiele.anlegen' : 'spiele.aenderungenSpeichern')}
         </PressableButton>
       </div>

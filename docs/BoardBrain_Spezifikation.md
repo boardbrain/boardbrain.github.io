@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.22 |
+| Version | 0.23 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 18.11.2026 |
+| Stand | 24.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -36,6 +36,7 @@
 | 0.20 | 15.11.2026 | Entscheidungen des Product Owners in I3-A: Der Timer läuft nach dem Wiederholen eines Schritts der laufenden Partie weiter (3.5, neu US-AB-07 AK-5); beim Bearbeiten eines Ergebnisses stehen Gruppe und Spiel fest (neu US-ER-05 AK-4) |
 | 0.21 | 16.11.2026 | Punkte und Rangfolge bei eigenen Spielen (Anforderungsdokumentation 0.25, E-45, OP-14 geklärt): Einstellung „Punkte“ am eigenen Spiel (neu US-SP-02 AK-4, US-SP-02 AK-3, US-VW-07 neu „Eigenes Spiel bearbeiten“ mit AK-3 und AK-4); Ergebnis mit Punkten oder Rangfolge (3.6, US-ER-02 neu gefasst als „Punkte erfassen“ mit neu AK-6, neu US-ER-06 „Rangfolge erfassen“); Kennzahlen, Rangliste und Rekorde für Plätze und Punkte aller Spiele, neu Platzverteilung, Rote Laterne, Paradespiel, Partien je Spiel und Ø Abstand zum Sieger (3.8, US-ST-01, US-ST-03 AK-4, neu US-ST-05 AK-5, neu US-ST-06); Umfang und Übersicht (2.3, 2.5); Rückverfolgbarkeit (6) |
 | 0.22 | 18.11.2026 | Design I3-B (Anforderungsdokumentation 0.26, E-46 bis E-48): Spiele in einer gemeinsamen Liste, unterscheidbar am Aussehen (US-SP-03 AK-1, nach I3 vorgezogen); „Neues Spiel“ als eigene Seite (US-SP-02 AK-1); Sieger aus der besten Punktzahl, gewählt nur bei Gleichstand an der Spitze, Punkte oder „Sieger oder Rangfolge“ (3.6, US-ER-02 AK-4 entfällt, AK-6 neu gefasst); Grenzen im Formular: Datum nicht in der Zukunft, Punkte bis 99 999 im Betrag, Notizen bis 1000 Zeichen, Warnung bei mehr als 8 Stunden Spieldauer (3.6, US-ER-01 AK-8 neu); Spielbindung frei, nur die Mitgliederzahl wird geprüft (US-VW-02 AK-3); Spieldauer in der laufenden Partie korrigieren (3.5, US-AB-07 AK-6 neu); Rangfolge von Hand auch bei Catan (3.6, US-ER-06, E-49); Spieldauer im Formular in Stunden und Minuten (3.6, US-ER-01 AK-7); Uhr nach der Abnahme neu: Verlauf mit einzeln erfassten Pausen, Pausen nachtragen, ändern und löschen, „Fertig“ speichert (3.5, US-AB-07 AK-1, AK-6, neu AK-7); Umfang (2.3, 2.5) |
+| 0.23 | 24.11.2026 | Notizblock für eigene Spiele mit Punkten (Anforderungsdokumentation 0.28, FA-NB-01 bis FA-NB-09, E-51 bis E-55): neu 4.16 mit US-NB-01 bis US-NB-05; der laufende Notizblock als laufende Partie mit denselben Sperren (3.5); Runden und Ziel im Ergebnis (3.6); Umfang und Übersicht (2.3, 2.5); Rückverfolgbarkeit (6); Abnahme: kein Namensvorschlag für neue Gruppen mehr, das Namensfeld bleibt leer mit Beispiel (US-PG-02 AK-2, K-19) |
 
 ## Inhaltsverzeichnis
 
@@ -95,7 +96,7 @@ Da es keinen festen Termin gibt (RB-06) und Version 1 erst mit dem vollen Umfang
 |---|---|---|
 | I1 Fundament | Personen, Gruppen, Farben, eigene Spiele, Übersicht über Personen und Gruppen, Umbenennen und Gruppen bearbeiten, Brettdarstellung, Losbaustein *(ergänzt in 0.8)* | Stammdaten anlegbar und korrigierbar, Brett sichtbar |
 | I2 Generierung | Gesamter Ablauf einer Partie: Vorbereitung mit Spielversion, Optionen und abweichenden Farben, Losschritte, Platzierung (auch überspringbar), Startrohstoffe, laufende Partie; Inszenierung mit Karten, Aufblinken, Spannungsmodus und Überspringen der Animation *(geändert in 0.12, 0.14 und 0.16; Klänge nach Version 1)* | Vollständige Generierung, wie sie in Version 1 sein soll, am Spieleabend nutzbar |
-| I3 Ergebnisse und Statistik | Gemeinsame Spielliste als Einstieg, Ergebniserfassung mit Siegpunkten, Catan-Farben und Spieldauer, Punkte und Rangfolge bei eigenen Spielen, Ergebnisliste, Kennzahlen, Rangliste, Rekorde, Platzverteilung und Spielvergleich, Filter, Diagramme *(geändert in 0.12, 0.19 und 0.21)* | Langzeitstatistik nutzbar |
+| I3 Ergebnisse und Statistik | Gemeinsame Spielliste als Einstieg, Ergebniserfassung mit Siegpunkten, Catan-Farben und Spieldauer, Punkte und Rangfolge bei eigenen Spielen, Notizblock für eigene Spiele mit Punkten, Ergebnisliste, Kennzahlen, Rangliste, Rekorde, Platzverteilung und Spielvergleich, Filter, Diagramme *(geändert in 0.12, 0.19 und 0.21)* | Langzeitstatistik nutzbar |
 | I4 Daten und Updates | Vollsicherung, Teilexport und Export-Erinnerung, Import mit Konflikten und Zuordnung, automatische und manuelle Sicherungspunkte, Update mit Sicherungsdialog, Installation unter iOS und Hinweis unter Android und Windows, Speicherschutz und Hinweis zum Schutz vor Datenverlust *(geändert in 0.12)* | Daten sicher und teilbar |
 | I5 Verwaltung und Archiv | Personen, Gruppen und eigene Spiele archivieren, wiederbeleben und löschen *(geändert in 0.12 und 0.22; die Unterscheidung der Spiele kam mit I3)* | Stammdaten vollständig pflegbar |
 | I6 Einstellungen und Feinschliff | US-SP-05 „Ich hasse Catan!“, Design und Akzentfarbe *(geändert in 0.12)* | Kandidat für Release 1.0 |
@@ -175,8 +176,13 @@ Nicht Teil von Version 1 sind alle Punkte des Parkplatzes (Anforderungsdokumenta
 | US-IS-02 | Installationshinweis unter Android und Windows | S | I4 |
 | US-IS-03 | Persistenten Speicher sicherstellen | M | I4 |
 | US-GB-01 | Design und Akzentfarbe wählen | C | I6 |
+| US-NB-01 | Notizblock starten *(neu in 0.23)* | S | I3 |
+| US-NB-02 | Runden eintragen und korrigieren *(neu in 0.23)* | S | I3 |
+| US-NB-03 | Ziel und Rechenweise *(neu in 0.23)* | S | I3 |
+| US-NB-04 | Notizblock beenden *(neu in 0.23)* | S | I3 |
+| US-NB-05 | Runden im Ergebnis *(neu in 0.23)* | S | I3 |
 
-Summe: 65 User Stories (40 Must, 19 Should, 6 Could). *(berichtigt in 0.12, ergänzt in 0.19 und 0.21)*
+Summe: 70 User Stories (40 Must, 24 Should, 6 Could). *(berichtigt in 0.12, ergänzt in 0.19, 0.21 und 0.23)*
 
 ---
 
@@ -277,6 +283,7 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 - „Beenden ohne Ergebnis“ ist ab Beginn der Generierung jederzeit möglich.
 - **Spieldauer:** Mit dem Übergang in „Laufend“ beginnt ein Timer. Er lässt sich anhalten und fortsetzen; gespeichert werden nur Zeitpunkte, deshalb läuft er auch weiter, während die App geschlossen ist, solange er nicht angehalten ist. Der Beginn und die gemessene Dauer gehen ins Ergebnis ein (3.6, US-AB-07). Wird danach ein Schritt wiederholt, läuft der Timer weiter. Die Übersicht zeigt die Dauer mit kleinen Sekunden; antippen öffnet den Verlauf mit dem Beginn und jeder Pause. Beginn und Pausen lassen sich ändern, Pausen löschen und in Minuten nachtragen (US-AB-07 AK-6, AK-7). *(neu in 0.19, E-43, ergänzt in 0.20 und 0.22)*
 - **Sperren:** Solange eine Partie in Generierung oder laufend ist, sind Import, Wiederherstellung eines Sicherungspunkts sowie Archivieren, Löschen und Ändern der Spielbindung der beteiligten Gruppe gesperrt. Die App nennt den Grund und bietet an, die Partie vorher zu beenden. Im Tisch-Editor steht der Hinweis direkt bei der Spielbindung, die Auswahl ist gesperrt und nach dem Beenden sofort frei. *(ergänzt in 0.14)*
+- **Notizblock** *(neu in 0.23, FA-NB-02, E-51)*: Ein laufender Notizblock ist eine laufende Partie im Zustand „Laufend“ ohne Generierung. Er beginnt mit „Starten“ im Blatt „Los geht’s“ (die Wahl von Spiel und Tisch davor wird wie die Vorbereitung nicht gespeichert) und endet mit dem Speichern des Ergebnisses oder mit „Beenden ohne Ergebnis“. Neben ihm startet keine Catan-Partie und kein zweiter Notizblock; die Sperren gelten für seinen Tisch, dazu lässt sich bei seinem Spiel „Punkte“ nicht abschalten. Jede gespeicherte Runde, jede Änderung und die Einstellungen übersteht einen Neustart; eine angefangene, noch nicht vollständige Runde nicht.
 
 ### 3.6 Ergebnis
 
@@ -294,6 +301,8 @@ Die Mitglieder einer Gruppe sind nach dem Anlegen unveränderlich. Personennamen
 | Rangfolge | nein | Nur ohne Punkte, auch wenn das Spiel Punkte zählt; bei Catan genau eine Person auf Platz 1 *(seit 0.22, E-49)*; ein Platz je Beteiligtem, für alle oder für keinen (nur die Sieger auf Platz 1 heißt: keine Rangfolge); gleiche Plätze möglich, der folgende Platz wird übersprungen (1, 2, 2, 4) *(neu in 0.21, FA-ER-12)* |
 | Spieldauer | nein | Nur bei Catan; ganze Minuten ab 1, eingegeben in Stunden und Minuten (0 bis 59); aus einer laufenden Partie mit der gemessenen Dauer vorbelegt (3.5) und änderbar *(neu in 0.19, E-43, ergänzt in 0.22)* |
 | Notizen | nein | Freitext bis 1000 Zeichen *(ergänzt in 0.22)* |
+| Runden | nein | Nur aus einem Notizblock (FA-NB-07): die Punkte jeder Person je Runde, mindestens eine Runde, für alle Beteiligten; ganze Zahlen im Betrag bis 99 999. Die Punkte des Ergebnisses sind dann die Summen der Runden und werden nicht eigens eingegeben. Nie mit einer Rangfolge; wer beim Bearbeiten auf „Sieger oder Rangfolge“ schaltet, verwirft die Runden nach Warnung *(neu in 0.23)* |
+| Ziel | nein | Nur mit Runden: das Ziel des Notizblocks, Punktzahl oder Rundenzahl von 1 bis 99 999 (FA-NB-06) *(neu in 0.23)* |
 
 **Sieger aus Punkten** *(neu in 0.21, geändert in 0.22, E-47)*: Sind alle Punkte eingetragen, sind die Personen mit der besten Punktzahl die Sieger (bei „Wenigste Punkte gewinnen“ die niedrigste, sonst die höchste). Gewählt wird nur bei Gleichstand an der Spitze, und nur unter den Besten: bei eigenen Spielen sind zunächst alle Besten Sieger, also ein Unentschieden, und ich kann es auf einen Teil von ihnen verkleinern, etwa wenn ein Spiel den Gleichstand mit einer eigenen Regel auflöst; bei Catan wähle ich genau eine Person. Bei einer Rangfolge sind die Personen auf Platz 1 die Sieger; sie werden nicht eigens gewählt.
 
@@ -479,7 +488,7 @@ Als Nutzer möchte ich Gruppen mit fester Zusammensetzung anlegen, damit Statist
 Bezug: FA-PG-02, FA-PG-03, FA-PG-04, FA-PG-09, FA-PG-10 → 3.4
 
 - **AK-1:** Gegeben mindestens zwei Personen, wenn ich 2 bis 12 Mitglieder auswähle, eine Bindung (global oder genau ein Spiel) festlege und speichere, dann ist die Gruppe angelegt.
-- **AK-2:** Gegeben ich habe Mitglieder ausgewählt, dann schlägt die App einen Gruppennamen aus den Vornamen der Mitglieder vor, den ich ändern kann. Der Name ist Pflicht.
+- **AK-2:** Gegeben ich lege eine Gruppe an, dann ist das Namensfeld leer und zeigt nur ein Beispiel („z. B. Freitagsrunde“); die App schlägt keinen Namen vor. Der Name ist Pflicht. *(geändert in 0.23: vorher ein Vorschlag aus den Vornamen der Mitglieder, der bei vielen Mitgliedern zu lang wurde; einen selbst gewählten Namen findet man immer wieder, Entscheidung des Product Owners 25.11.2026)*
 - **AK-3:** Gegeben weniger als 2 oder mehr als 12 Mitglieder, wenn ich speichern will, dann ist das nicht möglich.
 - **AK-4:** Gegeben mehr als 4 Mitglieder, dann ist die Bindung an Catan nicht wählbar und die App nennt den Grund.
 - **AK-5:** Gegeben eine Person gehört bereits einer Gruppe an, wenn ich sie einer weiteren Gruppe hinzufüge, dann ist das zulässig.
@@ -1054,6 +1063,54 @@ Bezug: NFA-GB-03
 - **AK-3:** Gegeben ich wähle ein Design oder eine Akzentfarbe, dann wirkt die Wahl sofort und bleibt gespeichert.
 - **AK-4:** Gegeben ein beliebiges Design, dann sind Catan- und Gruppenfarben unverändert und gut erkennbar.
 
+### 4.16 Notizblock (NB) *(neu in 0.23)*
+
+#### US-NB-01 Notizblock starten · S
+Als Nutzer möchte ich bei einem eigenen Spiel mit Punkten einen Notizblock starten, damit die App die Punkte während des Spiels mitschreibt.
+Bezug: FA-NB-01, FA-NB-02, FA-AB-07, E-51 → 3.5
+
+- **AK-1:** Gegeben der Start, wenn ich „Notizblock“ wähle, dann sehe ich nur die aktiven eigenen Spiele mit Punkten; nach dem Spiel wähle ich den Tisch, bei nur einem passenden Tisch entfällt die Wahl.
+- **AK-2:** Gegeben das Formular eines neuen Ergebnisses zu einem eigenen Spiel mit Punkten, dann startet ein Knopf neben der Überschrift „Ergebnis“ den Notizblock mit diesem Spiel und Tisch. Bei Catan, bei Spielen ohne Punkte, beim Bearbeiten und aus einer laufenden Partie fehlt der Knopf.
+- **AK-3:** Gegeben Spiel und Tisch sind gewählt, dann öffnet sich der leere Notizblock mit dem Blatt „Los geht’s“ (US-NB-03); erst „Starten“ startet ihn. Zurück verwirft die Wahl.
+- **AK-4:** Gegeben ein Notizblock läuft, dann zeigt der Start ihn mit Spiel, Tisch und Runde, und ein Tipp öffnet ihn; wähle ich „Partie“, weist die App auf den laufenden Notizblock hin und bietet „Zum Notizblock“ an. Läuft eine Catan-Partie, startet kein Notizblock, die App bietet „Zur Partie“ an.
+- **AK-5:** Gegeben ein laufender Notizblock, wenn ich die App schließe und neu öffne, dann sind alle gespeicherten Runden und die Einstellungen unverändert.
+
+#### US-NB-02 Runden eintragen und korrigieren · S
+Als Nutzer möchte ich nach jeder Runde die Punkte aller Personen eintragen und Fehler korrigieren, damit Stand und Plätze jederzeit stimmen.
+Bezug: FA-NB-03, FA-NB-04, E-54, E-55 → 3.5
+
+- **AK-1:** Gegeben der Notizblock, dann sehe ich je Person eine Spalte und je Runde eine Zeile mit dem Stand nach der Runde und den Punkten der Runde, darunter die neue Runde und die Plätze nach dem Stand (geteilte Plätze wie 1, 2, 2, 4). Die Namenszeile bleibt beim Scrollen stehen; passen nicht alle Personen nebeneinander, verschiebe ich die Tabelle waagerecht, die Rundennummern bleiben stehen.
+- **AK-2:** Gegeben ich tippe ein Feld der neuen Runde, dann erscheint die Tastatur des Geräts und darüber eine Leiste mit allen Personen, Name, Runde, der Zahl und einem Knopf ±, der das Vorzeichen wechselt; „Weiter“ springt zur nächsten Person, ein Tipp auf eine Person in der Leiste zu ihr.
+- **AK-3:** Gegeben für alle Personen ist ein Wert eingetragen, wenn ich „Weiter“ bzw. „Fertig“ tippe oder die Tastatur schließe, dann ist die Runde gespeichert. Fehlt noch jemand, bleibt die Runde offen und die App sagt „Noch nicht alle eingetragen“.
+- **AK-4:** Gegeben eine gespeicherte Runde, wenn ich eine Zahl antippe, dann kann ich sie ändern; Stand und Plätze folgen sofort. Tippe ich die Rundennummer an, fragt die App „Runde ‹n› löschen?“ und löscht sie nach Bestätigung.
+- **AK-5:** Gegeben eine Eingabe, dann sind nur ganze Zahlen im Betrag bis 99 999 zulässig, auch für den Stand.
+
+#### US-NB-03 Ziel und Rechenweise · S
+Als Nutzer möchte ich je Notizblock ein Ziel und die Rechenweise festlegen, damit die App an das Ende erinnert und so rechnet, wie wir am Tisch zählen.
+Bezug: FA-NB-05, FA-NB-06, E-52
+
+- **AK-1:** Gegeben der Start eines Notizblocks, dann öffnet sich einmal das Blatt „Los geht’s“ mit „Ziel“ (Kein Ziel, Punkte, Runden) und „Rechnen“ (App rechnet, Selbst rechnen); Standard ist kein Ziel und „App rechnet“. Später öffnet der Regler im Kopf dasselbe Blatt als „Einstellungen“; Änderungen gelten nur für diesen Notizblock.
+- **AK-2:** Gegeben „Punkte“ oder „Runden“, dann wähle ich 50, 100, 200, 500 bzw. 5, 10, 15, 20 oder unter „Andere“ eine eigene Zahl von 1 bis 99 999; der Kopf zeigt das Ziel als „100P“ bzw. „15R“.
+- **AK-3:** Gegeben „Selbst rechnen“, dann tippe ich den neuen Stand ein und die App speichert die Differenz als Punkte der Runde; der Notizblock zeigt nur die Stände, die Plätze bleiben. Ändere ich einen Stand, bleiben die späteren Stände gleich. Umschalten ist jederzeit möglich, nichts geht verloren.
+- **AK-4:** Gegeben ein Ziel, wenn eine gespeicherte Runde es erreicht, dann zeigt die App einmal „Ziel erreicht“ mit dem Stand nach Plätzen und den Knöpfen „Weiterspielen“ und „Ergebnis speichern“; danach erinnert sie nicht erneut, bis das Ziel geändert wird. Sie beendet den Notizblock nie selbst.
+
+#### US-NB-04 Notizblock beenden · S
+Als Nutzer möchte ich den Notizblock als Ergebnis speichern oder verwerfen, damit die Partie ohne Abschreiben in die Ergebnisse kommt.
+Bezug: FA-NB-02, FA-NB-07, FA-AB-08 → 3.6
+
+- **AK-1:** Gegeben mindestens eine Runde, wenn ich „Ergebnis speichern“ wähle, dann öffnet sich das Ergebnisformular mit den Ständen als Punkten, den Siegern daraus, Datum und Uhrzeit des Starts; Zurück führt in den Notizblock. Ohne Runde ist der Knopf nicht wählbar.
+- **AK-2:** Gegeben das Formular aus dem Notizblock, wenn ich speichere, dann werden Ergebnis, Runden und Ziel gespeichert und der Notizblock in derselben Transaktion beendet; schlägt das Speichern fehl, läuft er weiter.
+- **AK-3:** Gegeben der Notizblock, wenn ich „Beenden ohne Ergebnis“ wähle, dann fragt die App mit der Zahl der Runden nach und verwirft den Notizblock nach Bestätigung ohne Ergebnis.
+
+#### US-NB-05 Runden im Ergebnis · S
+Als Nutzer möchte ich die Runden eines gespeicherten Ergebnisses nachlesen und korrigieren, damit Fehler im Notizblock auch später behebbar sind.
+Bezug: FA-NB-08, FA-NB-09, FA-ER-04, E-53
+
+- **AK-1:** Gegeben ein Ergebnis mit Runden, dann zeigt die Detailansicht unter dem Ergebnis eine Karte „Runden“ mit der Zahl der Runden und dem Ziel; aufgeklappt zeigt sie den Notizblock zum Lesen.
+- **AK-2:** Gegeben ich bearbeite ein Ergebnis mit Runden, dann steht statt der Punktfelder der Notizblock im Formular; ändere ich eine Zahl oder lösche eine Runde, folgen Punkte, Plätze und Sieger. Die letzte Runde lässt sich nicht löschen.
+- **AK-3:** Gegeben ich schalte beim Bearbeiten auf „Sieger oder Rangfolge“, dann warnt die App, dass die Runden verloren gehen und das Ergebnis ohne Punkte nicht in Ø Punkte und Bestwerte eingeht; nach Bestätigung werden die Runden beim Speichern verworfen.
+- **AK-4:** Gegeben Runden sind gespeichert, dann gehen sie in Version 1 nicht in die Statistik ein (PP-24).
+
 ---
 
 ## 5. Nicht-funktionale Anforderungen: Prüfkriterien
@@ -1143,6 +1200,12 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-ER-10 | US-ER-01, US-AB-06, US-AB-07 |
 | FA-ER-11 | US-ER-02 |
 | FA-ER-12 | US-ER-06 |
+| FA-NB-01 | US-NB-01 |
+| FA-NB-02 | US-NB-01, US-NB-04 |
+| FA-NB-03, FA-NB-04 | US-NB-02 |
+| FA-NB-05, FA-NB-06 | US-NB-03 |
+| FA-NB-07 | US-NB-04 |
+| FA-NB-08, FA-NB-09 | US-NB-05 |
 | FA-ST-01, FA-ST-02, FA-ST-05 | US-ST-01 |
 | FA-ST-03 | US-ST-02 |
 | FA-ST-04 | US-ST-04 |

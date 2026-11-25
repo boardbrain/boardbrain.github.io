@@ -33,9 +33,19 @@ async function openEditor(user: User): Promise<void> {
   await user.click(button);
 }
 
-async function bring(user: User, ...names: string[]): Promise<void> {
+async function choose(user: User, ...names: string[]): Promise<void> {
   for (const name of names) {
     await user.click(await screen.findByRole('button', { name }));
+  }
+}
+
+// Brings the persons and, while the name is still empty, names the table after them: the app
+// suggests no name (US-PG-02 AK-2, K-19).
+async function bring(user: User, ...names: string[]): Promise<void> {
+  await choose(user, ...names);
+  const name = screen.getByLabelText('Name des Tisches');
+  if (name instanceof HTMLInputElement && name.value === '') {
+    await user.type(name, names.join(' & '));
   }
 }
 
@@ -79,7 +89,7 @@ describe('US-PG-02 The room with all tables', () => {
     const user = userEvent.setup();
     const db = await setUpEditor(user, 2, 'Anna', 'Ben');
 
-    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
+    await user.click(screen.getByRole('button', { name: 'Tisch anlegen' }));
 
     const room = await screen.findByRole('list', { name: 'Alle Tische' });
     expect(await within(room).findByText('Anna & Ben')).toBeInTheDocument();
@@ -192,34 +202,52 @@ describe('US-VW-05 Search in the room', () => {
 });
 
 describe('US-PG-02 Bring persons to the table', () => {
-  it('AK-2: suggests the name from the members and allows changing it', async () => {
+  it('AK-2: suggests no name, the field shows an example; the typed name counts', async () => {
     const user = userEvent.setup();
-    await setUpEditor(user, 3, 'Anna', 'Ben', 'Clara');
+    const { db } = renderWithApp(<GroupsView />);
+    await addPersons(db, 3);
+    await openEditor(user);
+    await choose(user, 'Anna', 'Ben', 'Clara');
 
-    const name = screen.getByLabelText('Gruppenname');
-    expect(name).toHaveValue('Anna, Ben & Clara');
-    await user.clear(name);
+    const name = screen.getByLabelText('Name des Tisches');
+    expect(name).toHaveValue('');
+    expect(name).toHaveAttribute('placeholder', 'z. B. Freitagsrunde');
+    expect(screen.getByRole('button', { name: 'Tisch anlegen' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     await user.type(name, 'Freitag');
     expect(name).toHaveValue('Freitag');
+    expect(screen.getByRole('button', { name: 'Tisch anlegen' })).toHaveAttribute(
+      'aria-disabled',
+      'false',
+    );
   });
 
   it('AK-2: the name is required', async () => {
     const user = userEvent.setup();
     await setUpEditor(user, 2, 'Anna', 'Ben');
 
-    await user.clear(screen.getByLabelText('Gruppenname'));
+    await user.clear(screen.getByLabelText('Name des Tisches'));
 
-    expect(screen.getByRole('button', { name: 'Gruppe anlegen' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Tisch anlegen' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
-  it('AK-3: saving is impossible with fewer than two members', async () => {
+  it('AK-3: saving is impossible with fewer than two members; a tap only shows what is missing', async () => {
     const user = userEvent.setup();
-    await setUpEditor(user, 2, 'Anna');
-    const save = screen.getByRole('button', { name: 'Gruppe anlegen' });
+    const db = await setUpEditor(user, 2, 'Anna');
+    const save = screen.getByRole('button', { name: 'Tisch anlegen' });
 
-    expect(save).toBeDisabled();
+    // As in the result form: the button only looks disabled, a tap lights up the bench.
+    expect(save).toHaveAttribute('aria-disabled', 'true');
+    await user.click(save);
+    expect(await db.groups.count()).toBe(0);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     await bring(user, 'Ben');
-    expect(save).toBeEnabled();
+    expect(save).toHaveAttribute('aria-disabled', 'false');
   });
 
   it('AK-3: the 13th person cannot join', async () => {
@@ -296,7 +324,7 @@ describe('US-PG-02 Bring persons to the table', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Anderes Spiel ▾' }));
     await user.click(screen.getByRole('button', { name: 'Nur Uno' }));
-    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
+    await user.click(screen.getByRole('button', { name: 'Tisch anlegen' }));
 
     await waitFor(async () => {
       expect((await db.groups.toArray())[0]?.binding).toEqual({ kind: 'game', gameId: uno.id });
@@ -306,12 +334,12 @@ describe('US-PG-02 Bring persons to the table', () => {
   it('AK-5: a person from another group can join another table', async () => {
     const user = userEvent.setup();
     const db = await setUpEditor(user, 3, 'Anna', 'Ben');
-    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
+    await user.click(screen.getByRole('button', { name: 'Tisch anlegen' }));
     await screen.findByText('Anna & Ben');
 
     await openEditor(user);
     await bring(user, 'Anna', 'Clara');
-    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
+    await user.click(screen.getByRole('button', { name: 'Tisch anlegen' }));
 
     await waitFor(async () => {
       expect(await db.groups.count()).toBe(2);
@@ -330,7 +358,10 @@ describe('US-PG-02 Bring persons to the table', () => {
     await bring(user, 'anna', 'Anna');
 
     expect(screen.getByRole('alert')).toHaveTextContent('Diese Personen heißen gleich: anna, Anna');
-    expect(screen.getByRole('button', { name: 'Gruppe anlegen' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Tisch anlegen' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 });
 
@@ -352,7 +383,7 @@ describe('E-27 Exclude Catan', () => {
     const db = await setUpEditor(user, 3, 'Anna', 'Ben', 'Clara');
     await user.click(screen.getByRole('switch', { name: /Catan ausschließen/ }));
 
-    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
+    await user.click(screen.getByRole('button', { name: 'Tisch anlegen' }));
 
     await waitFor(async () => {
       const [group] = await db.groups.toArray();
@@ -476,7 +507,7 @@ describe('US-PG-03 Colours of a group', () => {
       }),
     );
 
-    await user.click(screen.getByRole('button', { name: 'Gruppe anlegen' }));
+    await user.click(screen.getByRole('button', { name: 'Tisch anlegen' }));
 
     await waitFor(async () => {
       const [group] = await db.groups.toArray();
@@ -593,10 +624,16 @@ describe('US-PG-02 AK-8 Unique table names', () => {
     expect(within(editor).getByRole('alert')).toHaveTextContent(
       'Es gibt bereits einen Tisch namens „Anna & Ben“. Bitte wähle einen anderen Namen.',
     );
-    expect(within(editor).getByRole('button', { name: 'Gruppe anlegen' })).toBeDisabled();
+    expect(within(editor).getByRole('button', { name: 'Tisch anlegen' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
 
-    await user.type(within(editor).getByLabelText('Gruppenname'), ' 2');
+    await user.type(within(editor).getByLabelText('Name des Tisches'), ' 2');
     expect(within(editor).queryByRole('alert')).not.toBeInTheDocument();
-    expect(within(editor).getByRole('button', { name: 'Gruppe anlegen' })).toBeEnabled();
+    expect(within(editor).getByRole('button', { name: 'Tisch anlegen' })).toHaveAttribute(
+      'aria-disabled',
+      'false',
+    );
   });
 });

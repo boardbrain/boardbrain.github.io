@@ -7,6 +7,8 @@ import { PressableButton } from './Pressable';
 type BackButtonProps = {
   /** Destination when the page was opened directly, e.g. via a saved address. */
   readonly fallback: string;
+  /** Leads elsewhere than back, e.g. a running score pad always to the start. */
+  readonly onBack?: () => void;
 };
 
 /**
@@ -14,14 +16,14 @@ type BackButtonProps = {
  * start → persons → back leads to the start view. Without a previous page it leads to the
  * fallback.
  */
-export function BackButton({ fallback }: BackButtonProps): React.JSX.Element {
+export function BackButton({ fallback, onBack }: BackButtonProps): React.JSX.Element {
   const goBack = useGoBack(fallback);
   return (
     <PressableButton
       type="button"
       className={styles.button}
       aria-label={t('allgemein.zurueck')}
-      onClick={goBack}
+      onClick={onBack ?? goBack}
     >
       <BackIcon />
     </PressableButton>

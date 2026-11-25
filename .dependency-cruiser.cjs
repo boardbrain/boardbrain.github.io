@@ -6,6 +6,7 @@ const CORE_MODULES = [
   'draws',
   'generation',
   'results',
+  'scorepad',
   'stats',
   'exchange',
   'backup',

@@ -12,6 +12,14 @@ async function createPersons(page: Page, ...names: string[]): Promise<void> {
   }
 }
 
+// The app suggests no table name (US-PG-02 AK-2, K-19): the tests name a table after its members
+// as the earlier suggestion did, "Anna, Ben & Clara".
+function tableName(names: readonly string[]): string {
+  return names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} & ${names.at(-1) ?? ''}`;
+}
+
 async function createTable(page: Page, ...names: string[]): Promise<void> {
   await page.goto('/#/verwaltung/gruppen');
   await page.getByRole('button', { name: 'Neuer Tisch' }).first().click();
@@ -19,7 +27,8 @@ async function createTable(page: Page, ...names: string[]): Promise<void> {
   for (const name of names) {
     await editor.getByRole('button', { name, exact: true }).click();
   }
-  await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+  await editor.getByLabel('Name des Tisches').fill(tableName(names));
+  await page.getByRole('button', { name: 'Tisch anlegen' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }
 
@@ -56,7 +65,10 @@ test.describe('US-VW-06 Rename a person', () => {
     await expect(page.getByRole('alert')).toContainText(
       'Es gibt bereits eine Person namens „ben“.',
     );
-    await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
 
     // AK-1: the new name everywhere.
     await field.fill('Anna');
@@ -76,7 +88,10 @@ test.describe('US-VW-06 Rename a person', () => {
     await expect(page.getByRole('alert')).toContainText(
       'Es gibt bereits eine Person namens „clara“. Bitte wähle einen anderen Namen.',
     );
-    await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   test('leaving with an unsaved name asks first', async ({ page }) => {
@@ -128,7 +143,7 @@ test.describe('US-VW-02 Edit a table', () => {
     ).toBeVisible();
     await expect(editor.getByRole('heading', { name: 'Wer spielt mit?' })).toHaveCount(0);
     // AK-1 and AK-6: new name, Catan excluded, so the Catan colours go.
-    await editor.getByLabel('Gruppenname').fill('Spieleabend');
+    await editor.getByLabel('Name des Tisches').fill('Spieleabend');
     await editor.getByRole('switch', { name: /Catan ausschließen/ }).click();
     await expect(editor.getByRole('group', { name: /^Catan-Farbe/ })).toHaveCount(0);
     await editor.getByRole('button', { name: 'Änderungen speichern' }).click();
@@ -154,12 +169,15 @@ test.describe('US-VW-02 Edit a table', () => {
 
     await page.getByRole('link', { name: 'Bearbeiten' }).click();
     const editor = page.getByRole('dialog', { name: 'Tisch bearbeiten' });
-    await editor.getByLabel('Gruppenname').fill('anna & clara');
+    await editor.getByLabel('Name des Tisches').fill('anna & clara');
 
     await expect(editor.getByRole('alert')).toContainText(
       'Es gibt bereits einen Tisch namens „anna & clara“.',
     );
-    await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+    await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   test('AK-3: Catan is blocked for five persons', async ({ page }) => {
@@ -181,7 +199,7 @@ test.describe('US-VW-02 Edit a table', () => {
     await createTable(page, 'Anna', 'Ben');
     await openTable(page, 'Anna & Ben');
     await page.getByRole('link', { name: 'Bearbeiten' }).click();
-    await page.getByLabel('Gruppenname').fill('Zu zweit');
+    await page.getByLabel('Name des Tisches').fill('Zu zweit');
 
     await page.goBack();
     await page.getByRole('button', { name: 'Verwerfen' }).click();
@@ -211,7 +229,10 @@ test.describe('US-VW-07 Edit a custom game', () => {
     for (const taken of ['skyjo', 'CATAN']) {
       await field.fill(taken);
       await expect(editor.getByText('Name gibt es schon')).toBeVisible();
-      await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toBeDisabled();
+      await expect(editor.getByRole('button', { name: 'Änderungen speichern' })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
     }
     await field.fill('UNO');
     await editor.getByRole('button', { name: 'Änderungen speichern' }).click();

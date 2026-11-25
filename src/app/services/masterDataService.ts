@@ -155,7 +155,8 @@ export type MasterDataService = {
    * Changes whether a custom game counts points and which score wins (US-VW-07 AK-3, FA-SP-07).
    * Changing the direction is allowed; it changes the places and statistics of stored results,
    * which the form warns about. Switching points off is rejected with `scoring-in-use` while a
-   * result of the game has points (AK-4). Supported games and unknown ids throw.
+   * result of the game has points (AK-4) or a score pad of the game runs (FA-AB-09). Supported
+   * games and unknown ids throw.
    */
   changeCustomGameScoring(
     input: ChangeCustomGameScoringInput,
@@ -277,13 +278,18 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
     },
 
     async editGroup({ groupId, name, binding, colors }) {
-      return store.transaction(async ({ customGames, groups, session }) => {
+      return store.transaction(async ({ customGames, groups, session, scorePad }) => {
         const allGroups = await groups.listAll();
         const group = allGroups.find((candidate) => candidate.id === groupId);
         assert(group !== undefined, `group ${groupId} exists`);
         // US-VW-02 AK-5, Architecture 10.4: the service checks the lock itself, not only the UI.
         // Name and colours stay changeable; the match keeps the colours it started with.
-        if (!isSameBinding(group.binding, binding) && (await session.get())?.groupId === groupId) {
+        // FA-NB-02: a running score pad locks its table like a match.
+        if (
+          !isSameBinding(group.binding, binding) &&
+          ((await session.get())?.groupId === groupId ||
+            (await scorePad.get())?.groupId === groupId)
+        ) {
           return err('group-in-session');
         }
         const boundGame =
@@ -330,11 +336,16 @@ export function createMasterDataService(deps: MasterDataServiceDependencies): Ma
     },
 
     async changeCustomGameScoring({ gameId, scoring }) {
-      return store.transaction(async ({ customGames, matches }) => {
+      return store.transaction(async ({ customGames, matches, scorePad }) => {
         const game = (await customGames.listAll()).find((candidate) => candidate.id === gameId);
         assert(game !== undefined, `custom game ${gameId} exists`);
-        // US-VW-07 AK-4: stored points would lose their meaning without the setting.
-        if (scoring === null && game.scoring !== undefined && (await matches.hasScores(gameId))) {
+        // US-VW-07 AK-4: stored points would lose their meaning without the setting; FA-AB-09:
+        // a running score pad of the game needs them as well.
+        if (
+          scoring === null &&
+          game.scoring !== undefined &&
+          ((await matches.hasScores(gameId)) || (await scorePad.get())?.gameId === gameId)
+        ) {
           return err('scoring-in-use');
         }
         const changed = changeCustomGameScoring(game, scoring, clock.now());

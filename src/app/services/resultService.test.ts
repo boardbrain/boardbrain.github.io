@@ -27,6 +27,7 @@ import {
   toPersonId,
   type Group,
 } from '@/core/model';
+import { createScorePad, type ScorePad } from '@/core/scorepad';
 import { InvariantError, type Result } from '@/core/shared';
 import { CATAN_GAME_ID, type CatanOptions } from '@/games/catan';
 import { gameCapabilities } from '@/games/registry';
@@ -588,5 +589,113 @@ describe('US-ER-05 Change and delete a result (service)', () => {
     });
     expect(await launch().delete(missing)).toEqual({ ok: false, error: 'match-not-found' });
     expect(await launch().draftOf(missing)).toEqual({ ok: false, error: 'match-not-found' });
+  });
+});
+
+describe('US-NB-04 End a score pad with a result (service)', () => {
+  const SKYJO = aCustomGame({
+    id: toGameId('00000000-0000-4000-8000-0000000000b5'),
+    name: 'Skyjo',
+    scoring: 'lowest-wins',
+  });
+  const [first, second] = aGroup().members.map((member) => member.personId);
+  const P1 = defined(first, 'first member');
+  const P2 = defined(second, 'second member');
+  const ROUNDS = [
+    { [P1]: 12, [P2]: 25 },
+    { [P1]: 8, [P2]: -30 },
+  ];
+
+  function runningPad(rounds = ROUNDS): ScorePad {
+    return {
+      ...createScorePad({
+        gameId: SKYJO.id,
+        groupId: aGroup().id,
+        participants: [P1, P2],
+        startedAt: '2026-10-07T17:15:00.000Z',
+        settings: { target: { kind: 'points', value: 100 }, calculation: 'self' },
+      }),
+      rounds,
+    };
+  }
+
+  beforeEach(() => {
+    store = new InMemoryResultStore([aGroup()], [SKYJO]);
+  });
+
+  it('AK-1: the form starts with the sums, their winners, the start, rounds and target', async () => {
+    store.scorePad = runningPad();
+    const draft = await value(launch().draftFromScorePad());
+    expect(draft).toMatchObject({ groupId: aGroup().id, gameId: SKYJO.id, participants: [P1, P2] });
+    expect(draft.values).toEqual({
+      date: '2026-10-07',
+      time: '17:15',
+      winnerIds: [P2],
+      scores: { [P1]: 20, [P2]: -5 },
+      rounds: ROUNDS,
+      target: { kind: 'points', value: 100 },
+    });
+  });
+
+  it('AK-1: without a round or a score pad there is no result', async () => {
+    store.scorePad = runningPad([]);
+    expect(await launch().draftFromScorePad()).toEqual({ ok: false, error: 'score-pad-empty' });
+    store.scorePad = { ...runningPad(), schemaVersion: 9 };
+    expect(await launch().draftFromScorePad()).toEqual({
+      ok: false,
+      error: 'score-pad-unsupported',
+    });
+    store.scorePad = undefined;
+    expect(await launch().draftFromScorePad()).toEqual({ ok: false, error: 'no-score-pad' });
+    expect(await launch().recordFromScorePad({ date: '2026-10-07', winnerIds: [P1] })).toEqual({
+      ok: false,
+      error: 'no-score-pad',
+    });
+  });
+
+  it('AK-2: storing the result keeps rounds and target and ends the score pad', async () => {
+    store.scorePad = runningPad();
+    const service = launch();
+    const draft = await value(service.draftFromScorePad());
+    const match = await value(service.recordFromScorePad(draft.values));
+    expect(match).toMatchObject({
+      gameId: SKYJO.id,
+      scores: { [P1]: 20, [P2]: -5 },
+      rounds: ROUNDS,
+      target: { kind: 'points', value: 100 },
+    });
+    expect(store.matches).toEqual([match]);
+    expect(store.scorePad).toBeUndefined();
+  });
+
+  it('AK-2: if storing fails, the score pad keeps running', async () => {
+    store.scorePad = runningPad();
+    const service = launch();
+    const draft = await value(service.draftFromScorePad());
+    expect(await service.recordFromScorePad({ ...draft.values, date: '2099-01-01' })).toEqual({
+      ok: false,
+      error: 'date-in-future',
+    });
+    expect(store.scorePad).toEqual(runningPad());
+  });
+
+  it('US-NB-05 AK-2: changing the result keeps its rounds', async () => {
+    store.scorePad = runningPad();
+    const service = launch();
+    const draft = await value(service.draftFromScorePad());
+    const match = await value(service.recordFromScorePad(draft.values));
+    const again = await value(service.draftOf(match.id));
+    expect(again.values.rounds).toEqual(ROUNDS);
+    expect(again.values.target).toEqual({ kind: 'points', value: 100 });
+    const changedRounds = [ROUNDS[0] ?? {}, { [P1]: 8, [P2]: 30 }];
+    const edited = await value(
+      service.edit(match.id, {
+        ...again.values,
+        rounds: changedRounds,
+        scores: { [P1]: 20, [P2]: 55 },
+        winnerIds: [P1],
+      }),
+    );
+    expect(edited.rounds).toEqual(changedRounds);
   });
 });

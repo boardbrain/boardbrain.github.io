@@ -1,5 +1,6 @@
 import type { SessionRepositories, SessionStore } from '@/app/ports';
 import { CURRENT_SESSION_ID } from '@/core/generation';
+import { SCORE_PAD_ID } from '@/core/scorepad';
 import type { BoardBrainDb } from './database';
 
 function repositories(db: BoardBrainDb): SessionRepositories {
@@ -10,6 +11,9 @@ function repositories(db: BoardBrainDb): SessionRepositories {
         await db.session.put(session);
       },
       delete: () => db.session.delete(CURRENT_SESSION_ID),
+    },
+    scorePad: {
+      get: () => db.scorePad.get(SCORE_PAD_ID),
     },
     groups: {
       listAll: () => db.groups.toArray(),
@@ -25,6 +29,7 @@ function repositories(db: BoardBrainDb): SessionRepositories {
 export function createDexieSessionStore(db: BoardBrainDb): SessionStore {
   const repos = repositories(db);
   return {
-    transaction: (work) => db.transaction('rw', [db.session, db.groups], () => work(repos)),
+    transaction: (work) =>
+      db.transaction('rw', [db.session, db.scorePad, db.groups], () => work(repos)),
   };
 }

@@ -1,15 +1,6 @@
-import { animate, useReducedMotion } from 'motion/react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
-import {
-  findByName,
-  parseGroupId,
-  sortByName,
-  type CustomGame,
-  type GameId,
-  type Group,
-} from '@/core/model';
-import type { PlayedGame } from '@/core/results';
+import { findByName, parseGroupId, type CustomGame, type GameId, type Group } from '@/core/model';
 import { CATAN_GAME_ID } from '@/games/catan';
 import { canGroupPlay } from '@/games/registry';
 import { useCustomGames, useGroup, usePlayedGames } from '@/infra/db/readHooks';
@@ -19,53 +10,24 @@ import { LandscapePicture } from '@/ui/art/Pictures';
 import { BackButton } from '@/ui/components/BackButton';
 import { cx } from '@/ui/components/classNames';
 import { SearchButton, SearchRow } from '@/ui/components/SearchControls';
-import { PlusIcon, SortAzIcon, SortRecentIcon, TrophyIcon } from '@/ui/components/Icons';
+import { PlusIcon, TrophyIcon } from '@/ui/components/Icons';
 import { PressableButton, PressableLink } from '@/ui/components/Pressable';
-import { Swap } from '@/ui/components/Swap';
 import { CatanGameCard, CustomGameCard, GameGrid } from '@/ui/views/games/GameCards';
+import {
+  GAME_SEARCH_LABELS,
+  SortButton,
+  sortGames,
+  useGameOrder,
+  useSortGlide,
+} from '@/ui/views/games/GameListTools';
 import { localToday } from '@/ui/views/games/dates';
 import gameStyles from '@/ui/views/games/GameCards.module.css';
 import { DevCard } from './DevCard';
 import shared from './Match.module.css';
 import styles from './GameChoiceView.module.css';
 
-const SORT_ICON_SIZE = 22;
-const ICON_FROM = { opacity: 0, scale: 0.6 };
-// Sorted anew, every card glides from its old place to the new one (PO 21.11.: no blinking).
-const GLIDE = { duration: 0.35, ease: 'easeInOut' } as const;
-const SEARCH_LABELS = {
-  open: t('spiele.suchen'),
-  field: t('spiele.suchfeld'),
-  close: t('spiele.suchfeldSchliessen'),
-};
 const PLUS_SIZE = 14;
 const TROPHY_SIZE = 40;
-
-type Order = 'recent' | 'name';
-
-// The order chosen last comes back (Product Owner 20.11.2026). A choice of this view on this
-// device, not data: it lives in the browser's storage, not in the database or a backup
-// (Architecture 13.2).
-const ORDER_KEY = 'boardbrain.gameListOrder';
-
-function readOrder(): Order {
-  try {
-    return localStorage.getItem(ORDER_KEY) === 'name' ? 'name' : 'recent';
-  } catch {
-    // Storage blocked, e.g. in a private window: the list starts with the last played.
-    return 'recent';
-  }
-}
-
-// `false` when the storage is blocked: the order then holds until the page is left.
-function storeOrder(order: Order): boolean {
-  try {
-    localStorage.setItem(ORDER_KEY, order);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 type ListedGame =
   | { readonly kind: 'catan'; readonly id: GameId; readonly name: string }
@@ -75,21 +37,6 @@ type ListedGame =
       readonly name: string;
       readonly game: CustomGame;
     };
-
-// SO3: the last played first, never played games after them; the same day and never played
-// games by name. "A–Z" by name only.
-function sortGames(
-  games: readonly ListedGame[],
-  played: ReadonlyMap<GameId, PlayedGame>,
-  order: Order,
-): ListedGame[] {
-  const byName = sortByName(games);
-  if (order === 'name') {
-    return byName;
-  }
-  const last = (game: ListedGame): string => played.get(game.id)?.lastDate ?? '';
-  return byName.toSorted((a, b) => (last(a) === last(b) ? 0 : last(a) < last(b) ? 1 : -1));
-}
 
 // Entered from a table (design I3-C SW4): the form returns to the table afterwards.
 function formHref(gameId: GameId, group: Group): string {
@@ -113,7 +60,7 @@ export function GameChoiceView(): React.JSX.Element | null {
   const customGames = useCustomGames(db);
   const played = usePlayedGames(db);
   const navigate = useNavigate();
-  const [order, setOrder] = useState<Order>(readOrder);
+  const { order, orderWord, otherWord, toggle } = useGameOrder();
   const [isAsking, setIsAsking] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -131,42 +78,13 @@ export function GameChoiceView(): React.JSX.Element | null {
   );
   const games = findByName(sorted, query);
   const listRef = useRef<HTMLUListElement>(null);
-  const isReduced = useReducedMotion() === true;
   const shownIds = games.map((listed) => listed.id).join(' ');
-  const shown = useRef({ order, ids: shownIds });
-
-  // Motion (external system): when the order changes, each card glides from the place it had;
-  // that place is where the card at its old position stands now. Searching moves nothing.
-  useLayoutEffect(() => {
-    const before = shown.current;
-    shown.current = { order, ids: shownIds };
-    const list = listRef.current;
-    if (before.order === order || list === null || isReduced) {
-      return;
-    }
-    const was = before.ids.split(' ');
-    const cards = [...list.children].filter((card) => card instanceof HTMLElement);
-    const ids = shownIds.split(' ');
-    cards.forEach((card, index) => {
-      const from = cards[was.indexOf(ids[index] ?? '')];
-      if (from !== undefined && from !== card) {
-        void animate(
-          card,
-          { x: [from.offsetLeft - card.offsetLeft, 0], y: [from.offsetTop - card.offsetTop, 0] },
-          GLIDE,
-        );
-      }
-    });
-  }, [order, shownIds, isReduced]);
+  useSortGlide(listRef, order, shownIds);
   const trimmedQuery = query.trim();
   const toggleSearch = (): void => {
     setIsSearchOpen(!isSearchOpen);
     setQuery('');
   };
-  const orderWord =
-    order === 'recent' ? t('spielliste.zuletztGespielt') : t('spielliste.alphabetisch');
-  const otherWord =
-    order === 'recent' ? t('spielliste.alphabetisch') : t('spielliste.zuletztGespielt');
   if (groupId !== undefined) {
     if (parsedGroup?.ok !== true || table === null || table?.archived === true) {
       return <Navigate to="/verwaltung/gruppen" replace />;
@@ -199,35 +117,24 @@ export function GameChoiceView(): React.JSX.Element | null {
           {/* A table plays few games: no search there, so the title keeps one line (I3-C). */}
           {fixed === null && (
             <SearchButton
-              labels={SEARCH_LABELS}
+              labels={GAME_SEARCH_LABELS}
               isOpen={isSearchOpen}
               className={shared.iconBtn}
               onToggle={toggleSearch}
             />
           )}
-          <PressableButton
-            type="button"
+          <SortButton
+            order={order}
+            orderWord={orderWord}
+            otherWord={otherWord}
             className={shared.iconBtn}
-            aria-label={t('spielliste.sortieren', { jetzt: orderWord, dann: otherWord })}
-            onClick={() => {
-              const next = order === 'recent' ? 'name' : 'recent';
-              setOrder(next);
-              storeOrder(next);
-            }}
-          >
-            <Swap swapKey={order} from={ICON_FROM} className={styles.sortIcon}>
-              {order === 'recent' ? (
-                <SortRecentIcon size={SORT_ICON_SIZE} />
-              ) : (
-                <SortAzIcon size={SORT_ICON_SIZE} />
-              )}
-            </Swap>
-          </PressableButton>
+            onToggle={toggle}
+          />
         </span>
       </div>
       <SearchRow
         isOpen={isSearchOpen}
-        labels={SEARCH_LABELS}
+        labels={GAME_SEARCH_LABELS}
         query={query}
         closeClassName={shared.iconBtn}
         onQuery={setQuery}

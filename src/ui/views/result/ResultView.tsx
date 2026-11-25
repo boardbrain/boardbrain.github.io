@@ -12,7 +12,14 @@ import {
 import type { ResultInput } from '@/core/results';
 import { err, ok, type Result } from '@/core/shared';
 import { t } from '@/i18n/t';
-import { useCustomGames, useGroup, usePersons } from '@/infra/db/readHooks';
+import { findSupportedGame } from '@/games/registry';
+import {
+  useCurrentScorePad,
+  useCurrentSession,
+  useCustomGames,
+  useGroup,
+  usePersons,
+} from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { BackButton } from '@/ui/components/BackButton';
 import { useGoBack } from '@/ui/components/useGoBack';
@@ -87,11 +94,13 @@ type FormPageProps = {
   readonly draft: ResultDraft;
   readonly gameName: string;
   readonly title: string;
-  readonly isFromMatch: boolean;
+  /** Where the values come from: entered anew, from the running match or the score pad. */
+  readonly origin: 'new' | 'match' | 'pad';
   /** Stores the result: its id, otherwise why not, as a text. */
   readonly save: (input: ResultInput) => Promise<Result<MatchId, string>>;
   readonly onSaved: (note: SavedNote, matchId: MatchId) => void;
   readonly onUnchanged?: (() => void) | undefined;
+  readonly onPad?: (() => void) | undefined;
   readonly backFallback: string;
 };
 
@@ -99,10 +108,11 @@ function FormPage({
   draft,
   gameName,
   title,
-  isFromMatch,
+  origin,
   save,
   onSaved,
   onUnchanged,
+  onPad,
   backFallback,
 }: FormPageProps): React.JSX.Element | null {
   const { db } = useAppDependencies();
@@ -112,9 +122,15 @@ function FormPage({
     return null;
   }
   const colors = new Map(group.members.map((member) => [member.personId, member.groupColor]));
-  const subtitle = isFromMatch
-    ? t('ergebnis.ausDerPartie', { spiel: gameName, tisch: group.name })
-    : t('ergebnis.unterzeile', { spiel: gameName, tisch: group.name });
+  const names = { spiel: gameName, tisch: group.name };
+  const subtitle = t(
+    origin === 'match'
+      ? 'ergebnis.ausDerPartie'
+      : origin === 'pad'
+        ? 'ergebnis.ausDemNotizblock'
+        : 'ergebnis.unterzeile',
+    names,
+  );
   return (
     <main className={shared.main}>
       <div className={shared.pageHead}>
@@ -133,6 +149,7 @@ function FormPage({
         save={save}
         onSaved={onSaved}
         onUnchanged={onUnchanged}
+        onPad={onPad}
       />
     </main>
   );
@@ -145,7 +162,9 @@ function FormPage({
  * shows who won, and the card leads to the result (NM3, NB1).
  */
 export function ResultView(): React.JSX.Element | null {
-  const { results } = useAppDependencies();
+  const { db, results } = useAppDependencies();
+  const session = useCurrentSession(db);
+  const pad = useCurrentScorePad(db);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isFromTable = searchParams.get('von') === 'tisch';
@@ -172,7 +191,18 @@ export function ResultView(): React.JSX.Element | null {
       draft={loaded.draft}
       gameName={name}
       title={t('ergebnis.titel')}
-      isFromMatch={false}
+      origin="new"
+      // US-NB-01 AK-2, FB6: a custom game with points can start the score pad, while no match runs.
+      onPad={
+        findSupportedGame(game.value) === undefined &&
+        loaded.draft.rules.scoring !== null &&
+        session?.status === 'none' &&
+        pad?.status === 'none'
+          ? () => {
+              void navigate(`/notizblock/neu/${gameId}/${groupId}`);
+            }
+          : undefined
+      }
       backFallback={
         isFromTable ? `/verwaltung/gruppen/${group.value}/ergebnis` : `/ergebnis/neu/${gameId}`
       }
@@ -227,7 +257,7 @@ export function MatchResultView(): React.JSX.Element | null {
       draft={loaded.draft}
       gameName={name}
       title={t('ergebnis.titel')}
-      isFromMatch
+      origin="match"
       backFallback="/partie/uebersicht"
       save={async (input) => {
         const stored = await results.recordFromSession(input);
@@ -278,7 +308,7 @@ export function ResultEditView(): React.JSX.Element | null {
       draft={loaded.draft}
       gameName={gameNameOf(loaded.draft.gameId, customGames)}
       title={t('ergebnisse.bearbeitenTitel')}
-      isFromMatch={false}
+      origin="new"
       backFallback={resultHref(groupId, matchId)}
       save={async (input) => {
         const stored = await results.edit(match.value, input);
@@ -286,6 +316,64 @@ export function ResultEditView(): React.JSX.Element | null {
       }}
       onSaved={goBack}
       onUnchanged={goBack}
+    />
+  );
+}
+
+/**
+ * Result of the running score pad `#/notizblock/ergebnis` (US-NB-04, design I3-C2 LA3): filled in
+ * with its sums, winners and start; storing keeps the rounds and ends it. Back leads into the
+ * score pad; without one, to the start.
+ */
+export function PadResultView(): React.JSX.Element | null {
+  const { results } = useAppDependencies();
+  const loaded = useDraft(() => results.draftFromScorePad(), 'pad');
+  if (loaded !== null && 'failed' in loaded) {
+    return <Navigate to="/notizblock" replace />;
+  }
+  if (loaded === null) {
+    return null;
+  }
+  // The game name is read for a fixed id: a live query keeps its last answer while it asks anew.
+  return <PadResultForm draft={loaded.draft} />;
+}
+
+function PadResultForm({ draft }: { readonly draft: ResultDraft }): React.JSX.Element | null {
+  const { results } = useAppDependencies();
+  const navigate = useNavigate();
+  const name = useGameName(draft.gameId);
+  if (name === undefined) {
+    return null;
+  }
+  if (name === null) {
+    return <Navigate to="/notizblock" replace />;
+  }
+  const { groupId } = draft;
+  return (
+    <FormPage
+      draft={draft}
+      gameName={name}
+      title={t('ergebnis.titel')}
+      origin="pad"
+      backFallback="/notizblock"
+      save={async (input) => {
+        const stored = await results.recordFromScorePad(input);
+        if (stored.ok) {
+          return ok(stored.value.id);
+        }
+        // The score pad was ended meanwhile, e.g. in another tab.
+        return err(
+          stored.error === 'no-score-pad' ||
+            stored.error === 'score-pad-unsupported' ||
+            stored.error === 'score-pad-empty'
+            ? t('ergebnis.notizblockBeendet')
+            : t('ergebnis.nichtGespeichert'),
+        );
+      }}
+      onSaved={(note, matchId) => {
+        const saved: SavedResult = { ...note, groupId, matchId };
+        void navigate('/', { replace: true, state: { saved } });
+      }}
     />
   );
 }

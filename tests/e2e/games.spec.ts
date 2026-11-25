@@ -50,7 +50,10 @@ test.describe('US-SP-02 Create a custom game', () => {
     for (const taken of ['uno', 'CATAN']) {
       await editor.getByRole('textbox', { name: 'Name des Spiels' }).fill(taken);
       await expect(editor.getByText('Name gibt es schon')).toBeVisible();
-      await expect(editor.getByRole('button', { name: 'Spiel anlegen' })).toBeDisabled();
+      await expect(editor.getByRole('button', { name: 'Spiel anlegen' })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
     }
 
     await page.reload();

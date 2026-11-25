@@ -109,3 +109,8 @@
   font-size: 1.05rem;
   font-weight: 700;
 }
+
+/* Something is missing: the button only looks disabled, a tap lights up what (nudgeMissing). */
+.looksOff {
+  opacity: 0.5;
+}

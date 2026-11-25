@@ -29,7 +29,6 @@ export {
   findSameNamedPersons,
   GROUP_MAX_PLAYERS_WITH_COLORS,
   GROUP_SIZE,
-  suggestGroupName,
   type BoundGame,
   type Group,
   type GroupBinding,
@@ -59,7 +58,7 @@ export {
   type LocalTime,
   type TimeInvalidError,
 } from './localDateTime';
-export type { Match } from './match';
+export type { Match, ScoreTarget } from './match';
 export {
   areMatchColorsValid,
   matchColorsOf,

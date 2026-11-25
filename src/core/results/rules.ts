@@ -6,6 +6,7 @@ import {
   type LocalTime,
   type Match,
   type PersonId,
+  type ScoreTarget,
   type ScoringDirection,
 } from '@/core/model';
 import { assert, err, ok, type Result } from '@/core/shared';
@@ -51,6 +52,10 @@ export type ResultInput = {
   readonly scores?: Readonly<Record<PersonId, number>>;
   /** Places entered by hand; persons without an entry are missing (FA-ER-12). */
   readonly places?: Readonly<Record<PersonId, number>>;
+  /** Points of every participant per round from a score pad; `scores` are their sums (FA-NB-07). */
+  readonly rounds?: readonly Readonly<Record<PersonId, number>>[];
+  /** Target of the score pad, only with `rounds` (FA-NB-06). */
+  readonly target?: ScoreTarget;
   readonly catanColors?: Readonly<Record<PersonId, CatanColorKey>>;
   readonly durationMinutes?: number;
   readonly notes?: string;
@@ -68,7 +73,8 @@ export type ResultContent = Omit<Match, 'id' | 'groupId' | 'gameId' | 'recordedA
  * points for only some participants (US-ER-02 AK-2) or not whole numbers in the allowed range
  * (AK-3, US-ER-01 AK-8), a winner without the best score although every participant has points
  * (US-ER-02 AK-6, E-47), places for only some participants or places that form no ranking
- * (US-ER-06 AK-2), a duration that is not whole minutes from 1 (US-ER-01 AK-7), notes longer
+ * (US-ER-06 AK-2), points of a round that are not whole numbers in the allowed range
+ * (US-NB-02 AK-5), a duration that is not whole minutes from 1 (US-ER-01 AK-7), notes longer
  * than 1000 characters (US-ER-01 AK-8).
  */
 export type ResultError =
@@ -83,6 +89,7 @@ export type ResultError =
   | 'winner-not-best'
   | 'places-incomplete'
   | 'places-invalid'
+  | 'rounds-invalid'
   | 'duration-invalid'
   | 'notes-too-long';
 
@@ -176,6 +183,56 @@ function assertFitsGame(
   }
 }
 
+// Points of the score pad a round or a total may have, also below 0 (FA-NB-03, US-NB-02 AK-5).
+function isPadNumber(value: number): boolean {
+  return Number.isInteger(value) && Math.abs(value) <= MAX_SCORE;
+}
+
+// FA-NB-07: rounds belong to a game with points; every round has a value for every participant
+// and nobody else, and the points of the result are their sums. The form takes the points from
+// the rounds, so anything else is a programming error.
+function assertFitsRounds(
+  input: ResultInput,
+  participants: readonly PersonId[],
+  rules: ResultRules,
+): void {
+  const { rounds, target } = input;
+  if (target !== undefined) {
+    assert(rounds !== undefined, 'a target only with rounds');
+    assert(
+      Number.isInteger(target.value) && target.value >= 1 && target.value <= MAX_SCORE,
+      'a target is a whole number from 1',
+    );
+  }
+  if (rounds === undefined) {
+    return;
+  }
+  assert(rules.scoring !== null, 'rounds only for a game with points');
+  assert(rounds.length > 0, 'at least one round');
+  assert(
+    rounds.every(
+      (round) =>
+        Object.keys(round).length === participants.length &&
+        participants.every((personId) => round[personId] !== undefined),
+    ),
+    'every round has a value for every participant',
+  );
+  if (
+    !rounds.every((round) => participants.every((personId) => isPadNumber(round[personId] ?? 0)))
+  ) {
+    return;
+  }
+  const scores = input.scores;
+  assert(
+    scores !== undefined &&
+      participants.every(
+        (personId) =>
+          scores[personId] === rounds.reduce((sum, round) => sum + (round[personId] ?? 0), 0),
+      ),
+    'the points are the sums of the rounds',
+  );
+}
+
 // FA-SP-07: the best score is the highest or, if the fewest points win, the lowest.
 function bestScore(scores: readonly number[], rules: ResultRules): number {
   return rules.scoring === 'lowest-wins' ? Math.min(...scores) : Math.max(...scores);
@@ -196,6 +253,7 @@ export function resultErrors(
   today: LocalDate,
 ): ResultError[] {
   assertFitsGame(input, participants, rules);
+  assertFitsRounds(input, participants, rules);
   const errors: ResultError[] = [];
   const date = parseLocalDate(input.date);
   if (!date.ok) {
@@ -248,6 +306,13 @@ export function resultErrors(
   if (hasPlaceOutOfRange || (places.length === participants.length && !isRanking(places))) {
     errors.push('places-invalid');
   }
+  // US-NB-02 AK-5: whole numbers up to 99 999 either way in every round.
+  const rounds = input.rounds ?? [];
+  if (
+    !rounds.every((round) => participants.every((personId) => isPadNumber(round[personId] ?? 0)))
+  ) {
+    errors.push('rounds-invalid');
+  }
   // FA-ER-10: whole minutes from 1.
   const duration = input.durationMinutes;
   if (duration !== undefined && (!Number.isInteger(duration) || duration < 1)) {
@@ -296,6 +361,8 @@ export function checkResult(
     winnerIds: [...input.winnerIds],
     ...(hasScores && input.scores !== undefined ? { scores: { ...input.scores } } : {}),
     ...(hasPlaces && input.places !== undefined ? { places: { ...input.places } } : {}),
+    ...(input.rounds === undefined ? {} : { rounds: input.rounds.map((round) => ({ ...round })) }),
+    ...(input.target === undefined ? {} : { target: { ...input.target } }),
     ...(input.catanColors === undefined ? {} : { catanColors: { ...input.catanColors } }),
     ...(input.durationMinutes === undefined ? {} : { durationMinutes: input.durationMinutes }),
     ...(notes === '' ? {} : { notes }),

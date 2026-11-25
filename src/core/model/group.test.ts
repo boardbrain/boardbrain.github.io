@@ -4,7 +4,6 @@ import {
   createGroup,
   editGroup,
   findSameNamedPersons,
-  suggestGroupName,
   type Group,
   type GroupChanges,
   type NewGroupFields,
@@ -88,13 +87,6 @@ describe('US-PG-02 AK-1: create a group', () => {
 });
 
 describe('US-PG-02 AK-2: name', () => {
-  it('suggests the names of the members', () => {
-    expect(suggestGroupName(people('Anna', 'Ben', 'Clara'))).toBe('Anna, Ben & Clara');
-    expect(suggestGroupName(people('Anna', 'Ben'))).toBe('Anna & Ben');
-    expect(suggestGroupName(people(' Anna '))).toBe('Anna');
-    expect(suggestGroupName([])).toBe('');
-  });
-
   it('requires a name', () => {
     expect(createGroup({ ...fields(people('Anna', 'Ben')), name: '   ' })).toEqual({
       ok: false,

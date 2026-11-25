@@ -99,22 +99,6 @@ export function findSameNamedPersons(persons: readonly Person[]): Person[][] {
   return groups.filter((known) => known.length > 1);
 }
 
-/**
- * Suggests a group name from the names of the members, e.g. "Anna, Ben & Clara"
- * (US-PG-02 AK-2). Empty without members.
- */
-export function suggestGroupName(persons: readonly Person[]): string {
-  const names = persons.map((person) => cleanName(person.name));
-  const last = names.at(-1);
-  if (last === undefined) {
-    return '';
-  }
-  if (names.length === 1) {
-    return last;
-  }
-  return `${names.slice(0, -1).join(', ')} & ${last}`;
-}
-
 // Combines persons and colours into members and checks that the colours fit the colour scheme
 // of the binding (Specification 3.3). Wrong colours are a programming error of the caller.
 function membersWithColors(

@@ -38,6 +38,23 @@ export function formatNumber(value: number): string {
   return NUMBER_FORMAT.format(value);
 }
 
+const MINUS = '−';
+
+/**
+ * A whole number of the score pad with a typographic minus, without grouping so it fits the
+ * narrow columns, e.g. `−2` or `104` (design I3-C2 BD2).
+ */
+export function formatPadNumber(value: number): string {
+  return value < 0 ? `${MINUS}${String(-value)}` : String(value);
+}
+
+/**
+ * Points of a round with their sign, e.g. `+12`, `−2` or `0` (design I3-C2 BD2).
+ */
+export function formatSigned(value: number): string {
+  return value > 0 ? `+${String(value)}` : formatPadNumber(value);
+}
+
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'] as const;
 const BYTES_PER_UNIT = 1000;
 

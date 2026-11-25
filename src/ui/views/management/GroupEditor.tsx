@@ -1,4 +1,5 @@
-import { useId, useState, useTransition, type SubmitEvent } from 'react';
+import { useReducedMotion } from 'motion/react';
+import { useId, useRef, useState, useTransition, type SubmitEvent } from 'react';
 import {
   CATAN_COLOR_KEYS,
   cleanName,
@@ -11,7 +12,6 @@ import {
   isBlankName,
   normalizeColors,
   setMemberColor,
-  suggestGroupName,
   type ColorScheme,
   type CustomGame,
   type GameId,
@@ -28,6 +28,7 @@ import { useAppDependencies } from '@/ui/AppDependencies';
 import { ColorPicker } from '@/ui/components/ColorPicker';
 import { LockIcon, PeopleIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
+import { nudgeMissing } from '@/ui/components/nudge';
 import { UnsavedChangesGuard } from '@/ui/components/UnsavedChangesGuard';
 import { EndMatchDialog } from '@/ui/views/match/EndMatchDialog';
 import { BindingPicker, type BindingOption } from './BindingPicker';
@@ -137,19 +138,22 @@ export function GroupEditor({
   const [choice, setChoice] = useState<BindingChoice>(choiceOf(group));
   const [isCatanExcluded, setIsCatanExcluded] = useState(excludesCatan(group));
   const [activeId, setActiveId] = useState<PersonId | null>(group?.members[0]?.personId ?? null);
-  // `null` while the user has not typed a name: the suggestion is shown then (US-PG-02 AK-2).
+  // `null` while the user has not typed a name: no suggestion, the field stays empty with an
+  // example, so each table gets a name of its own that is found again (US-PG-02 AK-2, K-19).
   const [typedName, setTypedName] = useState<string | null>(group?.name ?? null);
   const [hasSaveFailed, setHasSaveFailed] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
   const nameId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
+  const isReduced = useReducedMotion() === true;
 
   const members = memberIds.flatMap((id) => {
     const person = persons.find((candidate) => candidate.id === id);
     return person === undefined ? [] : [person];
   });
   const scheme = schemeOf(members.length, choice, isCatanExcluded);
-  const name = typedName ?? suggestGroupName(members);
+  const name = typedName ?? '';
   const sameNamed = findSameNamedPersons(members);
   // US-PG-02 AK-3: fewer than 2 or more than 12 members cannot be saved.
   const isCountValid = members.length >= GROUP_SIZE.min && members.length <= GROUP_SIZE.max;
@@ -160,7 +164,7 @@ export function GroupEditor({
       choice !== choiceOf(group) ||
       (choice === null && isCatanExcluded !== excludesCatan(group)) ||
       !sameColors(colors, colorsOf(group)));
-  // Checked while typing, the suggested name as well (US-PG-02 AK-8, US-VW-02 AK-1).
+  // Checked while typing (US-PG-02 AK-8, US-VW-02 AK-1).
   const isNameTaken = containsName(takenNames, name);
   // A blank name is an error only once something was typed, not before members are chosen.
   const isTypedNameBlank = typedName !== null && isBlankName(typedName);
@@ -243,7 +247,11 @@ export function GroupEditor({
     event.preventDefault();
     if (canSave) {
       save();
+      return;
     }
+    // As in the result form (design I3-B E6): the button only looks disabled; a tap lights up
+    // what is missing, the name or the persons (PO 25.11.2026).
+    nudgeMissing(formRef.current, isReduced);
   }
 
   function holderOf(field: 'groupColor' | 'catanColor', color: string): string | undefined {
@@ -283,6 +291,7 @@ export function GroupEditor({
 
   return (
     <form
+      ref={formRef}
       className={styles.form}
       onSubmit={handleSubmit}
       aria-label={t(group === undefined ? 'gruppen.neu' : 'gruppen.bearbeitenTitel')}
@@ -314,12 +323,17 @@ export function GroupEditor({
               {t('gruppen.mitgliederAnzahl', { count: members.length })}
             </span>
           </div>
-          <PersonBench
-            persons={persons}
-            selectedIds={memberIds}
-            isFull={members.length >= GROUP_SIZE.max}
-            onToggle={toggleMember}
-          />
+          <div
+            className={styles.need}
+            data-need={isCountValid && sameNamed.length === 0 ? undefined : ''}
+          >
+            <PersonBench
+              persons={persons}
+              selectedIds={memberIds}
+              isFull={members.length >= GROUP_SIZE.max}
+              onToggle={toggleMember}
+            />
+          </div>
           {sameNamed.length > 0 && (
             <Notice tone="error">
               <p>
@@ -342,7 +356,10 @@ export function GroupEditor({
             size="large"
             selectedId={activePerson?.id}
             onSelect={setActiveId}
-            title={name === '' ? t('gruppen.tischLeer') : name}
+            // Without a typed name: who sits there is asked first, then the table is new.
+            title={
+              name === '' ? t(members.length === 0 ? 'gruppen.tischLeer' : 'gruppen.neu') : name
+            }
             subtitle={
               choice === null
                 ? isSwitchOn
@@ -414,6 +431,8 @@ export function GroupEditor({
             id={nameId}
             type="text"
             autoComplete="off"
+            placeholder={t('gruppen.namePlatzhalter')}
+            data-need={isBlankName(name) || isNameTaken ? '' : undefined}
             value={name}
             onChange={(event) => {
               setTypedName(event.target.value);
@@ -429,9 +448,6 @@ export function GroupEditor({
             <Notice tone="error">
               <p>{t('gruppen.gleicherName', { name: cleanName(name) })}</p>
             </Notice>
-          )}
-          {!isNameTaken && !isTypedNameBlank && group === undefined && (
-            <span className={styles.muted}>{t('gruppen.namenHinweis')}</span>
           )}
         </div>
 
@@ -509,7 +525,11 @@ export function GroupEditor({
         />
       )}
       <div className={styles.saveBar}>
-        <PressableButton type="submit" className={styles.save} disabled={!canSave}>
+        <PressableButton
+          type="submit"
+          className={cx(styles.save, !canSave && styles.looksOff)}
+          aria-disabled={!canSave}
+        >
           {t(group === undefined ? 'gruppen.speichern' : 'gruppen.aenderungenSpeichern')}
         </PressableButton>
       </div>

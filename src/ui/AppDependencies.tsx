@@ -2,6 +2,7 @@ import { createContext, use, type ReactNode } from 'react';
 import type { ErrorLogService } from '@/app/services/errorLogService';
 import type { MasterDataService } from '@/app/services/masterDataService';
 import type { ResultService } from '@/app/services/resultService';
+import type { ScorePadService } from '@/app/services/scorePadService';
 import type { SessionService } from '@/app/services/sessionService';
 import type { RandomSource } from '@/core/random';
 import type { BoardBrainDb } from '@/infra/db/database';
@@ -16,6 +17,8 @@ export type AppDependencies = {
   readonly session: SessionService;
   /** Recording, changing and deleting results (Architecture 4.4). */
   readonly results: ResultService;
+  /** Writing in the running score pad (Architecture 10.5). */
+  readonly scorePad: ScorePadService;
   /**
    * Decorative chance of the views, e.g. which card is pulled out when mixing (Architecture
    * 13.6, NFA-ZF-01); the same source as for drawing. It never decides a result.

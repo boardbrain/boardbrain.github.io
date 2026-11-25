@@ -4,6 +4,15 @@ import type { GameId, GroupId, MatchId, PersonId } from './ids';
 import type { LocalDate, LocalTime } from './localDateTime';
 
 /**
+ * Target of a score pad (FA-NB-06): a number of points one person reaches or a number of rounds,
+ * whole numbers from 1. The app only reminds of it and never ends on its own (E-52).
+ */
+export type ScoreTarget = {
+  readonly kind: 'points' | 'rounds';
+  readonly value: number;
+};
+
+/**
  * A match with its result (FA-ER-02, Specification 3.6, Architecture 7.1). All members of the
  * group took part (E-41), so the match keeps no list of participants. Places from points are not
  * stored but calculated (FA-ER-11, `core/results`); only a ranking entered by hand is stored
@@ -35,6 +44,13 @@ export type Match = {
    * the winners are those on place 1. Never together with `scores`.
    */
   readonly places?: Readonly<Record<PersonId, number>>;
+  /**
+   * Points of every participant in every round of a score pad, oldest round first (FA-NB-07,
+   * E-53); `scores` are then their sums. Missing for a result without a score pad.
+   */
+  readonly rounds?: readonly Readonly<Record<PersonId, number>>[];
+  /** Target of the score pad, only together with `rounds` (FA-NB-06). */
+  readonly target?: ScoreTarget;
   /** Catan colours used in the match (FA-ER-09). */
   readonly catanColors?: Readonly<Record<PersonId, CatanColorKey>>;
   /** Whole minutes from 1 (FA-ER-10). */

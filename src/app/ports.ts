@@ -9,6 +9,7 @@ import type {
   MatchId,
   Person,
 } from '@/core/model';
+import type { ScorePad } from '@/core/scorepad';
 import type { CatanGameState, CatanSetup, CatanStep } from '@/games/catan';
 
 /**
@@ -67,10 +68,50 @@ export type SessionRepository = {
 };
 
 /**
+ * Read and write access to the single running score pad (Architecture 7.3, 10.5). Like the
+ * session it is no user data in the sense of Architecture 7.4.
+ */
+export type ScorePadRepository = {
+  /** The running score pad, or `undefined` if none runs. */
+  get(): Promise<ScorePad | undefined>;
+  /** Stores the score pad; replaces the one stored before. */
+  put(pad: ScorePad): Promise<void>;
+  /** Removes the running score pad, if there is one. */
+  delete(): Promise<void>;
+};
+
+/**
+ * Repositories available inside a score pad transaction.
+ */
+export type ScorePadRepositories = {
+  readonly scorePad: ScorePadRepository;
+  /** The match is only read: at most one running match (FA-AB-07, E-51). */
+  readonly session: Pick<SessionRepository, 'get'>;
+  /** Groups are only read: the participants of the table (E-41). */
+  readonly groups: Pick<GroupRepository, 'listAll'>;
+  /** Custom games are only read: only an active game with points (FA-NB-01). */
+  readonly customGames: Pick<CustomGameRepository, 'listAll'>;
+};
+
+/**
+ * Storage of the running score pad. The score pad service sets the transaction boundary: every
+ * round is stored completely before it is shown (Architecture 10.5).
+ */
+export type ScorePadStore = {
+  /**
+   * Runs `work` in one read-write transaction. If `work` throws, the transaction is rolled
+   * back and the error is passed on. Inside `work`, only the repositories may be awaited.
+   */
+  transaction<T>(work: (repositories: ScorePadRepositories) => Promise<T>): Promise<T>;
+};
+
+/**
  * Repositories available inside a session transaction.
  */
 export type SessionRepositories = {
   readonly session: SessionRepository;
+  /** The score pad is only read: at most one running match (FA-AB-07, E-51). */
+  readonly scorePad: Pick<ScorePadRepository, 'get'>;
   /** Groups are only read: the group of a new match is checked (US-AB-01 AK-1). */
   readonly groups: Pick<GroupRepository, 'listAll'>;
 };
@@ -106,6 +147,8 @@ export type MasterDataRepositories = {
   readonly matches: MatchFacts;
   /** The session is only read, to check the locks during a match (FA-AB-09, Architecture 10.4). */
   readonly session: Pick<SessionRepository, 'get'>;
+  /** The score pad is only read: it locks like a match (FA-NB-02, Architecture 10.4). */
+  readonly scorePad: Pick<ScorePadRepository, 'get'>;
 };
 
 /**
@@ -146,6 +189,8 @@ export type ResultRepositories = {
   readonly customGames: Pick<CustomGameRepository, 'listAll'>;
   /** The running match: its result ends it in the same transaction (FA-AB-08, US-AB-06 AK-2). */
   readonly session: Pick<SessionRepository, 'get' | 'delete'>;
+  /** The running score pad: its result ends it in the same transaction (FA-NB-07). */
+  readonly scorePad: Pick<ScorePadRepository, 'get' | 'delete'>;
 };
 
 /**

@@ -21,9 +21,22 @@ async function openEditor(page: Page): Promise<void> {
   await expect(page.getByRole('dialog', { name: 'Neuer Tisch' })).toBeVisible();
 }
 
+// The app suggests no table name (US-PG-02 AK-2, K-19): the tests name a table after its members
+// as the earlier suggestion did, "Anna, Ben & Clara".
+function tableName(names: readonly string[]): string {
+  return names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} & ${names.at(-1) ?? ''}`;
+}
+
+// Brings the persons and, while the name is still empty, names the table after them.
 async function bring(page: Page, ...names: string[]): Promise<void> {
   for (const name of names) {
     await page.getByRole('dialog').getByRole('button', { name, exact: true }).click();
+  }
+  const field = page.getByLabel('Name des Tisches');
+  if ((await field.inputValue()) === '') {
+    await field.fill(tableName(names));
   }
 }
 
@@ -37,18 +50,18 @@ test.describe('US-PG-02 and US-PG-03 The room and the editor', () => {
 
     await openEditor(page);
     await bring(page, 'Anna', 'Ben');
-    await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+    await page.getByRole('button', { name: 'Tisch anlegen' }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(room.getByText('Anna & Ben')).toBeVisible();
 
     await openEditor(page);
     await bring(page, 'Anna', 'Ben', 'Clara', 'David');
-    await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+    await page.getByRole('button', { name: 'Tisch anlegen' }).click();
     await expect(room.getByText('Anna, Ben, Clara & David')).toBeVisible();
 
     await openEditor(page);
     await bring(page, 'Anna', 'Ben', 'Clara', 'David', 'Eva');
-    await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+    await page.getByRole('button', { name: 'Tisch anlegen' }).click();
     await expect(room.getByText('Anna, Ben, Clara, David & Eva')).toBeVisible();
 
     await page.reload();
@@ -79,7 +92,7 @@ test.describe('US-PG-02 and US-PG-03 The room and the editor', () => {
     await page.getByRole('switch', { name: /Catan ausschließen/ }).click();
 
     await expect(page.getByRole('group', { name: /Catan-Farbe/ })).toHaveCount(0);
-    await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+    await page.getByRole('button', { name: 'Tisch anlegen' }).click();
     await expect(
       page.getByRole('list', { name: 'Alle Tische' }).getByText('Alle Spiele ohne Catan · 3'),
     ).toBeVisible();
@@ -101,7 +114,7 @@ test.describe('US-PG-02 and US-PG-03 The room and the editor', () => {
       'aria-pressed',
       'true',
     );
-    await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+    await page.getByRole('button', { name: 'Tisch anlegen' }).click();
 
     await expect(
       page.getByRole('list', { name: 'Alle Tische' }).getByText('Uno · 2'),
@@ -133,12 +146,12 @@ test.describe('US-PG-02 and US-PG-03 The room and the editor', () => {
     await openRoom(page);
     await openEditor(page);
     await bring(page, 'Anna', 'Ben');
-    await page.getByLabel('Gruppenname').fill('Freitag');
-    await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+    await page.getByLabel('Name des Tisches').fill('Freitag');
+    await page.getByRole('button', { name: 'Tisch anlegen' }).click();
     await openEditor(page);
     await bring(page, 'Ben', 'Clara');
-    await page.getByLabel('Gruppenname').fill('Familie');
-    await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+    await page.getByLabel('Name des Tisches').fill('Familie');
+    await page.getByRole('button', { name: 'Tisch anlegen' }).click();
     const room = page.getByRole('list', { name: 'Alle Tische' });
     await expect(room.getByText('Familie')).toBeVisible();
 

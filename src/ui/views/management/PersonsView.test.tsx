@@ -83,7 +83,10 @@ describe('US-PG-01 Create a person (person management)', () => {
     await expect.poll(personNames).toEqual(['Anna']);
     // Saving has finished once the button is enabled again.
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Speichern' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+        'aria-disabled',
+        'false',
+      );
     });
     expect(screen.getByLabelText('Name')).toHaveValue('Ben');
   });
@@ -106,11 +109,11 @@ describe('US-PG-01 Create a person (person management)', () => {
     const field = await nameField();
     const save = screen.getByRole('button', { name: 'Speichern' });
 
-    expect(save).toBeDisabled();
+    expect(save).toHaveAttribute('aria-disabled', 'true');
     await user.type(field, '   ');
-    expect(save).toBeDisabled();
+    expect(save).toHaveAttribute('aria-disabled', 'true');
     await user.type(field, 'A');
-    expect(save).toBeEnabled();
+    expect(save).toHaveAttribute('aria-disabled', 'false');
   });
 
   it('AK-3: shows a same-named person while typing and blocks saving', async () => {
@@ -125,7 +128,10 @@ describe('US-PG-01 Create a person (person management)', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(
       'Es gibt bereits eine Person namens „anna“. Bitte wähle einen anderen Namen.',
     );
-    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     await user.keyboard('{Enter}');
     expect(await db.persons.count()).toBe(1);
   });
@@ -141,7 +147,10 @@ describe('US-PG-01 Create a person (person management)', () => {
     await user.type(screen.getByLabelText('Name'), 'lena');
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Speichern' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Speichern' })).toHaveAttribute(
+      'aria-disabled',
+      'false',
+    );
   });
 
   it('closes the form with "new person" once persons exist', async () => {

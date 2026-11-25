@@ -5,6 +5,7 @@ import type {
   MasterDataStore,
   StoredSession,
 } from '@/app/ports';
+import type { ScorePad } from '@/core/scorepad';
 import {
   parseLocalDate,
   parseLocalTime,
@@ -91,6 +92,8 @@ export class InMemoryMasterDataStore implements MasterDataStore {
   groups: readonly Group[] = [];
   /** The running match, only read by the master data service (Architecture 10.4). */
   session: StoredSession | undefined = undefined;
+  /** The running score pad, only read for the locks (FA-NB-02). */
+  scorePad: ScorePad | undefined = undefined;
   /** Stored matches, only read: whether points of a game may be switched off (FA-SP-07). */
   matches: readonly Match[] = [];
 
@@ -146,6 +149,9 @@ export class InMemoryMasterDataStore implements MasterDataStore {
       },
       session: {
         get: () => Promise.resolve(this.session),
+      },
+      scorePad: {
+        get: () => Promise.resolve(this.scorePad),
       },
     });
     this.persons = persons;

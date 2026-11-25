@@ -1,6 +1,7 @@
 import { Dexie, type DexieOptions, type Table, type Transaction } from 'dexie';
 import type { ErrorLogEntry, StoredSession } from '@/app/ports';
 import { clockFromVersion4, type ClockVersion4 } from '@/core/generation';
+import type { ScorePad } from '@/core/scorepad';
 import type {
   CustomGame,
   GameId,
@@ -107,6 +108,11 @@ export const SCHEMA_VERSIONS: readonly SchemaVersion[] = [
     stores: {},
     upgrade: upgradeSessionToVersion5,
   },
+  {
+    // I3-C2: the running score pad in a store of its own, nothing to convert (Architecture 10.5).
+    version: 3,
+    stores: { scorePad: 'id' },
+  },
 ];
 
 /**
@@ -125,6 +131,7 @@ export class BoardBrainDb extends Dexie {
   readonly matches: Table<Match, MatchId>;
   readonly meta: Table<MetaEntry, MetaEntry['key']>;
   readonly session: Table<StoredSession, StoredSession['id']>;
+  readonly scorePad: Table<ScorePad, ScorePad['id']>;
 
   /**
    * @param name Database name; tests use a separate name or factory per test.
@@ -149,5 +156,6 @@ export class BoardBrainDb extends Dexie {
     this.matches = this.table('matches');
     this.meta = this.table('meta');
     this.session = this.table('session');
+    this.scorePad = this.table('scorePad');
   }
 }

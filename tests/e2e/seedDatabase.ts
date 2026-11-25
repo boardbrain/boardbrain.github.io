@@ -26,6 +26,7 @@ import {
   type ScoringDirection,
 } from '@/core/model';
 import { checkResult } from '@/core/results';
+import type { ScorePad } from '@/core/scorepad';
 import {
   CATAN_DEFAULT_OPTIONS,
   CATAN_GAME_ID,
@@ -59,6 +60,7 @@ type SeedRecords = {
   readonly games?: readonly CustomGame[];
   readonly matches?: readonly Match[];
   readonly session?: StoredSession;
+  readonly scorePad?: ScorePad;
 };
 
 // Persons and global tables; members get the group and Catan colours in the order the app gives
@@ -101,7 +103,7 @@ async function writeRecords(page: Page, data: SeedRecords): Promise<void> {
   // The app creates the database with its schema on the first start.
   await page.goto('/#/');
   await page.getByRole('navigation', { name: 'Karten' }).waitFor();
-  await page.evaluate(async ({ persons, groups, games = [], matches = [], session }) => {
+  await page.evaluate(async ({ persons, groups, games = [], matches = [], session, scorePad }) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('boardbrain');
       request.onsuccess = () => {
@@ -112,7 +114,7 @@ async function writeRecords(page: Page, data: SeedRecords): Promise<void> {
       };
     });
     const transaction = db.transaction(
-      ['persons', 'groups', 'games', 'matches', 'session'],
+      ['persons', 'groups', 'games', 'matches', 'session', 'scorePad'],
       'readwrite',
     );
     for (const person of persons) {
@@ -129,6 +131,9 @@ async function writeRecords(page: Page, data: SeedRecords): Promise<void> {
     }
     if (session !== undefined) {
       transaction.objectStore('session').put(session);
+    }
+    if (scorePad !== undefined) {
+      transaction.objectStore('scorePad').put(scorePad);
     }
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => {
@@ -352,4 +357,54 @@ export async function seedResults(
   }));
   const matches = results.map((result, index) => matchOf(result, index, group, persons, games));
   await writeRecords(page, { persons, groups, games, matches });
+}
+
+/**
+ * Writes a table and custom games without results straight into the database, for the score pad
+ * (US-NB-01): `scoring` gives the games that count points; with `rounds` a score pad of the first
+ * game runs with these points per round, in seat order. Afterwards the page shows the start view.
+ */
+export async function seedScorePadGames(
+  page: Page,
+  table: SeedTable,
+  games: Readonly<Record<string, ScoringDirection | null>>,
+  rounds?: readonly (readonly number[])[],
+): Promise<void> {
+  const { persons, groups } = recordsOf([table]);
+  const [group] = groups;
+  if (group === undefined) {
+    throw new Error('no table');
+  }
+  const records: CustomGame[] = Object.entries(games).map(([name, scoring], index) => ({
+    id: toGameId(uuid(201 + index)),
+    name,
+    archived: false,
+    ...(scoring === null ? {} : { scoring }),
+    createdAt: NOW,
+    updatedAt: NOW,
+  }));
+  const [first] = records;
+  const participants = group.members.map((member) => member.personId);
+  const scorePad: ScorePad | undefined =
+    rounds === undefined || first === undefined
+      ? undefined
+      : {
+          id: 'current',
+          schemaVersion: 1,
+          gameId: first.id,
+          groupId: group.id,
+          participants,
+          startedAt: NOW,
+          settings: { target: null, calculation: 'app' },
+          rounds: rounds.map((points) =>
+            Object.fromEntries(participants.map((personId, seat) => [personId, points[seat] ?? 0])),
+          ),
+          isTargetNoticed: false,
+        };
+  await writeRecords(page, {
+    persons,
+    groups,
+    games: records,
+    ...(scorePad === undefined ? {} : { scorePad }),
+  });
 }

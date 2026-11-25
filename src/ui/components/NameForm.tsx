@@ -1,7 +1,10 @@
-import { useId, type ReactNode, type SubmitEvent } from 'react';
+import { useReducedMotion } from 'motion/react';
+import { useId, useRef, type ReactNode, type SubmitEvent } from 'react';
 import { isBlankName } from '@/core/model';
 import { t } from '@/i18n/t';
+import { cx } from './classNames';
 import { Notice } from './Notice';
+import { nudgeMissing } from './nudge';
 import styles from './NameForm.module.css';
 import { PressableButton } from './Pressable';
 
@@ -21,7 +24,8 @@ type NameFormProps = {
 
 /**
  * Form for creating a record by name. Saving is impossible while the name is blank
- * (US-PG-01 AK-2), an error is shown or a save is still running.
+ * (US-PG-01 AK-2), an error is shown or a save is still running; the button then only looks
+ * disabled and a tap lights up the field.
  */
 export function NameForm({
   title,
@@ -35,16 +39,23 @@ export function NameForm({
 }: NameFormProps): React.JSX.Element {
   const titleId = useId();
   const inputId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
+  const isReduced = useReducedMotion() === true;
+  const isNameMissing = isBlankName(value) || error !== null;
+  const canSave = !isNameMissing && !isPending;
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>): void {
     event.preventDefault();
-    if (error === null) {
+    if (canSave) {
       onSubmit();
+      return;
     }
+    // Like every form: the button only looks disabled, a tap lights up the name (PO 25.11.2026).
+    nudgeMissing(formRef.current, isReduced);
   }
 
   return (
-    <form className={styles.form} aria-labelledby={titleId} onSubmit={handleSubmit}>
+    <form ref={formRef} className={styles.form} aria-labelledby={titleId} onSubmit={handleSubmit}>
       <h2 id={titleId} className={styles.title}>
         {title}
       </h2>
@@ -56,12 +67,17 @@ export function NameForm({
           type="text"
           autoComplete="off"
           autoFocus={isFocused}
+          data-need={isNameMissing ? '' : undefined}
           value={value}
           onChange={(event) => {
             onValueChange(event.target.value);
           }}
         />
-        <PressableButton type="submit" disabled={isBlankName(value) || error !== null || isPending}>
+        <PressableButton
+          type="submit"
+          className={cx(!canSave && styles.looksOff)}
+          aria-disabled={!canSave}
+        >
           {t('allgemein.speichern')}
         </PressableButton>
       </div>

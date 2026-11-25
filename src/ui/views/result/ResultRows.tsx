@@ -118,6 +118,8 @@ type PointsRowsProps = {
    */
   readonly isPointsRequired: boolean;
   readonly missing: Missing;
+  /** The points come from the score pad and are changed there (US-NB-04 AK-1). */
+  readonly isReadOnly?: boolean;
   readonly onPoints: (personId: PersonId, text: string) => void;
   readonly onCommit: () => void;
   readonly onWinner: (personId: PersonId) => void;
@@ -137,6 +139,7 @@ export function PointsRows({
   rules,
   isPointsRequired,
   missing,
+  isReadOnly = false,
   onPoints,
   onCommit,
   onWinner,
@@ -230,6 +233,7 @@ export function PointsRows({
               placeholder={t('ergebnis.punkte')}
               aria-label={t('ergebnis.punkteVon', { name: person.name })}
               aria-invalid={isBad}
+              readOnly={isReadOnly}
               data-need={missing === 'points' && text.trim() === '' ? 'points' : undefined}
               value={text}
               onChange={(event) => {
