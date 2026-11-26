@@ -7,12 +7,11 @@ import styles from './StatsSheet.module.css';
 const ENTER = { type: 'spring', bounce: 0.15, duration: 0.4 } as const;
 const LEAVE = { duration: 0.22, ease: [0.4, 0, 1, 1] } as const;
 const SNAP_BACK = { type: 'spring', bounce: 0.2, duration: 0.35 } as const;
-/** Pulled down further than this share of its height (at most `CLOSE_MAX_PX`), the sheet goes. */
-const CLOSE_SHARE = 0.25;
-const CLOSE_MAX_PX = 140;
-/** A quick flick closes it as well, in pixels per millisecond, once it went a little way. */
-const FLICK_SPEED = 0.5;
-const FLICK_MIN_PX = 24;
+// As the clock sheet of the match (ClockSheet): dragged down this far, or quicker over a shorter
+// way, the sheet goes (pixels, pixels per millisecond).
+const CLOSE_DISTANCE = 90;
+const FLICK_DISTANCE = 40;
+const FLICK_SPEED = 0.6;
 /** Movement of the mouse on the grip before it counts as dragging instead of a tap. */
 const DRAG_START_PX = 6;
 
@@ -59,13 +58,10 @@ export function StatsSheet({
   };
   // Where a drag ends: far or fast enough closes, else the sheet springs back.
   const release = (drag: Drag): void => {
-    const sheet = sheetRef.current;
     const offset = y.get();
-    const height = sheet?.offsetHeight ?? 0;
-    const isFar =
-      typeof offset === 'number' && offset > Math.min(CLOSE_MAX_PX, height * CLOSE_SHARE);
+    const isFar = typeof offset === 'number' && offset > CLOSE_DISTANCE;
     const isFlick =
-      typeof offset === 'number' && offset >= FLICK_MIN_PX && drag.speed > FLICK_SPEED;
+      typeof offset === 'number' && offset >= FLICK_DISTANCE && drag.speed > FLICK_SPEED;
     if (isFar || isFlick) {
       close();
     } else if (isReduced) {
