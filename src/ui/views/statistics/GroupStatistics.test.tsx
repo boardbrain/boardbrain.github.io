@@ -1,7 +1,7 @@
 import { aCustomGame, aGroup, aPerson } from '@tests/support/masterDataFakes';
 import { renderWithApp } from '@tests/support/renderWithApp';
 import { aMatch } from '@tests/support/resultFakes';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -198,6 +198,27 @@ describe('US-ST-01 Key figures and ranking of a table (design I3-D)', () => {
 
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('a sheet goes when swiped down at the top, not while its content is scrolled', async () => {
+    const user = userEvent.setup();
+    await renderStatistics(PAGE);
+
+    await user.click(await screen.findByRole('button', { name: 'So rechnet die Statistik' }));
+    const sheet = screen.getByRole('dialog', { name: 'So rechnet die Statistik' });
+    sheet.scrollTop = 80;
+    fireEvent.touchStart(sheet, { touches: [{ clientY: 100 }] });
+    fireEvent.touchMove(sheet, { touches: [{ clientY: 400 }] });
+    fireEvent.touchEnd(sheet, { touches: [] });
+    expect(screen.getByRole('dialog', { name: 'So rechnet die Statistik' })).toBeInTheDocument();
+
+    sheet.scrollTop = 0;
+    fireEvent.touchStart(sheet, { touches: [{ clientY: 100 }] });
+    fireEvent.touchMove(sheet, { touches: [{ clientY: 400 }] });
+    fireEvent.touchEnd(sheet, { touches: [] });
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 
   it('without results the tab invites to enter the first one', async () => {

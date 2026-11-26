@@ -1,0 +1,59 @@
+/* A sheet from below for the statistics (design I3-D), like the sheets of the score pad. */
+.back {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* The dark backdrop fades with the sheet while it is pulled down. */
+.shade {
+  position: absolute;
+  inset: 0;
+  background: var(--color-backdrop);
+}
+
+.sheet {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  width: min(100%, 32rem);
+  max-height: 92%;
+  padding: 0 16px calc(64px + env(safe-area-inset-bottom));
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+}
+
+/* The grip: the whole width is the target, only the bar is seen (K-4). */
+.sheet > .grip {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 28px;
+  height: 28px;
+  padding: 0;
+  touch-action: none;
+  cursor: grab;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.grip::before {
+  width: calc(44px + var(--press, 0) * 14px);
+  height: 5px;
+  content: '';
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+}

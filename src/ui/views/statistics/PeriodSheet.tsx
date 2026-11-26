@@ -1,5 +1,5 @@
-import { m, useReducedMotion } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { useReducedMotion } from 'motion/react';
+import { useRef, useState } from 'react';
 import { parseLocalDate, type LocalDate, type Match } from '@/core/model';
 import {
   isInPeriod,
@@ -13,9 +13,8 @@ import { cx } from '@/ui/components/classNames';
 import { nudgeMissing } from '@/ui/components/nudge';
 import shared from '@/ui/views/match/Match.module.css';
 import { matchCountText, periodParam } from './statsView';
+import { StatsSheet } from './StatsSheet';
 import styles from './PeriodSheet.module.css';
-
-const ENTER = { type: 'spring', bounce: 0.15, duration: 0.4 } as const;
 
 const ERROR_TEXT: Readonly<Record<PeriodRangeError, string>> = {
   'range-incomplete': t('statistik.fehler.unvollstaendig'),
@@ -77,116 +76,79 @@ export function PeriodSheet({
   const isToWrong =
     !canTake &&
     (error === 'range-reversed' || error === 'range-in-future' || error === null || toDay === null);
-  // Escape closes the sheet; the keyboard is an external system, hence the effect.
-  useEffect(() => {
-    function closeOnEscape(event: KeyboardEvent): void {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    }
-    document.addEventListener('keydown', closeOnEscape);
-    return () => {
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, [onClose]);
   return (
-    <div
-      className={styles.back}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <m.div
-        ref={sheetRef}
-        className={styles.sheet}
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('statistik.zeitraum')}
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        transition={ENTER}
+    <StatsSheet title={t('statistik.zeitraum')} sheetRef={sheetRef} onClose={onClose}>
+      <div className={styles.quick}>
+        {quick.map((choice) => {
+          const isChosen = periodParam(choice.period) === current;
+          return (
+            <PressableButton
+              key={choice.label}
+              type="button"
+              className={cx(styles.choice, isChosen && styles.chosen)}
+              aria-pressed={isChosen}
+              onClick={() => {
+                onChoose(choice.period);
+              }}
+            >
+              {choice.label}
+            </PressableButton>
+          );
+        })}
+      </div>
+      <span className={styles.label}>{t('statistik.eigenerZeitraum')}</span>
+      <div className={styles.dates}>
+        <label className={styles.date}>
+          <span className={styles.label}>{t('statistik.von')}</span>
+          <input
+            type="date"
+            value={from}
+            max={today}
+            data-need={isFromWrong ? '' : undefined}
+            onChange={(event) => {
+              setFrom(event.target.value);
+            }}
+          />
+        </label>
+        <span className={styles.dash} aria-hidden="true">
+          {t('statistik.strich')}
+        </span>
+        <label className={styles.date}>
+          <span className={styles.label}>{t('statistik.bis')}</span>
+          <input
+            type="date"
+            value={to}
+            max={today}
+            data-need={isToWrong ? '' : undefined}
+            onChange={(event) => {
+              setTo(event.target.value);
+            }}
+          />
+        </label>
+      </div>
+      {error !== null && (
+        <span className={styles.error} role="alert">
+          {ERROR_TEXT[error]}
+        </span>
+      )}
+      <PressableButton
+        type="button"
+        className={cx(shared.primary, styles.take, !canTake && styles.looksOff)}
+        aria-disabled={!canTake}
+        onClick={() => {
+          if (range !== null && inRange > 0) {
+            onChoose(range);
+          } else {
+            nudgeMissing(sheetRef.current, isReduced);
+          }
+        }}
       >
-        <PressableButton
-          type="button"
-          className={styles.grip}
-          aria-label={t('partie.schliessen')}
-          onClick={onClose}
-        />
-        <h2 className={styles.title}>{t('statistik.zeitraum')}</h2>
-        <div className={styles.quick}>
-          {quick.map((choice) => {
-            const isChosen = periodParam(choice.period) === current;
-            return (
-              <PressableButton
-                key={choice.label}
-                type="button"
-                className={cx(styles.choice, isChosen && styles.chosen)}
-                aria-pressed={isChosen}
-                onClick={() => {
-                  onChoose(choice.period);
-                }}
-              >
-                {choice.label}
-              </PressableButton>
-            );
-          })}
-        </div>
-        <span className={styles.label}>{t('statistik.eigenerZeitraum')}</span>
-        <div className={styles.dates}>
-          <label className={styles.date}>
-            <span className={styles.label}>{t('statistik.von')}</span>
-            <input
-              type="date"
-              value={from}
-              max={today}
-              data-need={isFromWrong ? '' : undefined}
-              onChange={(event) => {
-                setFrom(event.target.value);
-              }}
-            />
-          </label>
-          <span className={styles.dash} aria-hidden="true">
-            {t('statistik.strich')}
-          </span>
-          <label className={styles.date}>
-            <span className={styles.label}>{t('statistik.bis')}</span>
-            <input
-              type="date"
-              value={to}
-              max={today}
-              data-need={isToWrong ? '' : undefined}
-              onChange={(event) => {
-                setTo(event.target.value);
-              }}
-            />
-          </label>
-        </div>
-        {error !== null && (
-          <span className={styles.error} role="alert">
-            {ERROR_TEXT[error]}
-          </span>
-        )}
-        <PressableButton
-          type="button"
-          className={cx(shared.primary, styles.take, !canTake && styles.looksOff)}
-          aria-disabled={!canTake}
-          onClick={() => {
-            if (range !== null && inRange > 0) {
-              onChoose(range);
-            } else {
-              nudgeMissing(sheetRef.current, isReduced);
-            }
-          }}
-        >
-          {range === null
-            ? t('statistik.uebernehmen')
-            : inRange === 0
-              ? t('statistik.keineImZeitraum')
-              : t('statistik.zeigen', { partien: matchCountText(inRange) })}
-        </PressableButton>
-      </m.div>
-    </div>
+        {range === null
+          ? t('statistik.uebernehmen')
+          : inRange === 0
+            ? t('statistik.keineImZeitraum')
+            : t('statistik.zeigen', { partien: matchCountText(inRange) })}
+      </PressableButton>
+    </StatsSheet>
   );
 }
