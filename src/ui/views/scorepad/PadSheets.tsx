@@ -1,10 +1,11 @@
-import { m, useReducedMotion } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import { useId, useRef, useState, type ReactNode } from 'react';
 import type { PersonId, ScoreTarget } from '@/core/model';
 import { isValidTarget, type ScorePadSettings } from '@/core/scorepad';
 import { formatPadNumber } from '@/i18n/format';
 import { t } from '@/i18n/t';
 import { PlayIcon, TargetIcon, TrophyIcon } from '@/ui/components/Icons';
+import { BottomSheet } from '@/ui/components/BottomSheet';
 import { PressableButton } from '@/ui/components/Pressable';
 import { nudgeMissing } from '@/ui/components/nudge';
 import { cx } from '@/ui/components/classNames';
@@ -12,7 +13,6 @@ import shared from '@/ui/views/match/Match.module.css';
 import type { ResultPerson } from '@/ui/views/result/ResultRows';
 import styles from './PadSheets.module.css';
 
-const ENTER = { type: 'spring', bounce: 0.15, duration: 0.4 } as const;
 const PLAY_SIZE = 18;
 const TARGET_ICON_SIZE = 22;
 const TROPHY_SIZE = 16;
@@ -28,42 +28,14 @@ type SheetProps = {
 };
 
 /**
- * A sheet from below over the dimmed score pad (design I3-C2 ES3, EN2); the grip and a tap beside
- * it close it.
+ * A sheet from below over the dimmed score pad (design I3-C2 ES3, EN2): the shared sheet, closed
+ * by the grip, a tap beside it, Escape or a swipe down (PO 26.11.2026).
  */
 function Sheet({ label, onClose, className, children }: SheetProps): React.JSX.Element {
   return (
-    <div
-      className={styles.back}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape') {
-          onClose();
-        }
-      }}
-    >
-      <m.div
-        className={cx(styles.sheet, className)}
-        role="dialog"
-        aria-modal="true"
-        aria-label={label}
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        transition={ENTER}
-      >
-        <PressableButton
-          type="button"
-          className={styles.grip}
-          aria-label={t('partie.schliessen')}
-          onClick={onClose}
-        />
-        {children}
-      </m.div>
-    </div>
+    <BottomSheet label={label} className={cx(styles.sheet, className)} onClose={onClose}>
+      {children}
+    </BottomSheet>
   );
 }
 

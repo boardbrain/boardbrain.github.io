@@ -7,13 +7,13 @@ import {
   type PeriodRangeError,
   type StatsPeriod,
 } from '@/core/stats';
+import { BottomSheet } from '@/ui/components/BottomSheet';
 import { t } from '@/i18n/t';
 import { PressableButton } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 import { nudgeMissing } from '@/ui/components/nudge';
 import shared from '@/ui/views/match/Match.module.css';
 import { matchCountText, periodParam } from './statsView';
-import { StatsSheet } from './StatsSheet';
 import styles from './PeriodSheet.module.css';
 
 const ERROR_TEXT: Readonly<Record<PeriodRangeError, string>> = {
@@ -77,7 +77,12 @@ export function PeriodSheet({
     !canTake &&
     (error === 'range-reversed' || error === 'range-in-future' || error === null || toDay === null);
   return (
-    <StatsSheet title={t('statistik.zeitraum')} sheetRef={sheetRef} onClose={onClose}>
+    <BottomSheet
+      label={t('statistik.zeitraum')}
+      title={t('statistik.zeitraum')}
+      sheetRef={sheetRef}
+      onClose={onClose}
+    >
       <div className={styles.quick}>
         {quick.map((choice) => {
           const isChosen = periodParam(choice.period) === current;
@@ -149,6 +154,6 @@ export function PeriodSheet({
             ? t('statistik.keineImZeitraum')
             : t('statistik.zeigen', { partien: matchCountText(inRange) })}
       </PressableButton>
-    </StatsSheet>
+    </BottomSheet>
   );
 }

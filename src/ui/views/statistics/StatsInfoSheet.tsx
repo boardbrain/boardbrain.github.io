@@ -1,6 +1,6 @@
 import { useRef } from 'react';
+import { BottomSheet } from '@/ui/components/BottomSheet';
 import { t, type TextKey } from '@/i18n/t';
-import { StatsSheet } from './StatsSheet';
 import styles from './StatsInfoSheet.module.css';
 
 // The topics of the explanation in the order of the page: a title and its paragraphs.
@@ -34,7 +34,12 @@ const TOPICS: readonly (readonly [TextKey, readonly TextKey[]])[] = [
 export function StatsInfoSheet({ onClose }: { readonly onClose: () => void }): React.JSX.Element {
   const sheetRef = useRef<HTMLDivElement>(null);
   return (
-    <StatsSheet title={t('statistik.info.titel')} sheetRef={sheetRef} onClose={onClose}>
+    <BottomSheet
+      label={t('statistik.info.titel')}
+      title={t('statistik.info.titel')}
+      sheetRef={sheetRef}
+      onClose={onClose}
+    >
       {TOPICS.map(([title, paragraphs]) => (
         <section key={title} className={styles.topic}>
           <h3 className={styles.topicTitle}>{t(title)}</h3>
@@ -45,6 +50,6 @@ export function StatsInfoSheet({ onClose }: { readonly onClose: () => void }): R
           ))}
         </section>
       ))}
-    </StatsSheet>
+    </BottomSheet>
   );
 }

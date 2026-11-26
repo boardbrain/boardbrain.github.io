@@ -1,4 +1,4 @@
-/* A sheet from below for the statistics (design I3-D), like the sheets of the score pad. */
+/* A sheet from below over the dimmed page (statistics I3-D, score pad I3-C2). */
 .back {
   position: fixed;
   inset: 0;
@@ -18,7 +18,7 @@
 .sheet {
   position: relative;
   display: grid;
-  gap: 14px;
+  gap: var(--sheet-gap, 14px);
   width: min(100%, 32rem);
   max-height: 92%;
   padding: 0 16px calc(64px + env(safe-area-inset-bottom));

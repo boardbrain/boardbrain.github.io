@@ -1,8 +1,9 @@
 import { animate, m, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 import { useEffect, useEffectEvent, useRef, type ReactNode, type RefObject } from 'react';
 import { t } from '@/i18n/t';
-import { PressableButton } from '@/ui/components/Pressable';
-import styles from './StatsSheet.module.css';
+import { cx } from './classNames';
+import { PressableButton } from './Pressable';
+import styles from './BottomSheet.module.css';
 
 const ENTER = { type: 'spring', bounce: 0.15, duration: 0.4 } as const;
 const LEAVE = { duration: 0.22, ease: [0.4, 0, 1, 1] } as const;
@@ -18,26 +19,33 @@ const DRAG_START_PX = 6;
 type Drag = { base: number; lastY: number; lastTime: number; speed: number };
 
 /**
- * A sheet from below for the statistics (design I3-D): it rises in, and goes with a tap on the
- * grip or beside it, with Escape, or when it is swiped down by the grip or by its content while
- * the content is scrolled to the top (wish of the PO 26.11.2026). The finger moves a Motion value,
- * never React state per frame (Architecture 13.6); Motion's own dragging would need `domMax`.
+ * A sheet from below over the dimmed page (statistics I3-D, score pad I3-C2): it rises in, and
+ * goes with a tap on the grip or beside it, with Escape, or when it is swiped down by the grip or
+ * by its content while the content is scrolled to the top (wish of the PO 26.11.2026). The finger
+ * moves a Motion value, never React state per frame (Architecture 13.6); Motion's own dragging
+ * would need `domMax`. With `title` it starts with that heading; `label` names the dialog.
  */
-export function StatsSheet({
+export function BottomSheet({
+  label,
   title,
   sheetRef,
+  className,
   onClose,
   children,
 }: {
-  readonly title: string;
-  readonly sheetRef: RefObject<HTMLDivElement | null>;
+  readonly label: string;
+  readonly title?: string | undefined;
+  readonly sheetRef?: RefObject<HTMLDivElement | null> | undefined;
+  readonly className?: string | undefined;
   readonly onClose: () => void;
   readonly children: ReactNode;
 }): React.JSX.Element {
+  const ownRef = useRef<HTMLDivElement>(null);
+  const sheetRefOrOwn = sheetRef ?? ownRef;
   const isReduced = useReducedMotion() === true;
   const y = useMotionValue<number | string>('100%');
   const shade = useTransform(y, (value) => {
-    const height = sheetRef.current?.offsetHeight ?? 0;
+    const height = sheetRefOrOwn.current?.offsetHeight ?? 0;
     const offset = typeof value === 'number' ? value : height;
     return height > 0 ? 1 - Math.min(1, Math.max(0, offset) / height) : 1;
   });
@@ -45,7 +53,7 @@ export function StatsSheet({
   const hasDragged = useRef(false);
 
   const close = (): void => {
-    const sheet = sheetRef.current;
+    const sheet = sheetRefOrOwn.current;
     if (isClosing.current) {
       return;
     }
@@ -89,7 +97,7 @@ export function StatsSheet({
   // Swiping down with a finger (external system: touch events). The listener must not be
   // passive, so that pulling down at the top moves the sheet instead of bouncing the page.
   useEffect(() => {
-    const sheet = sheetRef.current;
+    const sheet = sheetRefOrOwn.current;
     if (sheet === null) {
       return;
     }
@@ -143,7 +151,7 @@ export function StatsSheet({
       sheet.removeEventListener('touchend', onEnd);
       sheet.removeEventListener('touchcancel', onEnd);
     };
-  }, [sheetRef, y]);
+  }, [sheetRefOrOwn, y]);
 
   // Dragging the grip with a mouse or a pen; fingers go through the touch events above.
   const gripDrag = useRef<(Drag & { startY: number }) | null>(null);
@@ -151,11 +159,11 @@ export function StatsSheet({
     <div className={styles.back}>
       <m.div className={styles.shade} style={{ opacity: shade }} onClick={close} />
       <m.div
-        ref={sheetRef}
-        className={styles.sheet}
+        ref={sheetRefOrOwn}
+        className={cx(styles.sheet, className)}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={label}
         style={{ y }}
         animate={{ y: 0 }}
         transition={ENTER}
@@ -211,7 +219,7 @@ export function StatsSheet({
             close();
           }}
         />
-        <h2 className={styles.title}>{title}</h2>
+        {title !== undefined && <h2 className={styles.title}>{title}</h2>}
         {children}
       </m.div>
     </div>
