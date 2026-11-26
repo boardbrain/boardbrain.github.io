@@ -869,6 +869,53 @@
   color: var(--color-text-muted);
 }
 
+/* One holder of a record: who above, when below. */
+.recordHolder {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* Several holders of an equal record, one per line (PO 26.11.2026). */
+.recordLines {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recordLine {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 0;
+  color: var(--color-text);
+  text-decoration: none;
+  border-top: 1px solid var(--color-border);
+}
+
+.recordLink {
+  justify-content: space-between;
+}
+
+.recordLineGo {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.recordMore {
+  justify-self: start;
+  min-height: 30px;
+  padding: 0 10px;
+  margin: 2px 0 -4px -10px;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--color-text-muted);
+  background: none;
+  border-radius: 999px;
+}
+
 /* Matches per game */
 .gameRow {
   display: flex;

@@ -363,6 +363,28 @@ describe('US-ST-05 Records (design I3-D)', () => {
     expect(screen.getByText('Längste Durststrecke')).toBeInTheDocument();
   });
 
+  it('AK-1: equal records all show, at most three and then "+N weitere"', async () => {
+    const user = userEvent.setup();
+    // Two wins in a row for Anna, Ben, Clara and again Anna: four eternal streaks of two.
+    const winners = [ANNA, ANNA, BEN, BEN, CLARA, CLARA, ANNA, ANNA];
+    await renderStatistics(
+      PAGE,
+      winners.map((winner, index) =>
+        match(20 + index, { date: day(`2026-10-0${String(index + 1)}`), winnerIds: [winner] }),
+      ),
+    );
+
+    expect(await screen.findByText('Ewige Serie')).toBeInTheDocument();
+    expect(screen.getByText('01.10. – 02.10.2026')).toBeInTheDocument();
+    expect(screen.getByText('03.10. – 04.10.2026')).toBeInTheDocument();
+    expect(screen.getByText('05.10. – 06.10.2026')).toBeInTheDocument();
+    const more = screen.getByRole('button', { name: '+1 weitere' });
+    await user.click(more);
+    expect(more).toHaveAttribute('aria-expanded', 'true');
+    expect(more).toHaveTextContent('Weniger');
+    expect(screen.getByText('seit 07.10.2026')).toBeInTheDocument();
+  });
+
   it('AK-2: the longest match of one game opens that match', async () => {
     const user = userEvent.setup();
     const { router } = await renderStatistics(`${PAGE}?spiel=${CATAN_GAME_ID}`);

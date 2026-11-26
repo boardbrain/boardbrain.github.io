@@ -31,6 +31,7 @@ export {
 } from './selection';
 export {
   computeStatistics,
+  RECORD_RUN_MIN,
   FAVORITE_GAME_MIN_MATCHES,
   FORM_LENGTH,
   matchesPerGame,

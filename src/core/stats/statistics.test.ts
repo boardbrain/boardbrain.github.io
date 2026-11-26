@@ -156,8 +156,8 @@ describe('US-ST-03 AK-4 several games in the filter', () => {
   it('shows no average points, no average duration and no records of single games', () => {
     expect(personOf(stats.persons, ANNA).averageScore).toBeNull();
     expect(stats.averageDuration).toBeNull();
-    expect(stats.records.longestMatch).toBeNull();
-    expect(stats.records.bestScore).toBeNull();
+    expect(stats.records.longestMatch).toEqual([]);
+    expect(stats.records.bestScore).toEqual([]);
   });
 
   it('keeps the average place over all games (E-45)', () => {
@@ -166,7 +166,7 @@ describe('US-ST-03 AK-4 several games in the filter', () => {
 });
 
 describe('US-ST-05 records', () => {
-  it('AK-1: the eternal streak is the longest, on a tie the one reached first', () => {
+  it('AK-1: the eternal streak lists every longest streak, the one reached first first', () => {
     const stats = computeStatistics(
       series([
         { winners: [BEN] },
@@ -180,16 +180,52 @@ describe('US-ST-05 records', () => {
       gameOf,
     );
 
-    expect(stats.records.longestStreak).toEqual({
-      personId: BEN,
-      length: 2,
-      firstDate: '2026-01-01',
-      lastDate: '2026-01-02',
-      isOngoing: false,
-    });
+    expect(stats.records.longestStreak).toEqual([
+      {
+        personId: BEN,
+        length: 2,
+        firstDate: '2026-01-01',
+        lastDate: '2026-01-02',
+        isOngoing: false,
+      },
+      {
+        personId: ANNA,
+        length: 2,
+        firstDate: '2026-01-03',
+        lastDate: '2026-01-04',
+        isOngoing: false,
+      },
+    ]);
   });
 
-  it('AK-1: the longest drought with person and span, marked as ongoing if it still runs', () => {
+  it('AK-1: the same person can hold an equal record twice', () => {
+    const stats = computeStatistics(
+      series([
+        { winners: [ANNA] },
+        { winners: [ANNA] },
+        { winners: [BEN] },
+        { winners: [ANNA] },
+        { winners: [ANNA] },
+      ]),
+      TABLE,
+      null,
+      gameOf,
+    );
+
+    expect(stats.records.longestStreak.map((run) => [run.personId, run.isOngoing])).toEqual([
+      [ANNA, false],
+      [ANNA, true],
+    ]);
+  });
+
+  it('AK-1: one win is no streak and one match without a win no drought worth a record', () => {
+    // Twelve at a table after one match: no eleven droughts of one (PO 26.11.2026).
+    const one = computeStatistics(series([{ winners: [ANNA] }]), TABLE, null, gameOf);
+    expect(one.records.longestStreak).toEqual([]);
+    expect(one.records.longestDrought).toEqual([]);
+  });
+
+  it('AK-1: every longest drought with person and span, ongoing if it still runs', () => {
     const stats = computeStatistics(
       series([{ winners: [DAVID] }, { winners: [ANNA] }, { winners: [ANNA] }, { winners: [ANNA] }]),
       TABLE,
@@ -197,18 +233,27 @@ describe('US-ST-05 records', () => {
       gameOf,
     );
 
-    expect(stats.records.longestDrought).toEqual({
-      personId: BEN,
-      length: 4,
-      firstDate: '2026-01-01',
-      lastDate: '2026-01-04',
-      isOngoing: true,
-    });
-    expect(stats.records.longestStreak?.isOngoing).toBe(true);
+    expect(stats.records.longestDrought).toEqual([
+      {
+        personId: BEN,
+        length: 4,
+        firstDate: '2026-01-01',
+        lastDate: '2026-01-04',
+        isOngoing: true,
+      },
+      {
+        personId: CLARA,
+        length: 4,
+        firstDate: '2026-01-01',
+        lastDate: '2026-01-04',
+        isOngoing: true,
+      },
+    ]);
+    expect(stats.records.longestStreak.map((run) => run.isOngoing)).toEqual([true]);
     expect(personOf(stats.persons, ANNA).longestStreak?.isOngoing).toBe(true);
   });
 
-  it('AK-2: the longest and the shortest Catan match; the shortest only from two with duration', () => {
+  it('AK-2: every longest and every shortest Catan match; the shortest from two with duration', () => {
     const two = series([
       { game: CATAN, winners: [ANNA], duration: 80 },
       { game: CATAN, winners: [BEN], duration: 140 },
@@ -217,53 +262,69 @@ describe('US-ST-05 records', () => {
     ]);
     const stats = computeStatistics(two, TABLE, CATAN, gameOf);
 
-    expect(stats.records.longestMatch).toMatchObject({ value: 140, personIds: [BEN] });
-    // On a tie the earlier match (Specification 3.8).
-    expect(stats.records.shortestMatch).toMatchObject({
-      value: 80,
-      personIds: [ANNA],
-      date: '2026-01-01',
-    });
+    expect(stats.records.longestMatch).toMatchObject([{ value: 140, personIds: [BEN] }]);
+    expect(stats.records.shortestMatch).toMatchObject([
+      { value: 80, personIds: [ANNA], date: '2026-01-01' },
+      { value: 80, personIds: [CLARA], date: '2026-01-03' },
+    ]);
     const one = computeStatistics(two.slice(0, 1), TABLE, CATAN, gameOf);
-    expect(one.records.longestMatch?.value).toBe(80);
-    expect(one.records.shortestMatch).toBeNull();
+    expect(one.records.longestMatch.map((record) => record.value)).toEqual([80]);
+    expect(one.records.shortestMatch).toEqual([]);
+    // All matches equally long: they are the longest, not also the shortest.
+    const same = computeStatistics(
+      [two[0], two[2]].flatMap((m) => m ?? []),
+      TABLE,
+      CATAN,
+      gameOf,
+    );
+    expect(same.records.longestMatch).toHaveLength(2);
+    expect(same.records.shortestMatch).toEqual([]);
   });
 
   it('AK-4: a record without fitting matches is missing', () => {
-    const stats = computeStatistics(series([{ winners: [ANNA, BEN] }]), TABLE, UNO, gameOf);
+    const stats = computeStatistics(
+      series([{ winners: [ANNA, BEN] }, { winners: [ANNA, BEN] }]),
+      TABLE,
+      UNO,
+      gameOf,
+    );
 
-    expect(stats.records.longestStreak).toBeNull();
-    expect(stats.records.longestMatch).toBeNull();
-    expect(stats.records.bestScore).toBeNull();
-    expect(stats.records.longestDrought?.personId).toBe(ANNA);
+    expect(stats.records.longestStreak).toEqual([]);
+    expect(stats.records.longestMatch).toEqual([]);
+    expect(stats.records.bestScore).toEqual([]);
+    expect(stats.records.longestDrought.map((run) => run.personId)).toEqual([
+      ANNA,
+      BEN,
+      CLARA,
+      DAVID,
+    ]);
   });
 
-  it('AK-5: the best score of a custom game, the lowest if the fewest points win', () => {
+  it('AK-5: the best score of a custom game, the lowest if the fewest points win, every holder', () => {
     const skyjo = series([
       { game: SKYJO, winners: [CLARA], scores: [20, 30, 8, 40] },
       { game: SKYJO, winners: [ANNA], scores: [8, 20, 30, 40] },
     ]);
     const stats = computeStatistics(skyjo, TABLE, SKYJO, gameOf);
 
-    expect(stats.records.bestScore).toMatchObject({
-      value: 8,
-      personIds: [CLARA],
-      date: '2026-01-01',
-    });
+    expect(stats.records.bestScore).toMatchObject([
+      { value: 8, personIds: [CLARA], date: '2026-01-01' },
+      { value: 8, personIds: [ANNA], date: '2026-01-02' },
+    ]);
     const carcassonne = computeStatistics(
-      series([{ game: CARCASSONNE, winners: [DAVID], scores: [80, 90, 70, 120] }]),
+      series([{ game: CARCASSONNE, winners: [DAVID, BEN], scores: [80, 120, 70, 120] }]),
       TABLE,
       CARCASSONNE,
       gameOf,
     );
-    expect(carcassonne.records.bestScore).toMatchObject({ value: 120, personIds: [DAVID] });
+    expect(carcassonne.records.bestScore).toMatchObject([{ value: 120, personIds: [BEN, DAVID] }]);
     const catan = computeStatistics(
       series([{ game: CATAN, winners: [ANNA], scores: [10, 5, 5, 5] }]),
       TABLE,
       CATAN,
       gameOf,
     );
-    expect(catan.records.bestScore).toBeNull();
+    expect(catan.records.bestScore).toEqual([]);
   });
 });
 

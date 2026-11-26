@@ -11126,6 +11126,42 @@
         line-height: 1.45;
         color: var(--muted);
       }
+
+      /* Equal records: every holder on its own line (PO 26.11.2026). */
+      .sxRecHolder {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+      }
+      .sxRecLines {
+        display: grid;
+      }
+      .sxRecLine {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 7px 0;
+        color: var(--text);
+        text-align: left;
+        background: none;
+        border: 0;
+        border-top: 1px solid var(--border);
+        border-radius: 0;
+      }
+      .sxRecMore {
+        justify-self: start;
+        min-height: 30px;
+        padding: 0 10px;
+        margin: 2px 0 -4px -10px;
+        font-size: 0.8rem;
+        font-weight: 650;
+        color: var(--muted);
+        background: none;
+        border: 0;
+        border-radius: 999px;
+      }
     </style>
   </head>
   <body>
@@ -21296,7 +21332,7 @@
           edition);
       }
       // How the statistics count: the same texts as the app (src/i18n/de.ts, statistik.info).
-      const SX_INFO = [["Welche Partien zählen", ["Die Statistik rechnet nur mit den Partien, die gerade im Filter liegen. Wählst du oben ein Spiel, eine Spielversion oder einen Zeitraum, ändern sich alle Zahlen auf dieser Seite mit."]], ["Sieg und Unentschieden", ["Ein Sieg zählt nur, wenn eine Person allein gewinnt. Gewinnen mehrere zusammen, ist das für jede von ihnen ein Unentschieden. Unentschieden werden eigens gezählt. Bei Siegquote, Serie und Durststrecke zählen sie aber wie eine Partie ohne Sieg."]], ["Siegquote", ["Die Siege geteilt durch alle Partien im Filter. Wer von 10 Partien 3 allein gewinnt, hat 30 %, auch wenn noch Unentschieden dazukommen."]], ["Serie", ["Eine Serie sind Siege direkt hintereinander. Jede Partie ohne eigenen Sieg beendet sie, auch ein Unentschieden. „Längste Serie“ ist die längste Serie einer Person im Filter. Gewinnt jemand gerade mindestens zwei Partien in Folge, erscheint unter dem Podest die Karte „Aktuelle Serie“."]], ["Durststrecke", ["Die Durststrecke zählt die Partien seit dem letzten eigenen Sieg und fällt mit dem nächsten Sieg wieder auf 0. Hat jemand im Filter noch nie gewonnen, zählen alle Partien. Klein darunter steht die längste Durststrecke der Person."]], ["Letzte fünf", ["Die fünf Punkte stehen für die letzten fünf Partien, die neueste rechts. Ein gefüllter Punkt ist ein Sieg, ein umrandeter ein Unentschieden, ein blasser eine Partie ohne Sieg."]], ["Plätze und Ø Platz", ["Plätze gibt es nur bei Partien mit Punkten oder mit einer eingetragenen Rangfolge. Bei Catan ergeben sie sich aus den Siegpunkten. Wer gleich viele Punkte hat, teilt sich den Platz. Der Durchschnittsplatz rechnet nur mit diesen Partien, ein kleinerer Wert ist besser.", "Im Balken unter „Plätze“ zählt der letzte Platz einer Partie als „Letzter“ (dunkelrot) und nicht noch einmal bei seiner Platzzahl. Teilen sich alle Platz 1, gibt es keinen Letzten."]], ["Ø Punkte", ["Durchschnittspunkte gibt es nur, wenn genau ein Spiel mit Punkten gewählt ist, weil sich Punkte verschiedener Spiele nicht vergleichen lassen. Gewinnen bei einem Spiel die wenigsten Punkte, ist der kleinere Wert besser. Bei Catan sind es die Siegpunkte."]], ["Rangliste und Podest", ["Oben wählst du, wonach sortiert wird: Siege, Ø Platz, Ø Punkte oder längste Serie. Bei Gleichstand entscheiden der Reihe nach die Siege, die Unentschieden, der Ø Platz und die Ø Punkte. Wer in allem gleich ist, teilt sich den Rang."]], ["Paradespiel", ["Das Spiel, in dem eine Person ihre höchste Siegquote hat. Es zählt erst ab fünf Partien in diesem Spiel und braucht mindestens einen Sieg. Du siehst es nur, wenn alle Spiele gewählt sind."]], ["Rekorde", ["„Ewige Serie“ und „Längste Durststrecke“ sind die längsten Folgen über alle Personen im Filter. Bei Gleichstand gilt die, die zuerst erreicht wurde. Steht dort „seit“, läuft sie noch.", "Längste und kürzeste Partie gibt es nur bei Catan, weil nur dort die Zeit gemessen wird, und nur wenn das Spiel gewählt ist. Die kürzeste erscheint erst ab zwei Partien mit Dauer, ebenso gilt die durchschnittliche Dauer oben nur für Catan.", "Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Antippen eines Rekords mit einer Partie öffnet diese Partie."]], ["Zeitraum", ["„Letzte 3 Monate“ und „Letzte 12 Monate“ reichen bis einschließlich heute. Als Schnellwahl stehen das laufende und die zwei vorigen Jahre bereit, ältere Jahre wählst du über „Eigener Zeitraum“."]]];
+      const SX_INFO = [["Welche Partien zählen", ["Die Statistik rechnet nur mit den Partien, die gerade im Filter liegen. Wählst du oben ein Spiel, eine Spielversion oder einen Zeitraum, ändern sich alle Zahlen auf dieser Seite mit."]], ["Sieg und Unentschieden", ["Ein Sieg zählt nur, wenn eine Person allein gewinnt. Gewinnen mehrere zusammen, ist das für jede von ihnen ein Unentschieden. Unentschieden werden eigens gezählt. Bei Siegquote, Serie und Durststrecke zählen sie aber wie eine Partie ohne Sieg."]], ["Siegquote", ["Die Siege geteilt durch alle Partien im Filter. Wer von 10 Partien 3 allein gewinnt, hat 30 %, auch wenn noch Unentschieden dazukommen."]], ["Serie", ["Eine Serie sind Siege direkt hintereinander. Jede Partie ohne eigenen Sieg beendet sie, auch ein Unentschieden. „Längste Serie“ ist die längste Serie einer Person im Filter. Gewinnt jemand gerade mindestens zwei Partien in Folge, erscheint unter dem Podest die Karte „Aktuelle Serie“."]], ["Durststrecke", ["Die Durststrecke zählt die Partien seit dem letzten eigenen Sieg und fällt mit dem nächsten Sieg wieder auf 0. Hat jemand im Filter noch nie gewonnen, zählen alle Partien. Klein darunter steht die längste Durststrecke der Person."]], ["Letzte fünf", ["Die fünf Punkte stehen für die letzten fünf Partien, die neueste rechts. Ein gefüllter Punkt ist ein Sieg, ein umrandeter ein Unentschieden, ein blasser eine Partie ohne Sieg."]], ["Plätze und Ø Platz", ["Plätze gibt es nur bei Partien mit Punkten oder mit einer eingetragenen Rangfolge. Bei Catan ergeben sie sich aus den Siegpunkten. Wer gleich viele Punkte hat, teilt sich den Platz. Der Durchschnittsplatz rechnet nur mit diesen Partien, ein kleinerer Wert ist besser.", "Im Balken unter „Plätze“ zählt der letzte Platz einer Partie als „Letzter“ (dunkelrot) und nicht noch einmal bei seiner Platzzahl. Teilen sich alle Platz 1, gibt es keinen Letzten."]], ["Ø Punkte", ["Durchschnittspunkte gibt es nur, wenn genau ein Spiel mit Punkten gewählt ist, weil sich Punkte verschiedener Spiele nicht vergleichen lassen. Gewinnen bei einem Spiel die wenigsten Punkte, ist der kleinere Wert besser. Bei Catan sind es die Siegpunkte."]], ["Rangliste und Podest", ["Oben wählst du, wonach sortiert wird: Siege, Ø Platz, Ø Punkte oder längste Serie. Bei Gleichstand entscheiden der Reihe nach die Siege, die Unentschieden, der Ø Platz und die Ø Punkte. Wer in allem gleich ist, teilt sich den Rang."]], ["Paradespiel", ["Das Spiel, in dem eine Person ihre höchste Siegquote hat. Es zählt erst ab fünf Partien in diesem Spiel und braucht mindestens einen Sieg. Du siehst es nur, wenn alle Spiele gewählt sind."]], ["Rekorde", ["„Ewige Serie“ und „Längste Durststrecke“ sind die längsten Folgen über alle Personen im Filter, gezählt ab zwei Partien. Sind mehrere gleich lang, stehen alle in der Karte, auch zwei derselben Person. Steht dort „seit“, läuft sie noch.", "Längste und kürzeste Partie gibt es nur bei Catan, weil nur dort die Zeit gemessen wird, und nur wenn das Spiel gewählt ist. Die kürzeste erscheint erst ab zwei Partien mit Dauer, ebenso gilt die durchschnittliche Dauer oben nur für Catan.", "Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Auch hier stehen bei Gleichstand alle Partien und Personen in der Karte. Antippen eines Rekords mit einer Partie öffnet diese Partie."]], ["Zeitraum", ["„Letzte 3 Monate“ und „Letzte 12 Monate“ reichen bis einschließlich heute. Als Schnellwahl stehen das laufende und die zwei vorigen Jahre bereit, ältere Jahre wählst du über „Eigener Zeitraum“."]]];
       function sxSheetView() {
         if (!st.sheet || app.screen !== 'mgTable' || i3c.tab !== 'stats') return null;
         const t = i3Table(res3.tableId || 't1');
@@ -21520,6 +21556,79 @@
           sxRankRows(S),
           sxRecords(S, 'rail'), sxPlaces(S), sxGames(S),
         ];
+      }
+
+      // ---------- records: every equal holder (PO 26.11.2026) ----------
+      // Runs from two on; on a tie all of them, also twice the same person, the one reached first
+      // first. Match records list every match with the record value. At most three lines, then
+      // "+N weitere".
+      function stRecords(S) {
+        const out = [];
+        const { list, ms } = S;
+        if (!S.n) return out;
+        const runsOf = (p, counts) => {
+          const runs = [];
+          let len = 0;
+          list.forEach((r, i) => {
+            if (counts(r, p)) { len++; return; }
+            if (len > 0) runs.push({ p, len, from: i - len, to: i - 1 });
+            len = 0;
+          });
+          if (len > 0) runs.push({ p, len, from: list.length - len, to: list.length - 1 });
+          return runs;
+        };
+        const sole = (r, p) => { const w = i3cWinners(r); return w.length === 1 && w[0] === p; };
+        const longest = (counts) => {
+          const all = ms.flatMap((p) => runsOf(p, counts));
+          const max = Math.max(0, ...all.map((run) => run.len));
+          if (max < 2) return [];
+          return all.filter((run) => run.len === max).sort((a, b) => a.to - b.to);
+        };
+        const runLine = (run) => ({ who: [run.p], when: run.to === S.n - 1 ? `seit ${stDate(list[run.from].date)}` : stSpan(list[run.from].date, list[run.to].date) });
+        const streaks = longest(sole);
+        if (streaks.length) out.push({ key: 'streak', icon: 'flame', title: 'Ewige Serie', value: `${streaks[0].len} Siege`, lines: streaks.map(runLine) });
+        const droughts = longest((r, p) => !sole(r, p));
+        if (droughts.length) out.push({ key: 'dry', icon: 'hourglass', title: 'Längste Durststrecke', value: `${droughts[0].len} Partien`, lines: droughts.map(runLine) });
+        const matchLine = (r, who) => ({ who, when: stDate(r.date), match: r });
+        if (S.isCatan && S.durs.length) {
+          const max = Math.max(...S.durs.map((r) => r.duration));
+          out.push({ key: 'long', icon: 'clock', title: 'Längste Partie', value: stDur(max), lines: S.durs.filter((r) => r.duration === max).map((r) => matchLine(r, i3cWinners(r))) });
+          const min = Math.min(...S.durs.map((r) => r.duration));
+          if (S.durs.length > 1 && min !== max)
+            out.push({ key: 'short', icon: 'bolt', title: 'Kürzeste Partie', value: stDur(min), lines: S.durs.filter((r) => r.duration === min).map((r) => matchLine(r, i3cWinners(r))) });
+        }
+        if (S.single && !S.isCatan && S.withPoints) {
+          const least = S.single.scoring === 'least';
+          const scored = list.filter((r) => r.points);
+          const values = scored.flatMap((r) => ms.map((p) => r.points[p]).filter((v) => v !== undefined));
+          if (values.length) {
+            const best = least ? Math.min(...values) : Math.max(...values);
+            const lines = scored.filter((r) => ms.some((p) => r.points[p] === best)).map((r) => matchLine(r, ms.filter((p) => r.points[p] === best)));
+            out.push({ key: 'best', icon: 'medal', title: least ? 'Bestwert · wenigste' : 'Bestwert', value: `${best} Punkte`, lines });
+          }
+        }
+        return out;
+      }
+      const SX_REC_OPEN = {};
+      function sxRecords(S) {
+        if (!S.records.length) return null;
+        const who = (line) => h('span', { class: 'sxRecHolder' },
+          h('span', { class: 'sxRecWho' }, line.who.slice(0, 3).map((p) => sxAv(S.t, p, 22)), h('span', {}, line.who.map(nameOf).join(', '))),
+          h('small', {}, line.when));
+        const card = (rec) => {
+          const head = [h('span', { class: 'sxRecIcon' }, icon(rec.icon, 18)), h('span', { class: 'sxLabel' }, rec.title), h('strong', { class: 'sxRecVal' }, rec.value)];
+          const [only] = rec.lines;
+          if (rec.lines.length === 1)
+            return h(only.match ? 'button' : 'div', { class: 'sxRec ' + rec.key, onclick: only.match ? () => stOpenMatch(only.match) : null },
+              ...head, who(only), only.match && h('span', { class: 'sxRecGo' }, icon('next', 16)));
+          const isOpen = !!SX_REC_OPEN[rec.key];
+          const line = (l) => h(l.match ? 'button' : 'div', { class: 'sxRecLine', onclick: l.match ? () => stOpenMatch(l.match) : null }, who(l), l.match && h('span', { class: 'muted' }, icon('next', 14)));
+          const shown = isOpen ? rec.lines : rec.lines.slice(0, 3);
+          const rest = rec.lines.length - 3;
+          return h('div', { class: 'sxRec ' + rec.key }, ...head, h('div', { class: 'sxRecLines' }, shown.map(line)),
+            rest > 0 && h('button', { class: 'sxRecMore', onclick: () => { SX_REC_OPEN[rec.key] = !isOpen; render(); } }, isOpen ? 'Weniger' : `+${rest} weitere`));
+        };
+        return h('section', { class: 'sxSection' }, sxLabel('Rekorde'), h('div', { class: 'sxRecRail' }, S.records.map(card)));
       }
 
       // ---------- pages of the reference ----------

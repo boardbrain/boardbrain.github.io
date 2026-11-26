@@ -97,15 +97,19 @@ export type MatchRecord = {
 };
 
 /**
- * The records of a group in the filter (US-ST-05); each missing without fitting matches.
+ * The records of a group in the filter (US-ST-05): every holder of the record value, the one
+ * reached first first (PO 26.11.2026: equal records all count); empty without fitting matches.
  */
 export type StatsRecords = {
-  readonly longestStreak: RunRecord | null;
-  readonly longestDrought: RunRecord | null;
-  readonly longestMatch: MatchRecord | null;
-  /** Only from two matches with a duration. */
-  readonly shortestMatch: MatchRecord | null;
-  readonly bestScore: MatchRecord | null;
+  /** Every longest winning streak, from `RECORD_RUN_MIN` wins. */
+  readonly longestStreak: readonly RunRecord[];
+  /** Every longest drought, from `RECORD_RUN_MIN` matches; a person may hold it twice. */
+  readonly longestDrought: readonly RunRecord[];
+  readonly longestMatch: readonly MatchRecord[];
+  /** Only from two matches with a duration, and only if not all are as long as the longest. */
+  readonly shortestMatch: readonly MatchRecord[];
+  /** One entry per match, with every person who reached the best score in it. */
+  readonly bestScore: readonly MatchRecord[];
 };
 
 /**
@@ -142,6 +146,12 @@ export const FORM_LENGTH = 5;
  * Length from which the current winning streak is shown (E-57).
  */
 export const SHOWN_STREAK_MIN = 2;
+
+/**
+ * Length from which a run of matches is a record (PO 26.11.2026): one win is no streak yet, one
+ * match without a win no drought worth a record.
+ */
+export const RECORD_RUN_MIN = 2;
 
 type Run = { length: number; from: number; to: number };
 
@@ -218,16 +228,16 @@ function countMatch(
   isScoreCounted: boolean,
 ): void {
   const winners = match.winnerIds;
-  const isSoleWinner = winners.length === 1 && winners[0] === personId;
-  const isDraw = !isSoleWinner && winners.includes(personId);
+  const isWin = isSoleWinner(match, personId);
+  const isDraw = !isWin && winners.includes(personId);
   const game = tally.perGame.get(match.gameId) ?? { matches: 0, wins: 0, firstPlayed: index };
   tally.perGame.set(match.gameId, {
     ...game,
     matches: game.matches + 1,
-    wins: game.wins + (isSoleWinner ? 1 : 0),
+    wins: game.wins + (isWin ? 1 : 0),
   });
   // Specification 3.8: losses and draws end a winning streak; a win ends the drought.
-  if (isSoleWinner) {
+  if (isWin) {
     tally.wins++;
     tally.run++;
     tally.dry = 0;
@@ -244,7 +254,7 @@ function countMatch(
       tally.bestDry = { length: tally.dry, from: index - tally.dry + 1, to: index };
     }
   }
-  tally.form.push({ matchId: match.id, result: isSoleWinner ? 'win' : isDraw ? 'draw' : 'none' });
+  tally.form.push({ matchId: match.id, result: isWin ? 'win' : isDraw ? 'draw' : 'none' });
   const place = places?.get(personId);
   if (place !== undefined) {
     tally.placeSum += place;
@@ -263,65 +273,98 @@ function countMatch(
   }
 }
 
-// The earliest of the longest runs over all persons (Specification 3.8: on a tie the one
-// reached first).
-function longestRun(
-  entries: readonly { personId: PersonId; run: Run | null }[],
-  matches: readonly Match[],
-  isOngoingFor: (personId: PersonId, run: Run) => boolean,
-): RunRecord | null {
-  let best: { personId: PersonId; run: Run } | null = null;
-  for (const { personId, run } of entries) {
-    if (
-      run !== null &&
-      (best === null ||
-        run.length > best.run.length ||
-        (run.length === best.run.length && run.to < best.run.to))
-    ) {
-      best = { personId, run };
-    }
-  }
-  if (best === null) {
-    return null;
-  }
-  const run = toRun(best.run, matches, isOngoingFor(best.personId, best.run));
-  return run === null ? null : { ...run, personId: best.personId };
+function isSoleWinner(match: Match, personId: PersonId): boolean {
+  return match.winnerIds.length === 1 && match.winnerIds[0] === personId;
 }
 
-// The match with the best value; on a tie the earlier one (Specification 3.8).
-function pickMatch(
+// Every run of matches in a row that count for the person, e.g. its wins.
+function runsOf(matches: readonly Match[], counts: (match: Match) => boolean): Run[] {
+  const runs: Run[] = [];
+  let length = 0;
+  matches.forEach((match, index) => {
+    if (counts(match)) {
+      length++;
+      return;
+    }
+    if (length > 0) {
+      runs.push({ length, from: index - length, to: index - 1 });
+    }
+    length = 0;
+  });
+  if (length > 0) {
+    runs.push({ length, from: matches.length - length, to: matches.length - 1 });
+  }
+  return runs;
+}
+
+// Every longest run over all persons from `RECORD_RUN_MIN`, the one reached first first, on the
+// same match in seat order. A run that ends with the latest match still goes on.
+function longestRuns(
+  matches: readonly Match[],
+  participants: readonly PersonId[],
+  counts: (match: Match, personId: PersonId) => boolean,
+): RunRecord[] {
+  const all = participants.flatMap((personId) =>
+    runsOf(matches, (match) => counts(match, personId)).map((run) => ({ personId, run })),
+  );
+  const longest = Math.max(0, ...all.map(({ run }) => run.length));
+  if (longest < RECORD_RUN_MIN) {
+    return [];
+  }
+  return all
+    .filter(({ run }) => run.length === longest)
+    .toSorted((a, b) => a.run.to - b.run.to)
+    .flatMap(({ personId, run }) => {
+      const record = toRun(run, matches, run.to === matches.length - 1);
+      return record === null ? [] : [{ ...record, personId }];
+    });
+}
+
+// Every match with the best value, in the order played.
+function bestMatches(
   matches: readonly Match[],
   valueOf: (match: Match) => number | undefined,
   isBetter: (a: number, b: number) => boolean,
-): { match: Match; value: number } | null {
-  let best: { match: Match; value: number } | null = null;
+): MatchRecord[] {
+  let best: number | null = null;
   for (const match of matches) {
     const value = valueOf(match);
-    if (value !== undefined && (best === null || isBetter(value, best.value))) {
-      best = { match, value };
+    if (value !== undefined && (best === null || isBetter(value, best))) {
+      best = value;
     }
   }
-  return best;
+  return matches.flatMap((match) =>
+    best !== null && valueOf(match) === best
+      ? [{ matchId: match.id, date: match.date, personIds: match.winnerIds, value: best }]
+      : [],
+  );
 }
 
-function bestScoreOf(
+// The best single score of a custom game: every match in which it was reached, with every
+// person who reached it there (FA-ST-08).
+function bestScoresOf(
   matches: readonly Match[],
   participants: readonly PersonId[],
   scoring: ScoringDirection,
-): MatchRecord | null {
-  let best: MatchRecord | null = null;
-  for (const match of matches) {
+): MatchRecord[] {
+  const isBetter = (a: number, b: number): boolean => (scoring === 'highest-wins' ? a > b : a < b);
+  const bestOf = (match: Match): number | undefined => {
+    let best: number | undefined;
     for (const personId of participants) {
       const value = match.scores?.[personId];
-      const isBetter =
-        value !== undefined &&
-        (best === null || (scoring === 'highest-wins' ? value > best.value : value < best.value));
-      if (isBetter) {
-        best = { matchId: match.id, date: match.date, personIds: [personId], value };
+      if (value !== undefined && (best === undefined || isBetter(value, best))) {
+        best = value;
       }
     }
-  }
-  return best;
+    return best;
+  };
+  return bestMatches(matches, bestOf, isBetter).map((record) => {
+    const match = matches.find((candidate) => candidate.id === record.matchId);
+    return {
+      ...record,
+      personIds: participants.filter((personId) => match?.scores?.[personId] === record.value),
+    };
+  });
 }
 
 /**
@@ -381,24 +424,13 @@ export function computeStatistics(
       favoriteGame: gameId === null ? favoriteOf(tally) : null,
     };
   });
-  const runs = (key: 'best' | 'bestDry'): { personId: PersonId; run: Run | null }[] =>
-    participants.map((personId) => ({ personId, run: tallies.get(personId)?.[key] ?? null }));
   const timed =
     single?.tracksDuration === true
       ? matches.filter((match) => match.durationMinutes !== undefined)
       : [];
   const duration = (match: Match): number | undefined => match.durationMinutes;
-  const longest = pickMatch(timed, duration, (a, b) => a > b);
-  const shortest = timed.length > 1 ? pickMatch(timed, duration, (a, b) => a < b) : null;
-  const asRecord = (picked: { match: Match; value: number } | null): MatchRecord | null =>
-    picked === null
-      ? null
-      : {
-          matchId: picked.match.id,
-          date: picked.match.date,
-          personIds: picked.match.winnerIds,
-          value: picked.value,
-        };
+  const longest = bestMatches(timed, duration, (a, b) => a > b);
+  const shortest = timed.length > 1 ? bestMatches(timed, duration, (a, b) => a < b) : [];
   const holder = persons.find((person) => person.currentStreak >= SHOWN_STREAK_MIN);
   return {
     matchCount: matches.length,
@@ -415,18 +447,19 @@ export function computeStatistics(
     currentStreak:
       holder === undefined ? null : { personId: holder.personId, length: holder.currentStreak },
     records: {
-      longestStreak: longestRun(runs('best'), matches, (personId, run) =>
-        isOngoing(run, tallies.get(personId)?.run ?? 0),
+      longestStreak: longestRuns(matches, participants, isSoleWinner),
+      longestDrought: longestRuns(
+        matches,
+        participants,
+        (match, personId) => !isSoleWinner(match, personId),
       ),
-      longestDrought: longestRun(runs('bestDry'), matches, (personId, run) =>
-        isOngoing(run, tallies.get(personId)?.dry ?? 0),
-      ),
-      longestMatch: asRecord(longest),
-      shortestMatch: asRecord(shortest),
+      longestMatch: longest,
+      // All as long as the longest: no shortest one.
+      shortestMatch: shortest[0]?.value === longest[0]?.value ? [] : shortest,
       bestScore:
         single?.recordsBestScore === true && scoring !== null
-          ? bestScoreOf(matches, participants, scoring)
-          : null,
+          ? bestScoresOf(matches, participants, scoring)
+          : [],
     },
   };
 }

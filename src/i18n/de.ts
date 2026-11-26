@@ -233,11 +233,11 @@ export const de = {
         'Das Spiel, in dem eine Person ihre höchste Siegquote hat. Es zählt erst ab fünf Partien in diesem Spiel und braucht mindestens einen Sieg. Du siehst es nur, wenn alle Spiele gewählt sind.',
       rekordeTitel: 'Rekorde',
       rekordeSerie:
-        '„Ewige Serie“ und „Längste Durststrecke“ sind die längsten Folgen über alle Personen im Filter. Bei Gleichstand gilt die, die zuerst erreicht wurde. Steht dort „seit“, läuft sie noch.',
+        '„Ewige Serie“ und „Längste Durststrecke“ sind die längsten Folgen über alle Personen im Filter, gezählt ab zwei Partien. Sind mehrere gleich lang, stehen alle in der Karte, auch zwei derselben Person. Steht dort „seit“, läuft sie noch.',
       rekordeDauer:
         'Längste und kürzeste Partie gibt es nur bei Catan, weil nur dort die Zeit gemessen wird, und nur wenn das Spiel gewählt ist. Die kürzeste erscheint erst ab zwei Partien mit Dauer, ebenso gilt die durchschnittliche Dauer oben nur für Catan.',
       rekordeBestwert:
-        'Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Antippen eines Rekords mit einer Partie öffnet diese Partie.',
+        'Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Auch hier stehen bei Gleichstand alle Partien und Personen in der Karte. Antippen eines Rekords mit einer Partie öffnet diese Partie.',
       zeitraumTitel: 'Zeitraum',
       zeitraum:
         '„Letzte 3 Monate“ und „Letzte 12 Monate“ reichen bis einschließlich heute. Als Schnellwahl stehen das laufende und die zwei vorigen Jahre bereit, ältere Jahre wählst du über „Eigener Zeitraum“.',
@@ -271,6 +271,9 @@ export const de = {
     bestwert: 'Bestwert',
     bestwertWenigste: 'Bestwert · wenigste',
     rekordOeffnen: '{titel}: {wert}, Partie ansehen',
+    rekordPartie: '{titel}: {wert} am {datum}, Partie ansehen',
+    weitere: '+{anzahl} weitere',
+    weniger: 'Weniger',
     spiele: 'Spiele',
     spieleHinweis: 'Partien je Spiel',
     spielFiltern: '{spiel}, {partien}, nur dieses Spiel zeigen',

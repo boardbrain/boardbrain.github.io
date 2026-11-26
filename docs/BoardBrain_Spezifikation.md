@@ -350,11 +350,11 @@ Niederlagen und Unentschieden beenden eine Siegesserie. Mit einem Sieg endet die
 
 | Rekord | Definition |
 |---|---|
-| Ewige Serie | Die längste Siegesserie im Filter mit Person sowie Datum der ersten und der letzten Partie der Serie; bei Gleichstand die zuerst erreichte; läuft sie noch, „seit“ ihrer ersten Partie |
-| Längste Durststrecke | Die längste Folge von Partien ohne Sieg einer Person im Filter, mit Person sowie Datum der ersten und der letzten Partie; bei Gleichstand die zuerst erreichte; läuft sie noch, „seit“ ihrer ersten Partie *(neu in 0.24)* |
-| Längste Partie | Die Partie mit der größten Spieldauer; nur bei Catan; bei Gleichstand die frühere nach 3.7 |
-| Kürzeste Partie | Die Partie mit der kleinsten Spieldauer; nur bei Catan und erst ab zwei Partien mit Dauer; bei Gleichstand die frühere nach 3.7 *(ergänzt in 0.24)* |
-| Bestwert | Die beste Punktzahl einer Person (die höchste, bei „Wenigste Punkte gewinnen“ die niedrigste); nur bei einem einzelnen eigenen Spiel mit Punkten; bei Gleichstand die frühere Partie nach 3.7, in ihr die erste Person in der Sitzordnung *(in die Tabelle übernommen in 0.24)* |
+| Ewige Serie | Die längste Siegesserie im Filter mit Person sowie Datum der ersten und der letzten Partie der Serie, erst ab zwei Siegen; bei Gleichstand alle gleich langen, auch zwei derselben Person, die zuerst erreichte zuerst; läuft sie noch, „seit“ ihrer ersten Partie *(Gleichstand und Mindestlänge geändert in 0.24, Product Owner 26.11.2026)* |
+| Längste Durststrecke | Die längste Folge von Partien ohne Sieg einer Person im Filter, mit Person sowie Datum der ersten und der letzten Partie, erst ab zwei Partien; bei Gleichstand alle gleich langen wie bei der ewigen Serie; läuft sie noch, „seit“ ihrer ersten Partie *(neu in 0.24)* |
+| Längste Partie | Die Partie mit der größten Spieldauer; nur bei Catan; bei Gleichstand alle, die frühere zuerst nach 3.7 *(geändert in 0.24)* |
+| Kürzeste Partie | Die Partie mit der kleinsten Spieldauer; nur bei Catan und erst ab zwei Partien mit Dauer, und nicht, wenn alle so lang sind wie die längste; bei Gleichstand alle, die frühere zuerst nach 3.7 *(ergänzt in 0.24)* |
+| Bestwert | Die beste Punktzahl einer Person (die höchste, bei „Wenigste Punkte gewinnen“ die niedrigste); nur bei einem einzelnen eigenen Spiel mit Punkten; bei Gleichstand alle Partien mit diesem Wert, die frühere zuerst nach 3.7, je Partie alle Personen mit diesem Wert *(in die Tabelle übernommen und geändert in 0.24)* |
 
 ### 3.9 Kennungen, Export und Import
 

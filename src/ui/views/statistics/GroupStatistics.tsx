@@ -1,7 +1,7 @@
 import { m } from 'motion/react';
 import { useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import type { CustomGame, GameId, Group, Person, PersonId } from '@/core/model';
+import type { CustomGame, GameId, Group, MatchId, Person, PersonId } from '@/core/model';
 import {
   computeStatistics,
   rankingCriteria,
@@ -871,6 +871,35 @@ function PlaceLegend({ size }: { readonly size: number }): React.JSX.Element {
   );
 }
 
+// One holder of a record: who, when, and the match to open for a record of one match.
+type RecordEntry = {
+  readonly key: string;
+  readonly who: readonly PersonId[];
+  readonly when: string;
+  readonly matchId: MatchId | null;
+};
+
+// How many holders of one record show before "+N weitere".
+const SHOWN_HOLDERS = 3;
+
+function runEntries(records: readonly RunRecord[]): RecordEntry[] {
+  return records.map((record) => ({
+    key: `${record.personId}-${record.firstDate}`,
+    who: [record.personId],
+    when: runText(record),
+    matchId: null,
+  }));
+}
+
+function matchEntries(records: readonly MatchRecord[]): RecordEntry[] {
+  return records.map((record) => ({
+    key: record.matchId,
+    who: record.personIds,
+    when: fullDate(record.date),
+    matchId: record.matchId,
+  }));
+}
+
 function Records({
   stats,
   groupId,
@@ -883,154 +912,190 @@ function Records({
   readonly coin: CoinOf;
 }): React.JSX.Element | null {
   const { records } = stats;
-  const cards: React.JSX.Element[] = [];
-  const runCard = (
-    key: string,
-    title: string,
-    record: RunRecord,
-    value: string,
-    icon: React.JSX.Element,
-    tone: string | undefined,
-  ): void => {
-    cards.push(
-      <div key={key} className={cx(styles.record, tone)}>
-        <RecordBody
-          title={title}
-          value={value}
-          icon={icon}
-          who={[record.personId]}
-          when={runText(record)}
-          nameOf={nameOf}
-          coin={coin}
-        />
-      </div>,
-    );
-  };
-  const matchCard = (
-    key: string,
-    title: string,
-    record: MatchRecord,
-    value: string,
-    icon: React.JSX.Element,
-    tone: string | undefined,
-  ): void => {
-    cards.push(
-      <PressableLink
-        key={key}
-        to={resultHref(groupId, record.matchId)}
-        className={cx(styles.record, tone)}
-        aria-label={t('statistik.rekordOeffnen', { titel: title, wert: value })}
-      >
-        <RecordBody
-          title={title}
-          value={value}
-          icon={icon}
-          who={record.personIds}
-          when={fullDate(record.date)}
-          nameOf={nameOf}
-          coin={coin}
-        />
-        <span className={styles.recordGo} aria-hidden="true">
-          <ChevronIcon size={16} />
-        </span>
-      </PressableLink>,
-    );
-  };
-  if (records.longestStreak !== null) {
-    runCard(
-      'streak',
-      t('statistik.ewigeSerie'),
-      records.longestStreak,
-      winsText(records.longestStreak.length),
-      <FlameIcon size={18} />,
-      styles.recordStreak,
-    );
-  }
-  if (records.longestDrought !== null) {
-    runCard(
-      'drought',
-      t('statistik.laengsteDurststrecke'),
-      records.longestDrought,
-      matchCountText(records.longestDrought.length),
-      <CactusIcon size={18} />,
-      styles.recordDrought,
-    );
-  }
-  if (records.longestMatch !== null) {
-    matchCard(
-      'long',
-      t('statistik.laengstePartie'),
-      records.longestMatch,
-      durationText(records.longestMatch.value),
-      <ClockIcon size={18} />,
-      styles.recordLong,
-    );
-  }
-  if (records.shortestMatch !== null) {
-    matchCard(
-      'short',
-      t('statistik.kuerzestePartie'),
-      records.shortestMatch,
-      durationText(records.shortestMatch.value),
-      <BoltIcon size={18} />,
-      styles.recordShort,
-    );
-  }
-  if (records.bestScore !== null) {
-    matchCard(
-      'best',
-      stats.scoring === 'lowest-wins' ? t('statistik.bestwertWenigste') : t('statistik.bestwert'),
-      records.bestScore,
-      t('statistik.punkteAnzahl', { anzahl: records.bestScore.value }),
-      <MedalIcon size={18} />,
-      styles.recordBest,
-    );
-  }
+  const cards = [
+    {
+      key: 'streak',
+      title: t('statistik.ewigeSerie'),
+      value: winsText(records.longestStreak[0]?.length ?? 0),
+      entries: runEntries(records.longestStreak),
+      icon: <FlameIcon size={18} />,
+      tone: styles.recordStreak,
+    },
+    {
+      key: 'drought',
+      title: t('statistik.laengsteDurststrecke'),
+      value: matchCountText(records.longestDrought[0]?.length ?? 0),
+      entries: runEntries(records.longestDrought),
+      icon: <CactusIcon size={18} />,
+      tone: styles.recordDrought,
+    },
+    {
+      key: 'long',
+      title: t('statistik.laengstePartie'),
+      value: durationText(records.longestMatch[0]?.value ?? 0),
+      entries: matchEntries(records.longestMatch),
+      icon: <ClockIcon size={18} />,
+      tone: styles.recordLong,
+    },
+    {
+      key: 'short',
+      title: t('statistik.kuerzestePartie'),
+      value: durationText(records.shortestMatch[0]?.value ?? 0),
+      entries: matchEntries(records.shortestMatch),
+      icon: <BoltIcon size={18} />,
+      tone: styles.recordShort,
+    },
+    {
+      key: 'best',
+      title:
+        stats.scoring === 'lowest-wins' ? t('statistik.bestwertWenigste') : t('statistik.bestwert'),
+      value: t('statistik.punkteAnzahl', { anzahl: records.bestScore[0]?.value ?? 0 }),
+      entries: matchEntries(records.bestScore),
+      icon: <MedalIcon size={18} />,
+      tone: styles.recordBest,
+    },
+  ].filter((card) => card.entries.length > 0);
   if (cards.length === 0) {
     return null;
   }
   return (
     <section className={styles.section}>
       <h3 className={styles.sectionTitle}>{t('statistik.rekorde')}</h3>
-      <div className={styles.recordRail}>{cards}</div>
+      <div className={styles.recordRail}>
+        {cards.map(({ key, ...card }) => (
+          <RecordCard key={key} {...card} groupId={groupId} nameOf={nameOf} coin={coin} />
+        ))}
+      </div>
     </section>
   );
 }
 
-function RecordBody({
+/**
+ * A record as a card (US-ST-05, design I3-D): every holder of the record value below its title
+ * (PO 26.11.2026), at most three and then "+N weitere". A record of a single match opens it with a
+ * tap on the whole card; with several matches each line opens its own.
+ */
+function RecordCard({
   title,
   value,
+  entries,
   icon,
-  who,
-  when,
+  tone,
+  groupId,
   nameOf,
   coin,
 }: {
   readonly title: string;
   readonly value: string;
+  readonly entries: readonly RecordEntry[];
   readonly icon: React.JSX.Element;
-  readonly who: readonly PersonId[];
-  readonly when: string;
+  readonly tone: string | undefined;
+  readonly groupId: string;
   readonly nameOf: Names;
   readonly coin: CoinOf;
 }): React.JSX.Element {
-  return (
+  const [isAllShown, setAllShown] = useState(false);
+  const head = (
     <>
       <span className={styles.recordIcon} aria-hidden="true">
         {icon}
       </span>
       <span className={styles.label}>{title}</span>
       <strong className={styles.recordValue}>{value}</strong>
+    </>
+  );
+  const [only] = entries;
+  if (entries.length === 1 && only !== undefined && only.matchId !== null) {
+    return (
+      <PressableLink
+        to={resultHref(groupId, only.matchId)}
+        className={cx(styles.record, tone)}
+        aria-label={t('statistik.rekordOeffnen', { titel: title, wert: value })}
+      >
+        {head}
+        <RecordHolder entry={only} nameOf={nameOf} coin={coin} />
+        <span className={styles.recordGo} aria-hidden="true">
+          <ChevronIcon size={16} />
+        </span>
+      </PressableLink>
+    );
+  }
+  const line = (entry: RecordEntry): React.JSX.Element =>
+    entry.matchId === null ? (
+      <li key={entry.key}>
+        <span className={styles.recordLine}>
+          <RecordHolder entry={entry} nameOf={nameOf} coin={coin} />
+        </span>
+      </li>
+    ) : (
+      <li key={entry.key}>
+        <PressableLink
+          to={resultHref(groupId, entry.matchId)}
+          className={cx(styles.recordLine, styles.recordLink)}
+          aria-label={t('statistik.rekordPartie', { titel: title, wert: value, datum: entry.when })}
+        >
+          <RecordHolder entry={entry} nameOf={nameOf} coin={coin} />
+          <span className={styles.recordLineGo} aria-hidden="true">
+            <ChevronIcon size={14} />
+          </span>
+        </PressableLink>
+      </li>
+    );
+  if (entries.length === 1 && only !== undefined) {
+    return (
+      <div className={cx(styles.record, tone)}>
+        {head}
+        <RecordHolder entry={only} nameOf={nameOf} coin={coin} />
+      </div>
+    );
+  }
+  const rest = entries.slice(SHOWN_HOLDERS);
+  return (
+    <div className={cx(styles.record, tone)}>
+      {head}
+      <ul className={styles.recordLines}>{entries.slice(0, SHOWN_HOLDERS).map(line)}</ul>
+      {rest.length > 0 && (
+        <>
+          <Unfold isOpen={isAllShown}>
+            <ul className={styles.recordLines}>{rest.map(line)}</ul>
+          </Unfold>
+          <PressableButton
+            type="button"
+            className={styles.recordMore}
+            aria-expanded={isAllShown}
+            onClick={() => {
+              setAllShown(!isAllShown);
+            }}
+          >
+            {isAllShown ? t('statistik.weniger') : t('statistik.weitere', { anzahl: rest.length })}
+          </PressableButton>
+        </>
+      )}
+    </div>
+  );
+}
+
+function RecordHolder({
+  entry,
+  nameOf,
+  coin,
+}: {
+  readonly entry: RecordEntry;
+  readonly nameOf: Names;
+  readonly coin: CoinOf;
+}): React.JSX.Element {
+  return (
+    <span className={styles.recordHolder}>
       <span className={styles.recordWho}>
         <span className={styles.coins}>
-          {who.slice(0, 3).map((personId) => (
+          {entry.who.slice(0, SHOWN_HOLDERS).map((personId) => (
             <span key={personId}>{coin(personId, 22)}</span>
           ))}
         </span>
-        <span className={styles.recordNames}>{who.map(nameOf).join(', ')}</span>
+        <span className={styles.recordNames}>{entry.who.map(nameOf).join(', ')}</span>
       </span>
-      <small className={styles.recordWhen}>{when}</small>
-    </>
+      <small className={styles.recordWhen}>{entry.when}</small>
+    </span>
   );
 }
 
