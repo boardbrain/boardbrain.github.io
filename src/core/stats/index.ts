@@ -23,6 +23,7 @@ export {
   type RankingCriterion,
 } from './ranking';
 export {
+  QUICK_YEAR_COUNT,
   selectMatches,
   type GameMatchCount,
   type StatsRequest,

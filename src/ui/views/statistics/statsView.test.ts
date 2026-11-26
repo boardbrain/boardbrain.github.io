@@ -75,6 +75,9 @@ describe('Design I3-D texts of the statistics', () => {
     expect(periodLabel({ kind: 'last-months', months: 3 })).toBe('Letzte 3 Monate');
     expect(periodLabel({ kind: 'last-months', months: 12 })).toBe('Letzte 12 Monate');
     expect(periodLabel({ kind: 'year', year: 2026 })).toBe('2026');
+    expect(periodLabel({ kind: 'range', from: day('2021-01-01'), to: day('2021-12-31') })).toBe(
+      '2021',
+    );
   });
 
   it('writes a span with the year once, across years twice and one day alone', () => {

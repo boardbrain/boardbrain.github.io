@@ -4,6 +4,12 @@ import { isInPeriod, type StatsPeriod } from './period';
 import { matchesPerGame } from './statistics';
 
 /**
+ * How many calendar years the quick choice of the period offers: this year and the two before
+ * (PO 26.11.2026); older years go through an own range.
+ */
+export const QUICK_YEAR_COUNT = 3;
+
+/**
  * What the person asks to see (US-ST-03): one game or all (`null`), one edition or all (`null`)
  * and the period. The statistics take from it only what exists in the matches.
  */
@@ -25,7 +31,7 @@ export type GameMatchCount = {
  * The filter as it applies to a group (Specification 3.8, US-ST-03).
  */
 export type StatsSelection = {
-  /** Years with matches, newest first (FA-ST-10). */
+  /** Years with matches for the quick choice, newest first, at most this year and the two before (FA-ST-10). */
   readonly years: readonly number[];
   /** Games with matches in the period, the most played first, then the one played first. */
   readonly games: readonly GameMatchCount[];
@@ -60,9 +66,10 @@ export function selectMatches(
   today: LocalDate,
 ): StatsSelection {
   const chronological = sortMatches(matches);
-  const years = [...new Set(chronological.map((match) => Number(match.date.slice(0, 4))))].toSorted(
-    (a, b) => b - a,
-  );
+  const oldestQuickYear = Number(today.slice(0, 4)) - QUICK_YEAR_COUNT + 1;
+  const years = [...new Set(chronological.map((match) => Number(match.date.slice(0, 4))))]
+    .filter((year) => year >= oldestQuickYear)
+    .toSorted((a, b) => b - a);
   const inPeriod = chronological.filter((match) => isInPeriod(match.date, request.period, today));
   const games = matchesPerGame(inPeriod);
   const canChooseGame = games.length > 1;

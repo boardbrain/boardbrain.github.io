@@ -30,10 +30,10 @@ function dayOrNull(value: string): LocalDate | null {
 
 /**
  * The period of the statistics as a sheet from below (US-ST-03 AK-5, AK-6, design I3-D ZE2):
- * quick choices for all matches, the years with matches and the last 3 or 12 months, below an
- * own range from–to. Errors show at once and keep the range from being taken; the button says how
- * many matches lie in it. Like every form it only looks greyed out then, and a tap lights up the
- * dates to change (Architecture 13.6).
+ * quick choices for all matches, the years with matches up to two years back and the last 3 or
+ * 12 months, below an own range from–to for anything else. Errors show at once and keep the range
+ * from being taken; the button says how many matches lie in it. Like every form it only looks
+ * greyed out then, and a tap lights up the dates to change (Architecture 13.6).
  */
 export function PeriodSheet({
   matches,

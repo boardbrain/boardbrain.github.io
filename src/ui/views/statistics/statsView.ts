@@ -147,7 +147,9 @@ export function writeStatsParams(
 }
 
 /**
- * The name of the period, e.g. "Gesamt", "2026", "Letzte 3 Monate" or "01.03. – 31.03.2026".
+ * The name of the period, e.g. "Gesamt", "2026", "Letzte 3 Monate" or "01.03. – 31.03.2026"; an
+ * own range over a whole calendar year is named by the year, e.g. an older one beyond the quick
+ * choice.
  */
 export function periodLabel(period: StatsPeriod): string {
   switch (period.kind) {
@@ -157,8 +159,12 @@ export function periodLabel(period: StatsPeriod): string {
       return String(period.year);
     case 'last-months':
       return period.months === 3 ? t('statistik.letzte3') : t('statistik.letzte12');
-    case 'range':
-      return spanText(period.from, period.to);
+    case 'range': {
+      const year = period.from.slice(0, 4);
+      return period.from === `${year}-01-01` && period.to === `${year}-12-31`
+        ? year
+        : spanText(period.from, period.to);
+    }
   }
 }
 

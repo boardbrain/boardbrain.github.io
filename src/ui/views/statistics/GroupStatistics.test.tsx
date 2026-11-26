@@ -4,7 +4,7 @@ import { aMatch } from '@tests/support/resultFakes';
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { parseLocalDate, toMatchId, toPersonId, type LocalDate, type Match } from '@/core/model';
 import { assert } from '@/core/shared';
 import { CATAN_GAME_ID } from '@/games/catan';
@@ -24,6 +24,15 @@ const TABLE = aGroup({
   ],
 });
 const PAGE = `/statistik/${TABLE.id}`;
+
+// The quick choice of years depends on today: a fixed day keeps the tests stable over the years.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-26T12:00:00') });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 function day(text: string): LocalDate {
   const parsed = parseLocalDate(text);

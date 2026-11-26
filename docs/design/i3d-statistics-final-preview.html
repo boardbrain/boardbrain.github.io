@@ -21216,7 +21216,7 @@
           err && h('span', { class: 'sxErr' }, err),
           h('button', { class: 'primary', disabled: !!err || !n, onclick: () => pick(`c:${dr.from}:${dr.to}`) }, err ? 'Übernehmen' : n ? `${n} ${n === 1 ? 'Partie' : 'Partien'} zeigen` : 'Keine Partien im Zeitraum')];
         if (ze === 'ZE2') {
-          const quick = [['all', 'Gesamt'], ...F.years.map((y) => [y, y]), ['q3', 'Letzte 3 Monate'], ['q12', 'Letzte 12 Monate']];
+          const quick = [['all', 'Gesamt'], ...F.years.filter((y) => Number(y) > Number(SX_TODAY.slice(0, 4)) - 3).map((y) => [y, y]), ['q3', 'Letzte 3 Monate'], ['q12', 'Letzte 12 Monate']];
           const apply = (k) => {
             if (k === 'all' || /^\d{4}$/.test(k)) return pick(k);
             const months = k === 'q3' ? 3 : 12;

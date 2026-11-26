@@ -71,6 +71,25 @@ describe('US-ST-03 filter the statistics', () => {
     ).toBeNull();
   });
 
+  it('AK-5: the quick choice offers the years with matches of this year and the two before', () => {
+    const old = [
+      match({ game: UNO, date: '2021-05-01', winners: [ANNA] }),
+      match({ game: UNO, date: '2023-12-31', winners: [ANNA] }),
+      match({ game: UNO, date: '2024-01-01', winners: [BEN] }),
+      ...MATCHES,
+    ];
+
+    const selection = selectMatches(old, { gameId: null, edition: null, period: ALL_TIME }, TODAY);
+    expect(selection.years).toEqual([2026, 2025, 2024]);
+    // Older years stay reachable through the period itself.
+    const year2021 = selectMatches(
+      old,
+      { gameId: null, edition: null, period: { kind: 'year', year: 2021 } },
+      TODAY,
+    );
+    expect(year2021.matches.map((m) => m.date)).toEqual(['2021-05-01']);
+  });
+
   it('AK-5: the period applies before the game; years with matches newest first', () => {
     const lastThree = selectMatches(
       MATCHES,
