@@ -19,6 +19,14 @@ export type StatsGame = {
 export type FormResult = 'win' | 'draw' | 'none';
 
 /**
+ * One match of the form: which match and its result for the person.
+ */
+export type FormEntry = {
+  readonly matchId: MatchId;
+  readonly result: FormResult;
+};
+
+/**
  * A run of matches in a row, e.g. a winning streak (Specification 3.8): its length, the first
  * and last match and whether it still runs with the latest match of the filter.
  */
@@ -56,7 +64,7 @@ export type PersonStatistics = {
   readonly drought: number;
   readonly longestDrought: MatchRun | null;
   /** The latest five matches, oldest first. */
-  readonly form: readonly FormResult[];
+  readonly form: readonly FormEntry[];
   /** Over matches with places, `null` without such matches (US-ST-01 AK-3). */
   readonly averagePlace: number | null;
   /** Over matches with points, only for a single game with points; else `null`. */
@@ -150,7 +158,7 @@ type Tally = {
   lastCount: number;
   scoreSum: number;
   scoredMatches: number;
-  form: FormResult[];
+  form: FormEntry[];
   perGame: Map<GameId, { matches: number; wins: number; firstPlayed: number }>;
 };
 
@@ -236,7 +244,7 @@ function countMatch(
       tally.bestDry = { length: tally.dry, from: index - tally.dry + 1, to: index };
     }
   }
-  tally.form.push(isSoleWinner ? 'win' : isDraw ? 'draw' : 'none');
+  tally.form.push({ matchId: match.id, result: isSoleWinner ? 'win' : isDraw ? 'draw' : 'none' });
   const place = places?.get(personId);
   if (place !== undefined) {
     tally.placeSum += place;

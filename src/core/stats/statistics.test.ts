@@ -53,11 +53,23 @@ describe('US-ST-01 key figures per person', () => {
     });
     expect(anna.drought).toBe(2);
     expect(personOf(stats.persons, DAVID).currentStreak).toBe(2);
-    expect(personOf(stats.persons, CLARA).form).toEqual(['none', 'draw', 'none', 'none', 'none']);
+    expect(personOf(stats.persons, CLARA).form.map((entry) => entry.result)).toEqual([
+      'none',
+      'draw',
+      'none',
+      'none',
+      'none',
+    ]);
   });
 
   it('AK-1: keeps at most the latest five matches in the form, oldest first', () => {
-    expect(personOf(stats.persons, ANNA).form).toEqual(['win', 'none', 'win', 'none', 'none']);
+    expect(personOf(stats.persons, ANNA).form.map((entry) => entry.result)).toEqual([
+      'win',
+      'none',
+      'win',
+      'none',
+      'none',
+    ]);
   });
 
   it('AK-2: counts a draw as a draw, not a win, and ends the winning streak', () => {

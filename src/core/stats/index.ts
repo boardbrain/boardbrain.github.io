@@ -35,6 +35,7 @@ export {
   matchesPerGame,
   SHOWN_STREAK_MIN,
   type FavoriteGame,
+  type FormEntry,
   type FormResult,
   type GroupStatistics,
   type MatchRecord,
