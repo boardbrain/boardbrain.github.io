@@ -525,8 +525,16 @@
   margin: 0;
 }
 
+/* Narrow phones: three tiles would cut labels like "Unentschieden" or "Ø Siegpunkte". */
+@media (width < 24.375rem) {
+  .figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .figure {
   display: grid;
+  align-content: start;
   gap: 2px;
   min-width: 0;
   padding: 10px 12px;
@@ -550,6 +558,14 @@
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* The longest drought under the current one (PO 26.11.2026). */
+.figureNote {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
 }
 
 .placeMini {

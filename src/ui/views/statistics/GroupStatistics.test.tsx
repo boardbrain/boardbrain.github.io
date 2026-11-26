@@ -148,7 +148,7 @@ describe('US-ST-01 Key figures and ranking of a table (design I3-D)', () => {
       within(details)
         .getAllByRole('definition')
         .map((value) => value.textContent),
-    ).toEqual(['4', '80 %', '0', '4', '1,0', '0']);
+    ).toEqual(['4', '80 %', '0längste 1', '4', '1,0', '0']);
   });
 
   it('AK-6: from two wins in a row the current series has its own card that opens the person', async () => {

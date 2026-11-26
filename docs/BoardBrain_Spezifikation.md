@@ -330,6 +330,7 @@ Alle Kennzahlen beziehen sich auf eine Gruppe und den aktuell gewählten Filter 
 | Aktuelle Siegesserie | Gruppe | Anzahl aufeinanderfolgender Siege der Person, die die letzte Partie allein gewonnen hat; nur sie kann eine haben. Angezeigt ab 2 als eigener Hinweis mit Person, nicht als Kennzahl je Person und nicht als Kriterium der Rangliste (E-57) *(geändert in 0.24)* |
 | Längste Siegesserie | Person | Größte Anzahl aufeinanderfolgender Siege |
 | Aktuelle Durststrecke | Person | Anzahl der Partien seit dem letzten Sieg der Person; ohne Sieg im Filter alle Partien. Ein Unentschieden ist kein Sieg. |
+| Längste Durststrecke | Person | Die längste Folge von Partien ohne Sieg der Person im Filter, klein unter der aktuellen *(neu in 0.24, Product Owner 26.11.2026)* |
 | Form | Person | Ergebnis der letzten fünf Partien im Filter, die jüngste zuletzt: Sieg, Unentschieden oder keins *(neu in 0.24)* |
 | Durchschnittspunkte | Person | Mittelwert der Punkte über alle Partien mit erfassten Punkten; nur wenn der Filter ein einzelnes Spiel mit Punkten zeigt, bei Catan als „Durchschnittssiegpunkte“; ohne Daten „–“ *(geändert in 0.21)* |
 | Durchschnittsplatz | Person | Mittelwert der Plätze (3.6) über alle Partien mit Plätzen, aus Punkten oder aus einer Rangfolge, auch über mehrere Spiele; ohne Daten „–“ *(geändert in 0.21)* |

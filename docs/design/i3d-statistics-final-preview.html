@@ -11073,6 +11073,24 @@
       .sxFig .sxNum {
         white-space: nowrap;
       }
+      .sxFig {
+        align-content: start;
+      }
+      /* Narrow phones: two tiles per row, so no label is cut off (as in the app below 390 px). */
+      .frame.phoneS .sxFigs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (width < 390px) {
+        .frame.device .sxFigs {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      .sxFigNote {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--muted);
+        white-space: nowrap;
+      }
     </style>
   </head>
   <body>
@@ -21386,7 +21404,7 @@
       function sxFigs(S, x) {
         const f = (label, key, v, fmt = 'int') => h('div', { class: 'sxFig' }, h('span', { class: 'sxLabel' }, label), sxNum(`${x.p}:${key}`, v, fmt));
         return h('div', { class: 'sxFigs' },
-          f('Siege', 'wins', x.wins), f('Siegquote', 'quote', x.quote === null ? null : x.quote * 100, 'pct'), f('Durststrecke', 'dry', x.dry),
+          f('Siege', 'wins', x.wins), f('Siegquote', 'quote', x.quote === null ? null : x.quote * 100, 'pct'), h('div', { class: 'sxFig' }, h('span', { class: 'sxLabel' }, 'Durststrecke'), sxNum(`${x.p}:dry`, x.dry, 'int'), x.bestDry.len > 0 && h('small', { class: 'sxFigNote' }, `längste ${x.bestDry.len}`)),
           !sxAs1() && f('Aktuelle Serie', 'cur', x.cur), f('Längste Serie', 'best', x.best.len), S.hasDraws && f('Unentschieden', 'draws', x.draws),
           S.hasPlaces && f('Ø Platz', 'avgPl', x.avgPlace, 'dec1'), S.hasPts && f(S.isCatan ? 'Ø Siegpunkte' : 'Ø Punkte', 'avgPts', x.avgPts, 'dec1'),
           S.hasPlaces && f('Letzter', 'lan', x.lantern));

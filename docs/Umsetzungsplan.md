@@ -534,7 +534,7 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
   - **Einstieg (KS2, TW1):** Karte „Statistik“ nur in der Kartenhand, dahinter die Tische als Karten mit Partien, letztem Spieltag, Spitzenreiter und kleinem Podest, zuletzt gespielte zuerst.
   - **Aufbau (RA):** Podest der ersten drei nach dem Kriterium (Siege, Ø Platz, Ø Punkte, Längste Serie), darunter die Rangliste mit Balken und Form zum Aufklappen, Rekorde als Karten zum Wischen, Plätze, Partien je Spiel.
   - **Aktuelle Serie:** kein Kriterium und keine Kennzahl je Person, sondern eine eigene schmale Karte unter dem Podest ab 2 Siegen in Folge (Frage und Vorschlag des Product Owners).
-  - **Zeitraum (ZE2):** Blatt mit Gesamt, Jahren, letzten 3 und 12 Monaten und Von–Bis. Bei der Abnahme (26.11.2026): Jahre nur bis zwei Jahre zurück, ältere über Von–Bis.
+  - **Zeitraum (ZE2):** Blatt mit Gesamt, Jahren, letzten 3 und 12 Monaten und Von–Bis. Bei der Abnahme (26.11.2026): Jahre nur bis zwei Jahre zurück, ältere über Von–Bis; je Person die längste Durststrecke klein unter der aktuellen; Kennzahlen unter 390 px in zwei Spalten, damit kein Titel abgeschnitten wird.
   - **Plätze (PL1):** „Letzter“ dunkelrot rechts im Balken statt Roter Laterne, ohne Doppelzählung. Paradespiel ab 5 Partien (MZ5). Längste Durststrecke als Rekord mit Kaktus (DI1).
   - **Stil (EH3, Mittelweg):** flach und holzbraun wie die App, wenige warme Akzente; Bewegung mit Motion: Zahlen zählen, Balken wachsen, Zeilen gleiten. Ein moderner eigener Stil (EH1) wurde verworfen, weil das einfache Holzdesign bleiben soll.
   - **Prüfung der Vorschauen:** Rechenlogik gegen eine unabhängige Nachrechnung, Überläufe und unerwartete Zeilenumbrüche auf vier Gerätegrößen per Skript (`previews/tools/i3d`).

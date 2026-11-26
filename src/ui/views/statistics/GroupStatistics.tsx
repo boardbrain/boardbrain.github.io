@@ -736,7 +736,14 @@ function PersonDetails({
       <dl className={styles.figures}>
         <Figure label={t('statistik.kennzahlen.siege')}>{person.wins}</Figure>
         <Figure label={t('statistik.kennzahlen.siegquote')}>{percentText(person.winRate)}</Figure>
-        <Figure label={t('statistik.kennzahlen.durststrecke')}>{person.drought}</Figure>
+        <Figure label={t('statistik.kennzahlen.durststrecke')}>
+          {person.drought}
+          {person.longestDrought !== null && (
+            <small className={styles.figureNote}>
+              {t('statistik.laengsteWert', { anzahl: person.longestDrought.length })}
+            </small>
+          )}
+        </Figure>
         <Figure label={t('statistik.kennzahlen.laengsteSerie')}>
           {person.longestStreak?.length ?? 0}
         </Figure>

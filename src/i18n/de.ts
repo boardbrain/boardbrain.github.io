@@ -197,6 +197,7 @@ export const de = {
     formUnentschieden: 'Unentschieden',
     formKeins: 'kein Sieg',
     kennzahlenVon: 'Kennzahlen von {name}',
+    laengsteWert: 'längste {anzahl}',
     kennzahlen: {
       siege: 'Siege',
       siegquote: 'Siegquote',
