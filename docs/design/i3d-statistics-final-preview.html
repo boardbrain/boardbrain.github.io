@@ -19991,7 +19991,7 @@
       const stDay = (iso) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}.`;
       // A span of dates: the year once when both lie in the same year.
       const stSpan = (a, b) => (a === b ? stDate(a) : a.slice(0, 4) === b.slice(0, 4) ? `${stDay(a)} – ${stDate(b)}` : `${stDate(a)} – ${stDate(b)}`);
-      const stDur = (m) => (m < 60 ? `${m} min` : m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
+      const stDur = (m) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`);
       function stPick(weights, R) {
         const keys = Object.keys(weights);
         let x = R() * keys.reduce((s, k) => s + weights[k], 0);
