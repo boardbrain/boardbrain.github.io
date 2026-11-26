@@ -109,9 +109,11 @@ describe('US-ER-04 Results of a table (table page, design I3-C)', () => {
 
     await user.keyboard('{ArrowRight}');
     expect(screen.getByRole('tab', { name: 'Statistik', selected: true })).toHaveFocus();
-    expect(screen.getByRole('tabpanel', { name: 'Statistik' })).toHaveTextContent(
-      'Kommt mit dem nächsten Update',
-    );
+    expect(
+      await within(screen.getByRole('tabpanel', { name: 'Statistik' })).findByRole('heading', {
+        name: 'Rangliste',
+      }),
+    ).toBeInTheDocument();
 
     await user.keyboard('{Home}');
     expect(screen.getByRole('tab', { name: 'Am Tisch', selected: true })).toHaveFocus();

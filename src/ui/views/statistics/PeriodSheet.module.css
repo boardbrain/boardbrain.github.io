@@ -1,0 +1,125 @@
+/* Period of the statistics as a sheet from below (design I3-D ZE2), like the sheets of the score pad. */
+.back {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--color-backdrop);
+}
+
+.sheet {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 32rem);
+  max-height: 92%;
+  padding: 0 16px calc(64px + env(safe-area-inset-bottom));
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+}
+
+/* The grip: the whole width is the target, only the bar is seen (K-4). */
+.sheet > .grip {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.grip::before {
+  width: calc(44px + var(--press, 0) * 14px);
+  height: 5px;
+  content: '';
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.choice {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.chosen {
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-color: transparent;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.dates {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+}
+
+.date {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+
+.date input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-text);
+  color-scheme: dark;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.dash {
+  padding-bottom: 14px;
+  color: var(--color-text-muted);
+}
+
+.error {
+  font-size: 0.85rem;
+  color: var(--color-status-error);
+}
+
+.take {
+  width: 100%;
+}
+
+/* Greyed out like every form: a tap shows which dates to change (Architecture 13.6). */
+.looksOff {
+  opacity: 0.45;
+}

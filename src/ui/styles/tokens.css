@@ -94,6 +94,59 @@
   --color-place-silver-rim: color-mix(in srgb, var(--color-place-silver) 75%, transparent);
   --color-place-bronze-rim: color-mix(in srgb, var(--color-place-bronze) 75%, transparent);
 
+  /* Design I3-D (EH3, middle way): the flat wooden look with a few warm accents. "Letzter" in dark
+     red at the right of the place bar (E-58), the other places beyond 3 in grey. */
+  --color-place-last: #8c2f2f;
+  --color-place-last-text: #fbe3e3;
+  --color-place-other: color-mix(in srgb, var(--color-text) 14%, transparent);
+  --color-stats-track: color-mix(in srgb, var(--color-text) 6%, transparent);
+  --color-stats-edge: color-mix(in srgb, var(--color-text) 8%, transparent);
+  --color-form-none: color-mix(in srgb, var(--color-text) 18%, transparent);
+  --gradient-stats-hero: radial-gradient(
+    90% 60% at 50% 0%,
+    color-mix(in srgb, var(--color-accent-text) 9%, transparent),
+    transparent 70%
+  );
+  --gradient-stats-glow: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-accent-text) 14%, transparent),
+    transparent 68%
+  );
+  --gradient-podium-1: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent-text) 24%, var(--color-surface-overlay)),
+    var(--color-surface-overlay)
+  );
+  --gradient-podium-2: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-place-silver) 16%, var(--color-surface-overlay)),
+    var(--color-surface-overlay)
+  );
+  --gradient-podium-3: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-place-bronze) 18%, var(--color-surface-overlay)),
+    var(--color-surface-overlay)
+  );
+  --shadow-stats-thumb: 0 2px 8px -2px #0009;
+  --shadow-stats-leader: 0 6px 18px -8px var(--color-accent-text);
+
+  /* Records: one colour each, the icon on a soft circle of it (design I3-D). */
+  --color-record-streak: var(--color-group-orange);
+  --color-record-drought: var(--color-group-green);
+  --color-record-long: var(--color-group-yellow);
+  --color-record-short: var(--color-group-teal);
+  --color-record-best: var(--color-accent-text);
+  --color-record-streak-soft: color-mix(in srgb, var(--color-record-streak) 22%, transparent);
+  --color-record-drought-soft: color-mix(in srgb, var(--color-record-drought) 22%, transparent);
+  --color-record-long-soft: color-mix(in srgb, var(--color-record-long) 22%, transparent);
+  --color-record-short-soft: color-mix(in srgb, var(--color-record-short) 22%, transparent);
+  --color-record-best-soft: color-mix(in srgb, var(--color-record-best) 22%, transparent);
+  --gradient-stats-streak: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-record-streak) 14%, var(--color-surface-raised)),
+    var(--color-surface-raised) 60%
+  );
+
   /* Score pad BD2 (design I3-C2, docs/design/i3c2-score-pad-final-preview.html): dark paper with
      lines, the red margin right of the round numbers, handwritten numbers; the same in every design */
   --color-pad-paper: #241e19;

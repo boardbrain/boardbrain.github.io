@@ -439,3 +439,111 @@ export function TargetIcon({ size }: IconProps): React.JSX.Element {
     </Outline>
   );
 }
+
+/**
+ * Crown of the leader on the podium (design I3-D). Filled. Decorative.
+ */
+export function CrownIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <svg
+      width={size ?? ICON_SIZE}
+      height={size ?? ICON_SIZE}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3.5 8l4.3 4.2L12 5l4.2 7.2L20.5 8l-1.8 10.5H5.3z" />
+    </svg>
+  );
+}
+
+/**
+ * Flame of a winning streak (design I3-D). Filled. Decorative.
+ */
+export function FlameIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <svg
+      width={size ?? ICON_SIZE}
+      height={size ?? ICON_SIZE}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3c.5 3.5 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.3 1.2-3.8 2.3-4.8.1 2 .9 3.1 2 3.3-.3-3.2-.4-5.8.7-9z" />
+    </svg>
+  );
+}
+
+/**
+ * Cactus for the drought (design I3-D DI1). Decorative.
+ */
+export function CactusIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M10 21V6a2 2 0 0 1 4 0v15M10 14H8a2 2 0 0 1-2-2V9M14 11.5h2a2 2 0 0 0 2-2V7M7 21h10" />
+    </Outline>
+  );
+}
+
+/**
+ * Clock for the duration of a match (design I3-D). Decorative.
+ */
+export function ClockIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </Outline>
+  );
+}
+
+/**
+ * Lightning for the shortest match (design I3-D). Decorative.
+ */
+export function BoltIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M13 3L5 14h6l-1 7 8-11h-6z" />
+    </Outline>
+  );
+}
+
+/**
+ * Medal for the best score (design I3-D). Decorative.
+ */
+export function MedalIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M8 3l2.5 6M16 3l-2.5 6M12 21a6 6 0 1 0 0-12 6 6 0 0 0 0 12z" />
+    </Outline>
+  );
+}
+
+/**
+ * Calendar for the period of the statistics (design I3-D). Decorative.
+ */
+export function CalendarIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4" />
+    </Outline>
+  );
+}
+
+/**
+ * Chevron pointing down, e.g. a choice that opens a sheet or details that unfold (design I3-D).
+ * Decorative.
+ */
+export function ChevronDownIcon({ size }: IconProps): React.JSX.Element {
+  return (
+    <Outline size={size}>
+      <path d="M6 9l6 6 6-6" />
+    </Outline>
+  );
+}

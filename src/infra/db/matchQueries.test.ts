@@ -6,6 +6,7 @@ import { parseLocalDate, toGroupId, toMatchId, type LocalDate } from '@/core/mod
 import type { BoardBrainDb } from './database';
 import {
   readMatch,
+  readMatchesByGroup,
   readMatchesOfGroup,
   readPlayedGames,
   readScoredMatchCount,
@@ -44,6 +45,28 @@ describe('US-ER-04 Results of a group (queries)', () => {
     await db.matches.bulkAdd([later, otherGroup, earlier]);
 
     expect(await readMatchesOfGroup(db, aGroup().id)).toEqual([earlier, later]);
+  });
+
+  it('US-ST-01 AK-7: reads the matches of all groups, grouped and in the order of 3.7', async () => {
+    const otherGroupId = toGroupId('00000000-0000-4000-8000-0000000000c9');
+    const later = aMatch({
+      id: toMatchId('00000000-0000-4000-8000-0000000000e1'),
+      date: day('2026-11-15'),
+    });
+    const earlier = aMatch({
+      id: toMatchId('00000000-0000-4000-8000-0000000000e2'),
+      date: day('2026-11-14'),
+    });
+    const other = aMatch({
+      id: toMatchId('00000000-0000-4000-8000-0000000000e3'),
+      groupId: otherGroupId,
+    });
+    await db.matches.bulkAdd([later, other, earlier]);
+
+    const byGroup = await readMatchesByGroup(db);
+
+    expect(byGroup.get(aGroup().id)).toEqual([earlier, later]);
+    expect(byGroup.get(otherGroupId)).toEqual([other]);
   });
 
   it('AK-2: reads one match, or null if there is none', async () => {

@@ -66,19 +66,6 @@
   border-radius: 50%;
 }
 
-/* Statistics until I3-D: a dashed box (design I3-C). */
-.soon {
-  display: grid;
-  gap: 6px;
-  justify-items: center;
-  padding: 28px var(--space-4);
-  color: var(--color-text-muted);
-  text-align: center;
-  background: var(--color-surface-raised);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-4);
-}
-
 .soon strong {
   color: var(--color-text);
 }

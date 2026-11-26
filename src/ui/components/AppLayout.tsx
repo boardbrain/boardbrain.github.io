@@ -4,15 +4,16 @@ import { Outlet, useLocation } from 'react-router';
 import { t } from '@/i18n/t';
 import { HandNavigation, type HandArea } from './HandNavigation';
 import { isHandFolded } from './cardHand';
-import { FolderIcon, HomeIcon, RotateIcon } from './Icons';
+import { ChartIcon, FolderIcon, HomeIcon, RotateIcon } from './Icons';
 import { useIsPhone } from './mediaQueries';
 import { suppressTouchContextMenu } from './touchMenu';
 import styles from './AppLayout.module.css';
 
 const HINT_ICON_SIZE = 56;
 
-// Architecture 13.1: only areas that already exist. Later areas (statistics I3, data I4,
-// settings I6) are one entry each; their look is in docs/design/d3-start-navigation-final-preview.html.
+// Architecture 13.1: only areas that already exist. Later areas (data I4, settings I6) are one
+// entry each; their look is in docs/design/d3-start-navigation-final-preview.html. The statistics
+// came with I3-D (design KS2: only in the card hand, not on the start).
 const AREAS: readonly HandArea[] = [
   {
     to: '/',
@@ -22,6 +23,7 @@ const AREAS: readonly HandArea[] = [
     alsoOn: ['/partie', '/ergebnis'],
   },
   { to: '/verwaltung', label: 'navigation.verwaltung', icon: FolderIcon },
+  { to: '/statistik', label: 'navigation.statistik', icon: ChartIcon },
 ];
 
 /**

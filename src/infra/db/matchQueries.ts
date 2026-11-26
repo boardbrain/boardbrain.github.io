@@ -14,6 +14,22 @@ export async function readMatchesOfGroup(
 }
 
 /**
+ * All matches of all groups, grouped by group, each in chronological order (Specification 3.7);
+ * for the table cards of the statistics (US-ST-01 AK-7).
+ */
+export async function readMatchesByGroup(
+  db: BoardBrainDb,
+): Promise<ReadonlyMap<GroupId, readonly Match[]>> {
+  const byGroup = new Map<GroupId, Match[]>();
+  for (const match of sortMatches(await db.matches.toArray())) {
+    const list = byGroup.get(match.groupId) ?? [];
+    list.push(match);
+    byGroup.set(match.groupId, list);
+  }
+  return byGroup;
+}
+
+/**
  * One match, or `null` if there is no such match (US-ER-04 AK-2).
  */
 export async function readMatch(db: BoardBrainDb, id: MatchId): Promise<Match | null> {

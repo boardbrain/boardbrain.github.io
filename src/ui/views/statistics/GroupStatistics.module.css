@@ -1,0 +1,902 @@
+/* The tab "Statistik" of a table (design I3-D RA, EH3: the flat wooden look of the app with a few
+   warm accents), docs/design/i3d-statistics-final-preview.html. */
+.stats {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.part {
+  min-width: 0;
+}
+
+/* The current series sits close under the podium. */
+.streakPart {
+  margin-top: -12px;
+}
+
+.count {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.strong {
+  font-weight: 800;
+}
+
+.grow {
+  flex: 1;
+}
+
+.label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.note {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Pills as in the app (PillButton): the period, "Ergebnis eintragen", "Zeitraum ändern". */
+.pill {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--color-accent-text);
+  white-space: nowrap;
+  text-decoration: none;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.pillOn {
+  border-color: var(--color-accent-text);
+}
+
+.pillText {
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Filter bar: stays at the top while scrolling (design I3-D). */
+.filterBar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: grid;
+  gap: 8px;
+  margin: -8px calc(-1 * var(--page-padding-side)) -10px;
+  padding: 8px var(--page-padding-side) 10px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+@media (width >= 62.5rem) {
+  .filterBar {
+    margin-right: 0;
+    margin-left: 0;
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+.filterRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.games {
+  flex: 1;
+}
+
+/* Coins in the table colour; rings in gold, silver and bronze, a crown for the leader. */
+.coin {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  font-weight: 800;
+  color: var(--color-surface);
+  border-radius: 50%;
+}
+
+.ring1 {
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-accent-text),
+    var(--shadow-stats-leader);
+}
+
+.ring2 {
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 3px var(--color-place-silver);
+}
+
+.ring3 {
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 3px var(--color-place-bronze);
+}
+
+.crown {
+  position: absolute;
+  top: -58%;
+  left: 50%;
+  display: grid;
+  color: var(--color-accent-text);
+  transform: translateX(-50%) rotate(-8deg);
+}
+
+/* Podium (design I3-D RA). */
+.hero {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding: 14px 12px;
+  overflow: hidden;
+  background: var(--gradient-stats-hero), var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 var(--color-stats-edge);
+}
+
+.glow {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+  background: var(--gradient-stats-glow);
+  transform: translateX(-50%);
+}
+
+.criteria {
+  justify-self: center;
+  max-width: 100%;
+}
+
+.podium {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  margin: 0;
+  padding: 26px 0 0;
+  list-style: none;
+}
+
+.podiumTwo {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.step {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  min-width: 0;
+}
+
+.step > .coin {
+  margin-bottom: 6px;
+}
+
+.stepName {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stepValue {
+  display: grid;
+  justify-items: center;
+  margin-bottom: 6px;
+  line-height: 1.1;
+}
+
+.stepNumber {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.stepFirst .stepNumber {
+  font-size: 1.75rem;
+  color: var(--color-accent-text);
+}
+
+.stepValue small {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.block {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  border-radius: 14px 14px 6px 6px;
+}
+
+.block b {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text-muted);
+}
+
+.block1 {
+  background: var(--gradient-podium-1);
+  box-shadow: inset 0 2px 0 var(--color-accent-text);
+}
+
+.block2 {
+  background: var(--gradient-podium-2);
+  box-shadow: inset 0 2px 0 var(--color-place-silver);
+}
+
+.block3 {
+  background: var(--gradient-podium-3);
+  box-shadow: inset 0 2px 0 var(--color-place-bronze);
+}
+
+.overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  justify-content: center;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.overview > span {
+  white-space: nowrap;
+}
+
+/* The current series as its own slim card under the podium (E-57). */
+.streak {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 14px 8px 10px;
+  color: var(--color-text);
+  text-align: left;
+  background: var(--gradient-stats-streak);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 var(--color-stats-edge);
+}
+
+.streakIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: var(--color-record-streak);
+  background: var(--color-record-streak-soft);
+  border-radius: 50%;
+}
+
+.streakText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.streakText strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.streakText small,
+.streakValue small {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.streakValue {
+  display: flex;
+  flex: none;
+  gap: 5px;
+  align-items: baseline;
+}
+
+.streakValue > span {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-record-streak);
+}
+
+/* Sections */
+.section {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sectionHead {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.card {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 var(--color-stats-edge);
+}
+
+.card > li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+/* Ranking rows */
+.rankItemOpen {
+  background: var(--color-stats-track);
+}
+
+.rankRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  color: var(--color-text);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.rankNumber {
+  flex: none;
+  width: 18px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.rank1 {
+  color: var(--color-accent-text);
+}
+
+.rank2 {
+  color: var(--color-place-silver);
+}
+
+.rank3 {
+  color: var(--color-place-bronze);
+}
+
+.rankMiddle {
+  display: grid;
+  flex: 1 1 0;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rankName {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.rankName strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track,
+.trackThin {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  background: var(--color-stats-track);
+  border-radius: 3px;
+}
+
+.trackThin {
+  height: 4px;
+}
+
+.bar {
+  background: var(--color-text-muted);
+}
+
+.barGold {
+  background: var(--color-accent-text);
+}
+
+.rankValue {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  min-width: 3rem;
+  line-height: 1.1;
+}
+
+.rankNumberValue {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.rankValue small {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Form of the last five matches */
+.form {
+  display: inline-flex;
+  flex: none;
+  gap: 3px;
+  align-items: center;
+}
+
+.form i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.formLarge i {
+  width: 10px;
+  height: 10px;
+}
+
+.formWin {
+  background: var(--color-accent-text);
+}
+
+.formDraw {
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-text);
+}
+
+.formNone {
+  background: var(--color-form-none);
+}
+
+/* Unfolded person */
+.details {
+  display: grid;
+  gap: 14px;
+  padding: 2px 14px 16px;
+}
+
+.formRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.figure {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.figure dt {
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.figure dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.placeMini {
+  display: grid;
+  gap: 6px;
+}
+
+.favorite {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.favoriteText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.favoriteText strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favoriteRate {
+  display: grid;
+  justify-items: end;
+  line-height: 1.15;
+}
+
+.favoriteRate b {
+  font-size: 1.15rem;
+  color: var(--color-accent-text);
+  white-space: nowrap;
+}
+
+.favoriteRate small {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Places: gold, silver, bronze, grey, "Letzter" dark red at the right (E-58). */
+.placeBar {
+  display: flex;
+  flex: 1;
+  gap: 3px;
+  min-width: 0;
+  height: 22px;
+}
+
+.segment {
+  display: grid;
+  flex-basis: 0;
+  place-items: center;
+  min-width: 5px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--color-surface);
+  border-radius: 7px;
+}
+
+.place1 {
+  background: var(--color-accent-text);
+}
+
+.place2 {
+  background: var(--color-place-silver);
+}
+
+.place3 {
+  background: var(--color-place-bronze);
+}
+
+.place4 {
+  color: var(--color-text);
+  background: var(--color-place-other);
+}
+
+.placeLast {
+  color: var(--color-place-last-text);
+  background: var(--color-place-last);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.legend > span {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.placeRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+}
+
+.placeMiddle {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+
+.placeName {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.placeName strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeName small {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Records as cards to swipe */
+.recordRail {
+  display: flex;
+  gap: 10px;
+  margin: 0 calc(-1 * var(--page-padding-side));
+  padding: 2px var(--page-padding-side) 6px;
+  overflow-x: auto;
+  scroll-padding: 0 var(--page-padding-side);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.recordRail::-webkit-scrollbar {
+  display: none;
+}
+
+@media (width >= 62.5rem) {
+  .recordRail {
+    margin: 0;
+    padding: 2px 0 6px;
+  }
+}
+
+.record {
+  position: relative;
+  display: grid;
+  flex: 0 0 72%;
+  gap: 4px;
+  align-content: start;
+  max-width: 270px;
+  padding: 14px;
+  color: var(--color-text);
+  text-align: left;
+  text-decoration: none;
+  scroll-snap-align: start;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 3px 0 var(--tone),
+    inset 0 1px 0 var(--color-stats-edge);
+}
+
+@media (width >= 37.5rem) {
+  .record {
+    flex-basis: 40%;
+  }
+}
+
+.recordStreak {
+  --tone: var(--color-record-streak);
+  --tone-soft: var(--color-record-streak-soft);
+}
+
+.recordDrought {
+  --tone: var(--color-record-drought);
+  --tone-soft: var(--color-record-drought-soft);
+}
+
+.recordLong {
+  --tone: var(--color-record-long);
+  --tone-soft: var(--color-record-long-soft);
+}
+
+.recordShort {
+  --tone: var(--color-record-short);
+  --tone-soft: var(--color-record-short-soft);
+}
+
+.recordBest {
+  --tone: var(--color-record-best);
+  --tone-soft: var(--color-record-best-soft);
+}
+
+.recordIcon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 6px;
+  color: var(--tone);
+  background: var(--tone-soft);
+  border-radius: 50%;
+}
+
+.recordValue {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.recordWho {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.coins {
+  display: inline-flex;
+  flex: none;
+}
+
+.coins > span + span {
+  margin-left: -8px;
+}
+
+.recordNames {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recordWhen {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.recordGo {
+  position: absolute;
+  top: 16px;
+  right: 12px;
+  color: var(--color-text-muted);
+}
+
+/* Matches per game */
+.gameRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 14px;
+  color: var(--color-text);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.gameMiddle {
+  display: grid;
+  flex: 1;
+  gap: 7px;
+  min-width: 0;
+}
+
+.gameMiddle strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gameCount {
+  min-width: 2ch;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+/* Without results */
+.empty {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 44px 20px;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 16px;
+}
+
+.empty .pill {
+  margin-top: 8px;
+}
+
+.emptyArt {
+  display: flex;
+  gap: 6px;
+  align-items: end;
+  height: 54px;
+  margin-bottom: 8px;
+}
+
+.emptyArt i {
+  width: 16px;
+  background: var(--color-accent-text);
+  border-radius: 5px 5px 2px 2px;
+  opacity: 0.5;
+}
+
+.emptyBar1 {
+  height: 45%;
+}
+
+.emptyBar2 {
+  height: 80%;
+}
+
+.emptyBar3 {
+  height: 60%;
+}
