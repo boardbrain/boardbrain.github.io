@@ -46,7 +46,8 @@ export function BottomSheet({
   const y = useMotionValue<number | string>('100%');
   const shade = useTransform(y, (value) => {
     const height = sheetRefOrOwn.current?.offsetHeight ?? 0;
-    const offset = typeof value === 'number' ? value : height;
+    // Motion slides the sheet in by percent ("100%" to "0%"), the finger moves it by pixels.
+    const offset = typeof value === 'number' ? value : (Number.parseFloat(value) / 100) * height;
     return height > 0 ? 1 - Math.min(1, Math.max(0, offset) / height) : 1;
   });
   const isClosing = useRef(false);
