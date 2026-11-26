@@ -355,6 +355,34 @@
   font-size: 1.05rem;
 }
 
+/* "Rangliste" with the small info symbol at the right; the symbol adds no height (PO 26.11.2026). */
+.rankHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.info {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  min-height: 26px;
+  height: 26px;
+  padding: 0;
+  margin: -6px -4px -6px 0;
+  color: var(--color-text-muted);
+  background: none;
+  border-radius: 50%;
+}
+
+/* The target grows to 44 px without moving anything (K-4, Architecture 13.6). */
+.info::before {
+  position: absolute;
+  inset: -9px;
+  content: '';
+}
+
 .card {
   display: grid;
   margin: 0;

@@ -28,6 +28,7 @@ import {
   ClockIcon,
   CrownIcon,
   FlameIcon,
+  InfoIcon,
   MedalIcon,
   PlusIcon,
 } from '@/ui/components/Icons';
@@ -39,6 +40,7 @@ import { localToday } from '@/ui/views/games/dates';
 import { gameNameOf, resultHref } from '@/ui/views/management/GroupResults';
 import { durationText } from '@/ui/views/management/resultList';
 import { PeriodSheet } from './PeriodSheet';
+import { StatsInfoSheet } from './StatsInfoSheet';
 import { CountUp, GrowBar, SlidingSegments, useGlide } from './StatsMotion';
 import {
   averageText,
@@ -91,6 +93,7 @@ export function GroupStatistics({
   const [searchParams, setSearchParams] = useSearchParams();
   const [openPerson, setOpenPerson] = useState<PersonId | null>(null);
   const [isPeriodOpen, setPeriodOpen] = useState(false);
+  const [isInfoOpen, setInfoOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const { request, criterion: requested } = readStatsParams(searchParams);
   useGlide(rootRef, searchParams.toString());
@@ -251,6 +254,9 @@ export function GroupStatistics({
               onToggle={(personId) => {
                 setOpenPerson(openPerson === personId ? null : personId);
               }}
+              onInfo={() => {
+                setInfoOpen(true);
+              }}
               nameOf={nameOf}
               coin={coin}
             />
@@ -273,6 +279,13 @@ export function GroupStatistics({
             </Rise>
           )}
         </>
+      )}
+      {isInfoOpen && (
+        <StatsInfoSheet
+          onClose={() => {
+            setInfoOpen(false);
+          }}
+        />
       )}
       {isPeriodOpen && (
         <PeriodSheet
@@ -602,6 +615,7 @@ function Ranking({
   customGames,
   openPerson,
   onToggle,
+  onInfo,
   nameOf,
   coin,
 }: {
@@ -612,12 +626,23 @@ function Ranking({
   readonly customGames: readonly CustomGame[];
   readonly openPerson: PersonId | null;
   readonly onToggle: (personId: PersonId) => void;
+  readonly onInfo: () => void;
   readonly nameOf: Names;
   readonly coin: CoinOf;
 }): React.JSX.Element {
   return (
     <section className={styles.section}>
-      <h3 className={styles.sectionTitle}>{t('statistik.rangliste')}</h3>
+      <div className={styles.rankHead}>
+        <h3 className={styles.sectionTitle}>{t('statistik.rangliste')}</h3>
+        <PressableButton
+          type="button"
+          className={styles.info}
+          aria-label={t('statistik.info.oeffnen')}
+          onClick={onInfo}
+        >
+          <InfoIcon size={17} />
+        </PressableButton>
+      </div>
       <ol className={styles.card}>
         {ranking.map((entry) => {
           const { person, rank } = entry;

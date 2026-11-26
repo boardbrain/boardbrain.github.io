@@ -198,6 +198,50 @@ export const de = {
     formKeins: 'kein Sieg',
     kennzahlenVon: 'Kennzahlen von {name}',
     laengsteWert: 'längste {anzahl}',
+    info: {
+      oeffnen: 'So rechnet die Statistik',
+      titel: 'So rechnet die Statistik',
+      partienTitel: 'Welche Partien zählen',
+      partien:
+        'Die Statistik rechnet nur mit den Partien, die gerade im Filter liegen. Wählst du oben ein Spiel, eine Spielversion oder einen Zeitraum, ändern sich alle Zahlen auf dieser Seite mit.',
+      siegTitel: 'Sieg und Unentschieden',
+      sieg: 'Ein Sieg zählt nur, wenn eine Person allein gewinnt. Gewinnen mehrere zusammen, ist das für jede von ihnen ein Unentschieden. Unentschieden werden eigens gezählt. Bei Siegquote, Serie und Durststrecke zählen sie aber wie eine Partie ohne Sieg.',
+      quoteTitel: 'Siegquote',
+      quote:
+        'Die Siege geteilt durch alle Partien im Filter. Wer von 10 Partien 3 allein gewinnt, hat 30 %, auch wenn noch Unentschieden dazukommen.',
+      serieTitel: 'Serie',
+      serie:
+        'Eine Serie sind Siege direkt hintereinander. Jede Partie ohne eigenen Sieg beendet sie, auch ein Unentschieden. „Längste Serie“ ist die längste Serie einer Person im Filter. Gewinnt jemand gerade mindestens zwei Partien in Folge, erscheint unter dem Podest die Karte „Aktuelle Serie“.',
+      durstTitel: 'Durststrecke',
+      durst:
+        'Die Durststrecke zählt die Partien seit dem letzten eigenen Sieg und fällt mit dem nächsten Sieg wieder auf 0. Hat jemand im Filter noch nie gewonnen, zählen alle Partien. Klein darunter steht die längste Durststrecke der Person.',
+      formTitel: 'Letzte fünf',
+      form: 'Die fünf Punkte stehen für die letzten fünf Partien, die neueste rechts. Ein gefüllter Punkt ist ein Sieg, ein umrandeter ein Unentschieden, ein blasser eine Partie ohne Sieg.',
+      platzTitel: 'Plätze und Ø Platz',
+      platz:
+        'Plätze gibt es nur bei Partien mit Punkten oder mit einer eingetragenen Rangfolge. Bei Catan ergeben sie sich aus den Siegpunkten. Wer gleich viele Punkte hat, teilt sich den Platz. Der Durchschnittsplatz rechnet nur mit diesen Partien, ein kleinerer Wert ist besser.',
+      letzter:
+        'Im Balken unter „Plätze“ zählt der letzte Platz einer Partie als „Letzter“ (dunkelrot) und nicht noch einmal bei seiner Platzzahl. Teilen sich alle Platz 1, gibt es keinen Letzten.',
+      punkteTitel: 'Ø Punkte',
+      punkte:
+        'Durchschnittspunkte gibt es nur, wenn genau ein Spiel mit Punkten gewählt ist, weil sich Punkte verschiedener Spiele nicht vergleichen lassen. Gewinnen bei einem Spiel die wenigsten Punkte, ist der kleinere Wert besser. Bei Catan sind es die Siegpunkte.',
+      ranglisteTitel: 'Rangliste und Podest',
+      rangliste:
+        'Oben wählst du, wonach sortiert wird: Siege, Ø Platz, Ø Punkte oder längste Serie. Bei Gleichstand entscheiden der Reihe nach die Siege, die Unentschieden, der Ø Platz und die Ø Punkte. Wer in allem gleich ist, teilt sich den Rang.',
+      paradeTitel: 'Paradespiel',
+      parade:
+        'Das Spiel, in dem eine Person ihre höchste Siegquote hat. Es zählt erst ab fünf Partien in diesem Spiel und braucht mindestens einen Sieg. Du siehst es nur, wenn alle Spiele gewählt sind.',
+      rekordeTitel: 'Rekorde',
+      rekordeSerie:
+        '„Ewige Serie“ und „Längste Durststrecke“ sind die längsten Folgen über alle Personen im Filter. Bei Gleichstand gilt die, die zuerst erreicht wurde. Steht dort „seit“, läuft sie noch.',
+      rekordeDauer:
+        'Längste und kürzeste Partie gibt es nur bei Catan, weil nur dort die Zeit gemessen wird, und nur wenn das Spiel gewählt ist. Die kürzeste erscheint erst ab zwei Partien mit Dauer, ebenso gilt die durchschnittliche Dauer oben nur für Catan.',
+      rekordeBestwert:
+        'Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Antippen eines Rekords mit einer Partie öffnet diese Partie.',
+      zeitraumTitel: 'Zeitraum',
+      zeitraum:
+        '„Letzte 3 Monate“ und „Letzte 12 Monate“ reichen bis einschließlich heute. Als Schnellwahl stehen das laufende und die zwei vorigen Jahre bereit, ältere Jahre wählst du über „Eigener Zeitraum“.',
+    },
     kennzahlen: {
       siege: 'Siege',
       siegquote: 'Siegquote',

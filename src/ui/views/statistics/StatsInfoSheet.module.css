@@ -1,0 +1,17 @@
+/* How the statistics count (design I3-D): short sections with a title, easy to scan. */
+.topic {
+  display: grid;
+  gap: 4px;
+}
+
+.topicTitle {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}

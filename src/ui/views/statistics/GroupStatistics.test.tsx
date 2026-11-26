@@ -185,6 +185,21 @@ describe('US-ST-01 Key figures and ranking of a table (design I3-D)', () => {
     expect(screen.getByRole('button', { name: 'Rang 3, Clara, 0' })).toBeInTheDocument();
   });
 
+  it('the small info symbol beside "Rangliste" explains how the statistics count', async () => {
+    const user = userEvent.setup();
+    await renderStatistics(PAGE);
+
+    await user.click(await screen.findByRole('button', { name: 'So rechnet die Statistik' }));
+    const sheet = screen.getByRole('dialog', { name: 'So rechnet die Statistik' });
+    expect(
+      within(sheet).getByRole('heading', { name: 'Sieg und Unentschieden' }),
+    ).toBeInTheDocument();
+    expect(within(sheet).getByRole('heading', { name: 'Durststrecke' })).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
   it('without results the tab invites to enter the first one', async () => {
     await renderStatistics(PAGE, []);
 
