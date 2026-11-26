@@ -203,6 +203,15 @@ describe('US-ST-03 Filter of the statistics (design I3-D ZE2)', () => {
     expect(screen.getByRole('button', { name: 'Rang 1, Ben, 1 Sieg' })).toBeInTheDocument();
   });
 
+  it('AK-1: with only one game played the bar names it instead of a choice', async () => {
+    await renderStatistics(PAGE, MATCHES.slice(0, 2));
+
+    const games = await screen.findByRole('radiogroup', { name: 'Spiel' });
+    expect(within(games).getByRole('radio', { name: /^Uno/u, checked: true })).toBeInTheDocument();
+    expect(within(games).getAllByRole('radio')).toHaveLength(1);
+    expect(screen.queryByRole('heading', { name: 'Spiele' })).not.toBeInTheDocument();
+  });
+
   it('AK-1: a row of the matches per game filters to that game', async () => {
     const user = userEvent.setup();
     const { router } = await renderStatistics(PAGE);

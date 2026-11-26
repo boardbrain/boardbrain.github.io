@@ -21234,11 +21234,11 @@
         const custom = sxIsCustom(F.period);
         const periodPill = F.all.length > 0 && h('button', { class: 'sxPill' + (F.period !== 'all' ? ' on' : ''), onclick: () => { st.sheet = 'period'; st.draft = null; render(); } }, icon('calendar', 15), custom ? stPeriodLabel(F.period).replace(/\.\d{4}/g, '.') : stPeriodLabel(F.period), icon('down', 14));
         const edition = F.game === 'catan' && F.editions.size > 1 && sxSeg('ed', [['all', 'Gesamt'], ['base', 'Basisspiel'], ['ck', 'Städte & Ritter']], F.edition, (k) => { st.f.edition = k; st.open = null; }, 'small');
-        if (!games && !periodPill && !edition) return null;
+        if (!games && !periodPill && !edition && F.game === 'all') return null;
         const total = F.games.reduce((s, g) => s + F.count[g], 0);
         return h('div', { class: 'sxSticky' },
           h('div', { class: 'sxFilterRow' },
-            games ? sxSeg('game', [['all', 'Alle', h('small', {}, total)], ...F.games.map((g) => [g, i3Game(g).name, h('small', {}, F.count[g])])], F.game, (k) => { st.f.game = k; st.f.edition = 'all'; st.open = null; }, 'scroll') : h('span', { class: 'sxGrow' }),
+            games ? sxSeg('game', [['all', 'Alle', h('small', {}, total)], ...F.games.map((g) => [g, i3Game(g).name, h('small', {}, F.count[g])])], F.game, (k) => { st.f.game = k; st.f.edition = 'all'; st.open = null; }, 'scroll') : [F.game !== 'all' && sxSeg('game', [[F.game, i3Game(F.game).name, h('small', {}, total)]], F.game, () => {}, ''), h('span', { class: 'sxGrow' })],
             periodPill),
           edition);
       }

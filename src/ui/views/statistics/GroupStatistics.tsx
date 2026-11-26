@@ -418,7 +418,24 @@ function FilterBar({
             className={styles.games}
           />
         ) : (
-          <span className={styles.grow} />
+          <>
+            {/* Only one game played: it stands where the choice would be, as the chosen one. */}
+            {selection.gameId !== null && (
+              <SlidingSegments
+                label={t('statistik.spiel')}
+                options={[
+                  {
+                    key: selection.gameId,
+                    label: gameNameOf(selection.gameId, customGames),
+                    note: String(total),
+                  },
+                ]}
+                selected={selection.gameId}
+                onSelect={() => undefined}
+              />
+            )}
+            <span className={styles.grow} />
+          </>
         )}
         <PressableButton
           type="button"
