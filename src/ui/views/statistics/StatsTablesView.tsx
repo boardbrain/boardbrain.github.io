@@ -1,5 +1,5 @@
 import type { CustomGame, Group, Match, Person, PersonId } from '@/core/model';
-import { computeStatistics, leadersOf, rankPersons } from '@/core/stats';
+import { computeStatistics, leadersOf, podiumOf, rankPersons } from '@/core/stats';
 import { t } from '@/i18n/t';
 import { useCustomGames, useGroups, useMatchesByGroup, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
@@ -12,6 +12,7 @@ import { initialOf, matchCountText, namesOf, statsGameOf, winsText } from './sta
 import styles from './StatsTablesView.module.css';
 
 const SEAT_COINS = 4;
+const SEAT_COINS_ON_STEP = 2;
 
 type TableCard = {
   readonly group: Group;
@@ -121,25 +122,37 @@ function Card({
   }
   const participants = group.members.map((member) => member.personId);
   const stats = computeStatistics(matches, participants, null, statsGameOf(customGames));
+  // By wins alone: equal wins share the lead and the step (PO 26.11.2026).
   const leaders = leadersOf(stats);
-  const ranking = rankPersons(stats, 'wins');
-  const leaderWins = ranking[0]?.person.wins ?? 0;
-  const leader = leaders[0];
+  const steps = podiumOf(rankPersons(stats, 'wins', true), 'wins');
+  const leaderWins = steps[0]?.persons[0]?.wins ?? 0;
+  const [leader] = leaders;
   const leaderText =
-    leaders.length === 1 && leader !== undefined ? nameOf(leader) : t('statistik.gleichstand');
-  const [first, second, third] = ranking;
-  const steps = [second, first, third].filter((entry) => entry !== undefined);
+    leader === undefined
+      ? null
+      : leaders.length === 1
+        ? nameOf(leader)
+        : t('statistik.gleichstand');
+  const [best, next, third] = steps;
+  const order = [next, best, third].filter((step) => step !== undefined);
   const today = localToday();
   return (
     <PressableLink
       to={href}
       look="card"
       className={styles.card}
-      aria-label={t('statistik.tischKarte', {
-        name: group.name,
-        partien: matchCountText(matches.length),
-        wer: `${leaderText}, ${winsText(leaderWins)}`,
-      })}
+      aria-label={
+        leaderText === null
+          ? t('statistik.tischKarteOhneSieg', {
+              name: group.name,
+              partien: matchCountText(matches.length),
+            })
+          : t('statistik.tischKarte', {
+              name: group.name,
+              partien: matchCountText(matches.length),
+              wer: `${leaderText}, ${winsText(leaderWins)}`,
+            })
+      }
     >
       <span className={styles.text}>
         <strong className={styles.name}>{group.name}</strong>
@@ -150,20 +163,28 @@ function Card({
           })}
         </small>
         <span className={styles.leader}>
-          <CrownIcon size={14} />
+          {leaderText !== null && <CrownIcon size={14} />}
           <span className={styles.leaderText}>
-            {t('statistik.spitzenreiter', { wer: leaderText, siege: winsText(leaderWins) })}
+            {leaderText === null
+              ? t('statistik.keinSieg')
+              : t('statistik.spitzenreiter', { wer: leaderText, siege: winsText(leaderWins) })}
           </span>
         </span>
       </span>
       <span className={styles.podium} aria-hidden="true">
-        {steps.map((entry) => {
-          const place = Math.min(entry.rank, 3);
+        {order.map(({ rank, persons }) => {
+          const place = rank === 1 ? 1 : rank === 2 ? 2 : 3;
           const ring = place === 1 ? styles.ring1 : place === 2 ? styles.ring2 : styles.ring3;
           const block = place === 1 ? styles.step1 : place === 2 ? styles.step2 : styles.step3;
+          const single = place === 1 ? 34 : 28;
+          const size = persons.length === 1 ? single : Math.round(single * 0.68);
           return (
-            <span key={entry.person.personId} className={styles.step}>
-              {coin(entry.person.personId, place === 1 ? 34 : 28, ring)}
+            <span key={rank} className={styles.step}>
+              <span className={styles.stepCoins}>
+                {persons.slice(0, SEAT_COINS_ON_STEP).map((person) => (
+                  <span key={person.personId}>{coin(person.personId, size, ring)}</span>
+                ))}
+              </span>
               <i className={block} />
             </span>
           );

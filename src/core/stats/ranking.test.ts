@@ -11,7 +11,7 @@ import {
   gameOf,
   series,
 } from '@tests/support/statsFakes';
-import { criterionValue, leadersOf, rankingCriteria, rankPersons } from './ranking';
+import { criterionValue, leadersOf, podiumOf, rankingCriteria, rankPersons } from './ranking';
 import { computeStatistics } from './statistics';
 
 function order(ranked: ReturnType<typeof rankPersons>): [string, number][] {
@@ -137,7 +137,7 @@ describe('US-ST-02 ranking', () => {
     expect(first === undefined ? null : criterionValue(first.person, 'longest-streak')).toBe(2);
   });
 
-  it('US-ST-01 AK-7: the leaders of a table are on rank 1 by wins, none without matches', () => {
+  it('US-ST-01 AK-7: the leaders of a table are all with the most wins, none without a win', () => {
     const tie = computeStatistics(
       series([{ winners: [ANNA] }, { winners: [BEN] }]),
       TABLE,
@@ -147,5 +147,41 @@ describe('US-ST-02 ranking', () => {
 
     expect(leadersOf(tie)).toEqual([ANNA, BEN]);
     expect(leadersOf(computeStatistics([], TABLE, null, gameOf))).toEqual([]);
+    // Equal wins: a draw more does not put Ben ahead on the card (PO 26.11.2026).
+    const draws = computeStatistics(
+      series([{ winners: [ANNA] }, { winners: [BEN] }, { winners: [BEN, CLARA] }]),
+      TABLE,
+      null,
+      gameOf,
+    );
+    expect(leadersOf(draws)).toEqual([ANNA, BEN]);
+    const none = computeStatistics(series([{ winners: [ANNA, BEN] }]), TABLE, null, gameOf);
+    expect(leadersOf(none)).toEqual([]);
+  });
+
+  it('PO 26.11.2026: the podium puts equal ranks on one step and nobody with 0 on it', () => {
+    const stats = computeStatistics(
+      series([{ winners: [ANNA] }, { winners: [ANNA] }, { winners: [BEN] }, { winners: [CLARA] }]),
+      TABLE,
+      null,
+      gameOf,
+    );
+    const steps = (criterion: Parameters<typeof podiumOf>[1]): [number, string[]][] =>
+      podiumOf(rankPersons(stats, criterion), criterion).map((step) => [
+        step.rank,
+        step.persons.map((person) => person.personId),
+      ]);
+
+    // Ben and Clara tie in everything; David has no win and stays off.
+    expect(steps('wins')).toEqual([
+      [1, [ANNA]],
+      [2, [BEN, CLARA]],
+    ]);
+    expect(steps('longest-streak')).toEqual([
+      [1, [ANNA]],
+      [2, [BEN, CLARA]],
+    ]);
+    const draws = computeStatistics(series([{ winners: [ANNA, BEN] }]), TABLE, null, gameOf);
+    expect(podiumOf(rankPersons(draws, 'wins'), 'wins')).toEqual([]);
   });
 });

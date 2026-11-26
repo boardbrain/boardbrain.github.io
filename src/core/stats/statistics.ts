@@ -75,8 +75,11 @@ export type PersonStatistics = {
   readonly placeCounts: ReadonlyMap<number, number>;
   /** How often the person was last: the largest place of a match, unless all share place 1. */
   readonly lastCount: number;
-  /** Only for all games (FA-ST-09 (3)). */
-  readonly favoriteGame: FavoriteGame | null;
+  /**
+   * Only for all games (FA-ST-09 (3)); several if they tie in rate and number of matches
+   * (PO 26.11.2026), in the order first played.
+   */
+  readonly favoriteGames: readonly FavoriteGame[];
 };
 
 /**
@@ -118,6 +121,9 @@ export type StatsRecords = {
 export type GroupStatistics = {
   readonly matchCount: number;
   readonly firstDate: LocalDate | null;
+  readonly lastDate: LocalDate | null;
+  /** Whether the filter reaches the latest match; else nothing "goes on" (PO 26.11.2026). */
+  readonly isCurrent: boolean;
   /** In the order of the participants. */
   readonly persons: readonly PersonStatistics[];
   readonly hasDraws: boolean;
@@ -204,18 +210,28 @@ function toRun(run: Run | null, matches: readonly Match[], isOngoing: boolean): 
 }
 
 // FA-ST-09 (3): the highest win rate over games with enough matches and at least one win; on a
-// tie the game with more matches, then the one played first.
-function favoriteOf(tally: Tally): FavoriteGame | null {
+// tie the game with more matches; games equal in both all count, the one played first first.
+function favoritesOf(tally: Tally): FavoriteGame[] {
   const candidates = [...tally.perGame]
     .filter(([, game]) => game.matches >= FAVORITE_GAME_MIN_MATCHES && game.wins > 0)
     .map(([gameId, game]) => ({ gameId, ...game, winRate: game.wins / game.matches }))
     .toSorted(
       (a, b) => b.winRate - a.winRate || b.matches - a.matches || a.firstPlayed - b.firstPlayed,
     );
-  const best = candidates[0];
-  return best === undefined
-    ? null
-    : { gameId: best.gameId, matchCount: best.matches, wins: best.wins, winRate: best.winRate };
+  const [best] = candidates;
+  return candidates
+    .filter(
+      (game) =>
+        best !== undefined &&
+        game.wins * best.matches === best.wins * game.matches &&
+        game.matches === best.matches,
+    )
+    .map((game) => ({
+      gameId: game.gameId,
+      matchCount: game.matches,
+      wins: game.wins,
+      winRate: game.winRate,
+    }));
 }
 
 function countMatch(
@@ -298,11 +314,13 @@ function runsOf(matches: readonly Match[], counts: (match: Match) => boolean): R
 }
 
 // Every longest run over all persons from `RECORD_RUN_MIN`, the one reached first first, on the
-// same match in seat order. A run that ends with the latest match still goes on.
+// same match in seat order. A run that ends with the latest match still goes on, if the filter
+// reaches the latest match at all.
 function longestRuns(
   matches: readonly Match[],
   participants: readonly PersonId[],
   counts: (match: Match, personId: PersonId) => boolean,
+  isCurrent: boolean,
 ): RunRecord[] {
   const all = participants.flatMap((personId) =>
     runsOf(matches, (match) => counts(match, personId)).map((run) => ({ personId, run })),
@@ -315,7 +333,7 @@ function longestRuns(
     .filter(({ run }) => run.length === longest)
     .toSorted((a, b) => a.run.to - b.run.to)
     .flatMap(({ personId, run }) => {
-      const record = toRun(run, matches, run.to === matches.length - 1);
+      const record = toRun(run, matches, isCurrent && run.to === matches.length - 1);
       return record === null ? [] : [{ ...record, personId }];
     });
 }
@@ -372,12 +390,15 @@ function bestScoresOf(
  * US-ST-06, Specification 3.8). `matches` must be in chronological order (3.7); all members
  * took part in every match (E-41). `gameId` is the single game of the filter or `null` for all
  * games; points, durations and the best score count only for a single game (US-ST-03 AK-4).
+ * `isCurrent` tells whether the filter reaches the latest match (`StatsSelection.isCurrent`);
+ * without it no streak is current and no run goes on.
  */
 export function computeStatistics(
   matches: readonly Match[],
   participants: readonly PersonId[],
   gameId: GameId | null,
   gameOf: (gameId: GameId) => StatsGame,
+  isCurrent = true,
 ): GroupStatistics {
   const single = gameId === null ? null : gameOf(gameId);
   const scoring = single?.scoring ?? null;
@@ -403,7 +424,7 @@ export function computeStatistics(
   const lastIndex = matches.length - 1;
   // A run still goes on if it ends with the latest match and has not been broken since.
   const isOngoing = (run: Run | null, current: number): boolean =>
-    run !== null && run.to === lastIndex && current === run.length;
+    isCurrent && run !== null && run.to === lastIndex && current === run.length;
   const persons = participants.map((personId): PersonStatistics => {
     const tally = tallies.get(personId) ?? newTally();
     return {
@@ -421,7 +442,7 @@ export function computeStatistics(
       placedMatches: tally.placedMatches,
       placeCounts: tally.placeCounts,
       lastCount: tally.lastCount,
-      favoriteGame: gameId === null ? favoriteOf(tally) : null,
+      favoriteGames: gameId === null ? favoritesOf(tally) : [],
     };
   });
   const timed =
@@ -431,10 +452,14 @@ export function computeStatistics(
   const duration = (match: Match): number | undefined => match.durationMinutes;
   const longest = bestMatches(timed, duration, (a, b) => a > b);
   const shortest = timed.length > 1 ? bestMatches(timed, duration, (a, b) => a < b) : [];
-  const holder = persons.find((person) => person.currentStreak >= SHOWN_STREAK_MIN);
+  const holder = isCurrent
+    ? persons.find((person) => person.currentStreak >= SHOWN_STREAK_MIN)
+    : undefined;
   return {
     matchCount: matches.length,
     firstDate: matches[0]?.date ?? null,
+    lastDate: matches.at(-1)?.date ?? null,
+    isCurrent,
     persons,
     hasDraws,
     placedMatchCount,
@@ -447,11 +472,12 @@ export function computeStatistics(
     currentStreak:
       holder === undefined ? null : { personId: holder.personId, length: holder.currentStreak },
     records: {
-      longestStreak: longestRuns(matches, participants, isSoleWinner),
+      longestStreak: longestRuns(matches, participants, isSoleWinner, isCurrent),
       longestDrought: longestRuns(
         matches,
         participants,
         (match, personId) => !isSoleWinner(match, personId),
+        isCurrent,
       ),
       longestMatch: longest,
       // All as long as the longest: no shortest one.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ANNA, BEN, CATAN, SKYJO, UNO, day, match } from '@tests/support/statsFakes';
 import { ALL_TIME } from './period';
-import { selectMatches } from './selection';
+import { selectMatches, type StatsRequest } from './selection';
 
 const TODAY = day('2026-11-17');
 const MATCHES = [
@@ -13,6 +13,22 @@ const MATCHES = [
 ];
 
 describe('US-ST-03 filter the statistics', () => {
+  it('PO 26.11.2026: knows whether the filter reaches the latest match of its game', () => {
+    const request = { gameId: null, edition: null } as const;
+    const year = (y: number): StatsRequest => ({ ...request, period: { kind: 'year', year: y } });
+
+    expect(selectMatches(MATCHES, { ...request, period: ALL_TIME }, TODAY).isCurrent).toBe(true);
+    expect(selectMatches(MATCHES, year(2025), TODAY).isCurrent).toBe(false);
+    expect(selectMatches(MATCHES, year(2026), TODAY).isCurrent).toBe(true);
+    // Uno's latest match lies in March: up to then Uno is current.
+    const uno = {
+      gameId: UNO,
+      edition: null,
+      period: { kind: 'range', from: day('2026-01-01'), to: day('2026-03-31') },
+    } as const;
+    expect(selectMatches(MATCHES, uno, TODAY).isCurrent).toBe(true);
+  });
+
   it('AK-1: a group with several played games chooses between all games and one game', () => {
     const all = selectMatches(MATCHES, { gameId: null, edition: null, period: ALL_TIME }, TODAY);
 

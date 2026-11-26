@@ -45,6 +45,11 @@ export type StatsSelection = {
   readonly edition: string | null;
   /** The matches in the filter, oldest first (Specification 3.7). */
   readonly matches: readonly Match[];
+  /**
+   * Whether the filter reaches the latest match of its game and edition: only then a streak
+   * "goes on" and is "current" (PO 26.11.2026); a past year ends before.
+   */
+  readonly isCurrent: boolean;
 };
 
 function editionsOf(matches: readonly Match[]): string[] {
@@ -81,6 +86,10 @@ export function selectMatches(
   const editions = playedEditions.length > 1 ? playedEditions : [];
   const edition =
     request.edition !== null && editions.includes(request.edition) ? request.edition : null;
+  const inScope = (match: Match): boolean =>
+    (gameId === null || match.gameId === gameId) && (edition === null || match.edition === edition);
+  const selected = edition === null ? ofGame : ofGame.filter((match) => match.edition === edition);
+  const latest = chronological.filter(inScope).at(-1);
   return {
     years,
     games,
@@ -88,6 +97,7 @@ export function selectMatches(
     gameId,
     editions,
     edition,
-    matches: edition === null ? ofGame : ofGame.filter((match) => match.edition === edition),
+    matches: selected,
+    isCurrent: latest === undefined || selected.at(-1)?.id === latest.id,
   };
 }

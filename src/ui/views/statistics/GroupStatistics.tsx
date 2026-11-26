@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router';
 import type { CustomGame, GameId, Group, MatchId, Person, PersonId } from '@/core/model';
 import {
   computeStatistics,
+  podiumOf,
   rankingCriteria,
   rankPersons,
   selectMatches,
@@ -56,6 +57,7 @@ import {
   readStatsParams,
   runText,
   shareOf,
+  spanText,
   statsGameOf,
   winsText,
   writeStatsParams,
@@ -109,6 +111,7 @@ export function GroupStatistics({
     participants,
     selection.gameId,
     statsGameOf(customGames),
+    selection.isCurrent,
   );
   const criteria = rankingCriteria(stats);
   const criterion = criteria.includes(requested) ? requested : 'wins';
@@ -479,6 +482,10 @@ function FilterBar({
   );
 }
 
+// Coin sizes on the podium: alone, two together, three or more (PO 26.11.2026).
+const STEP_COIN = { 1: [68, 46, 38], 2: [54, 40, 32], 3: [54, 40, 32] } as const;
+const STEP_COINS_SHOWN = 3;
+
 function Podium({
   ranking,
   criterion,
@@ -491,29 +498,61 @@ function Podium({
   readonly gameId: GameId | null;
   readonly nameOf: Names;
   readonly coin: CoinOf;
-}): React.JSX.Element {
-  const top = ranking.slice(0, 3);
-  const [first, second, third] = top;
-  const order = [second, first, third].filter((entry) => entry !== undefined);
+}): React.JSX.Element | null {
+  const steps = podiumOf(ranking, criterion);
+  const [best, next, third] = steps;
+  const order = [next, best, third].filter((step) => step !== undefined);
+  if (order.length === 0) {
+    return null;
+  }
   return (
-    <ol className={cx(styles.podium, order.length === 2 && styles.podiumTwo)}>
-      {order.map((entry) => {
-        const place = Math.min(entry.rank, 3);
-        const metric = metricOf(entry.person, criterion, gameId);
-        const name = nameOf(entry.person.personId);
+    <ol
+      className={cx(
+        styles.podium,
+        order.length === 2 && styles.podiumTwo,
+        order.length === 1 && styles.podiumOne,
+      )}
+    >
+      {order.map(({ rank, persons }) => {
+        const place = rank === 1 ? 1 : rank === 2 ? 2 : 3;
+        const [lead] = persons;
+        if (lead === undefined) {
+          return null;
+        }
+        const metric = metricOf(lead, criterion, gameId);
+        const names = persons.map((person) => nameOf(person.personId));
+        const size = STEP_COIN[place][Math.min(persons.length, STEP_COINS_SHOWN) - 1] ?? 32;
         return (
           <li
-            key={entry.person.personId}
+            key={lead.personId}
             className={cx(styles.step, place === 1 && styles.stepFirst)}
-            data-flip={`podium-${entry.person.personId}`}
+            data-flip={`podium-${lead.personId}`}
             aria-label={t('statistik.podestPlatz', {
-              rang: entry.rank,
-              name,
+              rang: rank,
+              name: names.join(', '),
               wert: `${metric.text} ${metric.unit}`.trim(),
             })}
           >
-            {coin(entry.person.personId, place === 1 ? 68 : 54, place, entry.rank === 1)}
-            <strong className={styles.stepName}>{name}</strong>
+            <span className={cx(styles.stepCoins, persons.length > 1 && styles.stepCoinsMany)}>
+              {persons.slice(0, STEP_COINS_SHOWN).map((person, index) => (
+                <span key={person.personId}>
+                  {coin(person.personId, size, place, rank === 1 && index === 0)}
+                </span>
+              ))}
+              {persons.length > STEP_COINS_SHOWN && (
+                <span className={styles.stepMore}>
+                  {t('statistik.mehrPersonen', { anzahl: persons.length - STEP_COINS_SHOWN })}
+                </span>
+              )}
+            </span>
+            <strong className={styles.stepName}>
+              {names.length <= 2
+                ? names.join(', ')
+                : t('statistik.namenMehr', {
+                    namen: names.slice(0, 2).join(', '),
+                    anzahl: names.length - 2,
+                  })}
+            </strong>
             <span className={styles.stepValue} aria-hidden="true">
               {metric.value === null ? (
                 <span className={styles.stepNumber}>{metric.text}</span>
@@ -531,10 +570,10 @@ function Podium({
                 styles.block,
                 place === 1 ? styles.block1 : place === 2 ? styles.block2 : styles.block3,
               )}
-              style={{ height: `${String(STEP_HEIGHT[place === 1 ? 1 : place === 2 ? 2 : 3])}px` }}
+              style={{ height: `${String(STEP_HEIGHT[place])}px` }}
               aria-hidden="true"
             >
-              <b>{entry.rank}</b>
+              <b>{rank}</b>
             </span>
           </li>
         );
@@ -544,6 +583,13 @@ function Podium({
 }
 
 function Overview({ stats }: { readonly stats: Statistics }): React.JSX.Element {
+  // A filter that ends before the latest match shows its span, not "since" (PO 26.11.2026).
+  const span =
+    stats.firstDate === null || stats.lastDate === null
+      ? null
+      : stats.isCurrent
+        ? t('statistik.seitDatum', { datum: fullDate(stats.firstDate) })
+        : spanText(stats.firstDate, stats.lastDate);
   return (
     <p className={styles.overview}>
       <span className={styles.count}>
@@ -552,11 +598,7 @@ function Overview({ stats }: { readonly stats: Statistics }): React.JSX.Element 
           {stats.matchCount === 1 ? t('statistik.partieWort') : t('statistik.partienWort')}
         </span>
       </span>
-      {stats.firstDate !== null && (
-        <span className={styles.muted}>
-          {t('statistik.seitDatum', { datum: fullDate(stats.firstDate) })}
-        </span>
-      )}
+      {span !== null && <span className={styles.muted}>{span}</span>}
       {stats.tracksDuration && (
         <span>
           {t('statistik.dauerSchnitt', {
@@ -746,7 +788,6 @@ function PersonDetails({
   readonly gameId: GameId | null;
   readonly customGames: readonly CustomGame[];
 }): React.JSX.Element {
-  const favorite = person.favoriteGame;
   const hasScores = stats.persons.some((other) => other.averageScore !== null);
   return (
     <div
@@ -798,8 +839,8 @@ function PersonDetails({
           <PlaceLegend size={stats.persons.length} />
         </div>
       )}
-      {favorite !== null && (
-        <div className={styles.favorite}>
+      {person.favoriteGames.map((favorite) => (
+        <div key={favorite.gameId} className={styles.favorite}>
           <GameSymbol
             gameId={favorite.gameId}
             name={gameNameOf(favorite.gameId, customGames)}
@@ -816,7 +857,7 @@ function PersonDetails({
             </small>
           </span>
         </div>
-      )}
+      ))}
     </div>
   );
 }

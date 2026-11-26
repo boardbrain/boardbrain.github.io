@@ -147,3 +147,12 @@
 .seats > span + span {
   margin-left: -8px;
 }
+
+/* Equal wins stand together on one step, coins a little overlapping (PO 26.11.2026). */
+.stepCoins {
+  display: inline-flex;
+}
+
+.stepCoins > span + span {
+  margin-left: -3px;
+}

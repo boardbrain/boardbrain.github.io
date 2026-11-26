@@ -165,6 +165,30 @@ describe('US-ST-03 AK-4 several games in the filter', () => {
   });
 });
 
+describe('PO 26.11.2026: a filter that ends before the latest match', () => {
+  const past = series([{ winners: [ANNA] }, { winners: [BEN] }, { winners: [BEN] }]);
+
+  it('has no current series and no run that goes on', () => {
+    const stats = computeStatistics(past, TABLE, null, gameOf, false);
+
+    expect(stats.isCurrent).toBe(false);
+    expect(stats.currentStreak).toBeNull();
+    expect(stats.records.longestStreak.map((run) => run.isOngoing)).toEqual([false]);
+    expect(stats.records.longestDrought.every((run) => !run.isOngoing)).toBe(true);
+    expect(personOf(stats.persons, BEN).longestStreak?.isOngoing).toBe(false);
+  });
+
+  it('knows its first and its last day', () => {
+    const stats = computeStatistics(past, TABLE, null, gameOf, false);
+
+    expect([stats.firstDate, stats.lastDate]).toEqual(['2026-01-01', '2026-01-03']);
+    expect(computeStatistics(past, TABLE, null, gameOf).currentStreak).toEqual({
+      personId: BEN,
+      length: 2,
+    });
+  });
+});
+
 describe('US-ST-05 records', () => {
   it('AK-1: the eternal streak lists every longest streak, the one reached first first', () => {
     const stats = computeStatistics(
@@ -361,24 +385,34 @@ describe('US-ST-06 places and games', () => {
     ]);
     const stats = computeStatistics(many, TABLE, null, gameOf);
 
-    expect(personOf(stats.persons, ANNA).favoriteGame).toEqual({
-      gameId: SKYJO,
-      matchCount: 5,
-      wins: 5,
-      winRate: 1,
-    });
-    expect(personOf(stats.persons, BEN).favoriteGame?.gameId).toBe(UNO);
-    expect(personOf(stats.persons, CLARA).favoriteGame).toBeNull();
-    expect(computeStatistics(many, TABLE, SKYJO, gameOf).persons[0]?.favoriteGame).toBeNull();
+    expect(personOf(stats.persons, ANNA).favoriteGames).toEqual([
+      { gameId: SKYJO, matchCount: 5, wins: 5, winRate: 1 },
+    ]);
+    expect(personOf(stats.persons, BEN).favoriteGames.map((game) => game.gameId)).toEqual([UNO]);
+    expect(personOf(stats.persons, CLARA).favoriteGames).toEqual([]);
+    expect(computeStatistics(many, TABLE, SKYJO, gameOf).persons[0]?.favoriteGames).toEqual([]);
   });
 
-  it('AK-3: on an equal rate and count the game played first', () => {
+  it('AK-3: games equal in rate and count are all favourites, the one played first first', () => {
     const tie = series([
       ...Array.from({ length: 5 }, () => ({ game: UNO, winners: [ANNA] as PersonId[] })),
       ...Array.from({ length: 5 }, () => ({ game: SKYJO, winners: [ANNA] as PersonId[] })),
     ]);
 
-    expect(computeStatistics(tie, TABLE, null, gameOf).persons[0]?.favoriteGame?.gameId).toBe(UNO);
+    expect(
+      computeStatistics(tie, TABLE, null, gameOf).persons[0]?.favoriteGames.map((g) => g.gameId),
+    ).toEqual([UNO, SKYJO]);
+  });
+
+  it('AK-3: on an equal rate the game with more matches alone', () => {
+    const rate = series([
+      ...Array.from({ length: 5 }, (_, i) => ({ game: UNO, winners: [i < 3 ? ANNA : BEN] })),
+      ...Array.from({ length: 10 }, (_, i) => ({ game: SKYJO, winners: [i < 6 ? ANNA : BEN] })),
+    ]);
+
+    expect(
+      computeStatistics(rate, TABLE, null, gameOf).persons[0]?.favoriteGames.map((g) => g.gameId),
+    ).toEqual([SKYJO]);
   });
 
   it('AK-4: counts the matches per game, the most played first, on a tie the one played first', () => {

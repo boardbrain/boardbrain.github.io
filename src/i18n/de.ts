@@ -133,6 +133,8 @@ export const de = {
     tischWahl: 'Welcher Tisch?',
     tischKarte: '{name}, {partien}, vorn {wer}',
     tischKarteLeer: '{name}, noch keine Partien',
+    tischKarteOhneSieg: '{name}, {partien}, noch kein Sieg',
+    keinSieg: 'noch kein Sieg',
     tischPartien: '{partien} · zuletzt {datum}',
     keinePartien: 'noch keine Partien',
     gleichstand: 'Gleichstand',
@@ -187,6 +189,8 @@ export const de = {
     dauerSchnitt: 'Ø {dauer}',
     podest: 'Podest nach {kriterium}',
     podestPlatz: 'Platz {rang}: {name}, {wert}',
+    mehrPersonen: '+{anzahl}',
+    namenMehr: '{namen} +{anzahl}',
     aktuelleSerie: 'Aktuelle Serie',
     serieKarte: '{name}, {anzahl} Siege in Folge, Kennzahlen zeigen',
     rangliste: 'Rangliste',
@@ -211,7 +215,7 @@ export const de = {
         'Die Siege geteilt durch alle Partien im Filter. Wer von 10 Partien 3 allein gewinnt, hat 30 %, auch wenn noch Unentschieden dazukommen.',
       serieTitel: 'Serie',
       serie:
-        'Eine Serie sind Siege direkt hintereinander. Jede Partie ohne eigenen Sieg beendet sie, auch ein Unentschieden. „Längste Serie“ ist die längste Serie einer Person im Filter. Gewinnt jemand gerade mindestens zwei Partien in Folge, erscheint unter dem Podest die Karte „Aktuelle Serie“.',
+        'Eine Serie sind Siege direkt hintereinander. Jede Partie ohne eigenen Sieg beendet sie, auch ein Unentschieden. „Längste Serie“ ist die längste Serie einer Person im Filter. Gewinnt jemand gerade mindestens zwei Partien in Folge, erscheint unter dem Podest die Karte „Aktuelle Serie“, aber nur, wenn der Zeitraum bis zur neuesten Partie reicht.',
       durstTitel: 'Durststrecke',
       durst:
         'Die Durststrecke zählt die Partien seit dem letzten eigenen Sieg und fällt mit dem nächsten Sieg wieder auf 0. Hat jemand im Filter noch nie gewonnen, zählen alle Partien. Klein darunter steht die längste Durststrecke der Person.',
@@ -227,10 +231,10 @@ export const de = {
         'Durchschnittspunkte gibt es nur, wenn genau ein Spiel mit Punkten gewählt ist, weil sich Punkte verschiedener Spiele nicht vergleichen lassen. Gewinnen bei einem Spiel die wenigsten Punkte, ist der kleinere Wert besser. Bei Catan sind es die Siegpunkte.',
       ranglisteTitel: 'Rangliste und Podest',
       rangliste:
-        'Oben wählst du, wonach sortiert wird: Siege, Ø Platz, Ø Punkte oder längste Serie. Bei Gleichstand entscheiden der Reihe nach die Siege, die Unentschieden, der Ø Platz und die Ø Punkte. Wer in allem gleich ist, teilt sich den Rang.',
+        'Oben wählst du, wonach sortiert wird: Siege, Ø Platz, Ø Punkte oder längste Serie. Bei Gleichstand entscheiden der Reihe nach die Siege, die Unentschieden, der Ø Platz und die Ø Punkte. Wer in allem gleich ist, teilt sich den Rang und steht auf dem Podest mit auf derselben Stufe. Wer bei Siegen oder der längsten Serie 0 hat, steht nicht auf dem Podest.',
       paradeTitel: 'Paradespiel',
       parade:
-        'Das Spiel, in dem eine Person ihre höchste Siegquote hat. Es zählt erst ab fünf Partien in diesem Spiel und braucht mindestens einen Sieg. Du siehst es nur, wenn alle Spiele gewählt sind.',
+        'Das Spiel, in dem eine Person ihre höchste Siegquote hat. Es zählt erst ab fünf Partien in diesem Spiel und braucht mindestens einen Sieg. Haben zwei Spiele die gleiche Siegquote bei gleich vielen Partien, stehen beide da. Du siehst es nur, wenn alle Spiele gewählt sind.',
       rekordeTitel: 'Rekorde',
       rekordeSerie:
         '„Ewige Serie“ und „Längste Durststrecke“ sind die längsten Folgen über alle Personen im Filter, gezählt ab zwei Partien. Sind mehrere gleich lang, stehen alle in der Karte, auch zwei derselben Person. Steht dort „seit“, läuft sie noch.',

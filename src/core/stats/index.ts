@@ -17,8 +17,10 @@ export {
 export {
   criterionValue,
   leadersOf,
+  podiumOf,
   rankingCriteria,
   rankPersons,
+  type PodiumStep,
   type RankedPerson,
   type RankingCriterion,
 } from './ranking';

@@ -11162,6 +11162,27 @@
         border: 0;
         border-radius: 999px;
       }
+
+      /* Equal ranks together on one step (PO 26.11.2026). */
+      .sxStepCoins {
+        display: inline-flex;
+        align-items: center;
+      }
+      .sxStepCoins.many > * + * {
+        margin-left: -8px;
+      }
+      .sxStepMore {
+        margin-left: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--muted);
+      }
+      .sxTcCoins {
+        display: inline-flex;
+      }
+      .sxTcCoins > * + * {
+        margin-left: -3px;
+      }
     </style>
   </head>
   <body>
@@ -21332,7 +21353,7 @@
           edition);
       }
       // How the statistics count: the same texts as the app (src/i18n/de.ts, statistik.info).
-      const SX_INFO = [["Welche Partien zählen", ["Die Statistik rechnet nur mit den Partien, die gerade im Filter liegen. Wählst du oben ein Spiel, eine Spielversion oder einen Zeitraum, ändern sich alle Zahlen auf dieser Seite mit."]], ["Sieg und Unentschieden", ["Ein Sieg zählt nur, wenn eine Person allein gewinnt. Gewinnen mehrere zusammen, ist das für jede von ihnen ein Unentschieden. Unentschieden werden eigens gezählt. Bei Siegquote, Serie und Durststrecke zählen sie aber wie eine Partie ohne Sieg."]], ["Siegquote", ["Die Siege geteilt durch alle Partien im Filter. Wer von 10 Partien 3 allein gewinnt, hat 30 %, auch wenn noch Unentschieden dazukommen."]], ["Serie", ["Eine Serie sind Siege direkt hintereinander. Jede Partie ohne eigenen Sieg beendet sie, auch ein Unentschieden. „Längste Serie“ ist die längste Serie einer Person im Filter. Gewinnt jemand gerade mindestens zwei Partien in Folge, erscheint unter dem Podest die Karte „Aktuelle Serie“."]], ["Durststrecke", ["Die Durststrecke zählt die Partien seit dem letzten eigenen Sieg und fällt mit dem nächsten Sieg wieder auf 0. Hat jemand im Filter noch nie gewonnen, zählen alle Partien. Klein darunter steht die längste Durststrecke der Person."]], ["Letzte fünf", ["Die fünf Punkte stehen für die letzten fünf Partien, die neueste rechts. Ein gefüllter Punkt ist ein Sieg, ein umrandeter ein Unentschieden, ein blasser eine Partie ohne Sieg."]], ["Plätze und Ø Platz", ["Plätze gibt es nur bei Partien mit Punkten oder mit einer eingetragenen Rangfolge. Bei Catan ergeben sie sich aus den Siegpunkten. Wer gleich viele Punkte hat, teilt sich den Platz. Der Durchschnittsplatz rechnet nur mit diesen Partien, ein kleinerer Wert ist besser.", "Im Balken unter „Plätze“ zählt der letzte Platz einer Partie als „Letzter“ (dunkelrot) und nicht noch einmal bei seiner Platzzahl. Teilen sich alle Platz 1, gibt es keinen Letzten."]], ["Ø Punkte", ["Durchschnittspunkte gibt es nur, wenn genau ein Spiel mit Punkten gewählt ist, weil sich Punkte verschiedener Spiele nicht vergleichen lassen. Gewinnen bei einem Spiel die wenigsten Punkte, ist der kleinere Wert besser. Bei Catan sind es die Siegpunkte."]], ["Rangliste und Podest", ["Oben wählst du, wonach sortiert wird: Siege, Ø Platz, Ø Punkte oder längste Serie. Bei Gleichstand entscheiden der Reihe nach die Siege, die Unentschieden, der Ø Platz und die Ø Punkte. Wer in allem gleich ist, teilt sich den Rang."]], ["Paradespiel", ["Das Spiel, in dem eine Person ihre höchste Siegquote hat. Es zählt erst ab fünf Partien in diesem Spiel und braucht mindestens einen Sieg. Du siehst es nur, wenn alle Spiele gewählt sind."]], ["Rekorde", ["„Ewige Serie“ und „Längste Durststrecke“ sind die längsten Folgen über alle Personen im Filter, gezählt ab zwei Partien. Sind mehrere gleich lang, stehen alle in der Karte, auch zwei derselben Person. Steht dort „seit“, läuft sie noch.", "Längste und kürzeste Partie gibt es nur bei Catan, weil nur dort die Zeit gemessen wird, und nur wenn das Spiel gewählt ist. Die kürzeste erscheint erst ab zwei Partien mit Dauer, ebenso gilt die durchschnittliche Dauer oben nur für Catan.", "Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Auch hier stehen bei Gleichstand alle Partien und Personen in der Karte. Antippen eines Rekords mit einer Partie öffnet diese Partie."]], ["Zeitraum", ["„Letzte 3 Monate“ und „Letzte 12 Monate“ reichen bis einschließlich heute. Als Schnellwahl stehen das laufende und die zwei vorigen Jahre bereit, ältere Jahre wählst du über „Eigener Zeitraum“."]]];
+      const SX_INFO = [["Welche Partien zählen", ["Die Statistik rechnet nur mit den Partien, die gerade im Filter liegen. Wählst du oben ein Spiel, eine Spielversion oder einen Zeitraum, ändern sich alle Zahlen auf dieser Seite mit."]], ["Sieg und Unentschieden", ["Ein Sieg zählt nur, wenn eine Person allein gewinnt. Gewinnen mehrere zusammen, ist das für jede von ihnen ein Unentschieden. Unentschieden werden eigens gezählt. Bei Siegquote, Serie und Durststrecke zählen sie aber wie eine Partie ohne Sieg."]], ["Siegquote", ["Die Siege geteilt durch alle Partien im Filter. Wer von 10 Partien 3 allein gewinnt, hat 30 %, auch wenn noch Unentschieden dazukommen."]], ["Serie", ["Eine Serie sind Siege direkt hintereinander. Jede Partie ohne eigenen Sieg beendet sie, auch ein Unentschieden. „Längste Serie“ ist die längste Serie einer Person im Filter. Gewinnt jemand gerade mindestens zwei Partien in Folge, erscheint unter dem Podest die Karte „Aktuelle Serie“, aber nur, wenn der Zeitraum bis zur neuesten Partie reicht."]], ["Durststrecke", ["Die Durststrecke zählt die Partien seit dem letzten eigenen Sieg und fällt mit dem nächsten Sieg wieder auf 0. Hat jemand im Filter noch nie gewonnen, zählen alle Partien. Klein darunter steht die längste Durststrecke der Person."]], ["Letzte fünf", ["Die fünf Punkte stehen für die letzten fünf Partien, die neueste rechts. Ein gefüllter Punkt ist ein Sieg, ein umrandeter ein Unentschieden, ein blasser eine Partie ohne Sieg."]], ["Plätze und Ø Platz", ["Plätze gibt es nur bei Partien mit Punkten oder mit einer eingetragenen Rangfolge. Bei Catan ergeben sie sich aus den Siegpunkten. Wer gleich viele Punkte hat, teilt sich den Platz. Der Durchschnittsplatz rechnet nur mit diesen Partien, ein kleinerer Wert ist besser.", "Im Balken unter „Plätze“ zählt der letzte Platz einer Partie als „Letzter“ (dunkelrot) und nicht noch einmal bei seiner Platzzahl. Teilen sich alle Platz 1, gibt es keinen Letzten."]], ["Ø Punkte", ["Durchschnittspunkte gibt es nur, wenn genau ein Spiel mit Punkten gewählt ist, weil sich Punkte verschiedener Spiele nicht vergleichen lassen. Gewinnen bei einem Spiel die wenigsten Punkte, ist der kleinere Wert besser. Bei Catan sind es die Siegpunkte."]], ["Rangliste und Podest", ["Oben wählst du, wonach sortiert wird: Siege, Ø Platz, Ø Punkte oder längste Serie. Bei Gleichstand entscheiden der Reihe nach die Siege, die Unentschieden, der Ø Platz und die Ø Punkte. Wer in allem gleich ist, teilt sich den Rang und steht auf dem Podest mit auf derselben Stufe. Wer bei Siegen oder der längsten Serie 0 hat, steht nicht auf dem Podest."]], ["Paradespiel", ["Das Spiel, in dem eine Person ihre höchste Siegquote hat. Es zählt erst ab fünf Partien in diesem Spiel und braucht mindestens einen Sieg. Haben zwei Spiele die gleiche Siegquote bei gleich vielen Partien, stehen beide da. Du siehst es nur, wenn alle Spiele gewählt sind."]], ["Rekorde", ["„Ewige Serie“ und „Längste Durststrecke“ sind die längsten Folgen über alle Personen im Filter, gezählt ab zwei Partien. Sind mehrere gleich lang, stehen alle in der Karte, auch zwei derselben Person. Steht dort „seit“, läuft sie noch.", "Längste und kürzeste Partie gibt es nur bei Catan, weil nur dort die Zeit gemessen wird, und nur wenn das Spiel gewählt ist. Die kürzeste erscheint erst ab zwei Partien mit Dauer, ebenso gilt die durchschnittliche Dauer oben nur für Catan.", "Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Auch hier stehen bei Gleichstand alle Partien und Personen in der Karte. Antippen eines Rekords mit einer Partie öffnet diese Partie."]], ["Zeitraum", ["„Letzte 3 Monate“ und „Letzte 12 Monate“ reichen bis einschließlich heute. Als Schnellwahl stehen das laufende und die zwei vorigen Jahre bereit, ältere Jahre wählst du über „Eigener Zeitraum“."]]];
       function sxSheetView() {
         if (!st.sheet || app.screen !== 'mgTable' || i3c.tab !== 'stats') return null;
         const t = i3Table(res3.tableId || 't1');
@@ -21540,15 +21561,6 @@
       function sxHot() {
         return null;
       }
-      function sxStreakCard(S) {
-        const holder = S.ms.map((p) => S.P[p]).find((x) => x.cur >= 2);
-        if (!holder) return null;
-        return h('button', { class: 'sxStreak', onclick: () => { st.open = holder.p; st.scrollTo = 'open'; render(); } },
-          h('span', { class: 'sxStreakIcon' }, icon('flame', 18)),
-          sxAv(S.t, holder.p, 30),
-          h('span', { class: 'sxStreakText' }, h('strong', {}, nameOf(holder.p)), h('small', {}, 'Aktuelle Serie')),
-          h('span', { class: 'sxStreakVal' }, sxNum('streak', holder.cur), h('small', {}, 'Siege in Folge')));
-      }
       function sxPageA(S) {
         return [
           h('section', { class: 'sxHero' }, h('div', { class: 'sxGlow' }), sxSeg('crit', sxCrits(S), st.sort, (k) => { st.sort = k; }, 'scroll ghost'), sxPodium(S), sxOverview(S)),
@@ -21629,6 +21641,118 @@
             rest > 0 && h('button', { class: 'sxRecMore', onclick: () => { SX_REC_OPEN[rec.key] = !isOpen; render(); } }, isOpen ? 'Weniger' : `+${rest} weitere`));
         };
         return h('section', { class: 'sxSection' }, sxLabel('Rekorde'), h('div', { class: 'sxRecRail' }, S.records.map(card)));
+      }
+
+      // ---------- fair ties and past periods (PO 26.11.2026) ----------
+      // Whether the filter reaches the latest match of its game and edition: only then is a series
+      // "current" and does a run go on ("seit").
+      function sxIsCurrent(S) {
+        const F = S.F;
+        const scope = F.all.filter((r) => (F.game === 'all' || r.game === F.game) && (F.edition === 'all' || r.edition === F.edition));
+        const last = S.list[S.list.length - 1];
+        return !last || scope[scope.length - 1] === last;
+      }
+      function sxStreakCard(S) {
+        if (!sxIsCurrent(S)) return null;
+        const holder = S.ms.map((p) => S.P[p]).find((x) => x.cur >= 2);
+        if (!holder) return null;
+        return h('button', { class: 'sxStreak', onclick: () => { st.open = holder.p; st.scrollTo = 'open'; render(); } },
+          h('span', { class: 'sxStreakIcon' }, icon('flame', 18)),
+          sxAv(S.t, holder.p, 30),
+          h('span', { class: 'sxStreakText' }, h('strong', {}, nameOf(holder.p)), h('small', {}, 'Aktuelle Serie')),
+          h('span', { class: 'sxStreakVal' }, sxNum('streak', holder.cur), h('small', {}, 'Siege in Folge')));
+      }
+      function sxOverview(S) {
+        const first = S.list[0];
+        const last = S.list[S.list.length - 1];
+        return h('div', { class: 'sxOverview' },
+          h('span', {}, sxNum('n', S.n), ` ${S.n === 1 ? 'Partie' : 'Partien'}`),
+          first && h('span', { class: 'muted' }, sxIsCurrent(S) ? `seit ${stDate(first.date)}` : stSpan(first.date, last.date)),
+          S.isCatan && h('span', {}, 'Ø ', S.avgDur === null ? '–' : sxNum('dur', S.avgDur, 'dur')));
+      }
+      // The podium: ranks 1 to 3, equal ranks together on one step, nobody with 0 on it.
+      function sxPodiumSteps(S, c = st.sort) {
+        const steps = [];
+        S.ranking.forEach((row) => {
+          const v = sxMetric(S, row.x, c).v;
+          const has = c === 'wins' || c === 'longest' ? v !== null && v > 0 : v !== null;
+          if (row.rank > 3 || !has) return;
+          const step = steps.find((s) => s.rank === row.rank);
+          if (step) step.rows.push(row);
+          else steps.push({ rank: row.rank, rows: [row] });
+        });
+        return steps;
+      }
+      function sxPodium(S) {
+        const steps = sxPodiumSteps(S);
+        const order = [steps[1], steps[0], steps[2]].filter(Boolean);
+        if (!order.length) return null;
+        const H = { 1: 96, 2: 66, 3: 44 };
+        const SIZE = { 1: [68, 46, 38], 2: [54, 40, 32], 3: [54, 40, 32] };
+        return h('div', { class: 'sxPodium n' + order.length },
+          order.map(({ rank, rows }) => {
+            const r = Math.min(rank, 3);
+            const lead = rows[0].x;
+            const m = sxMetric(S, lead);
+            const size = SIZE[r][Math.min(rows.length, 3) - 1];
+            const names = rows.map((row) => nameOf(row.x.p));
+            return h('div', { class: 'sxStep r' + r, 'data-flip': 'pod' + lead.p },
+              h('span', { class: 'sxStepCoins' + (rows.length > 1 ? ' many' : '') },
+                rows.slice(0, 3).map((row, i) => sxAv(S.t, row.x.p, size, { crown: rank === 1 && i === 0, ring: 'r' + r })),
+                rows.length > 3 && h('span', { class: 'sxStepMore' }, `+${rows.length - 3}`)),
+              h('strong', { class: 'sxStepName' }, h('span', {}, names.length <= 2 ? names.join(', ') : `${names.slice(0, 2).join(', ')} +${names.length - 2}`)),
+              h('span', { class: 'sxStepVal' }, sxNum('pod' + lead.p, m.v, m.fmt), h('small', {}, m.unit)),
+              h('span', { class: 'sxBlock', style: { height: H[r] + 'px' } }, sxBar('blk' + lead.p, 1, 'blockFill r' + r, true), h('b', {}, rank)));
+          }));
+      }
+      // Favourite games: equal rate and equal number of matches all count, the one played first first.
+      function sxParade(x) {
+        const cand = Object.entries(x.perGame).filter(([, g]) => g.n >= stMin() && g.wins > 0).map(([gid, g]) => ({ gid, n: g.n, wins: g.wins, q: g.wins / g.n }));
+        if (!cand.length) return null;
+        const best = cand.reduce((a, b) => (b.q > a.q || (b.q === a.q && b.n > a.n) ? b : a));
+        return cand.filter((g) => g.q === best.q && g.n === best.n).map((g) => h('div', { class: 'sxParade' }, stArt(g.gid, 34),
+          h('span', { class: 'sxParadeText' }, h('span', { class: 'sxLabel' }, 'Paradespiel'), h('strong', {}, i3Game(g.gid).name)),
+          h('span', { class: 'sxParadeQ' }, sxNum(`${x.p}:parade:${g.gid}`, g.q * 100, 'pct'), h('small', {}, `${g.wins} von ${g.n}`))));
+      }
+      // Table cards: the leaders by wins alone, equal wins together on one step, "noch kein Sieg".
+      function statsScreen() {
+        const last = (t) => {
+          const all = stAll(t.id);
+          return all.length ? all[all.length - 1].date : '';
+        };
+        const tables = [...I3_TABLES].sort((a, b) => (last(b) > last(a) ? 1 : last(b) < last(a) ? -1 : 0));
+        return h('main', { class: 'main' },
+          pageHead('Statistik', { back: () => go('start'), sub: 'Welcher Tisch?' }),
+          h('div', { class: 'sx sxTables' + sxPlain(), 'data-page': 'tables' }, tables.map((t) => {
+            const all = stAll(t.id);
+            if (!all.length)
+              return h('button', { class: 'sxTableCard none', onclick: () => stOpenTable(t) }, h('span', { class: 'sxTcText' }, h('strong', {}, t.name), h('small', {}, 'noch keine Partien')), h('span', { class: 'sxTcSeats' }, t.members.slice(0, 4).map(([p]) => sxAv(t, p, 26))));
+            const S = stCompute(t, { all, list: all, game: 'all', games: [], edition: 'all' }, 'wins');
+            const xs = S.ms.map((p) => S.P[p]);
+            const steps = [];
+            xs.forEach((x) => {
+              if (x.wins === 0) return;
+              const rank = xs.filter((y) => y.wins > x.wins).length + 1;
+              if (rank > 3) return;
+              const step = steps.find((s) => s.rank === rank);
+              if (step) step.xs.push(x);
+              else steps.push({ rank, xs: [x] });
+            });
+            steps.sort((a, b) => a.rank - b.rank);
+            const lead = steps[0] && steps[0].rank === 1 ? steps[0].xs : [];
+            const leadLine = lead.length
+              ? [icon('crown', 14), `${lead.length > 1 ? 'Gleichstand' : nameOf(lead[0].p)} · ${lead[0].wins} ${lead[0].wins === 1 ? 'Sieg' : 'Siege'}`]
+              : ['noch kein Sieg'];
+            return h('button', { class: 'sxTableCard', onclick: () => stOpenTable(t) },
+              h('span', { class: 'sxTcText' }, h('strong', {}, t.name), h('small', {}, `${all.length} Partien · zuletzt ${stDay(all[all.length - 1].date)}`),
+                h('span', { class: 'sxTcLead' }, ...leadLine)),
+              h('span', { class: 'sxTcPod' }, [steps[1], steps[0], steps[2]].filter(Boolean).map((s) => {
+                const r = Math.min(s.rank, 3);
+                const one = r === 1 ? 34 : 28;
+                const size = s.xs.length === 1 ? one : Math.round(one * 0.68);
+                return h('span', { class: 'sxTcStep r' + r }, h('span', { class: 'sxTcCoins' }, s.xs.slice(0, 2).map((x) => sxAv(t, x.p, size, { ring: 'r' + r }))), h('i', {}));
+              })));
+          })));
       }
 
       // ---------- pages of the reference ----------

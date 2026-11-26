@@ -114,7 +114,7 @@ describe('US-ST-01 Key figures and ranking of a table (design I3-D)', () => {
     expect(await screen.findByRole('heading', { name: 'Rangliste' })).toBeInTheDocument();
   });
 
-  it('AK-1: the podium shows the first three by wins, with their unit', async () => {
+  it('AK-1: the podium shows the first three by wins with their unit, nobody with 0', async () => {
     await renderStatistics(PAGE);
     await screen.findByRole('heading', { name: 'Rangliste' });
 
@@ -123,9 +123,32 @@ describe('US-ST-01 Key figures and ranking of a table (design I3-D)', () => {
       within(podium())
         .getAllByRole('listitem')
         .map((step) => step.getAttribute('aria-label')),
-    ).toEqual(['Platz 2: Anna, 1 Sieg', 'Platz 1: Ben, 4 Siege', 'Platz 3: Clara, 0 Siege']);
+    ).toEqual(['Platz 2: Anna, 1 Sieg', 'Platz 1: Ben, 4 Siege']);
     expect(within(podium()).getByText('5')).toBeInTheDocument();
     expect(within(podium()).getByText('seit 10.05.2025')).toBeInTheDocument();
+  });
+
+  it('PO 26.11.2026: equal ranks stand together on one step', async () => {
+    await renderStatistics(PAGE, [
+      match(30, { date: day('2026-10-01'), winnerIds: [ANNA] }),
+      match(31, { date: day('2026-10-02'), winnerIds: [BEN] }),
+    ]);
+    await screen.findByRole('heading', { name: 'Rangliste' });
+
+    expect(
+      within(podium())
+        .getAllByRole('listitem')
+        .map((step) => step.getAttribute('aria-label')),
+    ).toEqual(['Platz 1: Anna, Ben, 1 Sieg']);
+  });
+
+  it('PO 26.11.2026: a past period has no current series and shows its span', async () => {
+    await renderStatistics(`${PAGE}?zeitraum=2026-03-01_2026-10-31`);
+    await screen.findByRole('heading', { name: 'Rangliste' });
+
+    expect(within(podium()).getByText('01.03. – 01.10.2026')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /in Folge/u })).not.toBeInTheDocument();
+    expect(screen.queryByText(/^seit /u)).not.toBeInTheDocument();
   });
 
   it('AK-1: the ranking lists every member; a row unfolds the key figures of the person', async () => {

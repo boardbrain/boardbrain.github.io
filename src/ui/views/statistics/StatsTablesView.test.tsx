@@ -103,6 +103,15 @@ describe('US-ST-01 AK-7 Choice of the table (design I3-D KS2, TW1)', () => {
     ).toBeInTheDocument();
   });
 
+  it('PO 26.11.2026: only draws so far: nobody leads yet', async () => {
+    const { db } = renderWithApp(<StatisticsRoutes />, { path: '/statistik' });
+    await seed(db, [match(17, { groupId: FRIENDS.id, winnerIds: [ANNA, BEN] })]);
+
+    expect(
+      await screen.findByRole('link', { name: 'Freunde, 1 Partie, noch kein Sieg' }),
+    ).toBeInTheDocument();
+  });
+
   it('without tables it says so', async () => {
     renderWithApp(<StatisticsRoutes />, { path: '/statistik' });
 
