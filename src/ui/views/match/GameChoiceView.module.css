@@ -60,7 +60,7 @@
   place-items: center;
   align-content: center;
   aspect-ratio: 5 / 7.4;
-  padding: 14px 10px 14px 18px;
+  padding: 14px 12px;
   color: var(--color-text);
   text-align: center;
   background: linear-gradient(160deg, var(--color-surface-overlay), var(--color-surface-raised));
@@ -70,7 +70,9 @@
   transform: rotate(8deg) translateY(6px);
 }
 
+/* The symbol and the label centred on the card (PO 27.11.2026). */
 .askIcon {
+  display: grid;
   color: var(--color-accent-text);
 }
 
