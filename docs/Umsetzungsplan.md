@@ -61,7 +61,7 @@
 | 0.46 | 24.11.2026 | Bündel I3-C2 Notizblock geklärt, in neun Designrunden entworfen und umgesetzt (US-NB-01 bis US-NB-05, Referenz `docs/design/i3c2-score-pad-final-preview.html`); Abweichung vom Ablauf: Klärung, Vorschau und Umsetzung in einem gemeinsamen PR statt eines eigenen Doku-PRs (Wunsch des Product Owners); I3-C umgesetzt (#59), K-18 umgesetzt (#60); neue kleine Aufgabe K-19 „Kein Namensvorschlag für neue Tische“, nebenbei umgesetzt (2, 6, 9) |
 | 0.47 | 25.11.2026 | I3-C2 und K-19 umgesetzt (#61); neue kleine Aufgabe K-20 „Feinschliff Start und Kartenhand“ (Wunsch des Product Owners): Logo auf dem Start als zwei Karten wie das App-Symbol, Browser-Tab mit der App-Kachel, Inhalt des Starts auf dem Handy und quer tiefer, Symbole der Kartenhand gleiten mit weicherer Feder (2, 6, 9) |
 | 0.48 | 25.11.2026 | Empfehlungen zu Modell und Aufwand entfernt: Kapitel 3 entfallen, Spalte „Modell, Aufwand“ in den Bündel- und Aufgabentabellen gestrichen; K-20 umgesetzt (#62) |
-| 0.49 | 25.11.2026 | Bündel I3-D: Planung und vier Designrunden (Referenz `docs/design/i3d-statistics-final-preview.html`), Ø Abstand zum Sieger gestrichen (OP-15); I3-C3 „Spielsymbole“ nach I6 verschoben (Wunsch des Product Owners: nicht wichtig); neues Bündel I3-E2 „Personenseite mit Reitern“ nach I3-E (Frage PS1 aus I3-C, Entscheidung des Product Owners); I3-D umgesetzt (2, 7, 9); neue kleine Aufgabe K-21 „Platzbalken maßstabsgetreu“, zu klären vor Release 0.3.0 (Frage des Product Owners) |
+| 0.49 | 25.11.2026 | Bündel I3-D: Planung und vier Designrunden (Referenz `docs/design/i3d-statistics-final-preview.html`), Ø Abstand zum Sieger gestrichen (OP-15); I3-C3 „Spielsymbole“ nach I6 verschoben (Wunsch des Product Owners: nicht wichtig); neues Bündel I3-E2 „Personenseite mit Reitern“ nach I3-E (Frage PS1 aus I3-C, Entscheidung des Product Owners); I3-D umgesetzt (#64; 2, 7, 9); neue kleine Aufgabe K-21 „Platzbalken maßstabsgetreu“, zu klären vor Release 0.3.0 (Frage des Product Owners) |
 
 ## 1. Zweck
 
@@ -426,7 +426,7 @@ Ergebnis: Die Langzeitstatistik ist nutzbar (Spezifikation 2.3). Als ganzer Bloc
 | I3-C Ergebnisliste und Korrektur | US-ER-04, US-ER-05, US-ER-01 AK-1 (vom Tisch), US-ER-03 AK-2 | `feat/us-er-04-result-list` | umgesetzt (#59); Referenz `docs/design/i3c-result-list-final-preview.html` |
 | I3-C2 Notizblock für eigene Spiele *(neu in 0.42)* | US-NB-01 bis US-NB-05 *(seit 0.46)* | `feat/i3c2-score-pad` | umgesetzt (#61); Referenz `docs/design/i3c2-score-pad-final-preview.html` |
 | ~~I3-C3 Spielsymbole~~ *(neu in 0.44)* | *seit 0.49 in I6 (Kapitel 7)* | – | verschoben |
-| I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05, US-ST-06 | `feat/us-st-01-statistics` | umgesetzt; Referenz `docs/design/i3d-statistics-final-preview.html` |
+| I3-D Statistik | US-ST-01, US-ST-02, US-ST-03, US-ST-05, US-ST-06 | `feat/us-st-01-statistics` | umgesetzt (#64); Referenz `docs/design/i3d-statistics-final-preview.html` |
 | I3-E Diagramme | US-ST-04 | `feat/us-st-04-charts` | offen |
 | I3-E2 Personenseite mit Reitern *(neu in 0.49)* | neue Anforderung, Stories folgen aus der Klärung | nach der Klärung | offen |
 
