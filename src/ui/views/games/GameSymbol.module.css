@@ -19,8 +19,10 @@
   place-items: center;
   width: 100%;
   height: 100%;
+
+  /* The size comes from the circle (GameSymbol.tsx). */
   font:
-    700 1.1rem Georgia,
+    700 1em Georgia,
     'Times New Roman',
     serif;
   color: var(--color-accent-text);

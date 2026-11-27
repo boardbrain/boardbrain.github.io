@@ -1,5 +1,5 @@
 import { animate, useReducedMotion } from 'motion/react';
-import { useEffect, useEffectEvent, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef, type Ref } from 'react';
 import type { CustomGame, GameId, Group, Match, MatchId, Person } from '@/core/model';
 import { CATAN_GAME_ID } from '@/games/catan';
 import { t } from '@/i18n/t';
@@ -93,10 +93,38 @@ export function GroupResults({
       </div>
     );
   }
+  return (
+    <ResultDays
+      ref={listRef}
+      matches={matches}
+      group={group}
+      persons={persons}
+      customGames={customGames}
+    />
+  );
+}
+
+/**
+ * Results as in the list of a table (design I3-C EM3): newest first, a heading per day, each
+ * result a row that opens it. Also the matches of a record (PO 27.11.2026).
+ */
+export function ResultDays({
+  ref,
+  matches,
+  group,
+  persons,
+  customGames,
+}: {
+  readonly ref?: Ref<HTMLDivElement> | undefined;
+  readonly matches: readonly Match[];
+  readonly group: Group;
+  readonly persons: readonly Person[];
+  readonly customGames: readonly CustomGame[];
+}): React.JSX.Element {
   const today = localToday();
   const nameOf = (id: string): string => persons.find((person) => person.id === id)?.name ?? '';
   return (
-    <div ref={listRef} className={styles.days}>
+    <div ref={ref} className={styles.days}>
       {daysNewestFirst(matches).map((day) => {
         const heading = dayHeading(day.date, today);
         return (

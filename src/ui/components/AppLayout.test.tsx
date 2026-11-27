@@ -34,7 +34,7 @@ describe('Architecture 13.1 app frame and navigation', () => {
     expect(screen.queryByRole('banner')).not.toBeInTheDocument();
     expect(screen.queryByText('BoardBrain')).not.toBeInTheDocument();
     const links = within(navigation()).getAllByRole('link');
-    expect(links.map((link) => link.textContent)).toEqual(['Start', 'Verwaltung']);
+    expect(links.map((link) => link.textContent)).toEqual(['Start', 'Verwaltung', 'Statistik']);
   });
 
   it('NFA-PL-04: contains the hint to turn the phone, shown by the layout only in low landscape', () => {
@@ -109,7 +109,7 @@ describe('Design K-3 folded card hand', () => {
       within(navigation())
         .getAllByRole('link')
         .map((card) => card.textContent),
-    ).toEqual(['Start', 'Verwaltung']);
+    ).toEqual(['Start', 'Verwaltung', 'Statistik']);
   });
 
   it('leads straight to the area with a tap on a folded card and fans out on the start view', async () => {

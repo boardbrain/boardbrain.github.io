@@ -4,6 +4,8 @@ import { LandscapePicture } from '@/ui/art/Pictures';
 import { firstLetter } from './GameCards';
 import styles from './GameSymbol.module.css';
 
+const LETTER_SHARE = 0.44;
+
 /**
  * The symbol of a game in a circle (design I3-C EM3, SY1): the landscape for Catan, the first
  * letter for a custom game, as on its card. Decorative: the name stands beside it.
@@ -15,13 +17,18 @@ export function GameSymbol({
 }: {
   readonly gameId: GameId;
   readonly name: string;
-  /** Diameter in px: 40 in the list, 44 in the head of a result. */
-  readonly size: 40 | 44;
+  /** Diameter in px: 40 in the list, 44 in the head of a result, 32 and 36 in the statistics. */
+  readonly size: 32 | 36 | 40 | 44;
 }): React.JSX.Element {
   return (
     <span
       className={styles.symbol}
-      style={{ width: `${String(size)}px`, height: `${String(size)}px` }}
+      style={{
+        width: `${String(size)}px`,
+        height: `${String(size)}px`,
+        // The letter scales with the circle: 1.1rem at 40 px.
+        fontSize: `${String(Math.round(size * LETTER_SHARE * 10) / 10)}px`,
+      }}
       aria-hidden="true"
     >
       {gameId === CATAN_GAME_ID ? (

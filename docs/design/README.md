@@ -13,6 +13,7 @@ Je Bildschirm gilt nur die **jüngste** Referenz. Ältere Dateien zeigen den Sta
 | Uhr-Blatt (Verlauf der Uhr) | `i3b-clock-final-preview.html` |
 | Ergebnis eintragen, Ergebnisliste, Detail, Korrektur, Tischseite | `i3c-result-list-final-preview.html`; mit Notizblock (Knopf im Formular, Runden im Detail und beim Bearbeiten): `i3c2-score-pad-final-preview.html` |
 | Notizblock (Start-Zeile, Spielwahl, Block, Eingabe, Einstellungen, Ziel erreicht) | `i3c2-score-pad-final-preview.html` |
+| Statistik (Reiter „Statistik“ am Tisch, Tischwahl der Karte „Statistik“, Zeitraum, Kartenhand mit „Statistik“) | `i3d-statistics-final-preview.html` |
 | Verwaltung: Spiele, Personen, Tische (Übersicht) | `i3c-result-list-final-preview.html` |
 | Personen- und Tischdetail | `i1e-persons-tables-final-preview.html` |
 | Personenkarten | `i1e-person-cards-final-preview.html` |

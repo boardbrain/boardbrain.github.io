@@ -14,6 +14,7 @@ import { PieceMark } from '@/ui/board/PieceMark';
 import { BackButton } from '@/ui/components/BackButton';
 import { ChevronIcon, InfoIcon } from '@/ui/components/Icons';
 import { MiniTable } from '@/ui/components/MiniTable';
+import { GlideMarker } from '@/ui/components/GlideMarker';
 import { PressableButton } from '@/ui/components/Pressable';
 import { Unfold } from '@/ui/components/Unfold';
 import { DrawSymbol } from './DrawSymbol';
@@ -328,6 +329,7 @@ function Segmented<K extends string>({
 }: SegmentedProps<K>): React.JSX.Element {
   return (
     <div className={styles.seg}>
+      <GlideMarker at={selected} className={styles.segMarker} />
       {options.map(([key, label]) => (
         <PressableButton
           key={key}

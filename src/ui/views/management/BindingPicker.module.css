@@ -5,6 +5,7 @@
 
 /* Always one row: all games, the supported games and the button for own games. */
 .segment {
+  position: relative;
   display: grid;
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
@@ -18,6 +19,7 @@
 .on,
 .off,
 .more {
+  position: relative;
   padding: var(--space-1) var(--space-2);
   border: 0;
   border-radius: var(--radius-2);
@@ -34,10 +36,18 @@
   background: transparent;
 }
 
+/* The gold glides to the chosen option (design I3-D, PO 27.11.2026). */
 .on {
   font-weight: 600;
   color: var(--color-on-accent);
+  background: transparent;
+}
+
+.marker {
+  top: var(--space-1);
+  bottom: var(--space-1);
   background: var(--color-accent);
+  border-radius: var(--radius-2);
 }
 
 .hint {

@@ -36,6 +36,7 @@ import { PersonsView } from '@/ui/views/management/PersonsView';
 import { PersonView } from '@/ui/views/management/PersonView';
 import type * as MatchViews from '@/ui/views/match/matchViews';
 import { StartView } from '@/ui/views/start/StartView';
+import { StatsTablesView } from '@/ui/views/statistics/StatsTablesView';
 
 // Design I2-C: the views of a match load on first use, their pictures are large. As a lazy route
 // of React Router they load during the navigation, and the previous view stays until then;
@@ -138,6 +139,9 @@ const router = createHashRouter([
         path: '/verwaltung/gruppen/:groupId/ergebnisse/:matchId/bearbeiten',
         lazy: matchRoute((match) => view(<match.ResultEditView />)),
       },
+      // I3-D: the card "Statistik" leads to the tables, a table opens on its statistics (US-ST-01 AK-7).
+      { path: '/statistik', element: view(<StatsTablesView />) },
+      { path: '/statistik/:groupId', element: view(<GroupView isStatistics />) },
       { path: '/verwaltung/spiele', element: view(<GamesView />) },
       { path: '/verwaltung/spiele/neu', element: view(<GamesView isCreating />) },
       { path: '/verwaltung/spiele/:gameId', element: view(<GameView />) },

@@ -3,6 +3,7 @@ import type { GameId } from '@/core/model';
 import { t } from '@/i18n/t';
 import { useHasFinePointer } from '@/ui/components/mediaQueries';
 import styles from './BindingPicker.module.css';
+import { GlideMarker } from '@/ui/components/GlideMarker';
 import { PressableButton } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 
@@ -70,6 +71,10 @@ export function BindingPicker({
   return (
     <div className={styles.picker}>
       <div className={cx(styles.segment, isLocked && styles.locked)}>
+        <GlideMarker
+          at={chosenCustom === undefined ? choice : 'custom'}
+          className={styles.marker}
+        />
         <PressableButton
           type="button"
           className={choice === null ? styles.on : styles.off}

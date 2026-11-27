@@ -6,12 +6,13 @@ import { t } from '@/i18n/t';
 import { useCustomGames, useGroup, useGroups, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
 import { EditorDialog } from '@/ui/components/EditorDialog';
-import { ChartIcon, ChevronIcon, PenIcon, PlusIcon } from '@/ui/components/Icons';
+import { ChevronIcon, PenIcon, PlusIcon } from '@/ui/components/Icons';
 import { Page } from '@/ui/components/Page';
 import { PillButton } from '@/ui/components/PillButton';
 import { TabPanel, Tabs, type TabItem } from '@/ui/components/Tabs';
 import { cx } from '@/ui/components/classNames';
 import { useGoBack } from '@/ui/components/useGoBack';
+import { GroupStatistics } from '@/ui/views/statistics/GroupStatistics';
 import { GroupResults } from './GroupResults';
 import { GroupEditor } from './GroupEditor';
 import { bindingLongLabel } from './groupBinding';
@@ -23,7 +24,6 @@ import { PressableLink } from '@/ui/components/Pressable';
 const CHEVRON_SIZE = 18;
 const PILL_ICON_SIZE = 15;
 const PLUS_SIZE = 22;
-const SOON_ICON_SIZE = 30;
 
 type TableTab = 'am-tisch' | 'ergebnisse' | 'statistik';
 
@@ -33,9 +33,10 @@ const TABLE_TABS: readonly TabItem<TableTab>[] = [
   { key: 'statistik', label: t('ergebnisse.statistik') },
 ];
 
-// The tab from the address `?reiter=`; anything else is "Am Tisch".
-function tabOf(value: string | null): TableTab {
-  return value === 'ergebnisse' || value === 'statistik' ? value : 'am-tisch';
+// The tab from the address `?reiter=`; without it "Am Tisch", reached through the statistics
+// (`#/statistik/‹id›`) "Statistik".
+function tabOf(value: string | null, home: TableTab): TableTab {
+  return value === 'am-tisch' || value === 'ergebnisse' || value === 'statistik' ? value : home;
 }
 
 // The result just stored, passed along by the form (design I3-C HL1); anything else is ignored.
@@ -75,17 +76,26 @@ function seatsOf(group: Group, persons: readonly Person[]): TableSeat[] {
 type GroupViewProps = {
   /** `#/verwaltung/gruppen/‹id›/bearbeiten`: the editor is open above the page (US-VW-02). */
   readonly isEditing?: boolean;
+  /**
+   * `#/statistik/‹id›`: the same page reached through the card "Statistik" (US-ST-01 AK-7,
+   * design I3-D KS2); it opens on "Statistik" and leads back to the table cards.
+   */
+  readonly isStatistics?: boolean;
 };
 
 /**
  * Page of a table `#/verwaltung/gruppen/‹id›` (US-VW-05 AK-3, AK-4, design I1-E T7, I3-C RT2):
  * tabs "Am Tisch | Ergebnisse | Statistik" right below the head. "Am Tisch" shows the big round
  * table with the seats as links, the binding, the number of persons and the date, and the
- * members with their colours; "Ergebnisse" the results (US-ER-04); "Statistik" a placeholder
- * until I3-D. "Bearbeiten" opens the editor at its own address, so the Android back key closes
- * it (US-VW-02, design I1-F); the plus in the head enters a result (US-ER-01 AK-1).
+ * members with their colours; "Ergebnisse" the results (US-ER-04); "Statistik" the statistics
+ * (US-ST-01 to US-ST-06, design I3-D). "Bearbeiten" opens the editor at its own address, so the
+ * Android back key closes it (US-VW-02, design I1-F); the plus in the head enters a result
+ * (US-ER-01 AK-1).
  */
-export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Element | null {
+export function GroupView({
+  isEditing = false,
+  isStatistics = false,
+}: GroupViewProps): React.JSX.Element | null {
   const { db } = useAppDependencies();
   const { groupId = '' } = useParams();
   const parsed = parseGroupId(groupId);
@@ -98,7 +108,8 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
   const location = useLocation();
   const navigate = useNavigate();
   const tabsId = useId();
-  const tab = tabOf(searchParams.get('reiter'));
+  const home: TableTab = isStatistics ? 'statistik' : 'am-tisch';
+  const tab = tabOf(searchParams.get('reiter'), home);
   const highlight = highlightOf(location.state);
 
   if (group === undefined || persons === undefined) {
@@ -106,7 +117,10 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
   }
   if (group === null) {
     return (
-      <Page title={t('gruppen.titel')} backFallback="/verwaltung/gruppen">
+      <Page
+        title={t('gruppen.titel')}
+        backFallback={isStatistics ? '/statistik' : '/verwaltung/gruppen'}
+      >
         <p className={overview.hint}>{t('gruppen.nichtGefunden')}</p>
       </Page>
     );
@@ -117,12 +131,12 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
   const selectTab = (key: TableTab): void => {
     // The tab is part of the address, so the back key from a result returns to it; switching
     // tabs adds no entry to the history.
-    setSearchParams(key === 'am-tisch' ? {} : { reiter: key }, { replace: true });
+    setSearchParams(key === home ? {} : { reiter: key }, { replace: true });
   };
   return (
     <Page
       title={group.name}
-      backFallback="/verwaltung/gruppen"
+      backFallback={isStatistics ? '/statistik' : '/verwaltung/gruppen'}
       actions={
         // SW4: "Ergebnis eintragen" as a round plus in the head, in every tab (US-ER-01 AK-1).
         !group.archived && (
@@ -221,12 +235,7 @@ export function GroupView({ isEditing = false }: GroupViewProps): React.JSX.Elem
             />
           )}
           {tab === 'statistik' && (
-            // The statistics follow with I3-D; until then a placeholder (design I3-C).
-            <div className={styles.soon}>
-              <ChartIcon size={SOON_ICON_SIZE} />
-              <strong>{t('ergebnisse.statistik')}</strong>
-              <span className={overview.factLabel}>{t('ergebnisse.statistikBald')}</span>
-            </div>
+            <GroupStatistics group={group} persons={persons} customGames={customGames ?? []} />
           )}
         </TabPanel>
       </div>

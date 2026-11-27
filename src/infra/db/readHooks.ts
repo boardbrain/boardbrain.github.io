@@ -23,6 +23,7 @@ import type { PlayedGame } from '@/core/results';
 import { SCORE_PAD_ID, SCORE_PAD_SCHEMA_VERSION, type ScorePad } from '@/core/scorepad';
 import {
   readMatch,
+  readMatchesByGroup,
   readMatchesOfGroup,
   readPlayedGames,
   readScoredMatchCount,
@@ -224,6 +225,16 @@ export function useMatchesOfGroup(
   groupId: GroupId,
 ): readonly Match[] | undefined {
   return useLiveQuery(() => readMatchesOfGroup(db, groupId), [db, groupId]);
+}
+
+/**
+ * The matches of all groups, grouped by group and oldest first (US-ST-01 AK-7); `undefined` while
+ * loading. The table cards of the statistics update themselves on every change of a result.
+ */
+export function useMatchesByGroup(
+  db: BoardBrainDb,
+): ReadonlyMap<GroupId, readonly Match[]> | undefined {
+  return useLiveQuery(() => readMatchesByGroup(db), [db]);
 }
 
 /**

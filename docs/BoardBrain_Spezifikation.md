@@ -4,9 +4,9 @@
 |---|---|
 | Projekt | BoardBrain |
 | Dokumenttyp | Spezifikation (User Stories, Abnahmekriterien, Priorisierung) |
-| Version | 0.23 |
+| Version | 0.24 |
 | Status | Final – freigegeben für die Durchführung des Setups und die Umsetzung |
-| Stand | 24.11.2026 |
+| Stand | 25.11.2026 |
 | Grundlage | BoardBrain_Anforderungsdokumentation.md, Version 0.8; technische Umsetzung in BoardBrain_Architektur.md, Version 0.2; Arbeitsregeln in Entwicklungsrichtlinien.md |
 | Sprache | Deutsch |
 
@@ -37,6 +37,7 @@
 | 0.21 | 16.11.2026 | Punkte und Rangfolge bei eigenen Spielen (Anforderungsdokumentation 0.25, E-45, OP-14 geklärt): Einstellung „Punkte“ am eigenen Spiel (neu US-SP-02 AK-4, US-SP-02 AK-3, US-VW-07 neu „Eigenes Spiel bearbeiten“ mit AK-3 und AK-4); Ergebnis mit Punkten oder Rangfolge (3.6, US-ER-02 neu gefasst als „Punkte erfassen“ mit neu AK-6, neu US-ER-06 „Rangfolge erfassen“); Kennzahlen, Rangliste und Rekorde für Plätze und Punkte aller Spiele, neu Platzverteilung, Rote Laterne, Paradespiel, Partien je Spiel und Ø Abstand zum Sieger (3.8, US-ST-01, US-ST-03 AK-4, neu US-ST-05 AK-5, neu US-ST-06); Umfang und Übersicht (2.3, 2.5); Rückverfolgbarkeit (6) |
 | 0.22 | 18.11.2026 | Design I3-B (Anforderungsdokumentation 0.26, E-46 bis E-48): Spiele in einer gemeinsamen Liste, unterscheidbar am Aussehen (US-SP-03 AK-1, nach I3 vorgezogen); „Neues Spiel“ als eigene Seite (US-SP-02 AK-1); Sieger aus der besten Punktzahl, gewählt nur bei Gleichstand an der Spitze, Punkte oder „Sieger oder Rangfolge“ (3.6, US-ER-02 AK-4 entfällt, AK-6 neu gefasst); Grenzen im Formular: Datum nicht in der Zukunft, Punkte bis 99 999 im Betrag, Notizen bis 1000 Zeichen, Warnung bei mehr als 8 Stunden Spieldauer (3.6, US-ER-01 AK-8 neu); Spielbindung frei, nur die Mitgliederzahl wird geprüft (US-VW-02 AK-3); Spieldauer in der laufenden Partie korrigieren (3.5, US-AB-07 AK-6 neu); Rangfolge von Hand auch bei Catan (3.6, US-ER-06, E-49); Spieldauer im Formular in Stunden und Minuten (3.6, US-ER-01 AK-7); Uhr nach der Abnahme neu: Verlauf mit einzeln erfassten Pausen, Pausen nachtragen, ändern und löschen, „Fertig“ speichert (3.5, US-AB-07 AK-1, AK-6, neu AK-7); Umfang (2.3, 2.5) |
 | 0.23 | 24.11.2026 | Notizblock für eigene Spiele mit Punkten (Anforderungsdokumentation 0.28, FA-NB-01 bis FA-NB-09, E-51 bis E-55): neu 4.16 mit US-NB-01 bis US-NB-05; der laufende Notizblock als laufende Partie mit denselben Sperren (3.5); Runden und Ziel im Ergebnis (3.6); Umfang und Übersicht (2.3, 2.5); Rückverfolgbarkeit (6); Abnahme: kein Namensvorschlag für neue Gruppen mehr, das Namensfeld bleibt leer mit Beispiel (US-PG-02 AK-2, K-19) |
+| 0.24 | 25.11.2026 | Design I3-D Statistik (Anforderungsdokumentation 0.30, E-56 bis E-59): aktuelle Siegesserie nur noch als Hinweis ab zwei Siegen in Folge, kein Kriterium und keine Kennzahl je Person; Form der letzten fünf Partien; „Letzter“ statt „Rote Laterne“ ohne Doppelzählung; Filter nach Zeitraum (neu US-ST-03 AK-5, AK-6); längste Durststrecke als Rekord, kürzeste Partie ab zwei Partien mit Dauer, Bestwert in der Rekordtabelle; Paradespiel ab fünf Partien und nur mit Sieg; Ø Abstand zum Sieger gestrichen (US-ST-06 AK-5); Einstieg über die Karte „Statistik“ (neu US-ST-01 AK-6, AK-7); Filter nur mit Spielen und Versionen, die gespielt wurden (3.8, US-ST-01 bis US-ST-06) |
 
 ## Inhaltsverzeichnis
 
@@ -326,29 +327,34 @@ Alle Kennzahlen beziehen sich auf eine Gruppe und den aktuell gewählten Filter 
 | Siege | Person | Anzahl der Partien, in denen die Person alleiniger Sieger ist |
 | Siegquote | Person | Siege ÷ Partien, in Prozent |
 | Unentschieden | Person | Anzahl der Partien, in denen die Person zu mehreren Siegern gehört; nur angezeigt, wenn im Filter Unentschieden vorkommen (bei Catan nie, 3.6) |
-| Aktuelle Siegesserie | Person | Anzahl aufeinanderfolgender Siege bis einschließlich der letzten Partie |
+| Aktuelle Siegesserie | Gruppe | Anzahl aufeinanderfolgender Siege der Person, die die letzte Partie allein gewonnen hat; nur sie kann eine haben. Angezeigt ab 2 als eigener Hinweis mit Person, nicht als Kennzahl je Person und nicht als Kriterium der Rangliste (E-57); nur, wenn der Filter bis zur neuesten Partie seines Spiels reicht, denn in einem vergangenen Zeitraum ist nichts „aktuell“ (Product Owner 26.11.2026). Ebenso „läuft“ eine Serie oder Durststrecke nur dann noch („seit“) *(geändert in 0.24)* |
 | Längste Siegesserie | Person | Größte Anzahl aufeinanderfolgender Siege |
 | Aktuelle Durststrecke | Person | Anzahl der Partien seit dem letzten Sieg der Person; ohne Sieg im Filter alle Partien. Ein Unentschieden ist kein Sieg. |
+| Längste Durststrecke | Person | Die längste Folge von Partien ohne Sieg der Person im Filter, klein unter der aktuellen *(neu in 0.24, Product Owner 26.11.2026)* |
+| Form | Person | Ergebnis der letzten fünf Partien im Filter, die jüngste zuletzt: Sieg, Unentschieden oder keins *(neu in 0.24)* |
 | Durchschnittspunkte | Person | Mittelwert der Punkte über alle Partien mit erfassten Punkten; nur wenn der Filter ein einzelnes Spiel mit Punkten zeigt, bei Catan als „Durchschnittssiegpunkte“; ohne Daten „–“ *(geändert in 0.21)* |
 | Durchschnittsplatz | Person | Mittelwert der Plätze (3.6) über alle Partien mit Plätzen, aus Punkten oder aus einer Rangfolge, auch über mehrere Spiele; ohne Daten „–“ *(geändert in 0.21)* |
 | Durchschnittliche Spieldauer | Gruppe | Mittelwert der Spieldauer über alle Partien mit erfasster Dauer, in Minuten; nur bei Catan; ohne Daten „–“ |
-| Platzverteilung | Person | Wie oft die Person Platz 1, 2, 3 usw. belegt hat, über alle Partien mit Plätzen *(neu in 0.21)* |
-| Rote Laterne | Person | Wie oft die Person Letzter war, also den größten Platz einer Partie hatte, über alle Partien mit Plätzen; stehen alle auf Platz 1, ist niemand Letzter *(neu in 0.21)* |
-| Paradespiel | Person | Das Spiel mit der höchsten Siegquote der Person; nur im Filter „Alle Spiele“ und nur über Spiele mit einer Mindestzahl an Partien (Wert in der Vorschau von I3-D); bei Gleichstand das Spiel mit mehr Partien *(neu in 0.21)* |
-| Partien je Spiel | Gruppe | Anzahl der Partien je Spiel, das meistgespielte zuerst; nur im Filter „Alle Spiele“ *(neu in 0.21)* |
-| Ø Abstand zum Sieger | Person | Mittelwert des Abstands der eigenen Punkte zur Punktzahl der Sieger, über Partien mit Punkten, in denen die Person nicht gewonnen hat; nur bei einem einzelnen Spiel mit Punkten; ohne Daten „–“. Offen, ob die Kennzahl bleibt (OP-15) *(neu in 0.21)* |
+| Platzverteilung | Person | Wie oft die Person Platz 1, 2, 3 usw. belegt hat und wie oft sie Letzter war, über alle Partien mit Plätzen; eine Partie als Letzter zählt nur dort, nicht zusätzlich bei ihrer Platzzahl (E-58) *(neu in 0.21, geändert in 0.24)* |
+| Letzter | Person | Wie oft die Person Letzter war, also den größten Platz einer Partie hatte, über alle Partien mit Plätzen; stehen alle auf Platz 1, ist niemand Letzter (bis 0.23 „Rote Laterne“) *(neu in 0.21, umbenannt in 0.24)* |
+| Paradespiel | Person | Das Spiel mit der höchsten Siegquote der Person; nur im Filter „Alle Spiele“, nur über Spiele mit mindestens 5 Partien und nur mit mindestens einem Sieg; bei gleicher Quote das Spiel mit mehr Partien; sind auch die Partien gleich, alle diese Spiele, das zuerst gespielte zuerst *(neu in 0.21, ergänzt und geändert in 0.24)* |
+| Partien je Spiel | Gruppe | Anzahl der Partien je Spiel, das meistgespielte zuerst, bei Gleichstand das zuerst gespielte; nur im Filter „Alle Spiele“ *(neu in 0.21, ergänzt in 0.24)* |
 
 Niederlagen und Unentschieden beenden eine Siegesserie. Mit einem Sieg endet die Durststrecke; ist die aktuelle Siegesserie größer als 0, ist die aktuelle Durststrecke 0.
 
-**Rangliste:** Das Sortierkriterium ist manuell wählbar: Siege (Standard), Durchschnittsplatz (wenn im Filter Partien mit Plätzen liegen), Durchschnittspunkte (nur bei einem einzelnen Spiel mit Punkten), aktuelle Siegesserie, längste Siegesserie. Bei Gleichstand im gewählten Kriterium entscheiden nacheinander Siege, Unentschieden, Durchschnittsplatz und Durchschnittspunkte, soweit sie im Filter vorkommen. Ein kleinerer Durchschnittsplatz ist besser, ebenso kleinere Durchschnittspunkte bei „Wenigste Punkte gewinnen“; Personen ohne Wert („–“) stehen hinter denen mit Wert. *(geändert in 0.21)* Bei vollständigem Gleichstand teilen sich Personen einen Rang. Siegquote und Siege ergeben in einer Gruppe stets dieselbe Reihenfolge und sind deshalb kein eigenes Kriterium; Unentschieden sind kein Sortierkriterium.
+**Filter** *(neu in 0.24)*: Spiel (nur Spiele, von denen die Gruppe im Zeitraum Partien hat, und nur bei mehr als einem; bei einer Gruppe mit einem Spiel steht es fest), bei Catan die Spielversion (nur wenn im Zeitraum beide gespielt wurden) und der Zeitraum: Gesamt, ein Kalenderjahr mit Partien, die letzten 3 oder 12 Monate (bis einschließlich heute) oder ein eigener Zeitraum mit Beginn und Ende, beide einschließlich. Ein eigener Zeitraum braucht Beginn und Ende, der Beginn liegt nicht nach dem Ende und das Ende nicht nach heute. Als Schnellwahl stehen nur die Jahre mit Partien im laufenden und in den zwei vorigen Kalenderjahren bereit; ältere Jahre wählt man über den eigenen Zeitraum, ein ganzes Kalenderjahr heißt dann wie das Jahr (Product Owner 26.11.2026).
+
+**Rangliste:** Das Sortierkriterium ist manuell wählbar: Siege (Standard), Durchschnittsplatz (wenn im Filter Partien mit Plätzen liegen), Durchschnittspunkte (nur bei einem einzelnen Spiel mit Punkten), längste Siegesserie. Die aktuelle Siegesserie ist kein Kriterium (E-57). *(geändert in 0.24)* Bei Gleichstand im gewählten Kriterium entscheiden nacheinander Siege, Unentschieden, Durchschnittsplatz und Durchschnittspunkte, soweit sie im Filter vorkommen. Ein kleinerer Durchschnittsplatz ist besser, ebenso kleinere Durchschnittspunkte bei „Wenigste Punkte gewinnen“; Personen ohne Wert („–“) stehen hinter denen mit Wert. *(geändert in 0.21)* Bei vollständigem Gleichstand teilen sich Personen einen Rang. **Podest:** die Ränge 1 bis 3; wer einen Rang teilt, steht mit auf dessen Stufe, und wer bei Siegen oder der längsten Serie 0 hat, steht nicht darauf (Product Owner 26.11.2026). Unter dem Podest stehen die Zahl der Partien und „seit“ der ersten Partie; reicht der Filter nicht bis zur neuesten Partie, die Spanne von der ersten bis zur letzten. Siegquote und Siege ergeben in einer Gruppe stets dieselbe Reihenfolge und sind deshalb kein eigenes Kriterium; Unentschieden sind kein Sortierkriterium.
 
 **Rekorde** (→ US-ST-05):
 
 | Rekord | Definition |
 |---|---|
-| Ewige Serie | Die längste Siegesserie im Filter mit Person sowie Datum der ersten und der letzten Partie der Serie; bei Gleichstand die zuerst erreichte |
-| Längste Partie | Die Partie mit der größten Spieldauer; nur bei Catan; bei Gleichstand die frühere nach 3.7 |
-| Kürzeste Partie | Die Partie mit der kleinsten Spieldauer; nur bei Catan; bei Gleichstand die frühere nach 3.7 |
+| Ewige Serie | Die längste Siegesserie im Filter mit Person sowie Datum der ersten und der letzten Partie der Serie, erst ab zwei Siegen; bei Gleichstand alle gleich langen, auch zwei derselben Person, die zuerst erreichte zuerst; läuft sie noch, „seit“ ihrer ersten Partie *(Gleichstand und Mindestlänge geändert in 0.24, Product Owner 26.11.2026)* |
+| Längste Durststrecke | Die längste Folge von Partien ohne Sieg einer Person im Filter, mit Person sowie Datum der ersten und der letzten Partie, erst ab zwei Partien; bei Gleichstand alle gleich langen wie bei der ewigen Serie; läuft sie noch, „seit“ ihrer ersten Partie *(neu in 0.24)* |
+| Längste Partie | Die Partie mit der größten Spieldauer; nur bei Catan; bei Gleichstand alle, die frühere zuerst nach 3.7 *(geändert in 0.24)* |
+| Kürzeste Partie | Die Partie mit der kleinsten Spieldauer; nur bei Catan und erst ab zwei Partien mit Dauer, und nicht, wenn alle so lang sind wie die längste; bei Gleichstand alle, die frühere zuerst nach 3.7 *(ergänzt in 0.24)* |
+| Bestwert | Die beste Punktzahl einer Person (die höchste, bei „Wenigste Punkte gewinnen“ die niedrigste); nur bei einem einzelnen eigenen Spiel mit Punkten; bei Gleichstand alle Partien mit diesem Wert, die frühere zuerst nach 3.7, je Partie alle Personen mit diesem Wert *(in die Tabelle übernommen und geändert in 0.24)* |
 
 ### 3.9 Kennungen, Export und Import
 
@@ -845,11 +851,13 @@ Bezug: FA-ER-12, E-45, E-49 → 3.6
 Als Spielende möchten wir Kennzahlen je Person sehen, damit wir wissen, wer wie erfolgreich ist.
 Bezug: FA-ST-01, FA-ST-02, FA-ST-05 → 3.8
 
-- **AK-1:** Gegeben eine Gruppe, dann zeigt die Statistik die Anzahl der Partien einmal für die Gruppe und für jedes Mitglied Siege, Siegquote, aktuelle und längste Siegesserie und die aktuelle Durststrecke, Unentschieden nur, wenn es im Filter welche gibt; den Durchschnittsplatz, wenn im Filter Partien mit Plätzen liegen; die Durchschnittspunkte bei einem einzelnen Spiel mit Punkten (bei Catan Durchschnittssiegpunkte); bei Catan die durchschnittliche Spieldauer der Gruppe. *(geändert in 0.19 und 0.21)*
+- **AK-1:** Gegeben eine Gruppe, dann zeigt die Statistik die Anzahl der Partien einmal für die Gruppe und für jedes Mitglied Siege, Siegquote, längste Siegesserie, die aktuelle Durststrecke und die Form der letzten fünf Partien, Unentschieden nur, wenn es im Filter welche gibt; den Durchschnittsplatz, wenn im Filter Partien mit Plätzen liegen; die Durchschnittspunkte bei einem einzelnen Spiel mit Punkten (bei Catan Durchschnittssiegpunkte); bei Catan die durchschnittliche Spieldauer der Gruppe. *(geändert in 0.19, 0.21 und 0.24)*
 - **AK-2:** Gegeben ein Unentschieden, dann zählt es für die beteiligten Sieger als Unentschieden, nicht als Sieg, und beendet ihre Siegesserie.
 - **AK-3:** Gegeben Partien teils mit, teils ohne Punkte, Plätze bzw. Spieldauer, dann werden Durchschnittspunkte nur über Partien mit Punkten, der Durchschnittsplatz nur über Partien mit Plätzen und die durchschnittliche Spieldauer nur über Partien mit Dauer gebildet; ohne solche Partien wird „–“ angezeigt. *(ergänzt in 0.19 und 0.21)*
 - **AK-4:** Gegeben eine Gruppe ohne Partien im Filter, dann erscheint ein verständlicher Hinweis statt leerer Zahlen.
 - **AK-5:** Gegeben die App, dann gibt es keine gruppenübergreifende Statistik.
+- **AK-6:** Gegeben eine Person hat die letzten zwei oder mehr Partien im Filter allein gewonnen, dann zeigt die Statistik unter dem Podest einen eigenen Hinweis mit Person und Zahl der Siege in Folge; antippen zeigt ihre Kennzahlen. Bei weniger als zwei entfällt er (E-57). *(neu in 0.24)*
+- **AK-7:** Gegeben die Karte „Statistik“ in der Kartenhand, wenn ich sie antippe, dann sehe ich die Tische als Karten mit Partien, letztem Spieltag, Spitzenreiter und den ersten drei genau wie auf dem Podest der Statistikseite des Tisches (Rangliste nach Siegen über alle Partien mit denselben Folgekriterien; nur bei vollständigem Gleichstand „Gleichstand“ und gemeinsam auf einer Stufe, ohne Sieg „noch kein Sieg“; Product Owner 27.11.2026), zuletzt gespielte zuerst; ein Tisch öffnet seinen Reiter „Statistik“. *(neu in 0.24, E-56)*
 
 #### US-ST-02 Rangliste · M
 Als Spielende möchten wir eine Rangliste, deren Sortierung wir wählen können, damit wir uns aus verschiedenen Blickwinkeln vergleichen können.
@@ -861,12 +869,14 @@ Bezug: FA-ST-03 → 3.8
 
 #### US-ST-03 Statistik filtern · S
 Als Spielende möchten wir die Statistik nach Spiel und Spielversion filtern, damit wir Vergleichbares vergleichen.
-Bezug: FA-ST-06, FA-ST-07
+Bezug: FA-ST-06, FA-ST-07, FA-ST-10
 
 - **AK-1:** Gegeben eine globale Gruppe, dann kann ich zwischen „Alle Spiele“ und einem einzelnen Spiel filtern.
 - **AK-2:** Gegeben der Filter steht auf Catan (oder die Gruppe ist an Catan gebunden), dann kann ich zusätzlich zwischen „Gesamt“, „Basisspiel“ und „Städte & Ritter“ wählen.
 - **AK-3:** Gegeben ein Filter, dann gilt er für Kennzahlen, Rangliste und Diagramme gleichermaßen.
-- **AK-4:** Gegeben der Filter umfasst mehrere Spiele, dann werden keine Durchschnittspunkte, kein Ø Abstand zum Sieger, keine durchschnittliche Spieldauer und keine Rekorde einzelner Spiele angezeigt; der Durchschnittsplatz bleibt, weil an einem festen Tisch stets gleich viele Personen spielen (E-45). *(ergänzt in 0.19, geändert in 0.21)*
+- **AK-4:** Gegeben der Filter umfasst mehrere Spiele, dann werden keine Durchschnittspunkte, keine durchschnittliche Spieldauer und keine Rekorde einzelner Spiele angezeigt; der Durchschnittsplatz bleibt, weil an einem festen Tisch stets gleich viele Personen spielen (E-45). *(ergänzt in 0.19, geändert in 0.21 und 0.24)*
+- **AK-5:** Gegeben die Statistik, dann kann ich den Zeitraum nach 3.8 wählen (Gesamt, Jahre mit Partien bis zwei Jahre zurück, letzte 3 oder 12 Monate, eigener Zeitraum); der Zeitraum gilt wie der übrige Filter für alles. *(neu in 0.24, FA-ST-10)*
+- **AK-6:** Gegeben ein eigener Zeitraum ohne Beginn oder Ende, mit Beginn nach dem Ende oder Ende nach heute, dann sehe ich den Fehler sofort und kann ihn nicht übernehmen; sonst zeigt die Schaltfläche, wie viele Partien darin liegen. Gibt es im Zeitraum keine Partie, erscheint ein Hinweis mit einer Schaltfläche, den Zeitraum zu ändern. *(neu in 0.24)*
 
 #### US-ST-04 Diagramme · S
 Als Spielende möchten wir Verlauf und Verteilung der Siege grafisch sehen, damit Entwicklungen auf einen Blick erkennbar sind.
@@ -880,9 +890,9 @@ Bezug: FA-ST-04 → 3.7, 3.8
 Als Spielende möchten wir die Rekorde unseres Tisches sehen, damit besondere Partien und Serien in Erinnerung bleiben.
 Bezug: FA-ST-08, E-44 → 3.7, 3.8
 
-- **AK-1:** Gegeben eine Gruppe mit Partien, dann zeigt die Statistik die ewige Serie mit Person, Länge sowie Datum der ersten und der letzten Partie der Serie.
-- **AK-2:** Gegeben der Filter steht auf Catan und es gibt Partien mit Spieldauer, dann zeigt die Statistik die längste und die kürzeste Partie mit Dauer und Datum.
-- **AK-3:** Gegeben ein Rekord, der zu einer Partie gehört, wenn ich ihn antippe, dann öffnet sich die Detailansicht dieser Partie.
+- **AK-1:** Gegeben eine Gruppe mit Partien, dann zeigt die Statistik die ewige Serie und die längste Durststrecke jeweils mit Person, Länge sowie Datum der ersten und der letzten Partie. *(ergänzt in 0.24)*
+- **AK-2:** Gegeben der Filter steht auf Catan und es gibt Partien mit Spieldauer, dann zeigt die Statistik die längste und, ab zwei solchen Partien, die kürzeste Partie mit Dauer und Datum. *(ergänzt in 0.24)*
+- **AK-3:** Gegeben ein Rekord, der zu einer Partie gehört, wenn ich ihn antippe, dann öffnet sich die Detailansicht dieser Partie. Gegeben eine Serie oder Durststrecke, wenn ich sie antippe, dann sehe ich ihre Partien wie in den Ergebnissen des Tisches, und jede davon öffnet ihre Detailansicht (Product Owner 27.11.2026). *(ergänzt in 0.24)*
 - **AK-4:** Gegeben Gleichstand, dann gilt die Regel aus 3.8; gegeben keine passenden Partien, dann entfällt der Rekord.
 - **AK-5:** Gegeben der Filter steht auf ein eigenes Spiel mit Punkten und es gibt Partien mit Punkten, dann zeigt die Statistik den Bestwert (die höchste bzw. bei „Wenigste Punkte gewinnen“ die niedrigste Punktzahl) mit Person und Datum. *(neu in 0.21)*
 
@@ -890,11 +900,11 @@ Bezug: FA-ST-08, E-44 → 3.7, 3.8
 Als Spielende möchten wir sehen, wer wie oft welchen Platz belegt und in welchem Spiel wer am stärksten ist, damit die Statistik mehr zeigt als die Siege.
 Bezug: FA-ST-09, E-45 → 3.8
 
-- **AK-1:** Gegeben Partien mit Plätzen im Filter, dann zeigt die Statistik je Person, wie oft sie welchen Platz belegt hat.
-- **AK-2:** Gegeben Partien mit Plätzen im Filter, dann zeigt die Statistik je Person die Rote Laterne, also wie oft sie Letzter war, nach 3.8.
+- **AK-1:** Gegeben Partien mit Plätzen im Filter, dann zeigt die Statistik je Person als Balken, wie oft sie welchen Platz belegt hat, rechts dunkelrot, wie oft sie Letzter war; zusammen ergeben sie die Partien mit Plätzen (E-58). *(geändert in 0.24)*
+- **AK-2:** Gegeben Partien mit Plätzen im Filter, dann zeigt die Statistik je Person, wie oft sie Letzter war, nach 3.8. *(geändert in 0.24, bis 0.23 „Rote Laterne“)*
 - **AK-3:** Gegeben der Filter „Alle Spiele“, dann zeigt die Statistik je Person ihr Paradespiel nach 3.8; erreicht kein Spiel die Mindestzahl an Partien, entfällt es.
 - **AK-4:** Gegeben der Filter „Alle Spiele“, dann zeigt die Statistik die Anzahl der Partien je Spiel, das meistgespielte zuerst.
-- **AK-5:** Gegeben ein einzelnes Spiel mit Punkten, dann zeigt die Statistik je Person den Ø Abstand zum Sieger nach 3.8. Vor dem Bau wird geklärt, ob die Kennzahl bleibt (OP-15).
+- ~~**AK-5:** Ø Abstand zum Sieger~~ *(gestrichen in 0.24, E-59)*
 
 ### 4.11 Export und Import (EI)
 
@@ -1209,7 +1219,7 @@ Barrierefreiheit ist kein Ziel von Version 1 (E-24) und wird nicht geprüft. *(e
 | FA-ST-01, FA-ST-02, FA-ST-05 | US-ST-01 |
 | FA-ST-03 | US-ST-02 |
 | FA-ST-04 | US-ST-04 |
-| FA-ST-06, FA-ST-07 | US-ST-03 |
+| FA-ST-06, FA-ST-07, FA-ST-10 | US-ST-03 |
 | FA-ST-08 | US-ST-05 |
 | FA-ST-09 | US-ST-06 |
 | FA-EI-01 | US-EI-01, US-EI-03 |

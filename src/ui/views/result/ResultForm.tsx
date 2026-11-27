@@ -21,6 +21,7 @@ import type { Result } from '@/core/shared';
 import { t } from '@/i18n/t';
 import { CheckIcon, InfoIcon, PadIcon } from '@/ui/components/Icons';
 import { Notice } from '@/ui/components/Notice';
+import { GlideMarker } from '@/ui/components/GlideMarker';
 import { PressableButton } from '@/ui/components/Pressable';
 import { Unfold } from '@/ui/components/Unfold';
 import { cx } from '@/ui/components/classNames';
@@ -437,6 +438,7 @@ export function ResultForm({
         <section className={shared.section}>
           <h2 className={shared.sectionTitle}>{t('ergebnis.partie')}</h2>
           <div className={options.seg} role="group" aria-label={t('partie.spielversion')}>
+            <GlideMarker at={edition ?? null} className={options.segMarker} />
             {rules.editions.map((key) => (
               <PressableButton
                 key={key}
