@@ -671,11 +671,13 @@
   height: 22px;
 }
 
+/* A short part is as wide as its number, so no number is missing (PO 27.11.2026). */
 .segment {
   display: grid;
   flex-basis: 0;
   place-items: center;
-  min-width: 5px;
+  min-width: max-content;
+  padding: 0 4px;
   font-size: 0.7rem;
   font-weight: 800;
   color: var(--color-surface);

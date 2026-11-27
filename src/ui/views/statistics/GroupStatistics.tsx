@@ -68,7 +68,6 @@ import styles from './GroupStatistics.module.css';
 const RISE = { duration: 0.5, ease: [0.22, 1, 0.36, 1] } as const;
 const RISE_STEP = 0.04;
 const STEP_HEIGHT = { 1: 96, 2: 66, 3: 44 } as const;
-const SMALL_SEGMENT_SHARE = 0.14;
 const MAX_PLACE_COLOUR = 4;
 
 type Names = (personId: PersonId) => string;
@@ -890,18 +889,18 @@ function PersonDetails({
 
 function PlaceBar({ person }: { readonly person: PersonStatistics }): React.JSX.Element {
   const places = [...person.placeCounts].toSorted(([a], [b]) => a - b);
-  const total = person.placedMatches;
   const parts = [
     ...places.map(([place, count]) => t('statistik.platzAnzahl', { platz: place, anzahl: count })),
     t('statistik.letzterAnzahl', { anzahl: person.lastCount }),
   ];
+  // Every part shows its number, a short one is just wide enough for it (PO 27.11.2026).
   const segment = (
     key: string,
     count: number,
     className: string | undefined,
   ): React.JSX.Element => (
     <span key={key} className={cx(styles.segment, className)} style={{ flexGrow: count }}>
-      {count / total >= SMALL_SEGMENT_SHARE ? count : ''}
+      {count}
     </span>
   );
   return (

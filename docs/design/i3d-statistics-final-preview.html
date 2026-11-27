@@ -11195,6 +11195,11 @@
       .r-fanOut.q5 .askCard {
         padding: 14px 12px;
       }
+      /* Every part of the places bar shows its number (PO 27.11.2026). */
+      .sxStackSeg {
+        min-width: max-content;
+        padding: 0 4px;
+      }
     </style>
   </head>
   <body>
@@ -21396,7 +21401,7 @@
       function sxPlaceBar(S, x) {
         const pl = ui.DPL || 'PL1';
         if (!x.placeN) return h('span', { class: 'sxStack empty' });
-        const seg = (cls, k, v, total) => h('span', { class: 'sxStackSeg ' + cls, style: { flexGrow: v }, title: `${k}: ${v}` }, h('span', {}, v / total >= 0.14 ? v : ''));
+        const seg = (cls, k, v, total) => h('span', { class: 'sxStackSeg ' + cls, style: { flexGrow: v }, title: `${k}: ${v}` }, h('span', {}, v));
         if (pl === 'PL1') {
           const { d, n } = sxDist(S, x.p);
           const nums = Object.keys(d).filter((k) => k !== 'L').map(Number).sort((a, b) => a - b);
