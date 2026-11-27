@@ -41,6 +41,7 @@ import { localToday } from '@/ui/views/games/dates';
 import { gameNameOf, resultHref } from '@/ui/views/management/GroupResults';
 import { durationText } from '@/ui/views/management/resultList';
 import { PeriodSheet } from './PeriodSheet';
+import { RecordMatchesSheet } from './RecordMatchesSheet';
 import { StatsInfoSheet } from './StatsInfoSheet';
 import { CountUp, GrowBar, SlidingSegments, useGlide } from './StatsMotion';
 import {
@@ -96,6 +97,7 @@ export function GroupStatistics({
   const [openPerson, setOpenPerson] = useState<PersonId | null>(null);
   const [isPeriodOpen, setPeriodOpen] = useState(false);
   const [isInfoOpen, setInfoOpen] = useState(false);
+  const [shownRecord, setShownRecord] = useState<ShownRecord | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const { request, criterion: requested } = readStatsParams(searchParams);
   useGlide(rootRef, searchParams.toString());
@@ -265,7 +267,13 @@ export function GroupStatistics({
             />
           </Rise>
           <Rise order={3}>
-            <Records stats={stats} groupId={group.id} nameOf={nameOf} coin={coin} />
+            <Records
+              stats={stats}
+              groupId={group.id}
+              nameOf={nameOf}
+              coin={coin}
+              onShow={setShownRecord}
+            />
           </Rise>
           <Rise order={4}>
             <Places stats={stats} ranking={ranking} nameOf={nameOf} coin={coin} />
@@ -282,6 +290,25 @@ export function GroupStatistics({
             </Rise>
           )}
         </>
+      )}
+      {shownRecord !== null && (
+        <RecordMatchesSheet
+          title={shownRecord.title}
+          head={
+            <>
+              <strong className={styles.recordValue}>{shownRecord.value}</strong>
+              <RecordHolder entry={shownRecord.entry} nameOf={nameOf} coin={coin} />
+            </>
+          }
+          matchIds={shownRecord.entry.matchIds}
+          matches={selection.matches}
+          group={group}
+          persons={persons}
+          customGames={customGames}
+          onClose={() => {
+            setShownRecord(null);
+          }}
+        />
       )}
       {isInfoOpen && (
         <StatsInfoSheet
@@ -534,10 +561,9 @@ function Podium({
             })}
           >
             <span className={cx(styles.stepCoins, persons.length > 1 && styles.stepCoinsMany)}>
-              {persons.slice(0, STEP_COINS_SHOWN).map((person, index) => (
-                <span key={person.personId}>
-                  {coin(person.personId, size, place, rank === 1 && index === 0)}
-                </span>
+              {/* Everybody on step 1 wears the crown, not only the first (PO 27.11.2026). */}
+              {persons.slice(0, STEP_COINS_SHOWN).map((person) => (
+                <span key={person.personId}>{coin(person.personId, size, place, rank === 1)}</span>
               ))}
               {persons.length > STEP_COINS_SHOWN && (
                 <span className={styles.stepMore}>
@@ -912,12 +938,19 @@ function PlaceLegend({ size }: { readonly size: number }): React.JSX.Element {
   );
 }
 
-// One holder of a record: who, when, and the match to open for a record of one match.
+// One holder of a record: who, when, and its matches: one opens directly, several in a sheet.
 type RecordEntry = {
   readonly key: string;
   readonly who: readonly PersonId[];
   readonly when: string;
-  readonly matchId: MatchId | null;
+  readonly matchIds: readonly MatchId[];
+};
+
+// A record whose matches show in a sheet (PO 27.11.2026).
+type ShownRecord = {
+  readonly title: string;
+  readonly value: string;
+  readonly entry: RecordEntry;
 };
 
 // How many holders of one record show before "+N weitere".
@@ -928,7 +961,7 @@ function runEntries(records: readonly RunRecord[]): RecordEntry[] {
     key: `${record.personId}-${record.firstDate}`,
     who: [record.personId],
     when: runText(record),
-    matchId: null,
+    matchIds: record.matchIds,
   }));
 }
 
@@ -937,7 +970,7 @@ function matchEntries(records: readonly MatchRecord[]): RecordEntry[] {
     key: record.matchId,
     who: record.personIds,
     when: fullDate(record.date),
-    matchId: record.matchId,
+    matchIds: [record.matchId],
   }));
 }
 
@@ -946,11 +979,13 @@ function Records({
   groupId,
   nameOf,
   coin,
+  onShow,
 }: {
   readonly stats: Statistics;
   readonly groupId: string;
   readonly nameOf: Names;
   readonly coin: CoinOf;
+  readonly onShow: (shown: ShownRecord) => void;
 }): React.JSX.Element | null {
   const { records } = stats;
   const cards = [
@@ -1004,7 +1039,14 @@ function Records({
       <h3 className={styles.sectionTitle}>{t('statistik.rekorde')}</h3>
       <div className={styles.recordRail}>
         {cards.map(({ key, ...card }) => (
-          <RecordCard key={key} {...card} groupId={groupId} nameOf={nameOf} coin={coin} />
+          <RecordCard
+            key={key}
+            {...card}
+            groupId={groupId}
+            nameOf={nameOf}
+            coin={coin}
+            onShow={onShow}
+          />
         ))}
       </div>
     </section>
@@ -1013,8 +1055,9 @@ function Records({
 
 /**
  * A record as a card (US-ST-05, design I3-D): every holder of the record value below its title
- * (PO 26.11.2026), at most three and then "+N weitere". A record of a single match opens it with a
- * tap on the whole card; with several matches each line opens its own.
+ * (PO 26.11.2026), at most three and then "+N weitere". A tap on the card, or with several holders
+ * on a line, shows the matches of the record: a single match opens, a streak or drought shows its
+ * matches in a sheet (PO 27.11.2026).
  */
 function RecordCard({
   title,
@@ -1025,6 +1068,7 @@ function RecordCard({
   groupId,
   nameOf,
   coin,
+  onShow,
 }: {
   readonly title: string;
   readonly value: string;
@@ -1034,6 +1078,7 @@ function RecordCard({
   readonly groupId: string;
   readonly nameOf: Names;
   readonly coin: CoinOf;
+  readonly onShow: (shown: ShownRecord) => void;
 }): React.JSX.Element {
   const [isAllShown, setAllShown] = useState(false);
   const head = (
@@ -1046,10 +1091,11 @@ function RecordCard({
     </>
   );
   const [only] = entries;
-  if (entries.length === 1 && only !== undefined && only.matchId !== null) {
+  const [onlyMatch, ...more] = only?.matchIds ?? [];
+  if (entries.length === 1 && only !== undefined && onlyMatch !== undefined && more.length === 0) {
     return (
       <PressableLink
-        to={resultHref(groupId, only.matchId)}
+        to={resultHref(groupId, onlyMatch)}
         className={cx(styles.record, tone)}
         aria-label={t('statistik.rekordOeffnen', { titel: title, wert: value })}
       >
@@ -1061,35 +1107,70 @@ function RecordCard({
       </PressableLink>
     );
   }
-  const line = (entry: RecordEntry): React.JSX.Element =>
-    entry.matchId === null ? (
-      <li key={entry.key}>
-        <span className={styles.recordLine}>
-          <RecordHolder entry={entry} nameOf={nameOf} coin={coin} />
-        </span>
-      </li>
-    ) : (
-      <li key={entry.key}>
-        <PressableLink
-          to={resultHref(groupId, entry.matchId)}
-          className={cx(styles.recordLine, styles.recordLink)}
-          aria-label={t('statistik.rekordPartie', { titel: title, wert: value, datum: entry.when })}
-        >
-          <RecordHolder entry={entry} nameOf={nameOf} coin={coin} />
-          <span className={styles.recordLineGo} aria-hidden="true">
-            <ChevronIcon size={14} />
-          </span>
-        </PressableLink>
-      </li>
-    );
+  const show = (entry: RecordEntry): void => {
+    onShow({ title, value, entry });
+  };
   if (entries.length === 1 && only !== undefined) {
     return (
-      <div className={cx(styles.record, tone)}>
+      <PressableButton
+        type="button"
+        className={cx(styles.record, tone)}
+        aria-label={t('statistik.rekordPartienZeigen', { titel: title, wert: value })}
+        onClick={() => {
+          show(only);
+        }}
+      >
         {head}
         <RecordHolder entry={only} nameOf={nameOf} coin={coin} />
-      </div>
+        <span className={styles.recordGo} aria-hidden="true">
+          <ChevronIcon size={16} />
+        </span>
+      </PressableButton>
     );
   }
+  const go = (
+    <span className={styles.recordLineGo} aria-hidden="true">
+      <ChevronIcon size={14} />
+    </span>
+  );
+  const line = (entry: RecordEntry): React.JSX.Element => {
+    const [matchId, ...others] = entry.matchIds;
+    return (
+      <li key={entry.key}>
+        {matchId !== undefined && others.length === 0 ? (
+          <PressableLink
+            to={resultHref(groupId, matchId)}
+            className={cx(styles.recordLine, styles.recordLink)}
+            aria-label={t('statistik.rekordPartie', {
+              titel: title,
+              wert: value,
+              datum: entry.when,
+            })}
+          >
+            <RecordHolder entry={entry} nameOf={nameOf} coin={coin} />
+            {go}
+          </PressableLink>
+        ) : (
+          <PressableButton
+            type="button"
+            className={cx(styles.recordLine, styles.recordLink)}
+            aria-label={t('statistik.rekordFolgePartien', {
+              titel: title,
+              wert: value,
+              wer: entry.who.map(nameOf).join(', '),
+              zeit: entry.when,
+            })}
+            onClick={() => {
+              show(entry);
+            }}
+          >
+            <RecordHolder entry={entry} nameOf={nameOf} coin={coin} />
+            {go}
+          </PressableButton>
+        )}
+      </li>
+    );
+  };
   const rest = entries.slice(SHOWN_HOLDERS);
   return (
     <div className={cx(styles.record, tone)}>

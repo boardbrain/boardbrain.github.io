@@ -11,7 +11,15 @@ import {
   gameOf,
   series,
 } from '@tests/support/statsFakes';
-import { criterionValue, leadersOf, podiumOf, rankingCriteria, rankPersons } from './ranking';
+import {
+  criterionValue,
+  leadersOf,
+  podiumOf,
+  rankingCriteria,
+  rankPersons,
+  winsPodiumOf,
+  type PodiumStep,
+} from './ranking';
 import { computeStatistics } from './statistics';
 
 function order(ranked: ReturnType<typeof rankPersons>): [string, number][] {
@@ -137,7 +145,7 @@ describe('US-ST-02 ranking', () => {
     expect(first === undefined ? null : criterionValue(first.person, 'longest-streak')).toBe(2);
   });
 
-  it('US-ST-01 AK-7: the leaders of a table are all with the most wins, none without a win', () => {
+  it('US-ST-01 AK-7: the leaders of a table stand on step 1 of the page, none without a win', () => {
     const tie = computeStatistics(
       series([{ winners: [ANNA] }, { winners: [BEN] }]),
       TABLE,
@@ -147,16 +155,40 @@ describe('US-ST-02 ranking', () => {
 
     expect(leadersOf(tie)).toEqual([ANNA, BEN]);
     expect(leadersOf(computeStatistics([], TABLE, null, gameOf))).toEqual([]);
-    // Equal wins: a draw more does not put Ben ahead on the card (PO 26.11.2026).
+    // Equal wins: the draw puts Ben ahead, on the card as on the page (PO 27.11.2026).
     const draws = computeStatistics(
       series([{ winners: [ANNA] }, { winners: [BEN] }, { winners: [BEN, CLARA] }]),
       TABLE,
       null,
       gameOf,
     );
-    expect(leadersOf(draws)).toEqual([ANNA, BEN]);
+    expect(leadersOf(draws)).toEqual([BEN]);
     const none = computeStatistics(series([{ winners: [ANNA, BEN] }]), TABLE, null, gameOf);
     expect(leadersOf(none)).toEqual([]);
+  });
+
+  it('PO 27.11.2026: the podium by wins of a card is the podium of the page', () => {
+    // Ben and Clara have five wins each, Ben also a draw: page and card show 1, 2, 3.
+    const stats = computeStatistics(
+      series([
+        ...Array.from({ length: 6 }, () => ({ winners: [ANNA] })),
+        ...Array.from({ length: 5 }, () => ({ winners: [BEN] })),
+        ...Array.from({ length: 5 }, () => ({ winners: [CLARA] })),
+        { winners: [BEN, DAVID] },
+      ]),
+      TABLE,
+      null,
+      gameOf,
+    );
+    const ranks = (steps: readonly PodiumStep[]): [number, string[]][] =>
+      steps.map((step) => [step.rank, step.persons.map((person) => person.personId)]);
+
+    expect(ranks(winsPodiumOf(stats))).toEqual(ranks(podiumOf(rankPersons(stats, 'wins'), 'wins')));
+    expect(ranks(winsPodiumOf(stats))).toEqual([
+      [1, [ANNA]],
+      [2, [BEN]],
+      [3, [CLARA]],
+    ]);
   });
 
   it('PO 26.11.2026: the podium puts equal ranks on one step and nobody with 0 on it', () => {

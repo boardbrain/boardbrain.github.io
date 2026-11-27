@@ -918,6 +918,11 @@
 
 .recordLink {
   justify-content: space-between;
+  width: 100%;
+  min-height: 0;
+  text-align: left;
+  background: none;
+  border-radius: 0;
 }
 
 .recordLineGo {

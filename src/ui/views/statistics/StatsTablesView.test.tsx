@@ -7,6 +7,7 @@ import { Route, Routes } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import {
   parseLocalDate,
+  toGameId,
   toGroupId,
   toMatchId,
   toPersonId,
@@ -109,6 +110,59 @@ describe('US-ST-01 AK-7 Choice of the table (design I3-D KS2, TW1)', () => {
 
     expect(
       await screen.findByRole('link', { name: 'Freunde, 1 Partie, noch kein Sieg' }),
+    ).toBeInTheDocument();
+  });
+
+  it('PO 27.11.2026: equal wins are decided as on the page of the table', async () => {
+    const clara = toPersonId('00000000-0000-4000-8000-0000000000a3');
+    const trio = aGroup({
+      id: toGroupId('00000000-0000-4000-8000-0000000000c5'),
+      name: 'Zu dritt',
+      members: [...FRIDAY.members, { personId: clara, groupColor: 'green', catanColor: 'white' }],
+    });
+    const { db } = renderWithApp(<StatisticsRoutes />, { path: '/statistik' });
+    // Anna and Ben have one win each; Anna's draw with Clara puts her ahead, as on the page.
+    await seed(db, [
+      match(18, { groupId: trio.id, date: day('2026-11-01'), winnerIds: [ANNA] }),
+      match(19, { groupId: trio.id, date: day('2026-11-08'), winnerIds: [BEN] }),
+      match(20, { groupId: trio.id, date: day('2026-11-15'), winnerIds: [ANNA, clara] }),
+    ]);
+    await db.persons.add(aPerson({ id: clara, name: 'Clara' }));
+    await db.groups.add(trio);
+
+    expect(
+      await screen.findByRole('link', { name: 'Zu dritt, 3 Partien, vorn Anna, 1 Sieg' }),
+    ).toBeInTheDocument();
+  });
+
+  it('PO 27.11.2026: a table of a single game counts that game as its page does', async () => {
+    const skat = aCustomGame({
+      id: toGameId('00000000-0000-4000-8000-0000000000b2'),
+      name: 'Skat',
+      scoring: 'highest-wins',
+    });
+    const { db } = renderWithApp(<StatisticsRoutes />, { path: '/statistik' });
+    // One win each; Anna's higher average points put her ahead, as in the ranking of Skat.
+    await seed(db, [
+      match(21, {
+        groupId: FRIENDS.id,
+        gameId: skat.id,
+        date: day('2026-11-01'),
+        winnerIds: [ANNA],
+        scores: { [ANNA]: 50, [BEN]: 10 },
+      }),
+      match(22, {
+        groupId: FRIENDS.id,
+        gameId: skat.id,
+        date: day('2026-11-08'),
+        winnerIds: [BEN],
+        scores: { [ANNA]: 40, [BEN]: 45 },
+      }),
+    ]);
+    await db.games.add(skat);
+
+    expect(
+      await screen.findByRole('link', { name: 'Freunde, 2 Partien, vorn Anna, 1 Sieg' }),
     ).toBeInTheDocument();
   });
 

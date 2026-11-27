@@ -241,7 +241,7 @@ export const de = {
       rekordeDauer:
         'Längste und kürzeste Partie gibt es nur bei Catan, weil nur dort die Zeit gemessen wird, und nur wenn das Spiel gewählt ist. Die kürzeste erscheint erst ab zwei Partien mit Dauer, ebenso gilt die durchschnittliche Dauer oben nur für Catan.',
       rekordeBestwert:
-        'Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Auch hier stehen bei Gleichstand alle Partien und Personen in der Karte. Antippen eines Rekords mit einer Partie öffnet diese Partie.',
+        'Der Bestwert ist die beste einzelne Punktzahl in einem eigenen Spiel mit Punkten. Auch hier stehen bei Gleichstand alle Partien und Personen in der Karte. Antippen eines Rekords zeigt seine Partien: Eine einzelne Partie öffnet sich direkt, bei einer Serie oder Durststrecke erscheinen alle ihre Partien.',
       zeitraumTitel: 'Zeitraum',
       zeitraum:
         '„Letzte 3 Monate“ und „Letzte 12 Monate“ reichen bis einschließlich heute. Als Schnellwahl stehen das laufende und die zwei vorigen Jahre bereit, ältere Jahre wählst du über „Eigener Zeitraum“.',
@@ -276,6 +276,8 @@ export const de = {
     bestwertWenigste: 'Bestwert · wenigste',
     rekordOeffnen: '{titel}: {wert}, Partie ansehen',
     rekordPartie: '{titel}: {wert} am {datum}, Partie ansehen',
+    rekordPartienZeigen: '{titel}: {wert}, Partien ansehen',
+    rekordFolgePartien: '{titel}: {wert}, {wer}, {zeit}, Partien ansehen',
     weitere: '+{anzahl} weitere',
     weniger: 'Weniger',
     spiele: 'Spiele',

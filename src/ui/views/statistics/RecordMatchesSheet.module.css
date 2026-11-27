@@ -1,0 +1,7 @@
+/* The record on top of its matches (PO 27.11.2026). */
+.head {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}

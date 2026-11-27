@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import type { PersonId } from '@/core/model';
+import type { Match, MatchId, PersonId } from '@/core/model';
 import { rankPersons, rankingCriteria } from './ranking';
 import {
   ANNA,
@@ -189,20 +189,21 @@ describe('PO 26.11.2026: a filter that ends before the latest match', () => {
   });
 });
 
+// The ids of the matches from `from` up to but not including `to`.
+function idsOf(matches: readonly Match[], from: number, to: number): MatchId[] {
+  return matches.slice(from, to).map((match) => match.id);
+}
+
 describe('US-ST-05 records', () => {
   it('AK-1: the eternal streak lists every longest streak, the one reached first first', () => {
-    const stats = computeStatistics(
-      series([
-        { winners: [BEN] },
-        { winners: [BEN] },
-        { winners: [ANNA] },
-        { winners: [ANNA] },
-        { winners: [CLARA] },
-      ]),
-      TABLE,
-      null,
-      gameOf,
-    );
+    const matches = series([
+      { winners: [BEN] },
+      { winners: [BEN] },
+      { winners: [ANNA] },
+      { winners: [ANNA] },
+      { winners: [CLARA] },
+    ]);
+    const stats = computeStatistics(matches, TABLE, null, gameOf);
 
     expect(stats.records.longestStreak).toEqual([
       {
@@ -211,6 +212,7 @@ describe('US-ST-05 records', () => {
         firstDate: '2026-01-01',
         lastDate: '2026-01-02',
         isOngoing: false,
+        matchIds: idsOf(matches, 0, 2),
       },
       {
         personId: ANNA,
@@ -218,6 +220,7 @@ describe('US-ST-05 records', () => {
         firstDate: '2026-01-03',
         lastDate: '2026-01-04',
         isOngoing: false,
+        matchIds: idsOf(matches, 2, 4),
       },
     ]);
   });
@@ -249,13 +252,14 @@ describe('US-ST-05 records', () => {
     expect(one.records.longestDrought).toEqual([]);
   });
 
-  it('AK-1: every longest drought with person and span, ongoing if it still runs', () => {
-    const stats = computeStatistics(
-      series([{ winners: [DAVID] }, { winners: [ANNA] }, { winners: [ANNA] }, { winners: [ANNA] }]),
-      TABLE,
-      null,
-      gameOf,
-    );
+  it('AK-1: every longest drought with person, span and matches, ongoing if it still runs', () => {
+    const matches = series([
+      { winners: [DAVID] },
+      { winners: [ANNA] },
+      { winners: [ANNA] },
+      { winners: [ANNA] },
+    ]);
+    const stats = computeStatistics(matches, TABLE, null, gameOf);
 
     expect(stats.records.longestDrought).toEqual([
       {
@@ -264,6 +268,7 @@ describe('US-ST-05 records', () => {
         firstDate: '2026-01-01',
         lastDate: '2026-01-04',
         isOngoing: true,
+        matchIds: idsOf(matches, 0, 4),
       },
       {
         personId: CLARA,
@@ -271,6 +276,7 @@ describe('US-ST-05 records', () => {
         firstDate: '2026-01-01',
         lastDate: '2026-01-04',
         isOngoing: true,
+        matchIds: idsOf(matches, 0, 4),
       },
     ]);
     expect(stats.records.longestStreak.map((run) => run.isOngoing)).toEqual([true]);

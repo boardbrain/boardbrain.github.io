@@ -857,7 +857,7 @@ Bezug: FA-ST-01, FA-ST-02, FA-ST-05 → 3.8
 - **AK-4:** Gegeben eine Gruppe ohne Partien im Filter, dann erscheint ein verständlicher Hinweis statt leerer Zahlen.
 - **AK-5:** Gegeben die App, dann gibt es keine gruppenübergreifende Statistik.
 - **AK-6:** Gegeben eine Person hat die letzten zwei oder mehr Partien im Filter allein gewonnen, dann zeigt die Statistik unter dem Podest einen eigenen Hinweis mit Person und Zahl der Siege in Folge; antippen zeigt ihre Kennzahlen. Bei weniger als zwei entfällt er (E-57). *(neu in 0.24)*
-- **AK-7:** Gegeben die Karte „Statistik“ in der Kartenhand, wenn ich sie antippe, dann sehe ich die Tische als Karten mit Partien, letztem Spieltag, Spitzenreiter (die meisten Siege über alle Partien; bei gleich vielen Siegen „Gleichstand“, ohne Sieg „noch kein Sieg“) und den ersten drei nach Siegen, Gleichrangige gemeinsam auf einer Stufe, zuletzt gespielte zuerst; ein Tisch öffnet seinen Reiter „Statistik“. *(neu in 0.24, E-56)*
+- **AK-7:** Gegeben die Karte „Statistik“ in der Kartenhand, wenn ich sie antippe, dann sehe ich die Tische als Karten mit Partien, letztem Spieltag, Spitzenreiter und den ersten drei genau wie auf dem Podest der Statistikseite des Tisches (Rangliste nach Siegen über alle Partien mit denselben Folgekriterien; nur bei vollständigem Gleichstand „Gleichstand“ und gemeinsam auf einer Stufe, ohne Sieg „noch kein Sieg“; Product Owner 27.11.2026), zuletzt gespielte zuerst; ein Tisch öffnet seinen Reiter „Statistik“. *(neu in 0.24, E-56)*
 
 #### US-ST-02 Rangliste · M
 Als Spielende möchten wir eine Rangliste, deren Sortierung wir wählen können, damit wir uns aus verschiedenen Blickwinkeln vergleichen können.
@@ -892,7 +892,7 @@ Bezug: FA-ST-08, E-44 → 3.7, 3.8
 
 - **AK-1:** Gegeben eine Gruppe mit Partien, dann zeigt die Statistik die ewige Serie und die längste Durststrecke jeweils mit Person, Länge sowie Datum der ersten und der letzten Partie. *(ergänzt in 0.24)*
 - **AK-2:** Gegeben der Filter steht auf Catan und es gibt Partien mit Spieldauer, dann zeigt die Statistik die längste und, ab zwei solchen Partien, die kürzeste Partie mit Dauer und Datum. *(ergänzt in 0.24)*
-- **AK-3:** Gegeben ein Rekord, der zu einer Partie gehört, wenn ich ihn antippe, dann öffnet sich die Detailansicht dieser Partie.
+- **AK-3:** Gegeben ein Rekord, der zu einer Partie gehört, wenn ich ihn antippe, dann öffnet sich die Detailansicht dieser Partie. Gegeben eine Serie oder Durststrecke, wenn ich sie antippe, dann sehe ich ihre Partien wie in den Ergebnissen des Tisches, und jede davon öffnet ihre Detailansicht (Product Owner 27.11.2026). *(ergänzt in 0.24)*
 - **AK-4:** Gegeben Gleichstand, dann gilt die Regel aus 3.8; gegeben keine passenden Partien, dann entfällt der Rekord.
 - **AK-5:** Gegeben der Filter steht auf ein eigenes Spiel mit Punkten und es gibt Partien mit Punkten, dann zeigt die Statistik den Bestwert (die höchste bzw. bei „Wenigste Punkte gewinnen“ die niedrigste Punktzahl) mit Person und Datum. *(neu in 0.21)*
 

@@ -71,14 +71,9 @@ function compareBy(key: Key, a: PersonStatistics, b: PersonStatistics): number {
  * The ranking by a criterion (US-ST-02, Specification 3.8). On a tie the following criteria
  * decide in turn: wins, draws, average place and average points, as far as they occur in the
  * filter. A smaller average place is better, as are fewer average points if the fewest points
- * win. A complete tie shares the rank (1, 1, 3); among each other the seat order stays. With
- * `isCriterionOnly` nothing else decides, e.g. for the leaders by wins on a table card.
+ * win. A complete tie shares the rank (1, 1, 3); among each other the seat order stays.
  */
-export function rankPersons(
-  stats: GroupStatistics,
-  criterion: RankingCriterion,
-  isCriterionOnly = false,
-): RankedPerson[] {
+export function rankPersons(stats: GroupStatistics, criterion: RankingCriterion): RankedPerson[] {
   const isLowScoreBetter = stats.scoring === 'lowest-wins';
   const keyOf = (name: RankingCriterion | 'draws'): Key =>
     name === 'draws'
@@ -94,9 +89,7 @@ export function rankPersons(
     ...(available.includes('average-place') ? ['average-place' as const] : []),
     ...(available.includes('average-score') ? ['average-score' as const] : []),
   ];
-  const keys = (
-    isCriterionOnly ? [criterion] : [criterion, ...followers.filter((name) => name !== criterion)]
-  ).map(keyOf);
+  const keys = [criterion, ...followers.filter((name) => name !== criterion)].map(keyOf);
   const compare = (a: PersonStatistics, b: PersonStatistics): number => {
     for (const key of keys) {
       const result = compareBy(key, a, b);
@@ -157,11 +150,19 @@ export function podiumOf(
 }
 
 /**
- * The persons with the most wins, e.g. the leaders of a table on its card (US-ST-01 AK-7):
- * everybody with as many wins as the best counts, nothing else decides (PO 26.11.2026); empty
- * without a win.
+ * The podium by wins as the statistics of the table first show it, e.g. on its card (US-ST-01
+ * AK-7): the same ranking with the same tie-breakers, so card and page never differ (PO
+ * 27.11.2026).
+ */
+export function winsPodiumOf(stats: GroupStatistics): PodiumStep[] {
+  return podiumOf(rankPersons(stats, 'wins'), 'wins');
+}
+
+/**
+ * The leaders of the table on its card (US-ST-01 AK-7): who stands on step 1 of the podium by
+ * wins, several only in a complete tie; empty without a win.
  */
 export function leadersOf(stats: GroupStatistics): PersonId[] {
-  const [first] = podiumOf(rankPersons(stats, 'wins', true), 'wins');
+  const [first] = winsPodiumOf(stats);
   return first?.rank === 1 ? first.persons.map((person) => person.personId) : [];
 }

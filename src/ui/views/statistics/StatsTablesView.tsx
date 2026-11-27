@@ -1,5 +1,5 @@
 import type { CustomGame, Group, Match, Person, PersonId } from '@/core/model';
-import { computeStatistics, leadersOf, podiumOf, rankPersons } from '@/core/stats';
+import { computeStatistics, leadersOf, selectMatches, winsPodiumOf } from '@/core/stats';
 import { t } from '@/i18n/t';
 import { useCustomGames, useGroups, useMatchesByGroup, usePersons } from '@/infra/db/readHooks';
 import { useAppDependencies } from '@/ui/AppDependencies';
@@ -8,7 +8,14 @@ import { Page } from '@/ui/components/Page';
 import { PressableLink } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 import { localToday, shortDate } from '@/ui/views/games/dates';
-import { initialOf, matchCountText, namesOf, statsGameOf, winsText } from './statsView';
+import {
+  initialOf,
+  matchCountText,
+  namesOf,
+  readStatsParams,
+  statsGameOf,
+  winsText,
+} from './statsView';
 import styles from './StatsTablesView.module.css';
 
 const SEAT_COINS = 4;
@@ -121,10 +128,19 @@ function Card({
     );
   }
   const participants = group.members.map((member) => member.personId);
-  const stats = computeStatistics(matches, participants, null, statsGameOf(customGames));
-  // By wins alone: equal wins share the lead and the step (PO 26.11.2026).
+  // The podium by wins exactly as the page of the table shows it first, with its filter: a table
+  // with a single game counts that game, e.g. its points (PO 27.11.2026).
+  const today = localToday();
+  const selection = selectMatches(matches, readStatsParams(new URLSearchParams()).request, today);
+  const stats = computeStatistics(
+    selection.matches,
+    participants,
+    selection.gameId,
+    statsGameOf(customGames),
+    selection.isCurrent,
+  );
   const leaders = leadersOf(stats);
-  const steps = podiumOf(rankPersons(stats, 'wins', true), 'wins');
+  const steps = winsPodiumOf(stats);
   const leaderWins = steps[0]?.persons[0]?.wins ?? 0;
   const [leader] = leaders;
   const leaderText =
@@ -135,7 +151,6 @@ function Card({
         : t('statistik.gleichstand');
   const [best, next, third] = steps;
   const order = [next, best, third].filter((step) => step !== undefined);
-  const today = localToday();
   return (
     <PressableLink
       to={href}

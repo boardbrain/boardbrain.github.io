@@ -61,8 +61,15 @@ test.describe('US-ST-01 to US-ST-05 statistics of a table (design I3-D)', () => 
     await page.getByRole('button', { name: 'Zurück' }).click();
     await expect(page.getByRole('radio', { name: 'Ø Siegpunkte' })).toBeChecked();
 
-    // US-ST-03 AK-6: an own period.
+    // PO 27.11.2026: the eternal streak shows its matches.
     await page.getByRole('radio', { name: /Alle/u }).click();
+    await page.getByRole('button', { name: 'Ewige Serie: 2 Siege, Partien ansehen' }).click();
+    const series = page.getByRole('dialog', { name: 'Ewige Serie' });
+    await expect(series.getByRole('link')).toHaveCount(2);
+    await page.keyboard.press('Escape');
+    await expect(series).toBeHidden();
+
+    // US-ST-03 AK-6: an own period.
     await page.getByRole('button', { name: 'Zeitraum wählen, jetzt Gesamt' }).click();
     const sheet = page.getByRole('dialog', { name: 'Zeitraum' });
     await sheet.getByLabel('Von').fill(day(12));

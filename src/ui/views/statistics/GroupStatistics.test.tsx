@@ -408,6 +408,47 @@ describe('US-ST-05 Records (design I3-D)', () => {
     expect(screen.getByText('seit 07.10.2026')).toBeInTheDocument();
   });
 
+  it('PO 27.11.2026: a tap on a series shows its matches, a row opens one', async () => {
+    const user = userEvent.setup();
+    const { router } = await renderStatistics(PAGE);
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Ewige Serie: 4 Siege, Partien ansehen' }),
+    );
+    const sheet = screen.getByRole('dialog', { name: 'Ewige Serie' });
+    // Ben's four wins in a row, newest first as in the results; not Anna's first match.
+    const rows = within(sheet).getAllByRole('link');
+    expect(rows).toHaveLength(4);
+    expect(within(sheet).getByText('Ben')).toBeInTheDocument();
+    expect(within(sheet).getByText('Catan')).toBeInTheDocument();
+    const [newest] = rows;
+    assert(newest !== undefined, 'a row');
+    await user.click(newest);
+    expect(router.state.location.pathname).toBe(
+      `/verwaltung/gruppen/${TABLE.id}/ergebnisse/${MATCHES[4]?.id ?? ''}`,
+    );
+  });
+
+  it('PO 27.11.2026: with equal records each line shows the matches of its series', async () => {
+    const user = userEvent.setup();
+    const winners = [ANNA, ANNA, BEN, BEN];
+    await renderStatistics(
+      PAGE,
+      winners.map((winner, index) =>
+        match(40 + index, { date: day(`2026-10-0${String(index + 1)}`), winnerIds: [winner] }),
+      ),
+    );
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Ewige Serie: 2 Siege, Anna, 01.10. – 02.10.2026, Partien ansehen',
+      }),
+    );
+    const sheet = screen.getByRole('dialog', { name: 'Ewige Serie' });
+    expect(within(sheet).getAllByRole('link')).toHaveLength(2);
+    expect(within(sheet).getByText('01.10. – 02.10.2026')).toBeInTheDocument();
+  });
+
   it('AK-2: the longest match of one game opens that match', async () => {
     const user = userEvent.setup();
     const { router } = await renderStatistics(`${PAGE}?spiel=${CATAN_GAME_ID}`);

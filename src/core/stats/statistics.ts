@@ -83,9 +83,13 @@ export type PersonStatistics = {
 };
 
 /**
- * A record that belongs to a run of matches of one person (FA-ST-08).
+ * A record that belongs to a run of matches of one person (FA-ST-08), with its matches in the
+ * order played, so they can be shown (PO 27.11.2026).
  */
-export type RunRecord = MatchRun & { readonly personId: PersonId };
+export type RunRecord = MatchRun & {
+  readonly personId: PersonId;
+  readonly matchIds: readonly MatchId[];
+};
 
 /**
  * A record that belongs to one match: its duration or a score (FA-ST-08).
@@ -334,7 +338,8 @@ function longestRuns(
     .toSorted((a, b) => a.run.to - b.run.to)
     .flatMap(({ personId, run }) => {
       const record = toRun(run, matches, isCurrent && run.to === matches.length - 1);
-      return record === null ? [] : [{ ...record, personId }];
+      const matchIds = matches.slice(run.from, run.to + 1).map((match) => match.id);
+      return record === null ? [] : [{ ...record, personId, matchIds }];
     });
 }
 

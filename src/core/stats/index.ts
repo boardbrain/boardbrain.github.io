@@ -20,6 +20,7 @@ export {
   podiumOf,
   rankingCriteria,
   rankPersons,
+  winsPodiumOf,
   type PodiumStep,
   type RankedPerson,
   type RankingCriterion,
