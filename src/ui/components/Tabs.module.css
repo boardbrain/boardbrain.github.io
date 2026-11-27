@@ -1,5 +1,6 @@
 /* Design I3-C RA1: text on a thin line; the chosen tab golden, semi-bold, with a 3px bar below. */
 .tabs {
+  position: relative;
   display: flex;
   border-bottom: 1px solid var(--color-border);
 }
@@ -32,10 +33,9 @@
   color: var(--color-accent-text);
 }
 
-.tabs > button[aria-selected='true']::after {
-  position: absolute;
-  inset: auto 0 -1px;
+/* The bar glides to the chosen tab (design I3-D, PO 27.11.2026). */
+.bar {
+  bottom: -1px;
   height: 3px;
-  content: '';
   background: var(--color-accent-text);
 }

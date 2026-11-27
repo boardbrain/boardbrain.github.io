@@ -1,0 +1,7 @@
+/* The gliding marker of a choice (design I3-D); top, height and colour come from the choice. */
+.marker {
+  position: absolute;
+  left: 0;
+  width: 0;
+  pointer-events: none;
+}

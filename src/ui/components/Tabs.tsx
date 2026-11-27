@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { GlideMarker } from './GlideMarker';
 import { PressableButton } from './Pressable';
 import { cx } from './classNames';
 import styles from './Tabs.module.css';
@@ -42,7 +43,7 @@ export function panelId(idPrefix: string, key: string): string {
 
 /**
  * Tabs of the table page and of the running match (design I3-C RA1, UE1; C-G-10): text on a thin
- * line, the chosen tab golden with a bar below. A screen reader hears a tab list; the arrow keys,
+ * line, the chosen tab golden with a bar below that glides to it (PO 27.11.2026). A screen reader hears a tab list; the arrow keys,
  * Home and End move between the tabs (WAI-ARIA tabs pattern, automatic activation).
  */
 export function Tabs<K extends string>({
@@ -70,6 +71,7 @@ export function Tabs<K extends string>({
         document.getElementById(tabId(idPrefix, next.key))?.focus();
       }}
     >
+      <GlideMarker at={selected} className={styles.bar} />
       {tabs.map((tab) => (
         <PressableButton
           key={tab.key}

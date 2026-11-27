@@ -1,5 +1,6 @@
 import { animate, useReducedMotion } from 'motion/react';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, type RefObject } from 'react';
+import { GlideMarker } from '@/ui/components/GlideMarker';
 import { PressableButton } from '@/ui/components/Pressable';
 import { cx } from '@/ui/components/classNames';
 import styles from './StatsMotion.module.css';
@@ -8,7 +9,6 @@ import styles from './StatsMotion.module.css';
 const COUNT = { duration: 0.8, ease: [0.22, 1, 0.36, 1] } as const;
 const GROW = { duration: 0.75, ease: [0.22, 1, 0.36, 1] } as const;
 const GLIDE = { duration: 0.55, ease: [0.22, 1, 0.36, 1] } as const;
-const THUMB = { type: 'spring', stiffness: 380, damping: 32 } as const;
 
 /**
  * A number that counts from its previous value to the new one, from 0 the first time
@@ -143,29 +143,21 @@ export function SlidingSegments<K extends string>({
   readonly className?: string | undefined;
 }): React.JSX.Element {
   const rootRef = useRef<HTMLDivElement>(null);
-  const thumbRef = useRef<HTMLSpanElement>(null);
-  const last = useRef<{ x: number; width: number } | null>(null);
+  const hasScrolled = useRef(false);
   const isReduced = useReducedMotion() === true;
-  // Measuring the chosen button and moving the marker (external system: the DOM and Motion).
+  // Too many values: the chosen one comes into view (external system: the DOM).
   useLayoutEffect(() => {
     const root = rootRef.current;
-    const thumb = thumbRef.current;
     const chosen = root?.querySelector<HTMLElement>('[aria-checked="true"]');
-    if (root === null || thumb === null || chosen === null || chosen === undefined) {
+    if (root === null || chosen === null || chosen === undefined) {
       return;
     }
-    const now = { x: chosen.offsetLeft, width: chosen.offsetWidth };
-    const before = last.current;
-    last.current = now;
-    thumb.style.width = `${String(now.width)}px`;
-    thumb.style.left = `${String(now.x)}px`;
-    if (before !== null && !isReduced && (before.x !== now.x || before.width !== now.width)) {
-      void animate(thumb, { left: [before.x, now.x], width: [before.width, now.width] }, THUMB);
-    }
+    const isFirst = !hasScrolled.current;
+    hasScrolled.current = true;
     if (root.scrollWidth > root.clientWidth) {
       root.scrollTo({
-        left: Math.max(0, now.x - root.clientWidth / 2 + now.width / 2),
-        behavior: isReduced || before === null ? 'auto' : 'smooth',
+        left: Math.max(0, chosen.offsetLeft - root.clientWidth / 2 + chosen.offsetWidth / 2),
+        behavior: isReduced || isFirst ? 'auto' : 'smooth',
       });
     }
   }, [selected, options.length, isReduced]);
@@ -176,7 +168,7 @@ export function SlidingSegments<K extends string>({
       aria-label={label}
       className={cx(styles.segments, isSmall && styles.small, className)}
     >
-      <span ref={thumbRef} className={styles.thumb} aria-hidden="true" />
+      <GlideMarker at={`${selected}:${String(options.length)}`} className={styles.thumb} />
       {options.map((option) => (
         <PressableButton
           key={option.key}

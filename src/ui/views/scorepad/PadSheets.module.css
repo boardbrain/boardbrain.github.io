@@ -31,6 +31,7 @@
 }
 
 .seg {
+  position: relative;
   display: flex;
   padding: 3px;
   background: var(--color-surface-raised);
@@ -39,6 +40,7 @@
 }
 
 .seg > button {
+  position: relative;
   flex: 1;
   min-height: 42px;
   padding: 4px 8px;
@@ -48,10 +50,17 @@
   border-radius: 9px;
 }
 
+/* The gold glides to the chosen segment (design I3-D, PO 27.11.2026). */
 .seg > button[aria-pressed='true'] {
   font-weight: 600;
   color: var(--color-on-accent);
+}
+
+.segMarker {
+  top: 3px;
+  bottom: 3px;
   background: var(--color-accent);
+  border-radius: 9px;
 }
 
 .quick {

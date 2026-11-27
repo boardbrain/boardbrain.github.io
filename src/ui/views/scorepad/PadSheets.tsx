@@ -6,6 +6,7 @@ import { formatPadNumber } from '@/i18n/format';
 import { t } from '@/i18n/t';
 import { PlayIcon, TargetIcon, TrophyIcon } from '@/ui/components/Icons';
 import { BottomSheet } from '@/ui/components/BottomSheet';
+import { GlideMarker } from '@/ui/components/GlideMarker';
 import { PressableButton } from '@/ui/components/Pressable';
 import { nudgeMissing } from '@/ui/components/nudge';
 import { cx } from '@/ui/components/classNames';
@@ -108,6 +109,7 @@ export function SettingsSheet({
       <section ref={targetRef} className={styles.section}>
         <h2 className={styles.sectionTitle}>{t('notizblock.ziel')}</h2>
         <div className={styles.seg} role="group" aria-label={t('notizblock.ziel')}>
+          <GlideMarker at={kind} className={styles.segMarker} />
           {(['none', 'points', 'rounds'] as const).map((key) => (
             <PressableButton
               key={key}
@@ -184,6 +186,7 @@ export function SettingsSheet({
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{t('notizblock.rechnen')}</h2>
         <div className={styles.seg} role="group" aria-label={t('notizblock.rechnen')}>
+          <GlideMarker at={calculation} className={styles.segMarker} />
           {(['app', 'self'] as const).map((key) => (
             <PressableButton
               key={key}
